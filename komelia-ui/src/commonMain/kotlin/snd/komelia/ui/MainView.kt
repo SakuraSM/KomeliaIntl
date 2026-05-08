@@ -99,6 +99,8 @@ fun MainView(
 
             val notificationToaster = rememberToasterState()
 
+            val appStrings = dependencies.appStrings.collectAsState()
+
             CompositionLocalProvider(
                 LocalViewModelFactory provides viewModelFactory,
                 LocalToaster provides notificationToaster,
@@ -106,6 +108,7 @@ fun MainView(
                 LocalKomfIntegration provides dependencies.appRepositories.komfSettingsRepository.getKomfEnabled(),
                 LocalKeyEvents provides keyEvents,
                 LocalPlatform provides platformType,
+                LocalStrings provides appStrings.value,
                 LocalTheme provides theme,
                 LocalWindowState provides dependencies.windowState,
                 LocalWindowWidth provides windowWidth,

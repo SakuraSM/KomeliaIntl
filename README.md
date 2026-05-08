@@ -1,5 +1,7 @@
 # Komelia - Komga media client
 
+[English](README.md) | [简体中文](README_zh-CN.md)
+
 ### Downloads:
 
 - Latest prebuilt release is available at https://github.com/Snd-R/Komelia/releases

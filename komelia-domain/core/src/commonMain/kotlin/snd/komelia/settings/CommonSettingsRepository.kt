@@ -1,6 +1,7 @@
 package snd.komelia.settings
 
 import kotlinx.coroutines.flow.Flow
+import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppTheme
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.updates.AppVersion
@@ -39,4 +40,7 @@ interface CommonSettingsRepository {
 
     fun getAppTheme(): Flow<AppTheme>
     suspend fun putAppTheme(theme: AppTheme)
+
+    fun getAppLanguage(): Flow<AppLanguage>
+    suspend fun putAppLanguage(language: AppLanguage)
 }

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import snd.komelia.settings.CommonSettingsRepository
+import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppTheme
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.common.cards.defaultCardWidth
@@ -20,12 +21,14 @@ class AppSettingsViewModel(
 ) : StateScreenModel<LoadState<Unit>>(LoadState.Uninitialized) {
     var cardWidth by mutableStateOf(defaultCardWidth.dp)
     var currentTheme by mutableStateOf(AppTheme.DARK)
+    var currentLanguage by mutableStateOf(AppLanguage.SYSTEM)
 
     suspend fun initialize() {
         if (state.value !is LoadState.Uninitialized) return
         mutableState.value = LoadState.Loading
         cardWidth = settingsRepository.getCardWidth().map { it.dp }.first()
         currentTheme = settingsRepository.getAppTheme().first()
+        currentLanguage = settingsRepository.getAppLanguage().first()
         mutableState.value = LoadState.Success(Unit)
     }
 
@@ -37,6 +40,11 @@ class AppSettingsViewModel(
     fun onAppThemeChange(theme: AppTheme) {
         this.currentTheme = theme
         screenModelScope.launch { settingsRepository.putAppTheme(theme) }
+    }
+
+    fun onAppLanguageChange(language: AppLanguage) {
+        this.currentLanguage = language
+        screenModelScope.launch { settingsRepository.putAppLanguage(language) }
     }
 
 }

@@ -3,6 +3,7 @@ package snd.komelia.ui.strings
 import snd.komelia.image.ReduceKernel
 import snd.komelia.image.UpsamplingMode
 import snd.komelia.image.UpscaleMode
+import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppTheme
 import snd.komelia.settings.model.ContinuousReadingDirection
 import snd.komelia.settings.model.EpubReaderType
@@ -378,6 +379,10 @@ data class SettingsStrings(
     val appThemeDark: String,
     val appThemeLight: String,
     val appThemeOled: String,
+    val appLanguage: String,
+    val appLanguageSystem: String,
+    val appLanguageEnglish: String,
+    val appLanguageChineseSimplified: String,
     val imageCardSize: String,
     val decoder: String,
 
@@ -398,6 +403,14 @@ data class SettingsStrings(
             AppTheme.DARK -> appThemeDark
             AppTheme.LIGHT -> appThemeLight
             AppTheme.DARKER -> appThemeOled
+        }
+    }
+
+    fun forAppLanguage(language: AppLanguage): String {
+        return when (language) {
+            AppLanguage.SYSTEM -> appLanguageSystem
+            AppLanguage.EN -> appLanguageEnglish
+            AppLanguage.ZH_CN -> appLanguageChineseSimplified
         }
     }
 

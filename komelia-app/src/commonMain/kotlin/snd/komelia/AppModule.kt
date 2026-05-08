@@ -17,7 +17,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
@@ -56,7 +59,7 @@ import snd.komelia.offline.OfflineRepositories
 import snd.komelia.onnxruntime.OnnxRuntime
 import snd.komelia.settings.ImageReaderSettingsRepository
 import snd.komelia.ui.DependencyContainer
-import snd.komelia.ui.strings.EnStrings
+import snd.komelia.ui.strings.appStringsForLanguage
 import snd.komelia.updates.AppUpdater
 import snd.komelia.updates.OnnxModelDownloader
 import snd.komelia.updates.OnnxRuntimeInstaller
@@ -204,8 +207,15 @@ abstract class AppModule {
             onnxRuntimeUpscaler = upscaler,
         )
 
+        val systemTag = systemLanguageTag()
+        val initialLanguage = appRepositories.settingsRepository.getAppLanguage().first()
+        val appStringsFlow = MutableStateFlow(appStringsForLanguage(initialLanguage, systemTag))
+        appRepositories.settingsRepository.getAppLanguage()
+            .onEach { appStringsFlow.value = appStringsForLanguage(it, systemTag) }
+            .launchIn(initScope)
+
         return DependencyContainer(
-            appStrings = MutableStateFlow(EnStrings),
+            appStrings = appStringsFlow,
             appRepositories = appRepositories,
 
             komgaApi = komgaApi,

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
@@ -99,6 +100,7 @@ private fun Toolbar(
     onFilterChange: (Int) -> Unit,
     onEditStart: () -> Unit
 ) {
+    val strings = LocalStrings.current.legacy
     val chipColors = FilterChipDefaults.filterChipColors(
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         selectedContainerColor = MaterialTheme.colorScheme.primary,
@@ -160,7 +162,7 @@ private fun Toolbar(
                     FilterChip(
                         onClick = { onFilterChange(data.filter.order) },
                         selected = currentFilterNumber == data.filter.order || filters.size == 1,
-                        label = { Text(data.filter.label) },
+                        label = { Text(strings.forText(data.filter.label)) },
                         colors = chipColors,
                         border = null,
                     )
@@ -249,9 +251,10 @@ private fun LazyGridScope.BookFilterEntry(
     if (books.isEmpty()) return
 
     item(span = { GridItemSpan(maxLineSpan) }) {
+        val strings = snd.komelia.ui.LocalStrings.current.legacy
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(label, style = MaterialTheme.typography.titleLarge)
+            Text(strings.forText(label), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.width(10.dp))
             HorizontalDivider()
         }
@@ -276,10 +279,11 @@ private fun LazyGridScope.SeriesFilterEntries(
 ) {
     if (series.isEmpty()) return
     item(span = { GridItemSpan(maxLineSpan) }) {
+        val strings = snd.komelia.ui.LocalStrings.current.legacy
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(label, style = MaterialTheme.typography.titleLarge)
+            Text(strings.forText(label), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.width(10.dp))
             HorizontalDivider()
         }

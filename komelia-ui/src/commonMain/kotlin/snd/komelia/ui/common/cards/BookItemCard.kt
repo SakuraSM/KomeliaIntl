@@ -55,6 +55,7 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
 import snd.komelia.ui.LocalLibraries
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.BookReadButton
 import snd.komelia.ui.common.components.NoPaddingChip
@@ -414,7 +415,7 @@ private fun BookDetailedListDetails(
         ) {
             item {
                 Text(
-                    "${book.media.pagesCount} pages",
+                    LocalStrings.current.legacy.forText("${book.media.pagesCount} pages"),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -500,4 +501,3 @@ private fun BookMenuActionsDropdown(
         )
     }
 }
-

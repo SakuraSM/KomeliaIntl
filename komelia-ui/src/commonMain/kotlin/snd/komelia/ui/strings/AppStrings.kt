@@ -157,7 +157,14 @@ data class LegacyStrings(
             text.startsWith("Edit ") -> "编辑 ${text.removePrefix("Edit ")}"
             text.startsWith("Delete ") && text.endsWith("?") -> "删除 ${text.removePrefix("Delete ").removeSuffix("?")}？"
             text.startsWith("Download book ") -> "下载书籍 ${text.removePrefix("Download book ")}"
+            text.startsWith("Download series ") -> "下载系列 ${text.removePrefix("Download series ")}"
             text.startsWith("Book ") && text.matches(Regex("Book \\d+")) -> "书籍 ${text.removePrefix("Book ")}"
+            text.matches(Regex("\\d+ pages")) -> "${text.removeSuffix(" pages")} 页"
+            text.matches(Regex("Book #.+ · \\d+ pages")) -> {
+                val number = text.substringAfter("Book #").substringBefore(" · ")
+                val pages = text.substringAfter(" · ").removeSuffix(" pages")
+                "第 $number 册 · $pages 页"
+            }
             text.startsWith("Field ") && text.matches(Regex("Field \\d+")) -> "字段 ${text.removePrefix("Field ")}"
             text.startsWith("Roles for ") -> "${text.removePrefix("Roles for ")} 的角色"
             text.startsWith("Release Year: ") -> "发行年份：${text.removePrefix("Release Year: ")}"

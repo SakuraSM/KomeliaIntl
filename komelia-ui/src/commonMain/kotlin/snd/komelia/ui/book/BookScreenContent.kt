@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -112,11 +112,15 @@ fun BookScreenContent(
                 horizontalAlignment = Alignment.Start
             ) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                    val thumbnailMaxWidth = when (LocalWindowWidth.current) {
+                        COMPACT, MEDIUM -> 320.dp
+                        EXPANDED, FULL -> 500.dp
+                    }
                     BookThumbnail(
                         book.id,
                         modifier = Modifier
-                            .heightIn(min = 100.dp, max = 400.dp)
-                            .widthIn(min = 300.dp, max = 500.dp)
+                            .widthIn(min = 180.dp, max = thumbnailMaxWidth)
+                            .aspectRatio(0.703f)
                             .animateContentSize()
                     )
                     BookMainInfo(

@@ -163,9 +163,10 @@ private fun ColumnScope.SearchResultsDropDownBox(
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        val strings = LocalStrings.current.legacy
         val series = searchResults.series
         if (series.isNotEmpty()) {
-            Text(text = "Series")
+            Text(text = strings.forText("Series"))
             series.forEach {
                 SeriesSearchEntry(
                     series = it,
@@ -180,7 +181,7 @@ private fun ColumnScope.SearchResultsDropDownBox(
         val books = searchResults.books
         if (books.isNotEmpty()) {
             Text(
-                text = "Books",
+                text = strings.forText("Books"),
                 modifier = Modifier.padding(5.dp)
             )
             books.forEach {
@@ -270,7 +271,7 @@ fun SearchTextField(
     val focusManager = LocalFocusManager.current
     NoPaddingTextField(
         text = query,
-        placeholder = "Search",
+        placeholder = LocalStrings.current.common.search,
         onTextChange = onQueryChange,
         shape = CircleShape,
         colors = OutlinedTextFieldDefaults.colors(

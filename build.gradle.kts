@@ -319,6 +319,19 @@ tasks.register<Sync>("buildWebui") {
     into(composeCommonResources)
 }
 
+project(":komelia-ui") {
+    tasks.configureEach {
+        if (
+            name == "generateComposeResClass" ||
+            name.startsWith("generateResourceAccessors") ||
+            name.startsWith("prepareComposeResourcesTask") ||
+            name.startsWith("copyNonXmlValueResources")
+        ) {
+            dependsOn(rootProject.tasks.named("buildWebui"))
+        }
+    }
+}
+
 tasks.register<Exec>("cmakeSystemDepsConfigure") {
     group = "jni"
     delete("$projectDir/cmake-build")

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -234,7 +235,11 @@ fun SeriesDetailedListCard(
                 .heightIn(max = 200.dp)
                 .padding(10.dp)
         ) {
-            SeriesSimpleImageCard(series, onClick)
+            SeriesSimpleImageCard(
+                series = series,
+                onSeriesClick = onClick,
+                modifier = Modifier.width(130.dp)
+            )
             SeriesDetails(series)
         }
     }

@@ -30,6 +30,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import snd.komelia.DefaultDateTimeFormats.localDateTimeFormat
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.TagList
 import snd.komelia.ui.common.components.DescriptionChips
 import snd.komelia.ui.common.components.LabeledEntry
@@ -71,6 +72,7 @@ fun BookInfoColumn(
     fileUrl: String,
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
+    val strings = LocalStrings.current.legacy
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (!publisher.isNullOrBlank()) {
             DescriptionChips(
@@ -124,7 +126,7 @@ fun BookInfoColumn(
         Spacer(Modifier.size(0.dp))
         Row {
             Text(
-                "Size",
+                strings.forText("Size"),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.width(120.dp)
             )
@@ -133,7 +135,7 @@ fun BookInfoColumn(
 
         Row {
             Text(
-                "Format",
+                strings.forText("Format"),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.width(120.dp)
             )
@@ -145,7 +147,7 @@ fun BookInfoColumn(
         isbn.ifBlank { null }?.let { isbn ->
             Row {
                 Text(
-                    "ISBN",
+                    strings.forText("ISBN"),
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.width(120.dp)
                 )
@@ -155,7 +157,7 @@ fun BookInfoColumn(
 
         Row {
             Text(
-                "File",
+                strings.forText("File"),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.width(120.dp)
             )
@@ -170,6 +172,7 @@ fun BookInfoRow(
     book: KomeliaBook,
     onSeriesButtonClick: (() -> Unit)? = null,
 ) {
+    val strings = LocalStrings.current.legacy
 
     Column(
         modifier = modifier,
@@ -219,7 +222,7 @@ fun BookInfoRow(
         }
 
         SelectionContainer {
-            Text(text = "Book #${book.metadata.number} · ${book.media.pagesCount} pages")
+            Text(text = strings.forText("Book #${book.metadata.number} · ${book.media.pagesCount} pages"))
         }
 
         Spacer(Modifier.heightIn(5.dp))
@@ -228,7 +231,7 @@ fun BookInfoRow(
                 book.metadata.releaseDate?.let {
                     Row {
                         Text(
-                            text = "Release date:",
+                            text = strings.forText("Release date:"),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.width(120.dp)
                         )
@@ -253,14 +256,14 @@ fun BookInfoRow(
                                 append(percentage)
                                 append("%, ")
                                 append(pagesLeft)
-                                if (pagesLeft == 1) append(" page left")
-                                else append(" pages left")
+                                append(" ")
+                                append(if (pagesLeft == 1) strings.forText("page left") else strings.forText("pages left"))
                             }
                         }
 
                         Row {
                             Text(
-                                "Read progress:",
+                                strings.forText("Read progress:"),
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.width(120.dp)
                             )
@@ -275,7 +278,7 @@ fun BookInfoRow(
                                 .format(localDateTimeFormat)
                         }
                         Text(
-                            "Last read:",
+                            strings.forText("Last read:"),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.width(120.dp)
                         )

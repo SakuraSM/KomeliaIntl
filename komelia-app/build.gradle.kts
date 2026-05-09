@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -92,6 +93,27 @@ val androidVariant = runCatching {
     )
 }.getOrDefault(AndroidVariant.STANDALONE)
 
+val localProperties = Properties().apply {
+    val propertiesFile = rootProject.file("local.properties")
+    if (propertiesFile.exists()) {
+        propertiesFile.inputStream().use(::load)
+    }
+}
+
+fun releaseSigningProperty(name: String): String? {
+    return (project.findProperty(name) as? String)
+        ?: localProperties.getProperty(name)
+        ?: System.getenv(name)
+}
+
+val releaseSigningProperties = mapOf(
+    "storeFile" to releaseSigningProperty("KOMELIA_RELEASE_STORE_FILE"),
+    "storePassword" to releaseSigningProperty("KOMELIA_RELEASE_STORE_PASSWORD"),
+    "keyAlias" to releaseSigningProperty("KOMELIA_RELEASE_KEY_ALIAS"),
+    "keyPassword" to releaseSigningProperty("KOMELIA_RELEASE_KEY_PASSWORD"),
+)
+val hasReleaseSigningConfig = releaseSigningProperties.values.all { !it.isNullOrBlank() }
+
 android {
     namespace = "io.github.snd_r.komelia"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -109,14 +131,14 @@ android {
         buildConfig = true
     }
     defaultConfig {
-        applicationId = "io.github.snd_r.komelia"
+        applicationId = "io.github.zhengningning.komelia"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 19
+        versionCode = 20
         versionName = libs.versions.app.version.get()
 
         val enableSelfUpdates = when (androidVariant) {
-            AndroidVariant.STANDALONE -> "true"
+            AndroidVariant.STANDALONE -> (project.findProperty("snd.enable.self.updates") == "true").toString()
             AndroidVariant.FDROID -> "false"
             AndroidVariant.PLAY -> "false"
         }
@@ -134,8 +156,27 @@ android {
             includeInBundle = false
         }
     }
+    signingConfigs {
+        if (hasReleaseSigningConfig) {
+            create("release") {
+                storeFile = file(requireNotNull(releaseSigningProperties["storeFile"]))
+                storePassword = requireNotNull(releaseSigningProperties["storePassword"])
+                keyAlias = requireNotNull(releaseSigningProperties["keyAlias"])
+                keyPassword = requireNotNull(releaseSigningProperties["keyPassword"])
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasReleaseSigningConfig) {
+                signingConfig = signingConfigs.getByName("release")
+            } else if (project.findProperty("requireReleaseSigning") == "true") {
+                error(
+                    "Release signing is required. Configure KOMELIA_RELEASE_STORE_FILE, " +
+                        "KOMELIA_RELEASE_STORE_PASSWORD, KOMELIA_RELEASE_KEY_ALIAS, and " +
+                        "KOMELIA_RELEASE_KEY_PASSWORD in local.properties, Gradle properties, or environment variables."
+                )
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

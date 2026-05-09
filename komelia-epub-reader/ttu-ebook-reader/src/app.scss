@@ -15,9 +15,38 @@
 }
 
 @layer base {
+  body.reader-horizontal-mode,
+  body.reader-horizontal-mode #app {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     color: var(--font-color);
     background-color: var(--background-color);
+  }
+
+  .book-content--writing-horizontal-rl {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    overflow-wrap: anywhere;
+  }
+
+  .book-content--writing-horizontal-rl img,
+  .book-content--writing-horizontal-rl svg,
+  .book-content--writing-horizontal-rl video,
+  .book-content--writing-horizontal-rl canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .book-content--writing-horizontal-rl table,
+  .book-content--writing-horizontal-rl pre {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
   }
 }
 

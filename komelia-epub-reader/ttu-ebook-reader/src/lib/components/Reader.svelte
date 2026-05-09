@@ -20,7 +20,7 @@
   } from 'rxjs';
   import {quintInOut} from 'svelte/easing';
   import {fly} from 'svelte/transition';
-  import {faSpinner} from '@fortawesome/free-solid-svg-icons';
+  import {faBars, faList, faSpinner} from '@fortawesome/free-solid-svg-icons';
   import BookReader from '$lib/components/book-reader/book-reader.svelte';
   import type {AutoScroller, BookmarkManager, PageManager} from '$lib/components/book-reader/types';
   import MessageDialog from '$lib/components/message-dialog.svelte';
@@ -338,6 +338,14 @@
 
   $effect(() => {
     document.dispatchEvent(new CustomEvent(SKIPKEYLISTENER, {detail: $skipKeyDownListener$}))
+  });
+
+  $effect(() => {
+    const className = 'reader-horizontal-mode';
+
+    document.body.classList.toggle(className, !$verticalMode$);
+
+    return () => document.body.classList.remove(className);
   });
 
   onMount(() => {
@@ -723,6 +731,16 @@
       });
   }
 
+  function openToc() {
+    if (!$sectionData$?.length) {
+      showHeader = true;
+      return;
+    }
+
+    showHeader = false;
+    tocIsOpen$.next(true);
+  }
+
 
 </script>
 
@@ -734,7 +752,37 @@
 {:then _}
   {$collectReaderImageGallerySpoilerToggles$ ?? ''}
   {$handleUpdateImageGalleryPictureSpoilers$ ?? ''}
-  <button class="fixed inset-x-0 top-0 z-10 h-8 w-full" onclick={() => (showHeader = true)}></button>
+  <button
+      class="fixed inset-x-0 top-0 z-10 h-8 w-full"
+      aria-label="打开阅读菜单"
+      onclick={() => (showHeader = true)}
+  ></button>
+  {#if !showHeader}
+    <div class="writing-horizontal-tb fixed left-2 top-2 z-20 flex gap-2">
+      {#if $sectionData$?.length}
+        <button
+            type="button"
+            title="打开目录"
+            aria-label="打开目录"
+            class="flex h-10 items-center gap-2 rounded-full bg-black/55 px-3 text-sm text-white shadow backdrop-blur-sm"
+            onclick={openToc}
+        >
+          <Fa icon={faList}/>
+          <span>目录</span>
+        </button>
+      {/if}
+      <button
+          type="button"
+          title="打开阅读菜单"
+          aria-label="打开阅读菜单"
+          class="flex h-10 items-center gap-2 rounded-full bg-black/55 px-3 text-sm text-white shadow backdrop-blur-sm"
+          onclick={() => (showHeader = true)}
+      >
+        <Fa icon={faBars}/>
+        <span>菜单</span>
+      </button>
+    </div>
+  {/if}
   {#if showHeader}
     <div
         class="elevation-4 writing-horizontal-tb fixed inset-x-0 top-0 z-10 w-full"
@@ -751,10 +799,7 @@
           showFullscreenButton={fullscreenAvailable}
           autoScrollMultiplier={$multiplier$}
           {hasBookmarkData}
-          tocClick={() => {
-            showHeader = false;
-            tocIsOpen$.next(true);
-        }}
+          tocClick={openToc}
           completeBook={completeBook}
           setCustomReadingPoint={handleSetCustomReadingPoint}
           showCustomReadingPoint={() => {

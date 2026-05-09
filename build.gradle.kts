@@ -41,6 +41,26 @@ val composeCommonResources = "$projectDir/komelia-ui/src/commonMain/composeResou
 val epubReader = "$rootDir/komelia-epub-reader"
 val epubReaderKomga = "$epubReader/komga-webui"
 val epubReaderTtsu = "$epubReader/ttu-ebook-reader"
+val nodeVersion = file(".node-version")
+    .takeIf { it.exists() }
+    ?.readText()
+    ?.trim()
+    ?.takeIf { it.isNotBlank() }
+    ?: "20"
+
+fun Exec.npmCommand(vararg args: String) {
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        commandLine("npm.cmd", *args)
+        return
+    }
+
+    val npmArgs = args.joinToString(" ")
+    commandLine(
+        "zsh",
+        "-lc",
+        "if command -v fnm >/dev/null 2>&1; then eval \"\$(fnm env --shell zsh)\" && fnm use $nodeVersion >/dev/null; fi; npm $npmArgs"
+    )
+}
 
 val linuxCommonLibs = setOf(
     "libintl.so",
@@ -250,14 +270,7 @@ tasks.register<Exec>("komgaNpmInstall") {
     workingDir(epubReaderKomga)
     inputs.file("$epubReaderKomga/package.json")
     outputs.dir("$epubReaderKomga/node_modules")
-    commandLine(
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            "npm.cmd"
-        } else {
-            "npm"
-        },
-        "install",
-    )
+    npmCommand("install")
 }
 
 tasks.register<Exec>("komgaNpmBuild") {
@@ -266,15 +279,7 @@ tasks.register<Exec>("komgaNpmBuild") {
     workingDir(epubReaderKomga)
     inputs.dir(epubReaderKomga)
     outputs.dir("$epubReaderKomga/dist")
-    commandLine(
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            "npm.cmd"
-        } else {
-            "npm"
-        },
-        "run",
-        "build",
-    )
+    npmCommand("run", "build")
 }
 
 tasks.register<Exec>("ttsuNpmInstall") {
@@ -282,14 +287,7 @@ tasks.register<Exec>("ttsuNpmInstall") {
     workingDir(epubReaderTtsu)
     inputs.file("$epubReaderTtsu/package.json")
     outputs.dir("$epubReaderTtsu/node_modules")
-    commandLine(
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            "npm.cmd"
-        } else {
-            "npm"
-        },
-        "install",
-    )
+    npmCommand("install")
 }
 
 tasks.register<Exec>("ttsuNpmBuild") {
@@ -298,15 +296,7 @@ tasks.register<Exec>("ttsuNpmBuild") {
     workingDir(epubReaderTtsu)
     inputs.dir(epubReaderTtsu)
     outputs.dir("$epubReaderTtsu/dist")
-    commandLine(
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            "npm.cmd"
-        } else {
-            "npm"
-        },
-        "run",
-        "build",
-    )
+    npmCommand("run", "build")
 }
 
 tasks.register<Sync>("buildWebui") {

@@ -1,6 +1,7 @@
 [submodule "third_party/secret-service"]
 	path = third_party/secret-service
 	url = https://github.com/Snd-R/secret-service
+	ignore = dirty
 [submodule "third_party/compose-sonner"]
 	path = third_party/compose-sonner
 	url = https://github.com/Snd-R/compose-sonner

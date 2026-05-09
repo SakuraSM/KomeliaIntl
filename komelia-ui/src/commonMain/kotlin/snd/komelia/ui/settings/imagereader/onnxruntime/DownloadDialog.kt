@@ -57,7 +57,7 @@ fun DownloadDialog(
                 TextButton(
                     onClick = onDismiss,
                     modifier = Modifier.cursorForHand(),
-                    content = { Text("Cancel") }
+                    content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel")) }
                 )
             }
         },

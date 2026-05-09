@@ -147,7 +147,7 @@ fun SeriesActionsMenu(
     ) {
         if (isAdmin && !isOffline) {
             DropdownMenuItem(
-                text = { Text("Analyze") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Analyze")) },
                 onClick = {
                     actions.analyze(series)
                     onDismissRequest()
@@ -155,7 +155,7 @@ fun SeriesActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text("Refresh metadata") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Refresh metadata")) },
                 onClick = {
                     actions.refreshMetadata(series)
                     onDismissRequest()
@@ -163,7 +163,7 @@ fun SeriesActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text("Add to collection") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add to collection")) },
                 onClick = { showAddToCollectionDialog = true },
             )
         }
@@ -172,7 +172,7 @@ fun SeriesActionsMenu(
         val isUnread = remember { series.booksUnreadCount == series.booksCount }
         if (!isRead) {
             DropdownMenuItem(
-                text = { Text("Mark as read") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Mark as read")) },
                 onClick = {
                     actions.markAsRead(series)
                     onDismissRequest()
@@ -182,7 +182,7 @@ fun SeriesActionsMenu(
 
         if (!isUnread) {
             DropdownMenuItem(
-                text = { Text("Mark as unread") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Mark as unread")) },
                 onClick = {
                     actions.markAsUnread(series)
                     onDismissRequest()
@@ -192,14 +192,14 @@ fun SeriesActionsMenu(
 
         if (isAdmin && !isOffline && showEditOption) {
             DropdownMenuItem(
-                text = { Text("Edit") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit")) },
                 onClick = { showEditDialog = true },
             )
         }
 
         if (!isOffline && showDownloadOption) {
             DropdownMenuItem(
-                text = { Text("Download") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Download")) },
                 onClick = { showDownloadDialog = true },
             )
         }
@@ -211,7 +211,7 @@ fun SeriesActionsMenu(
                 if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
                 else Modifier
             DropdownMenuItem(
-                text = { Text("Delete downloaded") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded")) },
                 onClick = { showDeleteDownloadedDialog = true },
                 modifier = Modifier
                     .hoverable(deleteInteractionSource)
@@ -223,12 +223,12 @@ fun SeriesActionsMenu(
         val komfIntegration = LocalKomfIntegration.current.collectAsState(false)
         if (komfIntegration.value) {
             DropdownMenuItem(
-                text = { Text("Identify (Komf)") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Identify (Komf)")) },
                 onClick = { showKomfDialog = true },
             )
 
             DropdownMenuItem(
-                text = { Text("Reset Metadata (Komf)") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reset Metadata (Komf)")) },
                 onClick = { showKomfResetDialog = true },
             )
         }
@@ -240,7 +240,7 @@ fun SeriesActionsMenu(
 //                if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
 //                else Modifier
 //            DropdownMenuItem(
-//                text = { Text("Delete from server") },
+//                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete from server")) },
 //                onClick = { showDeleteDialog = true },
 //                modifier = Modifier
 //                    .hoverable(deleteInteractionSource)

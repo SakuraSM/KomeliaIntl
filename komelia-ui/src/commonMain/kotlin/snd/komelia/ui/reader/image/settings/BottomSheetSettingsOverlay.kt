@@ -190,14 +190,14 @@ fun BottomSheetSettingsOverlay(
                         onClick = { selectedTab = 0 },
                         modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
                     ) {
-                        Text("Reading mode")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reading mode"))
                     }
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
                         modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
                     ) {
-                        Text("Image settings")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Image settings"))
                     }
                 }
                 val focusManager = LocalFocusManager.current
@@ -273,23 +273,23 @@ private fun BottomSheetReadingModeSettings(
     panelsReaderState: PanelsReaderState?,
 ) {
     Column {
-        Text("Reading mode")
+        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reading mode"))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             InputChip(
                 selected = readerType == PAGED,
                 onClick = { onReaderTypeChange(PAGED) },
-                label = { Text("Paged") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Paged")) }
             )
             InputChip(
                 selected = readerType == CONTINUOUS,
                 onClick = { onReaderTypeChange(CONTINUOUS) },
-                label = { Text("Continuous") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Continuous")) }
             )
             if (panelsReaderState != null)
                 InputChip(
                     selected = readerType == PANELS,
                     onClick = { onReaderTypeChange(PANELS) },
-                    label = { Text("Panels") }
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Panels")) }
                 )
         }
 
@@ -641,7 +641,7 @@ private fun SamplingModeSettings(
     SwitchWithLabel(
         checked = linearLightDownsampling,
         onCheckedChange = onLinearLightDownsamplingChange,
-        label = { Text("Linear light downsampling") },
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Linear light downsampling")) },
         supportingText = {
             Text("slower but potentially more accurate", style = MaterialTheme.typography.labelMedium)
         },

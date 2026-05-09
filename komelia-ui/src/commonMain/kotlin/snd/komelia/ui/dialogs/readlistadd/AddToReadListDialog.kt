@@ -93,7 +93,7 @@ private fun DialogContent(
             TextField(
                 value = query,
                 onValueChange = { query = it },
-                label = { Text("Search or create read list") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Search or create read list")) },
                 supportingText = {
                     if (readListExistsForQuery.value)
                         Text(
@@ -106,7 +106,7 @@ private fun DialogContent(
             FilledTonalButton(
                 onClick = { coroutineScope.launch { onCreateNewReadList(query) } },
                 enabled = query.isNotBlank() && !readListExistsForQuery.value,
-                content = { Text("Create") },
+                content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Create")) },
             )
         }
 

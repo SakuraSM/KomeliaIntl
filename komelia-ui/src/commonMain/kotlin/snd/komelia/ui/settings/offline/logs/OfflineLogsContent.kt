@@ -53,7 +53,7 @@ fun OfflineLogsContent(
         )
 
         if (logs.isEmpty()) {
-            Text("Nothing to show")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Nothing to show"))
         } else {
             LogsContent(logs)
 
@@ -84,14 +84,14 @@ private fun StatusFilters(
         FilterChip(
             selected = selectedTab == TaskTab.ERROR,
             onClick = { onTabSelect(TaskTab.ERROR) },
-            label = { Text("Errors") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Errors")) },
             colors = AppFilterChipDefaults.filterChipColors(),
             border = null
         )
         FilterChip(
             selected = selectedTab == TaskTab.INFO,
             onClick = { onTabSelect(TaskTab.INFO) },
-            label = { Text("Info") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Info")) },
             colors = AppFilterChipDefaults.filterChipColors(),
             border = null
         )
@@ -99,7 +99,7 @@ private fun StatusFilters(
         var showDeleteDialog by remember { mutableStateOf(false) }
 
         Spacer(Modifier.weight(1f))
-        FilledTonalButton(onClick = { showDeleteDialog = true }) { Text("Delete all") }
+        FilledTonalButton(onClick = { showDeleteDialog = true }) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete all")) }
 
         if (showDeleteDialog) {
             ConfirmationDialog(

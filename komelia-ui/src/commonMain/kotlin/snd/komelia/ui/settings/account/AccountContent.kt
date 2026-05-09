@@ -68,7 +68,7 @@ private fun PasswordDetails(user: KomgaUser) {
         onClick = { showPasswordDialog = true },
         modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
     ) {
-        Text("Change Password")
+        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Change Password"))
     }
     if (showPasswordDialog) {
         PasswordChangeDialog(user = user, onDismiss = { showPasswordDialog = false })

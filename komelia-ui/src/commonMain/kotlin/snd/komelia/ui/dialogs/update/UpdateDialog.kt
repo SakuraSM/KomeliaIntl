@@ -85,14 +85,14 @@ private fun ControlButtons(
         TextButton(
             onClick = onDismiss,
             modifier = Modifier.cursorForHand(),
-            content = { Text("Dismiss") }
+            content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Dismiss")) }
         )
 
         FilledTonalButton(
             onClick = onConfirm,
             modifier = Modifier.cursorForHand(),
         ) {
-            Text("Update")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Update"))
         }
     }
 }

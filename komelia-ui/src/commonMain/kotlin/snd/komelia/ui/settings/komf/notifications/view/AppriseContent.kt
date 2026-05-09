@@ -67,7 +67,7 @@ fun AppriseContent(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
 
-        Text("Urls")
+        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Urls"))
         urls.forEach { url ->
 
             Row {
@@ -88,12 +88,12 @@ fun AppriseContent(
             onClick = { showAddUrlDialog = true },
             modifier = Modifier.cursorForHand()
         ) {
-            Text("Add Url")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add Url"))
         }
         SwitchWithLabel(
             checked = uploadSeriesCover,
             onCheckedChange = onUploadSeriesCoverChange,
-            label = { Text("Upload series cover") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Upload series cover")) }
         )
 
         if (showAddUrlDialog) {
@@ -151,18 +151,18 @@ fun AddUrlDialog(
                 TextField(
                     value = newWebhook,
                     onValueChange = { newWebhook = it },
-                    label = { Text("URL") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("URL")) },
                     modifier = Modifier.fillMaxWidth(),
                     isError = isError,
                     interactionSource = interactionSource,
-                    supportingText = { if (isError) Text("failed to parse URL") },
+                    supportingText = { if (isError) Text(snd.komelia.ui.LocalStrings.current.legacy.forText("failed to parse URL")) },
                     visualTransformation = if (isFocused) VisualTransformation.None else PasswordVisualTransformation(),
                 )
                 if (isError) {
                     CheckboxWithLabel(
                         checked = confirmInvalidUrl,
                         onCheckedChange = { confirmInvalidUrl = !confirmInvalidUrl },
-                        label = { Text("apply anyway") }
+                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("apply anyway")) }
                     )
                 }
             }
@@ -176,7 +176,7 @@ fun AddUrlDialog(
                 TextButton(
                     onClick = onDismissRequest,
                     modifier = Modifier.cursorForHand(),
-                    content = { Text("Cancel") }
+                    content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel")) }
                 )
 
                 FilledTonalButton(
@@ -187,7 +187,7 @@ fun AddUrlDialog(
                     modifier = Modifier.cursorForHand(),
                     enabled = !isError || confirmInvalidUrl
                 ) {
-                    Text("Confirm")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Confirm"))
                 }
             }
         }
@@ -233,14 +233,14 @@ private fun TemplatesEditor(
             TextField(
                 value = titleTemplate,
                 onValueChange = onTitleTemplateChange,
-                label = { Text("Title") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Title")) },
                 maxLines = 1,
                 modifier = Modifier.fillMaxWidth()
             )
             TextField(
                 value = bodyTemplate,
                 onValueChange = onBodyTemplateChange,
-                label = { Text("Body") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Body")) },
                 minLines = 2,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -254,7 +254,7 @@ private fun TemplatesEditor(
                 onClick = { showNotificationContextDialog = true },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Notification Context")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Notification Context"))
 
             }
 
@@ -262,7 +262,7 @@ private fun TemplatesEditor(
                 onClick = onTemplateSend,
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Test Send")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Test Send"))
             }
 
             FilledTonalButton(
@@ -270,7 +270,7 @@ private fun TemplatesEditor(
                 enabled = true,
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Save")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Save"))
             }
         }
     }

@@ -86,7 +86,7 @@ fun ColorLevelContent(
                     .align(Alignment.CenterVertically)
                     .pointerHoverIcon(PointerIcon.Hand),
             ) {
-                Text("Reset All")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reset All"))
             }
         }
 
@@ -186,7 +186,7 @@ private fun InputFields(
         NumberFieldWithIncrements(
             value = lowValue.toFloat(),
             onvValueChange = { onLowValueChange(it.toInt()) },
-            label = { Text("Black") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Black")) },
             stepSize = 1f,
             minValue = 0f,
             maxValue = 255f,
@@ -198,7 +198,7 @@ private fun InputFields(
         NumberFieldWithIncrements(
             value = gammaValue,
             onvValueChange = onGammaValueChange,
-            label = { Text("Gamma") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Gamma")) },
             stepSize = 0.01f,
             minValue = 0.1f,
             maxValue = 10f,
@@ -209,7 +209,7 @@ private fun InputFields(
         NumberFieldWithIncrements(
             value = highValue.toFloat(),
             onvValueChange = { onHighValueChange(it.toInt()) },
-            label = { Text("White") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("White")) },
             stepSize = 1f,
             minValue = 0f,
             maxValue = 255f,
@@ -233,7 +233,7 @@ private fun OutputFields(
         NumberFieldWithIncrements(
             value = lowValue.toFloat(),
             onvValueChange = { onLowValueChange(it.toInt()) },
-            label = { Text("Black") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Black")) },
             stepSize = 1f,
             minValue = 0f,
             maxValue = 255f,
@@ -244,7 +244,7 @@ private fun OutputFields(
         NumberFieldWithIncrements(
             value = highValue.toFloat(),
             onvValueChange = { onHighValueChange(it.toInt()) },
-            label = { Text("White") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("White")) },
             stepSize = 1f,
             minValue = 0f,
             maxValue = 255f,

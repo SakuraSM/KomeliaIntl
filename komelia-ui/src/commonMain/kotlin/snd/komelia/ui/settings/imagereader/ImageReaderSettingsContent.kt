@@ -35,21 +35,21 @@ fun ImageReaderSettingsContent(
         SwitchWithLabel(
             checked = loadThumbnailPreviews,
             onCheckedChange = onLoadThumbnailPreviewsChange,
-            label = { Text("Load small previews when dragging navigation slider") },
-            supportingText = { Text("can be slow for high resolution images") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Load small previews when dragging navigation slider")) },
+            supportingText = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("can be slow for high resolution images")) },
         )
 
         if (platform == PlatformType.MOBILE) {
             SwitchWithLabel(
                 checked = volumeKeysNavigation,
                 onCheckedChange = onVolumeKeysNavigationChange,
-                label = { Text("Volume keys navigation") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Volume keys navigation")) },
             )
         }
 
         FilledTonalButton(
             onClick = onCacheClear,
-        ) { Text("Clear image cache") }
+        ) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Clear image cache")) }
 
         if (isOnnxRuntimeSupported()) {
             HorizontalDivider(Modifier.padding(vertical = 10.dp))

@@ -208,7 +208,7 @@ private fun AddNewProviderButton(
                 .cursorForHand()
                 .menuAnchor(PrimaryNotEditable)
         ) {
-            Text("Add provider")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add provider"))
         }
 
         val scrollState = rememberScrollState()
@@ -261,7 +261,7 @@ private fun CommonSettingsContent(
             },
             options = remember { KomfNameMatchingMode.entries.map { LabeledEntry(it, it.name) } },
             onOptionChange = { onNameMatchingModeChange(it.value) },
-            label = { Text("Name matching mode") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Name matching mode")) },
             inputFieldModifier = Modifier.fillMaxWidth()
         )
 
@@ -269,13 +269,13 @@ private fun CommonSettingsContent(
             currentValue = comicVineClientId ?: "",
             onValueSave = onComicVineClientIdSave,
             useEditButton = true,
-            label = { Text("ComicVine client id") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("ComicVine client id")) }
         )
         SavableTextField(
             currentValue = malClientId ?: "",
             onValueSave = onMalClientIdSave,
             useEditButton = true,
-            label = { Text("MyAnimeList client id") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("MyAnimeList client id")) }
         )
 
         HorizontalDivider()
@@ -359,7 +359,7 @@ private fun MangaBakaDbDownloadContent(
                         onClick = onDismiss,
                         modifier = Modifier.cursorForHand(),
                         content = {
-                            Text("Close")
+                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Close"))
                         }
                     )
 
@@ -368,7 +368,7 @@ private fun MangaBakaDbDownloadContent(
                         onClick = onDismiss,
                         modifier = Modifier.cursorForHand(),
                         content = {
-                            Text("Close")
+                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Close"))
                         }
                     )
                 }
@@ -444,48 +444,48 @@ private class SeriesMetadataTab(private val state: ProviderConfigState) : Dialog
             SwitchWithLabel(
                 checked = state.seriesAgeRating,
                 onCheckedChange = state::onSeriesAgeRatingChange,
-                label = { Text("Age Rating") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Age Rating")) }
             )
             HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesAuthors,
                 onCheckedChange = state::onSeriesAuthorsChange,
-                label = { Text("Authors") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Authors")) }
             )
             HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesBookCount,
                 onCheckedChange = state::onSeriesBookCountChange,
-                label = { Text("Book Count") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Book Count")) }
             )
             HorizontalDivider()
             SwitchWithLabel(
                 checked = state.seriesCover,
                 onCheckedChange = state::onSeriesCoverChange,
-                label = { Text("Cover") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cover")) }
             )
             HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesGenres,
                 onCheckedChange = state::onSeriesGenresChange,
-                label = { Text("Genres") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Genres")) }
             )
             HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesLinks,
                 onCheckedChange = state::onSeriesLinksChange,
-                label = { Text("Links") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Links")) }
             )
             HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesPublisher,
                 onCheckedChange = state::onSeriesPublisherChange,
-                label = { Text("Publisher") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Publisher")) }
             )
             HorizontalDivider()
 
@@ -493,8 +493,8 @@ private class SeriesMetadataTab(private val state: ProviderConfigState) : Dialog
                 SwitchWithLabel(
                     checked = state.seriesOriginalPublisher,
                     onCheckedChange = state::onSeriesOriginalPublisherChange,
-                    label = { Text("Use Original Publisher") },
-                    supportingText = { Text("Prefer original publisher instead of localizing publisher") }
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Use Original Publisher")) },
+                    supportingText = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Prefer original publisher instead of localizing publisher")) }
                 )
                 HorizontalDivider()
             }
@@ -502,35 +502,35 @@ private class SeriesMetadataTab(private val state: ProviderConfigState) : Dialog
             SwitchWithLabel(
                 checked = state.seriesReleaseDate,
                 onCheckedChange = state::onSeriesReleaseDateChange,
-                label = { Text("Release date") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Release date")) }
             )
             HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesStatus,
                 onCheckedChange = state::onSeriesStatusChange,
-                label = { Text("Status") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Status")) }
             )
             HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesSummary,
                 onCheckedChange = state::onSeriesSummaryChange,
-                label = { Text("Summary") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Summary")) }
             )
             HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesTags,
                 onCheckedChange = state::onSeriesTagsChange,
-                label = { Text("Tags") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Tags")) }
             )
             HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesTitle,
                 onCheckedChange = state::onSeriesTitleChange,
-                label = { Text("Title") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Title")) }
             )
         }
     }
@@ -545,7 +545,7 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
             SwitchWithLabel(
                 checked = state.bookEnabled,
                 onCheckedChange = state::onBookEnabledChange,
-                label = { Text("Enabled") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Enabled")) }
             )
             HorizontalDivider()
 
@@ -553,7 +553,7 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 enabled = state.bookEnabled,
                 checked = state.bookAuthors,
                 onCheckedChange = state::onBookAuthorsChange,
-                label = { Text("Authors") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Authors")) }
             )
             HorizontalDivider()
 
@@ -561,7 +561,7 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 enabled = state.bookEnabled,
                 checked = state.bookCover,
                 onCheckedChange = state::onBookCoverChange,
-                label = { Text("Cover") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cover")) }
             )
             HorizontalDivider()
 
@@ -569,7 +569,7 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 enabled = state.bookEnabled,
                 checked = state.bookIsbn,
                 onCheckedChange = state::onBookIsbnChange,
-                label = { Text("ISBN") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("ISBN")) }
             )
             HorizontalDivider()
 
@@ -577,7 +577,7 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 enabled = state.bookEnabled,
                 checked = state.bookLinks,
                 onCheckedChange = state::onBookLinksChange,
-                label = { Text("Links") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Links")) }
             )
             HorizontalDivider()
 
@@ -585,7 +585,7 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 enabled = state.bookEnabled,
                 checked = state.bookNumber,
                 onCheckedChange = state::onBookNumberChange,
-                label = { Text("Number") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Number")) }
             )
             HorizontalDivider()
 
@@ -593,7 +593,7 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 enabled = state.bookEnabled,
                 checked = state.bookReleaseDate,
                 onCheckedChange = state::onBookReleaseDateChange,
-                label = { Text("Release Date") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Release Date")) }
             )
             HorizontalDivider()
 
@@ -601,7 +601,7 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 enabled = state.bookEnabled,
                 checked = state.bookSummary,
                 onCheckedChange = state::onBookSummaryChange,
-                label = { Text("Summary") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Summary")) }
             )
             HorizontalDivider()
 
@@ -609,7 +609,7 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 enabled = state.bookEnabled,
                 checked = state.bookTags,
                 onCheckedChange = state::onBookTagsChange,
-                label = { Text("Tags") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Tags")) }
             )
         }
     }
@@ -634,7 +634,7 @@ private class ProviderSettingsTab(private val state: ProviderConfigState) : Dial
                             KomfMediaType.entries.map { LabeledEntry(it, it.name) }
                 },
                 onOptionChange = { state.onMediaTypeChange(it.value) },
-                label = { Text("Media Type") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Media Type")) },
                 inputFieldModifier = Modifier.fillMaxWidth()
             )
 
@@ -650,7 +650,7 @@ private class ProviderSettingsTab(private val state: ProviderConfigState) : Dial
                             KomfNameMatchingMode.entries.map { LabeledEntry(it, it.name) }
                 },
                 onOptionChange = { state.onNameMatchingModeChange(it.value) },
-                label = { Text("Name matching mode") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Name matching mode")) },
                 inputFieldModifier = Modifier.fillMaxWidth()
             )
 
@@ -658,7 +658,7 @@ private class ProviderSettingsTab(private val state: ProviderConfigState) : Dial
                 selectedOptions = remember(state.authorRoles) { state.authorRoles.map { LabeledEntry(it, it.name) } },
                 options = remember { KomfAuthorRole.entries.map { LabeledEntry(it, it.name) } },
                 onOptionSelect = { state.onAuthorSelect(it.value) },
-                label = { Text("Author Roles") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Author Roles")) },
                 placeholder = "Unset",
                 inputFieldModifier = Modifier.fillMaxWidth()
             )
@@ -666,7 +666,7 @@ private class ProviderSettingsTab(private val state: ProviderConfigState) : Dial
                 selectedOptions = remember(state.artistRoles) { state.artistRoles.map { LabeledEntry(it, it.name) } },
                 options = remember { KomfAuthorRole.entries.map { LabeledEntry(it, it.name) } },
                 onOptionSelect = { state.onArtistSelect(it.value) },
-                label = { Text("Artist Roles") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Artist Roles")) },
                 placeholder = "Unset",
                 inputFieldModifier = Modifier.fillMaxWidth()
             )
@@ -687,14 +687,14 @@ private class ProviderSettingsTab(private val state: ProviderConfigState) : Dial
                 currentValue = remember(state.tagScoreThreshold) { state.tagScoreThreshold.toString() },
                 onValueSave = { state.onTagScoreThresholdChange(it.toInt()) },
                 valueChangePolicy = { it.toIntOrNull() != null },
-                label = { Text("Tag score threshold") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Tag score threshold")) }
             )
 
             SavableTextField(
                 currentValue = remember(state.tagSizeLimit) { state.tagSizeLimit.toString() },
                 onValueSave = { state.onTagSizeLimitChange(it.toInt()) },
                 valueChangePolicy = { it.toIntOrNull() != null },
-                label = { Text("Tag size limit") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Tag size limit")) }
             )
         }
     }
@@ -703,7 +703,7 @@ private class ProviderSettingsTab(private val state: ProviderConfigState) : Dial
     private fun MangaDexProviderSettings(state: MangaDexConfigState) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             ChipFieldWithSuggestions(
-                label = { Text("Alternative title languages (ISO 639)") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Alternative title languages (ISO 639)")) },
                 values = state.coverLanguages,
                 onValuesChange = state::onCoverLanguagesChange,
                 suggestions = komfLanguageTagsSuggestions
@@ -712,7 +712,7 @@ private class ProviderSettingsTab(private val state: ProviderConfigState) : Dial
                 selectedOptions = state.links.map { LabeledEntry(it, it.name) },
                 options = MangaDexLink.entries.map { LabeledEntry(it, it.name) },
                 onOptionSelect = { state.onLinkSelect(it.value) },
-                label = { Text("Include links") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Include links")) },
                 placeholder = "All",
                 inputFieldModifier = Modifier.fillMaxWidth()
             )
@@ -734,7 +734,7 @@ private class ProviderSettingsTab(private val state: ProviderConfigState) : Dial
                 MangaBakaMode.entries.map { LabeledEntry(it, it.name) }
             },
             onOptionChange = { state.onModeChange(it.value) },
-            label = { Text("Datasource type") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Datasource type")) },
             inputFieldModifier = Modifier.fillMaxWidth()
         )
     }

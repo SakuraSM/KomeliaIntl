@@ -90,7 +90,7 @@ fun SavableTextField(
                         textFieldValue = ""
                     },
                 ) {
-                    Text("Edit")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit"))
                 }
             }
 
@@ -104,7 +104,7 @@ fun SavableTextField(
                             textFieldValue = currentValue
                         },
                     ) {
-                        Text("Discard")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Discard"))
                     }
                     FilledTonalButton(
                         onClick = {
@@ -114,7 +114,7 @@ fun SavableTextField(
                         },
                         enabled = isChanged,
                     ) {
-                        Text("Save")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Save"))
                     }
                 }
             }
@@ -158,7 +158,7 @@ fun SavableHttpTextField(
                     textFieldValue = currentValue
                 },
             ) {
-                Text("Discard")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Discard"))
             }
             FilledTonalButton(
                 onClick = {
@@ -246,7 +246,7 @@ fun LanguageSelectionField(
             },
             enabled = isChanged,
         ) {
-            Text("Save")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Save"))
         }
     }
 }

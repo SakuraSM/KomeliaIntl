@@ -54,7 +54,7 @@ fun AppUpdatesContent(
         SwitchWithLabel(
             checked = checkForUpdates,
             onCheckedChange = onCheckForUpdatesChange,
-            label = { Text("Check for updates on startup") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Check for updates on startup")) }
         )
         HorizontalDivider(Modifier.padding(bottom = 20.dp))
         VersionDetails(currentVersion, latestVersion, lastChecked, versionCheckInProgress)
@@ -66,14 +66,14 @@ fun AppUpdatesContent(
 
             FilledTonalButton(
                 onClick = { onCheckForUpdates() },
-            ) { Text("Check for updates") }
+            ) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Check for updates")) }
 
             if (LocalPlatform.current != PlatformType.WEB_KOMF &&
                 latestVersion != null && currentVersion < latestVersion
             ) {
                 FilledTonalButton(
                     onClick = { onUpdate() },
-                ) { Text("Update") }
+                ) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Update")) }
             }
         }
 

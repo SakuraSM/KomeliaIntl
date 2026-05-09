@@ -143,7 +143,7 @@ fun SettingsSideMenuOverlay(
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                     Spacer(Modifier.width(3.dp))
-                    Text("Close Book")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Close Book"))
                 }
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = { onShowHelpMenu() }) { Icon(Icons.AutoMirrored.Default.Help, null) }
@@ -192,7 +192,7 @@ fun SettingsSideMenuOverlay(
                     .cursorForHand()
                     .padding(10.dp)
             ) {
-                Text("Image Settings")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Image Settings"))
                 Spacer(Modifier.weight(1f))
                 Icon(
                     Icons.Filled.ArrowDropDown,
@@ -243,7 +243,7 @@ fun SettingsSideMenuOverlay(
                         .cursorForHand()
                         .padding(10.dp)
                 ) {
-                    Text("OnnxRuntime")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("OnnxRuntime"))
                     Spacer(Modifier.weight(1f))
                     Icon(
                         Icons.Filled.ArrowDropDown,
@@ -547,7 +547,7 @@ private fun SamplingModeSettings(
             SwitchWithLabel(
                 checked = linearLightDownsampling,
                 onCheckedChange = onLinearLightDownsamplingChange,
-                label = { Text("Linear light downsampling") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Linear light downsampling")) },
                 supportingText = {
                     Text("slower but potentially more accurate", style = MaterialTheme.typography.labelMedium)
                 },

@@ -132,8 +132,8 @@ private fun DialogContent(
         SwitchWithLabel(
             checked = removeComicInfo,
             onCheckedChange = onRemoveComicInfoChange,
-            label = { Text("Remove ComicInfo.xml?") },
-            supportingText = { Text("Requires write access to files") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Remove ComicInfo.xml?")) },
+            supportingText = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Requires write access to files")) }
         )
     }
 }

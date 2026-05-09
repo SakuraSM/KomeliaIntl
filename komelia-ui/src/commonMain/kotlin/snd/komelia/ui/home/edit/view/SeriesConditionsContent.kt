@@ -537,7 +537,7 @@ fun SeriesAgeRatingConditionContent(
             options = NumericNullableOpState.Op.entries.map { LabeledEntry(it, it.name) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
         )
         if (operator != NumericNullableOpState.Op.IsNull && operator != NumericNullableOpState.Op.IsNotNull)
             IntTextField(
@@ -566,7 +566,7 @@ fun CollectionIdConditionContent(
             options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
         )
         SearchableOptionSelectionField(
             searchText = state.searchText.collectAsState().value,

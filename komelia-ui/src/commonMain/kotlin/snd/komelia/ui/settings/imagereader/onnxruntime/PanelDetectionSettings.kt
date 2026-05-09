@@ -58,7 +58,7 @@ fun PanelDetectionSettings(
                 Text(if (isDownloaded) "Re-download Model" else "Download Model")
             }
             if (isDownloaded) {
-                Text("Installed")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Installed"))
                 Icon(Icons.Default.Check, null, tint = Color.Green)
             }
         }

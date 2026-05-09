@@ -36,24 +36,26 @@ fun AppearanceSettingsContent(
     onLanguageChange: (AppLanguage) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         val strings = LocalStrings.current.settings
+
+        Text(strings.appLanguage, style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
+        DropdownChoiceMenu(
+            label = { Text(strings.appLanguage) },
+            selectedOption = LabeledEntry(currentLanguage, strings.forAppLanguage(currentLanguage)),
+            options = AppLanguage.entries.map { LabeledEntry(it, strings.forAppLanguage(it)) },
+            onOptionChange = { onLanguageChange(it.value) },
+            inputFieldModifier = Modifier.fillMaxWidth().widthIn(min = 250.dp)
+        )
 
         DropdownChoiceMenu(
             label = { Text(strings.appTheme) },
             selectedOption = LabeledEntry(currentTheme, strings.forAppTheme(currentTheme)),
             options = AppTheme.entries.map { LabeledEntry(it, strings.forAppTheme(it)) },
             onOptionChange = { onThemeChange(it.value) },
-            inputFieldModifier = Modifier.widthIn(min = 250.dp)
-        )
-
-        DropdownChoiceMenu(
-            label = { Text(strings.appLanguage) },
-            selectedOption = LabeledEntry(currentLanguage, strings.forAppLanguage(currentLanguage)),
-            options = AppLanguage.entries.map { LabeledEntry(it, strings.forAppLanguage(it)) },
-            onOptionChange = { onLanguageChange(it.value) },
-            inputFieldModifier = Modifier.widthIn(min = 250.dp)
+            inputFieldModifier = Modifier.fillMaxWidth().widthIn(min = 250.dp)
         )
 
         HorizontalDivider()

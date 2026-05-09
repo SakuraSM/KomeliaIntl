@@ -208,6 +208,7 @@ class MainScreen(
         toggleLibrariesDrawer: () -> Unit,
         modifier: Modifier
     ) {
+        val strings = LocalStrings.current.mainNavigation
         Surface(
             color = MaterialTheme.colorScheme.surface,
         ) {
@@ -218,7 +219,7 @@ class MainScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     CompactNavButton(
-                        text = "Libraries",
+                        text = strings.libraries,
                         icon = Icons.Default.LocalLibrary,
                         onClick = { toggleLibrariesDrawer() },
                         isSelected = false,
@@ -226,7 +227,7 @@ class MainScreen(
                     )
 
                     CompactNavButton(
-                        text = "Home",
+                        text = strings.home,
                         icon = Icons.Default.Home,
                         onClick = { navigator.replaceAll(HomeScreen()) },
                         isSelected = navigator.lastItem is HomeScreen,
@@ -235,7 +236,7 @@ class MainScreen(
 
 
                     CompactNavButton(
-                        text = "Search",
+                        text = strings.search,
                         icon = Icons.Default.Search,
                         onClick = { navigator.push(SearchScreen(null)) },
                         isSelected = navigator.lastItem is SearchScreen,
@@ -243,7 +244,7 @@ class MainScreen(
                     )
 
                     CompactNavButton(
-                        text = "Settings",
+                        text = strings.settings,
                         icon = Icons.Default.Settings,
                         onClick = { navigator.parent!!.push(MobileSettingsScreen()) },
                         isSelected = navigator.lastItem is SettingsScreen,
@@ -278,7 +279,7 @@ class MainScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(icon, null)
-                Text(text, style = MaterialTheme.typography.bodySmall)
+                Text(text, style = MaterialTheme.typography.bodySmall, maxLines = 1)
             }
         }
     }

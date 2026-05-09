@@ -80,7 +80,7 @@ fun BulkActionsContainer(
                 selected = allSelected,
                 onClick = { onSelectAll() }
             )
-            Text("Select All")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Select All"))
         }
         Text("$selectedCount selected", modifier = Modifier.width(110.dp).padding(start = 10.dp))
 

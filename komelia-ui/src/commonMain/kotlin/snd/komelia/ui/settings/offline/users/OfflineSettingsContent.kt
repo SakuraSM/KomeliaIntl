@@ -71,9 +71,9 @@ fun OfflineUserSettingsContent(
             }
 
             if (isOffline) {
-                FilledTonalButton(onClick = { goOnline() }) { Text("Go online") }
+                FilledTonalButton(onClick = { goOnline() }) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Go online")) }
             } else if (canGoOffline) {
-                FilledTonalButton(onClick = { currentUser?.let { loginAs(it.id) } }) { Text("Go offline as current user") }
+                FilledTonalButton(onClick = { currentUser?.let { loginAs(it.id) } }) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Go offline as current user")) }
             }
         }
 
@@ -181,7 +181,7 @@ private fun UserCard(
         }
 
         FilledTonalButton(onClick = { goOffline(user.id) }) {
-            Text("login")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("login"))
         }
 
         IconButton(
@@ -222,16 +222,16 @@ fun RootUserCard(goOffline: () -> Unit) {
                     null,
                     tint = MaterialTheme.colorScheme.tertiaryContainer
                 )
-                Text("root")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("root"))
             }
 
-            Text("Special user that has access to all downloaded books")
-            Text("Read progress will not be synced")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Special user that has access to all downloaded books"))
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Read progress will not be synced"))
         }
 
 
         FilledTonalButton(onClick = { goOffline() }) {
-            Text("login")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("login"))
         }
     }
 }

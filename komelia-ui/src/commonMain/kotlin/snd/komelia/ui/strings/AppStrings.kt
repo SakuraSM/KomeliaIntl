@@ -54,6 +54,10 @@ import snd.komga.client.settings.KomgaThumbnailSize.MEDIUM
 import snd.komga.client.settings.KomgaThumbnailSize.XLARGE
 
 data class AppStrings(
+    val common: CommonUiStrings,
+    val mainNavigation: MainNavigationStrings,
+    val settingsNavigation: SettingsNavigationStrings,
+    val login: LoginStrings,
     val seriesView: SeriesViewStrings,
     val filters: FilterStrings,
     val seriesFilter: SeriesFilterStrings,
@@ -68,8 +72,146 @@ data class AppStrings(
     val settings: SettingsStrings,
     val imageSettings: ImageSettingsStrings,
     val errorCodes: ErrorCodes,
-    val komf: KomfStrings
+    val komf: KomfStrings,
+    val legacy: LegacyStrings,
 )
+
+data class CommonUiStrings(
+    val cancel: String,
+    val confirm: String,
+    val save: String,
+    val discard: String,
+    val delete: String,
+    val edit: String,
+    val close: String,
+    val retry: String,
+    val reset: String,
+    val download: String,
+    val search: String,
+    val error: String,
+    val nothingToShow: String,
+    val copiedToClipboard: String,
+)
+
+data class MainNavigationStrings(
+    val libraries: String,
+    val home: String,
+    val search: String,
+    val settings: String,
+    val offline: String,
+    val goOnlineTitle: String,
+)
+
+data class SettingsNavigationStrings(
+    val appSettings: String,
+    val appearance: String,
+    val imageReader: String,
+    val epubReader: String,
+    val updates: String,
+    val offlineMode: String,
+    val userSettings: String,
+    val myAccount: String,
+    val myAuthenticationActivity: String,
+    val serverSettings: String,
+    val general: String,
+    val users: String,
+    val authenticationActivity: String,
+    val mediaManagement: String,
+    val announcements: String,
+    val komfSettings: String,
+    val connection: String,
+    val processing: String,
+    val providers: String,
+    val notifications: String,
+    val jobHistory: String,
+    val logOut: String,
+    val logOutConfirmTitle: String,
+    val logOutConfirmBody: String,
+)
+
+data class LoginStrings(
+    val komgaLogin: String,
+    val webClientSubtitle: String,
+    val serverUrl: String,
+    val username: String,
+    val password: String,
+    val login: String,
+    val offlineMode: String,
+    val goOffline: String,
+    val backToOnline: String,
+    val loginWithAnotherAccount: String,
+    val cancelLoginAttempt: String,
+)
+
+data class LegacyStrings(
+    private val translations: Map<String, String>
+) {
+    fun forText(text: String): String {
+        if (translations.isEmpty()) return text
+        return translations[text] ?: translateDynamicText(text)
+    }
+
+    private fun translateDynamicText(text: String): String {
+        return when {
+            text.startsWith("in ") -> "在 ${text.removePrefix("in ")} 中"
+            text.startsWith("Edit ") -> "编辑 ${text.removePrefix("Edit ")}"
+            text.startsWith("Delete ") && text.endsWith("?") -> "删除 ${text.removePrefix("Delete ").removeSuffix("?")}？"
+            text.startsWith("Download book ") -> "下载书籍 ${text.removePrefix("Download book ")}"
+            text.startsWith("Book ") && text.matches(Regex("Book \\d+")) -> "书籍 ${text.removePrefix("Book ")}"
+            text.startsWith("Field ") && text.matches(Regex("Field \\d+")) -> "字段 ${text.removePrefix("Field ")}"
+            text.startsWith("Roles for ") -> "${text.removePrefix("Roles for ")} 的角色"
+            text.startsWith("Release Year: ") -> "发行年份：${text.removePrefix("Release Year: ")}"
+            text.startsWith("Email:") -> text.replaceFirst("Email:", "邮箱：")
+            text.startsWith("Roles:") -> text.replaceFirst("Roles:", "角色：")
+            text.startsWith("user: ") -> "用户：${text.removePrefix("user: ")}"
+            text.startsWith("status: ") -> "状态：${text.removePrefix("status: ")}"
+            text.startsWith("server: ") -> "服务器：${text.removePrefix("server: ")}"
+            text.startsWith("Error ") -> "错误 ${text.removePrefix("Error ")}"
+            text.startsWith("Checksum ") -> "校验和 ${text.removePrefix("Checksum ")}"
+            text.startsWith("Download date ") -> "下载日期 ${text.removePrefix("Download date ")}"
+            text.startsWith("ONNX Runtime ") -> "ONNX Runtime ${text.removePrefix("ONNX Runtime ")}"
+            text.startsWith("An error occurred during installation:") ->
+                text.replaceFirst("An error occurred during installation:", "安装过程中发生错误：")
+            text.startsWith("The Book ") && text.contains(" will be removed from this server") -> {
+                val title = text.removePrefix("The Book ").substringBefore(" will be removed")
+                "书籍 $title 将从服务器删除，同时删除已存储的媒体文件。此操作无法撤销。继续？"
+            }
+            text.startsWith("Book ") && text.contains(" will be removed from this device") -> {
+                val title = text.removePrefix("Book ").substringBefore(" will be removed")
+                "书籍 $title 将从此设备删除"
+            }
+            text.startsWith("The Book ") && text.contains(" will be removed from this device only") -> {
+                val title = text.removePrefix("The Book ").substringBefore(" will be removed")
+                "书籍 $title 只会从此设备删除"
+            }
+            text.startsWith("The Series ") && text.contains(" will be removed from this server") -> {
+                val title = text.removePrefix("The Series ").substringBefore(" will be removed")
+                "系列 $title 将从服务器删除，同时删除已存储的媒体文件。此操作无法撤销。继续？"
+            }
+            text.startsWith("The series ") && text.contains(" will be removed from this device") -> {
+                val title = text.removePrefix("The series ").substringBefore(" will be removed")
+                "系列 $title 将从此设备删除"
+            }
+            text.startsWith("The library ") && text.contains(" will be removed from this server") -> {
+                val title = text.removePrefix("The library ").substringBefore(" will be removed")
+                "书库 $title 将从服务器删除，媒体文件不会受影响。此操作无法撤销。继续？"
+            }
+            text.startsWith("The library ") && text.contains(" will be removed from this device only") -> {
+                val title = text.removePrefix("The library ").substringBefore(" will be removed")
+                "书库 $title 只会从此设备删除"
+            }
+            text.startsWith("Collection ") && text.contains(" will be removed from this server") -> {
+                val title = text.removePrefix("Collection ").substringBefore(" will be removed")
+                "合集 $title 将从服务器删除，媒体文件不会受影响。此操作无法撤销。继续？"
+            }
+            text.startsWith("Read list ") && text.contains(" will be removed from this server") -> {
+                val title = text.removePrefix("Read list ").substringBefore(" will be removed")
+                "阅读列表 $title 将从服务器删除，媒体文件不会受影响。此操作无法撤销。继续？"
+            }
+            else -> text
+        }
+    }
+}
 
 data class KomfStrings(
     val providerSettings: KomfProviderSettingsStrings

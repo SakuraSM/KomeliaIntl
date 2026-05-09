@@ -266,7 +266,7 @@ private fun FlowRowScope.OneshotMainInfo(
                     onClick = onDownloadDelete,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
                 ) {
-                    Text("Delete downloaded")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded"))
                 }
             }
         }

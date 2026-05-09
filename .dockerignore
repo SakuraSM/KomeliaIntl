@@ -1,0 +1,13 @@
+.git
+.gradle
+.idea
+.kotlin
+.cxx
+.externalNativeBuild
+.DS_Store
+build
+**/build
+cmake/build*
+node_modules
+output
+captures

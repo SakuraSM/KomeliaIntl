@@ -45,7 +45,7 @@ fun OfflineDownloadsContent(
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (storageLocation != null) {
             Column {
-                Text("Storage location")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Storage location"))
                 Text(
                     rememberStorageLabel(storageLocation),
                     modifier = Modifier.padding(start = 10.dp),
@@ -63,8 +63,8 @@ fun OfflineDownloadsContent(
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(onClick = { showDirectoryPickerDialog = true }) { Text("Change location") }
-            Button(onClick = onStorageLocationReset) { Text("Reset to internal") }
+            Button(onClick = { showDirectoryPickerDialog = true }) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Change location")) }
+            Button(onClick = onStorageLocationReset) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reset to internal")) }
         }
 
         HorizontalDivider()
@@ -126,7 +126,7 @@ private fun RowScope.DownloadProgressIndicator(
 private fun DownloadCompleted(event: DownloadEvent.BookDownloadCompleted) {
     Column {
         Text(event.book.metadata.title)
-        Text("Download Complete ")
+        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Download Complete "))
     }
 }
 

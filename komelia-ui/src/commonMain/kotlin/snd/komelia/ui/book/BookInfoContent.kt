@@ -188,7 +188,7 @@ fun BookInfoRow(
             if (book.deleted) {
                 SuggestionChip(
                     onClick = {},
-                    label = { Text("Unavailable") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Unavailable")) },
                     border = null,
                     colors = SuggestionChipDefaults.suggestionChipColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer
@@ -198,7 +198,7 @@ fun BookInfoRow(
             if (book.remoteFileUnavailable) {
                 SuggestionChip(
                     onClick = {},
-                    label = { Text("Remote Unavailable") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Remote Unavailable")) },
                     border = null,
                     colors = SuggestionChipDefaults.suggestionChipColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer
@@ -209,7 +209,7 @@ fun BookInfoRow(
             if (book.isLocalFileOutdated) {
                 SuggestionChip(
                     onClick = {},
-                    label = { Text("Local download outdated") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Local download outdated")) },
                     border = null,
                     colors = SuggestionChipDefaults.suggestionChipColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer

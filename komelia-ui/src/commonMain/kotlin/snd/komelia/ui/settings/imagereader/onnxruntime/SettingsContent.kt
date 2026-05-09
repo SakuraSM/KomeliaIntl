@@ -28,6 +28,7 @@ import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.DirectML
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.ROCm
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.TENSOR_RT
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.WEBGPU
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.cursorForHand
@@ -54,6 +55,7 @@ fun OnnxRuntimeSettingsContent(
     panelModelIsDownloaded: Boolean,
     onPanelDetectionModelDownloadRequest: () -> Flow<UpdateProgress>
 ) {
+    val strings = LocalStrings.current.legacy
     val loadError = remember { onnxRuntimeLoadError() }
 
     var showOrtInstallDialog by remember { mutableStateOf(false) }
@@ -80,7 +82,7 @@ fun OnnxRuntimeSettingsContent(
             Text("ONNX Runtime", style = MaterialTheme.typography.titleLarge)
             FilledTonalButton(
                 onClick = { showOrtInstallDialog = true },
-            ) { Text("Download ONNX Runtime") }
+            ) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Download ONNX Runtime")) }
 
             if (loadError != null)
                 Text(
@@ -105,12 +107,12 @@ fun OnnxRuntimeSettingsContent(
                     onClick = { showOrtInstallDialog = true },
                     shape = RoundedCornerShape(5.dp),
                     modifier = Modifier.cursorForHand()
-                ) { Text("Update ONNX Runtime", maxLines = 1) }
+                ) { Text(strings.forText("Update ONNX Runtime"), maxLines = 1) }
 
-                Text("Update or download another version of ONNX Runtime", style = MaterialTheme.typography.labelLarge)
+                Text(strings.forText("Update or download another version of ONNX Runtime"), style = MaterialTheme.typography.labelLarge)
             }
 
-            Text("Upscaler Settings", style = MaterialTheme.typography.titleMedium)
+            Text(strings.forText("Upscaler Settings"), style = MaterialTheme.typography.titleMedium)
             UpscalerSettings(
                 upscaleMode = upscaleMode,
                 onModeChange = onUpscaleModeChange,
@@ -123,11 +125,10 @@ fun OnnxRuntimeSettingsContent(
             )
             HorizontalDivider()
         }
-        Text("Panel Detection", style = MaterialTheme.typography.titleMedium)
+        Text(strings.forText("Panel Detection"), style = MaterialTheme.typography.titleMedium)
         PanelDetectionSettings(
             isDownloaded = panelModelIsDownloaded,
             onDownloadRequest = onPanelDetectionModelDownloadRequest
         )
     }
 }
-

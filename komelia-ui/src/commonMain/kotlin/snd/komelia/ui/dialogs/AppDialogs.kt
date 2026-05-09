@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.platform.VerticalScrollbar
 import snd.komelia.ui.platform.cursorForHand
 import kotlin.math.roundToInt
@@ -192,6 +193,7 @@ fun DialogConfirmCancelButtons(
     isLoading: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current.legacy
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -201,7 +203,7 @@ fun DialogConfirmCancelButtons(
                 onClick = onCancel,
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(cancelText)
+                Text(strings.forText(cancelText))
             }
 
         FilledTonalButton(
@@ -210,15 +212,16 @@ fun DialogConfirmCancelButtons(
             modifier = Modifier.cursorForHand()
         ) {
             if (isLoading) CircularProgressIndicator(Modifier.size(25.dp))
-            else Text(confirmText)
+            else Text(strings.forText(confirmText))
         }
     }
 }
 
 @Composable
 fun DialogSimpleHeader(headerText: String) {
+    val strings = LocalStrings.current.legacy
     Column {
-        Text(headerText, style = MaterialTheme.typography.headlineMedium)
+        Text(strings.forText(headerText), style = MaterialTheme.typography.headlineMedium)
         HorizontalDivider(Modifier.padding(vertical = 10.dp))
     }
 

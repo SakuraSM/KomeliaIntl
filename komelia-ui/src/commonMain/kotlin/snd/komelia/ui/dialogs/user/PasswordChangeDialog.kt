@@ -79,7 +79,7 @@ fun PasswordChangeDialog(
                 PasswordTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("New password") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("New password")) },
                     isError = passwordError != null,
                     supportingText = { passwordError?.let { Text(it) } },
                     modifier = Modifier.fillMaxWidth()
@@ -90,7 +90,7 @@ fun PasswordChangeDialog(
                 PasswordTextField(
                     value = repeatPassword,
                     onValueChange = { repeatPassword = it },
-                    label = { Text("Repeat new password") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Repeat new password")) },
                     isError = repeatPasswordError != null,
                     supportingText = { repeatPasswordError?.let { Text(it) } },
                     modifier = Modifier.fillMaxWidth()
@@ -111,7 +111,7 @@ fun PasswordChangeDialog(
                     onClick = onDismiss,
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    Text("Cancel")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel"))
                 }
 
                 FilledTonalButton(
@@ -127,7 +127,7 @@ fun PasswordChangeDialog(
                     },
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    Text("Change Password")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Change Password"))
                 }
             }
         }

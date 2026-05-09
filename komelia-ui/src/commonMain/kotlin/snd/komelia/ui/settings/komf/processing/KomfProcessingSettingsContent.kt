@@ -61,7 +61,7 @@ private fun ProcessingConfigContent(
             selectedOptions = state.updateModes.map { LabeledEntry(it, it.name) },
             options = remember { KomfUpdateMode.entries.map { LabeledEntry(it, it.name) } },
             onOptionSelect = { state.onUpdateModeSelect(it.value) },
-            label = { Text("Update Modes") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Update Modes")) },
             placeholder = "None",
             inputFieldModifier = Modifier.fillMaxWidth()
         )
@@ -70,14 +70,14 @@ private fun ProcessingConfigContent(
             selectedOption = LabeledEntry(state.libraryType, state.libraryType.name),
             options = remember { KomfMediaType.entries.map { LabeledEntry(it, it.name) } },
             onOptionChange = { state.onLibraryTypeChange(it.value) },
-            label = { Text("Library type. Affects some options, mainly book name parsing") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Library type. Affects some options, mainly book name parsing")) },
             inputFieldModifier = Modifier.fillMaxWidth(),
         )
 
         SwitchWithLabel(
             checked = state.orderBooks,
             onCheckedChange = state::onOrderBooksChange,
-            label = { Text("Order Books") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Order Books")) },
 
             supportingText = {
                 Text(
@@ -92,7 +92,7 @@ private fun ProcessingConfigContent(
         SwitchWithLabel(
             checked = state.aggregate,
             onCheckedChange = state::onAggregateChange,
-            label = { Text("Aggregate") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Aggregate")) },
             supportingText = {
                 Text(
                     "aggregate and combine metadata from all enabled providers instead of taking first matched result",
@@ -105,7 +105,7 @@ private fun ProcessingConfigContent(
             checked = state.mergeGenres,
             onCheckedChange = state::onMergeGenresChange,
             enabled = state.aggregate,
-            label = { Text("Merge Genres") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Merge Genres")) },
             supportingText = {
                 Text(
                     "if aggregate option is enabled merge genres instead of taking them from first matched result",
@@ -118,7 +118,7 @@ private fun ProcessingConfigContent(
             checked = state.mergeTags,
             onCheckedChange = state::onMergeTagsChange,
             enabled = state.aggregate,
-            label = { Text("Merge Tags") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Merge Tags")) },
 
             supportingText = {
                 Text(
@@ -133,7 +133,7 @@ private fun ProcessingConfigContent(
         SwitchWithLabel(
             checked = state.seriesCovers,
             onCheckedChange = state::onSeriesCoversChange,
-            label = { Text("Series Covers") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Series Covers")) },
 
             supportingText = {
                 Text(
@@ -146,7 +146,7 @@ private fun ProcessingConfigContent(
         SwitchWithLabel(
             checked = state.bookCovers,
             onCheckedChange = state::onBookCoversChange,
-            label = { Text("Book Covers") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Book Covers")) },
 
             supportingText = {
                 Text(
@@ -159,7 +159,7 @@ private fun ProcessingConfigContent(
         SwitchWithLabel(
             checked = state.overrideExistingCovers,
             onCheckedChange = state::onOverrideExistingCoversChange,
-            label = { Text("Override Existing Covers") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Override Existing Covers")) },
 
             supportingText = {
                 Text(
@@ -174,7 +174,7 @@ private fun ProcessingConfigContent(
         SwitchWithLabel(
             checked = state.seriesTitle,
             onCheckedChange = state::onSeriesTitleChange,
-            label = { Text("Series Title") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Series Title")) },
 
             supportingText = {
                 Text(
@@ -186,7 +186,7 @@ private fun ProcessingConfigContent(
         SwitchWithLabel(
             checked = state.alternativeSeriesTitles,
             onCheckedChange = state::onAlternativeSeriesTitlesChange,
-            label = { Text("Alternative Series Titles") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Alternative Series Titles")) },
 
             supportingText = {
                 Text(
@@ -198,7 +198,7 @@ private fun ProcessingConfigContent(
         SwitchWithLabel(
             checked = state.fallbackToAltTitle,
             onCheckedChange = state::onFallbackToAltTitleChange,
-            label = { Text("Alternative Title Fallback") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Alternative Title Fallback")) },
 
             supportingText = {
                 Text(
@@ -214,7 +214,7 @@ private fun ProcessingConfigContent(
             onLanguageValueSave = state::onSeriesTitleLanguageSave
         )
         ChipFieldWithSuggestions(
-            label = { Text("Alternative title languages (ISO 639)") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Alternative title languages (ISO 639)")) },
             values = state.alternativeSeriesTitleLanguages,
             onValuesChange = state::onAlternativeTitleLanguagesChange,
             suggestions = komfLanguageTagsSuggestions
@@ -229,7 +229,7 @@ private fun ProcessingConfigContent(
                             KomfReadingDirection.entries.map { LabeledEntry(it, it.name) }
                 },
                 onOptionChange = { state.onReadingDirectionChange(it.value) },
-                label = { Text("Default series reading direction") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Default series reading direction")) },
                 inputFieldModifier = Modifier.fillMaxWidth(),
             )
         }

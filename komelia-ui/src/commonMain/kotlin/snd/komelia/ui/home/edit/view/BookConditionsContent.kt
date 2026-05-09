@@ -338,7 +338,7 @@ fun SeriesIdConditionContent(
             options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
         )
         SearchableOptionSelectionField(
             searchText = state.searchText.collectAsState().value,
@@ -424,7 +424,7 @@ fun NumberSortConditionContent(
             options = NumericOpState.Op.entries.map { LabeledEntry(it, it.name) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
         )
         FloatTextField(
             value = state.value.collectAsState().value,
@@ -452,7 +452,7 @@ fun PosterConditionContent(
             options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
         )
 
         DropdownChoiceMenu(
@@ -473,7 +473,7 @@ fun PosterConditionContent(
             },
             onOptionChange = { state.setType(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Type") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Type")) }
         )
 
         DropdownChoiceMenu(
@@ -492,7 +492,7 @@ fun PosterConditionContent(
             },
             onOptionChange = { state.setSelected(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Selected") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Selected")) }
         )
 
     }
@@ -516,7 +516,7 @@ fun ReadListConditionContent(
             options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
         )
         SearchableOptionSelectionField(
             searchText = state.searchText.collectAsState().value,

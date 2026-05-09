@@ -97,17 +97,17 @@ class UserRolesTab(private val vm: UserEditDialogViewModel) : DialogTab {
             CheckboxWithLabel(
                 checked = administrator.value,
                 onCheckedChange = { administrator.setValue(it) },
-                label = { Text("Administrator") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Administrator")) }
             )
             CheckboxWithLabel(
                 checked = pageStreaming.value,
                 onCheckedChange = { pageStreaming.setValue(it) },
-                label = { Text("Page Streaming") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Page Streaming")) }
             )
             CheckboxWithLabel(
                 checked = fileDownload.value,
                 onCheckedChange = { fileDownload.setValue(it) },
-                label = { Text("File Download") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("File Download")) }
             )
         }
     }
@@ -142,12 +142,12 @@ class UserSharedLibrariesTab(private val vm: UserEditDialogViewModel) : DialogTa
         onLibraryUncheck: (KomgaLibraryId) -> Unit,
     ) {
         Column {
-            Text("Share Libraries")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Share Libraries"))
             Spacer(Modifier.height(20.dp))
             CheckboxWithLabel(
                 checked = shareAll,
                 onCheckedChange = onShareAllChange,
-                label = { Text("All Libraries") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("All Libraries")) }
             )
 
             HorizontalDivider()

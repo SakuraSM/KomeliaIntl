@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -35,6 +37,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -181,7 +184,23 @@ private fun LazyGridScope.BooksContent(
 ) {
     if (books.isEmpty()) {
         item(span = { GridItemSpan(maxLineSpan) }) {
-            Text("No books", modifier = Modifier.fillMaxWidth())
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 28.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .55f),
+                    shape = RoundedCornerShape(8.dp),
+                ) {
+                    Text(
+                        LocalStrings.current.legacy.forText("No books"),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+                    )
+                }
+            }
         }
     } else
         when (layout) {
@@ -226,10 +245,22 @@ private fun BooksToolBar(
 ) {
     val width = LocalWindowWidth.current
     var showFilters by remember { mutableStateOf(false) }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 1.dp,
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 5.dp)
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
         ) {
             val booksLabel = remember(series) {
                 if (series == null) null
@@ -245,7 +276,7 @@ private fun BooksToolBar(
                 SuggestionChip(
                     onClick = {},
                     label = { Text(booksLabel, style = MaterialTheme.typography.bodyMedium) },
-                    modifier = Modifier.padding(10.dp, 0.dp)
+                    modifier = Modifier.padding(end = 8.dp)
                 )
             }
 
@@ -261,11 +292,17 @@ private fun BooksToolBar(
             }
 
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (!selectionMode) {
                     if (width == COMPACT || width == MEDIUM) {
-                        IconButton(onClick = { showFilters = !showFilters }, modifier = Modifier.cursorForHand()) {
+                        IconButton(
+                            onClick = { showFilters = !showFilters },
+                            modifier = Modifier
+                                .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
+                                .cursorForHand()
+                        ) {
                             Icon(
                                 Icons.Default.FilterList,
                                 null,
@@ -277,38 +314,35 @@ private fun BooksToolBar(
                     PageSizeSelectionDropdown(booksPageSize, onBooksPageSizeChange)
                 }
 
-                Box(
-                    Modifier
-                        .background(
-                            if (booksLayout == LIST) MaterialTheme.colorScheme.surfaceVariant
-                            else MaterialTheme.colorScheme.surface
-                        )
+                Surface(
+                    color = if (booksLayout == LIST) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = if (booksLayout == LIST) MaterialTheme.colorScheme.onSecondaryContainer else LocalContentColor.current,
+                    shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp),
+                    modifier = Modifier
+                        .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
                         .clickable { onBooksLayoutChange(LIST) }
                         .cursorForHand()
-                        .padding(10.dp)
                 ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ViewList,
-                        null,
-                    )
+                    Box(Modifier.padding(10.dp), contentAlignment = Alignment.Center) {
+                        Icon(Icons.AutoMirrored.Filled.ViewList, null)
+                    }
                 }
 
-                Box(
-                    Modifier
-                        .background(
-                            if (booksLayout == GRID) MaterialTheme.colorScheme.surfaceVariant
-                            else MaterialTheme.colorScheme.surface
-                        )
+                Surface(
+                    color = if (booksLayout == GRID) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = if (booksLayout == GRID) MaterialTheme.colorScheme.onSecondaryContainer else LocalContentColor.current,
+                    shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
+                    modifier = Modifier
+                        .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
                         .clickable { onBooksLayoutChange(GRID) }
                         .cursorForHand()
-                        .padding(10.dp)
                 ) {
-                    Icon(
-                        Icons.Default.GridView,
-                        null,
-                    )
+                    Box(Modifier.padding(10.dp), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.GridView, null)
+                    }
                 }
             }
+        }
         }
         if (showFilters) {
             BookFilterDialog(
@@ -348,7 +382,7 @@ fun BooksBulkActionsToolbar(
         when (LocalWindowWidth.current) {
             FULL, EXPANDED -> {
                 if (selectedBooks.isEmpty()) {
-                    Text("Click on items to select or deselect them")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Click on items to select or deselect them"))
                 } else {
                     Spacer(Modifier.weight(1f))
                     BooksBulkActionsContent(
@@ -369,12 +403,20 @@ fun BooksBulkActionsToolbar(
 fun ExpandableBookFiltersRow(filterState: BooksFilterState) {
     var showFilters by remember { mutableStateOf(false) }
     val currentFilter = filterState.state.collectAsState().value
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .65f),
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.padding(vertical = 2.dp)
+    ) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)
+    ) {
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            val widthModifier = Modifier.width(200.dp)
+            val widthModifier = Modifier.widthIn(min = 190.dp, max = 240.dp)
 
             SortOrder(
                 sortOrder = currentFilter.sortOrder,
@@ -420,6 +462,7 @@ fun ExpandableBookFiltersRow(filterState: BooksFilterState) {
             }
         }
     }
+    }
 }
 
 @Composable
@@ -429,11 +472,13 @@ fun BookFilterDialog(
 ) {
     val currentFilter = filterState.state.collectAsState().value
     AppDialog(
-        modifier = Modifier.fillMaxWidth(.8f),
+        modifier = Modifier
+            .fillMaxWidth(.94f)
+            .widthIn(max = 520.dp),
         content = {
             Column(
-                modifier = Modifier.padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 SortOrder(
                     sortOrder = currentFilter.sortOrder,
@@ -474,7 +519,11 @@ fun BookFilterDialog(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("Book Filters", modifier = Modifier.padding(start = 10.dp))
+                Text(
+                    LocalStrings.current.legacy.forText("Book Filters"),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, null) }
             }

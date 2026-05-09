@@ -58,7 +58,7 @@ fun NotificationContextDialog(
             FilledTonalButton(
                 onClick = onDismissRequest,
             ) {
-                Text("Close")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Close"))
             }
         },
         onDismissRequest = onDismissRequest,
@@ -229,7 +229,7 @@ fun NotificationContextDialogContent(
 
         }
 
-        FilledTonalButton(onClick = state::onBookAdd) { Text("Add Book") }
+        FilledTonalButton(onClick = state::onBookAdd) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add Book")) }
     }
 }
 

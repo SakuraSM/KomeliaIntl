@@ -24,7 +24,7 @@ class UsersScreen : Screen {
 
         SettingsScreenContainer("Users") {
             when (vm.state.collectAsState().value) {
-                is Error -> Text("Error")
+                is Error -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Error"))
                 Uninitialized, Loading -> LoadingMaxSizeIndicator()
 
                 is Success -> UsersContent(

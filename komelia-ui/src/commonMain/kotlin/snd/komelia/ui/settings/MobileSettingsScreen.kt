@@ -27,6 +27,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.settings.navigation.SettingsNavigationMenu
@@ -36,6 +37,7 @@ class MobileSettingsScreen : Screen {
     override fun Content() {
         val currentNavigator = LocalNavigator.currentOrThrow
         val viewModelFactory = LocalViewModelFactory.current
+        val strings = LocalStrings.current.mainNavigation
         val vm = rememberScreenModel { viewModelFactory.getSettingsNavigationViewModel(currentNavigator) }
         LaunchedEffect(Unit) { vm.initialize() }
 
@@ -54,7 +56,7 @@ class MobileSettingsScreen : Screen {
                     IconButton(onClick = { currentNavigator.pop() }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, null)
                     }
-                    Text("Settings", style = MaterialTheme.typography.titleLarge)
+                    Text(strings.settings, style = MaterialTheme.typography.titleLarge)
                 }
 
                 HorizontalDivider()

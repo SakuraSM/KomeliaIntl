@@ -77,7 +77,7 @@ fun UsersContent(
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
 
         ) {
-            Text("Add User")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add User"))
         }
 
         if (showUserAddDialog) {
@@ -207,7 +207,7 @@ private fun UserActions(
             ) {
                 Icon(Icons.Default.Edit, null)
                 Spacer(Modifier.width(10.dp))
-                Text("Edit User")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit User"))
             }
 
         FilledTonalButton(
@@ -217,7 +217,7 @@ private fun UserActions(
         ) {
             Icon(Icons.Default.LockReset, null)
             Spacer(Modifier.width(10.dp))
-            Text("Change Password")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Change Password"))
         }
 
 
@@ -233,7 +233,7 @@ private fun UserActions(
             ) {
                 Icon(Icons.Default.Delete, null)
                 Spacer(Modifier.width(10.dp))
-                Text("Delete User")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete User"))
             }
     }
 

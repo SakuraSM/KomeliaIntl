@@ -128,7 +128,7 @@ fun SeriesDescriptionRow(
             if (deleted) {
                 SuggestionChip(
                     onClick = {},
-                    label = { Text("Unavailable") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Unavailable")) },
                     border = null,
                     colors = SuggestionChipDefaults.suggestionChipColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer

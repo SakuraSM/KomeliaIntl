@@ -32,14 +32,14 @@ fun KomfSettingsContent(
                 onClick = { selectedTab = 0 },
                 modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
             ) {
-                Text("Discord")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Discord"))
             }
             Tab(
                 selected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
                 modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
             ) {
-                Text("Apprise")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Apprise"))
             }
         }
         Spacer(Modifier.height(30.dp))

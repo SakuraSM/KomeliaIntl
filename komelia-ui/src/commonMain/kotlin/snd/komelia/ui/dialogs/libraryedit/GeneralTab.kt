@@ -54,7 +54,7 @@ private fun GeneralTabContent(
         TextField(
             value = name.value,
             onValueChange = name.setValue,
-            label = { Text("Name") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Name")) },
             isError = name.errorMessage != null,
             supportingText = { name.errorMessage?.let { Text(it) } },
             modifier = Modifier.fillMaxWidth()
@@ -64,7 +64,7 @@ private fun GeneralTabContent(
             TextField(
                 value = rootFolder.value,
                 onValueChange = rootFolder.setValue,
-                label = { Text("Root folder") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Root folder")) },
                 isError = rootFolder.errorMessage != null,
                 supportingText = { rootFolder.errorMessage?.let { Text(it) } },
                 modifier = Modifier.weight(7f)
@@ -74,7 +74,7 @@ private fun GeneralTabContent(
                 onClick = { showFileBrowserDialog = true },
                 modifier = Modifier.padding(horizontal = 10.dp),
             ) {
-                Text("Browse")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Browse"))
             }
         }
     }

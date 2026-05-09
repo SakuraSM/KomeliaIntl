@@ -68,9 +68,9 @@ fun KomfSettingsContent(
                             komfEnabledConfirmed = true
                         }
                     },
-                    label = { Text("Enable Komf Integration") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Enable Komf Integration")) },
                     supportingText = {
-                        Text("Adds features aimed at metadata updates and editing")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Adds features aimed at metadata updates and editing"))
                     }
                 )
 
@@ -79,7 +79,7 @@ fun KomfSettingsContent(
                     ElevatedButton(
                         onClick = { uriHandler.openUri("https://github.com/Snd-R/komf") },
                     ) {
-                        Text("Project Link")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Project Link"))
                     }
                 }
             }
@@ -124,14 +124,14 @@ private fun KomgaAndKavitaConnectionSettings(
             onClick = { selectedTab = 0 },
             modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
         ) {
-            Text("Komga")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Komga"))
         }
         Tab(
             selected = selectedTab == 1,
             onClick = { selectedTab = 1 },
             modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
         ) {
-            Text("Kavita")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Kavita"))
         }
     }
 
@@ -203,13 +203,13 @@ private fun KomgaConnectionDetails(
         SavableTextField(
             currentValue = username,
             onValueSave = onUsernameChange,
-            label = { Text("Komga Username") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Komga Username")) },
         )
 
         SavableTextField(
             currentValue = "",
             onValueSave = onPasswordChange,
-            label = { Text("Komga Password") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Komga Password")) },
             useEditButton = true,
             isPassword = true
         )
@@ -256,7 +256,7 @@ private fun KavitaConnectionDetails(
         SavableTextField(
             currentValue = "",
             onValueSave = onPasswordChange,
-            label = { Text("Kavita API Key") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Kavita API Key")) },
             useEditButton = true,
             isPassword = true
         )
@@ -289,7 +289,7 @@ private fun MediaServerEventListenerSettings(
         SwitchWithLabel(
             checked = enableEventListener,
             onCheckedChange = onEnableEventListenerChange,
-            label = { Text("Event Listener") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Event Listener")) },
             supportingText = {
                 Text(
                     "Launch processing jobs when new series or book is added",
@@ -341,7 +341,7 @@ private fun EventListenerContent(
             selectedOptions = metadataSelectedOptions,
             options = libraryOptions,
             onOptionSelect = { onMetadataLibraryFilterSelect(it.value) },
-            label = { Text("Enable metadata update jobs for libraries") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Enable metadata update jobs for libraries")) },
             inputFieldModifier = Modifier.fillMaxWidth(),
             inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -359,7 +359,7 @@ private fun EventListenerContent(
             selectedOptions = notificationsSelectedOptions,
             options = libraryOptions,
             onOptionSelect = { onNotificationsLibraryFilterSelect(it.value) },
-            label = { Text("Enable notification jobs for libraries") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Enable notification jobs for libraries")) },
             inputFieldModifier = Modifier.fillMaxWidth(),
             inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
         )

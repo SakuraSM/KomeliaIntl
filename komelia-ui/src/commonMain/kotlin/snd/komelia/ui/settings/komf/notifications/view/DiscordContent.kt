@@ -97,7 +97,7 @@ fun DiscordNotificationsContent(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
 
-        Text("Webhooks")
+        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Webhooks"))
         discordWebhooks.forEach { webhook ->
             Row {
                 TextField(
@@ -119,13 +119,13 @@ fun DiscordNotificationsContent(
             onClick = { showAddWebhookDialog = true },
             modifier = Modifier.cursorForHand()
         ) {
-            Text("Add Webhook")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add Webhook"))
         }
 
         SwitchWithLabel(
             checked = discordUploadSeriesCover.value,
             onCheckedChange = { discordUploadSeriesCover.setValue(it) },
-            label = { Text("Upload series cover") }
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Upload series cover")) }
         )
 
         if (showAddWebhookDialog) {
@@ -196,12 +196,12 @@ private fun AddDiscordWebhookDialog(
                 TextField(
                     value = newWebhook,
                     onValueChange = { newWebhook = it },
-                    label = { Text("Webhook URL") },
-                    placeholder = { Text("https://discord.com/api/webhooks/...") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Webhook URL")) },
+                    placeholder = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("https://discord.com/api/webhooks/...")) },
                     modifier = Modifier.fillMaxWidth(),
                     isError = isError.value,
                     interactionSource = interactionSource,
-                    supportingText = { if (isError.value) Text("Invalid webhook URL") },
+                    supportingText = { if (isError.value) Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Invalid webhook URL")) },
                     visualTransformation = if (isFocused) VisualTransformation.None else PasswordVisualTransformation(),
                 )
             }
@@ -215,7 +215,7 @@ private fun AddDiscordWebhookDialog(
                 TextButton(
                     onClick = onDismissRequest,
                     modifier = Modifier.cursorForHand(),
-                    content = { Text("Cancel") }
+                    content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel")) }
                 )
 
                 FilledTonalButton(
@@ -226,7 +226,7 @@ private fun AddDiscordWebhookDialog(
                     modifier = Modifier.cursorForHand(),
                     enabled = isValidUrl.value
                 ) {
-                    Text("Confirm")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Confirm"))
                 }
             }
         }
@@ -260,7 +260,7 @@ private fun TemplatesContent(
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("Notification Template", style = MaterialTheme.typography.titleLarge)
         Column {
-            Text("Uses markdown syntax. Templates are rendered using Apache Velocity")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Uses markdown syntax. Templates are rendered using Apache Velocity"))
             Text(
                 "Discord Markdown Text 101",
                 color = MaterialTheme.colorScheme.secondary,
@@ -286,7 +286,7 @@ private fun TemplatesContent(
                 onClick = { selectedTab = 0 },
                 modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
             ) {
-                Text("Write")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Write"))
             }
             Tab(
                 selected = selectedTab == 1,
@@ -296,7 +296,7 @@ private fun TemplatesContent(
                 },
                 modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
             ) {
-                Text("Preview")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Preview"))
             }
         }
 
@@ -345,7 +345,7 @@ private fun TemplatesContent(
                 onClick = { showNotificationContextDialog = true },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Notification Context")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Notification Context"))
 
             }
 
@@ -353,7 +353,7 @@ private fun TemplatesContent(
                 onClick = onTemplateSend,
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Test Send")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Test Send"))
             }
 
             FilledTonalButton(
@@ -361,7 +361,7 @@ private fun TemplatesContent(
                 enabled = true,
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Save")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Save"))
             }
         }
     }
@@ -391,20 +391,20 @@ private fun TemplatesEditor(
         TextField(
             value = titleTemplate.value,
             onValueChange = { titleTemplate.setValue(it) },
-            label = { Text("Title. 256 characters max") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Title. 256 characters max")) },
             maxLines = 1,
             modifier = Modifier.fillMaxWidth()
         )
         HttpTextField(
             value = titleUrlTemplate.value,
             onValueChange = { titleUrlTemplate.setValue(it) },
-            label = { Text("Title Url") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Title Url")) },
             modifier = Modifier.fillMaxWidth()
         )
         TextField(
             value = descriptionTemplate.value,
             onValueChange = { descriptionTemplate.setValue(it) },
-            label = { Text("Description. 4096 characters max") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Description. 4096 characters max")) },
             minLines = 4,
             modifier = Modifier.fillMaxWidth()
         )
@@ -413,7 +413,7 @@ private fun TemplatesEditor(
         TextField(
             value = footerTemplate.value,
             onValueChange = { footerTemplate.setValue(it) },
-            label = { Text("Footer. 2048 characters max") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Footer. 2048 characters max")) },
             maxLines = 1,
             modifier = Modifier.fillMaxWidth()
         )
@@ -463,7 +463,7 @@ private fun TemplateFieldsEditor(
             enabled = fieldTemplates.size < 25,
             modifier = Modifier.cursorForHand()
         ) {
-            Text("Add Field")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add Field"))
         }
     }
 
@@ -481,19 +481,19 @@ private fun TemplateFieldEditor(
             TextField(
                 value = state.nameTemplate,
                 onValueChange = { state.nameTemplate = it },
-                label = { Text("Field name. 256 characters max") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Field name. 256 characters max")) },
                 maxLines = 1,
                 modifier = Modifier.weight(1f),
             )
             CheckboxWithLabel(
                 checked = state.inline,
                 onCheckedChange = { state.inline = it },
-                label = { Text("Inline") })
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Inline")) })
         }
         TextField(
             value = state.valueTemplate,
             onValueChange = { state.valueTemplate = it },
-            label = { Text("Field value. 1024 characters max") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Field value. 1024 characters max")) },
             minLines = 4,
             modifier = Modifier.fillMaxWidth(),
         )

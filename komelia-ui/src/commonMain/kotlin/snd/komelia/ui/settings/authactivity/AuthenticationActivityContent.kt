@@ -98,7 +98,7 @@ private fun AuthenticationInfoCard(
                 )
                 Spacer(Modifier.weight(1f))
                 if (activity.success) {
-                    Text("Successful")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Successful"))
                     Icon(
                         Icons.Default.Done,
                         null,

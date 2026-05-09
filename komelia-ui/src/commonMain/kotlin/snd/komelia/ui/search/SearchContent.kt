@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.cards.BookDetailedListCard
 import snd.komelia.ui.common.cards.SeriesDetailedListCard
@@ -125,13 +126,14 @@ fun SearchContent(
 
 @Composable
 private fun EmptySearchResults() {
+    val strings = LocalStrings.current.legacy
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(100.dp))
-        Text("The search returned no results", style = MaterialTheme.typography.titleLarge)
-        Text("Try searching for something else")
+        Text(strings.forText("The search returned no results"), style = MaterialTheme.typography.titleLarge)
+        Text(strings.forText("Try searching for something else"))
     }
 }
 
@@ -162,7 +164,7 @@ fun SearchToolBar(
             FilterChip(
                 onClick = { onSearchTypeChange(SearchResultsTab.SERIES) },
                 selected = searchType == SearchResultsTab.SERIES,
-                label = { Text("Series") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Series")) },
                 colors = chipColors,
                 border = null,
             )
@@ -171,11 +173,10 @@ fun SearchToolBar(
             FilterChip(
                 onClick = { onSearchTypeChange(SearchResultsTab.BOOKS) },
                 selected = searchType == SearchResultsTab.BOOKS,
-                label = { Text("Books") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Books")) },
                 colors = chipColors,
                 border = null,
             )
         }
     }
 }
-

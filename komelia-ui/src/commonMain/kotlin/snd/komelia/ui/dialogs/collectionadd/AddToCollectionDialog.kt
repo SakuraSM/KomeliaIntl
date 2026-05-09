@@ -93,7 +93,7 @@ private fun DialogContent(
             TextField(
                 value = query,
                 onValueChange = { query = it },
-                label = { Text("Search or create collection") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Search or create collection")) },
                 supportingText = {
                     if (collectionExistsForQuery.value)
                         Text(
@@ -106,7 +106,7 @@ private fun DialogContent(
             FilledTonalButton(
                 onClick = { coroutineScope.launch { onCreateNewCollection(query) } },
                 enabled = query.isNotBlank() && !collectionExistsForQuery.value,
-                content = { Text("Create") },
+                content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Create")) },
             )
         }
 

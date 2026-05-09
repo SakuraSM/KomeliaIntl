@@ -253,7 +253,7 @@ private fun FlowRowScope.BookMainInfo(
                     onClick = onDownloadDelete,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
                 ) {
-                    Text("Delete downloaded")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded"))
                 }
             }
         }
@@ -310,7 +310,7 @@ fun DownloadButton(
             }
         }
         Spacer(Modifier.width(3.dp))
-        Text("Download")
+        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Download"))
 
 
     }

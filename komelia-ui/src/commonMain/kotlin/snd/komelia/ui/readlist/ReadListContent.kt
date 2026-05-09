@@ -194,8 +194,8 @@ private fun BulkActionsToolbar(
     ) {
         when (LocalWindowWidth.current) {
             WindowSizeClass.FULL -> {
-                if (readList.ordered) Text("Edit mode: Click to select, drag to change order")
-                else Text("Selection mode: Click on items to select or deselect them")
+                if (readList.ordered) Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit mode: Click to select, drag to change order"))
+                else Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Selection mode: Click on items to select or deselect them"))
                 if (selectedBooks.isNotEmpty()) {
                     Spacer(Modifier.weight(1f))
 
@@ -205,8 +205,8 @@ private fun BulkActionsToolbar(
 
             WindowSizeClass.EXPANDED -> {
                 if (selectedBooks.isEmpty()) {
-                    if (readList.ordered) Text("Edit mode: Click to select, drag to change order")
-                    else Text("Selection mode: Click on items to select or deselect them")
+                    if (readList.ordered) Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit mode: Click to select, drag to change order"))
+                    else Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Selection mode: Click on items to select or deselect them"))
                 } else {
                     Spacer(Modifier.weight(1f))
                     ReadListBulkActionsContent(readList, books, false)

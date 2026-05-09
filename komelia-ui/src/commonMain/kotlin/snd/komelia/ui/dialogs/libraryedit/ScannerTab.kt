@@ -132,20 +132,20 @@ private fun ScanFileTypes(
     scanPdf: StateHolder<Boolean>,
 ) {
     Column(Modifier.padding(vertical = 15.dp)) {
-        Text("Scan for these file types")
+        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Scan for these file types"))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ScanFiletypeChip(
-                label = { Text("Comic Book archives") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Comic Book archives")) },
                 selected = scanCbx.value,
                 onValueChange = scanCbx.setValue
             )
             ScanFiletypeChip(
-                label = { Text("PDF") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("PDF")) },
                 selected = scanPdf.value,
                 onValueChange = scanPdf.setValue
             )
             ScanFiletypeChip(
-                label = { Text("Epub") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Epub")) },
                 selected = scanEpub.value,
                 onValueChange = scanEpub.setValue
             )

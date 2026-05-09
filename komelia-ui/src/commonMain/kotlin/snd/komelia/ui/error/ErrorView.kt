@@ -90,7 +90,7 @@ fun ErrorView(
                 ) {
                     TooltipBox(
                         positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                        tooltip = { Text("Copied to clipboard") },
+                        tooltip = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Copied to clipboard")) },
                         state = tooltipState,
                         enableUserInput = false
                     ) {
@@ -100,21 +100,21 @@ fun ErrorView(
                                 scope.launch { tooltipState.show() }
                             },
                         ) {
-                            Text("Copy stacktrace to clipboard")
+                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Copy stacktrace to clipboard"))
                         }
                     }
                     if (isRestartable) {
                         Button(
                             onClick = onRestart,
                         ) {
-                            Text("Restart")
+                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Restart"))
                         }
 
                     }
                     Button(
                         onClick = onExit,
                     ) {
-                        Text("Exit")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Exit"))
                     }
                 }
             }

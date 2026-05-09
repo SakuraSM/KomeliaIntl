@@ -205,7 +205,7 @@ class LibraryScreen(
 
         when (val state = readListTabState.state.collectAsState().value) {
             Uninitialized -> LoadingMaxSizeIndicator()
-            is Error -> Text("Error")
+            is Error -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Error"))
             else -> {
                 val loading = state is Loading
                 LibraryReadListsContent(
@@ -281,7 +281,7 @@ fun LibraryToolBar(
                 FilterChip(
                     onClick = onBrowseClick,
                     selected = currentTab == SERIES,
-                    label = { Text("Series") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Series")) },
                     colors = chipColors,
                     border = null,
                 )
@@ -292,7 +292,7 @@ fun LibraryToolBar(
                 FilterChip(
                     onClick = onCollectionsClick,
                     selected = currentTab == COLLECTIONS,
-                    label = { Text("Collections") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Collections")) },
                     colors = chipColors,
                     border = null,
                 )
@@ -303,7 +303,7 @@ fun LibraryToolBar(
                 FilterChip(
                     onClick = onReadListsClick,
                     selected = currentTab == READ_LISTS,
-                    label = { Text("Read Lists") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Read Lists")) },
                     colors = chipColors,
                     border = null,
                 )

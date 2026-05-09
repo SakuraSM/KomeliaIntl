@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Icon
@@ -15,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -129,7 +133,7 @@ private fun BulkActionsToolbar(
         when (LocalWindowWidth.current) {
             FULL, EXPANDED -> {
                 if (selectedSeries.isEmpty()) {
-                    Text("Click on items to select or deselect them")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Click on items to select or deselect them"))
                 } else {
                     Spacer(Modifier.weight(1f))
                     SeriesBulkActionsContent(selectedSeries, false)
@@ -169,10 +173,20 @@ private fun ToolBar(
                 }
             }
 
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 1.dp,
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp)
+            ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 6.dp)
             ) {
 
                 if (seriesTotalCount != 0) {
@@ -188,13 +202,19 @@ private fun ToolBar(
                             if (filterState.isChanged) MaterialTheme.colorScheme.tertiary
                             else MaterialTheme.colorScheme.primary
 
-                        IconButton(onClick = { showFilters = !showFilters }, modifier = Modifier.cursorForHand()) {
+                        IconButton(
+                            onClick = { showFilters = !showFilters },
+                            modifier = Modifier
+                                .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
+                                .cursorForHand()
+                        ) {
                             Icon(Icons.Default.FilterList, null, tint = color)
                         }
                     }
 
                     PageSizeSelectionDropdown(pageSize, onPageSizeChange)
                 }
+            }
             }
         }
     }

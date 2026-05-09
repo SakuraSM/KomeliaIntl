@@ -106,7 +106,7 @@ fun KomfJobsContent(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 if (loading) CircularProgressIndicator()
                 else if (jobs.isEmpty()) {
-                    Text("Nothing to show")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Nothing to show"))
                 } else {
                     key(currentPage, selectedStatus) {
                         jobs.forEach {
@@ -263,7 +263,7 @@ private fun StatusFilters(
         FilterChip(
             selected = selectedStatus == null,
             onClick = { onStatusSelect(null) },
-            label = { Text("All") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("All")) },
             colors = AppFilterChipDefaults.filterChipColors(),
             border = null
         )
@@ -271,21 +271,21 @@ private fun StatusFilters(
         FilterChip(
             selected = selectedStatus == RUNNING,
             onClick = { onStatusSelect(RUNNING) },
-            label = { Text("Running") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Running")) },
             colors = AppFilterChipDefaults.filterChipColors(),
             border = null
         )
         FilterChip(
             selected = selectedStatus == COMPLETED,
             onClick = { onStatusSelect(COMPLETED) },
-            label = { Text("Completed") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Completed")) },
             colors = AppFilterChipDefaults.filterChipColors(),
             border = null
         )
         FilterChip(
             selected = selectedStatus == FAILED,
             onClick = { onStatusSelect(FAILED) },
-            label = { Text("Failed") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Failed")) },
             colors = AppFilterChipDefaults.filterChipColors(),
             border = null
         )
@@ -297,7 +297,7 @@ private fun StatusFilters(
             colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
             modifier = Modifier.cursorForHand()
         ) {
-            Text("Delete all")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete all"))
         }
         if (showConfirmationDialog) {
             ConfirmationDialog(
@@ -326,7 +326,7 @@ private fun SeriesTooltip(
             if (loading) CircularProgressIndicator()
             else {
                 Spacer(Modifier.weight(1f))
-                Text("Unknown series")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Unknown series"))
             }
         }
     else SeriesImageCard(

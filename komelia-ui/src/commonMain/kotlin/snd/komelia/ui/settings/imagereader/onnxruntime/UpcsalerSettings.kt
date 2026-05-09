@@ -100,7 +100,7 @@ fun MangaJaNaiSettings(
                 onClick = { uriHandler.openUri("https://github.com/the-database/mangajanai") },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Project on Github")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Project on Github"))
             }
         }
     }

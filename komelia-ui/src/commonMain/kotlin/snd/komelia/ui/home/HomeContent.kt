@@ -143,7 +143,7 @@ private fun Toolbar(
                     FilterChip(
                         onClick = { onFilterChange(0) },
                         selected = currentFilterNumber == 0,
-                        label = { Text("All") },
+                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("All")) },
                         colors = chipColors,
                         border = null,
                     )

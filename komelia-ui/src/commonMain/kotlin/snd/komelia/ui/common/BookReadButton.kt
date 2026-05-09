@@ -92,7 +92,7 @@ private fun ReadButton(
             contentDescription = null,
         )
         Spacer(Modifier.width(10.dp))
-        Text("Read")
+        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Read"))
     }
 }
 
@@ -130,7 +130,7 @@ private fun IncognitoDropDown(
             modifier = Modifier.width(150.dp)
         ) {
             DropdownMenuItem(
-                text = { Text("Read incognito") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Read incognito")) },
                 onClick = { onIncognitoRead() },
                 modifier = Modifier.cursorForHand()
             )

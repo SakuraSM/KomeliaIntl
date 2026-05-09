@@ -50,7 +50,7 @@ fun <T : Preset> PresetsContent(
             options = remember(availablePresets) { availablePresets.map { LabeledEntry(it, it.name) } },
             onOptionChange = { preset -> preset.value?.let { state.onPresetSelect(it) } },
             inputFieldModifier = Modifier.fillMaxWidth(),
-            label = { Text("Presets") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Presets")) },
             modifier = Modifier.weight(1f, false).widthIn(max = 400.dp).fillMaxWidth(),
         )
         if (selectedPreset == null)
@@ -94,7 +94,7 @@ fun <T : Preset> PresetsContent(
                         value = newPresetName,
                         onValueChange = { newPresetName = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Saved Settings") },
+                        placeholder = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Saved Settings")) },
                         supportingText = {
                             if (!isValidName) Text(
                                 "Preset with that name already exists",
@@ -107,7 +107,7 @@ fun <T : Preset> PresetsContent(
                         CheckboxWithLabel(
                             checked = confirmOverride,
                             onCheckedChange = { confirmOverride = it },
-                            label = { Text("Override existing preset") }
+                            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Override existing preset")) }
                         )
                     }
 

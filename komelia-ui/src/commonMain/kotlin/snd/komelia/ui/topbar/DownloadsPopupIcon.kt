@@ -121,10 +121,10 @@ private fun NotificationsContent(
                 modifier = Modifier.padding(5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Recent downloads", modifier = Modifier.padding(start = 5.dp))
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Recent downloads"), modifier = Modifier.padding(start = 5.dp))
                 Spacer(Modifier.weight(1f))
                 ElevatedButton(onClick = onNotificationsClear) {
-                    Text("Clear all")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Clear all"))
                     Icon(Icons.Default.Clear, null)
                 }
             }

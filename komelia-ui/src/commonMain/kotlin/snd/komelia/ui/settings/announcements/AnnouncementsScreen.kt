@@ -26,7 +26,7 @@ class AnnouncementsScreen : Screen {
                 is Success -> AnnouncementsContent(result.value.items)
                 LoadState.Uninitialized, Loading -> LoadingMaxSizeIndicator()
 
-                is Error -> Text("Error")
+                is Error -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Error"))
             }
         }
 

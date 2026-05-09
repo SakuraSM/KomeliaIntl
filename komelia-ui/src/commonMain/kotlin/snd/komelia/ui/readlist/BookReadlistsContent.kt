@@ -57,7 +57,7 @@ fun BookReadListsContent(
                     .padding(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text("Read lists")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Read lists"))
                 if (show) Icon(Icons.Default.ExpandLess, null)
                 else Icon(Icons.Default.ExpandMore, null)
             }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberBasicTooltipState
@@ -79,13 +80,14 @@ fun <T> DropdownChoiceMenu(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val strings = LocalStrings.current.legacy
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = isExpanded,
         onExpandedChange = { isExpanded = it },
-    ) {
-        InputField(
-            value = selectedOption?.label ?: "",
+        ) {
+            InputField(
+            value = selectedOption?.label?.let(strings::forText) ?: "",
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
                 .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
@@ -106,7 +108,7 @@ fun <T> DropdownChoiceMenu(
 
             options.forEach {
                 DropdownMenuItem(
-                    text = { Text(it.label) },
+                    text = { Text(strings.forText(it.label)) },
                     onClick = {
                         onOptionChange(it)
                         isExpanded = false
@@ -131,13 +133,14 @@ fun <T> DropdownMultiChoiceMenu(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val strings = LocalStrings.current.legacy
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = isExpanded,
         onExpandedChange = { isExpanded = it },
     ) {
         InputField(
-            value = selectedOptions.joinToString { it.label }.ifBlank { placeholder ?: "Any" },
+            value = selectedOptions.joinToString { strings.forText(it.label) }.ifBlank { placeholder?.let(strings::forText) ?: strings.forText("Any") },
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
                 .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
@@ -182,6 +185,7 @@ private fun InputField(
         shadowElevation = 1.dp,
         color = color,
         modifier = Modifier
+            .heightIn(min = 44.dp)
             .cursorForHand()
             .indication(interactionSource, LocalIndication.current)
             .hoverable(interactionSource)
@@ -223,6 +227,7 @@ fun <T> DropdownChoiceMenuWithSearch(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     var searchText by remember { mutableStateOf("") }
+    val legacyStrings = LocalStrings.current.legacy
     LaunchedEffect(searchText) {
         delay(200)
         onSearch(searchText)
@@ -234,7 +239,8 @@ fun <T> DropdownChoiceMenuWithSearch(
         onExpandedChange = { isExpanded = it },
     ) {
         InputField(
-            value = selectedOptions.joinToString { it.label }.ifBlank { placeholder ?: "Any" },
+            value = selectedOptions.joinToString { legacyStrings.forText(it.label) }
+                .ifBlank { placeholder?.let(legacyStrings::forText) ?: legacyStrings.forText("Any") },
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
                 .then(textFieldModifier),
@@ -254,7 +260,7 @@ fun <T> DropdownChoiceMenuWithSearch(
             val focusRequester = remember { FocusRequester() }
             NoPaddingTextField(
                 text = searchText,
-                placeholder = "Search",
+                placeholder = legacyStrings.forText("Search"),
                 onTextChange = { searchText = it },
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
@@ -274,7 +280,7 @@ fun <T> DropdownChoiceMenuWithSearch(
                         onClick = { onOptionSelect(it) }
                     ) {
                         Icon(Icons.Default.Close, null)
-                        Text(it.label, style = MaterialTheme.typography.labelMedium)
+                        Text(legacyStrings.forText(it.label), style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
@@ -307,7 +313,7 @@ fun <T> FilterDropdownChoice(
         options = options,
         onOptionChange = onOptionChange,
         contentPadding = PaddingValues(5.dp),
-        label = label?.let { { Text(it) } },
+        label = label?.let { { Text(LocalStrings.current.legacy.forText(it)) } },
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
         modifier = modifier.clip(RoundedCornerShape(5.dp)),
         inputFieldModifier = Modifier.fillMaxWidth()
@@ -389,6 +395,7 @@ fun TagFiltersDropdownMenu(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     val strings = LocalStrings.current.filters
+    val legacyStrings = LocalStrings.current.legacy
     var isExpanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
@@ -410,7 +417,7 @@ fun TagFiltersDropdownMenu(
                 append(exclude.joinToString())
             }
         }
-        value.ifBlank { placeholder ?: strings.anyValue }
+        value.ifBlank { placeholder?.let(legacyStrings::forText) ?: strings.anyValue }
     }
 
     BasicTooltipBox(
@@ -554,7 +561,7 @@ private fun TagFilterDropdownContent(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 10.dp)
         ) {
-            Text("Other Options")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Other Options"))
             HorizontalDivider(Modifier.padding(start = 10.dp))
         }
 
@@ -569,7 +576,7 @@ private fun TagFilterDropdownContent(
                     }
                 },
                 onOptionChange = { onInclusionModeChange(it.value) },
-                label = { Text("Inclusion mode") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Inclusion mode")) }
             )
 
             DropdownChoiceMenu(
@@ -582,7 +589,7 @@ private fun TagFilterDropdownContent(
                     }
                 },
                 onOptionChange = { onExclusionModeChange(it.value) },
-                label = { Text("Exclusion mode") }
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Exclusion mode")) }
             )
         }
     }
@@ -666,8 +673,9 @@ private fun <T> DropdownMultiChoiceItem(
     selected: Boolean,
 ) {
     val color = if (selected) MaterialTheme.colorScheme.tertiary else Color.Unspecified
+    val strings = LocalStrings.current.legacy
     DropdownMenuItem(
-        text = { Text(text = option.label, color = color) },
+        text = { Text(text = strings.forText(option.label), color = color) },
         onClick = { onOptionSelect(option) },
         modifier = Modifier.cursorForHand(),
         leadingIcon = {
@@ -679,11 +687,12 @@ private fun <T> DropdownMultiChoiceItem(
 
 @Composable
 private fun FilterLabelAndCount(label: String, includeCount: Int, excludeCount: Int = 0) {
+    val strings = LocalStrings.current.legacy
     Row(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, style = MaterialTheme.typography.labelLarge)
+        Text(strings.forText(label), style = MaterialTheme.typography.labelLarge)
         if (includeCount > 0) {
             Text(
                 " + $includeCount",
@@ -715,4 +724,3 @@ data class LabeledEntry<T>(
 
     }
 }
-

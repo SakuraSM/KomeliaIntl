@@ -126,7 +126,7 @@ private fun Toolbar(
             onClick = { onEditEnd() },
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
-            Text("Done")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Done"))
             Icon(Icons.Default.Check, null)
         }
 
@@ -135,7 +135,7 @@ private fun Toolbar(
             onClick = { showResetDialog = true },
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
-            Text("Reset to default")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reset to default"))
             Icon(Icons.Default.Restore, null)
         }
         if (showResetDialog) {
@@ -198,7 +198,7 @@ fun AddConditionButton(
                 .cursorForHand()
                 .menuAnchor(PrimaryNotEditable)
         ) {
-            Text("Add Filter")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add Filter"))
         }
 
         ExposedDropdownMenu(
@@ -273,7 +273,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 if (showEdit) {
                     OutlinedTextField(
                         value = labelText,
-                        label = { Text("Label") },
+                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Label")) },
                         onValueChange = {
                             labelText = it
                             filterState.label.value = it
@@ -295,7 +295,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 onClick = { showEdit = !showEdit },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Edit")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit"))
                 Icon(
                     imageVector = if (showEdit) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = null,
@@ -308,7 +308,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Delete")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete"))
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = null,

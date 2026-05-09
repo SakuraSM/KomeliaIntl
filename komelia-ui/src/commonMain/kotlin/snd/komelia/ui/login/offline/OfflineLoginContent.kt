@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import snd.komelia.offline.server.model.OfflineMediaServer
 import snd.komelia.offline.server.model.OfflineMediaServerId
 import snd.komelia.offline.user.model.OfflineUser
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.settings.offline.users.RootUserCard
 import snd.komelia.ui.settings.offline.users.ServerCard
 import snd.komga.client.user.KomgaUserId
@@ -25,12 +26,13 @@ fun OfflineLoginContent(
     onUserDelete: (KomgaUserId) -> Unit,
     onReturnToLogin: () -> Unit
 ) {
+    val strings = LocalStrings.current.login
 
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.widthIn(max = 600.dp)
     ) {
-        Text("Offline mode", style = MaterialTheme.typography.titleLarge)
+        Text(strings.offlineMode, style = MaterialTheme.typography.titleLarge)
 
         for ((server, users) in serverUsers) {
             ServerCard(
@@ -48,7 +50,7 @@ fun OfflineLoginContent(
         }
 
         Button(onClick = onReturnToLogin, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            Text("Back to online")
+            Text(strings.backToOnline)
         }
     }
 }

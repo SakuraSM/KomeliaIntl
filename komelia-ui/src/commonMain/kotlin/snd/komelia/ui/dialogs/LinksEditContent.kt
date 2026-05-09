@@ -48,7 +48,7 @@ fun LinksEditContent(
                     TextField(
                         value = link.label,
                         onValueChange = { onLinkChange(index, link.copy(label = it)) },
-                        label = { Text("Label") },
+                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Label")) },
                         maxLines = 2,
                         modifier = Modifier.widthIn(min = 100.dp).withTextFieldNavigation()
                     )
@@ -56,7 +56,7 @@ fun LinksEditContent(
                     TextField(
                         value = link.url,
                         onValueChange = { onLinkChange(index, link.copy(url = it)) },
-                        label = { Text("URL") },
+                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("URL")) },
                         maxLines = 3,
                         modifier = Modifier.fillMaxWidth().withTextFieldNavigation()
                     )

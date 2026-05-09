@@ -13,7 +13,8 @@ set(JXL_ARGS ${EP_CMAKE_ARGS}
         -DJPEGXL_ENABLE_BENCHMARK=OFF
         -DJPEGXL_ENABLE_TOOLS=OFF
         -DJPEGXL_ENABLE_DEVTOOLS=OFF
-        -DJPEGXL_ENABLE_JPEGLI=OFF)
+        -DJPEGXL_ENABLE_JPEGLI=OFF
+        -DHWY_ENABLE_INSTALL=OFF)
 
 # fails when building with android clang toolchain
 # for some reason it tries to find hwy test headers but we don't build them

@@ -68,7 +68,7 @@ private fun AlternativeTitlesTabContent(
                 TextField(
                     value = altTitle.label,
                     onValueChange = { onTitleChange(index, altTitle.copy(label = it)) },
-                    label = { Text("Label") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Label")) },
                     maxLines = 1,
                     modifier = Modifier.weight(.3f).withTextFieldNavigation(onTitleAdd)
                 )
@@ -78,7 +78,7 @@ private fun AlternativeTitlesTabContent(
                 TextField(
                     value = altTitle.title,
                     onValueChange = { onTitleChange(index, altTitle.copy(title = it)) },
-                    label = { Text("Alternate title") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Alternate title")) },
                     maxLines = 1,
                     modifier = Modifier.weight(.7f).withTextFieldNavigation()
                 )

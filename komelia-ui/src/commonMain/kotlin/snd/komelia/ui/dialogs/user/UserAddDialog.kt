@@ -102,7 +102,7 @@ fun UserAddDialog(
                 TextField(
                     value = email,
                     onValueChange = onEmailChange,
-                    label = { Text("Email") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Email")) },
                     supportingText = {
                         if (emailValidation != null)
                             Text(text = emailValidation, color = MaterialTheme.colorScheme.error)
@@ -113,31 +113,31 @@ fun UserAddDialog(
                 PasswordTextField(
                     value = password,
                     onValueChange = onPasswordChange,
-                    label = { Text("Password") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Password")) },
                     isError = passwordValidation != null,
                     supportingText = { passwordValidation?.let { Text(it) } },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Column {
-                    Text("Roles")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Roles"))
 
                     CheckboxWithLabel(
                         checked = administratorRole,
                         onCheckedChange = onAdministratorRoleChange,
-                        label = { Text("Administrator") }
+                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Administrator")) }
                     )
 
                     CheckboxWithLabel(
                         checked = pageStreamingRole,
                         onCheckedChange = onPageStreamingRoleChange,
-                        label = { Text("Page Streaming") }
+                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Page Streaming")) }
                     )
 
                     CheckboxWithLabel(
                         checked = fileDownloadRole,
                         onCheckedChange = onFileDownloadRoleChange,
-                        label = { Text("File Download") }
+                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("File Download")) }
                     )
                 }
             }
@@ -153,7 +153,7 @@ fun UserAddDialog(
                     onClick = onDismissRequest,
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    Text("Cancel")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel"))
                 }
 
                 FilledTonalButton(
@@ -166,7 +166,7 @@ fun UserAddDialog(
                     enabled = isValid,
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    Text("Add")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add"))
                 }
             }
         }

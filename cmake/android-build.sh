@@ -73,12 +73,28 @@ case "$1" in
             exit;;
 esac
 
-rm -rf ./cmake/build-android-"$ARCH"
-mkdir -p ./cmake/build-android-"$ARCH"/sysroot
-cd ./cmake/build-android-"$ARCH"
+BUILD_DIR=./cmake/build-android-"$ARCH"
+if [ "${KOMELIA_ANDROID_CLEAN:-0}" = "1" ]; then
+    rm -rf "$BUILD_DIR"
+fi
+
+mkdir -p "$BUILD_DIR"/sysroot
+cd "$BUILD_DIR"
 
 
 SYSROOT="$(readlink -f .)/sysroot"
+
+if [ -n "${KOMELIA_ANDROID_REBUILD_PROJECTS:-}" ]; then
+    IFS=',' read -ra REBUILD_PROJECTS <<< "$KOMELIA_ANDROID_REBUILD_PROJECTS"
+    for project in "${REBUILD_PROJECTS[@]}"; do
+        [ -z "$project" ] && continue
+        rm -rf "$SYSROOT/src/$project" \
+            "$SYSROOT/src/$project-build" \
+            "$SYSROOT/src/$project-stamp" \
+            "$SYSROOT/tmp/$project-"*
+    done
+fi
+
 export PKG_CONFIG_DIR=""
 export PKG_CONFIG_LIBDIR="${SYSROOT}/lib/pkgconfig"
 export PKG_CONFIG_PATH="${SYSROOT}/lib/pkgconfig"
@@ -92,6 +108,11 @@ export CXX=$CLANG_CPP_PATH
 export LD=$TOOLCHAIN_PATH/bin/ld
 export RANLIB=$TOOLCHAIN_PATH/bin/llvm-ranlib
 export STRIP=$TOOLCHAIN_PATH/bin/llvm-strip
+
+EXTERNAL_UPDATE_DISCONNECTED=OFF
+if [ "${KOMELIA_ANDROID_OFFLINE:-0}" = "1" ]; then
+    EXTERNAL_UPDATE_DISCONNECTED=ON
+fi
 
 cat << EOF > "android-$ARCH-cross_file.txt"
 [host_machine]
@@ -134,7 +155,8 @@ cmake ../.. -G Ninja \
     -DANDROID_PLATFORM=26 \
     -DANDROID_SDK_PATH="${ANDROID_SDK_PATH}" \
     -DANDROID_NDK_PATH="${ANDROID_NDK_PATH}" \
-    -DHOST_FLAG=--host="$AUTOCONF_HOST"
+    -DHOST_FLAG=--host="$AUTOCONF_HOST" \
+    -DKOMELIA_EXTERNAL_UPDATE_DISCONNECTED="$EXTERNAL_UPDATE_DISCONNECTED"
 
 cmake --build . -j $(nproc)
 

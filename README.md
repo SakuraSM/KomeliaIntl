@@ -74,10 +74,14 @@ Then choose your packaging option:
 To build with docker container, replace <*arch*> placeholder with your target architecture\
 Available architectures include:  `aarch64`, `armv7a`, `x86_64`, `x86`
 
-- `docker build -t komelia-build-android . -f ./cmake/android.Dockerfile `
-- `docker run -v .:/build komelia-build-android <arch>`
+- `docker build --platform=linux/amd64 -t komelia-build-android . -f ./cmake/android.Dockerfile`
+- `docker run --platform=linux/amd64 -v "$PWD:/build" komelia-build-android <arch>`
 - `./gradlew <arch>_copyJniLibs` - copy built shared libraries to resource directory that will be bundled with the app
 - `./gradlew buildWebui` - build and copy epub reader webui (npm is required for build)
+
+Android native builds reuse `cmake/build-android-<arch>` by default so third-party downloads and compiled sysroot files are cached between runs.
+Use `-e KOMELIA_ANDROID_CLEAN=1` with `docker run` for a clean rebuild, or `-e KOMELIA_ANDROID_OFFLINE=1` to reuse an existing cache without checking remote Git updates.
+Use `-e KOMELIA_ANDROID_REBUILD_PROJECTS=ep_iconv` to rebuild only selected cached external projects.
 
 Then choose app build option:
 

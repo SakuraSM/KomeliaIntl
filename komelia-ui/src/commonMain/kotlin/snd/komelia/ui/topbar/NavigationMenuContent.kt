@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineMode
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.menus.LibraryActionsMenu
 import snd.komelia.ui.common.menus.LibraryMenuActions
 import snd.komelia.ui.dialogs.libraryedit.LibraryEditDialogs
@@ -142,10 +143,11 @@ fun ColumnScope.LibrariesNavBarContent(
 
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
+    val strings = LocalStrings.current.mainNavigation
     NavButton(
         onClick = { onLibrariesClick() },
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
-        label = "Libraries",
+        label = strings.libraries,
         isSelected = false,
         actionButton = if (!isAdmin || isOffline) null else {
             {
@@ -203,6 +205,7 @@ private fun NavMenu(
     val scrollState: ScrollState = rememberScrollState()
     val navBarInteractionSource = remember { MutableInteractionSource() }
     val isHovered = navBarInteractionSource.collectIsHoveredAsState()
+    val strings = LocalStrings.current.mainNavigation
     var showLibraryAddDialog by remember { mutableStateOf(false) }
     if (showLibraryAddDialog) {
         LibraryEditDialogs(
@@ -222,7 +225,7 @@ private fun NavMenu(
             NavButton(
                 onClick = { onHomeClick() },
                 icon = Icons.Default.Home,
-                label = "Home",
+                label = strings.home,
                 isSelected = currentScreen is HomeScreen
             )
             LibrariesNavBarContent(
@@ -237,7 +240,7 @@ private fun NavMenu(
             NavButton(
                 onClick = onSettingsClick,
                 icon = Icons.Default.Settings,
-                label = "Settings",
+                label = strings.settings,
                 isSelected = false
             )
 
@@ -311,7 +314,7 @@ private fun TaskQueueIndicator(queueStatus: TaskQueueStatus) {
             Surface(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .9f)) {
                 Column(Modifier.padding(10.dp)) {
                     when (queueStatus.count) {
-                        1 -> Text("1 pending task")
+                        1 -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("1 pending task"))
                         else -> Text("${queueStatus.count} pending tasks")
                     }
                     Spacer(Modifier.height(10.dp))

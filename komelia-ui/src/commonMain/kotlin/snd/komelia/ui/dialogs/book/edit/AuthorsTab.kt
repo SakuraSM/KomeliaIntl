@@ -75,7 +75,7 @@ private fun AuthorsTabContent(
         TextField(
             value = newCustomRole,
             onValueChange = { newCustomRole = it },
-            label = { Text("Add custom role") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add custom role")) },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,

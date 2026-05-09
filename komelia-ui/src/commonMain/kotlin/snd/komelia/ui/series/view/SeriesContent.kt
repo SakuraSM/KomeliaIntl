@@ -462,14 +462,14 @@ private fun TabRow(
                 FilterChip(
                     onClick = { onTabChange(SeriesTab.BOOKS) },
                     selected = currentTab == SeriesTab.BOOKS,
-                    label = { Text("Books") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Books")) },
                     colors = chipColors,
                     border = null,
                 )
                 FilterChip(
                     onClick = { onTabChange(SeriesTab.COLLECTIONS) },
                     selected = currentTab == SeriesTab.COLLECTIONS,
-                    label = { Text("Collections") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Collections")) },
                     colors = chipColors,
                     border = null,
                 )

@@ -1,12 +1,10 @@
 include(ExternalProject)
 
 ExternalProject_Add(ep_ffi
-        GIT_REPOSITORY https://github.com/libffi/libffi
-        GIT_TAG v3.5.2
-        GIT_SHALLOW 1
-        GIT_PROGRESS 1
+        URL https://github.com/libffi/libffi/releases/download/v3.5.2/libffi-3.5.2.tar.gz
+        URL_HASH SHA256=f3a3082a23b37c293a4fcd1053147b371f2ff91fa7ea1b2a52e335676bac82dc
         BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND <SOURCE_DIR>/autogen.sh && <SOURCE_DIR>/configure ${HOST_FLAG}
+        CONFIGURE_COMMAND <SOURCE_DIR>/configure ${HOST_FLAG}
             --disable-exec-static-tramp
             --disable-multi-os-directory
             --disable-static --enable-pax_emutramp

@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.components.CheckboxWithLabel
 import snd.komelia.ui.platform.cursorForHand
 
@@ -39,18 +40,19 @@ fun ConfirmationDialog(
     onDialogDismiss: () -> Unit,
 ) {
     var confirmed by remember { mutableStateOf(false) }
+    val strings = LocalStrings.current.legacy
     AppDialog(
         onDismissRequest = onDialogDismiss,
         modifier = Modifier.widthIn(max = 600.dp),
-        header = title?.let { { Text(title, fontSize = 20.sp, modifier = Modifier.padding(10.dp)) } },
+        header = title?.let { { Text(strings.forText(title), fontSize = 20.sp, modifier = Modifier.padding(10.dp)) } },
         content = {
             Column(Modifier.padding(10.dp)) {
-                Text(body, modifier = Modifier.padding(20.dp))
+                Text(strings.forText(body), modifier = Modifier.padding(20.dp))
                 if (confirmText != null) {
                     CheckboxWithLabel(
                         checked = confirmed,
                         onCheckedChange = { confirmed = it },
-                        label = { Text(confirmText) }
+                        label = { Text(strings.forText(confirmText)) }
                     )
                 }
             }
@@ -62,7 +64,7 @@ fun ConfirmationDialog(
                     onClick = onDialogDismiss,
                     modifier = Modifier.cursorForHand(),
                 ) {
-                    Text(buttonCancel)
+                    Text(strings.forText(buttonCancel))
                 }
                 Spacer(Modifier.size(10.dp))
 
@@ -74,7 +76,7 @@ fun ConfirmationDialog(
                         },
                         modifier = Modifier.cursorForHand(),
                     ) {
-                        Text(buttonAlternate)
+                        Text(strings.forText(buttonAlternate))
                     }
                     Spacer(Modifier.size(10.dp))
                 }
@@ -91,7 +93,7 @@ fun ConfirmationDialog(
                     ),
                     modifier = Modifier.cursorForHand(),
                 ) {
-                    Text(buttonConfirm)
+                    Text(strings.forText(buttonConfirm))
                 }
             }
         }

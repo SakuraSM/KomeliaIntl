@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.cards.BookSimpleImageCard
 import snd.komelia.ui.common.cards.SeriesSimpleImageCard
 import snd.komelia.ui.common.components.NoPaddingTextField
@@ -151,7 +152,7 @@ private fun ColumnScope.SearchResultsDropDownBox(
             .padding(horizontal = 5.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        Text("Search all...")
+        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Search all..."))
     }
     if (isLoading) LinearProgressIndicator(
         color = MaterialTheme.colorScheme.tertiary,
@@ -230,7 +231,7 @@ private fun SeriesSearchEntry(
         )
         Column {
             Text(series.metadata.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            library?.let { Text("in ${library.name}") }
+            library?.let { Text(LocalStrings.current.legacy.forText("in ${library.name}")) }
         }
     }
 }
@@ -251,7 +252,7 @@ private fun BookSearchEntry(
         )
         Column {
             Text(book.metadata.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            library?.let { Text("in ${library.name}") }
+            library?.let { Text(LocalStrings.current.legacy.forText("in ${library.name}")) }
         }
     }
 }

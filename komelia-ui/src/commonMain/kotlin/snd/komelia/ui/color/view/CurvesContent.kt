@@ -149,7 +149,7 @@ fun ColorCurvesContent(
                     .align(Alignment.CenterVertically)
                     .pointerHoverIcon(PointerIcon.Hand),
             ) {
-                Text("Reset All")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reset All"))
             }
         }
 
@@ -384,7 +384,7 @@ fun ChannelSelection(
         DropdownChoiceMenu(
             selectedOption = remember(selectedChannel) { LabeledEntry(selectedChannel, selectedChannel.name) },
             options = remember { ColorChannel.entries.map { LabeledEntry(it, it.name) } },
-            label = { Text("Channel") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Channel")) },
             onOptionChange = { onChannelChange(it.value) },
             inputFieldModifier = Modifier.widthIn(min = 150.dp)
 
@@ -425,7 +425,7 @@ private fun PointTypeSelection(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.padding(8.dp)
                 ) {
-                    Text("Smooth")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Smooth"))
                     Canvas(Modifier.size(28.dp).padding(6.dp)) { drawCircle(primaryColor) }
                 }
             }
@@ -442,7 +442,7 @@ private fun PointTypeSelection(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.padding(8.dp)
                 ) {
-                    Text("Corner")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Corner"))
                     Canvas(Modifier.size(28.dp).padding(6.dp)) { rotate(45f) { drawRect(primaryColor) } }
                 }
             }
@@ -468,7 +468,7 @@ private fun ChannelValues(
             onvValueChange = { newX ->
                 selectedPoint?.let { onPointChange(selectedPoint, IntOffset(newX.toInt(), currentPointOffset?.y ?: 0)) }
             },
-            label = { Text("Input") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Input")) },
             stepSize = 1f,
             minValue = 0f,
             maxValue = 255f,
@@ -480,7 +480,7 @@ private fun ChannelValues(
             onvValueChange = { newY ->
                 selectedPoint?.let { onPointChange(selectedPoint, IntOffset(currentPointOffset?.x ?: 0, newY.toInt())) }
             },
-            label = { Text("Output") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Output")) },
             stepSize = 1f,
             minValue = 0f,
             maxValue = 255f,

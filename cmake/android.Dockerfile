@@ -1,6 +1,6 @@
 FROM ubuntu:25.10
 
-RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+RUN apt-get update -o Acquire::Retries=5 && apt-get install -y --no-install-recommends \
     openjdk-17-jdk-headless \
     python3-dev \
     python3-numpy \
@@ -25,7 +25,8 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     wget \
     git \
     aria2 \
-    curl
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV ANDROID_SDK_PATH=/android-sdk
 ENV NDK_VERSION=28.0.13004108

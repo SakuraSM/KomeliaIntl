@@ -126,7 +126,7 @@ fun OneshotActionsMenu(
     ) {
         if (isAdmin && !isOffline) {
             DropdownMenuItem(
-                text = { Text("Analyze") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Analyze")) },
                 onClick = {
                     actions.analyze(book)
                     onDismissRequest()
@@ -134,7 +134,7 @@ fun OneshotActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text("Refresh metadata") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Refresh metadata")) },
                 onClick = {
                     actions.refreshMetadata(book)
                     onDismissRequest()
@@ -142,11 +142,11 @@ fun OneshotActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text("Add to read list") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add to read list")) },
                 onClick = { showAddToReadListDialog = true },
             )
             DropdownMenuItem(
-                text = { Text("Add to collection") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add to collection")) },
                 onClick = { showAddToCollectionDialog = true },
             )
         }
@@ -156,7 +156,7 @@ fun OneshotActionsMenu(
 
         if (!isRead) {
             DropdownMenuItem(
-                text = { Text("Mark as read") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Mark as read")) },
                 onClick = {
                     actions.markAsRead(book)
                     onDismissRequest()
@@ -166,7 +166,7 @@ fun OneshotActionsMenu(
 
         if (!isUnread) {
             DropdownMenuItem(
-                text = { Text("Mark as unread") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Mark as unread")) },
                 onClick = {
                     actions.markAsUnread(book)
                     onDismissRequest()
@@ -177,12 +177,12 @@ fun OneshotActionsMenu(
         val komfIntegration = LocalKomfIntegration.current.collectAsState(false)
         if (komfIntegration.value) {
             DropdownMenuItem(
-                text = { Text("Identify (Komf)") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Identify (Komf)")) },
                 onClick = { showKomfDialog = true },
             )
 
             DropdownMenuItem(
-                text = { Text("Reset Metadata (Komf)") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reset Metadata (Komf)")) },
                 onClick = { showKomfResetDialog = true },
             )
         }
@@ -194,7 +194,7 @@ fun OneshotActionsMenu(
             else Modifier
         if (isAdmin && !isOffline) {
             DropdownMenuItem(
-                text = { Text("Delete") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete")) },
                 onClick = {
                     showDeleteDialog = true
                 },
@@ -206,7 +206,7 @@ fun OneshotActionsMenu(
 
         if (isOffline) {
             DropdownMenuItem(
-                text = { Text("Delete downloaded") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded")) },
                 onClick = { showDeleteDownloadedDialog = true },
                 modifier = Modifier
                     .hoverable(deleteInteractionSource)

@@ -88,7 +88,7 @@ fun <T> SimpleConditionLayout(
                 conditionType,
                 options = options,
                 onOptionChange = { onConditionTypeChange(it.value) },
-                label = { Text("Condition") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Condition")) },
                 inputFieldModifier = Modifier.widthIn(conditionInputMinWidth)
             )
             content()
@@ -162,7 +162,7 @@ fun RowScope.AuthorConditionContent(
         options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
     )
 
     DropdownChoiceMenu(
@@ -175,7 +175,7 @@ fun RowScope.AuthorConditionContent(
         },
         onOptionChange = { state.setRoleValue(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Role") }
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Role")) }
     )
 
     SearchableOptionSelectionField(
@@ -233,7 +233,7 @@ fun RowScope.EqualityNullableOpContent(
         options = EqualityNullableOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
     )
 
     if (operator != EqualityNullableOpState.Op.IsNull && operator != EqualityNullableOpState.Op.IsNotNull)
@@ -257,7 +257,7 @@ fun RowScope.BooleanOpContent(
         options = BooleanOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { onOperatorChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
     )
 }
 
@@ -274,7 +274,7 @@ fun <T> RowScope.EqualityOpDropDownContent(
         options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { onOpChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
     )
 
     DropdownChoiceMenu(
@@ -282,7 +282,7 @@ fun <T> RowScope.EqualityOpDropDownContent(
         options = valueOptions,
         onOptionChange = { onValueChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Value") }
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Value")) }
     )
 }
 
@@ -410,7 +410,7 @@ fun RowScope.StringOpContent(
         options = StringOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { onOperatorChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
     )
 
     var textValue by remember { mutableStateOf(value ?: "") }
@@ -441,7 +441,7 @@ private fun RowScope.DateOpContent(
         options = DateOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { onOperatorChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
     )
 
     when (operator) {
@@ -517,7 +517,7 @@ private fun DatePickerField(
     TextField(
         value = currentDate?.toLocalDateTime(TimeZone.currentSystemDefault())?.toString() ?: "",
         onValueChange = { },
-        placeholder = { Text("MM/DD/YYYY") },
+        placeholder = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("MM/DD/YYYY")) },
         trailingIcon = {
             Icon(Icons.Default.DateRange, null)
         },
@@ -545,12 +545,12 @@ private fun DatePickerField(
                     }
                     showDatePicker = false
                 }) {
-                    Text("OK")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("OK"))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel"))
                 }
             }
         ) {
@@ -582,7 +582,7 @@ private fun PeriodPickerField(
                 }
 
             },
-            label = { Text("Days") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Days")) },
             modifier = Modifier.width(100.dp),
         )
     }
@@ -605,7 +605,7 @@ fun <T> ConditionAddButton(
                 .cursorForHand()
                 .menuAnchor(PrimaryNotEditable)
         ) {
-            Text("Add condition")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add condition"))
         }
 
         val scrollState = rememberScrollState()
@@ -645,7 +645,7 @@ fun EqualityNullableOpDropdownSearchContent(
         options = EqualityNullableOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
     )
 
     if (operator != EqualityNullableOpState.Op.IsNull && operator != EqualityNullableOpState.Op.IsNotNull) {
@@ -677,7 +677,7 @@ fun EqualityOpDropdownSearchContent(
         options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
     )
 
     var searchText by remember { mutableStateOf(value ?: "") }
@@ -711,14 +711,14 @@ fun <T> PageSettingsContent(
             selectedOption = sort,
             options = sortOptions,
             onOptionChange = { onSortChange(it.value) },
-            label = { Text("Sort") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Sort")) },
             inputFieldModifier = Modifier.widthIn(min = 150.dp)
         )
         DropdownChoiceMenu(
             selectedOption = remember(sortDirection) { LabeledEntry(sortDirection, sortDirection.name) },
             options = remember { KomgaSort.Direction.entries.map { LabeledEntry(it, it.name) } },
             onOptionChange = { onSortDirectionChange(it.value) },
-            label = { Text("Direction") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Direction")) },
             inputFieldModifier = Modifier.widthIn(min = 60.dp)
         )
         PageSizeSettingsContent(pageSize, onPageSizeChange)
@@ -742,7 +742,7 @@ fun PageSizeSettingsContent(pageSize: Int, onPageSizeChange: (Int) -> Unit) {
                 }
             }
         },
-        label = { Text("Limit") },
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Limit")) },
         modifier = Modifier.width(70.dp),
     )
 

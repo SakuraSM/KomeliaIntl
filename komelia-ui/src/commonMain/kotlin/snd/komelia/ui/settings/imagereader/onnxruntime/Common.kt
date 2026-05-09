@@ -56,7 +56,7 @@ fun UpscaleModeSelector(
             }
         },
         onOptionChange = { onModeChange(it.value) },
-        label = { Text("OnnxRuntime upscale mode") },
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("OnnxRuntime upscale mode")) },
         inputFieldModifier = Modifier.fillMaxSize()
     )
     AnimatedVisibility(currentMode == UpscaleMode.USER_SPECIFIED_MODEL) {
@@ -73,7 +73,7 @@ fun UpscaleModeSelector(
                 value = currentModelPath?.toString() ?: "",
                 onValueChange = {},
                 enabled = false,
-                label = { Text("ONNX model path") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("ONNX model path")) },
                 readOnly = true,
                 modifier = Modifier.weight(7f),
             )
@@ -82,7 +82,7 @@ fun UpscaleModeSelector(
                 onClick = { launcher.launch() },
                 modifier = Modifier.padding(horizontal = 10.dp),
             ) {
-                Text("Browse")
+                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Browse"))
             }
         }
     }
@@ -113,7 +113,7 @@ fun TileSizeSelector(
                 )
             },
             onOptionChange = { onTileSizeChange(it.value) },
-            label = { Text("Tile size") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Tile size")) },
             modifier = Modifier.weight(1f),
             inputFieldModifier = Modifier.fillMaxSize()
         )
@@ -159,7 +159,7 @@ fun DeviceSelector(
             selectedOption = LabeledEntry(selectedDevice, "${selectedDevice.name} ${selectedDevice.memoryGb()}GiB"),
             options = remember { availableDevices.map { LabeledEntry(it, "${it.name} ${it.memoryGb()}GiB") } },
             onOptionChange = { onDeviceIdChange(it.value.id) },
-            label = { Text("GPU") },
+            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("GPU")) },
             inputFieldModifier = Modifier.fillMaxSize()
         )
     }

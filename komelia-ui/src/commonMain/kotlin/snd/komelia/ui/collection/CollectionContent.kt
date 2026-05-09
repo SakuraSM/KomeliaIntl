@@ -191,8 +191,8 @@ private fun BulkActionsToolbar(
     ) {
         when (LocalWindowWidth.current) {
             FULL -> {
-                if (collection.ordered) Text("Click to select, drag to change order")
-                else Text("Click on items to select or deselect them")
+                if (collection.ordered) Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Click to select, drag to change order"))
+                else Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Click on items to select or deselect them"))
                 if (selectedSeries.isNotEmpty()) {
                     Spacer(Modifier.weight(1f))
 
@@ -202,8 +202,8 @@ private fun BulkActionsToolbar(
 
             EXPANDED -> {
                 if (selectedSeries.isEmpty()) {
-                    if (collection.ordered) Text("Click to select, drag to change order")
-                    else Text("Click on items to select or deselect them")
+                    if (collection.ordered) Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Click to select, drag to change order"))
+                    else Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Click on items to select or deselect them"))
                 } else {
                     Spacer(Modifier.weight(1f))
                     CollectionBulkActionsContent(collection, selectedSeries, false)

@@ -55,7 +55,7 @@ class OfflineSettingsScreen : Screen {
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         Icon(Icons.Default.Person, null)
-                        Text("Users")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Users"))
                     }
                 }
                 Tab(
@@ -65,7 +65,7 @@ class OfflineSettingsScreen : Screen {
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         Icon(Icons.Default.Download, null)
-                        Text("Downloads")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Downloads"))
                     }
                 }
 
@@ -76,7 +76,7 @@ class OfflineSettingsScreen : Screen {
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         Icon(Icons.Default.Cached, null)
-                        Text("Logs")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Logs"))
                     }
                 }
             }

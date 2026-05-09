@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.PlatformType.DESKTOP
@@ -53,6 +54,7 @@ fun SettingsScreenContainer(
 @Composable
 private fun MobileContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
     val navigator = LocalNavigator.currentOrThrow
+    val localizedTitle = LocalStrings.current.legacy.forText(title)
     Column(Modifier.padding()) {
         PlatformTitleBar()
         Row(
@@ -63,7 +65,7 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
                 Icon(Icons.AutoMirrored.Default.ArrowBack, null)
             }
 
-            Text(title, style = MaterialTheme.typography.titleLarge)
+            Text(localizedTitle, style = MaterialTheme.typography.titleLarge)
         }
 
         HorizontalDivider()
@@ -93,9 +95,10 @@ private fun DesktopContainer(title: String, content: @Composable ColumnScope.() 
 
 @Composable
 private fun DesktopContent(title: String, content: @Composable ColumnScope.() -> Unit) {
+    val localizedTitle = LocalStrings.current.legacy.forText(title)
     Column(Modifier.widthIn(min = 0.dp, max = settingsDesktopContentWidth)) {
         Spacer(Modifier.height(50.dp))
-        Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 30.dp))
+        Text(localizedTitle, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 30.dp))
         Spacer(Modifier.height(20.dp))
 
         Column(

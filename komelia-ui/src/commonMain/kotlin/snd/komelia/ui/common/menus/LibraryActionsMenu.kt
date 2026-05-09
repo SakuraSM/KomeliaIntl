@@ -111,7 +111,7 @@ fun LibraryActionsMenu(
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
         if (isAdmin && !isOffline) {
             DropdownMenuItem(
-                text = { Text("Scan library files") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Scan library files")) },
                 onClick = {
                     actions.scan(library)
                     onDismissRequest()
@@ -125,7 +125,7 @@ fun LibraryActionsMenu(
                 else Modifier
 
             DropdownMenuItem(
-                text = { Text("Scan library files (deep)") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Scan library files (deep)")) },
                 onClick = {
                     actions.deepScan(library)
                     onDismissRequest()
@@ -135,28 +135,28 @@ fun LibraryActionsMenu(
                     .then(deepScanColor)
             )
             DropdownMenuItem(
-                text = { Text("Analyze") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Analyze")) },
                 onClick = {
                     showAnalyzeDialog = true
                     onDismissRequest()
                 }
             )
             DropdownMenuItem(
-                text = { Text("Refresh metadata") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Refresh metadata")) },
                 onClick = {
                     refreshMetadataDialog = true
                     onDismissRequest()
                 }
             )
             DropdownMenuItem(
-                text = { Text("Empty trash") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Empty trash")) },
                 onClick = {
                     emptyTrashDialog = true
                     onDismissRequest()
                 }
             )
             DropdownMenuItem(
-                text = { Text("Edit") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit")) },
                 onClick = {
                     showLibraryEditDialog = true
                     onDismissRequest()
@@ -171,7 +171,7 @@ fun LibraryActionsMenu(
                 vmFactory.getKomfLibraryIdentifyViewModel(library)
             }
             DropdownMenuItem(
-                text = { Text("Auto-Identify (Komf)") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Auto-Identify (Komf)")) },
                 onClick = {
                     autoIdentifyVm.autoIdentify()
                     onDismissRequest()
@@ -179,7 +179,7 @@ fun LibraryActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text("Reset Metadata (Komf)") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reset Metadata (Komf)")) },
                 onClick = { showKomfResetDialog = true },
             )
         }
@@ -192,7 +192,7 @@ fun LibraryActionsMenu(
 
         if (!isOffline && isAdmin) {
             DropdownMenuItem(
-                text = { Text("Delete") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete")) },
                 onClick = {
                     deleteLibraryDialog = true
                     onDismissRequest()
@@ -204,7 +204,7 @@ fun LibraryActionsMenu(
         }
         if (isOffline) {
             DropdownMenuItem(
-                text = { Text("Delete downloaded") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded")) },
                 onClick = {
                     deleteOfflineLibraryDialog = true
                     onDismissRequest()

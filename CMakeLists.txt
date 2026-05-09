@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 
 option(KOMELIA_SUPERBUILD "superbuild" ON)
+option(KOMELIA_EXTERNAL_UPDATE_DISCONNECTED "skip ExternalProject remote update checks" OFF)
 
 if (KOMELIA_SUPERBUILD)
     project(komelia_superbuild C CXX)
@@ -25,6 +26,9 @@ if (KOMELIA_SUPERBUILD)
     set(THIRD_PARTY_LIB_PATH ${CMAKE_BINARY_DIR}/sysroot)
     set(CMAKE_FIND_ROOT_PATH ${THIRD_PARTY_LIB_PATH};${CMAKE_FIND_ROOT_PATH})
     set_directory_properties(PROPERTIES EP_PREFIX ${THIRD_PARTY_LIB_PATH})
+    if (KOMELIA_EXTERNAL_UPDATE_DISCONNECTED)
+        set_directory_properties(PROPERTIES EP_UPDATE_DISCONNECTED TRUE)
+    endif ()
 
     if (MESON_CROSS_FILE)
         set(MESON_CROSS_FILE_ARG --cross-file=${MESON_CROSS_FILE})

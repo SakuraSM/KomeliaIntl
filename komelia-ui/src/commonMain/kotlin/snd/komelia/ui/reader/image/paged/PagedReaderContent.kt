@@ -132,7 +132,7 @@ private fun TransitionPage(page: TransitionPage) {
                         )
                     }
                 } else {
-                    Text("There's no next book")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("There's no next book"))
                 }
 
             }
@@ -147,7 +147,7 @@ private fun TransitionPage(page: TransitionPage) {
                         )
                     }
                 } else {
-                    Text("There's no previous book")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("There's no previous book"))
 
                 }
                 Spacer(Modifier.size(50.dp))

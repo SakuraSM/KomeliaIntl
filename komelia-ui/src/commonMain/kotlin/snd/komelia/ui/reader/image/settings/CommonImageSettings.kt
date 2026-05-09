@@ -73,7 +73,7 @@ fun CommonImageSettings(
             SwitchWithLabel(
                 checked = cropBorders,
                 onCheckedChange = onCropBordersChange,
-                label = { Text("Crop borders") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Crop borders")) },
                 contentPadding = PaddingValues(horizontal = 10.dp)
             )
         }
@@ -86,7 +86,7 @@ fun CommonImageSettings(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Color Correction")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Color Correction"))
             Spacer(Modifier.width(10.dp))
             Icon(
                 imageVector = Icons.Default.BarChart,
@@ -109,8 +109,8 @@ fun CommonImageSettings(
             SwitchWithLabel(
                 checked = flashEnabled,
                 onCheckedChange = onFlashEnabledChange,
-                label = { Text("Flash on page change") },
-                supportingText = { Text("Prevents ghosting on e-ink devices") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Flash on page change")) },
+                supportingText = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Prevents ghosting on e-ink devices")) },
                 contentPadding = PaddingValues(horizontal = 10.dp)
             )
             AnimatedVisibility(flashEnabled) {
@@ -151,24 +151,24 @@ fun CommonImageSettings(
                     }
 
                     Column {
-                        Text("Flash with")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Flash with"))
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             InputChip(
                                 selected = flashWith == ReaderFlashColor.BLACK,
                                 onClick = { onFlashWithChange(ReaderFlashColor.BLACK) },
-                                label = { Text("Black") }
+                                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Black")) }
                             )
                             InputChip(
                                 selected = flashWith == ReaderFlashColor.WHITE,
                                 onClick = { onFlashWithChange(ReaderFlashColor.WHITE) },
-                                label = { Text("White") }
+                                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("White")) }
                             )
                             InputChip(
                                 selected = flashWith == ReaderFlashColor.WHITE_AND_BLACK,
                                 onClick = { onFlashWithChange(ReaderFlashColor.WHITE_AND_BLACK) },
-                                label = { Text("White and Black") }
+                                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("White and Black")) }
                             )
                         }
                     }

@@ -61,12 +61,12 @@ fun ReadListActionsMenu(
         val deleteIsHovered = deleteInteractionSource.collectIsHoveredAsState()
 
         DropdownMenuItem(
-            text = { Text("Edit") },
+            text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit")) },
             onClick = { showEditDialog = true },
         )
 
         DropdownMenuItem(
-            text = { Text("Delete") },
+            text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete")) },
             onClick = { showDeleteDialog = true },
             modifier = Modifier
                 .hoverable(deleteInteractionSource)

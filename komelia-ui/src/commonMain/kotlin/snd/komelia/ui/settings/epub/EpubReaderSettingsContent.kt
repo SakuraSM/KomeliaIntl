@@ -42,7 +42,7 @@ fun EpubReaderSettingsContent(
                 },
                 options = remember { EpubReaderType.entries.map { LabeledEntry(it, strings.forEpubReaderType(it)) } },
                 onOptionChange = { onReaderChange(it.value) },
-                label = { Text("Reader Type") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reader Type")) },
                 inputFieldModifier = Modifier.fillMaxWidth().animateContentSize(),
                 modifier = Modifier.weight(1f),
             )
@@ -53,7 +53,7 @@ fun EpubReaderSettingsContent(
                     onClick = { uriHandler.openUri("https://github.com/ttu-ttu/ebook-reader") },
                     modifier = Modifier.cursorForHand().padding(start = 20.dp)
                 ) {
-                    Text("Project on Github")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Project on Github"))
                 }
             }
         }
@@ -67,7 +67,7 @@ fun EpubReaderSettingsContent(
                 """.trimIndent()
             )
 
-            KOMGA_EPUB -> Text("Komga webui epub reader adapted for use in Komelia")
+            KOMGA_EPUB -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Komga webui epub reader adapted for use in Komelia"))
 
         }
     }

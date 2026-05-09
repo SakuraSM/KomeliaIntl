@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.launch
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.platform.VerticalScrollbar
 import snd.komelia.ui.platform.cursorForHand
@@ -48,6 +49,7 @@ fun FileBrowserDialogContent(
 ) {
     val viewModelFactory = LocalViewModelFactory.current
     val viewmodel = remember { viewModelFactory.getFileBrowserDialogViewModel() }
+    val strings = LocalStrings.current.legacy
     LaunchedEffect(Unit) {
         viewmodel.selectDirectory("")
     }
@@ -66,7 +68,7 @@ fun FileBrowserDialogContent(
             Column(Modifier.padding(20.dp)) {
                 if (directoryListing == null) return@Column
 
-                Text("Library's root folder", fontSize = 20.sp, modifier = Modifier.padding(vertical = 10.dp))
+                Text(strings.forText("Library's root folder"), fontSize = 20.sp, modifier = Modifier.padding(vertical = 10.dp))
 
                 TextField(
                     value = viewmodel.selectedPath,
@@ -108,11 +110,11 @@ private fun DirectoryListing(
     ) {
         val parent = listing.parent
         if (parent != null) {
-            DirectoryListingItem(
-                icon = Icons.Default.ChevronLeft,
-                title = "Parent",
-                onClick = { onDirectoryClick(parent) }
-            )
+                DirectoryListingItem(
+                    icon = Icons.Default.ChevronLeft,
+                    title = LocalStrings.current.legacy.forText("Parent"),
+                    onClick = { onDirectoryClick(parent) }
+                )
         }
 
         listing.directories.forEach {
@@ -155,7 +157,7 @@ private fun DialogControlButtons(
 
         Spacer(Modifier.weight(1f))
         TextButton(onClick = onDismissRequest) {
-            Text("CANCEL")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("CANCEL"))
         }
         Spacer(Modifier.size(10.dp))
 
@@ -163,7 +165,7 @@ private fun DialogControlButtons(
             onDirectoryChoice(currentPath)
             onDismissRequest()
         }) {
-            Text("CHOOSE")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("CHOOSE"))
         }
     }
 }

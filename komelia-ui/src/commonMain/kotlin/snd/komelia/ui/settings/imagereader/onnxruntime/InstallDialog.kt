@@ -102,7 +102,7 @@ fun OrtInstallDialog(
                     TextButton(
                         onClick = onDismiss,
                         modifier = Modifier.cursorForHand(),
-                        content = { Text("Cancel") }
+                        content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel")) }
                     )
 
                     FilledTonalButton(
@@ -110,7 +110,7 @@ fun OrtInstallDialog(
                         onClick = { provider?.let { onInstall(it) } },
                         modifier = Modifier.cursorForHand(),
                     ) {
-                        Text("Install")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Install"))
                     }
                 }
             },
@@ -151,7 +151,7 @@ private fun OrtDownloadDialogContent(
                         labelAlignment = Alignment.Top,
                         label = {
                             Column {
-                                Text("Cuda (Nvidia GPUs, requires CUDA12 and cuDNN9 system install)")
+                                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cuda (Nvidia GPUs, requires CUDA12 and cuDNN9 system install)"))
                                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                                     Text(
                                         "download CUDA12",
@@ -183,7 +183,7 @@ private fun OrtDownloadDialogContent(
                     labelAlignment = Alignment.Top,
                     label = {
                         Column {
-                            Text("TensorRT (Nvidia GPUs, requires CUDA12, cuDNN9 and TensorRT system install)")
+                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("TensorRT (Nvidia GPUs, requires CUDA12, cuDNN9 and TensorRT system install)"))
                             Text(
                                 "Uses TensorRT to create optimized graph engine. Takes a significant time on model first load. After initial load engine is cached for future use",
                                 style = MaterialTheme.typography.labelLarge
@@ -225,7 +225,7 @@ private fun OrtDownloadDialogContent(
                 ROCm -> CheckboxWithLabel(
                     checked = chosenProvider == ROCm,
                     onCheckedChange = { onProviderChoice(ROCm) },
-                    label = { Text("ROCm (AMD GPUs, requires ROCm7 system install)") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("ROCm (AMD GPUs, requires ROCm7 system install)")) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -235,7 +235,7 @@ private fun OrtDownloadDialogContent(
                     labelAlignment = Alignment.Top,
                     label = {
                         Column {
-                            Text("DirectML (any GPU)")
+                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("DirectML (any GPU)"))
                             Text(
                                 "High-performance, hardware-accelerated DirectX 12 library for machine learning",
                                 style = MaterialTheme.typography.labelLarge
@@ -248,7 +248,7 @@ private fun OrtDownloadDialogContent(
                 CPU -> CheckboxWithLabel(
                     checked = chosenProvider == CPU,
                     onCheckedChange = { onProviderChoice(CPU) },
-                    label = { Text("CPU") },
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("CPU")) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -258,7 +258,7 @@ private fun OrtDownloadDialogContent(
                     labelAlignment = Alignment.Top,
                     label = {
                         Column {
-                            Text("WebGPU (Any GPU)")
+                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("WebGPU (Any GPU)"))
                             Text(
                                 " API for cross-platform efficient GPU access using system's underlying Vulkan, Metal, or Direct3D 12 technologies",
                                 style = MaterialTheme.typography.labelLarge
@@ -284,7 +284,7 @@ fun RestartDialog(
                 if (error != null)
                     Text("An error occurred during installation:\n$error")
                 else
-                    Text("App restart is required for changes to take effect")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("App restart is required for changes to take effect"))
             }
         },
         controlButtons = {
@@ -293,7 +293,7 @@ fun RestartDialog(
                     onClick = onConfirm,
                     modifier = Modifier.cursorForHand(),
                 ) {
-                    Text("Confirm")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Confirm"))
                 }
             }
         },

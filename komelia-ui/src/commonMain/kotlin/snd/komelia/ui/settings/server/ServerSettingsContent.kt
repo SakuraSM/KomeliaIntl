@@ -282,11 +282,11 @@ fun ChangesConfirmationPopup(
                     modifier = Modifier.padding(10.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text("You have unsaved changes")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("You have unsaved changes"))
                     Spacer(Modifier.weight(1f))
 
                     TextButton(onClick = onDiscard) {
-                        Text("Discard")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Discard"))
                     }
                     Spacer(Modifier.width(20.dp))
 
@@ -296,7 +296,7 @@ fun ChangesConfirmationPopup(
                             onSave()
                         },
                     ) {
-                        Text("Save Changes")
+                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Save Changes"))
 
                     }
                 }

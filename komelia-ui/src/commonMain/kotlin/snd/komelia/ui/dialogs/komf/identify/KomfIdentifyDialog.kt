@@ -115,7 +115,7 @@ fun IdentifyConfigContent(state: ConfigState) {
             TextField(
                 value = state.searchName,
                 onValueChange = state::searchName::set,
-                label = { Text("Title") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Title")) },
                 modifier = Modifier.weight(1f)
             )
 
@@ -131,7 +131,7 @@ fun IdentifyConfigContent(state: ConfigState) {
                 enabled = !isLoading.value,
             ) {
                 if (isLoading.value && searchInProgress) CircularProgressIndicator(Modifier.size(25.dp))
-                else Text("Search")
+                else Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Search"))
             }
         }
     }
@@ -143,7 +143,7 @@ fun IdentifyResultsContent(
     state: SearchResultsState,
 ) {
     if (state.searchResults.isEmpty()) {
-        Text("No results")
+        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("No results"))
         return
     }
     FlowRow(
@@ -207,7 +207,7 @@ private fun ProviderProgressCard(progress: ProviderProgressStatus) {
 
             when (progress.status) {
                 ProgressStatus.COMPLETED -> {
-                    Text("Completed")
+                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Completed"))
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
@@ -252,7 +252,7 @@ private fun ProcessingProgressCard() {
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("Processing")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Processing"))
             Spacer(Modifier.weight(1f))
         }
         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -272,7 +272,7 @@ fun IdentifyConfigButtons(state: ConfigState) {
             onClick = state.onDismiss,
             modifier = Modifier.cursorForHand()
         ) {
-            Text("Cancel")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel"))
         }
 
         FilledTonalButton(
@@ -287,7 +287,7 @@ fun IdentifyConfigButtons(state: ConfigState) {
             modifier = Modifier.cursorForHand()
         ) {
             if (isLoading.value && autoIdentifyProgress) CircularProgressIndicator(Modifier.size(25.dp))
-            else Text("Auto-Identify")
+            else Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Auto-Identify"))
         }
     }
 }
@@ -310,8 +310,8 @@ fun IdentificationProgressButtons(
         onClick = state.onDismiss,
         modifier = Modifier.cursorForHand()
     ) {
-        if (isLoading) Text("Run in background")
-        else Text("Confirm")
+        if (isLoading) Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Run in background"))
+        else Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Confirm"))
     }
 }
 
@@ -331,7 +331,7 @@ private fun ControlButtons(
             onClick = onDismissRequest,
             modifier = Modifier.cursorForHand()
         ) {
-            Text("Cancel")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel"))
         }
 
         FilledTonalButton(

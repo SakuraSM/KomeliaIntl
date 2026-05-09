@@ -33,7 +33,7 @@ internal class GeneralTab(
             TextField(
                 value = vm.name,
                 onValueChange = vm::name::set,
-                label = { Text("Name") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Name")) },
                 supportingText = {
                     vm.nameValidationError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 },
@@ -45,7 +45,7 @@ internal class GeneralTab(
             TextField(
                 value = vm.summary,
                 onValueChange = vm::summary::set,
-                label = { Text("Summary") },
+                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Summary")) },
                 minLines = 6,
                 maxLines = 12,
                 modifier = Modifier.fillMaxWidth()
@@ -60,7 +60,7 @@ internal class GeneralTab(
                 CheckboxWithLabel(
                     checked = vm.manualOrdering,
                     onCheckedChange = vm::manualOrdering::set,
-                    label = { Text("Manual ordering") }
+                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Manual ordering")) }
                 )
 
             }

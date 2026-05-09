@@ -33,7 +33,7 @@ fun UpdateProgressDialog(
             FilledTonalButton(
                 onClick = onCancel,
                 modifier = Modifier.cursorForHand().padding(10.dp),
-                content = { Text("Cancel") }
+                content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel")) }
             )
         },
         content = { DialogContent(totalSize, downloadedSize) },

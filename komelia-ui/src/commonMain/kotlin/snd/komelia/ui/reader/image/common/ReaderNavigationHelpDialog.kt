@@ -215,7 +215,7 @@ private fun ShortcutKeys(keys: List<String>, modifier: Modifier) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         ShortcutKey(keys.first())
         keys.drop(1).forEach { key ->
-            Text(" + ")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText(" + "))
             ShortcutKey(key)
         }
     }

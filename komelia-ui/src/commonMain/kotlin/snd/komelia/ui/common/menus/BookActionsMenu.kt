@@ -116,7 +116,7 @@ fun BookActionsMenu(
     ) {
         if (isAdmin && !isOffline) {
             DropdownMenuItem(
-                text = { Text("Analyze") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Analyze")) },
                 onClick = {
                     actions.analyze(book)
                     onDismissRequest()
@@ -124,7 +124,7 @@ fun BookActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text("Refresh metadata") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Refresh metadata")) },
                 onClick = {
                     actions.refreshMetadata(book)
                     onDismissRequest()
@@ -132,7 +132,7 @@ fun BookActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text("Add to read list") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add to read list")) },
                 onClick = { showAddToReadListDialog = true },
             )
         }
@@ -142,7 +142,7 @@ fun BookActionsMenu(
 
         if (!isRead) {
             DropdownMenuItem(
-                text = { Text("Mark as read") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Mark as read")) },
                 onClick = {
                     actions.markAsRead(book)
                     onDismissRequest()
@@ -152,7 +152,7 @@ fun BookActionsMenu(
 
         if (!isUnread) {
             DropdownMenuItem(
-                text = { Text("Mark as unread") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Mark as unread")) },
                 onClick = {
                     actions.markAsUnread(book)
                     onDismissRequest()
@@ -162,13 +162,13 @@ fun BookActionsMenu(
 
         if (isAdmin && !isOffline && showEditOption) {
             DropdownMenuItem(
-                text = { Text("Edit") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit")) },
                 onClick = { showEditDialog = true },
             )
         }
         if (!isOffline && showDownloadOption) {
             DropdownMenuItem(
-                text = { Text("Download") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Download")) },
                 onClick = { showDownloadDialog = true },
             )
         }
@@ -180,7 +180,7 @@ fun BookActionsMenu(
                 if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
                 else Modifier
             DropdownMenuItem(
-                text = { Text("Delete downloaded") },
+                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded")) },
                 onClick = { showDeleteDownloadedDialog = true },
                 modifier = Modifier
                     .hoverable(deleteInteractionSource)
@@ -196,7 +196,7 @@ fun BookActionsMenu(
 //                if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
 //                else Modifier
 //            DropdownMenuItem(
-//                text = { Text("Delete from server") },
+//                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete from server")) },
 //                onClick = { showDeleteDialog = true },
 //                modifier = Modifier
 //                    .hoverable(deleteInteractionSource)

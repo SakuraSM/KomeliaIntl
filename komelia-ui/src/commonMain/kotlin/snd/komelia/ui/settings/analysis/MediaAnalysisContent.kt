@@ -42,7 +42,7 @@ fun MediaAnalysisContent(
         )
 
         if (books.isEmpty()) {
-            Text("Nothing to show")
+            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Nothing to show"))
         } else {
             books.forEach {
                 BookAnalysisCard(

@@ -1,13 +1,30 @@
-# Komelia - Komga media client
+# Komelia Chinese Fork - Komga media client
 
 [English](README.md) | [简体中文](README_zh-CN.md)
 
-### Downloads:
+This repository is a community fork of the official [Snd-R/Komelia](https://github.com/Snd-R/Komelia) project.
+It keeps the original Komga media client experience while adding Simplified Chinese localization and practical fixes for this fork's Android builds.
 
-- Latest prebuilt release is available at https://github.com/Snd-R/Komelia/releases
-- Google Play Store https://play.google.com/store/apps/details?id=io.github.snd_r.komelia
-- F-Droid https://f-droid.org/packages/io.github.snd_r.komelia/
-- AUR package https://aur.archlinux.org/packages/komelia
+Komelia is a cross-platform client for the [Komga](https://komga.org/) media server. It supports reading comics and ebooks on Android, desktop, and WebAssembly targets.
+
+## Fork Highlights
+
+- Simplified Chinese UI text for the main app, Komga WebUI surfaces, settings, dialogs, and common reader workflows.
+- Android release packages signed and published from this fork.
+- Hotfixes for EPUB reader navigation, including Komga scroll-mode chapter switching at chapter boundaries.
+- Login URL validation improvements to prevent invalid host/port values from being saved.
+- UI polish and reader interaction improvements for mobile reading.
+
+## Downloads
+
+- Fork releases: https://github.com/SakuraSM/Komelia/releases
+- Latest Android APK: https://github.com/SakuraSM/Komelia/releases/latest
+- Official upstream releases: https://github.com/Snd-R/Komelia/releases
+- Google Play Store for the official app: https://play.google.com/store/apps/details?id=io.github.snd_r.komelia
+- F-Droid for the official app: https://f-droid.org/packages/io.github.snd_r.komelia/
+- AUR package for the official app: https://aur.archlinux.org/packages/komelia
+
+> Package names and signing certificates may differ between the official app and this fork. If Android reports a signature mismatch, uninstall the previous package first or install the matching release channel.
 
 ## Screenshots
 
@@ -42,9 +59,13 @@
 
 [//]: # (![screenshots]&#40;./screenshots/screenshot.jpg&#41;)
 
+## Chinese Localization
+
+The app can follow the system language or be switched manually in settings. Simplified Chinese coverage in this fork includes app navigation, settings, login, home filters, reader options, and high-frequency Komga WebUI text.
+
 ## Native libraries build instructions
 
-Android and JVM targets require C and C++ compiler for native libraries as well nodeJs for epub reader build
+Android and JVM targets require a C/C++ compiler for native libraries, and Node.js for EPUB reader builds.
 
 The recommended way to build native libraries is by using docker images that contain all required build dependencies\
 If you want to build with system toolchain and dependencies try running:\
@@ -86,8 +107,8 @@ Use `-e KOMELIA_ANDROID_REBUILD_PROJECTS=ep_iconv` to rebuild only selected cach
 Then choose app build option:
 
 - `./gradlew :komelia-app:assembleDebug` debug apk build (output in `komelia-app/build/outputs/apk/debug`)
-- `./gradlew :komelia-app:assembleRelease` unsigned release apk build (output in
-  `komelia-app/build/outputs/apk/release`)
+- `./gradlew :komelia-app:assembleRelease` release APK build (output in `komelia-app/build/outputs/apk/release`)
+- `./scripts/build-release.sh` fork release helper that builds and prepares the Android release artifact when local signing is configured
 
 ## Komf Extension Build
 

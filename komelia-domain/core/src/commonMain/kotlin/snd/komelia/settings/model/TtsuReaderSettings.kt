@@ -55,6 +55,22 @@ data class TtsuReaderSettings(
     val verticalCustomReadingPosition: Int = 100,
     val horizontalCustomReadingPosition: Int = 0,
     val userFonts: List<TtsuUserFont> = emptyList(),
+    val annotationsByBook: Map<String, List<TtsuAnnotation>> = emptyMap(),
+)
+
+@Serializable
+data class TtsuAnnotation(
+    val id: String,
+    val type: String = "highlight",
+    val bookId: String,
+    val chapterReference: String,
+    val chapterIndex: Int,
+    val startCharacter: Long,
+    val endCharacter: Long,
+    val text: String,
+    val color: String,
+    val createdAt: Long,
+    val updatedAt: Long,
 )
 
 @Serializable

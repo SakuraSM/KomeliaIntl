@@ -260,7 +260,7 @@ fun PosterEditContent(
                     .clip(RectangleShape)
             )
             Text(
-                "Choose an image - drag and drop",
+                snd.komelia.ui.LocalStrings.current.legacy.forText("Choose an image - drag and drop"),
                 textDecoration = TextDecoration.Underline,
                 color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold

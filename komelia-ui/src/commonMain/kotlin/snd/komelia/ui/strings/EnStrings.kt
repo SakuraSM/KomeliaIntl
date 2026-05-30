@@ -63,6 +63,8 @@ val EnStrings = AppStrings(
         backToOnline = "Back to online",
         loginWithAnotherAccount = "Login with another account",
         cancelLoginAttempt = "Cancel login attempt",
+        invalidServerUrl = "Enter a valid HTTP or HTTPS server address",
+        invalidServerPort = "Port must be between 1 and 65535",
     ),
     filters = FilterStrings(
         anyValue = "Any",

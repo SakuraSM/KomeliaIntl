@@ -42,6 +42,7 @@ import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.common.menus.LibraryActionsMenu
 import snd.komelia.ui.common.menus.LibraryMenuActions
+import snd.komelia.ui.home.HomeScreen
 import snd.komelia.ui.library.LibraryTab.COLLECTIONS
 import snd.komelia.ui.library.LibraryTab.READ_LISTS
 import snd.komelia.ui.library.LibraryTab.SERIES
@@ -108,7 +109,10 @@ class LibraryScreen(
                     }
                 }
             }
-            BackPressHandler { navigator.pop() }
+            BackPressHandler {
+                if (navigator.canPop) navigator.pop()
+                else navigator.replaceAll(HomeScreen())
+            }
         }
     }
 

@@ -247,6 +247,7 @@ fun OutlinedHttpTextField(
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
     singleLine: Boolean = false,
 ) {
     val strippedValue by remember(value) { mutableStateOf(value.replace(httpRegex, "")) }
@@ -273,6 +274,7 @@ fun OutlinedHttpTextField(
         },
         label = label,
         placeholder = placeholder,
+        isError = isError,
         supportingText = supportingText,
         singleLine = singleLine,
     )

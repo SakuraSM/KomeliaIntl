@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.updates.UpdateProgress
 
@@ -28,10 +29,11 @@ fun PanelDetectionSettings(
     isDownloaded: Boolean,
     onDownloadRequest: () -> Flow<UpdateProgress>
 ) {
+    val strings = LocalStrings.current.legacy
     var showDownloadDialog by remember { mutableStateOf(false) }
     if (showDownloadDialog) {
         DownloadDialog(
-            headerText = "Downloading panel detection model",
+            headerText = strings.forText("Downloading panel detection model"),
             onDownloadRequest = onDownloadRequest,
             onDismiss = { showDownloadDialog = false },
         )
@@ -39,10 +41,7 @@ fun PanelDetectionSettings(
 
     Column {
         Text(
-            """
-                If model is available, a new "Panels" reader mode will be added.
-                In this mode reader will zoom and scroll from panel to panel
-            """.trimIndent(),
+            strings.forText("Panels reader uses automatic panel detection to navigate one panel at a time"),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(start = 5.dp)
         )
@@ -55,13 +54,12 @@ fun PanelDetectionSettings(
                 onClick = { showDownloadDialog = true },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(if (isDownloaded) "Re-download Model" else "Download Model")
+                Text(if (isDownloaded) strings.forText("Re-download Model") else strings.forText("Download Model"))
             }
             if (isDownloaded) {
-                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Installed"))
+                Text(strings.forText("Installed"))
                 Icon(Icons.Default.Check, null, tint = Color.Green)
             }
         }
     }
 }
-

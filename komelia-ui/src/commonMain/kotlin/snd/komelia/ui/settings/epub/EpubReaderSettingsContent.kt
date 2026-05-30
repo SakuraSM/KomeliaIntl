@@ -29,6 +29,7 @@ fun EpubReaderSettingsContent(
     onReaderChange: (EpubReaderType) -> Unit,
 ) {
     val strings = LocalStrings.current.settings
+    val legacyStrings = LocalStrings.current.legacy
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -42,7 +43,7 @@ fun EpubReaderSettingsContent(
                 },
                 options = remember { EpubReaderType.entries.map { LabeledEntry(it, strings.forEpubReaderType(it)) } },
                 onOptionChange = { onReaderChange(it.value) },
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reader Type")) },
+                label = { Text(legacyStrings.forText("Reader Type")) },
                 inputFieldModifier = Modifier.fillMaxWidth().animateContentSize(),
                 modifier = Modifier.weight(1f),
             )
@@ -53,21 +54,16 @@ fun EpubReaderSettingsContent(
                     onClick = { uriHandler.openUri("https://github.com/ttu-ttu/ebook-reader") },
                     modifier = Modifier.cursorForHand().padding(start = 20.dp)
                 ) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Project on Github"))
+                    Text(legacyStrings.forText("Project on Github"))
                 }
             }
         }
 
 
         when (readerType) {
-            TTSU_EPUB -> Text(
-                """
-                    Loads entire book data at once. May cause long load times or performance issues
-                    Adapted for use in Komelia with storage/statistics features removed
-                """.trimIndent()
-            )
+            TTSU_EPUB -> Text(legacyStrings.forText("TTSU reader description"))
 
-            KOMGA_EPUB -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Komga webui epub reader adapted for use in Komelia"))
+            KOMGA_EPUB -> Text(legacyStrings.forText("Komga webui epub reader adapted for use in Komelia"))
 
         }
     }

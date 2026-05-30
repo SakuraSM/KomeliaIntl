@@ -48,6 +48,25 @@
     overflow-wrap: anywhere;
     white-space: pre-wrap;
   }
+
+  .reader-highlight,
+  .reader-search-match {
+    border-radius: 0.16em;
+    color: inherit;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .reader-highlight {
+    background-color: color-mix(in srgb, var(--reader-mark-color, #facc15) 46%, transparent);
+    box-shadow: 0 0 0 0.08em color-mix(in srgb, var(--reader-mark-color, #facc15) 36%, transparent);
+  }
+
+  .reader-search-match {
+    background-color: color-mix(in srgb, var(--reader-mark-color, #38bdf8) 34%, transparent);
+    outline: 0.12em solid color-mix(in srgb, var(--reader-mark-color, #38bdf8) 66%, transparent);
+    outline-offset: 0.08em;
+  }
 }
 
 @layer utilities {

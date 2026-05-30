@@ -53,6 +53,7 @@ import kotlinx.coroutines.launch
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.home.HomeScreen
 import snd.komelia.ui.library.LibraryScreen
+import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
@@ -199,6 +200,16 @@ class MainScreen(
                     }
                 }
             )
+
+            if (vm.navBarState.isOpen || navigator.canPop) {
+                BackPressHandler {
+                    if (vm.navBarState.isOpen) {
+                        coroutineScope.launch { vm.navBarState.close() }
+                    } else if (navigator.canPop) {
+                        navigator.pop()
+                    }
+                }
+            }
         }
     }
 
@@ -309,7 +320,11 @@ class MainScreen(
                 navigator.replaceAll(LibraryScreen(it))
                 if (width != FULL) coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
-            onSettingsClick = { navigator.parent!!.push(SettingsScreen()) },
+            onSettingsClick = {
+                navigator.parent!!.push(SettingsScreen())
+                if (width != FULL) coroutineScope.launch { vm.navBarState.snapTo(Closed) }
+            },
+            onLibrariesRefreshClick = vm::refreshLibraries,
             taskQueueStatus = vm.komgaTaskQueueStatus.collectAsState().value
         )
     }
@@ -335,6 +350,7 @@ class MainScreen(
                 navigator.replaceAll(LibraryScreen(it))
                 coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
+            onLibrariesRefreshClick = vm::refreshLibraries,
         )
     }
 }

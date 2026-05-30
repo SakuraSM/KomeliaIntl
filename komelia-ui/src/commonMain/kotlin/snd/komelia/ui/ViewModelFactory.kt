@@ -179,6 +179,7 @@ class ViewModelFactory(
             libraries = dependencies.komgaSharedState.libraries,
             offlineSettingsRepository = dependencies.offlineDependencies.repositories.offlineSettingsRepository,
             taskEmitter = dependencies.offlineDependencies.taskEmitter,
+            komgaAuthenticationState = dependencies.komgaSharedState,
         )
     }
 

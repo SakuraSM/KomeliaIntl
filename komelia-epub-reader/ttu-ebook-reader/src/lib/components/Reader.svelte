@@ -20,7 +20,9 @@
   } from 'rxjs';
   import {quintInOut} from 'svelte/easing';
   import {fly} from 'svelte/transition';
-  import {faBars, faList, faSpinner} from '@fortawesome/free-solid-svg-icons';
+  import {
+    faSpinner
+  } from '@fortawesome/free-solid-svg-icons';
   import BookReader from '$lib/components/book-reader/book-reader.svelte';
   import type {AutoScroller, BookmarkManager, PageManager} from '$lib/components/book-reader/types';
   import MessageDialog from '$lib/components/message-dialog.svelte';
@@ -31,6 +33,7 @@
     autoBookmarkTime$,
     autoPositionOnResize$,
     avoidPageBreak$,
+    annotationsByBook$,
     bookId$,
     bookReaderKeybindMap$,
     confirmClose$,
@@ -73,14 +76,13 @@
     nextChapter$,
     sectionList$,
     sectionProgress$,
+    type SectionWithProgress,
     tocIsOpen$
   } from '$lib/components/book-reader/book-toc/book-toc';
-  import BookToc from '$lib/components/book-reader/book-toc/book-toc.svelte';
   import ConfirmDialog from '$lib/components/confirm-dialog.svelte';
   import {type BookData, type BookmarkData,} from '$lib/data/books-db';
   import {type Dialog, dialogManager} from '$lib/data/dialog-manager';
-  import {PAGE_CHANGE, SKIPKEYLISTENER, SYNCED} from '$lib/data/events';
-  import {fullscreenManager} from '$lib/data/fullscreen-manager';
+  import {PAGE_CHANGE, SKIPKEYLISTENER} from '$lib/data/events';
   import {logger} from '$lib/data/logger';
   import {availableThemes} from '$lib/data/theme-option';
   import {ViewMode} from '$lib/data/view-mode';
@@ -88,7 +90,7 @@
   import {reduceToEmptyString} from '$lib/functions/rxjs/reduce-to-empty-string';
   import {tapDom} from '$lib/functions/rxjs/tap-dom';
   import {clickOutside} from '$lib/functions/use-click-outside';
-  import {dummyFn, isMobile, isMobile$} from '$lib/functions/utils';
+  import {isMobile$} from '$lib/functions/utils';
   import {onKeydownReader} from '../../on-keydown-reader';
   import {onDestroy, onMount, tick} from 'svelte';
   import {
@@ -99,12 +101,36 @@
     pulseElement
   } from '$lib/functions/range-util';
   import {externalFunctions} from "$lib/external";
+  import ReaderChrome from '$lib/components/reader/ReaderChrome.svelte';
+  import ReaderNavigationDrawer from '$lib/components/reader/ReaderNavigationDrawer.svelte';
+  import SelectionActionToolbar from '$lib/components/reader/SelectionActionToolbar.svelte';
+  import ReaderAnnotationLayer from '$lib/components/reader/ReaderAnnotationLayer.svelte';
+  import {
+    buildReaderSearchIndex,
+    createAnnotationFromRange,
+    createBookmarkDataFromCharacter,
+    getBookAnnotations,
+    getSelectionToolbarState,
+    removeBookAnnotation,
+    searchReaderIndex,
+    upsertBookAnnotation,
+    type ReaderSearchResult,
+    type SelectionToolbarState
+  } from '$lib/functions/reader-interactions';
+  import type {ReaderAnnotation} from '$lib/data/reader-annotation';
 
   interface Props {
     onSettingsClick: () => void;
   }
 
   let {onSettingsClick}: Props = $props();
+
+  const MIN_AUTOSCROLL_MULTIPLIER = 1;
+  const PROGRESS_PRECISION = 2;
+  const ACTION_FEEDBACK_OPACITY = 0.5;
+  const ACTION_FEEDBACK_DURATION_MS = 500;
+  const READER_TOAST_DURATION_MS = 1800;
+  const SEARCH_DEBOUNCE_MS = 180;
 
   let showHeader = $state(false);
   let isBookmarkScreen = $state(false);
@@ -132,6 +158,12 @@
   let skipFirstFreezeChange = $state(false);
   let showReaderImageGallery = $state(false);
   let fullscreenAvailable = $state(false)
+  let isAutoScrollerEnabled = $state(false);
+  let selectionToolbarState: SelectionToolbarState | undefined = $state();
+  let rawSearchQuery = $state('');
+  let searchQuery = $state('');
+  let activeSearchResultId: string | undefined = $state();
+  let readerToastMessage = $state('');
 
   let initPromise = initialize();
 
@@ -274,11 +306,14 @@
 
       if (!currentSelected && lastSelectedRangeWasEmpty) {
         lastSelectedRange = undefined;
+        selectionToolbarState = undefined;
       } else if (currentSelected) {
         lastSelectedRange = window.getSelection()?.getRangeAt(0);
+        selectionToolbarState = getSelectionToolbarState(window, lastSelectedRange);
         lastSelectedRangeWasEmpty = false;
       } else {
         lastSelectedRangeWasEmpty = true;
+        selectionToolbarState = undefined;
       }
     }),
     reduceToEmptyString()
@@ -326,6 +361,16 @@
 
 
   let isPaginated = $derived($viewMode$ === ViewMode.Paginated);
+  let readingProgressPercent = $derived(getReadingProgressPercent(exploredCharCount, bookCharCount));
+  let readingProgressLabel = $derived(formatReadingProgress(exploredCharCount, bookCharCount));
+  let activeChapterLabel = $derived(getActiveChapterLabel($sectionData$));
+  let currentBookId = $derived($rawBookData$?.id || '');
+  let currentBookAnnotations = $derived(currentBookId
+    ? getBookAnnotations($annotationsByBook$, currentBookId)
+    : []);
+  let readerSearchIndex = $derived(buildReaderSearchIndex($bookData$?.htmlContent || '', $sectionData$));
+  let searchResults = $derived(searchReaderIndex(readerSearchIndex, searchQuery));
+  let activeSearchResult = $derived(searchResults.find((result) => result.id === activeSearchResultId));
 
   $effect(() => {
     bookmarkData.then((data) => {
@@ -333,6 +378,37 @@
       storedExploredCharacter = data?.exploredCharCount || 0;
     })
   })
+
+  $effect(() => {
+    const query = rawSearchQuery;
+    const timeout = setTimeout(() => {
+      searchQuery = query;
+      if (!query.trim()) {
+        activeSearchResultId = undefined;
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(timeout);
+  });
+
+  $effect(() => {
+    if (activeSearchResultId && !searchResults.some((result) => result.id === activeSearchResultId)) {
+      activeSearchResultId = undefined;
+    }
+  });
+
+  $effect(() => {
+    if (!autoScroller) {
+      isAutoScrollerEnabled = false;
+      return;
+    }
+
+    const subscription = autoScroller.wasAutoScrollerEnabled$.subscribe((isEnabled) => {
+      isAutoScrollerEnabled = isEnabled;
+    });
+
+    return () => subscription.unsubscribe();
+  });
 
   /** Experimental Code - May be removed any time without warning */
 
@@ -351,6 +427,7 @@
   onMount(() => {
     // settings = await SettingsStore.getSettingsStore();
     document.addEventListener('ttu-action', handleAction, false)
+    document.addEventListener('pointerdown', handleDocumentPointerDown, true);
   });
 
   function handleAction({detail}: any) {
@@ -366,6 +443,7 @@
 
   onDestroy(() => {
     document.removeEventListener('ttu-action', handleAction, false);
+    document.removeEventListener('pointerdown', handleDocumentPointerDown, true);
 
     readerImageGalleryPictures$.next([]);
   });
@@ -445,7 +523,136 @@
     }
   }
 
+  function getReadingProgressPercent(currentCharacterCount: number, totalCharacterCount: number) {
+    if (!totalCharacterCount) {
+      return 0;
+    }
+
+    return Math.min(100, Math.max(0, (currentCharacterCount / totalCharacterCount) * 100));
+  }
+
+  function formatReadingProgress(currentCharacterCount: number, totalCharacterCount: number) {
+    if (!totalCharacterCount) {
+      return '';
+    }
+
+    return `${currentCharacterCount} / ${totalCharacterCount} ${getReadingProgressPercent(
+      currentCharacterCount,
+      totalCharacterCount
+    ).toFixed(PROGRESS_PRECISION)}%`;
+  }
+
+  function getActiveChapterLabel(sectionData: SectionWithProgress[] | undefined) {
+    if (!sectionData?.length) {
+      return '读取中';
+    }
+
+    const [mainChapters, currentChapterIndex] = getChapterData(sectionData);
+    const activeChapter = mainChapters[currentChapterIndex] || sectionData[sectionData.length - 1];
+
+    return activeChapter?.label || '当前章节';
+  }
+
+  function showReaderMenu() {
+    showHeader = true;
+  }
+
+  function hideReaderChrome() {
+    showHeader = false;
+  }
+
+  function showReaderToast(message: string) {
+    readerToastMessage = message;
+    setTimeout(() => {
+      if (readerToastMessage === message) {
+        readerToastMessage = '';
+      }
+    }, READER_TOAST_DURATION_MS);
+  }
+
+  function handleDocumentPointerDown(event: PointerEvent) {
+    if (!selectionToolbarState) {
+      return;
+    }
+
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    if (target.closest('[role="toolbar"]')) {
+      return;
+    }
+
+    closeSelectionToolbar();
+  }
+
+  function closeSelectionToolbar() {
+    selectionToolbarState = undefined;
+    lastSelectedRange = undefined;
+    lastSelectedRangeWasEmpty = true;
+    clearRange(window);
+  }
+
+  function copyProgressWithFeedback(event: MouseEvent) {
+    if (!$showCharacterCounter$ || !readingProgressLabel) {
+      return;
+    }
+
+    copyCurrentProgress(readingProgressLabel);
+    if (event.currentTarget instanceof HTMLElement) {
+      pulseElement(
+        event.currentTarget,
+        'add',
+        ACTION_FEEDBACK_OPACITY,
+        ACTION_FEEDBACK_DURATION_MS
+      );
+    }
+  }
+
+  function goToPreviousPage() {
+    hideReaderChrome();
+    pageManager?.prevPage();
+  }
+
+  function goToNextPage() {
+    hideReaderChrome();
+    pageManager?.nextPage();
+  }
+
+  function goToPreviousChapter() {
+    hideReaderChrome();
+    changeChapter($verticalMode$ ? 1 : -1);
+  }
+
+  function goToNextChapter() {
+    hideReaderChrome();
+    changeChapter($verticalMode$ ? -1 : 1);
+  }
+
+  function toggleAutoScroll() {
+    hideReaderChrome();
+    autoScroller?.toggle();
+  }
+
+  function updateAutoScrollMultiplier(offset: number) {
+    multiplier$.next(Math.max(MIN_AUTOSCROLL_MULTIPLIER, multiplier$.getValue() + offset));
+  }
+
   function onKeydown(ev: KeyboardEvent) {
+    if (ev.key === 'Escape') {
+      showHeader = false;
+      showReaderImageGallery = false;
+      tocIsOpen$.next(false);
+      activeSearchResultId = undefined;
+      readerToastMessage = '';
+      if (selectionToolbarState) {
+        closeSelectionToolbar();
+      }
+      return;
+    }
+
     if (
       $skipKeyDownListener$ ||
       ev.altKey ||
@@ -529,6 +736,116 @@
     if (!data || !bookmarkManager) return;
 
     bookmarkManager.scrollToBookmark(data, customReadingPointScrollOffset);
+  }
+
+  function scrollToCharacter(startCharacter: number) {
+    const bookId = getBookIdSync();
+    const data = bookId
+      ? createBookmarkDataFromCharacter(bookId, $sectionData$, startCharacter)
+      : undefined;
+
+    if (!data || !bookmarkManager) {
+      return;
+    }
+
+    bookmarkManager.scrollToBookmark(data, customReadingPointScrollOffset);
+  }
+
+  function handleSearchResultClick(result: ReaderSearchResult) {
+    activeSearchResultId = result.id;
+    showHeader = false;
+    tocIsOpen$.next(false);
+    scrollToCharacter(result.startCharacter);
+  }
+
+  function activateRelativeSearchResult(offset: number) {
+    if (!searchResults.length) {
+      return;
+    }
+
+    const currentIndex = Math.max(
+      0,
+      searchResults.findIndex((result) => result.id === activeSearchResultId)
+    );
+    const nextIndex = (currentIndex + offset + searchResults.length) % searchResults.length;
+
+    handleSearchResultClick(searchResults[nextIndex]);
+  }
+
+  function handleAnnotationClick(annotation: ReaderAnnotation) {
+    showHeader = false;
+    tocIsOpen$.next(false);
+    scrollToCharacter(annotation.startCharacter);
+  }
+
+  function handleAnnotationDelete(annotation: ReaderAnnotation) {
+    annotationsByBook$.next(removeBookAnnotation($annotationsByBook$, annotation.bookId, annotation.id));
+    showReaderToast('已删除高亮');
+  }
+
+  function highlightSelection() {
+    const annotation = createAnnotationFromRange(
+      window,
+      lastSelectedRange,
+      $sectionData$,
+      currentBookId
+    );
+
+    if (!annotation) {
+      showReaderToast('当前选择无法高亮');
+      closeSelectionToolbar();
+      return;
+    }
+
+    annotationsByBook$.next(upsertBookAnnotation($annotationsByBook$, annotation));
+    closeSelectionToolbar();
+    showReaderToast('已高亮');
+  }
+
+  async function bookmarkSelection() {
+    await bookmarkPage();
+    closeSelectionToolbar();
+  }
+
+  async function copySelectionText() {
+    if (!selectionToolbarState?.text) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(selectionToolbarState.text);
+      showReaderToast('已复制');
+    } catch (error: any) {
+      logger.error(`Error writing selected text to Clipboard: ${error.message}`);
+      showReaderToast('复制失败');
+    } finally {
+      closeSelectionToolbar();
+    }
+  }
+
+  async function searchSelectionOnWeb() {
+    if (!selectionToolbarState?.text) {
+      return;
+    }
+
+    const selectedText = selectionToolbarState.text;
+    const openedWindow = window.open(
+      `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+
+    if (!openedWindow) {
+      try {
+        await navigator.clipboard.writeText(selectedText);
+        showReaderToast('浏览器拦截了搜索，已复制文本');
+      } catch (error: any) {
+        logger.error(`Error copying selected text after blocked web search: ${error.message}`);
+        showReaderToast('浏览器拦截了搜索');
+      }
+    }
+
+    closeSelectionToolbar();
   }
 
   async function onFullscreenClick() {
@@ -752,37 +1069,34 @@
 {:then _}
   {$collectReaderImageGallerySpoilerToggles$ ?? ''}
   {$handleUpdateImageGalleryPictureSpoilers$ ?? ''}
-  <button
-      class="fixed inset-x-0 top-0 z-10 h-8 w-full"
-      aria-label="打开阅读菜单"
-      onclick={() => (showHeader = true)}
-  ></button>
-  {#if !showHeader}
-    <div class="writing-horizontal-tb fixed left-2 top-2 z-20 flex gap-2">
-      {#if $sectionData$?.length}
-        <button
-            type="button"
-            title="打开目录"
-            aria-label="打开目录"
-            class="flex h-10 items-center gap-2 rounded-full bg-black/55 px-3 text-sm text-white shadow backdrop-blur-sm"
-            onclick={openToc}
-        >
-          <Fa icon={faList}/>
-          <span>目录</span>
-        </button>
-      {/if}
-      <button
-          type="button"
-          title="打开阅读菜单"
-          aria-label="打开阅读菜单"
-          class="flex h-10 items-center gap-2 rounded-full bg-black/55 px-3 text-sm text-white shadow backdrop-blur-sm"
-          onclick={() => (showHeader = true)}
-      >
-        <Fa icon={faBars}/>
-        <span>菜单</span>
-      </button>
-    </div>
-  {/if}
+  <ReaderChrome
+      {showHeader}
+      showImageGallery={showReaderImageGallery}
+      navigationOpen={!!$tocIsOpen$}
+      hasBookData={!!$bookData$}
+      hasChapterData={!!$sectionData$?.length}
+      hasPageManager={!!pageManager}
+      {showFooter}
+      {bookCharCount}
+      showCharacterCounter={$showCharacterCounter$}
+      {readingProgressPercent}
+      {readingProgressLabel}
+      {activeChapterLabel}
+      tooltipColor={$themeOption$?.tooltipTextFontColor}
+      viewMode={$viewMode$}
+      autoScrollMultiplier={$multiplier$}
+      autoScrollEnabled={isAutoScrollerEnabled}
+      onShowMenu={showReaderMenu}
+      onOpenNavigation={openToc}
+      onPreviousPage={goToPreviousPage}
+      onNextPage={goToNextPage}
+      onPreviousChapter={goToPreviousChapter}
+      onNextChapter={goToNextChapter}
+      onCopyProgress={copyProgressWithFeedback}
+      onToggleFooter={() => (showFooter = !showFooter)}
+      onToggleAutoScroll={toggleAutoScroll}
+      onAutoScrollMultiplierChange={updateAutoScrollMultiplier}
+  />
   {#if showHeader}
     <div
         class="elevation-4 writing-horizontal-tb fixed inset-x-0 top-0 z-10 w-full"
@@ -876,23 +1190,58 @@
         bind:showCustomReadingPoint
         on:bookmark={bookmarkPage}
     />
+    <ReaderAnnotationLayer
+        annotations={currentBookAnnotations}
+        activeSearchResult={activeSearchResult}
+        sectionData={$sectionData$}
+        htmlContent={$bookData$.htmlContent}
+        {exploredCharCount}
+    />
     {$initBookmarkData$ ?? ''}
     {$setWritingMode$ ?? ''}
     {$textSelector$ ?? ''}
   {/if}
 
-  {#if $sectionData$ && $tocIsOpen$ }
+  {#if selectionToolbarState}
+    <SelectionActionToolbar
+        selection={selectionToolbarState}
+        onHighlight={highlightSelection}
+        onBookmark={bookmarkSelection}
+        onCopy={copySelectionText}
+        onWebSearch={searchSelectionOnWeb}
+        onCancel={closeSelectionToolbar}
+    />
+  {/if}
+
+  {#if readerToastMessage}
     <div
-        class="writing-horizontal-tb fixed top-0 left-0 z-[60] flex h-full w-full max-w-xl flex-col justify-between"
-        style:color={$themeOption$?.fontColor}
-        style:background-color={$backgroundColor$}
-        in:fly|local={{ x: -100, duration: 100, easing: quintInOut }}
-        use:clickOutside={() => { tocIsOpen$.next(false); }}
+        class="writing-horizontal-tb fixed left-1/2 top-16 z-[75] -translate-x-1/2 rounded-full bg-slate-950/88 px-4 py-2 text-sm font-medium text-white shadow-xl shadow-black/25 backdrop-blur-md"
+        role="status"
+        aria-live="polite"
     >
-      <BookToc
+      {readerToastMessage}
+    </div>
+  {/if}
+
+  {#if $sectionData$ && $tocIsOpen$ }
+    <div use:clickOutside={() => { tocIsOpen$.next(false); }}>
+      <ReaderNavigationDrawer
           sectionData={$sectionData$}
           verticalMode={$verticalMode$}
-          exploredCharCount={exploredCharCount}
+          {exploredCharCount}
+          fontColor={$themeOption$?.fontColor}
+          backgroundColor={$backgroundColor$}
+          searchQuery={rawSearchQuery}
+          {searchResults}
+          {activeSearchResultId}
+          annotations={currentBookAnnotations}
+          onClose={() => tocIsOpen$.next(false)}
+          onSearchQueryInput={(query) => (rawSearchQuery = query)}
+          onPreviousSearchResult={() => activateRelativeSearchResult(-1)}
+          onNextSearchResult={() => activateRelativeSearchResult(1)}
+          onSearchResultClick={handleSearchResultClick}
+          onAnnotationClick={handleAnnotationClick}
+          onAnnotationDelete={handleAnnotationDelete}
       />
     </div>
   {/if}
@@ -915,42 +1264,6 @@
         style:left={`${customReadingPointLeft}px`}
     ></div>
   {/if}
-
-  <div
-      id="ttu-page-footer"
-      tabindex="0"
-      role="button"
-      class="writing-horizontal-tb fixed bottom-0 left-0 z-10 flex h-8 w-full items-center justify-between text-xs leading-none"
-      style:color={$themeOption$?.tooltipTextFontColor}
-      onclick={() => (showFooter = !showFooter)}
-      onkeyup={dummyFn}
-  >
-    {#if showFooter && bookCharCount}
-      {@const currentProgress = `${exploredCharCount} / ${bookCharCount} ${(
-          (exploredCharCount / bookCharCount) *
-          100
-      ).toFixed(2)}%`}
-      <div
-          tabindex="0"
-          role="button"
-          title="Click to copy Progress"
-          class="writing-horizontal-tb fixed bottom-2 right-2 z-10 text-xs leading-none select-none"
-          class:invisible={!$showCharacterCounter$}
-          style:color={$themeOption$?.tooltipTextFontColor}
-          onclick={(e) => {
-              e.stopPropagation()
-              if (!$showCharacterCounter$) return;
-              copyCurrentProgress(currentProgress);
-              if (e.target instanceof HTMLElement) {
-                pulseElement(e.target, 'add', 0.5, 500);
-              }
-            }}
-          onkeyup={dummyFn}
-      >
-        {currentProgress}
-      </div>
-    {/if}
-  </div>
 
 {/await}
 

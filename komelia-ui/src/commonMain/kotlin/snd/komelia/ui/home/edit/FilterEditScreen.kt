@@ -15,6 +15,7 @@ import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.home.HomeFilterData
 import snd.komelia.ui.home.HomeScreen
 import snd.komelia.ui.home.edit.view.FilterEditContent
+import snd.komelia.ui.platform.BackPressHandler
 import kotlin.jvm.Transient
 
 class FilterEditScreen(
@@ -54,5 +55,7 @@ class FilterEditScreen(
                 onFiltersReset = vm::onResetFiltersToDefault
             )
         }
+
+        BackPressHandler { navigator.replaceAll(HomeScreen()) }
     }
 }

@@ -72,12 +72,13 @@ class LoginScreen : Screen {
 
             is Error -> LoginContent(
                 url = viewModel.url,
-                onUrlChange = viewModel::url::set,
+                onUrlChange = viewModel::onUrlChange,
                 user = viewModel.user,
                 onUserChange = { viewModel.user = it },
                 password = viewModel.password,
                 onPasswordChange = { viewModel.password = it },
                 userLoginError = viewModel.userLoginError,
+                serverUrlError = viewModel.serverUrlError,
                 autoLoginError = viewModel.autoLoginError,
                 onAutoLoginRetry = viewModel::retryAutoLogin,
                 onLogin = viewModel::loginWithCredentials,

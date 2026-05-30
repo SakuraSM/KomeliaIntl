@@ -30,6 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -73,6 +74,7 @@ fun NavBarContent(
     libraryActions: LibraryMenuActions,
     onHomeClick: () -> Unit,
     onLibrariesClick: () -> Unit,
+    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
     onSettingsClick: () -> Unit,
     taskQueueStatus: TaskQueueStatus?,
@@ -84,6 +86,7 @@ fun NavBarContent(
             libraryActions = libraryActions,
             onHomeClick = onHomeClick,
             onLibrariesClick = onLibrariesClick,
+            onLibrariesRefreshClick = onLibrariesRefreshClick,
             onLibraryClick = onLibraryClick,
             onSettingsClick = onSettingsClick
         )
@@ -102,6 +105,7 @@ fun LibrariesNavBarContent(
     libraries: List<KomgaLibrary>,
     libraryActions: LibraryMenuActions,
     onLibrariesClick: () -> Unit,
+    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
 ) {
     Surface(Modifier.width(230.dp)) {
@@ -117,6 +121,7 @@ fun LibrariesNavBarContent(
                 libraries = libraries,
                 libraryActions = libraryActions,
                 onLibrariesClick = onLibrariesClick,
+                onLibrariesRefreshClick = onLibrariesRefreshClick,
                 onLibraryClick = onLibraryClick
             )
             Spacer(Modifier.size(30.dp))
@@ -131,6 +136,7 @@ fun ColumnScope.LibrariesNavBarContent(
     libraries: List<KomgaLibrary>,
     libraryActions: LibraryMenuActions,
     onLibrariesClick: () -> Unit,
+    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
 ) {
     var showLibraryAddDialog by remember { mutableStateOf(false) }
@@ -149,13 +155,24 @@ fun ColumnScope.LibrariesNavBarContent(
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
         label = strings.libraries,
         isSelected = false,
-        actionButton = if (!isAdmin || isOffline) null else {
-            {
-                IconButton(onClick = { showLibraryAddDialog = true }) {
+        actionButton = {
+            Row {
+                IconButton(
+                    onClick = onLibrariesRefreshClick,
+                    enabled = !isOffline
+                ) {
                     Icon(
-                        Icons.Default.Add,
-                        contentDescription = null,
+                        Icons.Default.Refresh,
+                        contentDescription = LocalStrings.current.legacy.forText("Refresh libraries"),
                     )
+                }
+                if (isAdmin && !isOffline) {
+                    IconButton(onClick = { showLibraryAddDialog = true }) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = LocalStrings.current.legacy.forText("Add library"),
+                        )
+                    }
                 }
             }
         }
@@ -166,7 +183,7 @@ fun ColumnScope.LibrariesNavBarContent(
             onClick = { onLibraryClick(library.id) },
             icon = null,
             label = library.name,
-            errorLabel = if (library.unavailable) "Unavailable" else null,
+            errorLabel = if (library.unavailable) LocalStrings.current.legacy.forText("Unavailable") else null,
             isSelected = currentScreen is LibraryScreen && currentScreen.libraryId == library.id,
             actionButton = if (!isAdmin && !isOffline) null else {
                 {
@@ -199,6 +216,7 @@ private fun NavMenu(
     libraryActions: LibraryMenuActions,
     onHomeClick: () -> Unit,
     onLibrariesClick: () -> Unit,
+    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
     onSettingsClick: () -> Unit,
 ) {
@@ -233,6 +251,7 @@ private fun NavMenu(
                 libraries = libraries,
                 libraryActions = libraryActions,
                 onLibrariesClick = onLibrariesClick,
+                onLibrariesRefreshClick = onLibrariesRefreshClick,
                 onLibraryClick = onLibraryClick
             )
 

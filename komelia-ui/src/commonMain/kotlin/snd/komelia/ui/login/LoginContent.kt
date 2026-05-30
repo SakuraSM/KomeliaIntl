@@ -60,6 +60,7 @@ fun LoginContent(
     password: String,
     onPasswordChange: (String) -> Unit,
     userLoginError: String?,
+    serverUrlError: LoginServerUrlError?,
     autoLoginError: String?,
     onAutoLoginRetry: () -> Unit,
     onLogin: () -> Unit,
@@ -107,6 +108,7 @@ fun LoginContent(
                     password = password,
                     onPasswordChange = onPasswordChange,
                     errorMessage = userLoginError,
+                    serverUrlError = serverUrlError,
                     onLogin = onLogin,
                     offlineIsAvailable = offlineIsAvailable,
                     onOfflineSelect = onOfflineSelect,
@@ -139,6 +141,7 @@ fun LoginContent(
                         password = password,
                         onPasswordChange = onPasswordChange,
                         errorMessage = userLoginError,
+                        serverUrlError = serverUrlError,
                         onLogin = onLogin,
                         offlineIsAvailable = offlineIsAvailable,
                         onOfflineSelect = onOfflineSelect,
@@ -161,6 +164,7 @@ fun ColumnScope.LoginForm(
     password: String,
     onPasswordChange: (String) -> Unit,
     errorMessage: String?,
+    serverUrlError: LoginServerUrlError?,
     onLogin: () -> Unit,
     offlineIsAvailable: Boolean,
     onOfflineSelect: () -> Unit,
@@ -170,11 +174,18 @@ fun ColumnScope.LoginForm(
     val coroutineScope = rememberCoroutineScope()
     val (first, second, third) = remember { FocusRequester.createRefs() }
     val strings = LocalStrings.current.login
+    val serverUrlErrorMessage = when (serverUrlError) {
+        LoginServerUrlError.INVALID_URL -> strings.invalidServerUrl
+        LoginServerUrlError.INVALID_PORT -> strings.invalidServerPort
+        null -> null
+    }
 
     OutlinedHttpTextField(
         value = url,
         onValueChange = onUrlChange,
         label = { Text(strings.serverUrl) },
+        isError = serverUrlErrorMessage != null,
+        supportingText = serverUrlErrorMessage?.let { message -> { Text(message) } },
         modifier = textFieldsModifier
             .withTextFieldNavigation()
             .focusRequester(first)

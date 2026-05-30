@@ -275,6 +275,8 @@ class TtsuReaderState(
 
         val chapterIndex = data.manifest.readingOrder
             .indexOfFirst { it.href?.replace(resourceBaseUriRegex, "") == progress.locator.href }
+            .takeIf { it >= 0 }
+            ?: 0
         val section = data.sections[chapterIndex]
         val totalProgress = progress.locator.locations?.totalProgression?.toDouble() ?: .0
         val bookCharCount = data.characterCount
@@ -422,7 +424,8 @@ class TtsuReaderState(
             result.appendChild(childWrapperDiv)
 
             val chapterCharCount = charCountForElement(childWrapperDiv)
-            val tocTitle = tocEntries[chapter.href]
+            val normalizedChapterHref = normalizeHref(chapter.href)
+            val tocTitle = tocEntries[normalizedChapterHref]
             if (tocTitle != null) {
                 val startCharacter = currentMainChapterIndex
                     ?.let { sectionData[it].startCharacter + sectionData[it].characters }
@@ -450,7 +453,7 @@ class TtsuReaderState(
                             reference = chapter.href,
                             charactersWeight = chapterCharCount,
                             startCharacter = currentCharCount,
-                            characters = currentCharCount + chapterCharCount,
+                            characters = chapterCharCount,
                             parentChapter = mainChapter.reference,
                             label = null,
                         )
@@ -629,11 +632,14 @@ class TtsuReaderState(
                 flattened.putAll(flattenToc(entry.children))
             }
             entry.href?.let {
-                val urlString = URLBuilder(it).apply { fragment = "" }.buildString()
-                flattened[urlString] = requireNotNull(entry.title)
+                flattened[normalizeHref(it)] = requireNotNull(entry.title)
             }
         }
         return flattened
+    }
+
+    private fun normalizeHref(href: String): String {
+        return URLBuilder(href).apply { fragment = "" }.buildString()
     }
 
     data class TtuEpubData(

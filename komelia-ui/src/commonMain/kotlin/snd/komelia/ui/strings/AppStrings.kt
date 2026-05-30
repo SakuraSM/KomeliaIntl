@@ -141,6 +141,8 @@ data class LoginStrings(
     val backToOnline: String,
     val loginWithAnotherAccount: String,
     val cancelLoginAttempt: String,
+    val invalidServerUrl: String,
+    val invalidServerPort: String,
 )
 
 data class LegacyStrings(

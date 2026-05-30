@@ -35,6 +35,11 @@ import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 
+private const val HTTP_SCHEME = "http://"
+private const val HTTPS_SCHEME = "https://"
+private const val MIN_SERVER_PORT = 1
+private const val MAX_SERVER_PORT = 65535
+
 class LoginViewModel(
     private val settingsRepository: CommonSettingsRepository,
     private val secretsRepository: SecretsRepository,
@@ -54,6 +59,7 @@ class LoginViewModel(
     var user by mutableStateOf("")
     var password by mutableStateOf("")
     var userLoginError by mutableStateOf<String?>(null)
+    var serverUrlError by mutableStateOf<LoginServerUrlError?>(null)
     var autoLoginError by mutableStateOf<String?>(null)
     val offlineIsAvailable = MutableStateFlow(false)
     private val offlineUser = MutableStateFlow<OfflineUser?>(null)
@@ -99,9 +105,17 @@ class LoginViewModel(
         userLoginError = "Cancelled login attempt"
     }
 
+    fun onUrlChange(newUrl: String) {
+        url = newUrl
+        serverUrlError = null
+    }
+
     fun loginWithCredentials() {
         screenModelScope.launch {
             userLoginError = null
+            serverUrlError = validateServerUrl(url)
+            if (serverUrlError != null) return@launch
+
             settingsRepository.putServerUrl(url)
             settingsRepository.putCurrentUser(user)
             tryUserLogin(user, password)
@@ -181,6 +195,63 @@ class LoginViewModel(
         komgaAuthState.setStateValues(user, libraries)
         mutableState.value = LoadState.Success(Unit)
     }
+
+    private fun validateServerUrl(serverUrl: String): LoginServerUrlError? {
+        val authority = serverUrl.getAuthority() ?: return LoginServerUrlError.INVALID_URL
+        if (authority.isBlank()) return LoginServerUrlError.INVALID_URL
+        if (!authority.hasHost()) return LoginServerUrlError.INVALID_URL
+
+        val port = authority.getExplicitPort() ?: return null
+        return if (port in MIN_SERVER_PORT..MAX_SERVER_PORT) null
+        else LoginServerUrlError.INVALID_PORT
+    }
+
+    private fun String.getAuthority(): String? {
+        val schemeEndIndex = when {
+            startsWith(HTTP_SCHEME) -> HTTP_SCHEME.length
+            startsWith(HTTPS_SCHEME) -> HTTPS_SCHEME.length
+            else -> return null
+        }
+        val authorityAndPath = drop(schemeEndIndex)
+        return authorityAndPath.substringBefore('/').substringBefore('?').substringBefore('#')
+    }
+
+    private fun String.hasHost(): Boolean {
+        if (startsWith("[")) return indexOf(']') > 1
+        return substringBefore(':').isNotBlank()
+    }
+
+    private fun String.getExplicitPort(): Int? {
+        if (startsWith("[")) return getBracketedHostPort()
+
+        val portSeparatorCount = count { it == ':' }
+        if (portSeparatorCount == 0) return null
+        if (portSeparatorCount > 1) return null
+
+        val portText = substringAfter(':')
+        return portText.toValidServerPort()
+    }
+
+    private fun String.getBracketedHostPort(): Int? {
+        val hostEndIndex = indexOf(']')
+        if (hostEndIndex < 0) return null
+
+        val portText = drop(hostEndIndex + 1)
+        if (portText.isEmpty()) return null
+        if (!portText.startsWith(":")) return null
+
+        return portText.drop(1).toValidServerPort()
+    }
+
+    private fun String.toValidServerPort(): Int? {
+        if (isBlank() || any { !it.isDigit() }) return Int.MIN_VALUE
+        return toIntOrNull() ?: Int.MIN_VALUE
+    }
+}
+
+enum class LoginServerUrlError {
+    INVALID_URL,
+    INVALID_PORT
 }
 
 sealed class LoginResult {

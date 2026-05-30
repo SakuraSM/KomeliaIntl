@@ -12,8 +12,8 @@
       "sortBy": "排序方式"
     },
     "fileInput": {
-      "counter": "{0} files",
-      "counterSize": "{0} files ({1} in total)"
+      "counter": "{0} 个文件",
+      "counterSize": "{0} 个文件（共 {1}）"
     },
     "noDataText": "暂无数据"
   },
@@ -98,12 +98,12 @@
     "download_current_page": "下载当前页",
     "end_of_book": "已到达书籍末尾",
     "from_series_metadata": "来自系列元数据",
-    "move_next": "Click or press \"Next\" again to move to the next book.",
-    "move_next_exit": "Click or press \"Next\" again to exit the reader.",
-    "move_previous": "Click or press \"Previous\" again to move to the previous book.",
-    "notification_poster_set_book": "Book poster is now set to the current page.",
-    "notification_poster_set_readlist": "Read list poster is now set to the current page.",
-    "notification_poster_set_series": "Series poster is now set to the current page.",
+    "move_next": "再次点击或按“下一页”以进入下一本书。",
+    "move_next_exit": "再次点击或按“下一页”以退出阅读器。",
+    "move_previous": "再次点击或按“上一页”以进入上一本书。",
+    "notification_poster_set_book": "已将当前页设为书籍封面。",
+    "notification_poster_set_readlist": "已将当前页设为阅读列表封面。",
+    "notification_poster_set_series": "已将当前页设为系列封面。",
     "paged_reader_layout": {
       "double": "双页",
       "double_no_cover": "双页（不含封面）",
@@ -117,11 +117,11 @@
       "original": "原始大小",
       "screen": "适应屏幕",
       "width": "适应宽度",
-      "width_shrink_only": "Fit width (shrink only)"
+      "width_shrink_only": "适应宽度（仅缩小）"
     },
-    "set_current_page_as_book_poster": "Set page as poster for book",
-    "set_current_page_as_readlist_poster": "Set page as poster for read list",
-    "set_current_page_as_series_poster": "Set page as poster for series",
+    "set_current_page_as_book_poster": "将当前页设为书籍封面",
+    "set_current_page_as_readlist_poster": "将当前页设为阅读列表封面",
+    "set_current_page_as_series_poster": "将当前页设为系列封面",
     "settings": {
       "always_fullscreen": "始终全屏",
       "animate_page_transitions": "页面切换动画",
@@ -167,14 +167,14 @@
     "tooltip_incognito": "阅读进度不会保存"
   },
   "browse_book": {
-    "comment": "COMMENT",
+    "comment": "备注",
     "download_file": "下载文件",
-    "file": "FILE",
-    "format": "FORMAT",
+    "file": "文件",
+    "format": "格式",
     "isbn": "ISBN",
-    "links": "LINKS",
-    "navigation_within_readlist": "Navigation within the readlist: {name}",
-    "outdated_tooltip": "The file for this book has changed, this book must be re-analyzed",
+    "links": "链接",
+    "navigation_within_readlist": "在阅读列表中导航：{name}",
+    "outdated_tooltip": "这本书的文件已更改，需要重新分析",
     "read_book": "阅读书籍",
     "read_incognito": "无痕阅读",
     "size": "SIZE"
@@ -196,15 +196,15 @@
   },
   "collections_expansion_panel": {
     "manage_collection": "管理合集",
-    "title": "{name} collection"
+    "title": "{name} 合集"
   },
   "common": {
     "age": "年龄",
     "all_libraries": "全部书库",
     "book": "书籍",
     "books": "书籍",
-    "books_n": "No book | 1 book | {count} books",
-    "books_total": "{count} / {total} books",
+    "books_n": "无书籍 | 1 本书 | {count} 本书",
+    "books_total": "{count} / {total} 本书",
     "cancel": "取消",
     "cbx": "漫画压缩包",
     "choose_image": "选择图片",
@@ -215,14 +215,14 @@
     "delete": "删除",
     "dimension": "w: {width}, h: {height}",
     "discard": "放弃",
-    "disk_space": "Disk space",
+    "disk_space": "磁盘空间",
     "dismiss": "关闭",
     "download": "下载",
     "drag_drop": "拖放",
     "email": "邮箱",
     "epub": "Epub",
     "filename": "文件名",
-    "filter_no_matches": "The active filter has no matches",
+    "filter_no_matches": "当前筛选条件没有匹配结果",
     "genre": "类型",
     "go_to_collection": "转到合集",
     "go_to_library": "转到书库",
@@ -232,46 +232,46 @@
     "library": "书库",
     "locale_name": "简体中文",
     "locale_rtl": "false",
-    "lock_all": "Lock all",
-    "n_selected": "{count} selected",
+    "lock_all": "全部锁定",
+    "n_selected": "已选择 {count} 项",
     "nothing_to_show": "暂无内容",
     "oneshot": "单本",
     "outdated": "已过期",
     "page": "页",
-    "page_number": "Page number",
-    "pages": "pages",
-    "pages_left": "No pages left | 1 page left | {count} pages left",
-    "pages_n": "No pages | 1 page | {count} pages",
-    "password": "Password",
+    "page_number": "页码",
+    "pages": "页",
+    "pages_left": "无剩余页 | 剩余 1 页 | 剩余 {count} 页",
+    "pages_n": "无页面 | 1 页 | {count} 页",
+    "password": "密码",
     "pdf": "PDF",
     "pending_tasks": "No pending tasks | 1 pending task | {count} pending tasks",
-    "publisher": "Publisher",
-    "read": "Read",
-    "read_on": "Read on {date}",
-    "readlist": "Read List",
-    "readlists": "Read Lists",
-    "remember-me": "Remember me",
-    "required": "Required",
-    "reset_filters": "Reset filters",
-    "roles": "Roles",
-    "save_changes": "Save changes",
-    "series": "Series | Series",
-    "sidecars": "Sidecars",
-    "tags": "Tags",
-    "unavailable": "Unavailable",
-    "unlock_all": "Unlock all",
+    "publisher": "出版社",
+    "read": "已读",
+    "read_on": "{date} 阅读",
+    "readlist": "阅读列表",
+    "readlists": "阅读列表",
+    "remember-me": "记住我",
+    "required": "必填",
+    "reset_filters": "重置筛选",
+    "roles": "角色",
+    "save_changes": "保存更改",
+    "series": "系列 | 系列",
+    "sidecars": "附加文件",
+    "tags": "标签",
+    "unavailable": "不可用",
+    "unlock_all": "全部解锁",
     "url": "URL",
-    "use_filter_panel_to_change_filter": "Use the filter panel to change the active filter",
-    "year": "year"
+    "use_filter_panel_to_change_filter": "使用筛选面板调整当前筛选条件",
+    "year": "年份"
   },
   "dashboard": {
-    "keep_reading": "Keep Reading",
-    "on_deck": "On Deck",
-    "recently_added_books": "Recently Added Books",
-    "recently_added_series": "Recently Added Series",
-    "recently_read_books": "Recently Read Books",
-    "recently_released_books": "Recently Released Books",
-    "recently_updated_series": "Recently Updated Series"
+    "keep_reading": "继续阅读",
+    "on_deck": "待读书籍",
+    "recently_added_books": "最近添加的书籍",
+    "recently_added_series": "最近添加的系列",
+    "recently_read_books": "最近阅读的书籍",
+    "recently_released_books": "最近发布的书籍",
+    "recently_updated_series": "最近更新的系列"
   },
   "data_import": {
     "book_number": "Book number: {name}",
@@ -297,12 +297,12 @@
   },
   "dialog": {
     "add_api_key": {
-      "button_confirm": "Generate",
-      "context": "API Keys can be used to authenticate through the Kobo Sync protocol.",
-      "dialog_title": "Generate new API key",
-      "field_comment": "Comment",
-      "field_comment_hint": "What's this API key for?",
-      "info_copy": "Make sure to copy your API key now. You won't be able to see it again!"
+      "button_confirm": "生成",
+      "context": "API Key 可用于通过 Kobo 同步协议进行身份验证。",
+      "dialog_title": "生成新的 API Key",
+      "field_comment": "备注",
+      "field_comment_hint": "这个 API Key 用来做什么？",
+      "info_copy": "请立即复制你的 API Key，之后将无法再次查看。"
     },
     "add_to_collection": {
       "button_create": "创建",
@@ -322,11 +322,11 @@
     },
     "add_user": {
       "button_cancel": "取消",
-      "button_confirm": "Add",
-      "dialog_title": "Add User",
+      "button_confirm": "添加",
+      "dialog_title": "添加用户",
       "field_email": "邮箱",
-      "field_email_error": "Must be a valid email address",
-      "field_password": "Password"
+      "field_email_error": "必须是有效的邮箱地址",
+      "field_password": "密码"
     },
     "analyze_library": {
       "body": "Analyzes all the media files in the library. The analysis captures information about the media. Depending on your library size, this may take a long time.",
@@ -340,15 +340,15 @@
     "delete_apikey": {
       "button_confirm": "删除",
       "confirm_delete": "I understand, delete the API key \"{name}\"",
-      "dialog_title": "Delete API key",
+      "dialog_title": "删除 API Key",
       "warning_html": "Any applications or scripts using this API key will no longer be able to access the Komga API. You cannot undo this action."
     },
     "delete_book": {
       "button_confirm": "删除",
       "confirm_delete": "Yes, delete book \"{name}\" and its files",
       "confirm_delete_multiple": "Yes, delete {count} books and their files",
-      "dialog_title": "Delete Book",
-      "dialog_title_multiple": "Delete Books",
+      "dialog_title": "删除书籍",
+      "dialog_title_multiple": "删除书籍",
       "warning_html": "The book <b>{name}</b> will be removed from this server alongside with stored media files. This <b>cannot</b> be undone. Continue?",
       "warning_multiple_html": "{count} books will be removed from this server alongside with stored media files. This <b>cannot</b> be undone. Continue?"
     },
@@ -356,23 +356,23 @@
       "button_confirm": "删除",
       "confirm_delete": "Yes, delete the collection \"{name}\"",
       "confirm_delete_multiple": "Yes, delete {count} collections",
-      "dialog_title": "Delete Collection",
-      "dialog_title_multiple": "Delete Collections",
+      "dialog_title": "删除合集",
+      "dialog_title_multiple": "删除合集",
       "warning_html": "The collection <b>{name}</b> will be removed from this server. Your media files will not be affected. This <b>cannot</b> be undone. Continue?",
       "warning_multiple_html": "{count} collections will be removed from this server. Your media files will not be affected. This <b>cannot</b> be undone. Continue?"
     },
     "delete_library": {
       "button_confirm": "删除",
       "confirm_delete": "Yes, delete the library \"{name}\"",
-      "title": "Delete Library",
+      "title": "删除书库",
       "warning_html": "The library <b>{name}</b> will be removed from this server. Your media files will not be affected. This <b>cannot</b> be undone. Continue?"
     },
     "delete_readlist": {
       "button_confirm": "删除",
       "confirm_delete": "Yes, delete the read list \"{name}\"",
       "confirm_delete_multiple": "Yes, delete {count} read lists",
-      "dialog_title": "Delete Read List",
-      "dialog_title_multiple": "Delete Read Lists",
+      "dialog_title": "删除阅读列表",
+      "dialog_title_multiple": "删除阅读列表",
       "warning_html": "The read list <b>{name}</b> will be removed from this server. Your media files will not be affected. This <b>cannot</b> be undone. Continue?",
       "warning_multiple_html": "{count} read lists will be removed from this server. Your media files will not be affected. This <b>cannot</b> be undone. Continue?"
     },
@@ -380,65 +380,65 @@
       "button_confirm": "删除",
       "confirm_delete": "Yes, delete series \"{name}\" and its files",
       "confirm_delete_multiple": "Yes, delete {count} series and their files",
-      "dialog_title": "Delete Series",
+      "dialog_title": "删除系列",
       "warning_html": "The Series <b>{name}</b> will be removed from this server alongside with stored media files. This <b>cannot</b> be undone. Continue?",
       "warning_multiple_html": "{count} series will be removed from this server alongside with stored media files. This <b>cannot</b> be undone. Continue?"
     },
     "delete_user": {
       "button_confirm": "删除",
       "confirm_delete": "Yes, delete the user \"{name}\"",
-      "dialog_title": "Delete User",
+      "dialog_title": "删除用户",
       "warning_html": "The user <b>{name}</b> will be deleted from this server. This <b>cannot</b> be undone. Continue?"
     },
     "edit_books": {
       "add_author_role_error_duplicate": "Already exists",
       "authors_notice_multiple_edit": "You are editing authors for multiple books. This will override existing authors of each book.",
       "button_cancel": "取消",
-      "button_confirm": "Save changes",
+      "button_confirm": "保存更改",
       "copy_from": "Copy from {field}",
-      "dialog_title_multiple": "Edit {count} book | Edit {count} books",
-      "dialog_title_single": "Edit {book}",
-      "field_alternate_title": "Alternate title",
+      "dialog_title_multiple": "编辑 {count} 本书 | 编辑 {count} 本书",
+      "dialog_title_single": "编辑 {book}",
+      "field_alternate_title": "备用标题",
       "field_isbn": "ISBN",
       "field_isbn_error": "Must be a valid ISBN 13",
-      "field_link_label": "Label",
+      "field_link_label": "标签",
       "field_link_url": "URL",
       "field_link_url_error_protocol": "Must be http or https",
       "field_link_url_error_url": "Must be a valid URL",
       "field_number": "编号",
       "field_number_sort": "Sort Number",
       "field_number_sort_hint": "You can use decimal numbers",
-      "field_release_date": "Release Date",
-      "field_release_date_error": "Must be a valid date in YYYY-MM-DD format",
-      "field_summary": "Summary",
-      "field_tags": "Tags",
-      "field_title": "Title",
+      "field_release_date": "发布日期",
+      "field_release_date_error": "必须是 YYYY-MM-DD 格式的有效日期",
+      "field_summary": "简介",
+      "field_tags": "标签",
+      "field_title": "标题",
       "number_sort_decrement": "Decrement all by 1",
       "number_sort_increment": "Increment all by 1",
-      "tab_authors": "Authors",
+      "tab_authors": "作者",
       "tab_general": "通用",
-      "tab_links": "Links",
-      "tab_poster": "Poster",
-      "tab_tags": "Tags",
+      "tab_links": "链接",
+      "tab_poster": "封面",
+      "tab_tags": "标签",
       "tags_notice_multiple_edit": "You are editing tags for multiple books. This will override existing tags of each book."
     },
     "edit_collection": {
       "button_cancel": "取消",
-      "button_confirm": "Save changes",
+      "button_confirm": "保存更改",
       "dialog_title": "编辑合集",
       "field_manual_ordering": "Manual ordering",
       "label_ordering": "By default, series in a collection will be ordered by name. You can enable manual ordering to define your own order.",
       "tab_general": "通用",
-      "tab_poster": "Poster"
+      "tab_poster": "封面"
     },
     "edit_library": {
       "button_browse": "浏览",
       "button_cancel": "取消",
       "button_confirm_add": "Add",
-      "button_confirm_edit": "Edit",
-      "button_next": "Next",
-      "dialog_title_add": "Add Library",
-      "dialot_title_edit": "Edit Library",
+      "button_confirm_edit": "编辑",
+      "button_next": "下一步",
+      "dialog_title_add": "添加书库",
+      "dialot_title_edit": "编辑书库",
       "field_analysis_analyze_dimensions": "Analyze pages dimensions",
       "field_analysis_hash_files": "Compute hash for files",
       "field_analysis_hash_pages": "Compute hash for pages",
@@ -451,7 +451,7 @@
       "field_import_comicinfo_series_append_volume": "Append volume to series title",
       "field_import_epub_book": "Book metadata",
       "field_import_epub_series": "Series metadata",
-      "field_import_local_artwork": "Local artwork",
+      "field_import_local_artwork": "本地图片附件",
       "field_import_mylar_series": "Series metadata",
       "field_name": "Name",
       "field_oneshotsdirectory": "One-Shots directory",
@@ -484,48 +484,48 @@
     },
     "edit_readlist": {
       "button_cancel": "取消",
-      "button_confirm": "Save changes",
+      "button_confirm": "保存更改",
       "dialog_title": "编辑阅读列表",
-      "field_manual_ordering": "Manual ordering",
-      "field_name": "Name",
-      "field_summary": "Summary",
+      "field_manual_ordering": "手动排序",
+      "field_name": "名称",
+      "field_summary": "简介",
       "label_ordering": "By default, books in a read list are ordered manually. You can disable manual ordering to sort books by release date.",
       "tab_general": "通用",
-      "tab_poster": "Poster"
+      "tab_poster": "封面"
     },
     "edit_series": {
       "button_cancel": "取消",
-      "button_confirm": "Save changes",
-      "dialog_title_multiple": "Edit {count} series | Edit {count} series",
-      "dialog_title_single": "Edit {series}",
-      "field_age_rating": "Age Rating",
+      "button_confirm": "保存更改",
+      "dialog_title_multiple": "编辑 {count} 个系列 | 编辑 {count} 个系列",
+      "dialog_title_single": "编辑 {series}",
+      "field_age_rating": "年龄分级",
       "field_age_rating_error": "Age rating must be 0 or more",
-      "field_genres": "Genres",
-      "field_labels": "Labels",
-      "field_language": "Language",
+      "field_genres": "类型",
+      "field_labels": "标签",
+      "field_language": "语言",
       "field_language_hint": "IETF BCP 47 language tag",
-      "field_publisher": "Publisher",
-      "field_reading_direction": "Reading Direction",
-      "field_sort_title": "Sort Title",
-      "field_status": "Status",
-      "field_summary": "Summary",
-      "field_tags": "Tags",
-      "field_title": "Title",
-      "field_total_book_count": "Total Book Count",
+      "field_publisher": "出版社",
+      "field_reading_direction": "阅读方向",
+      "field_sort_title": "排序标题",
+      "field_status": "状态",
+      "field_summary": "简介",
+      "field_tags": "标签",
+      "field_title": "标题",
+      "field_total_book_count": "书籍总数",
       "field_total_book_count_error": "Total book count must be 1 or more",
       "mixed": "MIXED",
       "tab_general": "通用",
-      "tab_poster": "Poster",
-      "tab_sharing": "Sharing",
-      "tab_tags": "Tags",
-      "tab_titles": "Alternate Titles",
+      "tab_poster": "封面",
+      "tab_sharing": "共享",
+      "tab_tags": "标签",
+      "tab_titles": "备用标题",
       "tags_notice_multiple_edit": "You are editing tags for multiple series. This will override existing tags of each series."
     },
     "edit_user": {
       "button_cancel": "取消",
-      "button_confirm": "Save changes",
-      "dialog_title": "Edit user",
-      "label_roles_for": "Roles for {name}"
+      "button_confirm": "保存更改",
+      "dialog_title": "编辑用户",
+      "label_roles_for": "{name} 的角色"
     },
     "edit_user_restrictions": {
       "age_restriction": {
@@ -533,12 +533,12 @@
         "exclude_over": "Exclude over",
         "none": "No restriction"
       },
-      "edit_restrictions_for": "Edit restrictions for {name}",
-      "label_age_restriction": "Age restriction",
-      "label_allow_only_labels": "Allow only labels",
-      "label_exclude_labels": "Exclude labels",
-      "tab_content_restrictions": "Content Restrictions",
-      "tab_shared_libraries": "Shared Libraries"
+      "edit_restrictions_for": "编辑 {name} 的限制",
+      "label_age_restriction": "年龄限制",
+      "label_allow_only_labels": "仅允许标签",
+      "label_exclude_labels": "排除标签",
+      "tab_content_restrictions": "内容限制",
+      "tab_shared_libraries": "共享书库"
     },
     "empty_trash": {
       "body": "By default the media server doesn't remove information for media right away. This helps if a drive is temporarily disconnected. When you empty the trash for a library, all information about missing media is deleted.",
@@ -623,14 +623,14 @@
     "action_auto_delete_remaining": "Auto delete remaining ({count})",
     "action_delete_auto": "Auto delete",
     "action_delete_manual": "Manual delete",
-    "action_delete_matches": "Delete matches",
+    "action_delete_matches": "删除匹配项",
     "action_ignore": "Ignore",
     "action_ignore_remaining": "Ignore remaining ({count})",
     "action_manual_delete_remaining": "Manual delete remaining ({count})",
     "confirm_auto_delete_remaining": "All of the remaining page hashes on this page ({count}) will be marked for automatic deletion.",
     "confirm_manual_delete_remaining": "All of the remaining page hashes on this page ({count}) will be marked for manual deletion.",
-    "delete_to_save": "Delete to save {size}",
-    "deleted_count": "Deleted {count} times",
+    "delete_to_save": "删除可节省 {size}",
+    "deleted_count": "已删除 {count} 次",
     "empty_title": "No duplicate pages found",
     "filter": {
       "count": "Count",
@@ -663,27 +663,27 @@
     },
     "epubreader": {
       "appearances": {
-        "day": "Day",
-        "night": "Night",
-        "sepia": "Sepia"
+        "day": "日间",
+        "night": "夜间",
+        "sepia": "护眼"
       },
       "column_count": {
-        "auto": "Auto",
-        "one": "One",
-        "two": "Two"
+        "auto": "自动",
+        "one": "单栏",
+        "two": "双栏"
       },
       "reading_direction": {
-        "auto": "Automatic",
-        "ltr": "Left to right",
-        "rtl": "Right to left"
+        "auto": "自动",
+        "ltr": "从左到右",
+        "rtl": "从右到左"
       }
     },
     "historical_event_type": {
       "BookConverted": "Book converted",
-      "BookFileDeleted": "Book file deleted",
+      "BookFileDeleted": "书籍文件已删除",
       "BookImported": "Book imported",
-      "DuplicatePageDeleted": "Duplicate page deleted",
-      "SeriesFolderDeleted": "Series folder deleted"
+      "DuplicatePageDeleted": "重复页面已删除",
+      "SeriesFolderDeleted": "系列文件夹已删除"
     },
     "media_status": {
       "ERROR": "错误",
@@ -731,34 +731,34 @@
     }
   },
   "epubreader": {
-    "current_chapter": "Current chapter",
-    "page_of": "Page {page} of {count}",
+    "current_chapter": "当前章节",
+    "page_of": "第 {page} 页，共 {count} 页",
     "settings": {
-      "column_count": "Column count",
-      "layout": "Layout",
-      "layout_paginated": "Paginated",
-      "layout_scroll": "Scroll",
-      "navigation_mode": "Navigation mode",
+      "column_count": "栏数",
+      "layout": "布局",
+      "layout_paginated": "分页",
+      "layout_scroll": "滚动",
+      "navigation_mode": "导航模式",
       "navigation_options": {
-        "both": "Both",
-        "buttons": "Buttons",
-        "click": "Click / Tap"
+        "both": "全部",
+        "buttons": "按钮",
+        "click": "点击 / 轻触"
       },
-      "page_margins": "Page margins",
-      "viewing_theme": "Viewing theme"
+      "page_margins": "页面边距",
+      "viewing_theme": "阅读主题"
     },
     "shortcuts": {
-      "cycle_pagination": "Cycle column count",
-      "cycle_viewing_theme": "Cycle viewing theme",
-      "font_size_decrease": "Decrease font size",
-      "font_size_increase": "Increase font size",
+      "cycle_pagination": "切换栏数",
+      "cycle_viewing_theme": "切换阅读主题",
+      "font_size_decrease": "减小字号",
+      "font_size_increase": "增大字号",
       "menus": "菜单",
-      "next": "Forward",
-      "previous": "Back",
+      "next": "前进",
+      "previous": "返回",
       "reader_navigation": "阅读器导航",
-      "scroll": "Change layout to scroll",
+      "scroll": "切换为滚动布局",
       "settings": "设置",
-      "show_hide_toc": "Show/hide table of contents"
+      "show_hide_toc": "显示/隐藏目录"
     }
   },
   "error_codes": {
@@ -849,26 +849,26 @@
     "url": "URL"
   },
   "media_management": {
-    "title": "Media Management"
+    "title": "媒体管理"
   },
   "menu": {
-    "add_to_collection": "Add to collection",
-    "add_to_readlist": "Add to read list",
-    "analyze": "Analyze",
-    "bulk_edit_metadata": "Bulk edit metadata",
+    "add_to_collection": "添加到合集",
+    "add_to_readlist": "添加到阅读列表",
+    "analyze": "分析",
+    "bulk_edit_metadata": "批量编辑元数据",
     "delete": "删除",
-    "deselect_all": "Deselect all",
-    "download_readlist": "Download read list",
-    "download_series": "Download series",
-    "edit": "Edit",
-    "edit_metadata": "Edit metadata",
-    "empty_trash": "Empty trash",
+    "deselect_all": "取消全选",
+    "download_readlist": "下载阅读列表",
+    "download_series": "下载系列",
+    "edit": "编辑",
+    "edit_metadata": "编辑元数据",
+    "empty_trash": "清空回收站",
     "mark_read": "标为已读",
-    "mark_unread": "Mark as unread",
-    "refresh_metadata": "Refresh metadata",
-    "scan_library_files": "Scan library files",
-    "scan_library_files_deep": "Scan library files (deep)",
-    "select_all": "Select all"
+    "mark_unread": "标为未读",
+    "refresh_metadata": "刷新元数据",
+    "scan_library_files": "扫描书库文件",
+    "scan_library_files_deep": "深度扫描书库文件",
+    "select_all": "全选"
   },
   "metrics": {
     "library_books": "Books per library",
@@ -880,9 +880,9 @@
     "title": "Metrics"
   },
   "navigation": {
-    "home": "Home",
-    "libraries": "Libraries",
-    "logout": "Log Out"
+    "home": "首页",
+    "libraries": "书库",
+    "logout": "退出登录"
   },
   "page_not_found": {
     "go_back_to_home_page": "Go back to home page",
@@ -936,8 +936,8 @@
       "title": "Regenerate thumbnails"
     },
     "hint_kobo_port": "Set only in case of sync issues with covers and downloads",
-    "label_delete_empty_collections": "Delete empty collections after scan",
-    "label_delete_empty_readlists": "Delete empty read lists after scan",
+    "label_delete_empty_collections": "扫描后删除空合集",
+    "label_delete_empty_readlists": "扫描后删除空阅读列表",
     "label_kepubify_path": "Path to kepubify",
     "label_kobo_port": "Kobo Sync external port",
     "label_kobo_proxy": "Proxy Kobo Sync requests to Kobo Store",
@@ -951,8 +951,8 @@
   },
   "settings_user": {
     "change_password": "Change password",
-    "edit_restrictions": "Edit restrictions",
-    "edit_user": "Edit user",
+    "edit_restrictions": "编辑限制",
+    "edit_user": "编辑用户",
     "latest_activity": "Latest activity: {date}",
     "no_recent_activity": "No recent activity",
     "role_administrator": "Administrator",
@@ -976,14 +976,14 @@
   },
   "thumbnail_card": {
     "tooltip_delete": "删除",
-    "tooltip_generated": "Generated artwork",
-    "tooltip_mark_as_selected": "Mark as selected",
-    "tooltip_selected": "Selected",
-    "tooltip_sidecar": "Local artwork",
-    "tooltip_to_be_deleted": "To be deleted",
-    "tooltip_to_be_uploaded": "To be uploaded",
-    "tooltip_too_big": "File too big!",
-    "tooltip_user_uploaded": "User uploaded"
+    "tooltip_generated": "自动生成的图片",
+    "tooltip_mark_as_selected": "标记为选中",
+    "tooltip_selected": "已选中",
+    "tooltip_sidecar": "本地图片附件",
+    "tooltip_to_be_deleted": "待删除",
+    "tooltip_to_be_uploaded": "待上传",
+    "tooltip_too_big": "文件太大！",
+    "tooltip_user_uploaded": "用户上传"
   },
   "titles_more": {
     "less": "Less titles",

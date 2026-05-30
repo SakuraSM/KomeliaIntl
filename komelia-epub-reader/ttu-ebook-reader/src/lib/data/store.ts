@@ -19,6 +19,7 @@ import type {WritingMode} from './writing-mode';
 import {externalFunctions} from '$lib/external';
 import {BookReaderAvailableKeybind, type BookReaderKeybindMap} from './book-reader-keybind';
 import {subjectToSvelteWritable} from '$lib/functions/rxjs/subject-to-writable';
+import type {ReaderAnnotationsByBook} from '$lib/data/reader-annotation';
 
 export const bookId$ = subjectToSvelteWritable(new ReplaySubject<string>(1));
 
@@ -56,6 +57,7 @@ export const pageColumns$ = writableSubject(0);
 export const verticalCustomReadingPosition$ = writableSubject(100);
 export const horizontalCustomReadingPosition$ = writableSubject(0);
 export const userFonts$ = writableSubject<UserFont[]>([]);
+export const annotationsByBook$ = writableSubject<ReaderAnnotationsByBook>({});
 export const availableSystemFonts$ = writableSubject<string[]>([]);
 
 export const bookReaderKeybindMap$ = writableSubject<BookReaderKeybindMap>({
@@ -134,6 +136,7 @@ export interface ReaderSettings {
   verticalCustomReadingPosition: number;
   horizontalCustomReadingPosition: number;
   userFonts: UserFont[];
+  annotationsByBook: ReaderAnnotationsByBook;
 }
 
 let externalSettingsState: ReaderSettings;
@@ -146,6 +149,7 @@ export async function loadExternalSettings() {
   let userfonts = await externalFunctions.getStoredFonts()
   userFonts$.next(userfonts);
   externalSettingsState = await externalFunctions.getSettings();
+  externalSettingsState.annotationsByBook = externalSettingsState.annotationsByBook ?? {};
 
   theme$.next(externalSettingsState.theme);
   customThemes$.next(externalSettingsState.customThemes);
@@ -177,6 +181,7 @@ export async function loadExternalSettings() {
   pageColumns$.next(externalSettingsState.pageColumns);
   verticalCustomReadingPosition$.next(externalSettingsState.verticalCustomReadingPosition);
   horizontalCustomReadingPosition$.next(externalSettingsState.horizontalCustomReadingPosition);
+  annotationsByBook$.next(externalSettingsState.annotationsByBook);
 
   theme$.pipe(skip(1)).subscribe((value) => {
     externalSettingsState.theme = value;
@@ -298,6 +303,10 @@ export async function loadExternalSettings() {
   });
   horizontalCustomReadingPosition$.pipe(skip(1)).subscribe((value) => {
     externalSettingsState.horizontalCustomReadingPosition = value;
+    externalFunctions.putSettings(externalSettingsState);
+  });
+  annotationsByBook$.pipe(skip(1)).subscribe((value) => {
+    externalSettingsState.annotationsByBook = value;
     externalFunctions.putSettings(externalSettingsState);
   });
   // userFonts$.pipe(skip(1)).subscribe((value) => {

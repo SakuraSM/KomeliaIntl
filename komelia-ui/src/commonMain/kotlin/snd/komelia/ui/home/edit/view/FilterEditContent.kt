@@ -59,6 +59,7 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.components.DropdownChoiceMenu
@@ -102,6 +103,7 @@ private fun Toolbar(
     onEditEnd: () -> Unit,
     onReset: () -> Unit,
 ) {
+    val strings = LocalStrings.current
     Row(
         modifier = Modifier.animateContentSize(),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -126,7 +128,7 @@ private fun Toolbar(
             onClick = { onEditEnd() },
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Done"))
+            Text(strings.legacy.forText("Done"))
             Icon(Icons.Default.Check, null)
         }
 
@@ -135,12 +137,12 @@ private fun Toolbar(
             onClick = { showResetDialog = true },
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reset to default"))
+            Text(strings.legacy.forText("Reset to default"))
             Icon(Icons.Default.Restore, null)
         }
         if (showResetDialog) {
             ConfirmationDialog(
-                body = "Reset homescreen filters to default?",
+                body = strings.legacy.forText("Reset homescreen filters to default?"),
                 onDialogConfirm = onReset,
                 onDialogDismiss = { showResetDialog = false }
             )
@@ -187,6 +189,7 @@ fun AddConditionButton(
     modifier: Modifier = Modifier
 ) {
     var dropDownExpanded by remember { mutableStateOf(false) }
+    val strings = LocalStrings.current
     ExposedDropdownMenuBox(
         expanded = dropDownExpanded,
         onExpandedChange = { dropDownExpanded = it },
@@ -198,7 +201,7 @@ fun AddConditionButton(
                 .cursorForHand()
                 .menuAnchor(PrimaryNotEditable)
         ) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add Filter"))
+            Text(strings.legacy.forText("Add Filter"))
         }
 
         ExposedDropdownMenu(
@@ -208,7 +211,7 @@ fun AddConditionButton(
         ) {
             FilterEditViewModel.FilterType.entries.forEach {
                 DropdownMenuItem(
-                    text = { Text(it.name) },
+                    text = { Text(strings.legacy.forText(it.displayKey)) },
                     onClick = {
                         dropDownExpanded = false
                         onConditionAdd(it)
@@ -230,6 +233,8 @@ private fun ReorderableCollectionItemScope.FilterContent(
     var showEdit by remember { mutableStateOf(false) }
     val label = filterState.label.collectAsState().value
     var labelText by remember { mutableStateOf(label) }
+    val strings = LocalStrings.current
+    val localizedLabel = strings.legacy.forText(label)
     Column(
         modifier = Modifier
             .padding(vertical = 5.dp)
@@ -273,7 +278,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 if (showEdit) {
                     OutlinedTextField(
                         value = labelText,
-                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Label")) },
+                        label = { Text(strings.legacy.forText("Label")) },
                         onValueChange = {
                             labelText = it
                             filterState.label.value = it
@@ -282,7 +287,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                     )
                 } else {
                     Text(
-                        text = label,
+                        text = localizedLabel,
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(horizontal = 14.dp)
@@ -295,7 +300,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 onClick = { showEdit = !showEdit },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit"))
+                Text(strings.legacy.forText("Edit"))
                 Icon(
                     imageVector = if (showEdit) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = null,
@@ -308,7 +313,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete"))
+                Text(strings.legacy.forText("Delete"))
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = null,
@@ -327,20 +332,42 @@ private fun ReorderableCollectionItemScope.FilterContent(
 
     if (showDeleteConfirmation) {
         ConfirmationDialog(
-            body = "Delete ${label}?",
+            body = strings.legacy.forText("Delete $localizedLabel?"),
             onDialogConfirm = onFilterRemove,
             onDialogDismiss = { showDeleteConfirmation = false })
     }
 }
+
+private val FilterEditViewModel.FilterType.displayKey: String
+    get() = when (this) {
+        FilterEditViewModel.FilterType.Book -> "Book Filter"
+        FilterEditViewModel.FilterType.Series -> "Series Filter"
+    }
+
+private val BookFilterEditState.FilterType.displayKey: String
+    get() = when (this) {
+        BookFilterEditState.FilterType.Custom -> "Book Filter"
+        BookFilterEditState.FilterType.OnDeck -> "On deck"
+    }
+
+private val SeriesFilterEditState.FilterType.displayKey: String
+    get() = when (this) {
+        SeriesFilterEditState.FilterType.Custom -> "Series Filter"
+        SeriesFilterEditState.FilterType.RecentlyAdded -> "Recently added series"
+        SeriesFilterEditState.FilterType.RecentlyUpdated -> "Recently updated series"
+    }
 
 @Composable
 private fun BookFilterEditContent(state: BookFilterEditState) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         val filter = state.filter.collectAsState().value
         val type = state.type.collectAsState().value
+        val strings = LocalStrings.current
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(type, type.name),
-            options = remember { BookFilterEditState.FilterType.entries.map { LabeledEntry(it, it.name) } },
+            selectedOption = LabeledEntry(type, strings.legacy.forText(type.displayKey)),
+            options = BookFilterEditState.FilterType.entries.map {
+                LabeledEntry(it, strings.legacy.forText(it.displayKey))
+            },
             onOptionChange = { state.onTypeChange(it.value) },
         )
 
@@ -370,9 +397,12 @@ private fun SeriesFilterEditContent(state: SeriesFilterEditState) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         val filter = state.filter.collectAsState().value
         val type = state.type.collectAsState().value
+        val strings = LocalStrings.current
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(type, type.name),
-            options = remember { SeriesFilterEditState.FilterType.entries.map { LabeledEntry(it, it.name) } },
+            selectedOption = LabeledEntry(type, strings.legacy.forText(type.displayKey)),
+            options = SeriesFilterEditState.FilterType.entries.map {
+                LabeledEntry(it, strings.legacy.forText(it.displayKey))
+            },
             onOptionChange = { state.onTypeChange(it.value) },
         )
 

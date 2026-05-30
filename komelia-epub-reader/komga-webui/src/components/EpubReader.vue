@@ -123,7 +123,14 @@
     <header id="headerMenu"/>
 
     <div id="D2Reader-Container" style="height: 100vh" :class="appearanceClass('bg')">
-      <main tabindex=-1 id="iframe-wrapper" style="height: 100vh" @click="clickThrough">
+      <main
+          tabindex=-1
+          id="iframe-wrapper"
+          style="height: 100vh"
+          @click="clickThrough"
+          @touchstart="touchStart"
+          @touchend="touchEnd"
+      >
         <div id="reader-loading"></div>
         <div id="reader-error"></div>
       </main>
@@ -430,7 +437,7 @@ const settings = reactive(
       pageMargins: 1,
       lineHeight: 1,
       fontSize: 100,
-      verticalScroll: false,
+      verticalScroll: true,
       columnCount: 'auto',
       fixedLayoutMargin: 0,
       fixedLayoutShadow: false,
@@ -464,12 +471,22 @@ const notification = reactive({
   timeout: 4000,
 })
 const clickTimer: Ref<number | undefined> = ref(undefined)
+const swipeStart = reactive({
+  x: 0,
+  y: 0,
+  time: 0,
+})
 // const forceUpdate = ref(false)
 const progressionTitle: Ref<undefined | string> = ref(undefined)
 const progressionPage: Ref<undefined | number> = ref(undefined)
 const progressionPageCount: Ref<undefined | number> = ref(undefined)
 const effectiveDirection = ref('ltr')
 const fixedLayout = ref(false)
+const SWIPE_DISTANCE_THRESHOLD = 48
+const SWIPE_AXIS_RATIO = 1.35
+const SWIPE_DURATION_MS = 650
+const CHAPTER_NAVIGATION_SETTLE_MS = 80
+const SCROLL_BOUNDARY_TOLERANCE = 2
 
 
 const effectiveRtl = computed(() => {
@@ -727,6 +744,7 @@ const navigationMode = computed({
 
 
 onBeforeUnmount(() => {
+  cleanupReaderContentSwipeNavigation()
   d2Reader.value.stop()
 })
 
@@ -742,6 +760,7 @@ function previousBook() {
   if (siblingPrevious.value == undefined) {
     closeBook()
   } else {
+    cleanupReaderContentSwipeNavigation()
     d2Reader.value.stop()
     setupState(siblingPrevious.value.id)
   }
@@ -751,6 +770,7 @@ function nextBook() {
   if (siblingNext.value == undefined) {
     closeBook()
   } else {
+    cleanupReaderContentSwipeNavigation()
     d2Reader.value.stop()
     setupState(siblingNext.value.id)
   }
@@ -804,19 +824,174 @@ function clickThrough(e: MouseEvent) {
   }
 }
 
+function touchStart(e: TouchEvent) {
+  if (e.changedTouches.length !== 1) return
+  const touch = e.changedTouches[0]
+  swipeStart.x = touch.clientX
+  swipeStart.y = touch.clientY
+  swipeStart.time = e.timeStamp
+}
+
+function touchEnd(e: TouchEvent) {
+  if (e.changedTouches.length !== 1) return
+  if (e.timeStamp - swipeStart.time > SWIPE_DURATION_MS) return
+
+  const touch = e.changedTouches[0]
+  const deltaX = touch.clientX - swipeStart.x
+  const deltaY = touch.clientY - swipeStart.y
+  const absoluteX = Math.abs(deltaX)
+  const absoluteY = Math.abs(deltaY)
+
+  if (verticalScroll.value) {
+    if (absoluteY < SWIPE_DISTANCE_THRESHOLD || absoluteY < absoluteX * SWIPE_AXIS_RATIO) return
+    if (navigateAtVerticalScrollBoundary(deltaY, getReaderScrollElement())) e.preventDefault()
+    return
+  }
+
+  if (absoluteX < SWIPE_DISTANCE_THRESHOLD || absoluteX < absoluteY * SWIPE_AXIS_RATIO) return
+  const isNext = effectiveRtl.value ? deltaX > 0 : deltaX < 0
+  isNext ? navigateForward() : navigateBackward()
+  e.preventDefault()
+}
+
+let readerContentSwipeCleanup: (() => void) | undefined
+let readerContentSwipeSetupTimer: number | undefined
+
+function scheduleReaderContentSwipeNavigationSetup(): void {
+  cleanupReaderContentSwipeNavigation()
+  readerContentSwipeSetupTimer = window.setTimeout(setupReaderContentSwipeNavigation, CHAPTER_NAVIGATION_SETTLE_MS)
+}
+
+function setupReaderContentSwipeNavigation(): void {
+  readerContentSwipeSetupTimer = undefined
+  const readerDocument = getReaderContentDocument()
+  if (!readerDocument || !getReaderScrollElement()) return
+
+  readerDocument.addEventListener('touchstart', touchStart, {passive: true})
+  readerDocument.addEventListener('touchend', touchEndAtReaderContentBoundary, {passive: false})
+  readerContentSwipeCleanup = () => {
+    readerDocument.removeEventListener('touchstart', touchStart)
+    readerDocument.removeEventListener('touchend', touchEndAtReaderContentBoundary)
+  }
+}
+
+function cleanupReaderContentSwipeNavigation(): void {
+  if (readerContentSwipeSetupTimer !== undefined) {
+    window.clearTimeout(readerContentSwipeSetupTimer)
+    readerContentSwipeSetupTimer = undefined
+  }
+  readerContentSwipeCleanup?.()
+  readerContentSwipeCleanup = undefined
+}
+
+function getReaderContentDocument(): Document | undefined {
+  const iframe = document.querySelector<HTMLIFrameElement>('#iframe-wrapper iframe')
+  return iframe?.contentDocument ?? iframe?.contentWindow?.document
+}
+
+function getReaderScrollElement(): Element | undefined {
+  const readerDocument = getReaderContentDocument()
+  return readerDocument?.scrollingElement
+      ?? readerDocument?.documentElement
+      ?? readerDocument?.body
+      ?? undefined
+}
+
+function touchEndAtReaderContentBoundary(e: TouchEvent): void {
+  if (!verticalScroll.value) return
+  if (e.changedTouches.length !== 1) return
+  if (e.timeStamp - swipeStart.time > SWIPE_DURATION_MS) return
+
+  const touch = e.changedTouches[0]
+  const deltaX = touch.clientX - swipeStart.x
+  const deltaY = touch.clientY - swipeStart.y
+  const absoluteX = Math.abs(deltaX)
+  const absoluteY = Math.abs(deltaY)
+  if (absoluteY < SWIPE_DISTANCE_THRESHOLD || absoluteY < absoluteX * SWIPE_AXIS_RATIO) return
+
+  if (navigateAtVerticalScrollBoundary(deltaY, getReaderScrollElement())) {
+    e.preventDefault()
+  }
+}
+
+function navigateAtVerticalScrollBoundary(deltaY: number, scrollElement?: Element): boolean {
+  if (deltaY < 0 && (d2Reader.value.atEnd || (scrollElement !== undefined && isScrollAtEnd(scrollElement)))) {
+    navigateForward()
+    return true
+  }
+
+  if (deltaY > 0 && (d2Reader.value.atStart || (scrollElement !== undefined && isScrollAtStart(scrollElement)))) {
+    navigateBackward()
+    return true
+  }
+
+  return false
+}
+
+function isScrollAtEnd(scrollElement: Element): boolean {
+  return scrollElement.scrollTop + scrollElement.clientHeight >= scrollElement.scrollHeight - SCROLL_BOUNDARY_TOLERANCE
+}
+
+function isScrollAtStart(scrollElement: Element): boolean {
+  return scrollElement.scrollTop <= SCROLL_BOUNDARY_TOLERANCE
+}
+
 function singleClick(x: number, y: number) {
   if (verticalScroll.value) {
     if (settings.navigationClick) {
-      if (y < height.value / 4) return d2Reader.value.previousPage()
-      if (y > height.value * .75) return d2Reader.value.nextPage()
+      if (y < height.value / 4) return navigateBackward()
+      if (y > height.value * .75) return navigateForward()
     }
   } else {
     if (settings.navigationClick) {
-      if (x < width.value / 4) return effectiveRtl.value ? d2Reader.value.nextPage() : d2Reader.value.previousPage()
-      if (x > width.value * .75) return effectiveRtl.value ? d2Reader.value.previousPage() : d2Reader.value.nextPage()
+      if (x < width.value / 4) return effectiveRtl.value ? navigateForward() : navigateBackward()
+      if (x > width.value * .75) return effectiveRtl.value ? navigateBackward() : navigateForward()
     }
   }
   toggleToolbars()
+}
+
+async function navigateForward(): Promise<void> {
+  if (verticalScroll.value && d2Reader.value.atEnd) {
+    d2Reader.value.nextResource()
+    return
+  }
+
+  const resourceBeforeNavigation = d2Reader.value.currentResource
+  await d2Reader.value.nextPage()
+  navigateResourceAfterUnchangedBoundary(resourceBeforeNavigation, 'next')
+}
+
+async function navigateBackward(): Promise<void> {
+  if (verticalScroll.value && d2Reader.value.atStart) {
+    d2Reader.value.previousResource()
+    return
+  }
+
+  const resourceBeforeNavigation = d2Reader.value.currentResource
+  await d2Reader.value.previousPage()
+  navigateResourceAfterUnchangedBoundary(resourceBeforeNavigation, 'previous')
+}
+
+function navigateResourceAfterUnchangedBoundary(
+    resourceBeforeNavigation: unknown,
+    direction: 'next' | 'previous'
+): void {
+  if (!verticalScroll.value) return
+
+  window.setTimeout(() => {
+    const isStillOnSameResource = d2Reader.value.currentResource === resourceBeforeNavigation
+    if (!isStillOnSameResource) return
+
+    if (direction === 'next' && d2Reader.value.atEnd) {
+      d2Reader.value.nextResource()
+      return
+    }
+
+    if (direction === 'previous' && d2Reader.value.atStart) {
+      d2Reader.value.previousResource()
+    }
+  }, CHAPTER_NAVIGATION_SETTLE_MS)
 }
 
 async function setupState(currentBookId: string) {
@@ -909,6 +1084,7 @@ async function setupState(currentBookId: string) {
       updateCurrentLocation: updateCurrentLocation,
       keydownFallthrough: keyPressed,
       clickThrough: clickThrough,
+      resourceReady: scheduleReaderContentSwipeNavigationSetup,
       positionInfo: updatePositionInfo,
       chapterInfo: updateChapterInfo,
       direction: updateDirection,

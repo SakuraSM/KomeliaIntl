@@ -1155,25 +1155,35 @@ function appearanceClass(suffix?: string): string {
 }
 
 function goToEntry(tocEntry: TocEntry) {
-  if (tocEntry.href !== undefined) {
-    const url = new URL(tocEntry.href)
-    let locations = {
-      progression: 0,
-    } as Locations
-    let href = tocEntry.href
-    if (url.hash) {
-      locations = {
-        fragment: url.hash.slice(1),
-      }
-      href = tocEntry.href.substring(0, tocEntry.href.indexOf('#'))
-    }
-    let locator = {
-      href: href,
-      locations: locations,
-    }
-    d2Reader.value.goTo(locator)
-    showToc.value = false
+  const locator = tocEntryToLocator(tocEntry)
+  if (locator === undefined) return
+
+  d2Reader.value.goTo(locator)
+  showToc.value = false
+  showToolbars.value = false
+}
+
+function tocEntryToLocator(tocEntry: TocEntry): Locator | undefined {
+  if (tocEntry.href === undefined) {
+    return undefined
   }
+
+  const hashIndex = tocEntry.href.indexOf('#')
+  if (hashIndex < 0) {
+    return {
+      href: tocEntry.href,
+      locations: {
+        progression: 0,
+      } as Locations,
+    } as Locator
+  }
+
+  return {
+    href: tocEntry.href.substring(0, hashIndex),
+    locations: {
+      fragment: tocEntry.href.substring(hashIndex + 1),
+    } as Locations,
+  } as Locator
 }
 
 function closeDialog() {

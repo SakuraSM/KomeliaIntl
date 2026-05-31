@@ -25,6 +25,7 @@ import snd.komelia.image.ReaderImageFactory
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.KomgaSeriesApi
+import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.onnxruntime.OnnxRuntime
 import snd.komelia.settings.ImageReaderSettingsRepository
 import snd.komelia.settings.model.ReaderType.CONTINUOUS
@@ -43,6 +44,7 @@ private val cleanupScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 private val logger = KotlinLogging.logger { }
 
 class ReaderViewModel(
+    book: KomeliaBook?,
     bookApi: KomgaBookApi,
     seriesApi: KomgaSeriesApi,
     readListApi: KomgaReadListApi,
@@ -80,6 +82,7 @@ class ReaderViewModel(
     }
 
     val readerState: ReaderState = ReaderState(
+        initialBook = book,
         bookApi = bookApi,
         seriesApi = seriesApi,
         readListApi = readListApi,

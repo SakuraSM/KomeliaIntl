@@ -24,6 +24,22 @@ class SettingsRepositoryWrapper(
         wrapper.transform { it.copy(serverUrl = url) }
     }
 
+    override fun getLanServerUrl(): Flow<String> {
+        return wrapper.state.map { it.lanServerUrl }.distinctUntilChanged()
+    }
+
+    override suspend fun putLanServerUrl(url: String) {
+        wrapper.transform { it.copy(lanServerUrl = url) }
+    }
+
+    override fun getLanAutoSwitchEnabled(): Flow<Boolean> {
+        return wrapper.state.map { it.lanAutoSwitchEnabled }.distinctUntilChanged()
+    }
+
+    override suspend fun putLanAutoSwitchEnabled(enabled: Boolean) {
+        wrapper.transform { it.copy(lanAutoSwitchEnabled = enabled) }
+    }
+
     override fun getCardWidth(): Flow<Int> {
         return wrapper.state.map { it.cardWidth }.distinctUntilChanged()
     }

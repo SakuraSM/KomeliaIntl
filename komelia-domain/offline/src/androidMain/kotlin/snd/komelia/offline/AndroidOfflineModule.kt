@@ -3,10 +3,14 @@ package snd.komelia.offline
 import android.content.Context
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import snd.komelia.offline.mediacontainer.AndroidPdfExtractor
 import snd.komelia.offline.mediacontainer.DivinaExtractor
+import snd.komelia.offline.mediacontainer.DivinaRarExtractor
 import snd.komelia.offline.mediacontainer.DivinaZipExtractor
 import snd.komelia.offline.mediacontainer.EpubExtractor
 import snd.komelia.offline.mediacontainer.EpubZipExtractor
+import snd.komelia.offline.mediacontainer.PdfExtractor
+import snd.komelia.offline.mediacontainer.RarExtractor
 import snd.komelia.offline.mediacontainer.ZipExtractor
 import snd.komelia.offline.sync.AndroidDownloadManager
 import snd.komelia.offline.sync.BookDownloadService
@@ -31,13 +35,21 @@ class AndroidOfflineModule(
     komgaClientFactory = komgaClientFactory,
 ) {
     private val zipExtractor = ZipExtractor()
+    private val rarExtractor = RarExtractor()
 
     override fun createDivinaExtractors(): List<DivinaExtractor> {
-        return listOf(DivinaZipExtractor(zipExtractor))
+        return listOf(
+            DivinaZipExtractor(zipExtractor),
+            DivinaRarExtractor(rarExtractor),
+        )
     }
 
     override fun createEpubExtractor(): EpubExtractor {
         return EpubZipExtractor(zipExtractor)
+    }
+
+    override fun createPdfExtractor(): PdfExtractor {
+        return AndroidPdfExtractor(context)
     }
 
 

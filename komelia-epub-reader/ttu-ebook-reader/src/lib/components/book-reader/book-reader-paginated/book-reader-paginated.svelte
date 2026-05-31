@@ -621,8 +621,12 @@
   }
 
   nextChapter$.pipe(takeUntil(destroy$)).subscribe((chapterId) => {
+    const normalizedChapterId = chapterId.split('#')[0];
     const nextSectionIndex = sections.findIndex(
-      (section) => section.id === chapterId || section.querySelector(`[id="${chapterId}"]`)
+      (section) => section.id === chapterId ||
+        section.id === normalizedChapterId ||
+        section.querySelector(`[id="${chapterId}"]`) ||
+        section.querySelector(`[id="${normalizedChapterId}"]`)
     );
 
     if (nextSectionIndex > -1) {

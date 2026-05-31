@@ -547,10 +547,13 @@ private fun SamplingModeSettings(
             SwitchWithLabel(
                 checked = linearLightDownsampling,
                 onCheckedChange = onLinearLightDownsamplingChange,
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Linear light downsampling")) },
-                supportingText = {
-                    Text("slower but potentially more accurate", style = MaterialTheme.typography.labelMedium)
-                },
+        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Linear light downsampling")) },
+        supportingText = {
+            Text(
+                snd.komelia.ui.LocalStrings.current.legacy.forText("slower but potentially more accurate"),
+                style = MaterialTheme.typography.labelMedium
+            )
+        },
                 contentPadding = PaddingValues(horizontal = 10.dp)
             )
         }

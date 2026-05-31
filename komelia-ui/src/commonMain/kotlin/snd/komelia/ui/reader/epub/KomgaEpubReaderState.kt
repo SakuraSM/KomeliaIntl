@@ -8,8 +8,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
@@ -20,7 +20,6 @@ import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.komga.api.model.KomeliaBook
-import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.settings.EpubReaderSettingsRepository
 import snd.komelia.ui.BookSiblingsContext
 import snd.komelia.ui.LoadState
@@ -46,7 +45,7 @@ class KomgaEpubReaderState(
     private val bookApi: KomgaBookApi,
     private val seriesApi: KomgaSeriesApi,
     private val readListApi: KomgaReadListApi,
-    private val settingsRepository: CommonSettingsRepository,
+    private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
     private val notifications: AppNotifications,
     private val markReadProgress: Boolean,
@@ -102,7 +101,6 @@ class KomgaEpubReaderState(
 
     @OptIn(ExperimentalResourceApi::class)
     private suspend fun loadEpub(webview: KomeliaWebview) {
-        val serverUrl = settingsRepository.getServerUrl().stateIn(coroutineScope)
         webview.bind<Unit, String>("bookId") {
             bookId.value.value
         }
@@ -160,7 +158,7 @@ class KomgaEpubReaderState(
         webview.bind<Unit, Unit>("closeBook") { closeWebview() }
 
         webview.bind<Unit, String>("getServerUrl") {
-            settingsRepository.getServerUrl().first()
+            serverUrl.first()
         }
 
         webview.bind<Unit, JsonObject>("getSettings") {
@@ -197,7 +195,7 @@ class KomgaEpubReaderState(
     }
 
     private suspend fun progressionToWebview(progress: R2Progression): R2Progression {
-        val baseUrl = settingsRepository.getServerUrl().first()
+        val baseUrl = serverUrl.first()
         return progress.copy(
             locator = progress.locator.copy(
                 href = "$baseUrl/api/v1/books/${bookId.value}/resource/${progress.locator.href}"
@@ -218,7 +216,7 @@ class KomgaEpubReaderState(
             val textResponse = proxyResourceRequest(
                 bookApi = bookApi,
                 urlString = url,
-                serverUrl = settingsRepository.getServerUrl()
+                serverUrl = serverUrl
             ).data.decodeToString()
             if (platformType == WEB_KOMF) {
                 val document = Ksoup.parse(textResponse, xmlParser()) //strict xhtml rules

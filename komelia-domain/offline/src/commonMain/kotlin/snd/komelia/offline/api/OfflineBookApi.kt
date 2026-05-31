@@ -206,7 +206,12 @@ class OfflineBookApi(
         bookId: KomgaBookId,
         thumbnailId: KomgaThumbnailId
     ): ByteArray {
-        TODO("Not yet implemented")
+        val thumbnail = thumbnailBookRepository.find(thumbnailId)
+            ?: thumbnailBookRepository.findSelectedByBookId(bookId)
+            ?: throw IllegalStateException("Book thumbnail $thumbnailId is not downloaded")
+
+        if (thumbnail.bookId != bookId) throw IllegalStateException("Book thumbnail $thumbnailId does not belong to $bookId")
+        return thumbnail.thumbnail ?: throw IllegalStateException("Book thumbnail $thumbnailId content is missing")
     }
 
     override suspend fun getThumbnails(bookId: KomgaBookId): List<KomgaBookThumbnail> {

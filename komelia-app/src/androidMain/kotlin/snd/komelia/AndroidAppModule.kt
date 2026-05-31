@@ -2,6 +2,9 @@ package snd.komelia
 
 import android.app.Activity
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
 import coil3.memory.MemoryCache
@@ -11,8 +14,11 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.io.files.Path
@@ -233,6 +239,27 @@ class AndroidAppModule(
 
     override fun createKtorClientWithoutCache(): HttpClient {
         return configureKtor(okHttpClientWithoutCache)
+    }
+
+    override fun networkChangeEvents(): Flow<Unit> = callbackFlow {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                trySend(Unit)
+            }
+
+            override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+                trySend(Unit)
+            }
+
+            override fun onLost(network: Network) {
+                trySend(Unit)
+            }
+        }
+
+        connectivityManager.registerDefaultNetworkCallback(callback)
+        trySend(Unit)
+        awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
     }
 
     private fun configureKtor(okHttpClient: OkHttpClient): HttpClient {

@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.home.EqualityOpState
@@ -55,12 +56,13 @@ fun BookConditionContent(
     state: BookCustomFilterState,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        val legacyStrings = LocalStrings.current.legacy
         val sort = state.sort.collectAsState().value
         PageSettingsContent(
             pageSize = state.pageSize.collectAsState().value,
             onPageSizeChange = state::onPagSizeChange,
-            sort = remember(sort) { LabeledEntry(sort, sort.name) },
-            sortOptions = remember { BookSort.entries.map { LabeledEntry(it, it.name) } },
+            sort = sort.localizedEntry(legacyStrings),
+            sortOptions = BookSort.entries.localizedEntries(legacyStrings),
             onSortChange = state::onSortChange,
             sortDirection = state.sortDirection.collectAsState().value,
             onSortDirectionChange = state::onSortDirectionChange
@@ -92,10 +94,11 @@ fun BookMatchConditionContent(
     ) {
         FlowRow {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                val legacyStrings = LocalStrings.current.legacy
                 val type = state.matchType.collectAsState().value
                 DropdownChoiceMenu(
-                    selectedOption = LabeledEntry(type, type.name),
-                    options = MatchType.entries.map { LabeledEntry(it, it.name) },
+                    selectedOption = type.localizedEntry(legacyStrings),
+                    options = MatchType.entries.localizedEntries(legacyStrings),
                     onOptionChange = { state.setMatchType(it.value) }
                 )
                 IconButton(onClick = onConditionRemove) {
@@ -108,7 +111,7 @@ fun BookMatchConditionContent(
         }
 
         ConditionAddButton(
-            conditions = remember { BookConditionType.entries.map { LabeledEntry(it, it.name) } },
+            conditions = BookConditionType.entries.localizedEntries(LocalStrings.current.legacy),
             onConditionAdd = state::addCondition,
         )
     }
@@ -242,7 +245,7 @@ private fun ConditionContent(
 
         null -> {
             ConditionAddButton(
-                conditions = remember { BookConditionType.entries.map { LabeledEntry(it, it.name) } },
+                conditions = BookConditionType.entries.localizedEntries(LocalStrings.current.legacy),
                 onConditionAdd = onConditionAdd,
             )
         }
@@ -258,8 +261,8 @@ private fun BookConditionLayout(
     content: @Composable RowScope.() -> Unit
 ) {
     SimpleConditionLayout(
-        conditionType = remember { LabeledEntry(type, type.name) },
-        options = remember { BookConditionType.entries.map { LabeledEntry(it, it.name) } },
+        conditionType = type.localizedEntry(LocalStrings.current.legacy),
+        options = BookConditionType.entries.localizedEntries(LocalStrings.current.legacy),
         onConditionTypeChange = onTypeChange,
         onConditionRemove = onConditionRemove
     ) {
@@ -333,9 +336,10 @@ fun SeriesIdConditionContent(
     ) {
         val options = state.seriesSuggestions.collectAsState(emptyList()).value
         val operator = state.operator.collectAsState().value
+        val legacyStrings = LocalStrings.current.legacy
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = operator.localizedEntry(legacyStrings),
+            options = EqualityOpState.Op.entries.localizedEntries(legacyStrings),
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
             label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
@@ -375,11 +379,12 @@ fun MediaProfileConditionContent(
         onConditionRemove = onConditionRemove
     ) {
         val value = state.value.collectAsState().value
+        val legacyStrings = LocalStrings.current.legacy
         EqualityOpDropDownContent(
             operator = state.operator.collectAsState().value,
             onOpChange = state::setOp,
-            selectedValue = remember(value) { value?.let { LabeledEntry(it, it.name) } },
-            valueOptions = remember { MediaProfile.entries.map { LabeledEntry(it, it.name) } },
+            selectedValue = value?.localizedEntry(legacyStrings),
+            valueOptions = MediaProfile.entries.localizedEntries(legacyStrings),
             onValueChange = state::setValue
         )
     }
@@ -397,11 +402,12 @@ fun MediaStatusConditionContent(
         onConditionRemove = onConditionRemove
     ) {
         val value = state.value.collectAsState().value
+        val legacyStrings = LocalStrings.current.legacy
         EqualityOpDropDownContent(
             operator = state.operator.collectAsState().value,
             onOpChange = state::setOp,
-            selectedValue = remember(value) { value?.let { LabeledEntry(it, it.name) } },
-            valueOptions = remember { KomgaMediaStatus.entries.map { LabeledEntry(it, it.name) } },
+            selectedValue = value?.localizedEntry(legacyStrings),
+            valueOptions = KomgaMediaStatus.entries.localizedEntries(legacyStrings),
             onValueChange = state::setValue
         )
     }
@@ -419,9 +425,10 @@ fun NumberSortConditionContent(
         onConditionRemove = onConditionRemove
     ) {
         val operator = state.operator.collectAsState().value
+        val legacyStrings = LocalStrings.current.legacy
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = NumericOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = operator.localizedEntry(legacyStrings),
+            options = NumericOpState.Op.entries.localizedEntries(legacyStrings),
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
             label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
@@ -447,9 +454,10 @@ fun PosterConditionContent(
     ) {
         val operator = state.operator.collectAsState().value
         val currentValue = state.value.collectAsState().value
+        val legacyStrings = LocalStrings.current.legacy
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = operator.localizedEntry(legacyStrings),
+            options = EqualityOpState.Op.entries.localizedEntries(legacyStrings),
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
             label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
@@ -459,16 +467,16 @@ fun PosterConditionContent(
             selectedOption = remember(currentValue) {
                 LabeledEntry(
                     currentValue?.type,
-                    currentValue?.type?.name ?: "Any"
+                    currentValue?.type?.let { legacyStrings.forText(it.name) } ?: legacyStrings.forText("Any")
                 )
             },
             options = remember {
                 listOf(
                     LabeledEntry<PosterMatch.Type?>(
                         null,
-                        "Any"
+                        legacyStrings.forText("Any")
                     )
-                ).plus(PosterMatch.Type.entries.map { LabeledEntry(it, it.name) }
+                ).plus(PosterMatch.Type.entries.map { LabeledEntry(it, legacyStrings.forText(it.name)) }
                 )
             },
             onOptionChange = { state.setType(it.value) },
@@ -480,14 +488,14 @@ fun PosterConditionContent(
             selectedOption = remember(currentValue) {
                 LabeledEntry(
                     currentValue?.selected,
-                    currentValue?.selected?.toString() ?: "Any"
+                    currentValue?.selected?.localizedBoolean(legacyStrings) ?: legacyStrings.forText("Any")
                 )
             },
             options = remember {
                 listOf(
-                    LabeledEntry(null, "Any"),
-                    LabeledEntry(true, "True"),
-                    LabeledEntry(false, "False"),
+                    LabeledEntry(null, legacyStrings.forText("Any")),
+                    LabeledEntry(true, legacyStrings.forText("True")),
+                    LabeledEntry(false, legacyStrings.forText("False")),
                 )
             },
             onOptionChange = { state.setSelected(it.value) },
@@ -511,9 +519,10 @@ fun ReadListConditionContent(
     ) {
         val options = state.readListSuggestions.collectAsState(emptyList()).value
         val operator = state.operator.collectAsState().value
+        val legacyStrings = LocalStrings.current.legacy
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = operator.localizedEntry(legacyStrings),
+            options = EqualityOpState.Op.entries.localizedEntries(legacyStrings),
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
             label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }

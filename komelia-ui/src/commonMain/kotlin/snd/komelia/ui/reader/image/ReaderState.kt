@@ -40,10 +40,12 @@ import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.KomgaBookReadProgressUpdateRequest
 import snd.komga.client.common.KomgaReadingDirection
 import snd.komga.client.series.KomgaSeries
+import kotlin.coroutines.cancellation.CancellationException
 
 typealias SpreadIndex = Int
 
 class ReaderState(
+    private val initialBook: KomeliaBook?,
     private val bookApi: KomgaBookApi,
     private val seriesApi: KomgaSeriesApi,
     private val readListApi: KomgaReadListApi,
@@ -100,13 +102,14 @@ class ReaderState(
             state.value = LoadState.Loading
             val currentBooksState = booksState.value
             if (currentBooksState == null) state.value = LoadState.Loading
-            val newBook = bookApi.getOne(bookId)
+            val newBook = initialBook?.takeIf { it.id == bookId }
+                ?: bookApi.getOne(bookId)
 
             val bookPages = loadBookPages(newBook.id)
 
-            val prevBook = getPreviousBook(bookId)
+            val prevBook = getPreviousBook(newBook)
             val prevBookPages = if (prevBook != null) loadBookPages(prevBook.id) else emptyList()
-            val nextBook = getNextBook(bookId)
+            val nextBook = getNextBook(newBook)
             val nextBookPages = if (nextBook != null) loadBookPages(nextBook.id) else emptyList()
 
             booksState.value = BookState(
@@ -125,9 +128,9 @@ class ReaderState(
             }
             currentBookId.value = bookId
 
-            val currentSeries = seriesApi.getOneSeries(newBook.seriesId)
+            val currentSeries = runCatching { seriesApi.getOneSeries(newBook.seriesId) }.getOrNull()
             series.value = currentSeries
-            readerType.value = when (currentSeries.metadata.readingDirection) {
+            readerType.value = when (currentSeries?.metadata?.readingDirection) {
                 KomgaReadingDirection.LEFT_TO_RIGHT -> ReaderType.PAGED
                 KomgaReadingDirection.RIGHT_TO_LEFT -> ReaderType.PAGED
                 KomgaReadingDirection.WEBTOON -> ReaderType.CONTINUOUS
@@ -153,32 +156,42 @@ class ReaderState(
         }
     }
 
-    private suspend fun getNextBook(currentBookId: KomgaBookId): KomeliaBook? {
+    private suspend fun getNextBook(currentBook: KomeliaBook): KomeliaBook? {
+        val currentBookId = currentBook.id
         return try {
             when (bookSiblingsContext) {
                 is BookSiblingsContext.ReadList ->
-                    readListApi.getBookSiblingNext(bookSiblingsContext.id, currentBookId)
+                    if (currentBook.downloaded) bookApi.getBookSiblingNext(currentBookId)
+                    else readListApi.getBookSiblingNext(bookSiblingsContext.id, currentBookId)
 
                 BookSiblingsContext.Series -> bookApi.getBookSiblingNext(currentBookId)
             }
         } catch (e: ClientRequestException) {
             if (e.response.status != NotFound) throw e
             else null
+        } catch (e: Throwable) {
+            if (e is CancellationException) throw e
+            null
         }
 
     }
 
-    private suspend fun getPreviousBook(currentBookId: KomgaBookId): KomeliaBook? {
+    private suspend fun getPreviousBook(currentBook: KomeliaBook): KomeliaBook? {
+        val currentBookId = currentBook.id
         return try {
             when (bookSiblingsContext) {
                 is BookSiblingsContext.ReadList ->
-                    readListApi.getBookSiblingPrevious(bookSiblingsContext.id, currentBookId)
+                    if (currentBook.downloaded) bookApi.getBookSiblingPrevious(currentBookId)
+                    else readListApi.getBookSiblingPrevious(bookSiblingsContext.id, currentBookId)
 
                 BookSiblingsContext.Series -> bookApi.getBookSiblingPrevious(currentBookId)
             }
         } catch (e: ClientRequestException) {
             if (e.response.status != NotFound) throw e
             else null
+        } catch (e: Throwable) {
+            if (e is CancellationException) throw e
+            null
         }
 
     }
@@ -186,7 +199,7 @@ class ReaderState(
     suspend fun loadNextBook() {
         val booksState = requireNotNull(booksState.value)
         if (booksState.nextBook != null) {
-            val nextBook = getNextBook(booksState.nextBook.id)
+            val nextBook = getNextBook(booksState.nextBook)
             val nextBookPages = if (nextBook != null) loadBookPages(nextBook.id) else emptyList()
 
             this.booksState.value = BookState(
@@ -210,7 +223,7 @@ class ReaderState(
     suspend fun loadPreviousBook() {
         val booksState = requireNotNull(booksState.value)
         if (booksState.previousBook != null) {
-            val previousBook = getPreviousBook(booksState.previousBook.id)
+            val previousBook = getPreviousBook(booksState.previousBook)
             val previousBookPages =
                 if (previousBook != null) loadBookPages(previousBook.id) else emptyList()
 

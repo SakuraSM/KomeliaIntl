@@ -96,7 +96,7 @@ fun CommonImageSettings(
             )
             if (isColorCorrectionsActive) {
                 Text(
-                    "active",
+                    strings.legacy.forText("active"),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -120,7 +120,7 @@ fun CommonImageSettings(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.width(100.dp)) {
-                            Text("Flash Duration", style = MaterialTheme.typography.labelLarge)
+                            Text(strings.legacy.forText("Flash Duration"), style = MaterialTheme.typography.labelLarge)
                             Text("$flashDuration ms", style = MaterialTheme.typography.labelMedium)
                         }
                         Slider(
@@ -134,10 +134,12 @@ fun CommonImageSettings(
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.width(100.dp)) {
-                            Text("Flash every", style = MaterialTheme.typography.labelLarge)
+                            Text(strings.legacy.forText("Flash every"), style = MaterialTheme.typography.labelLarge)
                             val pagesText = remember(flashEveryNPages) {
-                                if (flashEveryNPages == 1) "$flashEveryNPages page"
-                                else "$flashEveryNPages pages"
+                                strings.legacy.forText(
+                                    if (flashEveryNPages == 1) "$flashEveryNPages page"
+                                    else "$flashEveryNPages pages"
+                                )
                             }
                             Text(pagesText, style = MaterialTheme.typography.labelMedium)
                         }

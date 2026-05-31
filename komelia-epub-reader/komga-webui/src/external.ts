@@ -25,7 +25,7 @@ declare global {
         // readListGetBookSiblingNext: (readListId: string, bookId: string) => Promise<BookDto>
         // readListGetBookSiblingPrevious: (readListId: string, bookId: string) => Promise<BookDto>
 
-        d2ReaderGetContent: (href: string) => Promise<CallbackResponse<string>>;
+        d2ReaderGetContent: (href: string) => Promise<CallbackResponse<string | null>>;
         d2ReaderGetContentBytesLength: (href: string, requestConfig?: RequestConfig) => Promise<CallbackResponse<number>>;
 
         getReaderSettings: () => Promise<CallbackResponse<EpubReaderSettings>>;
@@ -88,7 +88,8 @@ export default class ExternalFunctions {
     }
 
     async d2ReaderGetContent(href: string): Promise<string> {
-        return window.d2ReaderGetContent(href).then((value) => value.result)
+        return window.d2ReaderGetContent(href)
+            .then((value) => value.result ?? (undefined as unknown as string))
     }
 
     async d2ReaderGetContentBytesLength(href: string, requestConfig?: RequestConfig): Promise<number> {

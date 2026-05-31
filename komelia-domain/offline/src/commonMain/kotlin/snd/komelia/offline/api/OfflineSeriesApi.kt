@@ -179,7 +179,12 @@ class OfflineSeriesApi(
         seriesId: KomgaSeriesId,
         thumbnailId: KomgaThumbnailId
     ): ByteArray {
-        TODO("Not yet implemented")
+        val thumbnail = seriesThumbnailRepository.find(thumbnailId)
+            ?: seriesThumbnailRepository.findSelectedBySeriesId(seriesId)
+            ?: throw IllegalStateException("Series thumbnail $thumbnailId is not downloaded")
+
+        if (thumbnail.seriesId != seriesId) throw IllegalStateException("Series thumbnail $thumbnailId does not belong to $seriesId")
+        return thumbnail.thumbnail ?: throw IllegalStateException("Series thumbnail $thumbnailId content is missing")
     }
 
     override suspend fun getThumbnails(seriesId: KomgaSeriesId): List<KomgaSeriesThumbnail> {

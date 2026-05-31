@@ -14,9 +14,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okio.Path.Companion.toPath
+import snd.komelia.api.LocalFirstBookApi
 import snd.komelia.api.RemoteActuatorApi
 import snd.komelia.api.RemoteAnnouncementsApi
 import snd.komelia.api.RemoteApi
@@ -92,11 +95,31 @@ abstract class AppModule {
             }
         )
 
-        val baseUrl = appRepositories.settingsRepository.getServerUrl().stateIn(initScope)
+        val primaryServerUrl = appRepositories.settingsRepository.getServerUrl().stateIn(initScope)
+        val lanServerUrl = appRepositories.settingsRepository.getLanServerUrl().stateIn(initScope)
+        val lanAutoSwitchEnabled = appRepositories.settingsRepository.getLanAutoSwitchEnabled().stateIn(initScope)
+        val serverUrlResolver = DefaultServerUrlResolver(
+            primaryServerUrl = primaryServerUrl,
+            lanServerUrl = lanServerUrl,
+            lanAutoSwitchEnabled = lanAutoSwitchEnabled,
+            networkChangeEvents = networkChangeEvents(),
+            httpClient = ktorWithoutCache.config { expectSuccess = false },
+            scope = initScope,
+        )
+        val baseUrl = serverUrlResolver.effectiveServerUrl
         val komfUrl = appRepositories.komfSettingsRepository.getKomfUrl().stateIn(initScope)
+        val knownServerUrls = primaryServerUrl
+            .combine(lanServerUrl) { primaryUrl, lanUrl ->
+                listOf(primaryUrl, lanUrl)
+                    .filter { it.isNotBlank() }
+                    .distinct()
+                    .mapNotNull { runCatching { Url(it) }.getOrNull() }
+            }
+            .stateIn(initScope)
 
         val cookiesStorage = RememberMePersistingCookieStore(
             baseUrl.map { Url(it) }.stateIn(initScope),
+            knownServerUrls,
             appRepositories.secretsRepository
         )
         cookiesStorage.loadRememberMeCookie()
@@ -122,7 +145,7 @@ abstract class AppModule {
 
         val isOffline = offlineRepositories.offlineSettingsRepository.getOfflineMode().stateIn(initScope)
         val currentUserFlow = MutableStateFlow<KomgaUser?>(null)
-        val currentServerUrl = appRepositories.settingsRepository.getServerUrl().stateIn(initScope)
+        val currentServerUrl = baseUrl
 
         val androidContext = createCoilContext()
         val offlineModule: OfflineDependencies = createOfflineModule(
@@ -131,26 +154,29 @@ abstract class AppModule {
             onlineUser = currentUserFlow
                 .combine(isOffline) { user, isOffline -> if (isOffline) null else user }
                 .stateIn(initScope),
-            onlineServerUrl = appRepositories.settingsRepository.getServerUrl().stateIn(initScope),
+            onlineServerUrl = baseUrl,
             isOffline = isOffline,
         ).initDependencies()
 
+        val remoteKomgaApi = createRemoteApi(
+            komgaClientFactory = komgaClientFactory,
+            offlineRepositories = offlineRepositories,
+            offlineEvents = offlineModule.komgaEvents
+        )
+        val remoteKomgaNoCacheApi = createRemoteApi(
+            komgaClientFactory = komgaClientFactoryNoCache,
+            offlineRepositories = offlineRepositories,
+            offlineEvents = offlineModule.komgaEvents
+        )
+        val readerBookApi = LocalFirstBookApi(
+            remoteBookApi = remoteKomgaNoCacheApi.bookApi,
+            offlineBookApi = offlineModule.komgaApi.bookApi,
+            offlineBookRepository = offlineRepositories.bookRepository,
+        )
+
         val komgaApi = isOffline.map { offline ->
             if (offline) offlineModule.komgaApi
-            else createRemoteApi(
-                komgaClientFactory = komgaClientFactory,
-                offlineRepositories = offlineRepositories,
-                offlineEvents = offlineModule.komgaEvents
-            )
-        }.stateIn(initScope)
-
-        val komgaNoRemoteCacheApi = isOffline.map { offline ->
-            if (offline) offlineModule.komgaApi
-            else createRemoteApi(
-                komgaClientFactory = komgaClientFactoryNoCache,
-                offlineRepositories = offlineRepositories,
-                offlineEvents = offlineModule.komgaEvents
-            )
+            else remoteKomgaApi
         }.stateIn(initScope)
 
         val komgaSharedState = KomgaAuthenticationState(
@@ -191,6 +217,9 @@ abstract class AppModule {
             context = androidContext,
             decoder = imageDecoder,
         )
+        baseUrl.drop(1)
+            .onEach { coil.memoryCache?.clear() }
+            .launchIn(initScope)
 
         val komgaEvents = ManagedKomgaEvents(
             komgaApi = komgaApi,
@@ -217,8 +246,10 @@ abstract class AppModule {
         return DependencyContainer(
             appStrings = appStringsFlow,
             appRepositories = appRepositories,
+            serverUrlResolver = serverUrlResolver,
 
             komgaApi = komgaApi,
+            readerBookApi = readerBookApi,
             isOffline = isOffline,
             komfClientFactory = komfClientFactory,
             appNotifications = appNotifications,
@@ -230,7 +261,7 @@ abstract class AppModule {
             coilImageLoader = coil,
             imageDecoder = imageDecoder,
             bookImageLoader = createReaderImageLoader(
-                bookApi = komgaNoRemoteCacheApi.map { it.bookApi }.stateIn(initScope),
+                bookApi = MutableStateFlow<KomgaBookApi>(readerBookApi),
                 imageFactory = readerImageFactory,
                 imageDecoder = createImageDecoder()
             ),
@@ -340,6 +371,7 @@ abstract class AppModule {
     protected abstract suspend fun createOfflineRepositories(): OfflineRepositories
     protected abstract fun createKtorClient(): HttpClient
     protected abstract fun createKtorClientWithoutCache(): HttpClient
+    protected abstract fun networkChangeEvents(): Flow<Unit>
 
     protected abstract fun createAppUpdater(updateClient: UpdateClient): AppUpdater?
 

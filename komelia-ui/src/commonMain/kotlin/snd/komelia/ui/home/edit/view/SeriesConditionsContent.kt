@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.home.EqualityOpState
@@ -56,12 +57,13 @@ fun SeriesConditionContent(
     state: SeriesCustomFilterState,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        val legacyStrings = LocalStrings.current.legacy
         val sort = state.sort.collectAsState().value
         PageSettingsContent(
             pageSize = state.pageSize.collectAsState().value,
             onPageSizeChange = state::onPagSizeChange,
-            sort = remember(sort) { LabeledEntry(sort, sort.name) },
-            sortOptions = remember { SeriesSort.entries.map { LabeledEntry(it, it.name) } },
+            sort = sort.localizedEntry(legacyStrings),
+            sortOptions = SeriesSort.entries.localizedEntries(legacyStrings),
             onSortChange = state::onSortChange,
             sortDirection = state.sortDirection.collectAsState().value,
             onSortDirectionChange = state::onSortDirectionChange
@@ -92,10 +94,11 @@ fun SeriesMatchConditionContent(
     ) {
         FlowRow {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                val legacyStrings = LocalStrings.current.legacy
                 val type = state.matchType.collectAsState().value
                 DropdownChoiceMenu(
-                    selectedOption = LabeledEntry(type, type.name),
-                    options = MatchType.entries.map { LabeledEntry(it, it.name) },
+                    selectedOption = type.localizedEntry(legacyStrings),
+                    options = MatchType.entries.localizedEntries(legacyStrings),
                     onOptionChange = { state.setMatchType(it.value) }
                 )
                 IconButton(onClick = onConditionRemove) {
@@ -108,7 +111,7 @@ fun SeriesMatchConditionContent(
 
         }
         ConditionAddButton(
-            conditions = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.name) } },
+            conditions = SeriesConditionType.entries.localizedEntries(LocalStrings.current.legacy),
             onConditionAdd = state::addCondition,
         )
     }
@@ -153,7 +156,7 @@ private fun ConditionContent(
     when (condition) {
         is SeriesMatchConditionState -> SeriesMatchConditionContent(condition, onConditionRemove)
         null -> ConditionAddButton(
-            conditions = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.name) } },
+            conditions = SeriesConditionType.entries.localizedEntries(LocalStrings.current.legacy),
             onConditionAdd = onConditionAdd,
         )
 
@@ -270,8 +273,8 @@ private fun SeriesConditionLayout(
     content: @Composable RowScope.() -> Unit
 ) {
     SimpleConditionLayout(
-        conditionType = remember { LabeledEntry(type, type.name) },
-        options = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.name) } },
+        conditionType = type.localizedEntry(LocalStrings.current.legacy),
+        options = SeriesConditionType.entries.localizedEntries(LocalStrings.current.legacy),
         onConditionTypeChange = onTypeChange,
         onConditionRemove = onConditionRemove
     ) {
@@ -509,11 +512,12 @@ fun SeriesStatusConditionContent(
         onConditionRemove = onConditionRemove
     ) {
         val value = state.value.collectAsState().value
+        val legacyStrings = LocalStrings.current.legacy
         EqualityOpDropDownContent(
             operator = state.operator.collectAsState().value,
             onOpChange = state::setOp,
-            selectedValue = remember(value) { value?.let { LabeledEntry(it, it.name) } },
-            valueOptions = remember { KomgaSeriesStatus.entries.map { LabeledEntry(it, it.name) } },
+            selectedValue = value?.localizedEntry(legacyStrings),
+            valueOptions = KomgaSeriesStatus.entries.localizedEntries(legacyStrings),
             onValueChange = state::setValue
         )
     }
@@ -532,9 +536,10 @@ fun SeriesAgeRatingConditionContent(
         onConditionRemove = onConditionRemove
     ) {
         val operator = state.operator.collectAsState().value
+        val legacyStrings = LocalStrings.current.legacy
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = NumericNullableOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = operator.localizedEntry(legacyStrings),
+            options = NumericNullableOpState.Op.entries.localizedEntries(legacyStrings),
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
             label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
@@ -561,9 +566,10 @@ fun CollectionIdConditionContent(
     ) {
         val options = state.collectionsSuggestions.collectAsState(emptyList()).value
         val operator = state.operator.collectAsState().value
+        val legacyStrings = LocalStrings.current.legacy
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = operator.localizedEntry(legacyStrings),
+            options = EqualityOpState.Op.entries.localizedEntries(legacyStrings),
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
             label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }

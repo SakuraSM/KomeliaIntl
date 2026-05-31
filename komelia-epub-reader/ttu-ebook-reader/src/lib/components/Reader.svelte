@@ -131,10 +131,12 @@
   const ACTION_FEEDBACK_DURATION_MS = 500;
   const READER_TOAST_DURATION_MS = 1800;
   const SEARCH_DEBOUNCE_MS = 180;
+  const READER_CHROME_CENTER_ZONE_MIN = 0.25;
+  const READER_CHROME_CENTER_ZONE_MAX = 0.75;
 
   let showHeader = $state(false);
   let isBookmarkScreen = $state(false);
-  let showFooter = $state(true);
+  let showFooter = $state(false);
   let exploredCharCount = $state(0);
   let bookCharCount = $state(0);
   let autoScroller: AutoScroller | undefined = $state();
@@ -555,10 +557,12 @@
 
   function showReaderMenu() {
     showHeader = true;
+    showFooter = true;
   }
 
   function hideReaderChrome() {
     showHeader = false;
+    showFooter = false;
   }
 
   function showReaderToast(message: string) {
@@ -586,6 +590,42 @@
     }
 
     closeSelectionToolbar();
+  }
+
+  function handleReaderChromeClick(event: MouseEvent) {
+    if (showHeader || showFooter || showReaderImageGallery || $tocIsOpen$ || selectionToolbarState) {
+      return;
+    }
+
+    if (!isReaderCenterClick(event) || isInteractiveReaderTarget(event.target)) {
+      return;
+    }
+
+    if (window.getSelection()?.toString().trim()) {
+      return;
+    }
+
+    showReaderMenu();
+  }
+
+  function isReaderCenterClick(event: MouseEvent) {
+    const xRatio = event.clientX / window.innerWidth;
+    const yRatio = event.clientY / window.innerHeight;
+
+    return xRatio >= READER_CHROME_CENTER_ZONE_MIN &&
+      xRatio <= READER_CHROME_CENTER_ZONE_MAX &&
+      yRatio >= READER_CHROME_CENTER_ZONE_MIN &&
+      yRatio <= READER_CHROME_CENTER_ZONE_MAX;
+  }
+
+  function isInteractiveReaderTarget(target: EventTarget | null) {
+    if (!(target instanceof Element)) {
+      return false;
+    }
+
+    return !!target.closest(
+      'a, button, input, textarea, select, [role="button"], [role="dialog"], [contenteditable="true"]'
+    );
   }
 
   function closeSelectionToolbar() {
@@ -643,6 +683,7 @@
   function onKeydown(ev: KeyboardEvent) {
     if (ev.key === 'Escape') {
       showHeader = false;
+      showFooter = false;
       showReaderImageGallery = false;
       tocIsOpen$.next(false);
       activeSearchResultId = undefined;
@@ -1086,14 +1127,13 @@
       viewMode={$viewMode$}
       autoScrollMultiplier={$multiplier$}
       autoScrollEnabled={isAutoScrollerEnabled}
-      onShowMenu={showReaderMenu}
       onOpenNavigation={openToc}
       onPreviousPage={goToPreviousPage}
       onNextPage={goToNextPage}
       onPreviousChapter={goToPreviousChapter}
       onNextChapter={goToNextChapter}
       onCopyProgress={copyProgressWithFeedback}
-      onToggleFooter={() => (showFooter = !showFooter)}
+      onToggleFooter={() => (showFooter = false)}
       onToggleAutoScroll={toggleAutoScroll}
       onAutoScrollMultiplierChange={updateAutoScrollMultiplier}
   />
@@ -1269,6 +1309,7 @@
 
 <svelte:window
     on:keydown={onKeydown}
+    on:click={handleReaderChromeClick}
     on:beforeunload={handleUnload}
     on:resize={() => {
   }}

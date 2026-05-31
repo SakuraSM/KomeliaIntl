@@ -7,7 +7,9 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.io.files.Path
@@ -237,6 +239,8 @@ class DesktopAppModule(
     override fun createKtorClientWithoutCache(): HttpClient {
         return configureKtor(okHttpClientWithoutCache)
     }
+
+    override fun networkChangeEvents(): Flow<Unit> = emptyFlow()
 
     private fun configureKtor(okHttpClient: OkHttpClient): HttpClient {
         return HttpClient(OkHttp) {

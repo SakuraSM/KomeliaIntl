@@ -324,6 +324,62 @@
     };
   }
 
+  function getScrollAdjustmentOffset() {
+    return !customReadingPointScrollOffset ||
+    (customReadingPointScrollOffset && scrollAdjustment > customReadingPointScrollOffset)
+      ? scrollAdjustment
+      : 0;
+  }
+
+  function resolveChapterTarget(chapterId: string) {
+    let targetElement = document.getElementById(chapterId);
+
+    if (!targetElement) {
+      const normalizedChapterId = chapterId.split('#')[0];
+      targetElement = document.getElementById(normalizedChapterId);
+    }
+
+    if (!targetElement) {
+      return undefined;
+    }
+
+    const checkForParent = !chapterId.startsWith(prependValue);
+
+    return checkForParent
+      ? targetElement.closest<HTMLElement>(`div[id^="${prependValue}"]`) || targetElement
+      : targetElement;
+  }
+
+  function scrollToChapterElement(targetElement: HTMLElement) {
+    const rect = targetElement.getBoundingClientRect();
+    const adjustment = getScrollAdjustmentOffset();
+
+    willNavigate = true;
+
+    if (verticalMode) {
+      window.scrollTo({
+        left: Math.max(
+          0,
+          window.scrollX + rect.right - window.innerWidth + (firstDimensionMargin || 0) +
+          customReadingPointScrollOffset + adjustment
+        ),
+        top: 0,
+        behavior: 'instant'
+      });
+      return;
+    }
+
+    window.scrollTo({
+      left: 0,
+      top: Math.max(
+        0,
+        window.scrollY + rect.top - (firstDimensionMargin || 0) -
+        customReadingPointScrollOffset - adjustment
+      ),
+      behavior: 'instant'
+    });
+  }
+
   /** Experimental Code - May be removed any time without warning */
 
   onDestroy(() => {
@@ -578,48 +634,13 @@
   }
 
   nextChapter$.pipe(takeUntil(destroy$)).subscribe((chapterId) => {
-    let targetElement = document.getElementById(chapterId);
+    const targetElement = resolveChapterTarget(chapterId);
 
     if (!targetElement) {
       return;
     }
 
-    const checkForParent = !chapterId.startsWith(prependValue);
-
-    targetElement = checkForParent
-      ? targetElement.closest(`div[id^="${prependValue}"]`) || targetElement
-      : targetElement;
-
-    willNavigate = true;
-
-    const rect = targetElement.getBoundingClientRect();
-
-    if (verticalMode) {
-      window.scrollBy(
-        -(
-          window.innerWidth -
-          rect.right -
-          (firstDimensionMargin || 0) -
-          customReadingPointScrollOffset -
-          (!customReadingPointScrollOffset ||
-          (customReadingPointScrollOffset && scrollAdjustment > customReadingPointScrollOffset)
-            ? scrollAdjustment
-            : 0)
-        ),
-        0
-      );
-    } else {
-      window.scrollBy(
-        0,
-        rect.top -
-        (firstDimensionMargin || 0) -
-        customReadingPointScrollOffset -
-        (!customReadingPointScrollOffset ||
-        (customReadingPointScrollOffset && scrollAdjustment > customReadingPointScrollOffset)
-          ? scrollAdjustment
-          : 0)
-      );
-    }
+    scrollToChapterElement(targetElement);
   });
 </script>
 

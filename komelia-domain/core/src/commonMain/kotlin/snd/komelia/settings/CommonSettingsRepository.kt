@@ -11,6 +11,12 @@ interface CommonSettingsRepository {
     fun getServerUrl(): Flow<String>
     suspend fun putServerUrl(url: String)
 
+    fun getLanServerUrl(): Flow<String>
+    suspend fun putLanServerUrl(url: String)
+
+    fun getLanAutoSwitchEnabled(): Flow<Boolean>
+    suspend fun putLanAutoSwitchEnabled(enabled: Boolean)
+
     fun getCardWidth(): Flow<Int>
     suspend fun putCardWidth(cardWidth: Int)
 

@@ -185,19 +185,20 @@ fun BottomSheetSettingsOverlay(
                 SecondaryTabRow(
                     selectedTabIndex = selectedTab,
                 ) {
+                    val strings = LocalStrings.current
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
                         modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
                     ) {
-                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reading mode"))
+                        Text(strings.legacy.forText("Reading mode"))
                     }
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
                         modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
                     ) {
-                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Image settings"))
+                        Text(strings.legacy.forText("Image settings"))
                     }
                 }
                 val focusManager = LocalFocusManager.current
@@ -272,24 +273,25 @@ private fun BottomSheetReadingModeSettings(
     continuousReaderState: ContinuousReaderState,
     panelsReaderState: PanelsReaderState?,
 ) {
+    val strings = LocalStrings.current
     Column {
-        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reading mode"))
+        Text(strings.legacy.forText("Reading mode"))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             InputChip(
                 selected = readerType == PAGED,
                 onClick = { onReaderTypeChange(PAGED) },
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Paged")) }
+                label = { Text(strings.reader.readerPaged) }
             )
             InputChip(
                 selected = readerType == CONTINUOUS,
                 onClick = { onReaderTypeChange(CONTINUOUS) },
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Continuous")) }
+                label = { Text(strings.reader.readerContinuous) }
             )
             if (panelsReaderState != null)
                 InputChip(
                     selected = readerType == PANELS,
                     onClick = { onReaderTypeChange(PANELS) },
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Panels")) }
+                    label = { Text(strings.reader.readerPanels) }
                 )
         }
 
@@ -451,7 +453,7 @@ private fun ContinuousModeSettings(
             val sidePadding = state.sidePaddingFraction.collectAsState().value
             val paddingPercentage = remember(sidePadding) { (sidePadding * 200).roundToInt() }
             Column(Modifier.width(100.dp)) {
-                Text("Side padding", style = MaterialTheme.typography.labelLarge)
+                Text(strings.sidePadding, style = MaterialTheme.typography.labelLarge)
                 Text("$paddingPercentage%", style = MaterialTheme.typography.labelMedium)
             }
             Slider(
@@ -466,7 +468,7 @@ private fun ContinuousModeSettings(
         Row(verticalAlignment = Alignment.CenterVertically) {
             val spacing = state.pageSpacing.collectAsState(Dispatchers.Main.immediate).value
             Column(Modifier.width(100.dp)) {
-                Text("Page spacing", style = MaterialTheme.typography.labelLarge)
+                Text(strings.pageSpacing, style = MaterialTheme.typography.labelLarge)
                 Text("$spacing", style = MaterialTheme.typography.labelMedium)
             }
             when (windowWidth) {
@@ -643,7 +645,10 @@ private fun SamplingModeSettings(
         onCheckedChange = onLinearLightDownsamplingChange,
         label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Linear light downsampling")) },
         supportingText = {
-            Text("slower but potentially more accurate", style = MaterialTheme.typography.labelMedium)
+            Text(
+                snd.komelia.ui.LocalStrings.current.legacy.forText("slower but potentially more accurate"),
+                style = MaterialTheme.typography.labelMedium
+            )
         },
         contentPadding = PaddingValues(horizontal = 10.dp)
     )

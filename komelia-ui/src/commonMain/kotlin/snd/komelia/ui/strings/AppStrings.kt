@@ -161,6 +161,7 @@ data class LegacyStrings(
             text.startsWith("Download book ") -> "下载书籍 ${text.removePrefix("Download book ")}"
             text.startsWith("Download series ") -> "下载系列 ${text.removePrefix("Download series ")}"
             text.startsWith("Book ") && text.matches(Regex("Book \\d+")) -> "书籍 ${text.removePrefix("Book ")}"
+            text.matches(Regex("\\d+ page")) -> "${text.removeSuffix(" page")} 页"
             text.matches(Regex("\\d+ pages")) -> "${text.removeSuffix(" pages")} 页"
             text.matches(Regex("Book #.+ · \\d+ pages")) -> {
                 val number = text.substringAfter("Book #").substringBefore(" · ")

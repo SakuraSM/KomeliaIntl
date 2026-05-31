@@ -18,8 +18,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -32,7 +32,6 @@ import snd.komelia.fonts.getSystemFontNames
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.resolve
-import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.settings.EpubReaderSettingsRepository
 import snd.komelia.settings.model.TtsuReaderSettings
 import snd.komelia.settings.model.TtsuUserFont
@@ -68,7 +67,7 @@ class TtsuReaderState(
     private val bookApi: KomgaBookApi,
     private val notifications: AppNotifications,
     private val markReadProgress: Boolean,
-    private val settingsRepository: CommonSettingsRepository,
+    private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
     private val fontsRepository: UserFontsRepository,
     private val windowState: AppWindowState,
@@ -226,7 +225,6 @@ class TtsuReaderState(
             closeWebview()
         }
 
-        val serverUrl = settingsRepository.getServerUrl().stateIn(coroutineScope)
         webview.registerRequestInterceptor { request ->
             runCatching {
                 val urlString = request.url.toString()
@@ -376,8 +374,6 @@ class TtsuReaderState(
         val positions = bookApi.getReadiumPositions(bookId)
         val sectionData: MutableList<TtuSection> = mutableListOf()
         val result = Element("div")
-        val serverUrl = settingsRepository.getServerUrl()
-
         var currentCharCount = 0L
         var currentMainChapterIndex: Int? = null
         val images = mutableListOf<Url>()

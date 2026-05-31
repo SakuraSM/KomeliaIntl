@@ -1,5 +1,5 @@
 [versions]
-app-version = "0.18.9"
+app-version = "0.18.10"
 agp = "8.13.2"
 android-compileSdk = "36"
 android-minSdk = "26"
@@ -16,6 +16,7 @@ androidx-workManager = "2.11.2"
 cache4k = "0.14.0"
 coil = "3.4.0"
 commons-compress = "1.28.0"
+junrar = "7.5.5"
 compose-multiplatform = "1.11.0-beta03"
 compose-material3 = "1.11.0-alpha07"
 compose-materialIconsExtended = "1.7.3"
@@ -72,6 +73,7 @@ coil = { module = "io.coil-kt.coil3:coil", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
+junrar = { module = "com.github.junrar:junrar", version.ref = "junrar" }
 directories = { module = "dev.dirs:directories", version.ref = "directories" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }

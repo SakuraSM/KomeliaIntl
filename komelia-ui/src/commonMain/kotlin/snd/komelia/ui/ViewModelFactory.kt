@@ -63,6 +63,7 @@ import snd.komelia.ui.settings.komf.notifications.KomfNotificationSettingsViewMo
 import snd.komelia.ui.settings.komf.processing.KomfProcessingSettingsViewModel
 import snd.komelia.ui.settings.komf.providers.KomfProvidersSettingsViewModel
 import snd.komelia.ui.settings.navigation.SettingsNavigationViewModel
+import snd.komelia.ui.settings.network.NetworkSettingsViewModel
 import snd.komelia.ui.settings.offline.OfflineSettingsViewModel
 import snd.komelia.ui.settings.server.ServerSettingsViewModel
 import snd.komelia.ui.settings.updates.AppUpdatesViewModel
@@ -236,12 +237,14 @@ class ViewModelFactory(
     )
 
     fun getBookReaderViewModel(
+        book: KomeliaBook? = null,
         navigator: Navigator,
         markReadProgress: Boolean,
         bookSiblingsContext: BookSiblingsContext
     ): ReaderViewModel {
         return ReaderViewModel(
-            bookApi = komgaApi.bookApi,
+            book = book,
+            bookApi = dependencies.readerBookApi,
             seriesApi = komgaApi.seriesApi,
             readListApi = komgaApi.readListApi,
             navigator = navigator,
@@ -454,7 +457,7 @@ class ViewModelFactory(
             secretsRepository = appRepositories.secretsRepository,
             offlineSettingsRepository = dependencies.offlineDependencies.repositories.offlineSettingsRepository,
             isOffline = dependencies.isOffline,
-            currentServerUrl = appRepositories.settingsRepository.getServerUrl(),
+            currentServerUrl = dependencies.serverUrlResolver.effectiveServerUrl,
             bookApi = komgaApi.bookApi,
             latestVersion = appRepositories.settingsRepository.getLastCheckedReleaseVersion(),
             komfEnabled = appRepositories.komfSettingsRepository.getKomfEnabled(),
@@ -466,6 +469,13 @@ class ViewModelFactory(
 
     fun getAppearanceViewModel(): AppSettingsViewModel {
         return AppSettingsViewModel(appRepositories.settingsRepository)
+    }
+
+    fun getNetworkSettingsViewModel(): NetworkSettingsViewModel {
+        return NetworkSettingsViewModel(
+            settingsRepository = appRepositories.settingsRepository,
+            serverUrlResolver = dependencies.serverUrlResolver,
+        )
     }
 
     fun getSettingsUpdatesViewModel(): AppUpdatesViewModel {
@@ -603,10 +613,10 @@ class ViewModelFactory(
             bookId = bookId,
             book = book,
             markReadProgress = markReadProgress,
-            bookApi = komgaApi.bookApi,
+            bookApi = dependencies.readerBookApi,
             seriesApi = komgaApi.seriesApi,
             readListApi = komgaApi.readListApi,
-            settingsRepository = appRepositories.settingsRepository,
+            serverUrl = dependencies.serverUrlResolver.effectiveServerUrl,
             epubSettingsRepository = appRepositories.epubReaderSettingsRepository,
             fontsRepository = appRepositories.fontsRepository,
             notifications = dependencies.appNotifications,

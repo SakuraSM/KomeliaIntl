@@ -6,6 +6,8 @@ object AppSettingsTable : Table("AppSettings") {
     val version = integer("version")
     val username = text("username")
     val serverUrl = text("serverUrl")
+    val lanServerUrl = text("lan_server_url")
+    val lanAutoSwitchEnabled = bool("lan_auto_switch_enabled")
     val cardWidth = integer("card_width")
     val seriesPageLoadSize = integer("series_page_load_size")
 

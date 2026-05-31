@@ -10,11 +10,12 @@ private val logger = KotlinLogging.logger { }
 
 class BookContentExtractors(
     divinaExtractors: List<DivinaExtractor>,
-    private val epubExtractor: EpubExtractor
+    private val epubExtractor: EpubExtractor,
+    private val pdfExtractor: PdfExtractor? = null,
 ) {
 
     val divinaExtractors = divinaExtractors
-        .flatMap { e -> e.mediaTypes().map { it to e } }
+        .flatMap { e -> e.mediaTypes().map { it.normalizeMediaType() to e } }
         .toMap()
 
     fun getBookPage(
@@ -35,7 +36,7 @@ class BookContentExtractors(
 
         return when (media.mediaProfile) {
             MediaProfile.DIVINA -> getDivinaExtractorOrThrow(media)
-                .getEntryBytes(book.fileDownloadPath, media.pages[page - 1].fileName)
+                .getEntryBytes(book.fileDownloadPath, media.pages[page - 1].fileName, page)
 
             MediaProfile.EPUB -> {
                 if (media.epubDivinaCompatible) {
@@ -44,7 +45,13 @@ class BookContentExtractors(
             }
 
             MediaProfile.PDF -> {
-                TODO()
+                val pageMetadata = media.pages[page - 1]
+                pdfExtractor?.getPageBytes(
+                    file = book.fileDownloadPath,
+                    pageNumber = page,
+                    preferredWidth = pageMetadata.width,
+                    preferredHeight = pageMetadata.height,
+                ) ?: throw IllegalStateException("PDF local reading is not supported on this platform")
             }
 
             null -> throw IllegalStateException("Media is not ready")
@@ -65,6 +72,8 @@ class BookContentExtractors(
 
     private fun getDivinaExtractorOrThrow(media: OfflineMedia): DivinaExtractor {
         val type = checkNotNull(media.mediaType) { "Book media type is null" }
-        return checkNotNull(divinaExtractors[type]) { "Unsupported book file format $type" }
+        return checkNotNull(divinaExtractors[type.normalizeMediaType()]) { "Unsupported book file format $type" }
     }
+
+    private fun String.normalizeMediaType() = substringBefore(";").trim().lowercase()
 }

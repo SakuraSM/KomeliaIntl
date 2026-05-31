@@ -46,6 +46,7 @@ import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.MediaProfile.DIVINA
 import snd.komga.client.book.MediaProfile.EPUB
 import snd.komga.client.book.MediaProfile.PDF
+import kotlin.jvm.Transient
 
 fun readerScreen(
     book: KomeliaBook,
@@ -58,6 +59,7 @@ fun readerScreen(
         mediaProfile == DIVINA || mediaProfile == PDF || book.media.epubDivinaCompatible -> {
             ImageReaderScreen(
                 bookId = book.id,
+                book = book,
                 markReadProgress = markReadProgress,
                 bookSiblingsContext = context
             )
@@ -75,6 +77,8 @@ fun readerScreen(
 
 class ImageReaderScreen(
     private val bookId: KomgaBookId,
+    @Transient
+    private val book: KomeliaBook? = null,
     private val bookSiblingsContext: BookSiblingsContext,
     private val markReadProgress: Boolean = true,
 ) : Screen {
@@ -86,6 +90,7 @@ class ImageReaderScreen(
         val viewModelFactory = LocalViewModelFactory.current
         val vm = rememberScreenModel(bookId.value) {
             viewModelFactory.getBookReaderViewModel(
+                book = book,
                 navigator = navigator,
                 markReadProgress = markReadProgress,
                 bookSiblingsContext = bookSiblingsContext

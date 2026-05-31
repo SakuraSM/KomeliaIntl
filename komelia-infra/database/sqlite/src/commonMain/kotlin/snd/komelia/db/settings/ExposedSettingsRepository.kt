@@ -29,6 +29,8 @@ class ExposedSettingsRepository(database: Database) : ExposedRepository(database
                 it[version] = 1
                 it[username] = settings.username
                 it[serverUrl] = settings.serverUrl
+                it[lanServerUrl] = settings.lanServerUrl
+                it[lanAutoSwitchEnabled] = settings.lanAutoSwitchEnabled
                 it[cardWidth] = settings.cardWidth
 
                 it[seriesPageLoadSize] = settings.seriesPageLoadSize
@@ -49,6 +51,8 @@ class ExposedSettingsRepository(database: Database) : ExposedRepository(database
         return AppSettings(
             username = get(AppSettingsTable.username),
             serverUrl = get(AppSettingsTable.serverUrl),
+            lanServerUrl = get(AppSettingsTable.lanServerUrl),
+            lanAutoSwitchEnabled = get(AppSettingsTable.lanAutoSwitchEnabled),
             cardWidth = get(AppSettingsTable.cardWidth),
             seriesPageLoadSize = get(AppSettingsTable.seriesPageLoadSize),
             bookPageLoadSize = get(AppSettingsTable.bookPageLoadSize),

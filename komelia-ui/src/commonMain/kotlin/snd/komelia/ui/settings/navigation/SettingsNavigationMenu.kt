@@ -49,6 +49,7 @@ import snd.komelia.ui.settings.komf.jobs.KomfJobsScreen
 import snd.komelia.ui.settings.komf.notifications.KomfNotificationSettingsScreen
 import snd.komelia.ui.settings.komf.processing.KomfProcessingSettingsScreen
 import snd.komelia.ui.settings.komf.providers.KomfProvidersSettingsScreen
+import snd.komelia.ui.settings.network.NetworkSettingsScreen
 import snd.komelia.ui.settings.offline.OfflineSettingsScreen
 import snd.komelia.ui.settings.server.ServerSettingsScreen
 import snd.komelia.ui.settings.updates.AppUpdatesScreen
@@ -81,6 +82,12 @@ fun SettingsNavigationMenu(
             label = strings.appearance,
             onClick = { onNavigation(AppSettingsScreen()) },
             isSelected = currentScreen is AppSettingsScreen,
+            color = contentColor,
+        )
+        NavigationButton(
+            label = LocalStrings.current.legacy.forText("Network Connection"),
+            onClick = { onNavigation(NetworkSettingsScreen()) },
+            isSelected = currentScreen is NetworkSettingsScreen,
             color = contentColor,
         )
         NavigationButton(

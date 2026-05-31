@@ -1,0 +1,2 @@
+ALTER TABLE AppSettings ADD COLUMN lan_server_url TEXT NOT NULL DEFAULT '';
+ALTER TABLE AppSettings ADD COLUMN lan_auto_switch_enabled BOOLEAN NOT NULL DEFAULT FALSE;

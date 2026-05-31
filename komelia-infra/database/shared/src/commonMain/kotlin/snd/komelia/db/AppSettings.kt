@@ -11,6 +11,8 @@ import kotlin.time.Instant
 data class AppSettings(
     val username: String = "admin@example.org",
     val serverUrl: String = "http://localhost:25600",
+    val lanServerUrl: String = "",
+    val lanAutoSwitchEnabled: Boolean = false,
 
     val cardWidth: Int = 170,
     val seriesPageLoadSize: Int = 20,

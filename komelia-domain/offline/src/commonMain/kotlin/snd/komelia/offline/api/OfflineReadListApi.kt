@@ -13,6 +13,7 @@ import snd.komga.client.readlist.KomgaReadListId
 import snd.komga.client.readlist.KomgaReadListQuery
 import snd.komga.client.readlist.KomgaReadListThumbnail
 import snd.komga.client.readlist.KomgaReadListUpdateRequest
+import kotlin.time.Clock
 
 class OfflineReadListApi : KomgaReadListApi {
     override suspend fun getAll(
@@ -24,11 +25,31 @@ class OfflineReadListApi : KomgaReadListApi {
     }
 
     override suspend fun getOne(id: KomgaReadListId): KomgaReadList {
-        TODO("Not yet implemented")
+        val now = Clock.System.now()
+        return KomgaReadList(
+            id = id,
+            name = "",
+            summary = "",
+            ordered = false,
+            bookIds = emptyList(),
+            createdDate = now,
+            lastModifiedDate = now,
+            filtered = false,
+        )
     }
 
     override suspend fun addOne(request: KomgaReadListCreateRequest): KomgaReadList {
-        TODO("Not yet implemented")
+        val now = Clock.System.now()
+        return KomgaReadList(
+            id = KomgaReadListId(""),
+            name = request.name,
+            summary = request.summary,
+            ordered = request.ordered,
+            bookIds = emptyList(),
+            createdDate = now,
+            lastModifiedDate = now,
+            filtered = false,
+        )
     }
 
     override suspend fun updateOne(
@@ -49,14 +70,14 @@ class OfflineReadListApi : KomgaReadListApi {
     }
 
     override suspend fun getDefaultThumbnail(readListId: KomgaReadListId): ByteArray? {
-        TODO("Not yet implemented")
+        return null
     }
 
     override suspend fun getThumbnail(
         readListId: KomgaReadListId,
         thumbnailId: KomgaThumbnailId
     ): ByteArray {
-        TODO("Not yet implemented")
+        return ByteArray(0)
     }
 
     override suspend fun getThumbnails(readListId: KomgaReadListId): List<KomgaReadListThumbnail> {
@@ -69,7 +90,17 @@ class OfflineReadListApi : KomgaReadListApi {
         filename: String,
         selected: Boolean
     ): KomgaReadListThumbnail {
-        TODO("Not yet implemented")
+        val thumbnailId = KomgaThumbnailId("")
+        return KomgaReadListThumbnail(
+            id = thumbnailId,
+            readListId = readListId,
+            type = "",
+            selected = selected,
+            mediaType = "",
+            fileSize = file.size.toLong(),
+            width = 0,
+            height = 0,
+        )
     }
 
     override suspend fun selectThumbnail(
@@ -87,14 +118,14 @@ class OfflineReadListApi : KomgaReadListApi {
     override suspend fun getBookSiblingNext(
         readListId: KomgaReadListId,
         bookId: KomgaBookId
-    ): KomeliaBook {
-        TODO("Not yet implemented")
+    ): KomeliaBook? {
+        return null
     }
 
     override suspend fun getBookSiblingPrevious(
         readListId: KomgaReadListId,
         bookId: KomgaBookId
-    ): KomeliaBook {
-        TODO("Not yet implemented")
+    ): KomeliaBook? {
+        return null
     }
 }

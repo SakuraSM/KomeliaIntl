@@ -12,15 +12,17 @@ private const val sessionCookie = "KOMGA-SESSION"
 
 class RememberMePersistingCookieStore(
     private val komgaUrl: StateFlow<Url>,
+    private val knownKomgaUrls: StateFlow<List<Url>>,
     private val secretsRepository: SecretsRepository,
 ) : CookiesStorage {
     private val delegate = AcceptAllCookiesStorage()
 
     suspend fun loadRememberMeCookie() {
-        val url = komgaUrl.value
-        secretsRepository.getCookie(url.toString())
-            ?.let { parseServerSetCookieHeader(it) }
-            ?.let { delegate.addCookie(url, it) }
+        knownKomgaUrls.value.forEach { url ->
+            secretsRepository.getCookie(url.toString())
+                ?.let { parseServerSetCookieHeader(it) }
+                ?.let { addCookieToKnownUrls(url, it) }
+        }
     }
 
     /**
@@ -36,11 +38,13 @@ class RememberMePersistingCookieStore(
             return
         }
 
-        delegate.addCookie(requestUrl, cookie)
+        if (isKnownKomgaUrl(requestUrl)) addCookieToKnownUrls(requestUrl, cookie)
+        else delegate.addCookie(requestUrl, cookie)
+
         if (
             (cookie.name == rememberMeCookie || cookie.name == deprecatedRememberMeCookie)
             && cookie.value.isNotBlank()
-            && komgaUrl.value.host == requestUrl.host
+            && isKnownKomgaUrl(requestUrl)
         ) {
             secretsRepository.setCookie(komgaUrl.value.toString(), renderSetCookieHeader(cookie))
         }
@@ -49,10 +53,26 @@ class RememberMePersistingCookieStore(
 
     override suspend fun get(requestUrl: Url): List<Cookie> {
         val cookies = delegate.get(requestUrl)
-        return cookies
+        if (cookies.isNotEmpty() || !isKnownKomgaUrl(requestUrl)) return cookies
+
+        return knownKomgaUrls.value
+            .flatMap { delegate.get(it) }
+            .distinctBy { it.name }
+            .map { it.copy(domain = null, path = requestUrl.encodedPath.ifBlank { "/" }) }
     }
 
     override fun close() {
         delegate.close()
+    }
+
+    private suspend fun addCookieToKnownUrls(requestUrl: Url, cookie: Cookie) {
+        knownKomgaUrls.value
+            .forEach { url ->
+                delegate.addCookie(url, cookie.copy(domain = null, path = url.encodedPath.ifBlank { "/" }))
+            }
+    }
+
+    private fun isKnownKomgaUrl(url: Url): Boolean {
+        return knownKomgaUrls.value.any { it.host == url.host && it.port == url.port }
     }
 }

@@ -161,13 +161,15 @@ fun SettingsNavigationMenu(
                     isSelected = currentScreen is AuthenticationActivityScreen && !currentScreen.forMe,
                     color = contentColor,
                 )
-                NavigationButton(
-                    label = strings.mediaManagement,
-                    onClick = { onNavigation(MediaAnalysisScreen()) },
-                    isSelected = currentScreen is MediaAnalysisScreen,
-                    error = hasMediaErrors,
-                    color = contentColor,
-                )
+                if (hasMediaErrors) {
+                    NavigationButton(
+                        label = strings.mediaManagement,
+                        onClick = { onNavigation(MediaAnalysisScreen()) },
+                        isSelected = currentScreen is MediaAnalysisScreen,
+                        error = true,
+                        color = contentColor,
+                    )
+                }
 
                 NavigationButton(
                     label = strings.announcements,

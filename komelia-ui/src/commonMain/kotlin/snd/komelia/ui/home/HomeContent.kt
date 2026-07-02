@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -33,7 +34,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -50,6 +53,8 @@ import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.platform.PlatformType
 import snd.komga.client.series.KomgaSeries
+
+private const val HOME_FILTER_PREVIEW_COUNT = 3
 
 @Composable
 fun HomeContent(
@@ -209,6 +214,7 @@ private fun DisplayContent(
     onBookClick: (KomeliaBook) -> Unit,
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
 ) {
+    val expandedFilterOrders = remember { mutableStateMapOf<Int, Boolean>() }
     LazyVerticalGrid(
         modifier = Modifier.padding(horizontal = 20.dp),
         state = gridState,
@@ -219,10 +225,17 @@ private fun DisplayContent(
     ) {
         for (data in filters) {
             if (activeFilterNumber == 0 || data.filter.order == activeFilterNumber) {
+                val filterOrder = data.filter.order
+                val isExpanded = expandedFilterOrders[filterOrder] == true
+                val onExpandedChange = {
+                    expandedFilterOrders[filterOrder] = expandedFilterOrders[filterOrder] != true
+                }
                 when (data) {
                     is BookFilterData -> BookFilterEntry(
                         label = data.filter.label,
                         books = data.books,
+                        isExpanded = isExpanded,
+                        onExpandedChange = onExpandedChange,
                         bookMenuActions = bookMenuActions,
                         onBookClick = onBookClick,
                         onBookReadClick = onBookReadClick,
@@ -231,6 +244,8 @@ private fun DisplayContent(
                     is SeriesFilterData -> SeriesFilterEntries(
                         label = data.filter.label,
                         series = data.series,
+                        isExpanded = isExpanded,
+                        onExpandedChange = onExpandedChange,
                         onSeriesClick = onSeriesClick,
                         seriesMenuActions = seriesMenuActions,
                     )
@@ -244,6 +259,8 @@ private fun DisplayContent(
 private fun LazyGridScope.BookFilterEntry(
     label: String,
     books: List<KomeliaBook>,
+    isExpanded: Boolean,
+    onExpandedChange: () -> Unit,
     bookMenuActions: BookMenuActions,
     onBookClick: (KomeliaBook) -> Unit,
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
@@ -259,7 +276,8 @@ private fun LazyGridScope.BookFilterEntry(
             HorizontalDivider()
         }
     }
-    items(books) { book ->
+    val visibleBooks = if (isExpanded) books else books.take(HOME_FILTER_PREVIEW_COUNT)
+    items(visibleBooks) { book ->
         BookImageCard(
             book = book,
             onBookClick = { onBookClick(book) },
@@ -269,11 +287,18 @@ private fun LazyGridScope.BookFilterEntry(
             modifier = Modifier.fillMaxSize()
         )
     }
+    ShowMoreButton(
+        show = books.size > HOME_FILTER_PREVIEW_COUNT,
+        isExpanded = isExpanded,
+        onExpandedChange = onExpandedChange
+    )
 }
 
 private fun LazyGridScope.SeriesFilterEntries(
     label: String,
     series: List<KomgaSeries>,
+    isExpanded: Boolean,
+    onExpandedChange: () -> Unit,
     onSeriesClick: (KomgaSeries) -> Unit,
     seriesMenuActions: SeriesMenuActions,
 ) {
@@ -289,12 +314,38 @@ private fun LazyGridScope.SeriesFilterEntries(
         }
     }
 
-    items(series) {
+    val visibleSeries = if (isExpanded) series else series.take(HOME_FILTER_PREVIEW_COUNT)
+    items(visibleSeries) {
         SeriesImageCard(
             series = it,
             onSeriesClick = { onSeriesClick(it) },
             seriesMenuActions = seriesMenuActions,
             modifier = Modifier.fillMaxSize()
         )
+    }
+    ShowMoreButton(
+        show = series.size > HOME_FILTER_PREVIEW_COUNT,
+        isExpanded = isExpanded,
+        onExpandedChange = onExpandedChange
+    )
+}
+
+private fun LazyGridScope.ShowMoreButton(
+    show: Boolean,
+    isExpanded: Boolean,
+    onExpandedChange: () -> Unit
+) {
+    if (!show) return
+
+    item(span = { GridItemSpan(maxLineSpan) }) {
+        val strings = LocalStrings.current.filters
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            TextButton(onClick = onExpandedChange) {
+                Text(if (isExpanded) strings.filterTagsShowLess else strings.filterTagsShowMore)
+            }
+        }
     }
 }

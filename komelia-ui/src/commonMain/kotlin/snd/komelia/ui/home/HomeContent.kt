@@ -54,7 +54,8 @@ import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.platform.PlatformType
 import snd.komga.client.series.KomgaSeries
 
-private const val HOME_FILTER_PREVIEW_COUNT = 3
+// Keep the collapsed preview balanced for the two-column mobile home layout.
+private const val HOME_FILTER_PREVIEW_COUNT = 4
 
 @Composable
 fun HomeContent(

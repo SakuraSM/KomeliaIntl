@@ -85,7 +85,10 @@ fun BoxScope.PanelsReaderContent(
             } else {
                 page?.let {
                     Box(contentAlignment = Alignment.Center) {
-                        ReaderImageContent(page.imageResult)
+                        ReaderImageContent(
+                            imageResult = page.imageResult,
+                            onRetry = { panelsReaderState.retryPage(page.metadata) }
+                        )
                     }
 //                    SinglePageLayout(page)
                 }
@@ -155,8 +158,11 @@ private fun TransitionPage(page: TransitionPage) {
 }
 
 @Composable
-private fun SinglePageLayout(page: PanelsReaderState.PanelsPage) {
-    Layout(content = { ReaderImageContent(page.imageResult) }) { measurable, constraints ->
+private fun SinglePageLayout(
+    page: PanelsReaderState.PanelsPage,
+    onRetry: () -> Unit,
+) {
+    Layout(content = { ReaderImageContent(page.imageResult, onRetry) }) { measurable, constraints ->
         val placeable = measurable.first().measure(constraints)
         val startPadding = (constraints.maxWidth - placeable.width) / 2
         val topPadding = ((constraints.maxHeight - placeable.height) / 2).coerceAtLeast(0)

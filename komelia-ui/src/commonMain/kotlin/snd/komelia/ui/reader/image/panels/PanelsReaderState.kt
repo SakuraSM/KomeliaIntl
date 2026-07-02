@@ -350,6 +350,15 @@ class PanelsReaderState(
         launchPageLoad(page)
     }
 
+    fun retryPage(page: PageMetadata) {
+        imageCache.invalidate(page.toPageId())
+        val pageIndex = pageMetadata.value.indexOf(page)
+        if (pageIndex >= 0) {
+            pageChangeFlow.tryEmit(Unit)
+            launchPageLoad(pageIndex)
+        }
+    }
+
     private fun launchPageLoad(pageIndex: Int) {
         if (pageIndex != currentPageIndex.value.page) {
             val pageNumber = pageIndex + 1
@@ -420,11 +429,14 @@ class PanelsReaderState(
 
         val loadJob: Deferred<PanelsPage> = pageLoadScope.async {
             val imageResult = imageLoader.loadReaderImage(meta.bookId, meta.pageNumber)
-            val image = imageResult.image ?: return@async PanelsPage(
-                metadata = meta,
-                imageResult = imageResult,
-                panelData = null
-            )
+            val image = imageResult.image ?: run {
+                if (imageResult is ReaderImageResult.Error) imageCache.invalidate(pageId)
+                return@async PanelsPage(
+                    metadata = meta,
+                    imageResult = imageResult,
+                    panelData = null
+                )
+            }
 
             val originalImage = image.getOriginalImage().getOrNull()
                 ?: return@async PanelsPage(
@@ -439,6 +451,7 @@ class PanelsReaderState(
                     logger.info { "rf detr before run" }
                     onnxRuntimeRfDetr.detect(originalImage).map { it.boundingBox }
                 } catch (e: OnnxRuntimeException) {
+                    imageCache.invalidate(pageId)
                     return@async PanelsPage(
                         metadata = meta,
                         imageResult = ReaderImageResult.Error(e),

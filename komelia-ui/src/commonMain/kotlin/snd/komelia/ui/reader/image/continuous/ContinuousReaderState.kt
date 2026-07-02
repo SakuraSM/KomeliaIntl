@@ -410,7 +410,13 @@ class ContinuousReaderState(
             }
         }
 
-        return requestedPageJob.await()
+        val result = requestedPageJob.await()
+        if (result is ReaderImageResult.Error) imageCache.invalidate(requestPage.toPageId())
+        return result
+    }
+
+    fun retryPage(page: PageMetadata) {
+        imageCache.invalidate(page.toPageId())
     }
 
     private fun launchImageJob(requestPage: PageMetadata): Deferred<ReaderImageResult> {

@@ -347,13 +347,18 @@ private fun ContinuousReaderImage(
     modifier: Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var imageResult by remember { mutableStateOf<ReaderImageResult?>(null) }
-    DisposableEffect(Unit) {
+    var imageResult by remember(page) { mutableStateOf<ReaderImageResult?>(null) }
+
+    fun loadPageImage() {
         coroutineScope.launch {
             val result = state.getImage(page)
             result.image?.let { state.onPageDisplay(page, it) }
             imageResult = result
         }
+    }
+
+    DisposableEffect(page) {
+        loadPageImage()
 
         onDispose {
             imageResult?.image?.let { state.onPageDispose(page) }
@@ -362,5 +367,15 @@ private fun ContinuousReaderImage(
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
-    ) { ReaderImageContent(imageResult) }
+    ) {
+        ReaderImageContent(
+            imageResult = imageResult,
+            onRetry = {
+                imageResult?.image?.let { state.onPageDispose(page) }
+                imageResult = null
+                state.retryPage(page)
+                loadPageImage()
+            }
+        )
+    }
 }

@@ -96,8 +96,18 @@ fun BoxScope.PagedReaderContent(
                 TransitionPage(transitionPage)
             } else {
                 when (layout) {
-                    SINGLE_PAGE -> pages.firstOrNull()?.let { SinglePageLayout(it) }
-                    DOUBLE_PAGES, DOUBLE_PAGES_NO_COVER -> DoublePageLayout(pages, readingDirection)
+                    SINGLE_PAGE -> pages.firstOrNull()?.let {
+                        SinglePageLayout(
+                            page = it,
+                            onRetry = { pagedReaderState.retryPage(it.metadata) }
+                        )
+                    }
+
+                    DOUBLE_PAGES, DOUBLE_PAGES_NO_COVER -> DoublePageLayout(
+                        pages = pages,
+                        readingDirection = readingDirection,
+                        onRetry = pagedReaderState::retryPage,
+                    )
                 }
             }
         }
@@ -165,8 +175,11 @@ private fun TransitionPage(page: TransitionPage) {
 }
 
 @Composable
-private fun SinglePageLayout(page: Page) {
-    Layout(content = { ReaderImageContent(page.imageResult) }) { measurable, constraints ->
+private fun SinglePageLayout(
+    page: Page,
+    onRetry: () -> Unit,
+) {
+    Layout(content = { ReaderImageContent(page.imageResult, onRetry) }) { measurable, constraints ->
         val placeable = measurable.first().measure(constraints)
         val startPadding = (constraints.maxWidth - placeable.width) / 2
         val topPadding = ((constraints.maxHeight - placeable.height) / 2).coerceAtLeast(0)
@@ -180,14 +193,19 @@ private fun SinglePageLayout(page: Page) {
 private fun DoublePageLayout(
     pages: List<Page>,
     readingDirection: PagedReadingDirection,
+    onRetry: (snd.komelia.ui.reader.image.PageMetadata) -> Unit,
 ) {
     Layout(content = {
         when (pages.size) {
             0 -> {}
-            1 -> ReaderImageContent(pages.first().imageResult)
+            1 -> {
+                val page = pages.first()
+                ReaderImageContent(page.imageResult) { onRetry(page.metadata) }
+            }
+
             2 -> {
-                ReaderImageContent(pages[0].imageResult)
-                ReaderImageContent(pages[1].imageResult)
+                ReaderImageContent(pages[0].imageResult) { onRetry(pages[0].metadata) }
+                ReaderImageContent(pages[1].imageResult) { onRetry(pages[1].metadata) }
             }
 
             else -> error("can't display more than 2 images")

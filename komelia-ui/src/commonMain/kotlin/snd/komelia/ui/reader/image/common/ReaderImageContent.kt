@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,15 +25,16 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import snd.komelia.image.ReaderImage
 import snd.komelia.image.ReaderImageResult
+import snd.komelia.ui.LocalStrings
 
 @Composable
-fun ReaderImageContent(imageResult: ReaderImageResult?) {
+fun ReaderImageContent(
+    imageResult: ReaderImageResult?,
+    onRetry: (() -> Unit)? = null,
+) {
     when (imageResult) {
         is ReaderImageResult.Success -> ImageContent(imageResult.image)
-        is ReaderImageResult.Error -> Text(
-            "${imageResult.throwable::class.simpleName}: ${imageResult.throwable.message}",
-            color = MaterialTheme.colorScheme.error
-        )
+        is ReaderImageResult.Error -> ErrorContent(imageResult, onRetry)
 
         null -> Box(
             modifier = Modifier.fillMaxHeight().aspectRatio(0.7f).background(Color.White),
@@ -44,6 +46,24 @@ fun ReaderImageContent(imageResult: ReaderImageResult?) {
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun ErrorContent(
+    imageResult: ReaderImageResult.Error,
+    onRetry: (() -> Unit)?,
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            "${imageResult.throwable::class.simpleName}: ${imageResult.throwable.message}",
+            color = MaterialTheme.colorScheme.error
+        )
+        if (onRetry != null) {
+            Button(onClick = onRetry) {
+                Text(LocalStrings.current.common.retry)
+            }
+        }
     }
 }
 

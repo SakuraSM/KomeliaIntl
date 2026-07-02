@@ -290,6 +290,12 @@ class PagedReaderState(
         loadPage(page)
     }
 
+    fun retryPage(page: PageMetadata) {
+        imageCache.invalidate(page.toPageId())
+        pageChangeFlow.tryEmit(Unit)
+        loadPage(spreadIndexOf(page))
+    }
+
     fun moveToLastPage() {
         val lastPageIndex = pageSpreads.value.size - 1
         if (currentSpreadIndex.value == lastPageIndex) return
@@ -348,6 +354,7 @@ class PagedReaderState(
             if (cached != null && !cached.isCancelled) cached
             else pageLoadScope.async {
                 val imageResult = imageLoader.loadReaderImage(meta.bookId, meta.pageNumber)
+                if (imageResult is ReaderImageResult.Error) imageCache.invalidate(pageId)
                 Page(meta, imageResult)
             }.also { imageCache.put(pageId, it) }
         }

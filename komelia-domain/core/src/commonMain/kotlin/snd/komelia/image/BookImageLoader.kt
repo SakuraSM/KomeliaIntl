@@ -1,8 +1,10 @@
 package snd.komelia.image
 
 import coil3.disk.DiskCache
+import io.ktor.client.plugins.ResponseException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.StateFlow
 import okio.FileSystem
@@ -22,15 +24,51 @@ class BookImageLoader(
     val fileSystem = diskCache?.fileSystem
 
     suspend fun loadReaderImage(bookId: KomgaBookId, page: Int): ReaderImageResult {
+        val maxAttempts = 3
+        var lastError: Throwable? = null
+
+        repeat(maxAttempts) { attemptIndex ->
+            val attempt = attemptIndex + 1
+            try {
+                val source = doLoad(bookId, page)
+                if (attempt > 1) {
+                    logger.info { "reader image load recovered bookId=$bookId page=$page attempt=$attempt" }
+                }
+                return ReaderImageResult.Success(readerImageFactory.getImage(source, ReaderImage.PageId(bookId.value, page)))
+            } catch (e: Throwable) {
+                currentCoroutineContext().ensureActive()
+                lastError = e
+
+                if (!e.isRetryableReaderImageError() || attempt == maxAttempts) {
+                    logger.catching(e)
+                    logger.warn {
+                        "reader image load failed bookId=$bookId page=$page attempt=$attempt " +
+                            "status=${e.httpStatusCode()} exception=${e::class.simpleName}"
+                    }
+                    return ReaderImageResult.Error(e)
+                }
+
+                logger.warn {
+                    "reader image load retry bookId=$bookId page=$page attempt=$attempt " +
+                        "status=${e.httpStatusCode()} exception=${e::class.simpleName}"
+                }
+                delay(250L * attempt)
+            }
+        }
+
+        return ReaderImageResult.Error(checkNotNull(lastError))
+    }
+
+    private fun Throwable.isRetryableReaderImageError(): Boolean {
+        if (this is ResponseException) return response.status.value >= 500
         return try {
-            val source = doLoad(bookId, page)
-            ReaderImageResult.Success(readerImageFactory.getImage(source, ReaderImage.PageId(bookId.value, page)))
-        } catch (e: Throwable) {
-            currentCoroutineContext().ensureActive()
-            logger.catching(e)
-            ReaderImageResult.Error(e)
+            this::class.simpleName?.contains("Cancellation") != true
+        } catch (_: Throwable) {
+            true
         }
     }
+
+    private fun Throwable.httpStatusCode(): Int? = (this as? ResponseException)?.response?.status?.value
 
     // TODO remove
     suspend fun loadImage(bookId: KomgaBookId, page: Int): ImageResult {

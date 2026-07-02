@@ -164,6 +164,12 @@ class MainScreen(
                 BottomNavigationBar(
                     navigator = navigator,
                     toggleLibrariesDrawer = { coroutineScope.launch { vm.toggleNavBar() } },
+                    navigateFromBottom = { navigate ->
+                        coroutineScope.launch {
+                            if (vm.navBarState.isOpen) vm.navBarState.snapTo(Closed)
+                            navigate()
+                        }
+                    },
                     modifier = Modifier
                 )
             },
@@ -217,6 +223,7 @@ class MainScreen(
     private fun BottomNavigationBar(
         navigator: Navigator,
         toggleLibrariesDrawer: () -> Unit,
+        navigateFromBottom: (() -> Unit) -> Unit,
         modifier: Modifier
     ) {
         val strings = LocalStrings.current.mainNavigation
@@ -240,7 +247,7 @@ class MainScreen(
                     CompactNavButton(
                         text = strings.home,
                         icon = Icons.Default.Home,
-                        onClick = { navigator.replaceAll(HomeScreen()) },
+                        onClick = { navigateFromBottom { navigator.replaceAll(HomeScreen()) } },
                         isSelected = navigator.lastItem is HomeScreen,
                         modifier = Modifier.weight(1f)
                     )
@@ -249,7 +256,7 @@ class MainScreen(
                     CompactNavButton(
                         text = strings.search,
                         icon = Icons.Default.Search,
-                        onClick = { navigator.push(SearchScreen(null)) },
+                        onClick = { navigateFromBottom { navigator.push(SearchScreen(null)) } },
                         isSelected = navigator.lastItem is SearchScreen,
                         modifier = Modifier.weight(1f)
                     )
@@ -257,7 +264,7 @@ class MainScreen(
                     CompactNavButton(
                         text = strings.settings,
                         icon = Icons.Default.Settings,
-                        onClick = { navigator.parent!!.push(MobileSettingsScreen()) },
+                        onClick = { navigateFromBottom { navigator.parent!!.push(MobileSettingsScreen()) } },
                         isSelected = navigator.lastItem is SettingsScreen,
                         modifier = Modifier.weight(1f)
                     )

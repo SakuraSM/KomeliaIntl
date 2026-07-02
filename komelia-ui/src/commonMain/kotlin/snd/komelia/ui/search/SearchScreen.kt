@@ -5,11 +5,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -84,7 +81,6 @@ class SearchScreen(
 
     @Composable
     private fun SearchField(vm: SearchViewModel) {
-        val focusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
 
         SearchTextField(
@@ -92,10 +88,7 @@ class SearchScreen(
             onQueryChange = vm::query::set,
             onDone = { focusManager.clearFocus() },
             onDismiss = { vm.query = "" },
-            modifier = Modifier.focusRequester(focusRequester)
+            modifier = Modifier
         )
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
-        }
     }
 }

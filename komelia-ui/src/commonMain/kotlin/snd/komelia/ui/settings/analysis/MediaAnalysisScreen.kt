@@ -13,6 +13,7 @@ import snd.komelia.ui.LoadState.Error
 import snd.komelia.ui.LoadState.Loading
 import snd.komelia.ui.LoadState.Success
 import snd.komelia.ui.LoadState.Uninitialized
+import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.MainScreen
 import snd.komelia.ui.book.bookScreen
@@ -28,7 +29,7 @@ class MediaAnalysisScreen : Screen {
         val vm = rememberScreenModel { viewModelFactory.getMediaAnalysisViewModel() }
         LaunchedEffect(Unit) { vm.initialize() }
 
-        SettingsScreenContainer("Media Analysis") {
+        SettingsScreenContainer(LocalStrings.current.settingsNavigation.mediaManagement) {
             when (val state = vm.state.collectAsState().value) {
                 Uninitialized, Loading -> LoadingMaxSizeIndicator()
                 is Error -> Text(state.exception.message ?: "Error")

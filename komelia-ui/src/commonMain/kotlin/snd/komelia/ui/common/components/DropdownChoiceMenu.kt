@@ -61,6 +61,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dropdown_other_options
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_and_exclude
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_any_value
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_exclude
@@ -579,7 +580,7 @@ private fun TagFilterDropdownContent(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 10.dp)
         ) {
-            Text("Other Options")
+            Text(stringResource(Res.string.dropdown_other_options))
             HorizontalDivider(Modifier.padding(start = 10.dp))
         }
 
@@ -751,4 +752,3 @@ data class LabeledEntry<T>(
 
     }
 }
-

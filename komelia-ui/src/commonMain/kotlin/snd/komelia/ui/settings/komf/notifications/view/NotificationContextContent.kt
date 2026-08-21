@@ -37,6 +37,8 @@ import com.dokar.chiptextfield.rememberChipTextFieldState
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_authors_name
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_authors_role
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_alt_titles_label
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_alt_titles_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_book_add
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_book_author
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_book_id
@@ -454,13 +456,13 @@ private fun AlternativeTitlesEdit(state: AlternativeTitleContext) {
         TextField(
             value = state.label,
             onValueChange = state::label::set,
-            label = { Text("Label \$series.metadata.alternativeTitles[i].label") },
+            label = { Text(stringResource(Res.string.komf_notification_context_alt_titles_label)) },
             modifier = Modifier.fillMaxWidth()
         )
         TextField(
             value = state.title,
             onValueChange = state::title::set,
-            label = { Text("Title \$series.metadata.alternativeTitles[i].title") },
+            label = { Text(stringResource(Res.string.komf_notification_context_alt_titles_title)) },
             modifier = Modifier.fillMaxWidth()
         )
     }

@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
@@ -315,7 +316,7 @@ fun NavigationButton(
     }
 
     val height = when (platform) {
-        MOBILE -> 52.dp
+        MOBILE -> 48.dp
         DESKTOP, WEB_KOMF -> 40.dp
     }
 
@@ -347,7 +348,16 @@ fun NavigationButton(
                 )
                 Spacer(Modifier.width(12.dp))
             }
-            Text(label, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = label,
+                style = if (platform == MOBILE) {
+                    MaterialTheme.typography.bodyLarge
+                } else {
+                    MaterialTheme.typography.titleMedium
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             Spacer(Modifier.width(5.dp))
             if (error) {
                 val color = MaterialTheme.colorScheme.error

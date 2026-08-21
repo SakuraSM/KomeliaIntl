@@ -30,6 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.platform.BackPressHandler
@@ -61,7 +64,10 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { navigator.pop() }) {
-                Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
+                Icon(
+                    Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = stringResource(Res.string.navigation_back)
+                )
             }
 
             Text(title, style = MaterialTheme.typography.titleLarge)

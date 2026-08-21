@@ -22,7 +22,14 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_analyze
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_delete_confirm_body
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_delete_confirm_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_delete_downloaded
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_identify
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_mark_read
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_mark_unread
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_refresh_metadata
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_reset_metadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -162,7 +169,7 @@ fun SeriesActionsMenu(
         val isUnread = remember { series.booksUnreadCount == series.booksCount }
         if (!isRead) {
             DropdownMenuItem(
-                text = { Text("Mark as read") },
+                text = { Text(stringResource(Res.string.series_mark_read)) },
                 onClick = {
                     actions.markAsRead(series)
                     onDismissRequest()
@@ -172,7 +179,7 @@ fun SeriesActionsMenu(
 
         if (!isUnread) {
             DropdownMenuItem(
-                text = { Text("Mark as unread") },
+                text = { Text(stringResource(Res.string.series_mark_unread)) },
                 onClick = {
                     actions.markAsUnread(series)
                     onDismissRequest()
@@ -182,7 +189,7 @@ fun SeriesActionsMenu(
 
         if (isAdmin && !isOffline && showEditOption) {
             DropdownMenuItem(
-                text = { Text("Edit") },
+                text = { Text(stringResource(Res.string.series_edit)) },
                 onClick = { showEditDialog = true },
             )
         }
@@ -190,7 +197,7 @@ fun SeriesActionsMenu(
         val offlineAvailable = LocalOfflineAvailable.current
         if (!isOffline && showDownloadOption && offlineAvailable) {
             DropdownMenuItem(
-                text = { Text("Download") },
+                text = { Text(stringResource(Res.string.series_download)) },
                 onClick = { showDownloadDialog = true },
             )
         }
@@ -202,7 +209,7 @@ fun SeriesActionsMenu(
                 if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
                 else Modifier
             DropdownMenuItem(
-                text = { Text("Delete downloaded") },
+                text = { Text(stringResource(Res.string.series_delete_downloaded)) },
                 onClick = { showDeleteDownloadedDialog = true },
                 modifier = Modifier
                     .hoverable(deleteInteractionSource)
@@ -214,12 +221,12 @@ fun SeriesActionsMenu(
         val komfIntegration = LocalKomfIntegration.current.collectAsState(false)
         if (komfIntegration.value) {
             DropdownMenuItem(
-                text = { Text("Identify (Komf)") },
+                text = { Text(stringResource(Res.string.series_identify)) },
                 onClick = { showKomfDialog = true },
             )
 
             DropdownMenuItem(
-                text = { Text("Reset Metadata (Komf)") },
+                text = { Text(stringResource(Res.string.series_reset_metadata)) },
                 onClick = { showKomfResetDialog = true },
             )
         }

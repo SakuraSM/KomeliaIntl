@@ -50,6 +50,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_aut
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_condition
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_datepicker_canel
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_datepicker_ok
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_date_placeholder
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_days
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_limit
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_operator
@@ -533,7 +534,7 @@ private fun DatePickerField(
     TextField(
         value = currentDate?.toLocalDateTime(TimeZone.currentSystemDefault())?.toString() ?: "",
         onValueChange = { },
-        placeholder = { Text("MM/DD/YYYY") },
+        placeholder = { Text(stringResource(Res.string.home_filter_date_placeholder)) },
         trailingIcon = {
             Icon(Icons.Default.DateRange, null)
         },

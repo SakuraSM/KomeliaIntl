@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.screen_error
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_title
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState
@@ -24,7 +25,9 @@ class AppUpdatesScreen : Screen {
         val state = vm.state.collectAsState().value
         SettingsScreenContainer(stringResource(Res.string.settings_updates_title)) {
             when (state) {
-                is LoadState.Error -> Text("Error ${state.exception.message}")
+                is LoadState.Error -> Text(
+                    stringResource(Res.string.screen_error, state.exception.message.orEmpty())
+                )
                 LoadState.Loading, LoadState.Uninitialized, is LoadState.Success -> AppUpdatesContent(
                     checkForUpdates = vm.checkForUpdatesOnStartup.collectAsState().value,
                     onCheckForUpdatesChange = vm::onCheckForUpdatesOnStartupChange,

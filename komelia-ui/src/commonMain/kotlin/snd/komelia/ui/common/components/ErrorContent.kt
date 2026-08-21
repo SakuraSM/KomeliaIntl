@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_unknown
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_exit
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_reload
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -55,13 +57,13 @@ fun ErrorContent(
             Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                 if (onReload != null) {
                     FilledTonalButton(onClick = onReload) {
-                        Text("Reload")
+                        Text(stringResource(Res.string.error_reload))
                     }
                 }
 
                 if (onExit != null) {
                     FilledTonalButton(onClick = onExit) {
-                        Text("Exit")
+                        Text(stringResource(Res.string.error_exit))
                     }
                 }
             }

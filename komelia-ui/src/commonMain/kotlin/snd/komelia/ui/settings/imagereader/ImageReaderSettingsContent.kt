@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_clear_cache
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_thumbnail_previews
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_thumbnail_previews_desc
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_volume_key_navigation
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalPlatform
@@ -39,8 +41,8 @@ fun ImageReaderSettingsContent(
         SwitchWithLabel(
             checked = loadThumbnailPreviews,
             onCheckedChange = onLoadThumbnailPreviewsChange,
-            label = { Text("Load small previews when dragging navigation slider") },
-            supportingText = { Text("can be slow for high resolution images") },
+            label = { Text(stringResource(Res.string.settings_image_thumbnail_previews)) },
+            supportingText = { Text(stringResource(Res.string.settings_image_thumbnail_previews_desc)) },
         )
 
         if (platform == PlatformType.MOBILE) {
@@ -78,4 +80,3 @@ fun ImageReaderSettingsContent(
         }
     }
 }
-

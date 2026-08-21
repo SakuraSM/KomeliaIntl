@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_unknown
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_announcements_title
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState
@@ -29,7 +30,7 @@ class AnnouncementsScreen : Screen {
                 is Success -> AnnouncementsContent(result.value.items)
                 LoadState.Uninitialized, Loading -> LoadingMaxSizeIndicator()
 
-                is Error -> Text("Error")
+                is Error -> Text(stringResource(Res.string.error_unknown))
             }
         }
 

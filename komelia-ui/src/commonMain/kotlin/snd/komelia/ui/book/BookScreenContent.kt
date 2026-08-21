@@ -207,7 +207,8 @@ fun BookToolBar(
             book.metadata.title,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, false)
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f)
         )
         ToolbarBookActions(book, bookMenuActions)
     }

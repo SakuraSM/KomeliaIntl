@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyGridState
 import snd.komelia.ui.LocalPlatform
@@ -92,33 +93,39 @@ fun CoverCardCaption(
     supportingText: String? = null,
     statusText: String? = null,
 ) {
+    val isMobile = LocalPlatform.current == PlatformType.MOBILE
+    val secondaryText = statusText?.takeIf { it.isNotBlank() }
+        ?: supportingText?.takeIf { it.isNotBlank() }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 64.dp)
+            .heightIn(min = if (isMobile) 72.dp else 76.dp)
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
+            style = if (isMobile) {
+                MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp, lineHeight = 18.sp)
+            } else {
+                MaterialTheme.typography.titleSmall
+            },
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
-        if (!supportingText.isNullOrBlank()) {
+        if (secondaryText != null) {
             Text(
-                text = supportingText,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        if (!statusText.isNullOrBlank()) {
-            Text(
-                text = statusText,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.error,
+                text = secondaryText,
+                style = if (isMobile) {
+                    MaterialTheme.typography.bodySmall.copy(lineHeight = 16.sp)
+                } else {
+                    MaterialTheme.typography.bodySmall
+                },
+                color = if (!statusText.isNullOrBlank()) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

@@ -24,6 +24,9 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_close_settings
+import org.jetbrains.compose.resources.stringResource
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.transitions.CrossfadeTransition
 import kotlinx.coroutines.flow.SharedFlow
@@ -86,7 +89,7 @@ class SettingsScreen : Screen {
                             content = {
                                 Icon(
                                     Icons.Rounded.Close,
-                                    contentDescription = "Close settings",
+                                    contentDescription = stringResource(Res.string.navigation_close_settings),
                                 )
                             }
                         )

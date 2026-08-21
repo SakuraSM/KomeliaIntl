@@ -28,6 +28,7 @@ import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_unknown
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_all_libraries
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_collections
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_readlists
@@ -211,7 +212,7 @@ class LibraryScreen(
 
         when (val state = readListTabState.state.collectAsState().value) {
             Uninitialized -> LoadingMaxSizeIndicator()
-            is Error -> Text("Error")
+            is Error -> Text(stringResource(Res.string.error_unknown))
             else -> {
                 val loading = state is Loading
                 LibraryReadListsContent(

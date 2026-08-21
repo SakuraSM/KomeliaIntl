@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.image_dimensions
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.thumbnail_delete
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.thumbnail_generated
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.thumbnail_local_artwork
@@ -173,7 +174,9 @@ private fun ThumbnailCardContent(
     ) {
         val sizeInKb = remember(filesize) { (filesize.toFloat() / 1024).formatDecimal(1) }
         Text("${sizeInKb}kB")
-        size?.let { Text("w: ${it.width}, h: ${it.height}") }
+        size?.let {
+            Text(stringResource(Res.string.image_dimensions, it.width, it.height))
+        }
         mediaType?.let { Text(it) }
 
 

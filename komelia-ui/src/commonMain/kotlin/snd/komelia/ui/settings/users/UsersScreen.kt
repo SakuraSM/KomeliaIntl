@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_unknown
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_users_title
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState.Error
@@ -27,7 +28,7 @@ class UsersScreen : Screen {
 
         SettingsScreenContainer(stringResource(Res.string.settings_users_title)) {
             when (vm.state.collectAsState().value) {
-                is Error -> Text("Error")
+                is Error -> Text(stringResource(Res.string.error_unknown))
                 Uninitialized, Loading -> LoadingMaxSizeIndicator()
 
                 is Success -> UsersContent(

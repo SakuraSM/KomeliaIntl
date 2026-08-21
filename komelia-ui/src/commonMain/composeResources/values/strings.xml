@@ -1,5 +1,6 @@
 <resources>
     <string name="navigation_back">Back</string>
+    <string name="navigation_close_settings">Close settings</string>
     <string name="screen_error">Error %1$s</string>
 
     <string name="home_filter_all">All</string>
@@ -45,6 +46,7 @@
     <string name="home_filter_collection">Collection</string>
     <string name="home_filter_datepicker_ok">OK</string>
     <string name="home_filter_datepicker_canel">Cancel</string>
+    <string name="home_filter_date_placeholder">MM/DD/YYYY</string>
 
     <string name="library_analyze">Analyze</string>
     <string name="library_analyze_confirm_title">Analyze library</string>
@@ -317,6 +319,14 @@
 
     <string name="text_collapse">Collapse</string>
     <string name="text_expand">Expand</string>
+    <string name="tag_parody">Parody</string>
+    <string name="tag_character">Character</string>
+    <string name="tag_group">Group</string>
+    <string name="tag_female">Female</string>
+    <string name="tag_male">Male</string>
+    <string name="tag_category">Category</string>
+    <string name="image_dimensions">Width: %1$s, height: %2$s</string>
+    <string name="dropdown_other_options">Other options</string>
 
     <string name="filter_any_value">Any</string>
     <string name="filter_search">Search</string>
@@ -464,6 +474,17 @@
     <string name="reader_next_page">Next page</string>
     <string name="reader_page_display_size">display size %1$s x %2$s</string>
     <string name="reader_page_original_size">original size %1$s x %2$s</string>
+    <string name="reader_downloading">Downloading…</string>
+    <string name="reader_processing">Processing…</string>
+    <string name="reader_reached_series_start">Reached the start of the series</string>
+    <string name="reader_reached_series_end">Reached the end of the series</string>
+    <string name="reader_finished_book">Finished:</string>
+    <string name="reader_previous_book">Previous:</string>
+    <string name="reader_current_book">Current:</string>
+    <string name="reader_next_book">Next:</string>
+    <string name="reader_no_next_book">There is no next book</string>
+    <string name="reader_no_previous_book">There is no previous book</string>
+    <string name="reader_epub_preface">Preface</string>
 
     <string name="reader_paged_scale_type">Scale type</string>
     <string name="reader_paged_scale_screen">Screen</string>
@@ -588,6 +609,24 @@
     <string name="settings_server_requires_restart">Requires restart to take effect</string>
     <string name="settings_server_discard">Discard</string>
     <string name="settings_server_save">Save Changes</string>
+    <string name="settings_server_management">Server management</string>
+    <string name="settings_server_scan_all_libraries">Scan all libraries</string>
+    <string name="settings_server_deep_scan_all_libraries">Deep scan all libraries</string>
+    <string name="settings_server_empty_all_trash">Empty trash for all libraries</string>
+    <string name="settings_server_cancel_all_tasks">Cancel all tasks</string>
+    <string name="settings_server_shutdown">Shut down</string>
+    <string name="settings_server_empty_library_trash">Empty library trash</string>
+    <string name="settings_server_shutdown_confirm">Shut down server</string>
+    <string name="settings_server_scan_all_libraries_desc">Check folders for new or removed books using parent-folder modification times.</string>
+    <string name="settings_server_scan_action">Scan</string>
+    <string name="settings_server_deep_scan_all_libraries_desc">Compare every scanned book with the books stored in the database.</string>
+    <string name="settings_server_deep_scan_action">Deep scan</string>
+    <string name="settings_server_empty_all_trash_desc">Delete items marked as unavailable.</string>
+    <string name="settings_server_empty_action">Empty</string>
+    <string name="settings_server_cancel_all_tasks_desc">Cancel all currently running tasks.</string>
+    <string name="settings_server_shutdown_desc">Stop the Komga application process.</string>
+    <string name="settings_server_shutdown_body">Are you sure you want to stop Komga?</string>
+    <string name="settings_server_stop_action">Stop</string>
     <string name="settings_epub_title">Epub Reader Settings</string>
     <string name="settings_epub_reader_type">Reader Type</string>
     <string name="settings_epub_reader_type_komga">Komga Epub Reader</string>
@@ -596,6 +635,8 @@
     <string name="settings_epub_reader_type_ttsu_desc">Loads entire book data at once. May cause long load times or performance issues \nAdapted for use in Komelia with storage/statistics features removed</string>
     <string name="settings_epub_reader_type_ttsu_github">Project on Github</string>
     <string name="settings_image_title">Image Reader</string>
+    <string name="settings_image_thumbnail_previews">Load small previews while dragging the page slider</string>
+    <string name="settings_image_thumbnail_previews_desc">May be slower for high-resolution images</string>
     <string name="settings_image_volume_key_navigation">Volume keys navigation</string>
     <string name="settings_image_clear_cache">Clear image cache</string>
     <string name="settings_image_onnxruntime">ONNX Runtime</string>
@@ -627,6 +668,23 @@
     <string name="settings_image_onnxruntime_panel_detection_download">Download model</string>
     <string name="settings_image_onnxruntime_panel_detection_redownload">Re-download model</string>
     <string name="settings_image_onnxruntime_panel_detection_installed">Installed</string>
+    <string name="settings_image_onnxruntime_choose_version">Choose ONNX Runtime version</string>
+    <string name="settings_image_onnxruntime_downloading">Downloading ONNX Runtime</string>
+    <string name="settings_image_onnxruntime_install">Install</string>
+    <string name="settings_image_onnxruntime_install_error">An error occurred during installation:\n%1$s</string>
+    <string name="settings_image_onnxruntime_restart_required">Restart the app for changes to take effect</string>
+    <string name="settings_image_onnxruntime_cuda">CUDA (NVIDIA GPU; requires CUDA 12 and cuDNN 9)</string>
+    <string name="settings_image_onnxruntime_tensorrt">TensorRT (NVIDIA GPU; requires CUDA 12, cuDNN 9, and TensorRT)</string>
+    <string name="settings_image_onnxruntime_rocm">ROCm (AMD GPU; requires ROCm 7)</string>
+    <string name="settings_image_onnxruntime_directml">DirectML (any GPU)</string>
+    <string name="settings_image_onnxruntime_webgpu">WebGPU (any GPU)</string>
+    <string name="settings_image_onnxruntime_experimental_warning">ONNX Runtime support is experimental and may cause crashes or other instability.</string>
+    <string name="settings_image_onnxruntime_download_cuda">Download CUDA 12</string>
+    <string name="settings_image_onnxruntime_download_cudnn">Download cuDNN 9</string>
+    <string name="settings_image_onnxruntime_download_tensorrt">Download TensorRT</string>
+    <string name="settings_image_onnxruntime_tensorrt_desc">TensorRT builds an optimized graph engine. The first model load can take a long time; the engine is cached afterward.</string>
+    <string name="settings_image_onnxruntime_directml_desc">High-performance DirectX 12 acceleration for machine learning.</string>
+    <string name="settings_image_onnxruntime_webgpu_desc">Cross-platform GPU access using Vulkan, Metal, or Direct3D 12.</string>
     <string name="settings_offline_mode_title">Offline Mode</string>
     <string name="settings_offline_mode_users_tab">Users</string>
     <string name="settings_offline_mode_downloads_tab">Downloads</string>
@@ -1051,6 +1109,7 @@
     <string name="error_copy">Copy stacktrace to clipboard</string>
     <string name="error_copied">Copied to clipboard</string>
     <string name="error_restart">Restart</string>
+    <string name="error_reload">Reload</string>
     <string name="error_exit">Exit</string>
 
 </resources>

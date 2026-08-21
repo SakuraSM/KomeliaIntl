@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -58,7 +58,7 @@ fun PanelDetectionSettings(
             }
             if (isDownloaded) {
                 Text(strings.forText("Installed"))
-                Icon(Icons.Default.Check, null, tint = Color.Green)
+                Icon(Icons.Rounded.Check, null, tint = Color.Green)
             }
         }
     }

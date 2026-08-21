@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -90,7 +90,7 @@ private fun CollectionCardHoverOverlay(
                     IconButton(
                         onClick = { isActionsMenuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
-                    ) { Icon(Icons.Default.MoreVert, contentDescription = null) }
+                    ) { Icon(Icons.Rounded.MoreVert, contentDescription = null) }
 
                     CollectionActionsMenu(
                         collection = collection,

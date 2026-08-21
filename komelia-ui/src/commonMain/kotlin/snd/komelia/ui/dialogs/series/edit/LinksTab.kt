@@ -1,7 +1,7 @@
 package snd.komelia.ui.dialogs.series.edit
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.rounded.Link
 import androidx.compose.runtime.Composable
 import snd.komelia.ui.dialogs.LinksEditContent
 import snd.komelia.ui.dialogs.tabs.DialogTab
@@ -14,7 +14,7 @@ internal class LinksTab(
 
     override fun options() = TabItem(
         title = "Links",
-        icon = Icons.Default.Link
+        icon = Icons.Rounded.Link
     )
 
     @Composable

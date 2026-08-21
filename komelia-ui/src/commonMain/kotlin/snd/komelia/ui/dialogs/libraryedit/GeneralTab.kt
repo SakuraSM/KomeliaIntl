@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -28,7 +28,7 @@ class GeneralTab(
 ) : DialogTab {
     override fun options() = TabItem(
         title = "GENERAL",
-        icon = Icons.Default.Category
+        icon = Icons.Rounded.Category
     )
 
     @Composable

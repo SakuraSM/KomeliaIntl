@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -68,7 +68,7 @@ private fun Header(onDismissRequest: () -> Unit) {
         ) {
             Text("Add to read list", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.weight(1f))
-            IconButton(onClick = onDismissRequest) { Icon(Icons.Default.Close, null) }
+            IconButton(onClick = onDismissRequest) { Icon(Icons.Rounded.Close, null) }
         }
         HorizontalDivider()
     }

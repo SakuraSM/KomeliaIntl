@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ManageSearch
-import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.automirrored.rounded.ManageSearch
+import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -40,7 +40,7 @@ internal class ScannerTab(
 
     override fun options() = TabItem(
         title = "SCANNER",
-        icon = Icons.AutoMirrored.Filled.ManageSearch
+        icon = Icons.AutoMirrored.Rounded.ManageSearch
     )
 
     @Composable
@@ -168,7 +168,7 @@ private fun ScanFiletypeChip(
         leadingIcon = if (selected) {
             {
                 Icon(
-                    imageVector = Icons.Filled.Done,
+                    imageVector = Icons.Rounded.Done,
                     contentDescription = null,
                     modifier = Modifier.size(FilterChipDefaults.IconSize)
                 )

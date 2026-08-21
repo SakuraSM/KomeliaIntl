@@ -22,8 +22,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.FilterChip
@@ -269,7 +269,7 @@ fun SeriesToolBar(
                 IconButton(
                     onClick = { showDownloadConfirmationDialog = true },
                 ) {
-                    Icon(Icons.Default.Download, null)
+                    Icon(Icons.Rounded.Download, null)
                 }
             }
             if (showDownloadConfirmationDialog) {
@@ -414,7 +414,7 @@ fun SeriesChipTags(
             label = "Links",
             chipValues = series.metadata.links.map { LabeledEntry(it, it.label) },
             onChipClick = { entry -> uriHandler.openUri(entry.url) },
-            icon = Icons.Default.Link,
+            icon = Icons.Rounded.Link,
         )
 
         Spacer(Modifier.height(2.dp))

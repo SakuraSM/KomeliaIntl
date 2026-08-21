@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
@@ -148,14 +148,14 @@ private fun ColumnScope.SearchResultsDropDownBox(
                 onDismiss()
                 onSearchAllClick(currentQuery)
             }
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = 5.dp),
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.shapes.small)
+            .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Search all..."))
     }
     if (isLoading) LinearProgressIndicator(
-        color = MaterialTheme.colorScheme.tertiary,
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.fillMaxWidth()
     )
 
@@ -275,10 +275,14 @@ fun SearchTextField(
         onTextChange = onQueryChange,
         shape = CircleShape,
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedPlaceholderColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
         ),
         interactionSource = interactionSource,
         modifier = modifier
@@ -304,7 +308,8 @@ fun SearchTextField(
         trailingIcon = {
             if (query.isNotBlank()) {
                 Icon(
-                    Icons.Filled.Close, null,
+                    Icons.Rounded.Close,
+                    contentDescription = LocalStrings.current.legacy.forText("Clear search"),
                     modifier = Modifier
                         .clickable(
                             interactionSource = interactionSource,
@@ -314,11 +319,12 @@ fun SearchTextField(
                                 onDismiss()
                             }
                         ).cursorForHand(),
-                    tint = MaterialTheme.colorScheme.secondary
+                    tint = MaterialTheme.colorScheme.primary
                 )
             } else {
                 Icon(
-                    Icons.Filled.Search, null,
+                    Icons.Rounded.Search,
+                    contentDescription = LocalStrings.current.common.search,
                     modifier = Modifier.cursorForHand()
                 )
             }

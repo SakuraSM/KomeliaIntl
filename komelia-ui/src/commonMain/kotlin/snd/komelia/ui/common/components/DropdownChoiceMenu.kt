@@ -26,9 +26,9 @@ import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.RadioButtonChecked
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.RadioButtonChecked
+import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -279,7 +279,7 @@ fun <T> DropdownChoiceMenuWithSearch(
                         color = MaterialTheme.colorScheme.surface,
                         onClick = { onOptionSelect(it) }
                     ) {
-                        Icon(Icons.Default.Close, null)
+                        Icon(Icons.Rounded.Close, null)
                         Text(legacyStrings.forText(it.label), style = MaterialTheme.typography.labelMedium)
                     }
                 }
@@ -315,7 +315,7 @@ fun <T> FilterDropdownChoice(
         contentPadding = PaddingValues(5.dp),
         label = label?.let { { Text(LocalStrings.current.legacy.forText(it)) } },
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.clip(RoundedCornerShape(5.dp)),
+        modifier = modifier.clip(RoundedCornerShape(8.dp)),
         inputFieldModifier = Modifier.fillMaxWidth()
     )
 }
@@ -337,7 +337,7 @@ fun <T> FilterDropdownMultiChoice(
         label = label?.let { { FilterLabelAndCount(label, selectedOptions.size) } },
         placeholder = placeholder,
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.clip(RoundedCornerShape(5.dp)),
+        modifier = modifier.clip(RoundedCornerShape(8.dp)),
         inputFieldModifier = Modifier.fillMaxWidth()
     )
 }
@@ -361,7 +361,7 @@ fun <T> FilterDropdownMultiChoiceWithSearch(
         label = label?.let { { FilterLabelAndCount(label, selectedOptions.size) } },
         placeholder = placeholder,
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.clip(RoundedCornerShape(5.dp)),
+        modifier = modifier.clip(RoundedCornerShape(8.dp)),
         textFieldModifier = Modifier.fillMaxWidth()
     )
 }
@@ -534,7 +534,7 @@ private fun TagFilterDropdownContent(
                     onReset()
                 },
                 enabled = includeTags.isNotEmpty() || excludeTags.isNotEmpty() || includeGenres.isNotEmpty() || excludeGenres.isNotEmpty(),
-                shape = RoundedCornerShape(5.dp),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.cursorForHand()
             ) {
                 Text(strings.filterTagsReset, style = MaterialTheme.typography.bodyLarge)
@@ -628,7 +628,7 @@ private fun TagsRow(
         if (tags.size > maxTagNum) {
             TextButton(
                 onClick = { isExpanded = !isExpanded },
-                shape = RoundedCornerShape(5.dp),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.cursorForHand()
             ) {
                 Text(
@@ -679,8 +679,8 @@ private fun <T> DropdownMultiChoiceItem(
         onClick = { onOptionSelect(option) },
         modifier = Modifier.cursorForHand(),
         leadingIcon = {
-            if (selected) Icon(Icons.Default.RadioButtonChecked, null, tint = color)
-            else Icon(Icons.Default.RadioButtonUnchecked, null)
+            if (selected) Icon(Icons.Rounded.RadioButtonChecked, null, tint = color)
+            else Icon(Icons.Rounded.RadioButtonUnchecked, null)
         }
     )
 }

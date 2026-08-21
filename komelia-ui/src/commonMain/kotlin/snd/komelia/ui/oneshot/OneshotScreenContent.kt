@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -186,7 +186,7 @@ private fun ToolbarOneshotActions(
         Box {
             var expandActions by remember { mutableStateOf(false) }
             IconButton(onClick = { expandActions = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = null)
+                Icon(Icons.Rounded.MoreVert, contentDescription = null)
             }
             OneshotActionsMenu(
                 series = series,
@@ -201,7 +201,7 @@ private fun ToolbarOneshotActions(
         var showEditDialog by remember { mutableStateOf(false) }
         if (isAdmin) {
             IconButton(onClick = { showEditDialog = true }) {
-                Icon(Icons.Default.Edit, null)
+                Icon(Icons.Rounded.Edit, null)
             }
         }
         if (showEditDialog) {

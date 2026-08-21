@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -211,11 +211,11 @@ fun NotificationContextDialogContent(
                     modifier = Modifier.clickable { showBook = !showBook }.cursorForHand()
 
                 ) {
-                    Icon(if (showBook) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
+                    Icon(if (showBook) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null)
                     Text("Book ${index + 1}")
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = { state.onBookDelete(book) }) {
-                        Icon(Icons.Default.Delete, null)
+                        Icon(Icons.Rounded.Delete, null)
                     }
                 }
                 AnimatedVisibility(
@@ -353,11 +353,11 @@ private fun <T> ValueList(
                     modifier = Modifier.clickable { showBook = !showBook }.cursorForHand()
 
                 ) {
-                    Icon(if (showBook) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
+                    Icon(if (showBook) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null)
                     Text("$valueName ${index + 1}")
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = { onDelete(value) }) {
-                        Icon(Icons.Default.Delete, null)
+                        Icon(Icons.Rounded.Delete, null)
                     }
                 }
                 AnimatedVisibility(

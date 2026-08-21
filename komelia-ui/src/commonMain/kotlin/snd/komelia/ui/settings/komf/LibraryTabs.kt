@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -118,7 +118,7 @@ fun <T> LibraryTabs(
                                 .padding(3.dp)
                         ) {
                             Icon(
-                                Icons.Default.Close,
+                                Icons.Rounded.Close,
                                 null,
                                 modifier = Modifier.size(20.dp),
                                 tint = MaterialTheme.colorScheme.secondary
@@ -139,7 +139,7 @@ fun <T> LibraryTabs(
                         .menuAnchor(PrimaryNotEditable),
 
                     ) {
-                    Icon(Icons.Default.Add, null)
+                    Icon(Icons.Rounded.Add, null)
                 }
 
                 ExposedDropdownMenu(

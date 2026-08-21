@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -79,7 +79,7 @@ fun AppriseContent(
                 )
 
                 IconButton(onClick = { onUrlRemove(url) }, modifier = Modifier.cursorForHand()) {
-                    Icon(Icons.Default.Delete, null)
+                    Icon(Icons.Rounded.Delete, null)
                 }
             }
         }

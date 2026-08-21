@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.PriorityHigh
+import androidx.compose.material.icons.rounded.People
+import androidx.compose.material.icons.rounded.PriorityHigh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,7 +27,7 @@ internal class SharingTab(
 
     override fun options() = TabItem(
         title = "SHARING",
-        icon = Icons.Default.People
+        icon = Icons.Rounded.People
     )
 
     @Composable
@@ -50,7 +50,7 @@ private fun SharingContent(
     ) {
         val warningColor = MaterialTheme.colorScheme.tertiary
         Row(Modifier.border(Dp.Hairline, warningColor).padding(20.dp)) {
-            Icon(Icons.Default.PriorityHigh, null, tint = warningColor)
+            Icon(Icons.Rounded.PriorityHigh, null, tint = warningColor)
             Text(
                 text = "You are editing tags for multiple series. This will override existing tags of each series.",
                 color = warningColor

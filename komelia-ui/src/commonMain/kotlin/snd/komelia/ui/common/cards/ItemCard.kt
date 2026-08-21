@@ -14,9 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -46,14 +45,14 @@ const val defaultCardWidth = 240
 @Composable
 fun ItemCard(
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     image: @Composable () -> Unit,
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
     Card(
-        shape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
+        shape = MaterialTheme.shapes.medium,
         modifier = modifier
             .combinedClickable(onClick = onClick ?: {}, onLongClick = onLongClick)
             .then(if (onClick != null || onLongClick != null) Modifier.cursorForHand() else Modifier),
@@ -71,7 +70,7 @@ fun ItemCardWithContent(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
+        shape = MaterialTheme.shapes.medium,
         modifier = modifier
     ) {
         Box(modifier = Modifier.aspectRatio(0.703f)) { image() }
@@ -97,7 +96,7 @@ fun CardGradientOverlay() {
 
 @Composable
 fun overlayBorderModifier() =
-    Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.tertiary), RoundedCornerShape(5.dp))
+    Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.primary), MaterialTheme.shapes.medium)
 
 
 @Composable
@@ -129,10 +128,10 @@ fun SelectionRadioButton(
         selected = isSelected,
         onClick = onSelect,
         colors = RadioButtonDefaults.colors(
-            selectedColor = MaterialTheme.colorScheme.tertiary,
+            selectedColor = MaterialTheme.colorScheme.primary,
         ),
         modifier = Modifier
-            .clip(RoundedCornerShape(topEnd = 17.dp, bottomEnd = 17.dp))
+            .clip(MaterialTheme.shapes.large)
             .background(MaterialTheme.colorScheme.surface.copy(alpha = .4f))
             .selectable(selected = isSelected, onClick = onSelect)
     )
@@ -157,9 +156,9 @@ fun LazyGridItemScope.DraggableImageCard(
                             .height(30.dp)
                             .fillMaxWidth()
                             .draggableHandle()
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                         contentAlignment = Alignment.Center,
-                    ) { Icon(Icons.Default.DragHandle, null) }
+                    ) { Icon(Icons.Rounded.DragHandle, null) }
                 }
 
             } else {

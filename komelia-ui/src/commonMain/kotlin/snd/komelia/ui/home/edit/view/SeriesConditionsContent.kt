@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -89,7 +89,7 @@ fun SeriesMatchConditionContent(
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.secondary,
-                RoundedCornerShape(10.dp)
+                RoundedCornerShape(12.dp)
             ).padding(5.dp)
     ) {
         FlowRow {
@@ -102,7 +102,7 @@ fun SeriesMatchConditionContent(
                     onOptionChange = { state.setMatchType(it.value) }
                 )
                 IconButton(onClick = onConditionRemove) {
-                    Icon(Icons.Default.Delete, null)
+                    Icon(Icons.Rounded.Delete, null)
                 }
             }
 

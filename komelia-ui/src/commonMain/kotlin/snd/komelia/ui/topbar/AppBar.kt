@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.FullscreenExit
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.FullscreenExit
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
@@ -40,10 +40,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKeyEvents
+import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalWindowState
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.ReloadableScreen
+import snd.komelia.ui.common.components.KomeliaIconButton
+import snd.komelia.ui.common.components.KomeliaIconButtonStyle
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.WindowSizeClass.FULL
@@ -73,21 +76,22 @@ fun AppBar(
         val coroutineScope = rememberCoroutineScope()
         val strings = LocalStrings.current.mainNavigation
 
-        IconButton(
+        KomeliaIconButton(
             modifier = Modifier.align(Alignment.Start),
+            imageVector = Icons.Rounded.Menu,
+            contentDescription = LocalStrings.current.legacy.forText("Open navigation"),
             onClick = { coroutineScope.launch { onMenuButtonPress() } },
-        ) {
-            Icon(Icons.Rounded.Menu, null)
-        }
+            style = KomeliaIconButtonStyle.Tonal,
+        )
 
         val navigator = LocalNavigator.currentOrThrow
-        IconButton(
+        KomeliaIconButton(
             modifier = Modifier.align(Alignment.Start),
+            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+            contentDescription = LocalStrings.current.legacy.forText("Back"),
             onClick = { navigator.pop() },
-            enabled = navigator.canPop
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
-        }
+            enabled = navigator.canPop,
+        )
         val reloadableScreen = remember(navigator.lastItem) { navigator.lastItem as? ReloadableScreen }
         RefreshIndicator(
             onClick = onRefreshClick,
@@ -117,12 +121,12 @@ fun AppBar(
         val windowState = LocalWindowState.current
         val isFullscreen = windowState.isFullscreen.collectAsState(false)
         if (isFullscreen.value) {
-            IconButton(
+            KomeliaIconButton(
                 modifier = Modifier.align(Alignment.End),
+                imageVector = Icons.Rounded.FullscreenExit,
+                contentDescription = LocalStrings.current.legacy.forText("Exit fullscreen"),
                 onClick = { coroutineScope.launch { windowState.setFullscreen(false) } },
-            ) {
-                Icon(Icons.Default.FullscreenExit, null)
-            }
+            )
         }
 
         if (isOffline) {
@@ -154,6 +158,7 @@ private fun RefreshIndicator(
 ) {
     val keyEvents = LocalKeyEvents.current
     var isClicked by remember { mutableStateOf(false) }
+    val motion = LocalKomeliaMotion.current
     LaunchedEffect(isClicked) {
         if (isClicked) {
             delay(500)
@@ -180,7 +185,10 @@ private fun RefreshIndicator(
     ) {
         Crossfade(
             targetState = isClicked,
-            animationSpec = tween(durationMillis = 200)
+            animationSpec = tween(
+                durationMillis = motion.duration(motion.stateDurationMillis),
+                easing = motion.standardEasing,
+            )
         ) { refreshing ->
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -192,7 +200,7 @@ private fun RefreshIndicator(
                         modifier = Modifier.size(17.dp)
                     )
                 } else {
-                    Icon(Icons.Default.Refresh, null)
+                    Icon(Icons.Rounded.Refresh, contentDescription = LocalStrings.current.legacy.forText("Refresh"))
                 }
             }
         }

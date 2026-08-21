@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -55,6 +54,7 @@ import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.updates.AppRelease
 import snd.komelia.updates.StartupUpdateChecker
+import snd.komelia.settings.model.AppTheme
 
 private val vmFactory = MutableStateFlow<ViewModelFactory?>(null)
 
@@ -66,12 +66,17 @@ fun MainView(
     platformType: PlatformType,
     keyEvents: SharedFlow<KeyEvent>
 ) {
-    var theme by rememberSaveable { mutableStateOf(Theme.DARK) }
+    var appTheme by rememberSaveable { mutableStateOf(AppTheme.DARK) }
     LaunchedEffect(dependencies) {
-        dependencies?.appRepositories?.settingsRepository?.getAppTheme()?.collect { theme = it.toTheme() }
+        dependencies?.appRepositories?.settingsRepository?.getAppTheme()?.collect { appTheme = it }
     }
 
-    MaterialTheme(colorScheme = theme.colorScheme) {
+    val isReducedMotion = rememberSystemReducedMotion()
+    KomeliaTheme(appTheme = appTheme, isReducedMotion = isReducedMotion) {
+        val theme = appTheme.toTheme()
+        val layoutSpec = remember(platformType, windowWidth) {
+            komeliaLayoutSpec(platformType, windowWidth)
+        }
         ConfigurePlatformTheme(theme)
         val focusManager = LocalFocusManager.current
         Surface(
@@ -107,6 +112,7 @@ fun MainView(
                 LocalKomfIntegration provides dependencies.appRepositories.komfSettingsRepository.getKomfEnabled(),
                 LocalKeyEvents provides keyEvents,
                 LocalPlatform provides platformType,
+                LocalKomeliaLayout provides layoutSpec,
                 LocalStrings provides appStrings.value,
                 LocalTheme provides theme,
                 LocalWindowState provides dependencies.windowState,

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.DraggableImageCard
 import snd.komelia.ui.common.components.Pagination
@@ -49,7 +50,7 @@ fun BookLazyCardGrid(
     minSize: Dp = 200.dp,
     gridState: LazyGridState = rememberLazyGridState(),
 ) {
-
+    val layout = LocalKomeliaLayout.current
     val coroutineScope = rememberCoroutineScope()
     val reorderableLazyGridState = rememberReorderableLazyGridState(
         lazyGridState = gridState,
@@ -63,10 +64,10 @@ fun BookLazyCardGrid(
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize),
             state = gridState,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = 30.dp),
-            modifier = Modifier.padding(horizontal = 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
+            modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding)
         ) {
 
             items(books, key = { it.id.value }) { book ->
@@ -83,9 +84,7 @@ fun BookLazyCardGrid(
                         onBookReadClick = onBookReadClick?.let { { onBookReadClick(book, it) } },
                         isSelected = isSelected,
                         onSelect = onBookSelect?.let { { onBookSelect(book) } },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(5.dp),
+                        modifier = Modifier.fillMaxSize(),
                     )
 
                 }

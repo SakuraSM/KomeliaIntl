@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.PriorityHigh
+import androidx.compose.material.icons.rounded.LocalOffer
+import androidx.compose.material.icons.rounded.PriorityHigh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,7 +28,7 @@ class TagsTab(
 ) : DialogTab {
     override fun options() = TabItem(
         title = "TAGS",
-        icon = Icons.Default.LocalOffer
+        icon = Icons.Rounded.LocalOffer
     )
 
     @Composable
@@ -54,7 +54,7 @@ private fun TagsTabContent(
     ) {
         val warningColor = MaterialTheme.colorScheme.tertiary
         Row(Modifier.border(Dp.Hairline, warningColor).padding(20.dp)) {
-            Icon(Icons.Default.PriorityHigh, null, tint = warningColor)
+            Icon(Icons.Rounded.PriorityHigh, null, tint = warningColor)
             Text(
                 text = "You are editing tags for multiple books. This will override existing tags of each book.",
                 color = warningColor

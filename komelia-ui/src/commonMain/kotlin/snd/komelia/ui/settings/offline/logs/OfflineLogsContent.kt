@@ -116,7 +116,7 @@ private fun LogsContent(logs: List<OfflineLogEntry>) {
     SelectionContainer {
         Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(5.dp))
+                .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(5.dp),

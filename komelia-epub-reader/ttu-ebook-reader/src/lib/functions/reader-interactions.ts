@@ -354,7 +354,7 @@ function searchResultToAnnotation(result: ReaderSearchResult) {
     startCharacter: result.startCharacter,
     endCharacter: result.endCharacter,
     text: result.text,
-    color: '#38bdf8',
+    color: '#818cf8',
     createdAt: 0,
     updatedAt: 0
   } satisfies ReaderAnnotation;

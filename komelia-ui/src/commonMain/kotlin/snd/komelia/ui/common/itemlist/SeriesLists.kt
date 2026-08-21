@@ -18,7 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -34,6 +34,7 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyGridState
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.DraggableImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.components.Pagination
@@ -65,6 +66,7 @@ fun SeriesLazyCardGrid(
 
     beforeContent: @Composable () -> Unit = {},
 ) {
+    val layout = LocalKomeliaLayout.current
     val coroutineScope = rememberCoroutineScope()
     val reorderableLazyGridState = rememberReorderableLazyGridState(
         lazyGridState = gridState,
@@ -79,10 +81,10 @@ fun SeriesLazyCardGrid(
         LazyVerticalGrid(
             state = gridState,
             columns = GridCells.Adaptive(minSize),
-            horizontalArrangement = Arrangement.spacedBy(15.dp),
-            verticalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(bottom = 50.dp),
-            modifier = Modifier.padding(horizontal = 20.dp)
+            horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
+            modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding)
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 beforeContent()
@@ -154,7 +156,7 @@ private fun LazyGridItemScope.DraggableSeriesCard(
                         .draggableHandle()
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center,
-                ) { Icon(Icons.Default.DragHandle, null) }
+                ) { Icon(Icons.Rounded.DragHandle, null) }
             }
         } else {
             SeriesImageCard(

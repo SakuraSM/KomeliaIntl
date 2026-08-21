@@ -105,7 +105,7 @@ fun OnnxRuntimeSettingsContent(
             ) {
                 FilledTonalButton(
                     onClick = { showOrtInstallDialog = true },
-                    shape = RoundedCornerShape(5.dp),
+                    shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.cursorForHand()
                 ) { Text(strings.forText("Update ONNX Runtime"), maxLines = 1) }
 

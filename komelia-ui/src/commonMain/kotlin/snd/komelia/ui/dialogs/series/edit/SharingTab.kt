@@ -1,7 +1,7 @@
 package snd.komelia.ui.dialogs.series.edit
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.rounded.People
 import androidx.compose.runtime.Composable
 import snd.komelia.ui.StateHolder
 import snd.komelia.ui.common.components.LockableChipTextField
@@ -14,7 +14,7 @@ internal class SharingTab(
 
     override fun options() = TabItem(
         title = "SHARING",
-        icon = Icons.Default.People
+        icon = Icons.Rounded.People
     )
 
     @Composable

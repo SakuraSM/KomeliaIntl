@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,6 +28,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.LocalStrings
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.settings.navigation.SettingsNavigationMenu
@@ -42,24 +43,24 @@ class MobileSettingsScreen : Screen {
         LaunchedEffect(Unit) { vm.initialize() }
 
         Surface(
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.background,
         ) {
             Column(
-                modifier = Modifier.padding(5.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
+                modifier = Modifier.padding(horizontal = KomeliaSpacing.small),
+                verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.small),
             ) {
                 PlatformTitleBar()
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(KomeliaSpacing.small),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { currentNavigator.pop() }) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = LocalStrings.current.legacy.forText("Back"))
                     }
                     Text(strings.settings, style = MaterialTheme.typography.titleLarge)
                 }
 
-                HorizontalDivider()
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                 SettingsNavigationMenu(
                     currentScreen = currentNavigator.lastItem,
@@ -70,7 +71,7 @@ class MobileSettingsScreen : Screen {
                     newVersionIsAvailable = vm.newVersionIsAvailable,
                     onLogout = vm::logout,
                     user = vm.user.collectAsState().value,
-                    contentColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.background,
                     modifier = Modifier.weight(1f, false)
                 )
 

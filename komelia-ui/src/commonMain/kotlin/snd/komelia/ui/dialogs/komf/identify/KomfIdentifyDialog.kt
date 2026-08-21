@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
@@ -194,7 +194,7 @@ private fun ProviderProgressCard(progress: ProviderProgressStatus) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(5.dp))
+            .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(5.dp)
     ) {
@@ -209,7 +209,7 @@ private fun ProviderProgressCard(progress: ProviderProgressStatus) {
                 ProgressStatus.COMPLETED -> {
                     Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Completed"))
                     Icon(
-                        imageVector = Icons.Default.Check,
+                        imageVector = Icons.Rounded.Check,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.secondary
                     )
@@ -217,7 +217,7 @@ private fun ProviderProgressCard(progress: ProviderProgressStatus) {
 
                 ProgressStatus.ERROR -> {
                     Icon(
-                        imageVector = Icons.Default.Error,
+                        imageVector = Icons.Rounded.Error,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error
                     )
@@ -245,7 +245,7 @@ private fun ProcessingProgressCard() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(5.dp))
+            .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(5.dp)
     ) {

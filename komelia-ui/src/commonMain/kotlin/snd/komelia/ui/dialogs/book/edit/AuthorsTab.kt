@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.People
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -34,7 +34,7 @@ class AuthorsTab(
 ) : DialogTab {
     override fun options() = TabItem(
         title = "AUTHORS",
-        icon = Icons.Default.People
+        icon = Icons.Rounded.People
     )
 
     @Composable
@@ -101,7 +101,7 @@ private fun AuthorsTabContent(
                         newCustomRole = ""
                     }
                 }) {
-                    Icon(Icons.Default.Add, contentDescription = null)
+                    Icon(Icons.Rounded.Add, contentDescription = null)
                 }
             }
         )

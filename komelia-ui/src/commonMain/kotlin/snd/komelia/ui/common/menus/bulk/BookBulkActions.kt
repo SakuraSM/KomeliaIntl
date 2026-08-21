@@ -1,12 +1,12 @@
 package snd.komelia.ui.common.menus.bulk
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
-import androidx.compose.material.icons.filled.AutoDelete
-import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.BookmarkRemove
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
+import androidx.compose.material.icons.rounded.AutoDelete
+import androidx.compose.material.icons.rounded.BookmarkAdd
+import androidx.compose.material.icons.rounded.BookmarkRemove
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -184,41 +184,41 @@ data class BookBulkActionsState(
         add(
             BulkActionButtonData(
                 description = "Mark read",
-                icon = Icons.Default.BookmarkAdd,
+                icon = Icons.Rounded.BookmarkAdd,
                 onClick = { coroutineScope.launch { actions.markAsRead(books) } }
             ))
 
         add(
             BulkActionButtonData(
                 description = "Mark unread",
-                icon = Icons.Default.BookmarkRemove,
+                icon = Icons.Rounded.BookmarkRemove,
                 onClick = { coroutineScope.launch { actions.markAsUnread(books) } }
             ))
         if (!isOffline && isAdmin) add(
             BulkActionButtonData(
                 description = "Edit",
-                icon = Icons.Default.Edit,
+                icon = Icons.Rounded.Edit,
                 onClick = { showEditDialog = true }
             ))
         if (!isOffline && isAdmin)
             add(
                 BulkActionButtonData(
                     description = "Add to read list",
-                    icon = Icons.AutoMirrored.Default.PlaylistAdd,
+                    icon = Icons.AutoMirrored.Rounded.PlaylistAdd,
                     onClick = { showAddToReadListDialog = true }
                 ))
         if (books.any { it.downloaded })
             add(
                 BulkActionButtonData(
                     description = "Deleted downloaded",
-                    icon = Icons.Default.AutoDelete,
+                    icon = Icons.Rounded.AutoDelete,
                     onClick = { showDeleteDownloadedDialog = true }
                 ))
         if (!isOffline && books.any { !it.downloaded })
             add(
                 BulkActionButtonData(
                     description = "Download",
-                    icon = Icons.Default.Download,
+                    icon = Icons.Rounded.Download,
                     onClick = { showDownloadDialog = true }
                 ))
 
@@ -226,7 +226,7 @@ data class BookBulkActionsState(
 //            add(
 //                BulkActionButtonData(
 //                    description = "Delete from server",
-//                    icon = Icons.Default.Delete,
+//                    icon = Icons.Rounded.Delete,
 //                    onClick =
 //                        { showDeleteDialog = true }
 //                ))

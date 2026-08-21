@@ -17,7 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.ItemCard
 import snd.komelia.ui.platform.HorizontalScrollbar
 import snd.komelia.ui.platform.VerticalScrollbar
@@ -38,16 +39,17 @@ fun PlaceHolderLazyCardGrid(
     minSize: Dp = 200.dp,
     scrollState: LazyGridState = rememberLazyGridState(),
 ) {
+    val layout = LocalKomeliaLayout.current
     Box {
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize),
             state = scrollState,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(horizontal = 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding)
         ) {
             for (i in 0 until elements) {
-                item { ItemCard(modifier = Modifier.padding(5.dp), onClick = {}, image = {}) }
+                item { ItemCard(onClick = {}, image = {}) }
             }
         }
         VerticalScrollbar(scrollState, Modifier.align(Alignment.TopEnd))
@@ -79,7 +81,7 @@ fun ItemCardsSlider(
                     ).cursorForHand()
             ) {
                 label()
-                Icon(Icons.Default.ChevronRight, null)
+                Icon(Icons.Rounded.ChevronRight, null)
             }
             HorizontalDivider()
             LazyRow(
@@ -92,4 +94,3 @@ fun ItemCardsSlider(
         }
     }
 }
-

@@ -273,7 +273,7 @@ fun ChangesConfirmationPopup(
         ) {
             Surface(
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceVariant),
-                shape = RoundedCornerShape(5.dp),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .width(600.dp)
                     .padding(20.dp)

@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -167,7 +167,7 @@ private fun ReadListToolbar(
                     onDismissRequest = { expandActions = false }
                 )
             }
-            IconButton(onClick = onEditModeEnable) { Icon(Icons.Default.EditNote, null) }
+            IconButton(onClick = onEditModeEnable) { Icon(Icons.Rounded.EditNote, null) }
         }
 
         Spacer(Modifier.weight(1f))

@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.DateRange
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -80,7 +80,7 @@ fun <T> SimpleConditionLayout(
     content: @Composable RowScope.() -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onConditionRemove) { Icon(Icons.Default.Delete, null) }
+        IconButton(onClick = onConditionRemove) { Icon(Icons.Rounded.Delete, null) }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -527,7 +527,7 @@ private fun DatePickerField(
         onValueChange = { },
         placeholder = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("MM/DD/YYYY")) },
         trailingIcon = {
-            Icon(Icons.Default.DateRange, null)
+            Icon(Icons.Rounded.DateRange, null)
         },
         modifier = Modifier
             .pointerInput(currentDate) {

@@ -14,13 +14,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.LockReset
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.SupervisorAccount
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material.icons.rounded.LockReset
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.SupervisorAccount
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -107,7 +107,7 @@ private fun UserCard(
             UserInfo(user, latestActivity)
 
             Spacer(Modifier.weight(1f))
-            Icon(if (expandActions) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
+            Icon(if (expandActions) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null)
         }
 
 
@@ -155,12 +155,12 @@ private fun UserInfo(
     ) {
         if (isAdmin)
             Icon(
-                Icons.Default.SupervisorAccount,
+                Icons.Rounded.SupervisorAccount,
                 null,
                 tint = MaterialTheme.colorScheme.tertiaryContainer
             )
         else
-            Icon(Icons.Default.Person, null)
+            Icon(Icons.Rounded.Person, null)
 
         Spacer(Modifier.width(20.dp))
 
@@ -205,7 +205,7 @@ private fun UserActions(
                 contentPadding = contentPadding,
                 modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
             ) {
-                Icon(Icons.Default.Edit, null)
+                Icon(Icons.Rounded.Edit, null)
                 Spacer(Modifier.width(10.dp))
                 Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit User"))
             }
@@ -215,7 +215,7 @@ private fun UserActions(
             contentPadding = contentPadding,
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
-            Icon(Icons.Default.LockReset, null)
+            Icon(Icons.Rounded.LockReset, null)
             Spacer(Modifier.width(10.dp))
             Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Change Password"))
         }
@@ -231,7 +231,7 @@ private fun UserActions(
                 ),
                 modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
             ) {
-                Icon(Icons.Default.Delete, null)
+                Icon(Icons.Rounded.Delete, null)
                 Spacer(Modifier.width(10.dp))
                 Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete User"))
             }

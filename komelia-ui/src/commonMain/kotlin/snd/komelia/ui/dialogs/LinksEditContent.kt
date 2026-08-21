@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,13 +62,13 @@ fun LinksEditContent(
                     )
                 }
                 IconButton(onClick = { onLinkRemove(index) }) {
-                    Icon(Icons.Default.Delete, contentDescription = null)
+                    Icon(Icons.Rounded.Delete, contentDescription = null)
                 }
             }
         }
 
         FilledTonalIconButton(onClick = onLinkAdd) {
-            Icon(Icons.Default.Add, contentDescription = null)
+            Icon(Icons.Rounded.Add, contentDescription = null)
         }
     }
 }

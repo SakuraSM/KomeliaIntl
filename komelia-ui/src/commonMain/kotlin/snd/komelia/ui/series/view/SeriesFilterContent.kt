@@ -183,7 +183,7 @@ fun SeriesFilterContent(
                 inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier
                     .then(fieldModifier)
-                    .clip(RoundedCornerShape(5.dp)),
+                    .clip(RoundedCornerShape(8.dp)),
                 inputFieldModifier = Modifier.fillMaxWidth()
             )
             FilterDropdownMultiChoice(
@@ -262,7 +262,7 @@ fun SeriesFilterContent(
                         .clickable { filterState.onCompletionToggle() }
                         .cursorForHand()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clip(RoundedCornerShape(5.dp)),
+                        .clip(RoundedCornerShape(8.dp)),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val checkboxState by derivedStateOf {
@@ -288,7 +288,7 @@ fun SeriesFilterContent(
                         .clickable { filterState.onFormatToggle() }
                         .cursorForHand()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clip(RoundedCornerShape(5.dp)),
+                        .clip(RoundedCornerShape(8.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val checkboxState by derivedStateOf {

@@ -23,15 +23,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.automirrored.rounded.LibraryBooks
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -57,6 +56,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalStrings
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.common.menus.LibraryActionsMenu
 import snd.komelia.ui.common.menus.LibraryMenuActions
 import snd.komelia.ui.dialogs.libraryedit.LibraryEditDialogs
@@ -79,7 +79,10 @@ fun NavBarContent(
     onSettingsClick: () -> Unit,
     taskQueueStatus: TaskQueueStatus?,
 ) {
-    Surface(Modifier.width(230.dp)) {
+    Surface(
+        modifier = Modifier.width(256.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+    ) {
         NavMenu(
             currentScreen = currentScreen,
             libraries = libraries,
@@ -108,7 +111,10 @@ fun LibrariesNavBarContent(
     onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
 ) {
-    Surface(Modifier.width(230.dp)) {
+    Surface(
+        modifier = Modifier.width(256.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+    ) {
         val scrollState: ScrollState = rememberScrollState()
         Column(
             modifier = modifier
@@ -152,7 +158,7 @@ fun ColumnScope.LibrariesNavBarContent(
     val strings = LocalStrings.current.mainNavigation
     NavButton(
         onClick = { onLibrariesClick() },
-        icon = Icons.AutoMirrored.Filled.LibraryBooks,
+        icon = Icons.AutoMirrored.Rounded.LibraryBooks,
         label = strings.libraries,
         isSelected = false,
         actionButton = {
@@ -162,14 +168,14 @@ fun ColumnScope.LibrariesNavBarContent(
                     enabled = !isOffline
                 ) {
                     Icon(
-                        Icons.Default.Refresh,
+                        Icons.Rounded.Refresh,
                         contentDescription = LocalStrings.current.legacy.forText("Refresh libraries"),
                     )
                 }
                 if (isAdmin && !isOffline) {
                     IconButton(onClick = { showLibraryAddDialog = true }) {
                         Icon(
-                            Icons.Default.Add,
+                            Icons.Rounded.Add,
                             contentDescription = LocalStrings.current.legacy.forText("Add library"),
                         )
                     }
@@ -191,8 +197,8 @@ fun ColumnScope.LibrariesNavBarContent(
                     IconButton(onClick = { showMenu = true }) {
 
                         Icon(
-                            Icons.Default.MoreVert,
-                            contentDescription = null,
+                            Icons.Rounded.MoreVert,
+                            contentDescription = LocalStrings.current.legacy.forText("Library actions"),
                         )
 
                         LibraryActionsMenu(
@@ -242,7 +248,7 @@ private fun NavMenu(
 
             NavButton(
                 onClick = { onHomeClick() },
-                icon = Icons.Default.Home,
+                icon = Icons.Rounded.Home,
                 label = strings.home,
                 isSelected = currentScreen is HomeScreen
             )
@@ -255,10 +261,13 @@ private fun NavMenu(
                 onLibraryClick = onLibraryClick
             )
 
-            HorizontalDivider(Modifier.padding(0.dp, 20.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = KomeliaSpacing.large, vertical = KomeliaSpacing.extraLarge),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
             NavButton(
                 onClick = onSettingsClick,
-                icon = Icons.Default.Settings,
+                icon = Icons.Rounded.Settings,
                 label = strings.settings,
                 isSelected = false
             )
@@ -281,18 +290,20 @@ private fun NavButton(
 ) {
     TextButton(
         onClick = onClick,
+        modifier = Modifier.padding(horizontal = KomeliaSpacing.small, vertical = KomeliaSpacing.extraSmall),
         contentPadding = PaddingValues(0.dp),
-        shape = RoundedCornerShape(10.dp)
+        shape = MaterialTheme.shapes.medium,
     ) {
         Row(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(40.dp)
+                .height(44.dp)
                 .background(
-                    if (isSelected) MaterialTheme.colorScheme.surfaceVariant
-                    else MaterialTheme.colorScheme.surface
+                    if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surfaceContainerLow,
+                    MaterialTheme.shapes.medium,
                 )
         ) {
 
@@ -300,7 +311,8 @@ private fun NavButton(
                 Icon(
                     icon,
                     contentDescription = null,
-                    modifier = Modifier.padding(10.dp, 0.dp, 20.dp, 0.dp)
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(KomeliaSpacing.medium, 0.dp, KomeliaSpacing.large, 0.dp)
                 )
             } else {
                 Box(Modifier.padding(30.dp, 0.dp)) {}
@@ -330,7 +342,10 @@ private fun TaskQueueIndicator(queueStatus: TaskQueueStatus) {
     BasicTooltipBox(
         positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
         tooltip = {
-            Surface(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .9f)) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = MaterialTheme.shapes.small,
+            ) {
                 Column(Modifier.padding(10.dp)) {
                     when (queueStatus.count) {
                         1 -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("1 pending task"))
@@ -351,8 +366,8 @@ private fun TaskQueueIndicator(queueStatus: TaskQueueStatus) {
         ) {
             LinearProgressIndicator(
                 modifier = Modifier.height(8.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                trackColor = MaterialTheme.colorScheme.tertiary
+                color = MaterialTheme.colorScheme.tertiary,
+                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             )
         }
     }

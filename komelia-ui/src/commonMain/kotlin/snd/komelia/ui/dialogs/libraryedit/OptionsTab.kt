@@ -3,7 +3,7 @@ package snd.komelia.ui.dialogs.libraryedit
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,7 +23,7 @@ internal class OptionsTab(
 
     override fun options() = TabItem(
         title = "OPTIONS",
-        icon = Icons.Default.Tune
+        icon = Icons.Rounded.Tune
     )
 
     @Composable

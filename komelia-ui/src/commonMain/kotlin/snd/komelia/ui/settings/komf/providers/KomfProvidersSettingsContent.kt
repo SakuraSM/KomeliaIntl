@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -149,7 +149,7 @@ private fun ProvidersConfigContent(
                 ReorderableItem {
                     Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(5.dp))
+                            .clip(RoundedCornerShape(8.dp))
                             .height(70.dp)
                             .fillMaxWidth()
                             .background(
@@ -397,14 +397,14 @@ private fun ProviderCard(
             onClick = { showEditDialog = true },
             modifier = Modifier.cursorForHand()
         ) {
-            Icon(Icons.Default.Edit, null)
+            Icon(Icons.Rounded.Edit, null)
         }
         Spacer(Modifier.weight(1.0f))
         IconButton(
             onClick = { onProviderRemove(state) },
             modifier = Modifier.cursorForHand()
         ) {
-            Icon(Icons.Default.Delete, null)
+            Icon(Icons.Rounded.Delete, null)
         }
     }
 

@@ -21,9 +21,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
@@ -185,7 +185,7 @@ private fun ToolbarBookActions(
         Box {
             var expandActions by remember { mutableStateOf(false) }
             IconButton(onClick = { expandActions = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = null)
+                Icon(Icons.Rounded.MoreVert, contentDescription = null)
             }
             BookActionsMenu(
                 book = book,
@@ -203,7 +203,7 @@ private fun ToolbarBookActions(
 
         if (isAdmin && !isOffline) {
             IconButton(onClick = { showEditDialog = true }) {
-                Icon(Icons.Default.Edit, null)
+                Icon(Icons.Rounded.Edit, null)
             }
         }
         if (showEditDialog) {
@@ -301,7 +301,7 @@ fun DownloadButton(
                         modifier = Modifier.size(24.dp),
                     )
                     Icon(
-                        imageVector = Icons.Default.Download,
+                        imageVector = Icons.Rounded.Download,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(20.dp),
@@ -310,7 +310,7 @@ fun DownloadButton(
             }
 
             else -> {
-                Icon(Icons.Default.Download, null)
+                Icon(Icons.Rounded.Download, null)
             }
         }
         Spacer(Modifier.width(3.dp))

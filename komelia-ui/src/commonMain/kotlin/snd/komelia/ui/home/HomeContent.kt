@@ -1,6 +1,7 @@
 package snd.komelia.ui.home
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,9 +25,9 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -47,11 +49,15 @@ import kotlinx.coroutines.launch
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalKomeliaMotion
+import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.platform.PlatformType
+import snd.komelia.ui.homePosterColumnCount
 import snd.komga.client.series.KomgaSeries
 
 // Keep the collapsed preview balanced for the two-column mobile home layout.
@@ -107,8 +113,9 @@ private fun Toolbar(
     onEditStart: () -> Unit
 ) {
     val strings = LocalStrings.current.legacy
+    val layout = LocalKomeliaLayout.current
     val chipColors = FilterChipDefaults.filterChipColors(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         selectedContainerColor = MaterialTheme.colorScheme.primary,
         selectedLabelColor = MaterialTheme.colorScheme.onPrimary
     )
@@ -121,17 +128,23 @@ private fun Toolbar(
         }
     }
     Box {
+        val motion = LocalKomeliaMotion.current
         val lazyRowState = rememberLazyListState()
         val coroutineScope = rememberCoroutineScope()
 
         LazyRow(
             state = lazyRowState,
-            modifier = Modifier.animateContentSize(),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            modifier = Modifier.animateContentSize(
+                animationSpec = tween(
+                    durationMillis = motion.duration(motion.contentDurationMillis),
+                    easing = motion.standardEasing,
+                )
+            ),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             item {
-                Spacer(Modifier.width(20.dp))
+                Spacer(Modifier.width(layout.pageHorizontalPadding))
             }
 
             item {
@@ -139,7 +152,10 @@ private fun Toolbar(
                     onClick = onEditStart,
                     selected = false,
                     label = {
-                        Icon(Icons.Default.Tune, null)
+                        Icon(
+                            Icons.Rounded.Tune,
+                            contentDescription = strings.forText("Edit home filters"),
+                        )
                     },
                     colors = chipColors,
                     border = null,
@@ -175,7 +191,7 @@ private fun Toolbar(
                 }
             }
             item {
-                Spacer(Modifier.width(40.dp))
+                Spacer(Modifier.width(layout.pageHorizontalPadding))
             }
         }
 
@@ -186,7 +202,7 @@ private fun Toolbar(
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface),
                         onClick = { coroutineScope.launch { lazyRowState.animateScrollBy(-200.0f) } },
                     ) {
-                        Icon(Icons.Default.ChevronLeft, null)
+                        Icon(Icons.Rounded.ChevronLeft, contentDescription = strings.forText("Scroll left"))
                     }
                 }
                 Spacer(Modifier.weight(1f))
@@ -195,7 +211,7 @@ private fun Toolbar(
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface),
                         onClick = { coroutineScope.launch { lazyRowState.animateScrollBy(200.0f) } },
                     ) {
-                        Icon(Icons.Default.ChevronRight, null)
+                        Icon(Icons.Rounded.ChevronRight, contentDescription = strings.forText("Scroll right"))
                     }
                 }
             }
@@ -216,13 +232,15 @@ private fun DisplayContent(
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
 ) {
     val expandedFilterOrders = remember { mutableStateMapOf<Int, Boolean>() }
+    val layout = LocalKomeliaLayout.current
+    val fixedColumnCount = homePosterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     LazyVerticalGrid(
-        modifier = Modifier.padding(horizontal = 20.dp),
+        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         state = gridState,
-        columns = GridCells.Adaptive(cardWidth),
-        horizontalArrangement = Arrangement.spacedBy(15.dp),
-        verticalArrangement = Arrangement.spacedBy(15.dp),
-        contentPadding = PaddingValues(bottom = 50.dp)
+        columns = fixedColumnCount?.let { GridCells.Fixed(it) } ?: GridCells.Adaptive(cardWidth),
+        horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+        verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+        contentPadding = PaddingValues(bottom = layout.gridBottomPadding)
     ) {
         for (data in filters) {
             if (activeFilterNumber == 0 || data.filter.order == activeFilterNumber) {
@@ -269,16 +287,15 @@ private fun LazyGridScope.BookFilterEntry(
     if (books.isEmpty()) return
 
     item(span = { GridItemSpan(maxLineSpan) }) {
-        val strings = snd.komelia.ui.LocalStrings.current.legacy
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(strings.forText(label), style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.width(10.dp))
-            HorizontalDivider()
-        }
+        HomeSectionHeader(
+            label = label,
+            canExpand = books.size > HOME_FILTER_PREVIEW_COUNT,
+            isExpanded = isExpanded,
+            onExpandedChange = onExpandedChange,
+        )
     }
     val visibleBooks = if (isExpanded) books else books.take(HOME_FILTER_PREVIEW_COUNT)
-    items(visibleBooks) { book ->
+    items(visibleBooks, key = { it.id.value }) { book ->
         BookImageCard(
             book = book,
             onBookClick = { onBookClick(book) },
@@ -288,11 +305,6 @@ private fun LazyGridScope.BookFilterEntry(
             modifier = Modifier.fillMaxSize()
         )
     }
-    ShowMoreButton(
-        show = books.size > HOME_FILTER_PREVIEW_COUNT,
-        isExpanded = isExpanded,
-        onExpandedChange = onExpandedChange
-    )
 }
 
 private fun LazyGridScope.SeriesFilterEntries(
@@ -305,18 +317,16 @@ private fun LazyGridScope.SeriesFilterEntries(
 ) {
     if (series.isEmpty()) return
     item(span = { GridItemSpan(maxLineSpan) }) {
-        val strings = snd.komelia.ui.LocalStrings.current.legacy
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(strings.forText(label), style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.width(10.dp))
-            HorizontalDivider()
-        }
+        HomeSectionHeader(
+            label = label,
+            canExpand = series.size > HOME_FILTER_PREVIEW_COUNT,
+            isExpanded = isExpanded,
+            onExpandedChange = onExpandedChange,
+        )
     }
 
     val visibleSeries = if (isExpanded) series else series.take(HOME_FILTER_PREVIEW_COUNT)
-    items(visibleSeries) {
+    items(visibleSeries, key = { it.id.value }) {
         SeriesImageCard(
             series = it,
             onSeriesClick = { onSeriesClick(it) },
@@ -324,28 +334,43 @@ private fun LazyGridScope.SeriesFilterEntries(
             modifier = Modifier.fillMaxSize()
         )
     }
-    ShowMoreButton(
-        show = series.size > HOME_FILTER_PREVIEW_COUNT,
-        isExpanded = isExpanded,
-        onExpandedChange = onExpandedChange
-    )
 }
 
-private fun LazyGridScope.ShowMoreButton(
-    show: Boolean,
+@Composable
+private fun HomeSectionHeader(
+    label: String,
+    canExpand: Boolean,
     isExpanded: Boolean,
-    onExpandedChange: () -> Unit
+    onExpandedChange: () -> Unit,
 ) {
-    if (!show) return
-
-    item(span = { GridItemSpan(maxLineSpan) }) {
-        val strings = LocalStrings.current.filters
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            TextButton(onClick = onExpandedChange) {
-                Text(if (isExpanded) strings.filterTagsShowLess else strings.filterTagsShowMore)
+    val strings = LocalStrings.current
+    val layout = LocalKomeliaLayout.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = layout.sectionSpacing - layout.gridSpacing)
+            .heightIn(min = layout.minimumTouchTarget),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            strings.legacy.forText(label),
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+        )
+        Spacer(Modifier.width(12.dp))
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .65f),
+        )
+        if (canExpand) {
+            TextButton(
+                onClick = onExpandedChange,
+                modifier = Modifier.heightIn(min = layout.minimumTouchTarget),
+            ) {
+                Text(
+                    if (isExpanded) strings.filters.filterTagsShowLess
+                    else strings.filters.filterTagsShowMore
+                )
             }
         }
     }

@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -111,7 +111,7 @@ private fun DirectoryListing(
         val parent = listing.parent
         if (parent != null) {
                 DirectoryListingItem(
-                    icon = Icons.Default.ChevronLeft,
+                    icon = Icons.Rounded.ChevronLeft,
                     title = LocalStrings.current.legacy.forText("Parent"),
                     onClick = { onDirectoryClick(parent) }
                 )
@@ -120,7 +120,7 @@ private fun DirectoryListing(
         listing.directories.forEach {
             if (it.type == "directory") {
                 DirectoryListingItem(
-                    icon = Icons.Default.Folder,
+                    icon = Icons.Rounded.Folder,
                     title = it.name,
                     onClick = { onDirectoryClick(it.path) })
             }

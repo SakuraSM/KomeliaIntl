@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +32,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalStrings
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.PlatformType.DESKTOP
@@ -55,24 +56,25 @@ fun SettingsScreenContainer(
 private fun MobileContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
     val navigator = LocalNavigator.currentOrThrow
     val localizedTitle = LocalStrings.current.legacy.forText(title)
-    Column(Modifier.padding()) {
+    Column(Modifier.background(MaterialTheme.colorScheme.background)) {
         PlatformTitleBar()
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(KomeliaSpacing.small),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { navigator.pop() }) {
-                Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = LocalStrings.current.legacy.forText("Back"))
             }
 
             Text(localizedTitle, style = MaterialTheme.typography.titleLarge)
         }
 
-        HorizontalDivider()
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         Column(
-            modifier = Modifier.weight(1f, false).imePadding().verticalScroll(rememberScrollState()).padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.weight(1f, false).imePadding().verticalScroll(rememberScrollState())
+                .padding(KomeliaSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.large),
         ) {
             content()
         }
@@ -85,7 +87,7 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
 @Composable
 private fun DesktopContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
     val scrollState = rememberScrollState()
-    Box(Modifier.background(MaterialTheme.colorScheme.surface)) {
+    Box(Modifier.background(MaterialTheme.colorScheme.background)) {
         Box(Modifier.fillMaxSize().verticalScroll(scrollState)) {
             DesktopContent(title, content)
         }
@@ -97,13 +99,17 @@ private fun DesktopContainer(title: String, content: @Composable ColumnScope.() 
 private fun DesktopContent(title: String, content: @Composable ColumnScope.() -> Unit) {
     val localizedTitle = LocalStrings.current.legacy.forText(title)
     Column(Modifier.widthIn(min = 0.dp, max = settingsDesktopContentWidth)) {
-        Spacer(Modifier.height(50.dp))
-        Text(localizedTitle, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 30.dp))
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(KomeliaSpacing.huge))
+        Text(
+            localizedTitle,
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(horizontal = KomeliaSpacing.huge),
+        )
+        Spacer(Modifier.height(KomeliaSpacing.extraLarge))
 
         Column(
-            modifier = Modifier.padding(horizontal = 30.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(horizontal = KomeliaSpacing.huge, vertical = KomeliaSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.large),
             content = content
         )
     }

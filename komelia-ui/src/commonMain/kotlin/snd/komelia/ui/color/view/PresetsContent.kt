@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,7 +56,7 @@ fun <T : Preset> PresetsContent(
         if (selectedPreset == null)
             Tooltip("Save Preset") {
                 IconButton(onClick = { showNameDialog = true }) {
-                    Icon(Icons.Default.Add, null)
+                    Icon(Icons.Rounded.Add, null)
                 }
             }
         else {
@@ -64,7 +64,7 @@ fun <T : Preset> PresetsContent(
                 IconButton(
                     onClick = { state.onPresetDelete(selectedPreset) },
                 ) {
-                    Icon(Icons.Default.Delete, null)
+                    Icon(Icons.Rounded.Delete, null)
                 }
             }
         }

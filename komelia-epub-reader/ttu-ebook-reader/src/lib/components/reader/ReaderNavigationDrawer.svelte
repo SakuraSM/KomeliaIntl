@@ -85,7 +85,7 @@
     <nav class="flex rounded-full bg-current/10 p-1" aria-label="导航类型">
       <button
           type="button"
-          class={`flex h-9 items-center gap-2 rounded-full px-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 ${activeTab === 'toc' ? 'bg-cyan-400/20' : ''}`}
+          class={`flex h-9 items-center gap-2 rounded-full px-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 ${activeTab === 'toc' ? 'bg-indigo-400/20' : ''}`}
           aria-current={activeTab === 'toc' ? 'page' : undefined}
           onclick={() => (activeTab = 'toc')}
       >
@@ -94,7 +94,7 @@
       </button>
       <button
           type="button"
-          class={`flex h-9 items-center gap-2 rounded-full px-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 ${activeTab === 'search' ? 'bg-cyan-400/20' : ''}`}
+          class={`flex h-9 items-center gap-2 rounded-full px-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 ${activeTab === 'search' ? 'bg-indigo-400/20' : ''}`}
           aria-current={activeTab === 'search' ? 'page' : undefined}
           onclick={() => (activeTab = 'search')}
       >
@@ -103,7 +103,7 @@
       </button>
       <button
           type="button"
-          class={`flex h-9 items-center gap-2 rounded-full px-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 ${activeTab === 'marks' ? 'bg-cyan-400/20' : ''}`}
+          class={`flex h-9 items-center gap-2 rounded-full px-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 ${activeTab === 'marks' ? 'bg-indigo-400/20' : ''}`}
           aria-current={activeTab === 'marks' ? 'page' : undefined}
           onclick={() => (activeTab = 'marks')}
       >
@@ -113,7 +113,7 @@
     </nav>
     <button
         type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70"
+        class="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
         aria-label="关闭导航"
         onclick={onClose}
     >
@@ -133,7 +133,7 @@
             <li>
               <button
                   type="button"
-                  class={`w-full rounded-lg px-3 py-2 text-left transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 ${index === currentChapterIndex ? 'bg-cyan-400/15' : ''}`}
+                  class={`w-full rounded-lg px-3 py-2 text-left transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 ${index === currentChapterIndex ? 'bg-indigo-400/15' : ''}`}
                   class:opacity-45={chapter.progress === 100 && index !== currentChapterIndex}
                   aria-current={index === currentChapterIndex ? 'location' : undefined}
                   onclick={() => goToChapter(chapter)}
@@ -163,7 +163,7 @@
             <li class="rounded-lg border border-current/10 p-2">
               <button
                   type="button"
-                  class="w-full rounded-md px-2 py-2 text-left transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70"
+                  class="w-full rounded-md px-2 py-2 text-left transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
                   onclick={() => onAnnotationClick(annotation)}
               >
                 <span class="block max-h-[4.5rem] overflow-hidden text-sm leading-6">{annotation.text}</span>

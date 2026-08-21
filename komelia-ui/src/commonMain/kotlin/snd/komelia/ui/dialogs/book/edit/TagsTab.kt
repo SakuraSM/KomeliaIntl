@@ -1,7 +1,7 @@
 package snd.komelia.ui.dialogs.book.edit
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.rounded.LocalOffer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -16,7 +16,7 @@ class TagsTab(
 ) : DialogTab {
     override fun options() = TabItem(
         title = "TAGS",
-        icon = Icons.Default.LocalOffer
+        icon = Icons.Rounded.LocalOffer
     )
 
     @Composable

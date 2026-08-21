@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,7 +59,7 @@ class PosterTab(private val state: PosterEditState) : DialogTab {
 
     override fun options() = TabItem(
         title = "POSTER",
-        icon = Icons.Default.Image,
+        icon = Icons.Rounded.Image,
     )
 
     @Composable

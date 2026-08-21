@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.rounded.LocalOffer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -23,7 +23,7 @@ internal class TagsTab(
 
     override fun options() = TabItem(
         title = "TAGS",
-        icon = Icons.Default.LocalOffer
+        icon = Icons.Rounded.LocalOffer
     )
 
     @Composable

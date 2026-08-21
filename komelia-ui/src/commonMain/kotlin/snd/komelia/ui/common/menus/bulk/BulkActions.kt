@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.MoreHoriz
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,13 +64,13 @@ fun BulkActionsContainer(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .clip(RoundedCornerShape(5.dp))
+            .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
     ) {
-        IconButton(onClick = onCancel) { Icon(Icons.Default.Close, null) }
+        IconButton(onClick = onCancel) { Icon(Icons.Rounded.Close, null) }
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(5.dp))
+                .clip(RoundedCornerShape(8.dp))
                 .clickable { onSelectAll() }
                 .cursorForHand()
                 .padding(end = 15.dp),
@@ -98,7 +98,7 @@ fun BottomPopupBulkActionsPanel(content: @Composable RowScope.() -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
             ) {
                 content()
@@ -218,7 +218,7 @@ private fun MoreActionsDropdown(actions: List<BulkActionButtonData>, compact: Bo
     ) {
         BulkActionButton(
             description = "More",
-            icon = if (compact) Icons.Default.MoreHoriz else Icons.Default.MoreVert,
+            icon = if (compact) Icons.Rounded.MoreHoriz else Icons.Rounded.MoreVert,
             onClick = { showDropdown = true },
             compact = compact
         )

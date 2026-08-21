@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -208,7 +208,7 @@ private fun ToolBar(
                                 .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
                                 .cursorForHand()
                         ) {
-                            Icon(Icons.Default.FilterList, null, tint = color)
+                            Icon(Icons.Rounded.FilterList, null, tint = color)
                         }
                     }
 

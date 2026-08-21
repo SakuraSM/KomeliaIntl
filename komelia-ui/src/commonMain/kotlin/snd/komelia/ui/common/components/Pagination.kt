@@ -142,7 +142,7 @@ fun PageSizeSelectionDropdown(
         inputFieldColor = MaterialTheme.colorScheme.surface,
         inputFieldModifier = Modifier
             .widthIn(min = 70.dp)
-            .clip(RoundedCornerShape(5.dp))
+            .clip(RoundedCornerShape(8.dp))
             .padding(end = 10.dp)
     )
 }

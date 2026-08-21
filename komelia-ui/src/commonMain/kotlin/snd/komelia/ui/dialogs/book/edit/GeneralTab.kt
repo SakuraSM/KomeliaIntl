@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FormatAlignCenter
+import androidx.compose.material.icons.rounded.FormatAlignCenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +24,7 @@ class GeneralTab(
 ) : DialogTab {
     override fun options() = TabItem(
         title = "GENERAL",
-        icon = Icons.Default.FormatAlignCenter
+        icon = Icons.Rounded.FormatAlignCenter
     )
 
     @Composable

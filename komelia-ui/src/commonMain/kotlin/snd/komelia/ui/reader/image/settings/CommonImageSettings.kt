@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.LocalContentColor
@@ -89,7 +89,7 @@ fun CommonImageSettings(
             Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Color Correction"))
             Spacer(Modifier.width(10.dp))
             Icon(
-                imageVector = Icons.Default.BarChart,
+                imageVector = Icons.Rounded.BarChart,
                 contentDescription = null,
                 tint = if (isColorCorrectionsActive) MaterialTheme.colorScheme.secondary
                 else LocalContentColor.current

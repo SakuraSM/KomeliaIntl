@@ -1,13 +1,13 @@
 package snd.komelia.ui.common.menus.bulk
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
-import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.BookmarkRemove
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
+import androidx.compose.material.icons.rounded.BookmarkAdd
+import androidx.compose.material.icons.rounded.BookmarkRemove
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -168,14 +168,14 @@ data class SeriesBulkActionsState(
         add(
             BulkActionButtonData(
                 description = "Mark read",
-                icon = Icons.Default.BookmarkAdd,
+                icon = Icons.Rounded.BookmarkAdd,
                 onClick = { coroutineScope.launch { actions.markAsRead(series) } }
             )
         )
         add(
             BulkActionButtonData(
                 description = "Mark unread",
-                icon = Icons.Default.BookmarkRemove,
+                icon = Icons.Rounded.BookmarkRemove,
                 onClick = { coroutineScope.launch { actions.markAsUnread(series) } }
             )
         )
@@ -183,14 +183,14 @@ data class SeriesBulkActionsState(
             add(
                 BulkActionButtonData(
                     description = "Edit",
-                    icon = Icons.Default.Edit,
+                    icon = Icons.Rounded.Edit,
                     onClick = { showEditDialog = true }
                 )
             )
             add(
                 BulkActionButtonData(
                     description = "Add to collection",
-                    icon = Icons.AutoMirrored.Default.PlaylistAdd,
+                    icon = Icons.AutoMirrored.Rounded.PlaylistAdd,
                     onClick = { showAddToCollectionDialog = true }
                 )
             )
@@ -200,7 +200,7 @@ data class SeriesBulkActionsState(
             add(
                 BulkActionButtonData(
                     description = "Download",
-                    icon = Icons.Default.Download,
+                    icon = Icons.Rounded.Download,
                     onClick = { showDownloadDialog = true }
                 )
             )
@@ -210,7 +210,7 @@ data class SeriesBulkActionsState(
             add(
                 BulkActionButtonData(
                     description = "Delete downloaded",
-                    icon = Icons.Default.Delete,
+                    icon = Icons.Rounded.Delete,
                     onClick = { showDeleteDownloadedDialog = true }
                 )
             )
@@ -219,7 +219,7 @@ data class SeriesBulkActionsState(
             add(
                 BulkActionButtonData(
                     description = "Auto-identify",
-                    icon = Icons.Default.Extension,
+                    icon = Icons.Rounded.Extension,
                     onClick = { showKomfIdentifyDialog = true }
                 )
             )
@@ -229,7 +229,7 @@ data class SeriesBulkActionsState(
 //            add(
 //                BulkActionButtonData(
 //                    description = "Delete from server",
-//                    icon = Icons.Default.Delete,
+//                    icon = Icons.Rounded.Delete,
 //                    onClick = { showDeleteDialog = true }
 //                )
 //            )

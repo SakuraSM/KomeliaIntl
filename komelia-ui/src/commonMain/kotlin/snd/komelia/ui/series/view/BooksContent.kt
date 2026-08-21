@@ -26,12 +26,12 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ViewList
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.automirrored.rounded.ViewList
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -166,7 +166,7 @@ private fun LoadIndicator() {
             .height(500.dp)
             .fillMaxWidth()
             .background(animatedColor.value)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(12.dp))
     )
 
 }
@@ -304,7 +304,7 @@ private fun BooksToolBar(
                                 .cursorForHand()
                         ) {
                             Icon(
-                                Icons.Default.FilterList,
+                                Icons.Rounded.FilterList,
                                 null,
                                 tint = if (booksFilterState.isChanged) MaterialTheme.colorScheme.tertiary else LocalContentColor.current
                             )
@@ -324,7 +324,7 @@ private fun BooksToolBar(
                         .cursorForHand()
                 ) {
                     Box(Modifier.padding(10.dp), contentAlignment = Alignment.Center) {
-                        Icon(Icons.AutoMirrored.Filled.ViewList, null)
+                        Icon(Icons.AutoMirrored.Rounded.ViewList, null)
                     }
                 }
 
@@ -338,7 +338,7 @@ private fun BooksToolBar(
                         .cursorForHand()
                 ) {
                     Box(Modifier.padding(10.dp), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.GridView, null)
+                        Icon(Icons.Rounded.GridView, null)
                     }
                 }
             }
@@ -456,7 +456,7 @@ fun ExpandableBookFiltersRow(filterState: BooksFilterState) {
         if (filterState.authorsOptions.isNotEmpty() || filterState.tagOptions.isNotEmpty()) {
             IconButton(onClick = { showFilters = !showFilters }, modifier = Modifier.cursorForHand()) {
                 Icon(
-                    imageVector = if (showFilters) Icons.Default.ChevronLeft else Icons.Default.ChevronRight,
+                    imageVector = if (showFilters) Icons.Rounded.ChevronLeft else Icons.Rounded.ChevronRight,
                     contentDescription = null,
                 )
             }
@@ -525,7 +525,7 @@ fun BookFilterDialog(
                     modifier = Modifier.padding(start = 10.dp)
                 )
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, null) }
+                IconButton(onClick = onDismiss) { Icon(Icons.Rounded.Close, null) }
             }
         },
         onDismissRequest = onDismiss
@@ -612,7 +612,7 @@ private fun TagsFilter(
         label = if (withLabel) strings.tags else null,
         placeholder = if (withLabel) null else strings.tags,
         contentPadding = PaddingValues(5.dp),
-        modifier = modifier.clip(RoundedCornerShape(5.dp)),
+        modifier = modifier.clip(RoundedCornerShape(8.dp)),
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
         inputFieldModifier = Modifier.fillMaxWidth()
     )

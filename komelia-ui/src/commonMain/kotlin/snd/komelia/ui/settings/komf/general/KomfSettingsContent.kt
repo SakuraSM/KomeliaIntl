@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -163,7 +163,7 @@ private fun KomfConnectionDetails(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("Connected", color = MaterialTheme.colorScheme.secondary)
-                    Icon(Icons.Default.Check, null)
+                    Icon(Icons.Rounded.Check, null)
                 }
             }
         }

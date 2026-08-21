@@ -70,7 +70,7 @@ private fun BookAnalysisCard(
     val strings = LocalStrings.current
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(5.dp),
+        shape = RoundedCornerShape(8.dp),
         modifier = modifier.fillMaxWidth()
     ) {
         Column(

@@ -7,6 +7,13 @@
 :root {
   --font-color: rgba(0, 0, 0, 0.87);
   --background-color: #eceff1;
+  --komelia-primary: #4f46e5;
+  --komelia-primary-soft: #e0e7ff;
+  --komelia-surface: #ffffff;
+  --komelia-on-surface: #171a21;
+  --komelia-outline: #d7dce5;
+  --komelia-motion-state: 180ms;
+  --komelia-motion-content: 240ms;
   scrollbar-color: #c1c1c1 #c1c1c100;
 }
 
@@ -22,8 +29,15 @@
   }
 
   body {
+    min-height: 100vh;
+    margin: 0;
     color: var(--font-color);
     background-color: var(--background-color);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--komelia-primary);
+    outline-offset: 2px;
   }
 
   .book-content--writing-horizontal-rl {
@@ -63,9 +77,24 @@
   }
 
   .reader-search-match {
-    background-color: color-mix(in srgb, var(--reader-mark-color, #38bdf8) 34%, transparent);
-    outline: 0.12em solid color-mix(in srgb, var(--reader-mark-color, #38bdf8) 66%, transparent);
+    background-color: color-mix(in srgb, var(--reader-mark-color, #818cf8) 34%, transparent);
+    outline: 0.12em solid color-mix(in srgb, var(--reader-mark-color, #818cf8) 66%, transparent);
     outline-offset: 0.08em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .active\:scale-95:active {
+    transform: none !important;
   }
 }
 

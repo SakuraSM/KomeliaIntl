@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import snd.komelia.ui.LocalStrings
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.platform.VerticalScrollbar
 import snd.komelia.ui.platform.cursorForHand
 import kotlin.math.roundToInt
@@ -77,8 +77,8 @@ fun BasicAppDialog(
     ) {
         val focusManager = LocalFocusManager.current
         Surface(
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceContainerHighest),
-            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            shape = MaterialTheme.shapes.extraLarge,
             color = color,
             modifier = modifier
                 .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
@@ -196,7 +196,7 @@ fun DialogConfirmCancelButtons(
     val strings = LocalStrings.current.legacy
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(KomeliaSpacing.small),
     ) {
         if (showCancelButton)
             ElevatedButton(
@@ -222,7 +222,10 @@ fun DialogSimpleHeader(headerText: String) {
     val strings = LocalStrings.current.legacy
     Column {
         Text(strings.forText(headerText), style = MaterialTheme.typography.headlineMedium)
-        HorizontalDivider(Modifier.padding(vertical = 10.dp))
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = KomeliaSpacing.medium),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
     }
 
 }

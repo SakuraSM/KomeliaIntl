@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.rounded.Done
+import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -100,7 +100,7 @@ private fun AuthenticationInfoCard(
                 if (activity.success) {
                     Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Successful"))
                     Icon(
-                        Icons.Default.Done,
+                        Icons.Rounded.Done,
                         null,
                         tint = MaterialTheme.colorScheme.secondary,
                     )
@@ -108,7 +108,7 @@ private fun AuthenticationInfoCard(
                     Text(activity.error ?: "")
 
                     Icon(
-                        Icons.Default.Error,
+                        Icons.Rounded.Error,
                         null,
                         tint = MaterialTheme.colorScheme.error,
                     )

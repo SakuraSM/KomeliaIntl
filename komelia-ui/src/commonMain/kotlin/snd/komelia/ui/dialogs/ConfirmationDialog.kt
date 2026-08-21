@@ -34,7 +34,7 @@ fun ConfirmationDialog(
     buttonCancel: String = "Cancel",
     buttonConfirm: String = "Confirm",
     buttonAlternate: String? = null,
-    buttonConfirmColor: Color = MaterialTheme.colorScheme.secondaryContainer,
+    buttonConfirmColor: Color = MaterialTheme.colorScheme.primaryContainer,
     onDialogConfirm: () -> Unit,
     onDialogConfirmAlternate: () -> Unit = {},
     onDialogDismiss: () -> Unit,
@@ -89,7 +89,7 @@ fun ConfirmationDialog(
                     enabled = confirmText == null || confirmed,
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = buttonConfirmColor,
-                        contentColor = MaterialTheme.colorScheme.primary
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
                     modifier = Modifier.cursorForHand(),
                 ) {

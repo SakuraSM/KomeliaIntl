@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryNotEditable
@@ -119,7 +119,7 @@ private fun IncognitoDropDown(
                 .then(modifier),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Default.ExpandMore, null)
+            Icon(Icons.Rounded.ExpandMore, null)
         }
         ExposedDropdownMenu(
             expanded = isExpanded,

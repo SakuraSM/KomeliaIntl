@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
-import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -103,7 +103,7 @@ fun BookInfoColumn(
             label = "Links",
             chipValues = linkEntries,
             onChipClick = { entry -> uriHandler.openUri(entry.url) },
-            icon = Icons.Default.Link,
+            icon = Icons.Rounded.Link,
         )
 
         Spacer(Modifier.size(0.dp))

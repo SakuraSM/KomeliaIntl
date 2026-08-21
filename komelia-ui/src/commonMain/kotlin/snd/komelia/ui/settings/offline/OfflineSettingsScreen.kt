@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cached
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.rounded.Cached
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -54,7 +54,7 @@ class OfflineSettingsScreen : Screen {
                     modifier = Modifier.heightIn(min = 40.dp).pointerHoverIcon(PointerIcon.Hand),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Icon(Icons.Default.Person, null)
+                        Icon(Icons.Rounded.Person, null)
                         Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Users"))
                     }
                 }
@@ -64,7 +64,7 @@ class OfflineSettingsScreen : Screen {
                     modifier = Modifier.heightIn(min = 40.dp).pointerHoverIcon(PointerIcon.Hand),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Icon(Icons.Default.Download, null)
+                        Icon(Icons.Rounded.Download, null)
                         Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Downloads"))
                     }
                 }
@@ -75,7 +75,7 @@ class OfflineSettingsScreen : Screen {
                     modifier = Modifier.heightIn(min = 40.dp).pointerHoverIcon(PointerIcon.Hand),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Icon(Icons.Default.Cached, null)
+                        Icon(Icons.Rounded.Cached, null)
                         Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Logs"))
                     }
                 }

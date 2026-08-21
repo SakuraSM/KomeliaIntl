@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LockPerson
-import androidx.compose.material.icons.filled.RecentActors
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.rounded.LockPerson
+import androidx.compose.material.icons.rounded.RecentActors
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -71,7 +71,7 @@ fun UserEditDialog(
 class UserRolesTab(private val vm: UserEditDialogViewModel) : DialogTab {
     override fun options() = TabItem(
         title = "Roles",
-        icon = Icons.Default.RecentActors
+        icon = Icons.Rounded.RecentActors
     )
 
     @Composable
@@ -117,7 +117,7 @@ class UserSharedLibrariesTab(private val vm: UserEditDialogViewModel) : DialogTa
 
     override fun options() = TabItem(
         title = "Shared Libraries",
-        icon = Icons.Default.Share
+        icon = Icons.Rounded.Share
     )
 
     @Composable
@@ -180,7 +180,7 @@ class UserContentRestrictionTab(private val vm: UserEditDialogViewModel) : Dialo
 
     override fun options() = TabItem(
         title = "Content Restriction",
-        icon = Icons.Default.LockPerson
+        icon = Icons.Rounded.LockPerson
     )
 
     @Composable

@@ -81,7 +81,7 @@ fun ColorLevelContent(
             )
             OutlinedButton(
                 onClick = state::onAllChannelsReset,
-                shape = RoundedCornerShape(5.dp),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .pointerHoverIcon(PointerIcon.Hand),

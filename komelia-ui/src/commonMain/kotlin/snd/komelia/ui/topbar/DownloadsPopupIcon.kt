@@ -17,8 +17,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ElevatedButton
@@ -83,7 +83,7 @@ fun DownloadsPopupIcon(
             },
         ) {
             Icon(
-                Icons.Default.Download, null,
+                Icons.Rounded.Download, null,
             )
 
             if (showNotifications) {
@@ -125,7 +125,7 @@ private fun NotificationsContent(
                 Spacer(Modifier.weight(1f))
                 ElevatedButton(onClick = onNotificationsClear) {
                     Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Clear all"))
-                    Icon(Icons.Default.Clear, null)
+                    Icon(Icons.Rounded.Clear, null)
                 }
             }
             HorizontalDivider()

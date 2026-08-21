@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -71,7 +71,7 @@ fun OfflineDownloadsContent(
         for (event in downloads) {
             Column(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .padding(5.dp)
                     .fillMaxWidth()
@@ -93,7 +93,7 @@ private fun DownloadProgress(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         DownloadProgressIndicator(event)
-        IconButton(onClick = { onCancel(event.book.id) }) { Icon(Icons.Default.Cancel, null) }
+        IconButton(onClick = { onCancel(event.book.id) }) { Icon(Icons.Rounded.Cancel, null) }
     }
 }
 

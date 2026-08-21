@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -162,7 +162,7 @@ private fun JobCard(
 
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(5.dp))
+            .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .height(70.dp)
             .padding(end = 5.dp),
@@ -225,7 +225,7 @@ private fun JobCard(
                             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .9f),
                             border = BorderStroke(Dp.Hairline, MaterialTheme.colorScheme.surface),
                             modifier = Modifier.widthIn(max = 400.dp),
-                            shape = RoundedCornerShape(5.dp)
+                            shape = RoundedCornerShape(8.dp)
                         ) {
                             job.message?.let {
                                 Text(it, modifier = Modifier.padding(10.dp))
@@ -235,14 +235,14 @@ private fun JobCard(
                     },
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Error,
+                        imageVector = Icons.Rounded.Error,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
 
             COMPLETED -> Icon(
-                imageVector = Icons.Default.Check,
+                imageVector = Icons.Rounded.Check,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.secondary
             )

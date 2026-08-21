@@ -23,13 +23,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DragHandle
-import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.ArrowDropUp
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.DragHandle
+import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -114,7 +114,7 @@ private fun Toolbar(
             onClick = {},
             selected = true,
             label = {
-                Icon(Icons.Default.Tune, null)
+                Icon(Icons.Rounded.Tune, null)
             },
             colors = FilterChipDefaults.filterChipColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -129,7 +129,7 @@ private fun Toolbar(
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
             Text(strings.legacy.forText("Done"))
-            Icon(Icons.Default.Check, null)
+            Icon(Icons.Rounded.Check, null)
         }
 
         var showResetDialog by remember { mutableStateOf(false) }
@@ -138,7 +138,7 @@ private fun Toolbar(
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
             Text(strings.legacy.forText("Reset to default"))
-            Icon(Icons.Default.Restore, null)
+            Icon(Icons.Rounded.Restore, null)
         }
         if (showResetDialog) {
             ConfirmationDialog(
@@ -238,7 +238,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
     Column(
         modifier = Modifier
             .padding(vertical = 5.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(
                 if (isDragging) MaterialTheme.colorScheme.surfaceBright
                 else MaterialTheme.colorScheme.surface
@@ -247,7 +247,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 if (isDragging) Modifier.border(
                     4.dp,
                     MaterialTheme.colorScheme.secondary,
-                    RoundedCornerShape(10.dp)
+                    RoundedCornerShape(12.dp)
                 )
                 else Modifier
             )
@@ -270,7 +270,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Default.DragHandle,
+                    imageVector = Icons.Rounded.DragHandle,
                     contentDescription = null,
                     modifier = Modifier.padding(start = 15.dp).size(32.dp)
                         .then(if (platform == MOBILE) Modifier.draggableHandle() else Modifier)
@@ -302,7 +302,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
             ) {
                 Text(strings.legacy.forText("Edit"))
                 Icon(
-                    imageVector = if (showEdit) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                    imageVector = if (showEdit) Icons.Rounded.ArrowDropUp else Icons.Rounded.ArrowDropDown,
                     contentDescription = null,
                 )
             }
@@ -315,7 +315,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
             ) {
                 Text(strings.legacy.forText("Delete"))
                 Icon(
-                    imageVector = Icons.Default.Delete,
+                    imageVector = Icons.Rounded.Delete,
                     contentDescription = null,
                 )
             }

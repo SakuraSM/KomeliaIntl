@@ -21,9 +21,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -108,7 +108,7 @@ fun DiscordNotificationsContent(
                 )
 
                 IconButton(onClick = { onDiscordWebhookRemove(webhook) }, modifier = Modifier.cursorForHand()) {
-                    Icon(Icons.Default.Delete, null)
+                    Icon(Icons.Rounded.Delete, null)
                 }
             }
         }
@@ -440,11 +440,11 @@ private fun TemplateFieldsEditor(
                     modifier = Modifier.clickable { showField = !showField }.cursorForHand()
 
                 ) {
-                    Icon(if (showField) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
+                    Icon(if (showField) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null)
                     Text("Field ${index + 1}")
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = { onFieldDelete(field) }) {
-                        Icon(Icons.Default.Delete, null)
+                        Icon(Icons.Rounded.Delete, null)
                     }
                 }
                 AnimatedVisibility(
@@ -511,7 +511,7 @@ private fun TemplatesPreview(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(5.dp)
+        shape = RoundedCornerShape(8.dp)
     ) {
         Layout(content = {
             PreviewContent(

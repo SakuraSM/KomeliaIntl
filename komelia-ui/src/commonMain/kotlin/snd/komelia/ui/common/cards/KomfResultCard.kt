@@ -112,7 +112,7 @@ private fun ResultDescriptionContent(result: KomfMetadataSeriesSearchResult) {
         ElevatedButton(
             onClick = { result.url?.let { uriHandler.openUri(it) } },
             enabled = result.url != null,
-            shape = RoundedCornerShape(5.dp)
+            shape = RoundedCornerShape(8.dp)
         ) {
             Text(
                 text = strings.forProvider(result.provider),
@@ -132,7 +132,7 @@ private fun ResultCardOverlay(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
     val selectionModifier = if (isSelected) {
-        Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.secondary), RoundedCornerShape(5.dp))
+        Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.secondary), RoundedCornerShape(8.dp))
     } else if (isHovered.value) overlayBorderModifier()
     else Modifier
 

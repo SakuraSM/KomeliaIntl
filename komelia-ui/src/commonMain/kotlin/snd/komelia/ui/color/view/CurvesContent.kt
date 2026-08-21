@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SettingsBackupRestore
+import androidx.compose.material.icons.rounded.SettingsBackupRestore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -144,7 +144,7 @@ fun ColorCurvesContent(
 
             OutlinedButton(
                 onClick = onAllChannelsReset,
-                shape = RoundedCornerShape(5.dp),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .pointerHoverIcon(PointerIcon.Hand),
@@ -391,7 +391,7 @@ fun ChannelSelection(
         )
         Tooltip("Reset Channel") {
             IconButton(onClick = onChannelReset) {
-                Icon(Icons.Default.SettingsBackupRestore, null)
+                Icon(Icons.Rounded.SettingsBackupRestore, null)
             }
         }
     }
@@ -414,7 +414,7 @@ private fun PointTypeSelection(
         Row {
             Box(
                 Modifier
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .border(Dp.Hairline, selectColor)
                     .background(if (pointType == CurvePointType.SMOOTH) selectColor else Color.Unspecified)
                     .clickable { onPointTypeChange(CurvePointType.SMOOTH) }
@@ -431,7 +431,7 @@ private fun PointTypeSelection(
             }
             Box(
                 Modifier
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .border(Dp.Hairline, selectColor)
                     .background(if (pointType == CurvePointType.CORNER) selectColor else Color.Unspecified)
                     .clickable { onPointTypeChange(CurvePointType.CORNER) }

@@ -98,8 +98,8 @@ fun NoPaddingChip(
 ) {
     Box(
         modifier = modifier
-            .border(Dp.Hairline, borderColor, RoundedCornerShape(10.dp))
-            .clip(RoundedCornerShape(10.dp))
+            .border(Dp.Hairline, borderColor, RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(color)
             .clickable { onClick() }
             .padding(10.dp, 5.dp)

@@ -23,9 +23,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.OfflinePin
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.OfflinePin
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -155,7 +155,7 @@ private fun BookImageOverlay(
                         if (book.isLocalFileOutdated || book.remoteFileUnavailable) MaterialTheme.colorScheme.errorContainer
                         else MaterialTheme.colorScheme.secondary
                     Icon(
-                        imageVector = Icons.Filled.OfflinePin,
+                        imageVector = Icons.Rounded.OfflinePin,
                         contentDescription = null,
                         tint = tint,
                         modifier = Modifier
@@ -171,7 +171,7 @@ private fun BookImageOverlay(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Column(Modifier.padding(10.dp)) {
+            Column(Modifier.padding(8.dp)) {
                 if (showSeriesTitle && !book.oneshot) {
                     CardOutlinedText(
                         text = book.seriesTitle,
@@ -199,7 +199,7 @@ private fun BookImageOverlay(
                     progress = { getReadProgressPercentage(book) },
                     color = MaterialTheme.colorScheme.tertiary,
                     trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
-                    modifier = Modifier.height(6.dp).fillMaxWidth().background(Color.Black),
+                    modifier = Modifier.height(4.dp).fillMaxWidth().background(Color.Black),
                     drawStopIndicator = {}
                 )
             }
@@ -227,7 +227,7 @@ private fun BookDownloadCardOverlay(book: KomeliaBook) {
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .8f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Download, null, tint = MaterialTheme.colorScheme.tertiary)
+                Icon(Icons.Rounded.Download, null, tint = MaterialTheme.colorScheme.tertiary)
                 CircularProgressIndicator(
                     progress = { event.completed / event.total.toFloat() },
                     color = MaterialTheme.colorScheme.tertiary,
@@ -244,7 +244,7 @@ private fun BookDownloadCardOverlay(book: KomeliaBook) {
 @Composable
 private fun BookUnreadTick() {
     val color = MaterialTheme.colorScheme.tertiary
-    Canvas(modifier = Modifier.size(30.dp)) {
+    Canvas(modifier = Modifier.size(24.dp)) {
         val trianglePath = Path().apply {
             moveTo(0f, 0f)
             lineTo(x = size.width, y = size.height)
@@ -460,7 +460,7 @@ private fun BookDetailedListDetails(
                         onClick = { isMenuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        Icon(Icons.Default.MoreVert, null)
+                        Icon(Icons.Rounded.MoreVert, null)
                     }
                     BookActionsMenu(
                         book = book,
@@ -488,7 +488,7 @@ private fun BookMenuActionsDropdown(
             onClick = { onActionsMenuExpand(true) },
             colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Icon(Icons.Default.MoreVert, null)
+            Icon(Icons.Rounded.MoreVert, null)
         }
 
         BookActionsMenu(

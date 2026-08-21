@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -164,7 +164,7 @@ private fun CollectionToolbar(
                 )
             }
 
-            IconButton(onClick = onEditModeEnable) { Icon(Icons.Default.EditNote, null) }
+            IconButton(onClick = onEditModeEnable) { Icon(Icons.Rounded.EditNote, null) }
         }
 
         Spacer(Modifier.weight(1f))

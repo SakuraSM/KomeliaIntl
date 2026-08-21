@@ -63,6 +63,10 @@ compose.desktop {
         }
 
         buildTypes.release.proguard {
+            // Compose 1.12.0-rc01's external runner is incompatible with Gradle 9.7
+            // (getStandardOutput() is null). Keep the release jar task usable until
+            // the upstream plugin fixes the runner; desktop.pro remains ready to re-enable.
+            isEnabled.set(false)
             version.set("7.9.1")
             optimize.set(false)
             configurationFiles.from(project.file("desktop.pro"))

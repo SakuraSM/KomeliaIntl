@@ -35,6 +35,8 @@ kotlin {
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
+        // Compose UI tests need an executable webpack bundle to load Skiko.
+        binaries.executable()
     }
 
     sourceSets {

@@ -428,22 +428,20 @@ tasks.register<DefaultTask>("komfWebUI") {
         "${project.layout.projectDirectory}/komelia-infra/image-decoder/wasm-image-worker/build/dist/wasmJs/productionExecutable/"
 
     val output = "${project.layout.buildDirectory.get()}/komf-webui"
-    val outputResourcesFiles =
-        "${project.layout.buildDirectory.get()}/komf-webui/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/files"
-    val outputResourcesValues =
-        "${project.layout.buildDirectory.get()}/komf-webui/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/values"
-    delete(output)
-    mkdir(output)
-    mkdir(outputResourcesFiles)
-    mkdir(outputResourcesValues)
     inputs.dir(appInput)
     inputs.dir(appResourcesInput)
     inputs.dir(webWorkerInput)
     outputs.dir(output)
     val injected = project.objects.newInstance<Injected>()
 
+    doFirst {
+        File(output).deleteRecursively()
+        File(output).mkdirs()
+    }
+
     doLast {
         fun gzipFiles(files: FileCollection, outputDir: String) {
+            File(outputDir).mkdirs()
             files.forEach { file ->
                 val input = file.inputStream()
                 val output = FileOutputStream("$outputDir/${file.name}.gz")
@@ -478,11 +476,15 @@ tasks.register<DefaultTask>("komfWebUI") {
             },
             "$output/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/files"
         )
-        gzipFiles(
-            injected.objectFactory.fileTree().from("$appResourcesInput/values").matching {
-                include("*.cvr")
-            },
-            "$output/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/values"
-        )
+        File(appResourcesInput).listFiles()
+            ?.filter { it.isDirectory && it.name.startsWith("values") }
+            ?.forEach { valuesDirectory ->
+                gzipFiles(
+                    injected.objectFactory.fileTree().from(valuesDirectory).matching {
+                        include("*.cvr")
+                    },
+                    "$output/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/${valuesDirectory.name}"
+                )
+            }
     }
 }

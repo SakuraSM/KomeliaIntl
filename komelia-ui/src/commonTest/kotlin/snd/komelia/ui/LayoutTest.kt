@@ -9,11 +9,11 @@ import snd.komelia.ui.platform.WindowSizeClass
 
 class LayoutTest {
     @Test
-    fun compactMobileWidthsUseTwoHomeColumns() {
+    fun compactMobileWidthsUseThreeHomeColumns() {
         listOf(360.dp, 375.dp, 412.dp).forEach { width ->
             assertEquals(
-                2,
-                homePosterColumnCount(PlatformType.MOBILE, WindowSizeClass.fromDp(width)),
+                3,
+                posterColumnCount(PlatformType.MOBILE, WindowSizeClass.fromDp(width)),
             )
         }
     }
@@ -22,14 +22,14 @@ class LayoutTest {
     fun mediumMobileWidthUsesThreeHomeColumns() {
         assertEquals(
             3,
-            homePosterColumnCount(PlatformType.MOBILE, WindowSizeClass.fromDp(600.dp)),
+            posterColumnCount(PlatformType.MOBILE, WindowSizeClass.fromDp(600.dp)),
         )
     }
 
     @Test
     fun largeMobileAndDesktopKeepAdaptiveCardWidth() {
-        assertNull(homePosterColumnCount(PlatformType.MOBILE, WindowSizeClass.fromDp(840.dp)))
-        assertNull(homePosterColumnCount(PlatformType.DESKTOP, WindowSizeClass.COMPACT))
+        assertNull(posterColumnCount(PlatformType.MOBILE, WindowSizeClass.fromDp(840.dp)))
+        assertNull(posterColumnCount(PlatformType.DESKTOP, WindowSizeClass.COMPACT))
     }
 
     @Test

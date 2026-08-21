@@ -33,6 +33,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_continuous
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_paged
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_panels
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.rememberResourceEnvironment
@@ -73,6 +74,13 @@ fun ReaderContent(
 ) {
     var showHelpDialog by remember { mutableStateOf(false) }
     var showSettingsMenu by remember { mutableStateOf(false) }
+    var settingsDialogOpen by remember { mutableStateOf(false) }
+    LaunchedEffect(showSettingsMenu, settingsDialogOpen) {
+        if (showSettingsMenu && !settingsDialogOpen) {
+            delay(4_000)
+            showSettingsMenu = false
+        }
+    }
     if (LocalPlatform.current == MOBILE) {
         val windowState = LocalWindowState.current
         DisposableEffect(showSettingsMenu) {
@@ -184,6 +192,7 @@ fun ReaderContent(
             onColorCorrectionClick = onColorCorrectionClick,
             onBackPress = onExit,
             ohShowHelpDialogChange = { showHelpDialog = it },
+            onSettingsDialogVisibilityChange = { settingsDialogOpen = it },
         )
 
         EInkFlashOverlay(

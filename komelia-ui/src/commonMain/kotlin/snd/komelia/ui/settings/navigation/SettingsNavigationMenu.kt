@@ -16,7 +16,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Lan
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
@@ -112,18 +120,21 @@ fun SettingsNavigationMenu(
         )
         NavigationButton(
             label = stringResource(Res.string.settings_navigation_appearance),
+            icon = Icons.Rounded.Palette,
             onClick = { onNavigation(AppSettingsScreen()) },
             isSelected = currentScreen is AppSettingsScreen,
             color = contentColor,
         )
         NavigationButton(
             label = stringResource(Res.string.settings_network_title),
+            icon = Icons.Rounded.Lan,
             onClick = { onNavigation(NetworkSettingsScreen()) },
             isSelected = currentScreen is NetworkSettingsScreen,
             color = contentColor,
         )
         NavigationButton(
             label = stringResource(Res.string.settings_navigation_image_reader),
+            icon = Icons.Rounded.Image,
             onClick = { onNavigation(ImageReaderSettingsScreen()) },
             isSelected = currentScreen is ImageReaderSettingsScreen,
             color = contentColor,
@@ -131,6 +142,7 @@ fun SettingsNavigationMenu(
         if (webviewIsAvailable()) {
             NavigationButton(
                 label = stringResource(Res.string.settings_navigation_epub_reader),
+                icon = Icons.AutoMirrored.Rounded.MenuBook,
                 onClick = { onNavigation(EpubReaderSettingsScreen()) },
                 isSelected = currentScreen is EpubReaderSettingsScreen,
                 color = contentColor,
@@ -148,6 +160,7 @@ fun SettingsNavigationMenu(
         if (offlineAvailable) {
             NavigationButton(
                 label = stringResource(Res.string.settings_navigation_offline_mode),
+                icon = Icons.Rounded.CloudDownload,
                 onClick = { onNavigation(OfflineSettingsScreen()) },
                 isSelected = currentScreen is OfflineSettingsScreen,
                 color = contentColor,
@@ -164,6 +177,7 @@ fun SettingsNavigationMenu(
             )
             NavigationButton(
                 label = stringResource(Res.string.settings_navigation_my_account),
+                icon = Icons.Rounded.AccountCircle,
                 onClick = { onNavigation(AccountSettingsScreen()) },
                 isSelected = currentScreen is AccountSettingsScreen,
                 color = contentColor,
@@ -171,6 +185,7 @@ fun SettingsNavigationMenu(
 
             NavigationButton(
                 label = stringResource(Res.string.settings_navigation_my_auth_activity),
+                icon = Icons.Rounded.History,
                 onClick = { onNavigation(AuthenticationActivityScreen(true)) },
                 isSelected = currentScreen is AuthenticationActivityScreen && currentScreen.forMe,
                 color = contentColor,
@@ -285,6 +300,7 @@ fun SettingsNavigationMenu(
 @Composable
 fun NavigationButton(
     label: String,
+    icon: ImageVector? = null,
     isSelected: Boolean,
     onClick: () -> Unit,
     warn: Boolean = false,
@@ -294,7 +310,7 @@ fun NavigationButton(
     val platform = LocalPlatform.current
     val containerColor = when {
         isSelected -> MaterialTheme.colorScheme.primaryContainer
-        platform == MOBILE -> MaterialTheme.colorScheme.surfaceContainerLow
+        platform == MOBILE -> MaterialTheme.colorScheme.surface
         else -> color
     }
 
@@ -305,11 +321,10 @@ fun NavigationButton(
 
     Surface(
         onClick = { if (!isSelected) onClick() },
-        shape = if (platform == MOBILE) MaterialTheme.shapes.medium else RoundedCornerShape(3.dp),
+        shape = if (platform == MOBILE) RoundedCornerShape(0.dp) else RoundedCornerShape(3.dp),
         color = containerColor,
         contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
         modifier = Modifier
-            .then(if (platform == MOBILE) Modifier.padding(vertical = 2.dp) else Modifier)
             .height(height)
             .fillMaxWidth()
             .cursorForHand()
@@ -319,6 +334,19 @@ fun NavigationButton(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp)
         ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = if (isSelected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+                Spacer(Modifier.width(12.dp))
+            }
             Text(label, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.width(5.dp))
             if (error) {
@@ -341,6 +369,13 @@ fun NavigationButton(
                 )
             }
         }
+    }
+
+    if (platform == MOBILE) {
+        HorizontalDivider(
+            modifier = Modifier.padding(start = 46.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
     }
 
 }

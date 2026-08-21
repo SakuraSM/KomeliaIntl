@@ -47,6 +47,8 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.menus.BookMenuActions
@@ -208,10 +210,11 @@ private fun DisplayContent(
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
 ) {
     val layout = LocalKomeliaLayout.current
+    val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     LazyVerticalGrid(
         modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         state = gridState,
-        columns = GridCells.Adaptive(cardWidth),
+        columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(cardWidth),
         horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
         verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
         contentPadding = PaddingValues(

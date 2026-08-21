@@ -35,6 +35,8 @@ import sh.calvin.reorderable.ReorderableLazyGridState
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.common.cards.DraggableImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.components.Pagination
@@ -67,6 +69,7 @@ fun SeriesLazyCardGrid(
     beforeContent: @Composable () -> Unit = {},
 ) {
     val layout = LocalKomeliaLayout.current
+    val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     val coroutineScope = rememberCoroutineScope()
     val reorderableLazyGridState = rememberReorderableLazyGridState(
         lazyGridState = gridState,
@@ -80,7 +83,7 @@ fun SeriesLazyCardGrid(
     Box(modifier) {
         LazyVerticalGrid(
             state = gridState,
-            columns = GridCells.Adaptive(minSize),
+            columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(minSize),
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             contentPadding = PaddingValues(bottom = layout.gridBottomPadding),

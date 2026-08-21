@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -51,12 +52,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuous_page_spacing
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuous_reading_direction
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuous_side_padding
@@ -64,6 +68,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_do
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_linear_light_downsampling
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_linear_light_downsampling_desc
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_upsampling_mode
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_settings
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_layout
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_offset_pages
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_reading_direction
@@ -135,25 +140,32 @@ fun BottomSheetSettingsOverlay(
     continuousReaderState: ContinuousReaderState,
     panelsReaderState: PanelsReaderState?,
     onBackPress: () -> Unit,
+    onSettingsDialogVisibilityChange: (Boolean) -> Unit,
 ) {
 
     val windowWidth = LocalWindowWidth.current
     var showSettingsDialog by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxWidth()
             .windowInsetsPadding(
                 WindowInsets.statusBars
                     .add(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
-            ),
+            )
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             onClick = onBackPress,
-            modifier = Modifier.size(46.dp)
+            modifier = Modifier.size(42.dp)
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(Res.string.navigation_back),
+            )
         }
 
         book?.let {
@@ -180,11 +192,17 @@ fun BottomSheetSettingsOverlay(
             }
         }
         FilledIconButton(
-            onClick = { showSettingsDialog = true },
-            modifier = Modifier.size(46.dp)
+            onClick = {
+                showSettingsDialog = true
+                onSettingsDialogVisibilityChange(true)
+            },
+            modifier = Modifier.size(42.dp)
 
         ) {
-            Icon(Icons.Default.Settings, null)
+            Icon(
+                Icons.Default.Settings,
+                contentDescription = stringResource(Res.string.reader_image_settings),
+            )
         }
     }
 
@@ -197,7 +215,10 @@ fun BottomSheetSettingsOverlay(
         )
         if (showSettingsDialog) {
             ModalBottomSheet(
-                onDismissRequest = { showSettingsDialog = false },
+                onDismissRequest = {
+                    showSettingsDialog = false
+                    onSettingsDialogVisibilityChange(false)
+                },
                 sheetState = sheetState,
                 dragHandle = {},
                 scrimColor = Color.Transparent,

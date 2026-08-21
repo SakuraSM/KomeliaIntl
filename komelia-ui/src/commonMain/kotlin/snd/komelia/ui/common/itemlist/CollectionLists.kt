@@ -19,6 +19,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.common.cards.CollectionImageCard
 import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.platform.VerticalScrollbar
@@ -37,10 +40,11 @@ fun CollectionLazyCardGrid(
     scrollState: LazyGridState = rememberLazyGridState(),
 ) {
     val layout = LocalKomeliaLayout.current
+    val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     val coroutineScope = rememberCoroutineScope()
     Box {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize),
+            columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(minSize),
             state = scrollState,
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),

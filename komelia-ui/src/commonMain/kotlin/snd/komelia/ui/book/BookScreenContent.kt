@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
@@ -47,6 +48,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_downloaded
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
@@ -89,6 +91,7 @@ fun BookScreenContent(
     onReadListBookPress: (KomeliaBook, KomgaReadList) -> Unit,
     onParentSeriesPress: () -> Unit,
     onFilterClick: (SeriesScreenFilter) -> Unit,
+    onBackPress: () -> Unit,
     cardWidth: Dp
 ) {
 
@@ -98,6 +101,7 @@ fun BookScreenContent(
         BookToolBar(
             book = book,
             bookMenuActions = bookMenuActions,
+            onBackPress = onBackPress,
         )
 
         val contentPadding = when (LocalWindowWidth.current) {
@@ -124,8 +128,8 @@ fun BookScreenContent(
                         BookThumbnail(
                             book.id,
                             modifier = Modifier
-                                .heightIn(min = 220.dp, max = 320.dp)
-                                .widthIn(min = 160.dp, max = 220.dp)
+                                .heightIn(min = 180.dp, max = 240.dp)
+                                .widthIn(min = 128.dp, max = 170.dp)
                                 .animateContentSize()
                         )
                         BookMainInfo(
@@ -187,11 +191,18 @@ fun BookScreenContent(
 fun BookToolBar(
     book: KomeliaBook,
     bookMenuActions: BookMenuActions,
+    onBackPress: () -> Unit,
 ) {
     Row(
         modifier = Modifier.padding(start = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        IconButton(onClick = onBackPress) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(Res.string.navigation_back),
+            )
+        }
         Text(
             book.metadata.title,
             maxLines = 2,

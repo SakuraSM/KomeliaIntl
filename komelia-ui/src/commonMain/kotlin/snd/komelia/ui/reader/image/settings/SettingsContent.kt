@@ -61,6 +61,7 @@ fun BoxScope.SettingsOverlay(
     onColorCorrectionClick: () -> Unit,
     onBackPress: () -> Unit,
     ohShowHelpDialogChange: (Boolean) -> Unit,
+    onSettingsDialogVisibilityChange: (Boolean) -> Unit,
 ) {
     if (!show) return
     val windowWidth = LocalWindowWidth.current
@@ -115,6 +116,7 @@ fun BoxScope.SettingsOverlay(
             onFlashWithChange = commonReaderState::onFlashWithChange,
 
             onBackPress = onBackPress,
+            onSettingsDialogVisibilityChange = onSettingsDialogVisibilityChange,
         )
     } else {
         SettingsSideMenuOverlay(

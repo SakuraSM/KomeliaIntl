@@ -169,8 +169,14 @@ fun SeriesSummary(
     bookSummary: String,
     bookSummaryNumber: String,
 ) {
-    val bookSummary = stringResource(Res.string.series_summary_from_book, bookSummaryNumber, bookSummary)
-    val summaryText = remember(seriesSummary) { seriesSummary.ifBlank { bookSummary.ifBlank { null } } }
+    val localizedBookSummary = if (bookSummary.isBlank()) {
+        null
+    } else {
+        stringResource(Res.string.series_summary_from_book, bookSummaryNumber, bookSummary)
+    }
+    val summaryText = remember(seriesSummary, localizedBookSummary) {
+        seriesSummary.ifBlank { localizedBookSummary }
+    }
     if (summaryText != null) {
         ExpandableText(
             text = summaryText,

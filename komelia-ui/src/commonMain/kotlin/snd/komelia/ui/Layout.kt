@@ -64,13 +64,13 @@ internal fun komeliaLayoutSpec(
 }
 
 /** Returns null when the home grid should continue using the configured adaptive card width. */
-internal fun homePosterColumnCount(
+internal fun posterColumnCount(
     platform: PlatformType,
     windowWidth: WindowSizeClass,
 ): Int? {
     if (platform != PlatformType.MOBILE) return null
     return when (windowWidth) {
-        WindowSizeClass.COMPACT -> 2
+        WindowSizeClass.COMPACT -> 3
         WindowSizeClass.MEDIUM -> 3
         WindowSizeClass.EXPANDED, WindowSizeClass.FULL -> null
     }

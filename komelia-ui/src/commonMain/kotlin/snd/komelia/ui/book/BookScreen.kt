@@ -107,6 +107,7 @@ class BookScreen(
                 onFilterClick = { filter ->
                     navigator.push(LibraryScreen(requireNotNull(book?.libraryId), filter))
                 },
+                onBackPress = { onBackPress(navigator, book?.seriesId) },
                 cardWidth = vm.cardWidth.collectAsState().value,
             )
 

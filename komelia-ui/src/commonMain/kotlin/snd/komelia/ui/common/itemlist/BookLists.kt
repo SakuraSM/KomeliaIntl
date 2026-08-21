@@ -23,6 +23,9 @@ import kotlinx.coroutines.launch
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.DraggableImageCard
 import snd.komelia.ui.common.components.Pagination
@@ -51,6 +54,7 @@ fun BookLazyCardGrid(
     gridState: LazyGridState = rememberLazyGridState(),
 ) {
     val layout = LocalKomeliaLayout.current
+    val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     val coroutineScope = rememberCoroutineScope()
     val reorderableLazyGridState = rememberReorderableLazyGridState(
         lazyGridState = gridState,
@@ -62,7 +66,7 @@ fun BookLazyCardGrid(
 
     Box {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize),
+            columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(minSize),
             state = gridState,
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),

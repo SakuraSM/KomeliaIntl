@@ -41,6 +41,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_release_da
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_remote_unavailable
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_size
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_unavailable
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_penciller
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_writers
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
@@ -133,7 +135,11 @@ fun BookInfoColumn(
         }
         authorEntries.forEach { (role, authors) ->
             DescriptionChips(
-                label = role,
+                label = when (role.lowercase()) {
+                    "writer" -> stringResource(Res.string.series_author_writers)
+                    "penciller" -> stringResource(Res.string.series_author_penciller)
+                    else -> role
+                },
                 chipValues = authors,
                 onChipClick = { onFilterClick(SeriesScreenFilter(authors = listOf(it))) },
             )
@@ -156,7 +162,16 @@ fun BookInfoColumn(
                 modifier = Modifier.width(120.dp)
             )
             if (mediaType != null) {
-                SelectionContainer { Text(mediaType, style = MaterialTheme.typography.labelLarge) }
+                val displayType = remember(mediaType) {
+                    when (mediaType.lowercase()) {
+                        "application/epub+zip" -> "EPUB"
+                        "application/pdf" -> "PDF"
+                        "application/zip", "application/x-cbz" -> "CBZ / ZIP"
+                        "application/vnd.comicbook-rar", "application/x-rar-compressed" -> "CBR / RAR"
+                        else -> mediaType
+                    }
+                }
+                SelectionContainer { Text(displayType, style = MaterialTheme.typography.labelLarge) }
             }
         }
 
@@ -267,9 +282,13 @@ fun BookInfoRow(
                 if (readProgress != null) {
                     if (!readProgress.completed) {
                         val (percentage, pagesLeft) = remember(pagesCount, readProgress) {
-                            val pagesLeft = pagesCount - readProgress.page
-                            val percentage = (readProgress.page.toFloat() / pagesCount * 100).roundToInt()
-                            pagesLeft to percentage
+                            val safePageCount = pagesCount.coerceAtLeast(1)
+                            val currentPage = readProgress.page.coerceIn(0, safePageCount)
+                            val pagesLeft = (safePageCount - currentPage).coerceAtLeast(0)
+                            val percentage = (currentPage.toFloat() / safePageCount * 100)
+                                .roundToInt()
+                                .coerceIn(0, 100)
+                            percentage to pagesLeft
                         }
 
                         Row {

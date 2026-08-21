@@ -28,6 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.common.cards.ItemCard
 import snd.komelia.ui.platform.HorizontalScrollbar
 import snd.komelia.ui.platform.VerticalScrollbar
@@ -40,9 +43,10 @@ fun PlaceHolderLazyCardGrid(
     scrollState: LazyGridState = rememberLazyGridState(),
 ) {
     val layout = LocalKomeliaLayout.current
+    val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     Box {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize),
+            columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(minSize),
             state = scrollState,
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),

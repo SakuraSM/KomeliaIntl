@@ -42,11 +42,14 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_unavailable
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalLibraries
+import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.NoPaddingChip
 import snd.komelia.ui.common.images.SeriesThumbnail
 import snd.komelia.ui.common.menus.SeriesActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.platform.cursorForHand
+import snd.komelia.ui.platform.WindowSizeClass.COMPACT
+import snd.komelia.ui.platform.WindowSizeClass.MEDIUM
 import snd.komga.client.series.KomgaSeries
 
 @Composable
@@ -250,6 +253,7 @@ fun SeriesDetailedListCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val width = LocalWindowWidth.current
     Card(
         modifier
             .cursorForHand()
@@ -263,7 +267,12 @@ fun SeriesDetailedListCard(
             SeriesSimpleImageCard(
                 series = series,
                 onSeriesClick = onClick,
-                modifier = Modifier.width(130.dp)
+                modifier = Modifier.width(
+                    when (width) {
+                        COMPACT, MEDIUM -> 96.dp
+                        else -> 130.dp
+                    }
+                )
             )
             SeriesDetails(series)
         }

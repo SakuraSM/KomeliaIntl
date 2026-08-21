@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.rounded.Edit
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_penciller
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_writers
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download_confirm
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_genres
@@ -61,7 +63,9 @@ import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
+import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.collection.SeriesCollectionsContent
 import snd.komelia.ui.collection.SeriesCollectionsState
 import snd.komelia.ui.common.TagList
@@ -111,6 +115,7 @@ fun SeriesContent(
     onSeriesClick: (KomgaSeries) -> Unit,
 
     onDownload: () -> Unit,
+    onBackPress: () -> Unit,
 ) {
     val windowWidth = LocalWindowWidth.current
     val contentPadding = when (windowWidth) {
@@ -120,6 +125,7 @@ fun SeriesContent(
     }
     val gridMinWidth = booksState.cardWidth.collectAsState().value
     val width = LocalWindowWidth.current
+    val fixedColumnCount = posterColumnCount(LocalPlatform.current, width)
     val booksLoadState = booksState.state.collectAsState().value
     val bookMenuActions = remember { booksState.bookMenuActions() }
 
@@ -141,6 +147,7 @@ fun SeriesContent(
             series = series,
             seriesMenuActions = seriesMenuActions,
             onDownload = onDownload,
+            onBackPress = onBackPress,
         )
 
         val scrollState = rememberLazyGridState()
@@ -148,7 +155,7 @@ fun SeriesContent(
         Box {
             LazyVerticalGrid(
                 state = scrollState,
-                columns = GridCells.Adaptive(gridMinWidth),
+                columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(gridMinWidth),
                 horizontalArrangement = Arrangement.spacedBy(15.dp),
                 modifier = contentPadding,
             ) {
@@ -237,11 +244,18 @@ fun SeriesToolBar(
     series: KomgaSeries?,
     seriesMenuActions: SeriesMenuActions,
     onDownload: () -> Unit,
+    onBackPress: () -> Unit,
 ) {
     Row(
         modifier = Modifier.padding(start = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        IconButton(onClick = onBackPress) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(Res.string.navigation_back),
+            )
+        }
 
         if (series != null) {
             Text(
@@ -329,8 +343,8 @@ fun Series(
                     modifier = when (width) {
                         COMPACT, MEDIUM -> Modifier
                             .animateContentSize(animationSpec = animation)
-                            .heightIn(min = 220.dp, max = 320.dp)
-                            .widthIn(min = 160.dp, max = 220.dp)
+                            .heightIn(min = 180.dp, max = 240.dp)
+                            .widthIn(min = 128.dp, max = 170.dp)
                         else -> Modifier
                             .animateContentSize(animationSpec = animation)
                             .heightIn(min = 100.dp, max = 400.dp)

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -343,9 +344,10 @@ private fun BookHoverOverlay(
 
 private fun getReadProgressPercentage(book: KomeliaBook): Float {
     val progress = book.readProgress ?: return 0f
-    if (progress.completed) return 100f
+    if (progress.completed) return 1f
 
-    return progress.page / book.media.pagesCount.toFloat()
+    val pageCount = book.media.pagesCount.coerceAtLeast(1)
+    return (progress.page.toFloat() / pageCount).coerceIn(0f, 1f)
 }
 
 
@@ -362,6 +364,7 @@ fun BookDetailedListCard(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
+    val width = LocalWindowWidth.current
     Card(
         modifier
             .cursorForHand()
@@ -385,7 +388,15 @@ fun BookDetailedListCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box {
-                BookSimpleImageCard(book)
+                BookSimpleImageCard(
+                    book = book,
+                    modifier = Modifier.width(
+                        when (width) {
+                            COMPACT, MEDIUM -> 96.dp
+                            else -> 130.dp
+                        }
+                    )
+                )
                 if (onSelect != null && (isSelected || isHovered.value)) {
                     SelectionRadioButton(
                         isSelected,

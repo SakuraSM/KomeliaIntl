@@ -1,5 +1,6 @@
 <resources>
-    <string name="screen_error">Error %1$s</string>
+    <string name="navigation_back">返回</string>
+    <string name="screen_error">错误：%1$s</string>
 
     <string name="home_filter_all">全部</string>
     <string name="home_filter_default_keep_reading">继续阅读</string>
@@ -176,10 +177,10 @@
     <string name="series_analyze">分析</string>
     <string name="series_refresh_metadata">刷新元数据</string>
 
-    <string name="series_status_ended">Ended</string>
-    <string name="series_status_ongoing">Ongoing</string>
-    <string name="series_status_abandoned">Abandoned</string>
-    <string name="series_status_hiatus">Hiatus</string>
+    <string name="series_status_ended">已完结</string>
+    <string name="series_status_ongoing">连载中</string>
+    <string name="series_status_abandoned">已放弃</string>
+    <string name="series_status_hiatus">暂停更新</string>
     <string name="series_reading_direction_left_to_right">从左到右</string>
     <string name="series_reading_direction_vertical">垂直</string>
     <string name="series_reading_direction_webtoon">Webtoon</string>
@@ -188,17 +189,17 @@
     <string name="series_links">链接</string>
     <string name="series_author_writers">编剧</string>
     <string name="series_author_penciller">线稿</string>
-    <string name="series_release_year">Release Year %1$s</string>
+    <string name="series_release_year">发行年份 %1$s</string>
     <string name="series_unavailable">不可用</string>
     <string name="series_alternative_titles">其他标题</string>
-    <string name="series_summary_from_book">Summary from book %1$s: %2$s</string>
+    <string name="series_summary_from_book">来自第 %1$s 本书的简介：%2$s</string>
     <string name="series_tab_books">书籍</string>
     <string name="series_tab_collections">合集</string>
     <string name="series_no_books">暂无书籍</string>
     <string name="series_book_selection_mode">Click on items to select or deselect them</string>
     <plurals name="series_books_count">
-        <item quantity="one">%1$s book</item>
-        <item quantity="other">%1$s books</item>
+        <item quantity="one">%1$s 本</item>
+        <item quantity="other">%1$s 本</item>
     </plurals>
 
     <string name="series_book_filters">书籍筛选</string>
@@ -257,13 +258,13 @@
     <string name="book_unavailable">不可用</string>
     <string name="book_remote_unavailable">Remote Unavailable</string>
     <string name="book_local_download_outdated">Local download outdated</string>
-    <string name="book_number_and_page_count">Book %1$s · %2$s pages</string>
-    <string name="book_pages">%1$s pages</string>
+    <string name="book_number_and_page_count">第 %1$s 本 · %2$s 页</string>
+    <string name="book_pages">%1$s 页</string>
     <string name="book_release_date">发布日期：</string>
     <string name="book_read_progress">阅读进度：</string>
     <plurals name="book_percentage_read_pages_left">
-        <item quantity="one">%1$s%, %2$s page left</item>
-        <item quantity="other">%1$s%, %2$s pages left</item>
+        <item quantity="one">已读 %1$s%，剩余 %2$s 页</item>
+        <item quantity="other">已读 %1$s%，剩余 %2$s 页</item>
     </plurals>
     <string name="book_last_read">上次阅读：</string>
 
@@ -415,12 +416,12 @@
     <string name="readlist_edit_mode_desc">Selection mode: Click on items to select or deselect them</string>
     <string name="readlist_book_readlists">阅读列表</string>
 
-    <string name="reader_close_book">Close Book</string>
-    <string name="reader_zoom">Zoom: %1$s%</string>
-    <string name="reader_type">Reader type</string>
-    <string name="reader_type_paged">Paged</string>
-    <string name="reader_type_panels">Panels</string>
-    <string name="reader_type_continuous">Continuous</string>
+    <string name="reader_close_book">关闭书籍</string>
+    <string name="reader_zoom">缩放：%1$s%</string>
+    <string name="reader_type">阅读模式</string>
+    <string name="reader_type_paged">分页</string>
+    <string name="reader_type_panels">分镜</string>
+    <string name="reader_type_continuous">连续</string>
     <string name="reader_settings_reading_mode">阅读模式</string>
     <string name="reader_settings_image_settings">图像设置</string>
 
@@ -459,6 +460,8 @@
 
     <string name="reader_pages_info">Pages info</string>
     <string name="reader_page_number">page %1$s</string>
+    <string name="reader_previous_page">上一页</string>
+    <string name="reader_next_page">下一页</string>
     <string name="reader_page_display_size">display size %1$s x %2$s</string>
     <string name="reader_page_original_size">original size %1$s x %2$s</string>
 
@@ -467,19 +470,19 @@
     <string name="reader_paged_scale_fit_width">适应宽度</string>
     <string name="reader_paged_scale_fit_height">适应高度</string>
     <string name="reader_paged_scale_original">原始大小</string>
-    <string name="reader_paged_reading_direction">Reading direction</string>
+    <string name="reader_paged_reading_direction">阅读方向</string>
     <string name="reader_paged_reading_direction_left_to_right">从左到右</string>
     <string name="reader_paged_reading_direction_right_to_left">从右到左</string>
     <string name="reader_paged_layout">页面布局</string>
     <string name="reader_paged_layout_single_page">单页</string>
     <string name="reader_paged_layout_double_pages">双页</string>
     <string name="reader_paged_layout_double_pages_no_cover">双页（不含封面）</string>
-    <string name="reader_paged_offset_pages">Offset pages</string>
+    <string name="reader_paged_offset_pages">错开页面</string>
 
     <string name="reader_continuous_side_padding">侧边距</string>
     <string name="reader_continuous_page_spacing">页面间距</string>
-    <string name="reader_continuous_reading_direction">Reading direction</string>
-    <string name="reader_continuous_reading_direction_top_to_bottom">Top to bottom</string>
+    <string name="reader_continuous_reading_direction">阅读方向</string>
+    <string name="reader_continuous_reading_direction_top_to_bottom">从上到下</string>
     <string name="reader_continuous_reading_direction_left_to_rigth">从左到右</string>
     <string name="reader_continuous_reading_direction_right_to_left">从右到左</string>
 
@@ -507,15 +510,15 @@
     <string name="color_correction_preset_override_existing">Override existing preset</string>
 
     <string name="settings_mobile_title">设置</string>
-    <string name="settings_navigation_app_settings">App Settings</string>
+    <string name="settings_navigation_app_settings">应用设置</string>
     <string name="settings_navigation_appearance">外观</string>
     <string name="settings_navigation_image_reader">图像阅读器</string>
-    <string name="settings_navigation_epub_reader">Epub Reader</string>
-    <string name="settings_navigation_updates">Updates</string>
-    <string name="settings_navigation_offline_mode">Offline Mode</string>
-    <string name="settings_navigation_user_settings">User Settings</string>
-    <string name="settings_navigation_my_account">My Account</string>
-    <string name="settings_navigation_my_auth_activity">My Authentication Activity</string>
+    <string name="settings_navigation_epub_reader">EPUB 阅读器</string>
+    <string name="settings_navigation_updates">应用更新</string>
+    <string name="settings_navigation_offline_mode">离线模式</string>
+    <string name="settings_navigation_user_settings">用户设置</string>
+    <string name="settings_navigation_my_account">我的账户</string>
+    <string name="settings_navigation_my_auth_activity">我的登录活动</string>
     <string name="settings_navigation_server_settings">服务器设置</string>
     <string name="settings_navigation_server_general">通用</string>
     <string name="settings_navigation_server_users">用户</string>
@@ -587,10 +590,10 @@
     <string name="settings_server_save">Save Changes</string>
     <string name="settings_epub_title">EPUB 阅读器设置</string>
     <string name="settings_epub_reader_type">阅读器类型</string>
-    <string name="settings_epub_reader_type_komga">Komga Epub Reader</string>
-    <string name="settings_epub_reader_type_komga_desc">Komga webui epub reader adapted for use in Komelia</string>
+    <string name="settings_epub_reader_type_komga">Komga EPUB 阅读器</string>
+    <string name="settings_epub_reader_type_komga_desc">适配 Komelia 的 Komga 网页版 EPUB 阅读器</string>
     <string name="settings_epub_reader_type_ttsu">ッツ Ebook Reader</string>
-    <string name="settings_epub_reader_type_ttsu_desc">Loads entire book data at once. May cause long load times or performance issues \nAdapted for use in Komelia with storage/statistics features removed</string>
+    <string name="settings_epub_reader_type_ttsu_desc">一次加载整本书，内容较大时可能需要更长加载时间。\n已适配 Komelia，并移除存储与统计功能。</string>
     <string name="settings_epub_reader_type_ttsu_github">GitHub 项目</string>
     <string name="settings_image_title">图像阅读器</string>
     <string name="settings_image_volume_key_navigation">音量键翻页</string>
@@ -624,7 +627,7 @@
     <string name="settings_image_onnxruntime_panel_detection_download">Download model</string>
     <string name="settings_image_onnxruntime_panel_detection_redownload">Re-download model</string>
     <string name="settings_image_onnxruntime_panel_detection_installed">已安装</string>
-    <string name="settings_offline_mode_title">Offline Mode</string>
+    <string name="settings_offline_mode_title">离线模式</string>
     <string name="settings_offline_mode_users_tab">用户</string>
     <string name="settings_offline_mode_downloads_tab">下载</string>
     <string name="settings_offline_mode_logs_tab">日志</string>

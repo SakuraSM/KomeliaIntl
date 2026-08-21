@@ -185,7 +185,7 @@ private fun BookImageOverlay(
                 if (showTitle) {
                     CardOutlinedText(
                         text = book.metadata.title,
-                        maxLines = 3
+                        maxLines = 2
                     )
                 }
                 if (book.deleted || libraryIsDeleted) {
@@ -200,8 +200,8 @@ private fun BookImageOverlay(
             if (readProgress != null && !readProgress.completed) {
                 LinearProgressIndicator(
                     progress = { getReadProgressPercentage(book) },
-                    color = MaterialTheme.colorScheme.tertiary,
-                    trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
                     modifier = Modifier.height(6.dp).fillMaxWidth().background(Color.Black),
                     drawStopIndicator = {}
                 )
@@ -230,11 +230,11 @@ private fun BookDownloadCardOverlay(book: KomeliaBook) {
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .8f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Download, null, tint = MaterialTheme.colorScheme.tertiary)
+                Icon(Icons.Default.Download, null, tint = MaterialTheme.colorScheme.primary)
                 CircularProgressIndicator(
                     progress = { event.completed / event.total.toFloat() },
-                    color = MaterialTheme.colorScheme.tertiary,
-                    trackColor = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
                 )
             }
         }
@@ -504,4 +504,3 @@ private fun BookMenuActionsDropdown(
         )
     }
 }
-

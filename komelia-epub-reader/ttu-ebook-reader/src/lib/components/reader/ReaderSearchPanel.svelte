@@ -25,7 +25,7 @@
 </script>
 
 <section class="flex min-h-0 flex-1 flex-col gap-3" aria-label="书内搜索">
-  <label class="flex items-center gap-2 rounded-lg border border-current/15 px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-400/70">
+  <label class="flex items-center gap-2 rounded-xl border border-current/15 px-3 py-2 focus-within:ring-2 focus-within:ring-[#8e8bb8]/70">
     <Fa icon={faMagnifyingGlass} class="text-current/55"/>
     <span class="sr-only">搜索本书</span>
     <input
@@ -49,7 +49,7 @@
     <div class="flex gap-1">
       <button
           type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 disabled:pointer-events-none disabled:opacity-35"
+          class="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8e8bb8]/70 disabled:pointer-events-none disabled:opacity-35"
           aria-label="上一条搜索结果"
           disabled={!results.length}
           onclick={onPreviousResult}
@@ -58,7 +58,7 @@
       </button>
       <button
           type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 disabled:pointer-events-none disabled:opacity-35"
+          class="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8e8bb8]/70 disabled:pointer-events-none disabled:opacity-35"
           aria-label="下一条搜索结果"
           disabled={!results.length}
           onclick={onNextResult}
@@ -75,7 +75,7 @@
           <li>
             <button
                 type="button"
-                class={`w-full rounded-lg px-3 py-2 text-left transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 ${result.id === activeResultId ? 'bg-indigo-400/15' : ''}`}
+                class={`w-full rounded-xl px-3 py-2 text-left transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8e8bb8]/70 ${result.id === activeResultId ? 'bg-[#8e8bb8]/15' : ''}`}
                 aria-current={result.id === activeResultId ? 'true' : undefined}
                 onclick={() => onResultClick(result)}
             >

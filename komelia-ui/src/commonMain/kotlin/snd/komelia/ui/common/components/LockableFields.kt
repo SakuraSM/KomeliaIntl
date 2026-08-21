@@ -23,7 +23,6 @@ import com.dokar.chiptextfield.Chip
 import com.dokar.chiptextfield.ChipTextFieldState
 import com.dokar.chiptextfield.m3.ChipTextField
 import com.dokar.chiptextfield.rememberChipTextFieldState
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.StateHolder
 
 @Composable
@@ -71,15 +70,13 @@ fun LockableTextField(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
 ) {
-    val strings = LocalStrings.current.legacy
-
     Row(modifier) {
         LockIcon(lock)
 
         TextField(
             value = text,
             onValueChange = onTextChange,
-            label = label?.let { { Text(strings.forText(label)) } },
+            label = label?.let { { Text(label) } },
             isError = errorMessage != null,
             minLines = minLines,
             maxLines = maxLines,
@@ -140,11 +137,10 @@ fun LockableChipTextFieldWithSuggestions(
     locked: Boolean,
     onLockChange: (Boolean) -> Unit
 ) {
-    val strings = LocalStrings.current.legacy
     Row {
         LockIcon(locked, onLockChange)
         ChipFieldWithSuggestions(
-            label = { Text(strings.forText(label)) },
+            label = { Text(label) },
             values = values,
             onValuesChange = onValuesChange,
             suggestions = suggestions,
@@ -163,8 +159,6 @@ fun LockableChipTextField(
 
     val state = rememberStringChipTextFieldState(values, onValuesChange)
     var textFieldValue by remember { mutableStateOf("") }
-    val strings = LocalStrings.current.legacy
-
     Row {
         LockIcon(locked, onLockChange)
 
@@ -172,7 +166,7 @@ fun LockableChipTextField(
             state = state,
             value = textFieldValue,
             onValueChange = { textFieldValue = it },
-            label = { Text(strings.forText(label)) },
+            label = { Text(label) },
             onSubmit = { text ->
                 when {
                     text.isBlank() -> {

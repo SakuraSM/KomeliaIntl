@@ -23,9 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_retry
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.image.ReaderImage
 import snd.komelia.image.ReaderImageResult
-import snd.komelia.ui.LocalStrings
 
 @Composable
 fun ReaderImageContent(
@@ -61,7 +63,7 @@ private fun ErrorContent(
         )
         if (onRetry != null) {
             Button(onClick = onRetry) {
-                Text(LocalStrings.current.common.retry)
+                Text(stringResource(Res.string.login_retry))
             }
         }
     }

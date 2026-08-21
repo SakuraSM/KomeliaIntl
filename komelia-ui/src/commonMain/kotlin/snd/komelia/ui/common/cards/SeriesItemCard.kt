@@ -195,12 +195,12 @@ private fun SeriesImageOverlay(
                 contentAlignment = Alignment.TopEnd
             ) {
                 Box(
-                    modifier = Modifier.size(24.dp).background(MaterialTheme.colorScheme.tertiary),
+                    modifier = Modifier.size(24.dp).background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "${series.booksUnreadCount}",
-                        color = MaterialTheme.colorScheme.onTertiary,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         style = MaterialTheme.typography.labelMedium
                     )
                 }
@@ -213,7 +213,7 @@ private fun SeriesImageOverlay(
         ) {
             if (showTitle) {
 
-                CardOutlinedText(text = series.metadata.title, maxLines = 4)
+                CardOutlinedText(text = series.metadata.title, maxLines = 2)
                 if (series.deleted || libraryIsDeleted) {
                     CardOutlinedText(
                         stringResource(Res.string.series_unavailable),

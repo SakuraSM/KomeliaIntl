@@ -55,13 +55,13 @@ fun ErrorContent(
             Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                 if (onReload != null) {
                     FilledTonalButton(onClick = onReload) {
-                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reload"))
+                        Text("Reload")
                     }
                 }
 
                 if (onExit != null) {
                     FilledTonalButton(onClick = onExit) {
-                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Exit"))
+                        Text("Exit")
                     }
                 }
             }

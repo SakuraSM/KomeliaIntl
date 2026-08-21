@@ -104,7 +104,7 @@
   {#if bookCharCount}
     <div class="h-1 w-full bg-black/10">
       <div
-          class="h-full rounded-r-full bg-indigo-400 shadow-[0_0_12px_rgba(34,211,238,0.55)] transition-[width] duration-300 ease-out"
+          class="h-full rounded-r-full bg-[#8e8bb8] shadow-[0_0_8px_rgba(142,139,184,0.45)] transition-[width] duration-200 ease-out"
           style:width={`${readingProgressPercent}%`}
       ></div>
     </div>

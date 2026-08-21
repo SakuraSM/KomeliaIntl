@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
@@ -215,10 +216,10 @@ class MainScreen(
         modifier: Modifier
     ) {
         Surface(
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
         ) {
             Column {
-                HorizontalDivider()
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Row(
                     modifier = modifier,
                     horizontalArrangement = Arrangement.Center
@@ -273,17 +274,18 @@ class MainScreen(
         Surface(
             modifier = modifier,
             contentColor =
-                if (isSelected) MaterialTheme.colorScheme.secondary
-                else contentColorFor(MaterialTheme.colorScheme.surfaceVariant)
+                if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant
         ) {
             Column(
                 modifier = Modifier
                     .clickable { onClick() }
                     .cursorForHand()
-                    .padding(5.dp),
+                    .heightIn(min = 64.dp)
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(icon, null)
+                Icon(icon, contentDescription = text)
                 Text(text, style = MaterialTheme.typography.bodySmall)
             }
         }

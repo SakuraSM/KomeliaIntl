@@ -266,7 +266,7 @@ private fun LazyListScope.continuousPagesLayout(
             modifier = Modifier.sizeIn(minHeight = 300.dp, minWidth = 300.dp).fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reached the start of the series"), style = MaterialTheme.typography.titleLarge)
+            Text("Reached the start of the series", style = MaterialTheme.typography.titleLarge)
         }
     }
     pageIntervals.forEachIndexed { index, interval ->
@@ -279,7 +279,7 @@ private fun LazyListScope.continuousPagesLayout(
                 ) {
                     pageIntervals.getOrNull(index - 1)?.let { previous ->
                         Column {
-                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Previous:"), style = MaterialTheme.typography.bodyMedium)
+                            Text("Previous:", style = MaterialTheme.typography.bodyMedium)
                             Text(
                                 previous.book.metadata.title,
                                 style = MaterialTheme.typography.titleLarge
@@ -288,7 +288,7 @@ private fun LazyListScope.continuousPagesLayout(
                     }
                     Spacer(Modifier.size(50.dp))
                     Column {
-                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Current:"), style = MaterialTheme.typography.bodyMedium)
+                        Text("Current:", style = MaterialTheme.typography.bodyMedium)
                         Text(
                             interval.book.metadata.title,
                             style = MaterialTheme.typography.titleLarge
@@ -304,7 +304,7 @@ private fun LazyListScope.continuousPagesLayout(
         Box(
             modifier = Modifier.sizeIn(minHeight = 300.dp, minWidth = 300.dp).fillMaxSize(),
             contentAlignment = Alignment.Center
-        ) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reached the end of the series"), style = MaterialTheme.typography.titleLarge) }
+        ) { Text("Reached the end of the series", style = MaterialTheme.typography.titleLarge) }
     }
 
 }

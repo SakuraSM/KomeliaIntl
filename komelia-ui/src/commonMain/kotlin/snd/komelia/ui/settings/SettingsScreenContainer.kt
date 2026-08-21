@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
@@ -55,7 +54,6 @@ fun SettingsScreenContainer(
 @Composable
 private fun MobileContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
     val navigator = LocalNavigator.currentOrThrow
-    val localizedTitle = LocalStrings.current.legacy.forText(title)
     Column(Modifier.background(MaterialTheme.colorScheme.background)) {
         PlatformTitleBar()
         Row(
@@ -63,10 +61,10 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { navigator.pop() }) {
-                Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = LocalStrings.current.legacy.forText("Back"))
+                Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
             }
 
-            Text(localizedTitle, style = MaterialTheme.typography.titleLarge)
+            Text(title, style = MaterialTheme.typography.titleLarge)
         }
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -97,11 +95,10 @@ private fun DesktopContainer(title: String, content: @Composable ColumnScope.() 
 
 @Composable
 private fun DesktopContent(title: String, content: @Composable ColumnScope.() -> Unit) {
-    val localizedTitle = LocalStrings.current.legacy.forText(title)
     Column(Modifier.widthIn(min = 0.dp, max = settingsDesktopContentWidth)) {
         Spacer(Modifier.height(KomeliaSpacing.huge))
         Text(
-            localizedTitle,
+            title,
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(horizontal = KomeliaSpacing.huge),
         )

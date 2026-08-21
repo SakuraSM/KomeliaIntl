@@ -72,7 +72,7 @@ class CollectionScreen(val collectionId: KomgaCollectionId) : ReloadableScreen {
                     )
             }
 
-            is Error -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Error"))
+            is Error -> Text("Error")
         }
 
         BackPressHandler { navigator.pop() }

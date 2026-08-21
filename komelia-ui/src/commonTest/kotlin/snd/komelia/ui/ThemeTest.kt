@@ -1,6 +1,7 @@
 package snd.komelia.ui
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.animation.core.LinearEasing
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import snd.komelia.settings.model.AppTheme
@@ -10,18 +11,18 @@ class ThemeTest {
     fun lightThemeUsesAccessibleContentPalette() {
         val colors = Theme.LIGHT.colorScheme
 
-        assertEquals(Color(0xFFF7F8FC), colors.background)
-        assertEquals(Color(0xFF171A21), colors.onBackground)
-        assertEquals(Color(0xFF4F46E5), colors.primary)
+        assertEquals(Color(0xFFF5F5F7), colors.background)
+        assertEquals(Color(0xFF1B1C20), colors.onBackground)
+        assertEquals(Color(0xFF5F5D8E), colors.primary)
     }
 
     @Test
     fun darkThemeUsesNeutralReadingSurfaces() {
         val colors = Theme.DARK.colorScheme
 
-        assertEquals(Color(0xFF0D0F14), colors.background)
-        assertEquals(Color(0xFF12151C), colors.surface)
-        assertEquals(Color(0xFFA5B4FC), colors.primary)
+        assertEquals(Color(0xFF101114), colors.background)
+        assertEquals(Color(0xFF15161A), colors.surface)
+        assertEquals(Color(0xFFC5C2F0), colors.primary)
     }
 
     @Test
@@ -36,5 +37,19 @@ class ThemeTest {
             assertEquals(Theme.LIGHT, AppTheme.LIGHT.toTheme())
             assertEquals(Theme.DARKER, AppTheme.DARKER.toTheme())
         }
+    }
+
+    @Test
+    fun reducedMotionMakesTransitionsImmediate() {
+        val motion = KomeliaMotionSpec(
+            isReducedMotion = true,
+            pressDurationMillis = 150,
+            stateDurationMillis = 180,
+            contentDurationMillis = 200,
+            containerDurationMillis = 200,
+            standardEasing = LinearEasing,
+        )
+
+        assertEquals(0, motion.duration(motion.contentDurationMillis))
     }
 }

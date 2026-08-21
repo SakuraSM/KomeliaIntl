@@ -28,7 +28,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.transitions.CrossfadeTransition
 import kotlinx.coroutines.flow.SharedFlow
 import snd.komelia.ui.LocalKeyEvents
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
@@ -87,7 +86,7 @@ class SettingsScreen : Screen {
                             content = {
                                 Icon(
                                     Icons.Rounded.Close,
-                                    contentDescription = LocalStrings.current.legacy.forText("Close settings"),
+                                    contentDescription = "Close settings",
                                 )
                             }
                         )

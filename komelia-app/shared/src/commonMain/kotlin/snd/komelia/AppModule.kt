@@ -15,9 +15,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.io.files.Path
@@ -89,11 +91,28 @@ abstract class AppModule {
             }
         )
 
-        val baseUrl = appRepositories.settingsRepository.getServerUrl().stateIn(initScope)
+        val primaryServerUrl = appRepositories.settingsRepository.getServerUrl().stateIn(initScope)
+        val lanServerUrl = appRepositories.settingsRepository.getLanServerUrl().stateIn(initScope)
+        val serverUrlResolver = DefaultServerUrlResolver(
+            primaryServerUrl = primaryServerUrl,
+            lanServerUrl = lanServerUrl,
+            lanAutoSwitchEnabled = appRepositories.settingsRepository.getLanAutoSwitchEnabled().stateIn(initScope),
+            networkChangeEvents = networkChangeEvents(),
+            httpClient = ktorWithoutCache.config { expectSuccess = false },
+            scope = initScope,
+        )
+        val baseUrl = serverUrlResolver.effectiveServerUrl
+        val knownServerUrls = primaryServerUrl.combine(lanServerUrl) { primary, lan ->
+            listOf(primary, lan)
+                .filter { it.isNotBlank() }
+                .distinct()
+                .mapNotNull { runCatching { Url(it) }.getOrNull() }
+        }.stateIn(initScope)
         val komfUrl = appRepositories.komfSettingsRepository.getKomfUrl().stateIn(initScope)
 
         val cookiesStorage = RememberMePersistingCookieStore(
             baseUrl.map { Url(it) }.stateIn(initScope),
+            knownServerUrls,
             appRepositories.secretsRepository
         )
         cookiesStorage.loadRememberMeCookie()
@@ -120,7 +139,7 @@ abstract class AppModule {
         val isOffline = offlineRepositories?.offlineSettingsRepository?.getOfflineMode()?.stateIn(initScope)
             ?: MutableStateFlow(false)
         val currentUserFlow = MutableStateFlow<KomgaUser?>(null)
-        val currentServerUrl = appRepositories.settingsRepository.getServerUrl().stateIn(initScope)
+        val currentServerUrl = baseUrl
 
         val androidContext = createCoilContext()
         val offlineModule: OfflineDependencies? = offlineRepositories?.let {
@@ -130,7 +149,7 @@ abstract class AppModule {
                 onlineUser = currentUserFlow
                     .combine(isOffline) { user, isOffline -> if (isOffline) null else user }
                     .stateIn(initScope),
-                onlineServerUrl = appRepositories.settingsRepository.getServerUrl().stateIn(initScope),
+                onlineServerUrl = baseUrl,
                 isOffline = isOffline,
             )?.initDependencies()
         }
@@ -209,6 +228,7 @@ abstract class AppModule {
 
         val dependencies = DependencyContainer(
             appRepositories = appRepositories,
+            serverUrlResolver = serverUrlResolver,
 
             komgaApi = komgaApi,
             isOffline = isOffline,
@@ -335,6 +355,7 @@ abstract class AppModule {
     protected abstract suspend fun createOfflineRepositories(): OfflineRepositories?
     protected abstract fun createKtorClient(): HttpClient
     protected abstract fun createKtorClientWithoutCache(): HttpClient
+    protected open fun networkChangeEvents(): Flow<Unit> = emptyFlow()
 
     protected abstract fun createAppUpdater(updateClient: UpdateClient): AppUpdater?
 

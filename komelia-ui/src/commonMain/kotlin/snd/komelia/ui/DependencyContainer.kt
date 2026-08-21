@@ -17,6 +17,7 @@ import snd.komelia.image.processing.ColorCorrectionStep
 import snd.komelia.komga.api.KomgaApi
 import snd.komelia.offline.OfflineDependencies
 import snd.komelia.onnxruntime.OnnxRuntime
+import snd.komelia.settings.ServerUrlResolver
 import snd.komelia.updates.AppUpdater
 import snd.komelia.updates.OnnxModelDownloader
 import snd.komelia.updates.OnnxRuntimeInstaller
@@ -24,6 +25,7 @@ import snd.komf.client.KomfClientFactory
 
 data class DependencyContainer(
     val appRepositories: AppRepositories,
+    val serverUrlResolver: ServerUrlResolver,
     val komgaApi: StateFlow<KomgaApi>,
 
     val isOffline: StateFlow<Boolean>,
@@ -51,4 +53,3 @@ data class DependencyContainer(
 
     val offlineDependencies: OfflineDependencies?,
 )
-

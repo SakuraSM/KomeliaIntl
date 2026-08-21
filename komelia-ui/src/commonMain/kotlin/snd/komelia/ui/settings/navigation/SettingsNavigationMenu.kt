@@ -53,6 +53,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_naviga
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_users
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_updates
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_user_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_title
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
@@ -74,6 +75,7 @@ import snd.komelia.ui.settings.komf.jobs.KomfJobsScreen
 import snd.komelia.ui.settings.komf.notifications.KomfNotificationSettingsScreen
 import snd.komelia.ui.settings.komf.processing.KomfProcessingSettingsScreen
 import snd.komelia.ui.settings.komf.providers.KomfProvidersSettingsScreen
+import snd.komelia.ui.settings.network.NetworkSettingsScreen
 import snd.komelia.ui.settings.offline.OfflineSettingsScreen
 import snd.komelia.ui.settings.server.ServerSettingsScreen
 import snd.komelia.ui.settings.updates.AppUpdatesScreen
@@ -109,6 +111,12 @@ fun SettingsNavigationMenu(
             label = stringResource(Res.string.settings_navigation_appearance),
             onClick = { onNavigation(AppSettingsScreen()) },
             isSelected = currentScreen is AppSettingsScreen,
+            color = contentColor,
+        )
+        NavigationButton(
+            label = stringResource(Res.string.settings_network_title),
+            onClick = { onNavigation(NetworkSettingsScreen()) },
+            isSelected = currentScreen is NetworkSettingsScreen,
             color = contentColor,
         )
         NavigationButton(

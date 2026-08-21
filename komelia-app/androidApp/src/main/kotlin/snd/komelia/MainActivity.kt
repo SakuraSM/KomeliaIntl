@@ -69,7 +69,8 @@ class MainActivity : AppCompatActivity() {
                 windowWidth = WindowSizeClass.fromDp(windowSize.width),
                 windowHeight = WindowSizeClass.fromDp(windowSize.height),
                 platformType = PlatformType.MOBILE,
-                keyEvents = MutableSharedFlow()
+                keyEvents = MutableSharedFlow(),
+                appLocaleController = AndroidAppLocaleController,
             )
         }
     }

@@ -19,8 +19,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_image_card_size
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_language
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_language_chinese_simplified
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_language_english
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_language_system
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_theme
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppTheme
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.DropdownChoiceMenu
@@ -36,6 +41,8 @@ fun AppearanceSettingsContent(
     onCardWidthChange: (Dp) -> Unit,
     currentTheme: AppTheme,
     onThemeChange: (AppTheme) -> Unit,
+    currentLanguage: AppLanguage,
+    onLanguageChange: (AppLanguage) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -47,6 +54,16 @@ fun AppearanceSettingsContent(
             options = stringLabels(AppTheme.entries) { AppStrings.forAppTheme(it) },
             onOptionChange = { onThemeChange(it.value) },
             inputFieldModifier = Modifier.widthIn(min = 250.dp)
+        )
+
+        HorizontalDivider()
+
+        DropdownChoiceMenu(
+            label = { Text(stringResource(Res.string.settings_app_language)) },
+            selectedOption = LabeledEntry(currentLanguage, languageLabel(currentLanguage)),
+            options = AppLanguage.entries.map { LabeledEntry(it, languageLabel(it)) },
+            onOptionChange = { onLanguageChange(it.value) },
+            inputFieldModifier = Modifier.widthIn(min = 250.dp),
         )
 
         HorizontalDivider()
@@ -79,3 +96,12 @@ fun AppearanceSettingsContent(
         }
     }
 }
+
+@Composable
+private fun languageLabel(language: AppLanguage): String = stringResource(
+    when (language) {
+        AppLanguage.SYSTEM -> Res.string.settings_app_language_system
+        AppLanguage.EN -> Res.string.settings_app_language_english
+        AppLanguage.ZH_CN -> Res.string.settings_app_language_chinese_simplified
+    }
+)

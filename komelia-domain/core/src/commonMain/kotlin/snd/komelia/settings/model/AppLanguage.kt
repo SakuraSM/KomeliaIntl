@@ -7,8 +7,7 @@ package snd.komelia.settings.model
  * - [EN]: explicit English (`en`).
  * - [ZH_CN]: explicit Simplified Chinese (`zh-CN`).
  *
- * To add a new language: add an entry here and provide a matching `AppStrings` instance
- * in `komelia-ui/.../strings/` (mirroring `EnStrings.kt` / `ZhCnStrings.kt`).
+ * To add a new language, add an entry here and a matching Compose Resources locale directory.
  */
 enum class AppLanguage {
     SYSTEM, EN, ZH_CN

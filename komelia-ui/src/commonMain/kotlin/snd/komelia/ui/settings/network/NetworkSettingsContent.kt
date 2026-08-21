@@ -13,8 +13,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_auto_lan
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_check
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_checking_lan
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_current_server
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_invalid_port
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_invalid_url
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_lan_address
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_lan_unreachable
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_using_lan
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_using_primary
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.settings.ServerConnectionStatus
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.ServerUrlValidationError
 import snd.komelia.ui.common.components.SwitchWithLabel
 
@@ -29,7 +40,6 @@ fun NetworkSettingsContent(
     onLanAutoSwitchEnabledChange: (Boolean) -> Unit,
     onCheckLanConnection: () -> Unit,
 ) {
-    val legacyStrings = LocalStrings.current.legacy
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -37,13 +47,13 @@ fun NetworkSettingsContent(
         SwitchWithLabel(
             checked = lanAutoSwitchEnabled,
             onCheckedChange = onLanAutoSwitchEnabledChange,
-            label = { Text(legacyStrings.forText("Automatically use LAN address")) }
+            label = { Text(stringResource(Res.string.settings_network_auto_lan)) }
         )
 
         OutlinedTextField(
             value = lanServerUrl,
             onValueChange = onLanServerUrlChange,
-            label = { Text(legacyStrings.forText("LAN server address")) },
+            label = { Text(stringResource(Res.string.settings_network_lan_address)) },
             placeholder = { Text("http://192.168.1.10:25600") },
             isError = lanServerUrlError != null,
             supportingText = lanServerUrlError?.let { error ->
@@ -61,13 +71,13 @@ fun NetworkSettingsContent(
                 onClick = onCheckLanConnection,
                 enabled = lanServerUrlError == null && lanServerUrl.isNotBlank(),
             ) {
-                Text(legacyStrings.forText("Check connection"))
+                Text(stringResource(Res.string.settings_network_check))
             }
             Text(connectionStatus.localizedText(), style = MaterialTheme.typography.bodyMedium)
         }
 
         Text(
-            "${legacyStrings.forText("Current server address")}: $effectiveServerUrl",
+            stringResource(Res.string.settings_network_current_server, effectiveServerUrl),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
@@ -75,20 +85,18 @@ fun NetworkSettingsContent(
 
 @Composable
 private fun ServerUrlValidationError.localizedMessage(): String {
-    val loginStrings = LocalStrings.current.login
     return when (this) {
-        ServerUrlValidationError.INVALID_URL -> loginStrings.invalidServerUrl
-        ServerUrlValidationError.INVALID_PORT -> loginStrings.invalidServerPort
+        ServerUrlValidationError.INVALID_URL -> stringResource(Res.string.settings_network_invalid_url)
+        ServerUrlValidationError.INVALID_PORT -> stringResource(Res.string.settings_network_invalid_port)
     }
 }
 
 @Composable
 private fun ServerConnectionStatus.localizedText(): String {
-    val legacyStrings = LocalStrings.current.legacy
     return when (this) {
-        ServerConnectionStatus.Primary -> legacyStrings.forText("Using primary server address")
-        ServerConnectionStatus.CheckingLan -> legacyStrings.forText("Checking LAN address")
-        is ServerConnectionStatus.Lan -> "${legacyStrings.forText("Using LAN address")}: $url"
-        is ServerConnectionStatus.LanUnavailable -> legacyStrings.forText("LAN address is unreachable")
+        ServerConnectionStatus.Primary -> stringResource(Res.string.settings_network_using_primary)
+        ServerConnectionStatus.CheckingLan -> stringResource(Res.string.settings_network_checking_lan)
+        is ServerConnectionStatus.Lan -> stringResource(Res.string.settings_network_using_lan, url)
+        is ServerConnectionStatus.LanUnavailable -> stringResource(Res.string.settings_network_lan_unreachable)
     }
 }

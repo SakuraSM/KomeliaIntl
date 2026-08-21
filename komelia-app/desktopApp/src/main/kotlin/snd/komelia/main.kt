@@ -227,7 +227,8 @@ private fun ApplicationScope.MainAppContent(
                     windowWidth = widthClass,
                     windowHeight = heightClass,
                     platformType = PlatformType.DESKTOP,
-                    keyEvents = keyEvents
+                    keyEvents = keyEvents,
+                    appLocaleController = DesktopAppLocaleController,
                 )
             }
         }

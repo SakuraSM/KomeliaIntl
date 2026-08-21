@@ -8,21 +8,6 @@ pluginManagement {
                 includeGroup("org.jetbrains.compose")
             }
         }
-        maven("https://maven.aliyun.com/repository/google")
-        maven("https://maven.aliyun.com/repository/gradle-plugin") {
-            content {
-                excludeGroup("org.jetbrains.compose")
-                excludeGroup("io.github.snd-r")
-                excludeGroup("io.github.snd-r.komf")
-            }
-        }
-        maven("https://maven.aliyun.com/repository/public") {
-            content {
-                excludeGroup("org.jetbrains.compose")
-                excludeGroup("io.github.snd-r")
-                excludeGroup("io.github.snd-r.komf")
-            }
-        }
         google()
         gradlePluginPortal()
         mavenCentral()
@@ -32,13 +17,6 @@ pluginManagement {
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositories {
-        maven("https://maven.aliyun.com/repository/google")
-        maven("https://maven.aliyun.com/repository/public") {
-            content {
-                excludeGroup("io.github.snd-r")
-                excludeGroup("io.github.snd-r.komf")
-            }
-        }
         google()
         mavenCentral()
         mavenLocal()

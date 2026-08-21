@@ -23,6 +23,7 @@ private val initScope = CoroutineScope(Dispatchers.Default)
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
+    preparePersistedAppLocale()
     val dependencies = MutableStateFlow<DependencyContainer?>(null)
     val keyEvents = MutableSharedFlow<KeyEvent>()
     val windowWidth = MutableStateFlow(WindowSizeClass.fromDp(window.innerWidth.dp))
@@ -48,7 +49,8 @@ fun main() {
             windowWidth = windowWidth.collectAsState().value,
             windowHeight = windowHeight.collectAsState().value,
             platformType = PlatformType.WEB_KOMF,
-            keyEvents = keyEvents
+            keyEvents = keyEvents,
+            appLocaleController = WasmAppLocaleController,
         )
     }
 }

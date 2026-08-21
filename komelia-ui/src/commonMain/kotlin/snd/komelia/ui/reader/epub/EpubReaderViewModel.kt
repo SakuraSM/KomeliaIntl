@@ -12,7 +12,6 @@ import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.komga.api.model.KomeliaBook
-import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.settings.EpubReaderSettingsRepository
 import snd.komelia.settings.model.EpubReaderType.KOMGA_EPUB
 import snd.komelia.settings.model.EpubReaderType.TTSU_EPUB
@@ -29,7 +28,7 @@ class EpubReaderViewModel(
     private val bookApi: KomgaBookApi,
     private val seriesApi: KomgaSeriesApi,
     private val readListApi: KomgaReadListApi,
-    private val settingsRepository: CommonSettingsRepository,
+    private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
     private val fontsRepository: UserFontsRepository,
     private val notifications: AppNotifications,
@@ -52,7 +51,7 @@ class EpubReaderViewModel(
                             bookApi = bookApi,
                             seriesApi = seriesApi,
                             readListApi = readListApi,
-                            settingsRepository = settingsRepository,
+                            serverUrl = serverUrl,
                             notifications = notifications,
                             markReadProgress = markReadProgress,
                             epubSettingsRepository = epubSettingsRepository,
@@ -76,7 +75,7 @@ class EpubReaderViewModel(
                             bookApi = bookApi,
                             notifications = notifications,
                             markReadProgress = markReadProgress,
-                            settingsRepository = settingsRepository,
+                            serverUrl = serverUrl,
                             epubSettingsRepository = epubSettingsRepository,
                             fontsRepository = fontsRepository,
                             windowState = windowState,

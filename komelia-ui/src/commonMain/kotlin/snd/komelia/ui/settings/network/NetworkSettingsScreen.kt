@@ -2,6 +2,9 @@ package snd.komelia.ui.settings.network
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_title
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.runtime.collectAsState
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -15,7 +18,7 @@ class NetworkSettingsScreen : Screen {
         val viewModel = rememberScreenModel { viewModelFactory.getNetworkSettingsViewModel() }
         LaunchedEffect(Unit) { viewModel.initialize() }
 
-        SettingsScreenContainer("Network Connection") {
+        SettingsScreenContainer(stringResource(Res.string.settings_network_title)) {
             NetworkSettingsContent(
                 lanServerUrl = viewModel.lanServerUrl,
                 lanServerUrlError = viewModel.lanServerUrlError,

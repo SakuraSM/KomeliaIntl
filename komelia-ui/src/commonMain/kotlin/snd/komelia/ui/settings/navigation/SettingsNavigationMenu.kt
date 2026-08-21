@@ -15,6 +15,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -288,18 +291,25 @@ fun NavigationButton(
     error: Boolean = false,
     color: Color
 ) {
-    val containerColor = if (isSelected) MaterialTheme.colorScheme.surfaceContainer else color
+    val platform = LocalPlatform.current
+    val containerColor = when {
+        isSelected -> MaterialTheme.colorScheme.primaryContainer
+        platform == MOBILE -> MaterialTheme.colorScheme.surfaceContainerLow
+        else -> color
+    }
 
-    val height = when (LocalPlatform.current) {
-        MOBILE -> 50.dp
+    val height = when (platform) {
+        MOBILE -> 52.dp
         DESKTOP, WEB_KOMF -> 40.dp
     }
 
     Surface(
         onClick = { if (!isSelected) onClick() },
-        shape = RoundedCornerShape(3.dp),
+        shape = if (platform == MOBILE) MaterialTheme.shapes.medium else RoundedCornerShape(3.dp),
         color = containerColor,
+        contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
         modifier = Modifier
+            .then(if (platform == MOBILE) Modifier.padding(vertical = 2.dp) else Modifier)
             .height(height)
             .fillMaxWidth()
             .cursorForHand()
@@ -321,6 +331,14 @@ fun NavigationButton(
                 Canvas(modifier = Modifier.size(30.dp)) {
                     drawCircle(color = color)
                 }
+            }
+            Spacer(Modifier.weight(1f))
+            if (platform == MOBILE) {
+                Icon(
+                    Icons.Rounded.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -115,22 +114,49 @@ fun BookScreenContent(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                    BookThumbnail(
-                        book.id,
-                        modifier = Modifier
-                            .heightIn(min = 100.dp, max = 400.dp)
-                            .widthIn(min = 300.dp, max = 500.dp)
-                            .animateContentSize()
-                    )
-                    BookMainInfo(
-                        book = book,
-                        library = library,
-                        onBookReadPress = onBookReadPress,
-                        onSeriesParentSeriesPress = onParentSeriesPress,
-                        onDownload = onBookDownload,
-                        onDownloadDelete = onBookDownloadDelete
-                    )
+                val compact = LocalWindowWidth.current == COMPACT || LocalWindowWidth.current == MEDIUM
+                if (compact) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        BookThumbnail(
+                            book.id,
+                            modifier = Modifier
+                                .heightIn(min = 220.dp, max = 320.dp)
+                                .widthIn(min = 160.dp, max = 220.dp)
+                                .animateContentSize()
+                        )
+                        BookMainInfo(
+                            book = book,
+                            library = library,
+                            onBookReadPress = onBookReadPress,
+                            onSeriesParentSeriesPress = onParentSeriesPress,
+                            onDownload = onBookDownload,
+                            onDownloadDelete = onBookDownloadDelete,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                } else {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                        BookThumbnail(
+                            book.id,
+                            modifier = Modifier
+                                .heightIn(min = 100.dp, max = 400.dp)
+                                .widthIn(min = 300.dp, max = 500.dp)
+                                .animateContentSize()
+                        )
+                        BookMainInfo(
+                            book = book,
+                            library = library,
+                            onBookReadPress = onBookReadPress,
+                            onSeriesParentSeriesPress = onParentSeriesPress,
+                            onDownload = onBookDownload,
+                            onDownloadDelete = onBookDownloadDelete,
+                            modifier = Modifier.weight(1f, false),
+                        )
+                    }
                 }
 
                 BookInfoColumn(
@@ -213,21 +239,26 @@ private fun ToolbarBookActions(
 }
 
 @Composable
-private fun FlowRowScope.BookMainInfo(
+private fun BookMainInfo(
     book: KomeliaBook,
     library: KomgaLibrary,
     onBookReadPress: (markReadProgress: Boolean) -> Unit,
     onSeriesParentSeriesPress: () -> Unit,
     onDownload: () -> Unit,
-    onDownloadDelete: () -> Unit
+    onDownloadDelete: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val maxWidth = when (LocalWindowWidth.current) {
         FULL -> 1200.dp
         else -> Dp.Unspecified
     }
+    val minWidth = when (LocalWindowWidth.current) {
+        COMPACT, MEDIUM -> Dp.Unspecified
+        else -> 350.dp
+    }
 
     Column(
-        modifier = Modifier.weight(1f, false).widthIn(min = 350.dp, max = maxWidth),
+        modifier = modifier.widthIn(min = minWidth, max = maxWidth),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         BookInfoRow(

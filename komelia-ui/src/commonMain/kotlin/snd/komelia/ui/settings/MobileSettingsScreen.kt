@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,8 +45,8 @@ class MobileSettingsScreen : Screen {
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(
-                modifier = Modifier.padding(5.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
+                modifier = Modifier.padding(horizontal = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PlatformTitleBar()
                 Row(
@@ -59,11 +58,9 @@ class MobileSettingsScreen : Screen {
                     }
                     Text(
                         stringResource(Res.string.settings_mobile_title),
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
-
-                HorizontalDivider()
 
                 SettingsNavigationMenu(
                     currentScreen = currentNavigator.lastItem,
@@ -75,7 +72,7 @@ class MobileSettingsScreen : Screen {
                     onLogout = vm::logout,
                     user = vm.user.collectAsState().value,
                     contentColor = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.weight(1f, false)
+                    modifier = Modifier.padding(horizontal = 4.dp).weight(1f, false)
                 )
 
                 Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))

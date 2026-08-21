@@ -101,7 +101,7 @@ fun BookImageCard(
                 BookImageOverlay(
                     book = book,
                     libraryIsDeleted = libraryIsDeleted,
-                    showSeriesTitle = showSeriesTitle,
+                    showTitle = false,
                 ) {
                     BookThumbnail(
                         book.id,
@@ -110,7 +110,18 @@ fun BookImageCard(
                     )
                 }
             }
-        }
+        },
+        content = {
+            CoverCardCaption(
+                title = book.metadata.title,
+                supportingText = if (showSeriesTitle && !book.oneshot) book.seriesTitle else null,
+                statusText = if (book.deleted || libraryIsDeleted) {
+                    stringResource(Res.string.book_unavailable)
+                } else {
+                    null
+                },
+            )
+        },
     )
 }
 
@@ -202,7 +213,7 @@ private fun BookImageOverlay(
                     progress = { getReadProgressPercentage(book) },
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
-                    modifier = Modifier.height(6.dp).fillMaxWidth().background(Color.Black),
+                    modifier = Modifier.height(4.dp).fillMaxWidth().background(Color.Black),
                     drawStopIndicator = {}
                 )
             }

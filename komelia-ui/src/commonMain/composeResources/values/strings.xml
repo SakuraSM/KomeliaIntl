@@ -1014,6 +1014,12 @@
     <string name="login_cancel">Cancel login attempt</string>
     <string name="login_komf_title">Full-featured web client for Komga</string>
     <string name="login_komf_desc">Requires adding this host and port to Komga CORS configuration</string>
+    <string name="login_subtitle">Your library, ready wherever you read.</string>
+    <string name="login_error_invalid_credentials">The username or password is incorrect.</string>
+    <string name="login_error_server_unavailable">The server is temporarily unavailable. Try again shortly.</string>
+    <string name="login_error_timeout">The server took too long to respond. Check your connection and try again.</string>
+    <string name="login_error_connection">Could not connect to this server. Check the address and your network.</string>
+    <string name="login_error_unexpected_response">The server returned an unexpected response.</string>
 
     <string name="search_search_all">Search all...</string>
     <string name="search_search_input_placeholder">Search</string>

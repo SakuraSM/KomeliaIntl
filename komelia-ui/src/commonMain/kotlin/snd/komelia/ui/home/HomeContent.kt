@@ -46,6 +46,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.menus.BookMenuActions
@@ -102,10 +103,12 @@ private fun Toolbar(
     onFilterChange: (Int) -> Unit,
     onEditStart: () -> Unit
 ) {
+    val layout = LocalKomeliaLayout.current
     val chipColors = FilterChipDefaults.filterChipColors(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        selectedContainerColor = MaterialTheme.colorScheme.primary,
-        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
     val nonEmptyFilters = remember(filters) {
         filters.filter {
@@ -122,13 +125,10 @@ private fun Toolbar(
         LazyRow(
             state = lazyRowState,
             modifier = Modifier.animateContentSize(),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            contentPadding = PaddingValues(horizontal = layout.pageHorizontalPadding),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            item {
-                Spacer(Modifier.width(20.dp))
-            }
-
             item {
                 FilterChip(
                     onClick = onEditStart,
@@ -169,9 +169,6 @@ private fun Toolbar(
                     )
                 }
             }
-            item {
-                Spacer(Modifier.width(40.dp))
-            }
         }
 
         if (LocalPlatform.current != PlatformType.MOBILE) {
@@ -210,13 +207,17 @@ private fun DisplayContent(
     onBookClick: (KomeliaBook) -> Unit,
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     LazyVerticalGrid(
-        modifier = Modifier.padding(horizontal = 20.dp),
+        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         state = gridState,
         columns = GridCells.Adaptive(cardWidth),
-        horizontalArrangement = Arrangement.spacedBy(15.dp),
-        verticalArrangement = Arrangement.spacedBy(15.dp),
-        contentPadding = PaddingValues(bottom = 50.dp)
+        horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+        verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+        contentPadding = PaddingValues(
+            top = 8.dp,
+            bottom = layout.gridBottomPadding + 16.dp,
+        )
     ) {
         for (data in filters) {
             if (activeFilterNumber == 0 || data.filter.order == activeFilterNumber) {

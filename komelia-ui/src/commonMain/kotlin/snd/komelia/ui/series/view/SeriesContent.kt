@@ -326,10 +326,16 @@ fun Series(
             content = {
                 SeriesThumbnail(
                     seriesId = series.id,
-                    modifier = Modifier
-                        .animateContentSize(animationSpec = animation)
-                        .heightIn(min = 100.dp, max = 400.dp)
-                        .widthIn(min = 300.dp, max = 500.dp),
+                    modifier = when (width) {
+                        COMPACT, MEDIUM -> Modifier
+                            .animateContentSize(animationSpec = animation)
+                            .heightIn(min = 220.dp, max = 320.dp)
+                            .widthIn(min = 160.dp, max = 220.dp)
+                        else -> Modifier
+                            .animateContentSize(animationSpec = animation)
+                            .heightIn(min = 100.dp, max = 400.dp)
+                            .widthIn(min = 300.dp, max = 500.dp)
+                    },
                     contentScale = ContentScale.Fit
                 )
 
@@ -380,7 +386,10 @@ fun Series(
 
             }
             layout(totalWidth, totalHeight) {
-                thumbnail.placeRelative(0, 0)
+                thumbnail.placeRelative(
+                    x = if (isRow) 0 else (totalWidth - thumbnail.width) / 2,
+                    y = 0,
+                )
                 if (isRow) {
                     info.placeRelative(thumbnail.width + spacing, 0)
                 } else {

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -22,7 +23,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue.Closed
 import androidx.compose.material3.DrawerValue.Open
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
@@ -37,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType.Companion.KeyUp
@@ -215,13 +216,18 @@ class MainScreen(
         toggleLibrariesDrawer: () -> Unit,
         modifier: Modifier
     ) {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
-        ) {
-            Column {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Column {
+            Surface(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxWidth(),
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = 3.dp,
+                shadowElevation = 6.dp,
+            ) {
                 Row(
-                    modifier = modifier,
+                    modifier = modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     CompactNavButton(
@@ -256,10 +262,9 @@ class MainScreen(
                         isSelected = navigator.lastItem is SettingsScreen,
                         modifier = Modifier.weight(1f)
                     )
-
                 }
-                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
             }
+            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
         }
     }
 
@@ -273,6 +278,7 @@ class MainScreen(
     ) {
         Surface(
             modifier = modifier,
+            color = Color.Transparent,
             contentColor =
                 if (isSelected) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant
@@ -281,11 +287,21 @@ class MainScreen(
                 modifier = Modifier
                     .clickable { onClick() }
                     .cursorForHand()
-                    .heightIn(min = 64.dp)
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                    .heightIn(min = 60.dp)
+                    .padding(horizontal = 4.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(icon, contentDescription = text)
+                Surface(
+                    shape = MaterialTheme.shapes.large,
+                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                ) {
+                    Icon(
+                        icon,
+                        contentDescription = text,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 3.dp),
+                    )
+                }
                 Text(text, style = MaterialTheme.typography.bodySmall)
             }
         }

@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
@@ -21,6 +21,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoStories
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,9 +41,9 @@ import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
@@ -53,7 +57,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_invalid_u
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_offline_mode
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_password
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_retry
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_subtitle
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_url
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_username
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_with_another_account
@@ -124,20 +128,40 @@ fun LoginContent(
         val platform = LocalPlatform.current
         when (platform) {
             MOBILE, DESKTOP -> Surface(
-                modifier = Modifier.fillMaxWidth().widthIn(max = 480.dp),
+                modifier = Modifier.fillMaxWidth().widthIn(max = 440.dp),
                 shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             ) {
                 Column(
-                    modifier = Modifier.padding(KomeliaSpacing.extraLarge),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(horizontal = KomeliaSpacing.extraLarge, vertical = 28.dp),
+                    horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.large),
                 ) {
-                    Text(
-                        stringResource(Res.string.login_title),
-                        style = MaterialTheme.typography.headlineSmall,
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(KomeliaSpacing.medium),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Surface(
+                            shape = MaterialTheme.shapes.large,
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                        ) {
+                            Icon(
+                                Icons.Rounded.AutoStories,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(KomeliaSpacing.medium),
+                            )
+                        }
+                        Column {
+                            Text("Komelia", style = MaterialTheme.typography.headlineSmall)
+                            Text(
+                                stringResource(Res.string.login_subtitle),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                     LoginForm(
                         url = url,
                         onUrlChange = onUrlChange,
@@ -218,7 +242,8 @@ fun ColumnScope.LoginForm(
             .withTextFieldNavigation()
             .focusRequester(first)
             .focusProperties { next = second },
-        placeholder = { Text("localhost:25600") }
+        placeholder = { Text("localhost:25600") },
+        singleLine = true,
     )
 
     OutlinedTextField(
@@ -228,7 +253,8 @@ fun ColumnScope.LoginForm(
         modifier = textFieldsModifier
             .withTextFieldNavigation()
             .focusRequester(second)
-            .focusProperties { next = third }
+            .focusProperties { next = third },
+        singleLine = true,
     )
 
     OutlinedTextField(
@@ -241,21 +267,49 @@ fun ColumnScope.LoginForm(
                 onEnterPress = { coroutineScope.launch { onLogin() } }
             )
             .focusRequester(third),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        singleLine = true,
     )
 
     if (errorMessage != null) {
-        Text(errorMessage, style = TextStyle(color = MaterialTheme.colorScheme.error))
-    }
-
-    Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
-        if (offlineIsAvailable) {
-            TextButton(onClick = onOfflineSelect) { Text(stringResource(Res.string.login_offline_mode)) }
+        Surface(
+            color = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier.padding(KomeliaSpacing.medium),
+                horizontalArrangement = Arrangement.spacedBy(KomeliaSpacing.small),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Icon(Icons.Rounded.ErrorOutline, contentDescription = null)
+                Text(
+                    errorMessage,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
-        Button(onClick = { onLogin() }) { Text(stringResource(Res.string.login_login)) }
     }
 
-    Spacer(Modifier.imePadding())
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(KomeliaSpacing.small),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (offlineIsAvailable) {
+            TextButton(
+                onClick = onOfflineSelect,
+                modifier = Modifier.heightIn(min = 48.dp),
+            ) { Text(stringResource(Res.string.login_offline_mode)) }
+        }
+        Button(
+            onClick = { onLogin() },
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+        ) { Text(stringResource(Res.string.login_login)) }
+    }
 }
 
 @Composable

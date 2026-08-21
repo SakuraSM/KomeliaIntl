@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -72,7 +73,11 @@ fun SeriesImageCard(
                 isSelected = isSelected,
                 seriesActions = seriesMenuActions,
             ) {
-                SeriesImageOverlay(series = series, libraryIsDeleted = libraryIsDeleted) {
+                SeriesImageOverlay(
+                    series = series,
+                    libraryIsDeleted = libraryIsDeleted,
+                    showTitle = false,
+                ) {
                     SeriesThumbnail(
                         series.id,
                         modifier = Modifier.fillMaxSize(),
@@ -80,7 +85,17 @@ fun SeriesImageCard(
                     )
                 }
             }
-        }
+        },
+        content = {
+            CoverCardCaption(
+                title = series.metadata.title,
+                statusText = if (series.deleted || libraryIsDeleted) {
+                    stringResource(Res.string.series_unavailable)
+                } else {
+                    null
+                },
+            )
+        },
     )
 }
 
@@ -195,7 +210,11 @@ private fun SeriesImageOverlay(
                 contentAlignment = Alignment.TopEnd
             ) {
                 Box(
-                    modifier = Modifier.size(24.dp).background(MaterialTheme.colorScheme.primaryContainer),
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .clip(MaterialTheme.shapes.large)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(horizontal = 7.dp, vertical = 3.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

@@ -1,13 +1,13 @@
 package snd.komelia.ui.common.menus.bulk
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
-import androidx.compose.material.icons.rounded.BookmarkAdd
-import androidx.compose.material.icons.rounded.BookmarkRemove
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Extension
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.BookmarkRemove
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,13 +16,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_add_to_collection
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_auto_identify
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_bulk_delete_confirm_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_bulk_download
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_delete_confirm_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_delete_downloaded
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_komf_auto_identify_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_komf_auto_identify_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_mark_read
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_mark_unread
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.ui.LocalKomfIntegration
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.dialogs.ConfirmationDialog
@@ -64,24 +80,14 @@ fun SeriesBulkActionDialogs(
             SeriesBulkEditDialog(series = state.series, onDismissRequest = { state.showEditDialog = false })
     }
 
-    if (state.showDeleteDialog) {
-        ConfirmationDialog(
-            title = "Delete Series",
-            body = "${state.series.size} series will be removed from this server alongside with stored media files. This cannot be undone. Continue?",
-            confirmText = "Yes, delete ${state.series.size} series and their files",
-            onDialogConfirm = {
-                coroutineScope.launch { state.actions.delete(state.series) }
-                state.showDeleteDialog = false
-            },
-            onDialogDismiss = { state.showDeleteDialog = false },
-            buttonConfirmColor = MaterialTheme.colorScheme.errorContainer
-        )
-    }
-
     if (state.showDeleteDownloadedDialog) {
         ConfirmationDialog(
-            title = "Delete downloaded Series",
-            body = "${state.series.size} series will be removed from this device",
+            title = stringResource(Res.string.series_delete_confirm_title),
+            body = pluralStringResource(
+                Res.plurals.series_bulk_delete_confirm_body,
+                state.series.size,
+                state.series.size
+            ),
             onDialogConfirm = {
                 coroutineScope.launch { state.actions.deleteDownloaded(state.series) }
                 state.showDeleteDownloadedDialog = false
@@ -93,8 +99,12 @@ fun SeriesBulkActionDialogs(
 
     if (state.showKomfIdentifyDialog) {
         ConfirmationDialog(
-            title = "Komf series auto-identify",
-            body = "${state.series.size} series will be auto-identified by Komf",
+            title = stringResource(Res.string.series_komf_auto_identify_title),
+            body = pluralStringResource(
+                Res.plurals.series_komf_auto_identify_body,
+                state.series.size,
+                state.series.size
+            ),
             onDialogConfirm = {
                 coroutineScope.launch { state.actions.komfIdentify(state.series) }
                 state.showKomfIdentifyDialog = false
@@ -107,13 +117,12 @@ fun SeriesBulkActionDialogs(
         var permissionRequested by remember { mutableStateOf(false) }
         DownloadNotificationRequestDialog { permissionRequested = true }
 
-        val bodyText = remember(state.series) {
-            buildString {
-                append("Download ")
-                if (state.series.size == 1) append("${state.series.first().metadata.title}?")
-                else append("${state.series.size} series?")
-            }
-        }
+        val bodyText = pluralStringResource(
+            Res.plurals.series_bulk_download,
+            state.series.size,
+            if (state.series.size == 1) state.series.first().metadata.title
+            else state.series.size
+        )
         if (permissionRequested) {
             ConfirmationDialog(
                 body = bodyText,
@@ -136,6 +145,7 @@ fun rememberSeriesBulkActionsState(
     val isOffline = LocalOfflineMode.current.collectAsState().value
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isKomfEnabled = LocalKomfIntegration.current.collectAsState(false).value
+    val offlineAvailable = LocalOfflineAvailable.current
 
     return remember(series, coroutineScope, isOffline, isAdmin, isKomfEnabled) {
         SeriesBulkActionsState(
@@ -144,7 +154,8 @@ fun rememberSeriesBulkActionsState(
             coroutineScope = coroutineScope,
             isOffline = isOffline,
             isAdmin = isAdmin,
-            isKomfEnabled = isKomfEnabled
+            isKomfEnabled = isKomfEnabled,
+            offlineAvailable = offlineAvailable
         )
     }
 }
@@ -156,10 +167,12 @@ data class SeriesBulkActionsState(
     private val isOffline: Boolean,
     private val isKomfEnabled: Boolean,
     private val isAdmin: Boolean,
+    private val offlineAvailable: Boolean
 ) {
     var showAddToCollectionDialog by mutableStateOf(false)
     var showEditDialog by mutableStateOf(false)
-    var showDeleteDialog by mutableStateOf(false)
+
+    //    var showDeleteDialog by mutableStateOf(false)
     var showDeleteDownloadedDialog by mutableStateOf(false)
     var showKomfIdentifyDialog by mutableStateOf(false)
     var showDownloadDialog by mutableStateOf(false)
@@ -167,40 +180,40 @@ data class SeriesBulkActionsState(
     val buttons = buildList {
         add(
             BulkActionButtonData(
-                description = "Mark read",
-                icon = Icons.Rounded.BookmarkAdd,
+                description = Res.string.series_mark_read,
+                icon = Icons.Default.BookmarkAdd,
                 onClick = { coroutineScope.launch { actions.markAsRead(series) } }
             )
         )
         add(
             BulkActionButtonData(
-                description = "Mark unread",
-                icon = Icons.Rounded.BookmarkRemove,
+                description = Res.string.series_mark_unread,
+                icon = Icons.Default.BookmarkRemove,
                 onClick = { coroutineScope.launch { actions.markAsUnread(series) } }
             )
         )
         if (!isOffline && isAdmin) {
             add(
                 BulkActionButtonData(
-                    description = "Edit",
-                    icon = Icons.Rounded.Edit,
+                    description = Res.string.series_edit,
+                    icon = Icons.Default.Edit,
                     onClick = { showEditDialog = true }
                 )
             )
             add(
                 BulkActionButtonData(
-                    description = "Add to collection",
-                    icon = Icons.AutoMirrored.Rounded.PlaylistAdd,
+                    description = Res.string.series_add_to_collection,
+                    icon = Icons.AutoMirrored.Default.PlaylistAdd,
                     onClick = { showAddToCollectionDialog = true }
                 )
             )
         }
 
-        if (!isOffline) {
+        if (!isOffline && offlineAvailable) {
             add(
                 BulkActionButtonData(
-                    description = "Download",
-                    icon = Icons.Rounded.Download,
+                    description = Res.string.series_download,
+                    icon = Icons.Default.Download,
                     onClick = { showDownloadDialog = true }
                 )
             )
@@ -209,8 +222,8 @@ data class SeriesBulkActionsState(
         if (isOffline) {
             add(
                 BulkActionButtonData(
-                    description = "Delete downloaded",
-                    icon = Icons.Rounded.Delete,
+                    description = Res.string.series_delete_downloaded,
+                    icon = Icons.Default.Delete,
                     onClick = { showDeleteDownloadedDialog = true }
                 )
             )
@@ -218,22 +231,12 @@ data class SeriesBulkActionsState(
         if (isKomfEnabled) {
             add(
                 BulkActionButtonData(
-                    description = "Auto-identify",
-                    icon = Icons.Rounded.Extension,
+                    description = Res.string.series_auto_identify,
+                    icon = Icons.Default.Extension,
                     onClick = { showKomfIdentifyDialog = true }
                 )
             )
         }
-
-//        if (!isOffline && isAdmin) {
-//            add(
-//                BulkActionButtonData(
-//                    description = "Delete from server",
-//                    icon = Icons.Rounded.Delete,
-//                    onClick = { showDeleteDialog = true }
-//                )
-//            )
-//        }
     }
 }
 
@@ -249,7 +252,7 @@ data class SeriesBulkActions(
     constructor(
         seriesApi: KomgaSeriesApi,
         komfClient: KomfMetadataClient,
-        taskEmitter: OfflineTaskEmitter,
+        taskEmitter: OfflineTaskEmitter?,
         notifications: AppNotifications,
     ) : this(
         markAsRead = { series ->
@@ -269,10 +272,10 @@ data class SeriesBulkActions(
             }
         },
         download = { series ->
-            series.forEach { taskEmitter.downloadSeries(it.id) }
+            series.forEach { checkNotNull(taskEmitter).downloadSeries(it.id) }
         },
         deleteDownloaded = { series ->
-            series.forEach { taskEmitter.deleteSeries(it.id) }
+            series.forEach { checkNotNull(taskEmitter).deleteSeries(it.id) }
         },
         komfIdentify = { series ->
             series.forEach {

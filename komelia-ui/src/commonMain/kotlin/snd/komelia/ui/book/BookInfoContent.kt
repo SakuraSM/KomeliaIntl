@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
-import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,12 +25,29 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_ISBN
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_file
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_format
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_genres
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_last_read
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_links
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_local_download_outdated
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_number_and_page_count
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_percentage_read_pages_left
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_publisher
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_read_progress
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_release_date
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_remote_unavailable
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_size
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_unavailable
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.DefaultDateTimeFormats.localDateTimeFormat
 import snd.komelia.komga.api.model.KomeliaBook
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.TagList
 import snd.komelia.ui.common.components.DescriptionChips
 import snd.komelia.ui.common.components.LabeledEntry
@@ -72,11 +89,10 @@ fun BookInfoColumn(
     fileUrl: String,
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
-    val strings = LocalStrings.current.legacy
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (!publisher.isNullOrBlank()) {
             DescriptionChips(
-                label = "Publisher",
+                label = stringResource(Res.string.book_publisher),
                 chipValue = stringEntry(publisher),
                 onClick = { onFilterClick(SeriesScreenFilter(publisher = listOf(it))) },
             )
@@ -85,7 +101,7 @@ fun BookInfoColumn(
         val genreEntries = remember(genres) { genres?.map { stringEntry(it) } }
         if (genreEntries != null) {
             DescriptionChips(
-                label = "Genres",
+                label = stringResource(Res.string.book_genres),
                 chipValues = genreEntries,
                 onChipClick = { onFilterClick(SeriesScreenFilter(genres = listOf(it))) },
             )
@@ -100,10 +116,10 @@ fun BookInfoColumn(
         val uriHandler = LocalUriHandler.current
         val linkEntries = remember(links) { links.map { LabeledEntry(it, it.label) } }
         DescriptionChips(
-            label = "Links",
+            label = stringResource(Res.string.book_links),
             chipValues = linkEntries,
             onChipClick = { entry -> uriHandler.openUri(entry.url) },
-            icon = Icons.Rounded.Link,
+            icon = Icons.Default.Link,
         )
 
         Spacer(Modifier.size(0.dp))
@@ -126,7 +142,7 @@ fun BookInfoColumn(
         Spacer(Modifier.size(0.dp))
         Row {
             Text(
-                strings.forText("Size"),
+                stringResource(Res.string.book_size),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.width(120.dp)
             )
@@ -135,7 +151,7 @@ fun BookInfoColumn(
 
         Row {
             Text(
-                strings.forText("Format"),
+                stringResource(Res.string.book_format),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.width(120.dp)
             )
@@ -147,7 +163,7 @@ fun BookInfoColumn(
         isbn.ifBlank { null }?.let { isbn ->
             Row {
                 Text(
-                    strings.forText("ISBN"),
+                    stringResource(Res.string.book_ISBN),
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.width(120.dp)
                 )
@@ -157,7 +173,7 @@ fun BookInfoColumn(
 
         Row {
             Text(
-                strings.forText("File"),
+                stringResource(Res.string.book_file),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.width(120.dp)
             )
@@ -172,7 +188,6 @@ fun BookInfoRow(
     book: KomeliaBook,
     onSeriesButtonClick: (() -> Unit)? = null,
 ) {
-    val strings = LocalStrings.current.legacy
 
     Column(
         modifier = modifier,
@@ -191,7 +206,7 @@ fun BookInfoRow(
             if (book.deleted) {
                 SuggestionChip(
                     onClick = {},
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Unavailable")) },
+                    label = { Text(stringResource(Res.string.book_unavailable)) },
                     border = null,
                     colors = SuggestionChipDefaults.suggestionChipColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer
@@ -201,7 +216,7 @@ fun BookInfoRow(
             if (book.remoteFileUnavailable) {
                 SuggestionChip(
                     onClick = {},
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Remote Unavailable")) },
+                    label = { Text(stringResource(Res.string.book_remote_unavailable)) },
                     border = null,
                     colors = SuggestionChipDefaults.suggestionChipColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer
@@ -212,7 +227,7 @@ fun BookInfoRow(
             if (book.isLocalFileOutdated) {
                 SuggestionChip(
                     onClick = {},
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Local download outdated")) },
+                    label = { Text(stringResource(Res.string.book_local_download_outdated)) },
                     border = null,
                     colors = SuggestionChipDefaults.suggestionChipColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer
@@ -222,7 +237,11 @@ fun BookInfoRow(
         }
 
         SelectionContainer {
-            Text(text = strings.forText("Book #${book.metadata.number} · ${book.media.pagesCount} pages"))
+            Text(
+                text = stringResource(
+                    Res.string.book_number_and_page_count, book.metadata.number, book.media.pagesCount
+                )
+            )
         }
 
         Spacer(Modifier.heightIn(5.dp))
@@ -231,7 +250,7 @@ fun BookInfoRow(
                 book.metadata.releaseDate?.let {
                     Row {
                         Text(
-                            text = strings.forText("Release date:"),
+                            text = stringResource(Res.string.book_release_date),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.width(120.dp)
                         )
@@ -247,27 +266,26 @@ fun BookInfoRow(
                 val pagesCount = book.media.pagesCount
                 if (readProgress != null) {
                     if (!readProgress.completed) {
-                        val readProgressText = remember(pagesCount, readProgress) {
-                            buildString {
-                                val pagesLeft = pagesCount - readProgress.page
-                                val percentage =
-                                    (readProgress.page.toFloat() / pagesCount * 100)
-                                        .roundToInt()
-                                append(percentage)
-                                append("%, ")
-                                append(pagesLeft)
-                                append(" ")
-                                append(if (pagesLeft == 1) strings.forText("page left") else strings.forText("pages left"))
-                            }
+                        val (percentage, pagesLeft) = remember(pagesCount, readProgress) {
+                            val pagesLeft = pagesCount - readProgress.page
+                            val percentage = (readProgress.page.toFloat() / pagesCount * 100).roundToInt()
+                            pagesLeft to percentage
                         }
 
                         Row {
                             Text(
-                                strings.forText("Read progress:"),
+                                stringResource(Res.string.book_read_progress),
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.width(120.dp)
                             )
-                            Text(readProgressText, style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                pluralStringResource(
+                                    Res.plurals.book_percentage_read_pages_left,
+                                    pagesLeft,
+                                    percentage, pagesLeft
+                                ),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                     }
 
@@ -278,7 +296,7 @@ fun BookInfoRow(
                                 .format(localDateTimeFormat)
                         }
                         Text(
-                            strings.forText("Last read:"),
+                            stringResource(Res.string.book_last_read),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.width(120.dp)
                         )

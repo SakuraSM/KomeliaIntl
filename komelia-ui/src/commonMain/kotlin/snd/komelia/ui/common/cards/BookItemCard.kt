@@ -23,9 +23,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.OfflinePin
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -50,12 +50,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_pages
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_unavailable
 import kotlinx.coroutines.flow.filter
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
 import snd.komelia.ui.LocalLibraries
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.BookReadButton
 import snd.komelia.ui.common.components.NoPaddingChip
@@ -155,7 +158,7 @@ private fun BookImageOverlay(
                         if (book.isLocalFileOutdated || book.remoteFileUnavailable) MaterialTheme.colorScheme.errorContainer
                         else MaterialTheme.colorScheme.secondary
                     Icon(
-                        imageVector = Icons.Rounded.OfflinePin,
+                        imageVector = Icons.Filled.OfflinePin,
                         contentDescription = null,
                         tint = tint,
                         modifier = Modifier
@@ -171,7 +174,7 @@ private fun BookImageOverlay(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Column(Modifier.padding(8.dp)) {
+            Column(Modifier.padding(10.dp)) {
                 if (showSeriesTitle && !book.oneshot) {
                     CardOutlinedText(
                         text = book.seriesTitle,
@@ -187,7 +190,7 @@ private fun BookImageOverlay(
                 }
                 if (book.deleted || libraryIsDeleted) {
                     CardOutlinedText(
-                        text = "Unavailable",
+                        text = stringResource(Res.string.book_unavailable),
                         textColor = MaterialTheme.colorScheme.error
                     )
                 }
@@ -199,7 +202,7 @@ private fun BookImageOverlay(
                     progress = { getReadProgressPercentage(book) },
                     color = MaterialTheme.colorScheme.tertiary,
                     trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
-                    modifier = Modifier.height(4.dp).fillMaxWidth().background(Color.Black),
+                    modifier = Modifier.height(6.dp).fillMaxWidth().background(Color.Black),
                     drawStopIndicator = {}
                 )
             }
@@ -227,7 +230,7 @@ private fun BookDownloadCardOverlay(book: KomeliaBook) {
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .8f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Rounded.Download, null, tint = MaterialTheme.colorScheme.tertiary)
+                Icon(Icons.Default.Download, null, tint = MaterialTheme.colorScheme.tertiary)
                 CircularProgressIndicator(
                     progress = { event.completed / event.total.toFloat() },
                     color = MaterialTheme.colorScheme.tertiary,
@@ -244,7 +247,7 @@ private fun BookDownloadCardOverlay(book: KomeliaBook) {
 @Composable
 private fun BookUnreadTick() {
     val color = MaterialTheme.colorScheme.tertiary
-    Canvas(modifier = Modifier.size(24.dp)) {
+    Canvas(modifier = Modifier.size(30.dp)) {
         val trianglePath = Path().apply {
             moveTo(0f, 0f)
             lineTo(x = size.width, y = size.height)
@@ -415,7 +418,7 @@ private fun BookDetailedListDetails(
         ) {
             item {
                 Text(
-                    LocalStrings.current.legacy.forText("${book.media.pagesCount} pages"),
+                    stringResource(Res.string.book_pages, book.media.pagesCount),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -460,7 +463,7 @@ private fun BookDetailedListDetails(
                         onClick = { isMenuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        Icon(Icons.Rounded.MoreVert, null)
+                        Icon(Icons.Default.MoreVert, null)
                     }
                     BookActionsMenu(
                         book = book,
@@ -488,7 +491,7 @@ private fun BookMenuActionsDropdown(
             onClick = { onActionsMenuExpand(true) },
             colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Icon(Icons.Rounded.MoreVert, null)
+            Icon(Icons.Default.MoreVert, null)
         }
 
         BookActionsMenu(
@@ -501,3 +504,4 @@ private fun BookMenuActionsDropdown(
         )
     }
 }
+

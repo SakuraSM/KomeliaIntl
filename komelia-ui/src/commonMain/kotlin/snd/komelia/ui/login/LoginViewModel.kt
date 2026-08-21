@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.http.HttpStatusCode.Companion.Unauthorized
@@ -37,6 +38,8 @@ import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 
+private val logger = KotlinLogging.logger { }
+
 class LoginViewModel(
     private val settingsRepository: CommonSettingsRepository,
     private val secretsRepository: SecretsRepository,
@@ -46,10 +49,10 @@ class LoginViewModel(
     private val notifications: AppNotifications,
     private val platform: PlatformType,
 
-    private val offlineUserRepository: OfflineUserRepository,
-    private val offlineServerRepository: OfflineMediaServerRepository,
-    private val offlineSettingsRepository: OfflineSettingsRepository,
-    private val offlineLibraryApi: OfflineLibraryApi,
+    private val offlineUserRepository: OfflineUserRepository?,
+    private val offlineServerRepository: OfflineMediaServerRepository?,
+    private val offlineSettingsRepository: OfflineSettingsRepository?,
+    private val offlineLibraryApi: OfflineLibraryApi?,
 ) : StateScreenModel<LoadState<Unit>>(Uninitialized) {
 
     var url by mutableStateOf("")
@@ -68,12 +71,12 @@ class LoginViewModel(
         screenModelScope.launch {
             url = settingsRepository.getServerUrl().first()
             user = settingsRepository.getCurrentUser().first()
-            val offlineUsers = offlineUserRepository.findAll()
-            val offlineServer = offlineServerRepository.findByUrl(url)
+            val offlineUsers = offlineUserRepository?.findAll() ?: emptyList()
+            val offlineServer = offlineServerRepository?.findByUrl(url)
 
             offlineIsAvailable.value = offlineUsers.any { it.id != OfflineUser.ROOT }
             offlineUser.value = offlineServer?.let { server -> offlineUsers.firstOrNull { it.serverId == server.id } }
-            val isOffline = offlineSettingsRepository.getOfflineMode().first()
+            val isOffline = offlineSettingsRepository?.getOfflineMode()?.first() ?: false
 
             when (platform) {
                 MOBILE, DESKTOP -> {
@@ -122,9 +125,10 @@ class LoginViewModel(
     fun offlineLogin() {
         notifications.runCatchingToNotifications(screenModelScope) {
             val user = offlineUser.value ?: return@runCatchingToNotifications
-            offlineSettingsRepository.putOfflineMode(true)
+
+            checkNotNull(offlineSettingsRepository).putOfflineMode(true)
             offlineSettingsRepository.putUserId(user.id)
-            komgaAuthState.setStateValues(user.toKomgaUser(), offlineLibraryApi.getLibraries())
+            komgaAuthState.setStateValues(user.toKomgaUser(), checkNotNull(offlineLibraryApi).getLibraries())
             mutableState.value = LoadState.Success(Unit)
         }
     }
@@ -173,6 +177,7 @@ class LoginViewModel(
             else "Login error ${e::class.simpleName}: ${e.message}"
             mutableState.value = LoadState.Error(e)
         } catch (e: Throwable) {
+            logger.catching(e)
             userLoginError = formatExceptionMessage(e)
             mutableState.value = LoadState.Error(e)
         }

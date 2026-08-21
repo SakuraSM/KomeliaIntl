@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ChevronLeft
-import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -35,8 +35,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_filebrowser_cancel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_filebrowser_choose
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_filebrowser_directory
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_filebrowser_parent
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_filebrowser_root
 import kotlinx.coroutines.launch
-import snd.komelia.ui.LocalStrings
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.platform.VerticalScrollbar
 import snd.komelia.ui.platform.cursorForHand
@@ -49,7 +55,6 @@ fun FileBrowserDialogContent(
 ) {
     val viewModelFactory = LocalViewModelFactory.current
     val viewmodel = remember { viewModelFactory.getFileBrowserDialogViewModel() }
-    val strings = LocalStrings.current.legacy
     LaunchedEffect(Unit) {
         viewmodel.selectDirectory("")
     }
@@ -68,7 +73,11 @@ fun FileBrowserDialogContent(
             Column(Modifier.padding(20.dp)) {
                 if (directoryListing == null) return@Column
 
-                Text(strings.forText("Library's root folder"), fontSize = 20.sp, modifier = Modifier.padding(vertical = 10.dp))
+                Text(
+                    stringResource(Res.string.library_filebrowser_root),
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(vertical = 10.dp)
+                )
 
                 TextField(
                     value = viewmodel.selectedPath,
@@ -110,17 +119,17 @@ private fun DirectoryListing(
     ) {
         val parent = listing.parent
         if (parent != null) {
-                DirectoryListingItem(
-                    icon = Icons.Rounded.ChevronLeft,
-                    title = LocalStrings.current.legacy.forText("Parent"),
-                    onClick = { onDirectoryClick(parent) }
-                )
+            DirectoryListingItem(
+                icon = Icons.Default.ChevronLeft,
+                title = stringResource(Res.string.library_filebrowser_parent),
+                onClick = { onDirectoryClick(parent) }
+            )
         }
 
         listing.directories.forEach {
-            if (it.type == "directory") {
+            if (it.type == stringResource(Res.string.library_filebrowser_directory)) {
                 DirectoryListingItem(
-                    icon = Icons.Rounded.Folder,
+                    icon = Icons.Default.Folder,
                     title = it.name,
                     onClick = { onDirectoryClick(it.path) })
             }
@@ -134,10 +143,11 @@ private fun DirectoryListingItem(
     title: String,
     onClick: () -> Unit
 ) {
-    Column(Modifier
-        .clickable { onClick() }
-        .cursorForHand()
-        .fillMaxWidth()
+    Column(
+        Modifier
+            .clickable { onClick() }
+            .cursorForHand()
+            .fillMaxWidth()
     ) {
         Row(Modifier.padding(10.dp)) {
             Icon(icon, contentDescription = null, modifier = Modifier.padding(horizontal = 10.dp))
@@ -157,7 +167,7 @@ private fun DialogControlButtons(
 
         Spacer(Modifier.weight(1f))
         TextButton(onClick = onDismissRequest) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("CANCEL"))
+            Text(stringResource(Res.string.library_filebrowser_cancel))
         }
         Spacer(Modifier.size(10.dp))
 
@@ -165,7 +175,7 @@ private fun DialogControlButtons(
             onDirectoryChoice(currentPath)
             onDismissRequest()
         }) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("CHOOSE"))
+            Text(stringResource(Res.string.library_filebrowser_choose))
         }
     }
 }

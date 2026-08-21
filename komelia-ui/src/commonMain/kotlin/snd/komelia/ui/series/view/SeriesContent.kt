@@ -22,8 +22,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.FilterChip
@@ -45,10 +45,21 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_penciller
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_writers
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_genres
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_links
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_publisher
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_tab_books
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_tab_collections
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.collection.SeriesCollectionsContent
@@ -265,11 +276,12 @@ fun SeriesToolBar(
                 }
             }
             var showDownloadConfirmationDialog by remember { mutableStateOf(false) }
-            if (!isOffline) {
+            val offlineAvailable = LocalOfflineAvailable.current
+            if (!isOffline && offlineAvailable) {
                 IconButton(
                     onClick = { showDownloadConfirmationDialog = true },
                 ) {
-                    Icon(Icons.Rounded.Download, null)
+                    Icon(Icons.Default.Download, null)
                 }
             }
             if (showDownloadConfirmationDialog) {
@@ -278,7 +290,7 @@ fun SeriesToolBar(
 
                 if (permissionRequested) {
                     ConfirmationDialog(
-                        "Download series \"${series.metadata.title}\"?",
+                        stringResource(Res.string.series_download_confirm, series.metadata.title),
                         onDialogConfirm = onDownload,
                         onDialogDismiss = { showDownloadConfirmationDialog = false }
                     )
@@ -391,14 +403,14 @@ fun SeriesChipTags(
     ) {
         if (series.metadata.publisher.isNotBlank()) {
             DescriptionChips(
-                label = "Publisher",
+                label = stringResource(Res.string.series_publisher),
                 chipValue = stringEntry(series.metadata.publisher),
                 onClick = { onFilterClick(SeriesScreenFilter(publisher = listOf(it))) },
             )
         }
 
         DescriptionChips(
-            label = "Genres",
+            label = stringResource(Res.string.series_genres),
             chipValues = series.metadata.genres.map { stringEntry(it) },
             onChipClick = { onFilterClick(SeriesScreenFilter(genres = listOf(it))) },
         )
@@ -411,10 +423,10 @@ fun SeriesChipTags(
 
         val uriHandler = LocalUriHandler.current
         DescriptionChips(
-            label = "Links",
+            label = stringResource(Res.string.series_links),
             chipValues = series.metadata.links.map { LabeledEntry(it, it.label) },
             onChipClick = { entry -> uriHandler.openUri(entry.url) },
-            icon = Icons.Rounded.Link,
+            icon = Icons.Default.Link,
         )
 
         Spacer(Modifier.height(2.dp))
@@ -424,7 +436,7 @@ fun SeriesChipTags(
             .groupBy { it.role }
             .forEach { (_, author) ->
                 DescriptionChips(
-                    label = "Writers",
+                    label = stringResource(Res.string.series_author_writers),
                     chipValues = author.map { LabeledEntry(it, it.name) },
                     onChipClick = { onFilterClick(SeriesScreenFilter(authors = listOf(it))) },
                     modifier = Modifier.cursorForHand()
@@ -436,7 +448,7 @@ fun SeriesChipTags(
             .groupBy { it.role }
             .forEach { (_, author) ->
                 DescriptionChips(
-                    label = "Pencillers",
+                    label = stringResource(Res.string.series_author_penciller),
                     chipValues = author.map { LabeledEntry(it, it.name) },
                     onChipClick = { onFilterClick(SeriesScreenFilter(authors = listOf(it))) },
                     modifier = Modifier.cursorForHand()
@@ -462,14 +474,14 @@ private fun TabRow(
                 FilterChip(
                     onClick = { onTabChange(SeriesTab.BOOKS) },
                     selected = currentTab == SeriesTab.BOOKS,
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Books")) },
+                    label = { Text(stringResource(Res.string.series_tab_books)) },
                     colors = chipColors,
                     border = null,
                 )
                 FilterChip(
                     onClick = { onTabChange(SeriesTab.COLLECTIONS) },
                     selected = currentTab == SeriesTab.COLLECTIONS,
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Collections")) },
+                    label = { Text(stringResource(Res.string.series_tab_collections)) },
                     colors = chipColors,
                     border = null,
                 )

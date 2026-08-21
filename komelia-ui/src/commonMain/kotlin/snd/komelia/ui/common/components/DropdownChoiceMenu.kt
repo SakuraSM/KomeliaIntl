@@ -12,23 +12,21 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.RadioButtonChecked
-import androidx.compose.material.icons.rounded.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -59,13 +57,30 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_and_exclude
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_any_value
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_exclude
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_exclusion_mode
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_include
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_inclusion_mode
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_search
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_tags_genre_label
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_tags_reset
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_tags_search
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_tags_show_less
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_tags_show_more
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_tags_tags_label
 import kotlinx.coroutines.delay
-import snd.komelia.ui.LocalStrings
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.series.SeriesFilterState.TagExclusionMode
 import snd.komelia.ui.series.SeriesFilterState.TagInclusionMode
+import snd.komelia.ui.strings.AppStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,14 +95,13 @@ fun <T> DropdownChoiceMenu(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    val strings = LocalStrings.current.legacy
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = isExpanded,
         onExpandedChange = { isExpanded = it },
-        ) {
-            InputField(
-            value = selectedOption?.label?.let(strings::forText) ?: "",
+    ) {
+        InputField(
+            value = selectedOption?.label ?: "",
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
                 .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
@@ -108,7 +122,7 @@ fun <T> DropdownChoiceMenu(
 
             options.forEach {
                 DropdownMenuItem(
-                    text = { Text(strings.forText(it.label)) },
+                    text = { Text(it.label) },
                     onClick = {
                         onOptionChange(it)
                         isExpanded = false
@@ -133,14 +147,15 @@ fun <T> DropdownMultiChoiceMenu(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    val strings = LocalStrings.current.legacy
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = isExpanded,
         onExpandedChange = { isExpanded = it },
     ) {
         InputField(
-            value = selectedOptions.joinToString { strings.forText(it.label) }.ifBlank { placeholder?.let(strings::forText) ?: strings.forText("Any") },
+            value = selectedOptions.joinToString { it.label }.ifBlank {
+                placeholder ?: stringResource(Res.string.filter_any_value)
+            },
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
                 .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
@@ -185,7 +200,6 @@ private fun InputField(
         shadowElevation = 1.dp,
         color = color,
         modifier = Modifier
-            .heightIn(min = 44.dp)
             .cursorForHand()
             .indication(interactionSource, LocalIndication.current)
             .hoverable(interactionSource)
@@ -227,7 +241,6 @@ fun <T> DropdownChoiceMenuWithSearch(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     var searchText by remember { mutableStateOf("") }
-    val legacyStrings = LocalStrings.current.legacy
     LaunchedEffect(searchText) {
         delay(200)
         onSearch(searchText)
@@ -239,8 +252,9 @@ fun <T> DropdownChoiceMenuWithSearch(
         onExpandedChange = { isExpanded = it },
     ) {
         InputField(
-            value = selectedOptions.joinToString { legacyStrings.forText(it.label) }
-                .ifBlank { placeholder?.let(legacyStrings::forText) ?: legacyStrings.forText("Any") },
+            value = selectedOptions.joinToString { it.label }.ifBlank {
+                placeholder ?: stringResource(Res.string.filter_any_value)
+            },
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
                 .then(textFieldModifier),
@@ -260,7 +274,7 @@ fun <T> DropdownChoiceMenuWithSearch(
             val focusRequester = remember { FocusRequester() }
             NoPaddingTextField(
                 text = searchText,
-                placeholder = legacyStrings.forText("Search"),
+                placeholder = stringResource(Res.string.filter_search),
                 onTextChange = { searchText = it },
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
@@ -279,8 +293,8 @@ fun <T> DropdownChoiceMenuWithSearch(
                         color = MaterialTheme.colorScheme.surface,
                         onClick = { onOptionSelect(it) }
                     ) {
-                        Icon(Icons.Rounded.Close, null)
-                        Text(legacyStrings.forText(it.label), style = MaterialTheme.typography.labelMedium)
+                        Icon(Icons.Default.Close, null)
+                        Text(it.label, style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
@@ -313,9 +327,9 @@ fun <T> FilterDropdownChoice(
         options = options,
         onOptionChange = onOptionChange,
         contentPadding = PaddingValues(5.dp),
-        label = label?.let { { Text(LocalStrings.current.legacy.forText(it)) } },
+        label = label?.let { { Text(it) } },
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.clip(RoundedCornerShape(8.dp)),
+        modifier = modifier.clip(RoundedCornerShape(5.dp)),
         inputFieldModifier = Modifier.fillMaxWidth()
     )
 }
@@ -337,7 +351,7 @@ fun <T> FilterDropdownMultiChoice(
         label = label?.let { { FilterLabelAndCount(label, selectedOptions.size) } },
         placeholder = placeholder,
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.clip(RoundedCornerShape(8.dp)),
+        modifier = modifier.clip(RoundedCornerShape(5.dp)),
         inputFieldModifier = Modifier.fillMaxWidth()
     )
 }
@@ -361,7 +375,7 @@ fun <T> FilterDropdownMultiChoiceWithSearch(
         label = label?.let { { FilterLabelAndCount(label, selectedOptions.size) } },
         placeholder = placeholder,
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.clip(RoundedCornerShape(8.dp)),
+        modifier = modifier.clip(RoundedCornerShape(5.dp)),
         textFieldModifier = Modifier.fillMaxWidth()
     )
 }
@@ -394,30 +408,32 @@ fun TagFiltersDropdownMenu(
     inputFieldColor: Color = MaterialTheme.colorScheme.surface,
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
-    val strings = LocalStrings.current.filters
-    val legacyStrings = LocalStrings.current.legacy
     var isExpanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
+    val anyValueString = stringResource(Res.string.filter_any_value)
+    val includeString = stringResource(Res.string.filter_include)
+    val excludeString = stringResource(Res.string.filter_exclude)
+    val andExcludeString = stringResource(Res.string.filter_and_exclude)
     val inputValue = remember(includeGenres, includeTags, excludeGenres, excludeTags) {
         val include = includeGenres + includeTags
         val exclude = excludeGenres + excludeTags
 
         val value = buildString {
             if (include.isNotEmpty() && exclude.isNotEmpty()) {
-                append("Include ")
+                append("$includeString ")
                 append(include.joinToString())
-                append(" and exclude ")
+                append(" $andExcludeString ")
                 append(exclude.joinToString())
             } else if (include.isNotEmpty()) {
-                append("Include ")
+                append("$includeString ")
                 append(include.joinToString())
             } else if (exclude.isNotEmpty()) {
-                append("Exclude ")
+                append("$excludeString ")
                 append(exclude.joinToString())
             }
         }
-        value.ifBlank { placeholder?.let(legacyStrings::forText) ?: strings.anyValue }
+        value.ifBlank { placeholder ?: anyValueString }
     }
 
     BasicTooltipBox(
@@ -508,7 +524,6 @@ private fun TagFilterDropdownContent(
     exclusionMode: TagExclusionMode,
     onExclusionModeChange: (TagExclusionMode) -> Unit,
 ) {
-    val strings = LocalStrings.current.filters
     var tagsFilter by remember { mutableStateOf("") }
     var filteredGenreOptions by remember { mutableStateOf(allGenres) }
     var filteredTagsOptions by remember { mutableStateOf(allTags) }
@@ -524,7 +539,7 @@ private fun TagFilterDropdownContent(
         ) {
             NoPaddingTextField(
                 text = tagsFilter,
-                placeholder = strings.filterTagsSearch,
+                placeholder = stringResource(Res.string.filter_tags_search),
                 onTextChange = { tagsFilter = it },
                 modifier = Modifier.weight(1f).height(40.dp),
             )
@@ -534,16 +549,19 @@ private fun TagFilterDropdownContent(
                     onReset()
                 },
                 enabled = includeTags.isNotEmpty() || excludeTags.isNotEmpty() || includeGenres.isNotEmpty() || excludeGenres.isNotEmpty(),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(5.dp),
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(strings.filterTagsReset, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(Res.string.filter_tags_reset),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
 
         if (allGenres.isNotEmpty()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(strings.filterTagsGenreLabel)
+                Text(stringResource(Res.string.filter_tags_genre_label))
                 HorizontalDivider(Modifier.padding(start = 10.dp))
             }
             TagsRow(filteredGenreOptions, includeGenres, excludeGenres, onGenreSelect)
@@ -551,7 +569,7 @@ private fun TagFilterDropdownContent(
 
         if (allTags.isNotEmpty()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(strings.filterTagsTagsLabel)
+                Text(stringResource(Res.string.filter_tags_tags_label))
                 HorizontalDivider(Modifier.padding(start = 10.dp))
             }
             TagsRow(filteredTagsOptions, includeTags, excludeTags, onTagSelect)
@@ -561,41 +579,48 @@ private fun TagFilterDropdownContent(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 10.dp)
         ) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Other Options"))
+            Text("Other Options")
             HorizontalDivider(Modifier.padding(start = 10.dp))
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+            val inclusionModeString = stringResource(AppStrings.forInclusionMode(inclusionMode))
+            val exclusionModeString = stringResource(AppStrings.forExclusionMode(exclusionMode))
+            var inclusionModes by remember { mutableStateOf(emptyList<LabeledEntry<TagInclusionMode>>()) }
+            var exclusionModes by remember { mutableStateOf(emptyList<LabeledEntry<TagExclusionMode>>()) }
+            LaunchedEffect(Unit) {
+                inclusionModes = TagInclusionMode.entries.map {
+                    LabeledEntry(it, getString(AppStrings.forInclusionMode(it)))
+                }
+                exclusionModes = TagExclusionMode.entries.map {
+                    LabeledEntry(it, getString(AppStrings.forExclusionMode(it)))
+                }
+            }
+
             DropdownChoiceMenu(
                 selectedOption = remember(inclusionMode) {
-                    LabeledEntry(inclusionMode, strings.forInclusionMode(inclusionMode))
+                    LabeledEntry(
+                        inclusionMode,
+                        inclusionModeString
+                    )
                 },
-                options = remember {
-                    TagInclusionMode.entries.map {
-                        LabeledEntry(it, strings.forInclusionMode(it))
-                    }
-                },
+                options = inclusionModes,
                 onOptionChange = { onInclusionModeChange(it.value) },
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Inclusion mode")) }
+                label = { Text(stringResource(Res.string.filter_inclusion_mode)) }
             )
 
             DropdownChoiceMenu(
                 selectedOption = remember(exclusionMode) {
-                    LabeledEntry(exclusionMode, strings.forExclusionMode(exclusionMode))
+                    LabeledEntry(exclusionMode, exclusionModeString)
                 },
-                options = remember {
-                    TagExclusionMode.entries.map {
-                        LabeledEntry(it, strings.forExclusionMode(it))
-                    }
-                },
+                options = exclusionModes,
                 onOptionChange = { onExclusionModeChange(it.value) },
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Exclusion mode")) }
+                label = { Text(stringResource(Res.string.filter_exclusion_mode)) }
             )
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TagsRow(
     tags: List<String>,
@@ -603,10 +628,9 @@ private fun TagsRow(
     excludeTags: List<String>,
     onTagSelect: (String) -> Unit
 ) {
-    val strings = LocalStrings.current.filters
     val maxTagNum = 30
     var isExpanded by remember { mutableStateOf(false) }
-    val tagsToTake = if (isExpanded) tags else tags.take(maxTagNum)
+    val tagsToTake = if (isExpanded) tags.take(500) else tags.take(maxTagNum)
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -628,11 +652,11 @@ private fun TagsRow(
         if (tags.size > maxTagNum) {
             TextButton(
                 onClick = { isExpanded = !isExpanded },
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(5.dp),
                 modifier = Modifier.cursorForHand()
             ) {
                 Text(
-                    if (isExpanded) strings.filterTagsShowLess else strings.filterTagsShowMore,
+                    if (isExpanded) stringResource(Res.string.filter_tags_show_less) else stringResource(Res.string.filter_tags_show_more),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -662,7 +686,12 @@ private fun TagFilterChip(
         color = MaterialTheme.colorScheme.surface,
         borderColor = borderColor
     ) {
-        Text(tag, style = MaterialTheme.typography.labelLarge.copy(color = textColor))
+        Text(
+            tag.take(300),
+            style = MaterialTheme.typography.labelLarge.copy(color = textColor),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -673,26 +702,24 @@ private fun <T> DropdownMultiChoiceItem(
     selected: Boolean,
 ) {
     val color = if (selected) MaterialTheme.colorScheme.tertiary else Color.Unspecified
-    val strings = LocalStrings.current.legacy
     DropdownMenuItem(
-        text = { Text(text = strings.forText(option.label), color = color) },
+        text = { Text(text = option.label, color = color) },
         onClick = { onOptionSelect(option) },
         modifier = Modifier.cursorForHand(),
         leadingIcon = {
-            if (selected) Icon(Icons.Rounded.RadioButtonChecked, null, tint = color)
-            else Icon(Icons.Rounded.RadioButtonUnchecked, null)
+            if (selected) Icon(Icons.Default.RadioButtonChecked, null, tint = color)
+            else Icon(Icons.Default.RadioButtonUnchecked, null)
         }
     )
 }
 
 @Composable
 private fun FilterLabelAndCount(label: String, includeCount: Int, excludeCount: Int = 0) {
-    val strings = LocalStrings.current.legacy
     Row(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(strings.forText(label), style = MaterialTheme.typography.labelLarge)
+        Text(label, style = MaterialTheme.typography.labelLarge)
         if (includeCount > 0) {
             Text(
                 " + $includeCount",
@@ -724,3 +751,4 @@ data class LabeledEntry<T>(
 
     }
 }
+

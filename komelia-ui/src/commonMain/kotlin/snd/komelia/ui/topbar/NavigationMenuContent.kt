@@ -23,15 +23,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.LibraryBooks
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,10 +52,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_home
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries_unavailable
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.sidebar_task_count
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineMode
-import snd.komelia.ui.LocalStrings
-import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.common.menus.LibraryActionsMenu
 import snd.komelia.ui.common.menus.LibraryMenuActions
 import snd.komelia.ui.dialogs.libraryedit.LibraryEditDialogs
@@ -74,22 +79,17 @@ fun NavBarContent(
     libraryActions: LibraryMenuActions,
     onHomeClick: () -> Unit,
     onLibrariesClick: () -> Unit,
-    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
     onSettingsClick: () -> Unit,
     taskQueueStatus: TaskQueueStatus?,
 ) {
-    Surface(
-        modifier = Modifier.width(256.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-    ) {
+    Surface(Modifier.width(230.dp)) {
         NavMenu(
             currentScreen = currentScreen,
             libraries = libraries,
             libraryActions = libraryActions,
             onHomeClick = onHomeClick,
             onLibrariesClick = onLibrariesClick,
-            onLibrariesRefreshClick = onLibrariesRefreshClick,
             onLibraryClick = onLibraryClick,
             onSettingsClick = onSettingsClick
         )
@@ -108,13 +108,9 @@ fun LibrariesNavBarContent(
     libraries: List<KomgaLibrary>,
     libraryActions: LibraryMenuActions,
     onLibrariesClick: () -> Unit,
-    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
 ) {
-    Surface(
-        modifier = Modifier.width(256.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-    ) {
+    Surface(Modifier.width(230.dp)) {
         val scrollState: ScrollState = rememberScrollState()
         Column(
             modifier = modifier
@@ -127,7 +123,6 @@ fun LibrariesNavBarContent(
                 libraries = libraries,
                 libraryActions = libraryActions,
                 onLibrariesClick = onLibrariesClick,
-                onLibrariesRefreshClick = onLibrariesRefreshClick,
                 onLibraryClick = onLibraryClick
             )
             Spacer(Modifier.size(30.dp))
@@ -142,7 +137,6 @@ fun ColumnScope.LibrariesNavBarContent(
     libraries: List<KomgaLibrary>,
     libraryActions: LibraryMenuActions,
     onLibrariesClick: () -> Unit,
-    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
 ) {
     var showLibraryAddDialog by remember { mutableStateOf(false) }
@@ -155,30 +149,18 @@ fun ColumnScope.LibrariesNavBarContent(
 
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
-    val strings = LocalStrings.current.mainNavigation
     NavButton(
         onClick = { onLibrariesClick() },
-        icon = Icons.AutoMirrored.Rounded.LibraryBooks,
-        label = strings.libraries,
+        icon = Icons.AutoMirrored.Filled.LibraryBooks,
+        label = stringResource(Res.string.navbar_libraries),
         isSelected = false,
-        actionButton = {
-            Row {
-                IconButton(
-                    onClick = onLibrariesRefreshClick,
-                    enabled = !isOffline
-                ) {
+        actionButton = if (!isAdmin || isOffline) null else {
+            {
+                IconButton(onClick = { showLibraryAddDialog = true }) {
                     Icon(
-                        Icons.Rounded.Refresh,
-                        contentDescription = LocalStrings.current.legacy.forText("Refresh libraries"),
+                        Icons.Default.Add,
+                        contentDescription = null,
                     )
-                }
-                if (isAdmin && !isOffline) {
-                    IconButton(onClick = { showLibraryAddDialog = true }) {
-                        Icon(
-                            Icons.Rounded.Add,
-                            contentDescription = LocalStrings.current.legacy.forText("Add library"),
-                        )
-                    }
                 }
             }
         }
@@ -189,7 +171,7 @@ fun ColumnScope.LibrariesNavBarContent(
             onClick = { onLibraryClick(library.id) },
             icon = null,
             label = library.name,
-            errorLabel = if (library.unavailable) LocalStrings.current.legacy.forText("Unavailable") else null,
+            errorLabel = if (library.unavailable) stringResource(Res.string.navbar_libraries_unavailable) else null,
             isSelected = currentScreen is LibraryScreen && currentScreen.libraryId == library.id,
             actionButton = if (!isAdmin && !isOffline) null else {
                 {
@@ -197,8 +179,8 @@ fun ColumnScope.LibrariesNavBarContent(
                     IconButton(onClick = { showMenu = true }) {
 
                         Icon(
-                            Icons.Rounded.MoreVert,
-                            contentDescription = LocalStrings.current.legacy.forText("Library actions"),
+                            Icons.Default.MoreVert,
+                            contentDescription = null,
                         )
 
                         LibraryActionsMenu(
@@ -222,14 +204,12 @@ private fun NavMenu(
     libraryActions: LibraryMenuActions,
     onHomeClick: () -> Unit,
     onLibrariesClick: () -> Unit,
-    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
     onSettingsClick: () -> Unit,
 ) {
     val scrollState: ScrollState = rememberScrollState()
     val navBarInteractionSource = remember { MutableInteractionSource() }
     val isHovered = navBarInteractionSource.collectIsHoveredAsState()
-    val strings = LocalStrings.current.mainNavigation
     var showLibraryAddDialog by remember { mutableStateOf(false) }
     if (showLibraryAddDialog) {
         LibraryEditDialogs(
@@ -248,8 +228,8 @@ private fun NavMenu(
 
             NavButton(
                 onClick = { onHomeClick() },
-                icon = Icons.Rounded.Home,
-                label = strings.home,
+                icon = Icons.Default.Home,
+                label = stringResource(Res.string.navbar_home),
                 isSelected = currentScreen is HomeScreen
             )
             LibrariesNavBarContent(
@@ -257,18 +237,14 @@ private fun NavMenu(
                 libraries = libraries,
                 libraryActions = libraryActions,
                 onLibrariesClick = onLibrariesClick,
-                onLibrariesRefreshClick = onLibrariesRefreshClick,
                 onLibraryClick = onLibraryClick
             )
 
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = KomeliaSpacing.large, vertical = KomeliaSpacing.extraLarge),
-                color = MaterialTheme.colorScheme.outlineVariant,
-            )
+            HorizontalDivider(Modifier.padding(0.dp, 20.dp))
             NavButton(
                 onClick = onSettingsClick,
-                icon = Icons.Rounded.Settings,
-                label = strings.settings,
+                icon = Icons.Default.Settings,
+                label = stringResource(Res.string.navbar_settings),
                 isSelected = false
             )
 
@@ -290,20 +266,18 @@ private fun NavButton(
 ) {
     TextButton(
         onClick = onClick,
-        modifier = Modifier.padding(horizontal = KomeliaSpacing.small, vertical = KomeliaSpacing.extraSmall),
         contentPadding = PaddingValues(0.dp),
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(10.dp)
     ) {
         Row(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(44.dp)
+                .height(40.dp)
                 .background(
-                    if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.surfaceContainerLow,
-                    MaterialTheme.shapes.medium,
+                    if (isSelected) MaterialTheme.colorScheme.surfaceVariant
+                    else MaterialTheme.colorScheme.surface
                 )
         ) {
 
@@ -311,8 +285,7 @@ private fun NavButton(
                 Icon(
                     icon,
                     contentDescription = null,
-                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(KomeliaSpacing.medium, 0.dp, KomeliaSpacing.large, 0.dp)
+                    modifier = Modifier.padding(10.dp, 0.dp, 20.dp, 0.dp)
                 )
             } else {
                 Box(Modifier.padding(30.dp, 0.dp)) {}
@@ -336,21 +309,17 @@ private fun NavButton(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TaskQueueIndicator(queueStatus: TaskQueueStatus) {
     BasicTooltipBox(
         positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
         tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = MaterialTheme.shapes.small,
-            ) {
+            Surface(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .9f)) {
                 Column(Modifier.padding(10.dp)) {
-                    when (queueStatus.count) {
-                        1 -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("1 pending task"))
-                        else -> Text("${queueStatus.count} pending tasks")
-                    }
+                    Text(
+                        pluralStringResource(Res.plurals.sidebar_task_count, queueStatus.count, queueStatus.count)
+                    )
                     Spacer(Modifier.height(10.dp))
                     queueStatus.countByType.forEach { (task, count) ->
                         Text("$task: $count")
@@ -366,8 +335,8 @@ private fun TaskQueueIndicator(queueStatus: TaskQueueStatus) {
         ) {
             LinearProgressIndicator(
                 modifier = Modifier.height(8.dp),
-                color = MaterialTheme.colorScheme.tertiary,
-                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                trackColor = MaterialTheme.colorScheme.tertiary
             )
         }
     }

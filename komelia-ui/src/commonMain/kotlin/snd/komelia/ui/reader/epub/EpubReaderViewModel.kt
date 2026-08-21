@@ -12,6 +12,7 @@ import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.settings.EpubReaderSettingsRepository
 import snd.komelia.settings.model.EpubReaderType.KOMGA_EPUB
 import snd.komelia.settings.model.EpubReaderType.TTSU_EPUB
@@ -28,8 +29,7 @@ class EpubReaderViewModel(
     private val bookApi: KomgaBookApi,
     private val seriesApi: KomgaSeriesApi,
     private val readListApi: KomgaReadListApi,
-//    private val ktor: HttpClient,
-    private val serverUrl: StateFlow<String>,
+    private val settingsRepository: CommonSettingsRepository,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
     private val fontsRepository: UserFontsRepository,
     private val notifications: AppNotifications,
@@ -52,9 +52,8 @@ class EpubReaderViewModel(
                             bookApi = bookApi,
                             seriesApi = seriesApi,
                             readListApi = readListApi,
-                            serverUrl = serverUrl,
+                            settingsRepository = settingsRepository,
                             notifications = notifications,
-//                            ktor = ktor,
                             markReadProgress = markReadProgress,
                             epubSettingsRepository = epubSettingsRepository,
                             windowState = windowState,
@@ -66,7 +65,7 @@ class EpubReaderViewModel(
                         when (val res = komgaState.state.value) {
                             is LoadState.Error -> mutableState.value = LoadState.Error(res.exception)
                             is LoadState.Success<Unit> -> mutableState.value = LoadState.Success(komgaState)
-                            LoadState.Loading, LoadState.Uninitialized -> LoadState.Loading
+                            LoadState.Loading, LoadState.Uninitialized -> error("Unreachable. failed to initialize komga epub reader")
                         }
                     }
 
@@ -76,9 +75,8 @@ class EpubReaderViewModel(
                             book = book,
                             bookApi = bookApi,
                             notifications = notifications,
-//                            ktor = ktor,
                             markReadProgress = markReadProgress,
-                            serverUrl = serverUrl,
+                            settingsRepository = settingsRepository,
                             epubSettingsRepository = epubSettingsRepository,
                             fontsRepository = fontsRepository,
                             windowState = windowState,
@@ -90,7 +88,7 @@ class EpubReaderViewModel(
                         when (val res = ttsuState.state.value) {
                             is LoadState.Error -> mutableState.value = LoadState.Error(res.exception)
                             is LoadState.Success<Unit> -> mutableState.value = LoadState.Success(ttsuState)
-                            LoadState.Loading, LoadState.Uninitialized -> LoadState.Loading
+                            LoadState.Loading, LoadState.Uninitialized -> error("Unreachable. failed to initialize ttsu epub reader")
                         }
                     }
                 }

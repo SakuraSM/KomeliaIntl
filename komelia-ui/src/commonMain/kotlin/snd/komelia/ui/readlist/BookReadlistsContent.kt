@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ExpandLess
-import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,13 +24,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_book_readlists
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_readlist_name
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.itemlist.ItemCardsSlider
@@ -50,16 +50,16 @@ fun BookReadListsContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(10.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .clickable { show = !show }
                     .cursorForHand()
                     .padding(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Read lists"))
-                if (show) Icon(Icons.Rounded.ExpandLess, null)
-                else Icon(Icons.Rounded.ExpandMore, null)
+                Text(stringResource(Res.string.readlist_book_readlists))
+                if (show) Icon(Icons.Default.ExpandLess, null)
+                else Icon(Icons.Default.ExpandMore, null)
             }
         }
 
@@ -92,12 +92,7 @@ fun BookReadListsContent(
 @Composable
 private fun ReadListLabel(readList: KomgaReadList) {
     Text(
-        buildAnnotatedString {
-            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                append("read list ")
-            }
-            append(readList.name)
-        },
+        stringResource(Res.string.readlist_readlist_name, readList.name),
         style = MaterialTheme.typography.titleMedium,
         textDecoration = TextDecoration.Underline
     )

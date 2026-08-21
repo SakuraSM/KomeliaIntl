@@ -1,7 +1,7 @@
 package snd.komelia.ui.common.menus.bulk
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.LayersClear
+import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -9,7 +9,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_remove_books
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_remove_selected_books
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.model.KomeliaBook
@@ -40,7 +44,7 @@ fun ReadListBulkActionsDialogs(state: ReadListBulkActinsState) {
     val coroutineScope = rememberCoroutineScope()
     if (state.showDeleteDialog) {
         ConfirmationDialog(
-            body = "Remove selected books from this read list?",
+            body = stringResource(Res.string.readlist_remove_selected_books),
             onDialogConfirm = {
                 coroutineScope.launch { state.actions.removeFromReadList(state.readList, state.books) }
                 state.showDeleteDialog = false
@@ -108,8 +112,8 @@ data class ReadListBulkActinsState(
         if (!isOffline && isAdmin) {
             add(
                 BulkActionButtonData(
-                    description = "Remove from read list",
-                    icon = Icons.Rounded.LayersClear,
+                    description = Res.string.readlist_remove_books,
+                    icon = Icons.Default.LayersClear,
                     onClick = { showDeleteDialog = true }
                 )
             )

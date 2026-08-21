@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.MoreHoriz
-import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,6 +48,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.bulk_select_all
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.bulk_selected_count
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.platform.cursorForHand
 import kotlin.math.roundToInt
 
@@ -64,13 +70,13 @@ fun BulkActionsContainer(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(5.dp))
             .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
     ) {
-        IconButton(onClick = onCancel) { Icon(Icons.Rounded.Close, null) }
+        IconButton(onClick = onCancel) { Icon(Icons.Default.Close, null) }
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(5.dp))
                 .clickable { onSelectAll() }
                 .cursorForHand()
                 .padding(end = 15.dp),
@@ -80,9 +86,12 @@ fun BulkActionsContainer(
                 selected = allSelected,
                 onClick = { onSelectAll() }
             )
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Select All"))
+            Text(stringResource(Res.string.bulk_select_all))
         }
-        Text("$selectedCount selected", modifier = Modifier.width(110.dp).padding(start = 10.dp))
+        Text(
+            stringResource(Res.string.bulk_selected_count, selectedCount),
+            modifier = Modifier.width(110.dp).padding(start = 10.dp)
+        )
 
         content()
     }
@@ -98,7 +107,7 @@ fun BottomPopupBulkActionsPanel(content: @Composable RowScope.() -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(5.dp))
                     .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
             ) {
                 content()
@@ -167,7 +176,7 @@ fun BulkActionsButtonsLayout(
     for ((index, data) in buttons.withIndex()) {
         val measurable = subcompose(index, content = {
             BulkActionButton(
-                description = data.description,
+                description = stringResource(data.description),
                 icon = data.icon,
                 onClick = data.onClick,
                 compact = compact
@@ -217,8 +226,8 @@ private fun MoreActionsDropdown(actions: List<BulkActionButtonData>, compact: Bo
         onExpandedChange = { showDropdown = it },
     ) {
         BulkActionButton(
-            description = "More",
-            icon = if (compact) Icons.Rounded.MoreHoriz else Icons.Rounded.MoreVert,
+            description = stringResource(Res.string.actions_show_more),
+            icon = if (compact) Icons.Default.MoreHoriz else Icons.Default.MoreVert,
             onClick = { showDropdown = true },
             compact = compact
         )
@@ -235,7 +244,7 @@ private fun MoreActionsDropdown(actions: List<BulkActionButtonData>, compact: Bo
                         ) {
                             if (compact)
                                 Icon(actionData.icon, null)
-                            Text(actionData.description)
+                            Text(stringResource(actionData.description))
                         }
                     },
                     onClick = actionData.onClick
@@ -246,7 +255,7 @@ private fun MoreActionsDropdown(actions: List<BulkActionButtonData>, compact: Bo
 }
 
 data class BulkActionButtonData(
-    val description: String,
+    val description: StringResource,
     val icon: ImageVector,
     val onClick: () -> Unit,
 )

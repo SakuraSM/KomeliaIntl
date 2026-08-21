@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,7 +22,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import snd.komelia.ui.LocalStrings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_age
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_collection
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_genre
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_language
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_operator
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_publisher
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_sharing_label
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.home.EqualityOpState
@@ -57,13 +65,12 @@ fun SeriesConditionContent(
     state: SeriesCustomFilterState,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        val legacyStrings = LocalStrings.current.legacy
         val sort = state.sort.collectAsState().value
         PageSettingsContent(
             pageSize = state.pageSize.collectAsState().value,
             onPageSizeChange = state::onPagSizeChange,
-            sort = sort.localizedEntry(legacyStrings),
-            sortOptions = SeriesSort.entries.localizedEntries(legacyStrings),
+            sort = remember(sort) { LabeledEntry(sort, sort.name) },
+            sortOptions = remember { SeriesSort.entries.map { LabeledEntry(it, it.name) } },
             onSortChange = state::onSortChange,
             sortDirection = state.sortDirection.collectAsState().value,
             onSortDirectionChange = state::onSortDirectionChange
@@ -89,20 +96,19 @@ fun SeriesMatchConditionContent(
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.secondary,
-                RoundedCornerShape(12.dp)
+                RoundedCornerShape(10.dp)
             ).padding(5.dp)
     ) {
         FlowRow {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                val legacyStrings = LocalStrings.current.legacy
                 val type = state.matchType.collectAsState().value
                 DropdownChoiceMenu(
-                    selectedOption = type.localizedEntry(legacyStrings),
-                    options = MatchType.entries.localizedEntries(legacyStrings),
+                    selectedOption = LabeledEntry(type, type.name),
+                    options = MatchType.entries.map { LabeledEntry(it, it.name) },
                     onOptionChange = { state.setMatchType(it.value) }
                 )
                 IconButton(onClick = onConditionRemove) {
-                    Icon(Icons.Rounded.Delete, null)
+                    Icon(Icons.Default.Delete, null)
                 }
             }
 
@@ -111,7 +117,7 @@ fun SeriesMatchConditionContent(
 
         }
         ConditionAddButton(
-            conditions = SeriesConditionType.entries.localizedEntries(LocalStrings.current.legacy),
+            conditions = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.name) } },
             onConditionAdd = state::addCondition,
         )
     }
@@ -156,7 +162,7 @@ private fun ConditionContent(
     when (condition) {
         is SeriesMatchConditionState -> SeriesMatchConditionContent(condition, onConditionRemove)
         null -> ConditionAddButton(
-            conditions = SeriesConditionType.entries.localizedEntries(LocalStrings.current.legacy),
+            conditions = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.name) } },
             onConditionAdd = onConditionAdd,
         )
 
@@ -273,8 +279,8 @@ private fun SeriesConditionLayout(
     content: @Composable RowScope.() -> Unit
 ) {
     SimpleConditionLayout(
-        conditionType = type.localizedEntry(LocalStrings.current.legacy),
-        options = SeriesConditionType.entries.localizedEntries(LocalStrings.current.legacy),
+        conditionType = remember { LabeledEntry(type, type.name) },
+        options = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.name) } },
         onConditionTypeChange = onTypeChange,
         onConditionRemove = onConditionRemove
     ) {
@@ -420,7 +426,7 @@ private fun SeriesSharingLabelConditionContent(
         EqualityNullableOpDropdownSearchContent(
             state = state,
             options = state.sharingLabels.collectAsState(emptyList()).value,
-            label = "Sharing Label"
+            label = stringResource(Res.string.home_filter_sharing_label)
         )
     }
 }
@@ -457,7 +463,7 @@ private fun SeriesGenreConditionContent(
         EqualityNullableOpDropdownSearchContent(
             state = state,
             options = state.genres.collectAsState(emptyList()).value,
-            label = "Genre"
+            label = stringResource(Res.string.home_filter_genre)
         )
     }
 }
@@ -476,7 +482,7 @@ private fun SeriesLanguageConditionContent(
         EqualityOpDropdownSearchContent(
             state = state,
             options = state.languages.collectAsState(emptyList()).value,
-            label = "Language"
+            label = stringResource(Res.string.home_filter_language)
         )
     }
 }
@@ -495,7 +501,7 @@ private fun SeriesPublisherConditionContent(
         EqualityOpDropdownSearchContent(
             state = state,
             options = state.publishers.collectAsState(emptyList()).value,
-            label = "Publisher"
+            label = stringResource(Res.string.home_filter_publisher)
         )
     }
 }
@@ -512,12 +518,11 @@ fun SeriesStatusConditionContent(
         onConditionRemove = onConditionRemove
     ) {
         val value = state.value.collectAsState().value
-        val legacyStrings = LocalStrings.current.legacy
         EqualityOpDropDownContent(
             operator = state.operator.collectAsState().value,
             onOpChange = state::setOp,
-            selectedValue = value?.localizedEntry(legacyStrings),
-            valueOptions = KomgaSeriesStatus.entries.localizedEntries(legacyStrings),
+            selectedValue = remember(value) { value?.let { LabeledEntry(it, it.name) } },
+            valueOptions = remember { KomgaSeriesStatus.entries.map { LabeledEntry(it, it.name) } },
             onValueChange = state::setValue
         )
     }
@@ -536,19 +541,18 @@ fun SeriesAgeRatingConditionContent(
         onConditionRemove = onConditionRemove
     ) {
         val operator = state.operator.collectAsState().value
-        val legacyStrings = LocalStrings.current.legacy
         DropdownChoiceMenu(
-            selectedOption = operator.localizedEntry(legacyStrings),
-            options = NumericNullableOpState.Op.entries.localizedEntries(legacyStrings),
+            selectedOption = LabeledEntry(operator, operator.name),
+            options = NumericNullableOpState.Op.entries.map { LabeledEntry(it, it.name) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
+            label = { Text(stringResource(Res.string.home_filter_operator)) }
         )
         if (operator != NumericNullableOpState.Op.IsNull && operator != NumericNullableOpState.Op.IsNotNull)
             IntTextField(
                 value = state.value.collectAsState().value,
                 onValueChange = state::setValue,
-                label = "Age",
+                label = stringResource(Res.string.home_filter_age),
             )
     }
 }
@@ -566,20 +570,19 @@ fun CollectionIdConditionContent(
     ) {
         val options = state.collectionsSuggestions.collectAsState(emptyList()).value
         val operator = state.operator.collectAsState().value
-        val legacyStrings = LocalStrings.current.legacy
         DropdownChoiceMenu(
-            selectedOption = operator.localizedEntry(legacyStrings),
-            options = EqualityOpState.Op.entries.localizedEntries(legacyStrings),
+            selectedOption = LabeledEntry(operator, operator.name),
+            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
+            label = { Text(stringResource(Res.string.home_filter_operator)) }
         )
         SearchableOptionSelectionField(
             searchText = state.searchText.collectAsState().value,
             onSearchTextChange = state::onSearchTextChange,
             options = remember(options) { options.map { LabeledEntry(it, it.name) } },
             onValueChange = state::onCollectionSelect,
-            label = "Collection"
+            label = stringResource(Res.string.home_filter_collection)
         )
     }
 }

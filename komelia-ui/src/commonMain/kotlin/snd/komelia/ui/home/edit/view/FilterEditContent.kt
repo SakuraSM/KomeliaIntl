@@ -23,13 +23,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowDropDown
-import androidx.compose.material.icons.rounded.ArrowDropUp
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.DragHandle
-import androidx.compose.material.icons.rounded.Restore
-import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,11 +55,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_add_filter
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_delete
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_delete_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_edit
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_edit_done
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_label
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_reset_to_default
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_reset_to_default_confirm
+import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.components.DropdownChoiceMenu
@@ -103,7 +112,6 @@ private fun Toolbar(
     onEditEnd: () -> Unit,
     onReset: () -> Unit,
 ) {
-    val strings = LocalStrings.current
     Row(
         modifier = Modifier.animateContentSize(),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -114,7 +122,7 @@ private fun Toolbar(
             onClick = {},
             selected = true,
             label = {
-                Icon(Icons.Rounded.Tune, null)
+                Icon(Icons.Default.Tune, null)
             },
             colors = FilterChipDefaults.filterChipColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -128,8 +136,8 @@ private fun Toolbar(
             onClick = { onEditEnd() },
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
-            Text(strings.legacy.forText("Done"))
-            Icon(Icons.Rounded.Check, null)
+            Text(stringResource(Res.string.home_filter_edit_done))
+            Icon(Icons.Default.Check, null)
         }
 
         var showResetDialog by remember { mutableStateOf(false) }
@@ -137,12 +145,12 @@ private fun Toolbar(
             onClick = { showResetDialog = true },
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
-            Text(strings.legacy.forText("Reset to default"))
-            Icon(Icons.Rounded.Restore, null)
+            Text(stringResource(Res.string.home_filter_reset_to_default))
+            Icon(Icons.Default.Restore, null)
         }
         if (showResetDialog) {
             ConfirmationDialog(
-                body = strings.legacy.forText("Reset homescreen filters to default?"),
+                body = stringResource(Res.string.home_filter_reset_to_default_confirm),
                 onDialogConfirm = onReset,
                 onDialogDismiss = { showResetDialog = false }
             )
@@ -189,7 +197,6 @@ fun AddConditionButton(
     modifier: Modifier = Modifier
 ) {
     var dropDownExpanded by remember { mutableStateOf(false) }
-    val strings = LocalStrings.current
     ExposedDropdownMenuBox(
         expanded = dropDownExpanded,
         onExpandedChange = { dropDownExpanded = it },
@@ -201,7 +208,7 @@ fun AddConditionButton(
                 .cursorForHand()
                 .menuAnchor(PrimaryNotEditable)
         ) {
-            Text(strings.legacy.forText("Add Filter"))
+            Text(stringResource(Res.string.home_filter_add_filter))
         }
 
         ExposedDropdownMenu(
@@ -211,7 +218,7 @@ fun AddConditionButton(
         ) {
             FilterEditViewModel.FilterType.entries.forEach {
                 DropdownMenuItem(
-                    text = { Text(strings.legacy.forText(it.displayKey)) },
+                    text = { Text(it.name) },
                     onClick = {
                         dropDownExpanded = false
                         onConditionAdd(it)
@@ -233,12 +240,10 @@ private fun ReorderableCollectionItemScope.FilterContent(
     var showEdit by remember { mutableStateOf(false) }
     val label = filterState.label.collectAsState().value
     var labelText by remember { mutableStateOf(label) }
-    val strings = LocalStrings.current
-    val localizedLabel = strings.legacy.forText(label)
     Column(
         modifier = Modifier
             .padding(vertical = 5.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(10.dp))
             .background(
                 if (isDragging) MaterialTheme.colorScheme.surfaceBright
                 else MaterialTheme.colorScheme.surface
@@ -247,7 +252,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 if (isDragging) Modifier.border(
                     4.dp,
                     MaterialTheme.colorScheme.secondary,
-                    RoundedCornerShape(12.dp)
+                    RoundedCornerShape(10.dp)
                 )
                 else Modifier
             )
@@ -270,7 +275,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.DragHandle,
+                    imageVector = Icons.Default.DragHandle,
                     contentDescription = null,
                     modifier = Modifier.padding(start = 15.dp).size(32.dp)
                         .then(if (platform == MOBILE) Modifier.draggableHandle() else Modifier)
@@ -278,7 +283,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 if (showEdit) {
                     OutlinedTextField(
                         value = labelText,
-                        label = { Text(strings.legacy.forText("Label")) },
+                        label = { Text(stringResource(Res.string.home_filter_label)) },
                         onValueChange = {
                             labelText = it
                             filterState.label.value = it
@@ -287,7 +292,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                     )
                 } else {
                     Text(
-                        text = localizedLabel,
+                        text = label,
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(horizontal = 14.dp)
@@ -300,9 +305,9 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 onClick = { showEdit = !showEdit },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(strings.legacy.forText("Edit"))
+                Text(stringResource(Res.string.home_filter_edit))
                 Icon(
-                    imageVector = if (showEdit) Icons.Rounded.ArrowDropUp else Icons.Rounded.ArrowDropDown,
+                    imageVector = if (showEdit) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = null,
                 )
             }
@@ -313,9 +318,9 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(strings.legacy.forText("Delete"))
+                Text(stringResource(Res.string.home_filter_delete))
                 Icon(
-                    imageVector = Icons.Rounded.Delete,
+                    imageVector = Icons.Default.Delete,
                     contentDescription = null,
                 )
             }
@@ -332,42 +337,20 @@ private fun ReorderableCollectionItemScope.FilterContent(
 
     if (showDeleteConfirmation) {
         ConfirmationDialog(
-            body = strings.legacy.forText("Delete $localizedLabel?"),
+            body = stringResource(Res.string.home_filter_delete_confirm, label),
             onDialogConfirm = onFilterRemove,
             onDialogDismiss = { showDeleteConfirmation = false })
     }
 }
-
-private val FilterEditViewModel.FilterType.displayKey: String
-    get() = when (this) {
-        FilterEditViewModel.FilterType.Book -> "Book Filter"
-        FilterEditViewModel.FilterType.Series -> "Series Filter"
-    }
-
-private val BookFilterEditState.FilterType.displayKey: String
-    get() = when (this) {
-        BookFilterEditState.FilterType.Custom -> "Book Filter"
-        BookFilterEditState.FilterType.OnDeck -> "On deck"
-    }
-
-private val SeriesFilterEditState.FilterType.displayKey: String
-    get() = when (this) {
-        SeriesFilterEditState.FilterType.Custom -> "Series Filter"
-        SeriesFilterEditState.FilterType.RecentlyAdded -> "Recently added series"
-        SeriesFilterEditState.FilterType.RecentlyUpdated -> "Recently updated series"
-    }
 
 @Composable
 private fun BookFilterEditContent(state: BookFilterEditState) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         val filter = state.filter.collectAsState().value
         val type = state.type.collectAsState().value
-        val strings = LocalStrings.current
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(type, strings.legacy.forText(type.displayKey)),
-            options = BookFilterEditState.FilterType.entries.map {
-                LabeledEntry(it, strings.legacy.forText(it.displayKey))
-            },
+            selectedOption = LabeledEntry(type, type.name),
+            options = remember { BookFilterEditState.FilterType.entries.map { LabeledEntry(it, it.name) } },
             onOptionChange = { state.onTypeChange(it.value) },
         )
 
@@ -397,12 +380,9 @@ private fun SeriesFilterEditContent(state: SeriesFilterEditState) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         val filter = state.filter.collectAsState().value
         val type = state.type.collectAsState().value
-        val strings = LocalStrings.current
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(type, strings.legacy.forText(type.displayKey)),
-            options = SeriesFilterEditState.FilterType.entries.map {
-                LabeledEntry(it, strings.legacy.forText(it.displayKey))
-            },
+            selectedOption = LabeledEntry(type, type.name),
+            options = remember { SeriesFilterEditState.FilterType.entries.map { LabeledEntry(it, it.name) } },
             onOptionChange = { state.onTypeChange(it.value) },
         )
 

@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,15 +17,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import snd.komelia.settings.model.AppLanguage
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_image_card_size
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_theme
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.settings.model.AppTheme
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.DropdownChoiceMenu
-import snd.komelia.ui.common.components.KomeliaCard
 import snd.komelia.ui.common.components.LabeledEntry
-import snd.komelia.ui.common.components.SettingsSection
 import snd.komelia.ui.platform.cursorForHand
+import snd.komelia.ui.strings.AppStrings
+import snd.komelia.ui.strings.stringLabels
 import kotlin.math.roundToInt
 
 @Composable
@@ -32,56 +36,46 @@ fun AppearanceSettingsContent(
     onCardWidthChange: (Dp) -> Unit,
     currentTheme: AppTheme,
     onThemeChange: (AppTheme) -> Unit,
-    currentLanguage: AppLanguage,
-    onLanguageChange: (AppLanguage) -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        val strings = LocalStrings.current.settings
 
-        SettingsSection(title = strings.appLanguage) {
-            DropdownChoiceMenu(
-                label = { Text(strings.appLanguage) },
-                selectedOption = LabeledEntry(currentLanguage, strings.forAppLanguage(currentLanguage)),
-                options = AppLanguage.entries.map { LabeledEntry(it, strings.forAppLanguage(it)) },
-                onOptionChange = { onLanguageChange(it.value) },
-                inputFieldModifier = Modifier.fillMaxWidth().widthIn(min = 250.dp)
-            )
-        }
+        DropdownChoiceMenu(
+            label = { Text(stringResource(Res.string.settings_app_theme)) },
+            selectedOption = LabeledEntry(currentTheme, stringResource(AppStrings.forAppTheme(currentTheme))),
+            options = stringLabels(AppTheme.entries) { AppStrings.forAppTheme(it) },
+            onOptionChange = { onThemeChange(it.value) },
+            inputFieldModifier = Modifier.widthIn(min = 250.dp)
+        )
 
-        SettingsSection(title = strings.appTheme) {
-            DropdownChoiceMenu(
-                label = { Text(strings.appTheme) },
-                selectedOption = LabeledEntry(currentTheme, strings.forAppTheme(currentTheme)),
-                options = AppTheme.entries.map { LabeledEntry(it, strings.forAppTheme(it)) },
-                onOptionChange = { onThemeChange(it.value) },
-                inputFieldModifier = Modifier.fillMaxWidth().widthIn(min = 250.dp)
-            )
-        }
+        HorizontalDivider()
 
-        SettingsSection(title = strings.imageCardSize) {
-            Slider(
-                value = cardWidth.value,
-                onValueChange = { onCardWidthChange(it.roundToInt().dp) },
-                steps = 19,
-                valueRange = 150f..350f,
-                colors = AppSliderDefaults.colors(),
-                modifier = Modifier.cursorForHand().padding(end = 20.dp),
-            )
-            Column(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 400.dp, max = 520.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
+        Text(stringResource(Res.string.settings_app_image_card_size), modifier = Modifier.padding(10.dp))
+        Slider(
+            value = cardWidth.value,
+            onValueChange = { onCardWidthChange(it.roundToInt().dp) },
+            steps = 19,
+            valueRange = 150f..350f,
+            colors = AppSliderDefaults.colors(),
+            modifier = Modifier.cursorForHand().padding(end = 20.dp),
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 400.dp, max = 520.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            Text("${cardWidth.value}")
+
+            Card(
+                Modifier
+                    .width(cardWidth)
+                    .aspectRatio(0.703f)
             ) {
-                Text("${cardWidth.value}")
-                KomeliaCard(
-                    modifier = Modifier.width(cardWidth).aspectRatio(0.703f),
-                ) {}
+
             }
         }
-
     }
-
 }

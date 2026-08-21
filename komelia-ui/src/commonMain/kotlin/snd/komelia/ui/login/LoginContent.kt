@@ -39,10 +39,23 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_cancel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_go_offline
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_komf_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_komf_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_login
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_offline_mode
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_password
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_retry
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_url
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_username
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_with_another_account
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.components.OutlinedHttpTextField
 import snd.komelia.ui.common.components.withTextFieldNavigation
 import snd.komelia.ui.platform.PlatformType
@@ -60,7 +73,6 @@ fun LoginContent(
     password: String,
     onPasswordChange: (String) -> Unit,
     userLoginError: String?,
-    serverUrlError: LoginServerUrlError?,
     autoLoginError: String?,
     onAutoLoginRetry: () -> Unit,
     onLogin: () -> Unit,
@@ -70,7 +82,6 @@ fun LoginContent(
     goOfflineAsCurrentUser: () -> Unit,
 ) {
 
-    val strings = LocalStrings.current.login
     var showAutoLoginError by remember { mutableStateOf(true) }
     if (autoLoginError != null && showAutoLoginError) {
         Column(
@@ -87,19 +98,21 @@ fun LoginContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Button(onClick = { showAutoLoginError = false }) { Text(strings.loginWithAnotherAccount) }
+                Button(onClick = {
+                    showAutoLoginError = false
+                }) { Text(stringResource(Res.string.login_with_another_account)) }
                 if (canGoOfflineAsCurrentUser) {
-                    Button(onClick = goOfflineAsCurrentUser) { Text(strings.goOffline) }
+                    Button(onClick = goOfflineAsCurrentUser) { Text(stringResource(Res.string.login_go_offline)) }
                 }
 
-                Button(onClick = onAutoLoginRetry) { Text(LocalStrings.current.common.retry) }
+                Button(onClick = onAutoLoginRetry) { Text(stringResource(Res.string.login_retry)) }
             }
         }
     } else {
         val platform = LocalPlatform.current
         when (platform) {
             MOBILE, DESKTOP -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(strings.komgaLogin)
+                Text(stringResource(Res.string.login_title))
                 LoginForm(
                     url = url,
                     onUrlChange = onUrlChange,
@@ -108,11 +121,10 @@ fun LoginContent(
                     password = password,
                     onPasswordChange = onPasswordChange,
                     errorMessage = userLoginError,
-                    serverUrlError = serverUrlError,
                     onLogin = onLogin,
                     offlineIsAvailable = offlineIsAvailable,
                     onOfflineSelect = onOfflineSelect,
-                    textFieldsModifier = Modifier.fillMaxWidth()
+                    textFieldsModifier = Modifier
                 )
             }
 
@@ -122,9 +134,9 @@ fun LoginContent(
             ) {
                 val uriHandler = LocalUriHandler.current
                 Column {
-                    Text(strings.webClientSubtitle)
+                    Text(stringResource(Res.string.login_komf_title))
                     Text(
-                        "Requires adding this host and port to Komga CORS configuration",
+                        stringResource(Res.string.login_komf_desc),
                         color = MaterialTheme.colorScheme.secondary,
                         textDecoration = TextDecoration.Underline,
                         modifier = Modifier.clickable {
@@ -141,7 +153,6 @@ fun LoginContent(
                         password = password,
                         onPasswordChange = onPasswordChange,
                         errorMessage = userLoginError,
-                        serverUrlError = serverUrlError,
                         onLogin = onLogin,
                         offlineIsAvailable = offlineIsAvailable,
                         onOfflineSelect = onOfflineSelect,
@@ -164,7 +175,6 @@ fun ColumnScope.LoginForm(
     password: String,
     onPasswordChange: (String) -> Unit,
     errorMessage: String?,
-    serverUrlError: LoginServerUrlError?,
     onLogin: () -> Unit,
     offlineIsAvailable: Boolean,
     onOfflineSelect: () -> Unit,
@@ -173,30 +183,22 @@ fun ColumnScope.LoginForm(
 
     val coroutineScope = rememberCoroutineScope()
     val (first, second, third) = remember { FocusRequester.createRefs() }
-    val strings = LocalStrings.current.login
-    val serverUrlErrorMessage = when (serverUrlError) {
-        LoginServerUrlError.INVALID_URL -> strings.invalidServerUrl
-        LoginServerUrlError.INVALID_PORT -> strings.invalidServerPort
-        null -> null
-    }
 
     OutlinedHttpTextField(
         value = url,
         onValueChange = onUrlChange,
-        label = { Text(strings.serverUrl) },
-        isError = serverUrlErrorMessage != null,
-        supportingText = serverUrlErrorMessage?.let { message -> { Text(message) } },
+        label = { Text(stringResource(Res.string.login_url)) },
         modifier = textFieldsModifier
             .withTextFieldNavigation()
             .focusRequester(first)
             .focusProperties { next = second },
-        placeholder = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("localhost:25600")) }
+        placeholder = { Text("localhost:25600") }
     )
 
     OutlinedTextField(
         value = user,
         onValueChange = onUserChange,
-        label = { Text(strings.username) },
+        label = { Text(stringResource(Res.string.login_username)) },
         modifier = textFieldsModifier
             .withTextFieldNavigation()
             .focusRequester(second)
@@ -207,7 +209,7 @@ fun ColumnScope.LoginForm(
         value = password,
         onValueChange = onPasswordChange,
         visualTransformation = PasswordVisualTransformation(),
-        label = { Text(strings.password) },
+        label = { Text(stringResource(Res.string.login_password)) },
         modifier = textFieldsModifier
             .withTextFieldNavigation(
                 onEnterPress = { coroutineScope.launch { onLogin() } }
@@ -222,9 +224,9 @@ fun ColumnScope.LoginForm(
 
     Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
         if (offlineIsAvailable) {
-            TextButton(onClick = onOfflineSelect) { Text(strings.offlineMode) }
+            TextButton(onClick = onOfflineSelect) { Text(stringResource(Res.string.login_offline_mode)) }
         }
-        Button(onClick = { onLogin() }) { Text(strings.login) }
+        Button(onClick = { onLogin() }) { Text(stringResource(Res.string.login_login)) }
     }
 
     Spacer(Modifier.imePadding())
@@ -246,7 +248,7 @@ fun LoginLoadingContent(onCancel: () -> Unit) {
         CircularProgressIndicator()
         if (showCancelButton) {
             Spacer(Modifier.height(100.dp))
-            Button(onClick = onCancel) { Text(LocalStrings.current.login.cancelLoginAttempt) }
+            Button(onClick = onCancel) { Text(stringResource(Res.string.login_cancel)) }
         }
 
     }

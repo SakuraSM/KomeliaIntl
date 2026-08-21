@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
@@ -28,8 +29,10 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import snd.komelia.ui.LocalStrings
-import snd.komelia.ui.KomeliaSpacing
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_confirm
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.platform.VerticalScrollbar
 import snd.komelia.ui.platform.cursorForHand
 import kotlin.math.roundToInt
@@ -77,8 +80,8 @@ fun BasicAppDialog(
     ) {
         val focusManager = LocalFocusManager.current
         Surface(
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-            shape = MaterialTheme.shapes.extraLarge,
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceContainerHighest),
+            shape = RoundedCornerShape(12.dp),
             color = color,
             modifier = modifier
                 .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
@@ -184,8 +187,8 @@ fun AppDialogLayout(
 
 @Composable
 fun DialogConfirmCancelButtons(
-    confirmText: String = "Confirm",
-    cancelText: String = "Cancel",
+    confirmText: String = stringResource(Res.string.dialog_confirm),
+    cancelText: String = stringResource(Res.string.dialog_cancel),
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
     confirmEnabled: Boolean = true,
@@ -193,17 +196,16 @@ fun DialogConfirmCancelButtons(
     isLoading: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    val strings = LocalStrings.current.legacy
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(KomeliaSpacing.small),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         if (showCancelButton)
             ElevatedButton(
                 onClick = onCancel,
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(strings.forText(cancelText))
+                Text(cancelText)
             }
 
         FilledTonalButton(
@@ -212,20 +214,16 @@ fun DialogConfirmCancelButtons(
             modifier = Modifier.cursorForHand()
         ) {
             if (isLoading) CircularProgressIndicator(Modifier.size(25.dp))
-            else Text(strings.forText(confirmText))
+            else Text(confirmText)
         }
     }
 }
 
 @Composable
 fun DialogSimpleHeader(headerText: String) {
-    val strings = LocalStrings.current.legacy
     Column {
-        Text(strings.forText(headerText), style = MaterialTheme.typography.headlineMedium)
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = KomeliaSpacing.medium),
-            color = MaterialTheme.colorScheme.outlineVariant,
-        )
+        Text(headerText, style = MaterialTheme.typography.headlineMedium)
+        HorizontalDivider(Modifier.padding(vertical = 10.dp))
     }
 
 }

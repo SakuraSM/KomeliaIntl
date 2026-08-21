@@ -1,7 +1,6 @@
 package snd.komelia.ui.dialogs
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -21,38 +20,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import snd.komelia.ui.LocalStrings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_confirm
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.common.components.CheckboxWithLabel
 import snd.komelia.ui.platform.cursorForHand
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ConfirmationDialog(
     body: String,
     title: String? = null,
     confirmText: String? = null,
-    buttonCancel: String = "Cancel",
-    buttonConfirm: String = "Confirm",
+    buttonCancel: String = stringResource(Res.string.dialog_cancel),
+    buttonConfirm: String = stringResource(Res.string.dialog_confirm),
     buttonAlternate: String? = null,
-    buttonConfirmColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    buttonConfirmColor: Color = MaterialTheme.colorScheme.secondaryContainer,
     onDialogConfirm: () -> Unit,
     onDialogConfirmAlternate: () -> Unit = {},
     onDialogDismiss: () -> Unit,
 ) {
     var confirmed by remember { mutableStateOf(false) }
-    val strings = LocalStrings.current.legacy
     AppDialog(
         onDismissRequest = onDialogDismiss,
         modifier = Modifier.widthIn(max = 600.dp),
-        header = title?.let { { Text(strings.forText(title), fontSize = 20.sp, modifier = Modifier.padding(10.dp)) } },
+        header = title?.let { { Text(title, fontSize = 20.sp, modifier = Modifier.padding(10.dp)) } },
         content = {
             Column(Modifier.padding(10.dp)) {
-                Text(strings.forText(body), modifier = Modifier.padding(20.dp))
+                Text(body, modifier = Modifier.padding(20.dp))
                 if (confirmText != null) {
                     CheckboxWithLabel(
                         checked = confirmed,
                         onCheckedChange = { confirmed = it },
-                        label = { Text(strings.forText(confirmText)) }
+                        label = { Text(confirmText) }
                     )
                 }
             }
@@ -64,7 +64,7 @@ fun ConfirmationDialog(
                     onClick = onDialogDismiss,
                     modifier = Modifier.cursorForHand(),
                 ) {
-                    Text(strings.forText(buttonCancel))
+                    Text(buttonCancel)
                 }
                 Spacer(Modifier.size(10.dp))
 
@@ -76,7 +76,7 @@ fun ConfirmationDialog(
                         },
                         modifier = Modifier.cursorForHand(),
                     ) {
-                        Text(strings.forText(buttonAlternate))
+                        Text(buttonAlternate)
                     }
                     Spacer(Modifier.size(10.dp))
                 }
@@ -89,11 +89,11 @@ fun ConfirmationDialog(
                     enabled = confirmText == null || confirmed,
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = buttonConfirmColor,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        contentColor = MaterialTheme.colorScheme.primary
                     ),
                     modifier = Modifier.cursorForHand(),
                 ) {
-                    Text(strings.forText(buttonConfirm))
+                    Text(buttonConfirm)
                 }
             }
         }

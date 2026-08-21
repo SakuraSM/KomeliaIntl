@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.FullscreenExit
-import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.FullscreenExit
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
@@ -36,17 +36,17 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.topbar_go_online
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.topbar_offline
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKeyEvents
-import snd.komelia.ui.LocalKomeliaMotion
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalWindowState
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.ReloadableScreen
-import snd.komelia.ui.common.components.KomeliaIconButton
-import snd.komelia.ui.common.components.KomeliaIconButtonStyle
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.WindowSizeClass.FULL
@@ -74,24 +74,22 @@ fun AppBar(
 ) {
     PlatformTitleBar {
         val coroutineScope = rememberCoroutineScope()
-        val strings = LocalStrings.current.mainNavigation
 
-        KomeliaIconButton(
+        IconButton(
             modifier = Modifier.align(Alignment.Start),
-            imageVector = Icons.Rounded.Menu,
-            contentDescription = LocalStrings.current.legacy.forText("Open navigation"),
             onClick = { coroutineScope.launch { onMenuButtonPress() } },
-            style = KomeliaIconButtonStyle.Tonal,
-        )
+        ) {
+            Icon(Icons.Rounded.Menu, null)
+        }
 
         val navigator = LocalNavigator.currentOrThrow
-        KomeliaIconButton(
+        IconButton(
             modifier = Modifier.align(Alignment.Start),
-            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-            contentDescription = LocalStrings.current.legacy.forText("Back"),
             onClick = { navigator.pop() },
-            enabled = navigator.canPop,
-        )
+            enabled = navigator.canPop
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+        }
         val reloadableScreen = remember(navigator.lastItem) { navigator.lastItem as? ReloadableScreen }
         RefreshIndicator(
             onClick = onRefreshClick,
@@ -121,12 +119,12 @@ fun AppBar(
         val windowState = LocalWindowState.current
         val isFullscreen = windowState.isFullscreen.collectAsState(false)
         if (isFullscreen.value) {
-            KomeliaIconButton(
+            IconButton(
                 modifier = Modifier.align(Alignment.End),
-                imageVector = Icons.Rounded.FullscreenExit,
-                contentDescription = LocalStrings.current.legacy.forText("Exit fullscreen"),
                 onClick = { coroutineScope.launch { windowState.setFullscreen(false) } },
-            )
+            ) {
+                Icon(Icons.Default.FullscreenExit, null)
+            }
         }
 
         if (isOffline) {
@@ -136,11 +134,11 @@ fun AppBar(
                 modifier = Modifier.align(Alignment.End).padding(end = 10.dp),
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
             ) {
-                Text(strings.offline)
+                Text(stringResource(Res.string.topbar_offline))
             }
             if (showConfirmationDialog) {
                 ConfirmationDialog(
-                    body = strings.goOnlineTitle,
+                    body = stringResource(Res.string.topbar_go_online),
                     onDialogConfirm = onOfflineModeChange,
                     onDialogDismiss = { showConfirmationDialog = false }
                 )
@@ -158,7 +156,6 @@ private fun RefreshIndicator(
 ) {
     val keyEvents = LocalKeyEvents.current
     var isClicked by remember { mutableStateOf(false) }
-    val motion = LocalKomeliaMotion.current
     LaunchedEffect(isClicked) {
         if (isClicked) {
             delay(500)
@@ -185,10 +182,7 @@ private fun RefreshIndicator(
     ) {
         Crossfade(
             targetState = isClicked,
-            animationSpec = tween(
-                durationMillis = motion.duration(motion.stateDurationMillis),
-                easing = motion.standardEasing,
-            )
+            animationSpec = tween(durationMillis = 200)
         ) { refreshing ->
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -200,7 +194,7 @@ private fun RefreshIndicator(
                         modifier = Modifier.size(17.dp)
                     )
                 } else {
-                    Icon(Icons.Rounded.Refresh, contentDescription = LocalStrings.current.legacy.forText("Refresh"))
+                    Icon(Icons.Default.Refresh, null)
                 }
             }
         }

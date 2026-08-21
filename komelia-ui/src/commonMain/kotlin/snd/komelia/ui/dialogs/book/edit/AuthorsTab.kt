@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.People
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -24,6 +24,10 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_edit_add_custom_role
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_edit_tab_authors
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.common.components.LockableChipTextField
 import snd.komelia.ui.dialogs.tabs.DialogTab
 import snd.komelia.ui.dialogs.tabs.TabItem
@@ -33,8 +37,8 @@ class AuthorsTab(
     private val vm: BookEditMetadataState
 ) : DialogTab {
     override fun options() = TabItem(
-        title = "AUTHORS",
-        icon = Icons.Rounded.People
+        title = Res.string.book_edit_tab_authors,
+        icon = Icons.Default.People
     )
 
     @Composable
@@ -75,7 +79,7 @@ private fun AuthorsTabContent(
         TextField(
             value = newCustomRole,
             onValueChange = { newCustomRole = it },
-            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add custom role")) },
+            label = { Text(stringResource(Res.string.book_edit_add_custom_role)) },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
@@ -101,7 +105,7 @@ private fun AuthorsTabContent(
                         newCustomRole = ""
                     }
                 }) {
-                    Icon(Icons.Rounded.Add, contentDescription = null)
+                    Icon(Icons.Default.Add, contentDescription = null)
                 }
             }
         )

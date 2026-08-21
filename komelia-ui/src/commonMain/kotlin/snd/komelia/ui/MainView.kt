@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -45,6 +46,7 @@ import snd.komelia.ui.dialogs.update.UpdateDialog
 import snd.komelia.ui.dialogs.update.UpdateProgressDialog
 import snd.komelia.ui.komf.KomfMainScreen
 import snd.komelia.ui.login.LoginScreen
+import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.ConfigurePlatformTheme
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.PlatformType
@@ -54,7 +56,6 @@ import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.updates.AppRelease
 import snd.komelia.updates.StartupUpdateChecker
-import snd.komelia.settings.model.AppTheme
 
 private val vmFactory = MutableStateFlow<ViewModelFactory?>(null)
 
@@ -66,17 +67,12 @@ fun MainView(
     platformType: PlatformType,
     keyEvents: SharedFlow<KeyEvent>
 ) {
-    var appTheme by rememberSaveable { mutableStateOf(AppTheme.DARK) }
+    var theme by rememberSaveable { mutableStateOf(Theme.DARK) }
     LaunchedEffect(dependencies) {
-        dependencies?.appRepositories?.settingsRepository?.getAppTheme()?.collect { appTheme = it }
+        dependencies?.appRepositories?.settingsRepository?.getAppTheme()?.collect { theme = it.toTheme() }
     }
 
-    val isReducedMotion = rememberSystemReducedMotion()
-    KomeliaTheme(appTheme = appTheme, isReducedMotion = isReducedMotion) {
-        val theme = appTheme.toTheme()
-        val layoutSpec = remember(platformType, windowWidth) {
-            komeliaLayoutSpec(platformType, windowWidth)
-        }
+    MaterialTheme(colorScheme = theme.colorScheme) {
         ConfigurePlatformTheme(theme)
         val focusManager = LocalFocusManager.current
         Surface(
@@ -101,28 +97,23 @@ fun MainView(
 
             if (viewModelFactory == null) return@Surface
 
-            val notificationToaster = rememberToasterState()
-
-            val appStrings = dependencies.appStrings.collectAsState()
-
             CompositionLocalProvider(
                 LocalViewModelFactory provides viewModelFactory,
-                LocalToaster provides notificationToaster,
+                LocalNotifications provides dependencies.appNotifications,
                 LocalKomgaEvents provides dependencies.komgaEvents.events,
                 LocalKomfIntegration provides dependencies.appRepositories.komfSettingsRepository.getKomfEnabled(),
                 LocalKeyEvents provides keyEvents,
                 LocalPlatform provides platformType,
-                LocalKomeliaLayout provides layoutSpec,
-                LocalStrings provides appStrings.value,
                 LocalTheme provides theme,
                 LocalWindowState provides dependencies.windowState,
                 LocalWindowWidth provides windowWidth,
                 LocalWindowHeight provides windowHeight,
                 LocalLibraries provides dependencies.komgaSharedState.libraries,
                 LocalReloadEvents provides viewModelFactory.screenReloadEvents,
-                LocalBookDownloadEvents provides dependencies.offlineDependencies.bookDownloadEvents,
+                LocalBookDownloadEvents provides dependencies.offlineDependencies?.bookDownloadEvents,
                 LocalOfflineMode provides dependencies.isOffline,
-                LocalKomgaState provides dependencies.komgaSharedState
+                LocalKomgaState provides dependencies.komgaSharedState,
+                LocalOfflineAvailable provides (dependencies.offlineDependencies != null)
             ) {
                 MainContent(platformType, dependencies.komgaSharedState)
 
@@ -132,6 +123,8 @@ fun MainView(
                     StartupUpdateChecker(updateChecker)
                 }
             }
+
+            BackPressHandler {}
         }
     }
 }

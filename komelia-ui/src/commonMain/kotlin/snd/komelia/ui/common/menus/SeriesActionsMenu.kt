@@ -16,14 +16,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_add_to_collection
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_analyze
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_delete_confirm_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_delete_confirm_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_refresh_metadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.AppNotification
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.ui.LocalKomfIntegration
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.dialogs.collectionadd.AddToCollectionDialog
@@ -45,29 +54,11 @@ fun SeriesActionsMenu(
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    if (showDeleteDialog) {
-        ConfirmationDialog(
-            title = "Delete Series",
-            body = "The Series ${series.metadata.title} will be removed from this server alongside with stored media files. This cannot be undone. Continue?",
-            confirmText = "Yes, delete series \"${series.metadata.title}\"",
-            onDialogConfirm = {
-                actions.delete(series)
-                onDismissRequest()
-
-            },
-            onDialogDismiss = {
-                showDeleteDialog = false
-                onDismissRequest()
-            },
-            buttonConfirmColor = MaterialTheme.colorScheme.errorContainer
-        )
-    }
     var showDeleteDownloadedDialog by remember { mutableStateOf(false) }
     if (showDeleteDownloadedDialog) {
         ConfirmationDialog(
-            title = "Delete downloaded series",
-            body = "The series ${series.metadata.title} will be removed from this device",
+            title = stringResource(Res.string.series_delete_confirm_title),
+            body = stringResource(Res.string.series_delete_confirm_body, series.metadata.title),
             onDialogConfirm = {
                 actions.deleteDownloaded(series)
                 onDismissRequest()
@@ -126,7 +117,7 @@ fun SeriesActionsMenu(
 
         if (permissionRequested) {
             ConfirmationDialog(
-                "Download series \"${series.metadata.title}\"?",
+                stringResource(Res.string.series_download_confirm, series.metadata.title),
                 onDialogConfirm = { actions.download(series) },
                 onDialogDismiss = { showDownloadDialog = false }
             )
@@ -135,7 +126,6 @@ fun SeriesActionsMenu(
 
     val showDropdown = derivedStateOf {
         expanded &&
-                !showDeleteDialog &&
                 !showKomfDialog &&
                 !showKomfResetDialog &&
                 !showEditDialog &&
@@ -147,7 +137,7 @@ fun SeriesActionsMenu(
     ) {
         if (isAdmin && !isOffline) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Analyze")) },
+                text = { Text(stringResource(Res.string.series_analyze)) },
                 onClick = {
                     actions.analyze(series)
                     onDismissRequest()
@@ -155,7 +145,7 @@ fun SeriesActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Refresh metadata")) },
+                text = { Text(stringResource(Res.string.series_refresh_metadata)) },
                 onClick = {
                     actions.refreshMetadata(series)
                     onDismissRequest()
@@ -163,7 +153,7 @@ fun SeriesActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add to collection")) },
+                text = { Text(stringResource(Res.string.series_add_to_collection)) },
                 onClick = { showAddToCollectionDialog = true },
             )
         }
@@ -172,7 +162,7 @@ fun SeriesActionsMenu(
         val isUnread = remember { series.booksUnreadCount == series.booksCount }
         if (!isRead) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Mark as read")) },
+                text = { Text("Mark as read") },
                 onClick = {
                     actions.markAsRead(series)
                     onDismissRequest()
@@ -182,7 +172,7 @@ fun SeriesActionsMenu(
 
         if (!isUnread) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Mark as unread")) },
+                text = { Text("Mark as unread") },
                 onClick = {
                     actions.markAsUnread(series)
                     onDismissRequest()
@@ -192,14 +182,15 @@ fun SeriesActionsMenu(
 
         if (isAdmin && !isOffline && showEditOption) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit")) },
+                text = { Text("Edit") },
                 onClick = { showEditDialog = true },
             )
         }
 
-        if (!isOffline && showDownloadOption) {
+        val offlineAvailable = LocalOfflineAvailable.current
+        if (!isOffline && showDownloadOption && offlineAvailable) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Download")) },
+                text = { Text("Download") },
                 onClick = { showDownloadDialog = true },
             )
         }
@@ -211,7 +202,7 @@ fun SeriesActionsMenu(
                 if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
                 else Modifier
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded")) },
+                text = { Text("Delete downloaded") },
                 onClick = { showDeleteDownloadedDialog = true },
                 modifier = Modifier
                     .hoverable(deleteInteractionSource)
@@ -223,30 +214,15 @@ fun SeriesActionsMenu(
         val komfIntegration = LocalKomfIntegration.current.collectAsState(false)
         if (komfIntegration.value) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Identify (Komf)")) },
+                text = { Text("Identify (Komf)") },
                 onClick = { showKomfDialog = true },
             )
 
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Reset Metadata (Komf)")) },
+                text = { Text("Reset Metadata (Komf)") },
                 onClick = { showKomfResetDialog = true },
             )
         }
-
-//        if (isAdmin && !isOffline) {
-//            val deleteInteractionSource = remember { MutableInteractionSource() }
-//            val deleteIsHovered = deleteInteractionSource.collectIsHoveredAsState()
-//            val deleteColor =
-//                if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
-//                else Modifier
-//            DropdownMenuItem(
-//                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete from server")) },
-//                onClick = { showDeleteDialog = true },
-//                modifier = Modifier
-//                    .hoverable(deleteInteractionSource)
-//                    .then(deleteColor)
-//            )
-//        }
     }
 }
 
@@ -263,7 +239,7 @@ data class SeriesMenuActions(
     constructor(
         seriesApi: KomgaSeriesApi,
         notifications: AppNotifications,
-        taskEmitter: OfflineTaskEmitter,
+        taskEmitter: OfflineTaskEmitter?,
         scope: CoroutineScope,
     ) : this(
         analyze = {
@@ -288,7 +264,7 @@ data class SeriesMenuActions(
         delete = {
             notifications.runCatchingToNotifications(scope) { seriesApi.delete(it.id) }
         },
-        download = { scope.launch { taskEmitter.downloadSeries(it.id) } },
-        deleteDownloaded = { scope.launch { taskEmitter.deleteSeries(it.id) } }
+        download = { scope.launch { checkNotNull(taskEmitter).downloadSeries(it.id) } },
+        deleteDownloaded = { scope.launch { checkNotNull(taskEmitter).deleteSeries(it.id) } }
     )
 }

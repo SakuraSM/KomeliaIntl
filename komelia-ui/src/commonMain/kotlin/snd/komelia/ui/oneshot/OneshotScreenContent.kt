@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,6 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_downloaded
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalWindowWidth
@@ -64,7 +67,6 @@ import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.readlist.KomgaReadList
 import snd.komga.client.series.KomgaSeries
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OneshotScreenContent(
     series: KomgaSeries,
@@ -186,7 +188,7 @@ private fun ToolbarOneshotActions(
         Box {
             var expandActions by remember { mutableStateOf(false) }
             IconButton(onClick = { expandActions = true }) {
-                Icon(Icons.Rounded.MoreVert, contentDescription = null)
+                Icon(Icons.Default.MoreVert, contentDescription = null)
             }
             OneshotActionsMenu(
                 series = series,
@@ -201,7 +203,7 @@ private fun ToolbarOneshotActions(
         var showEditDialog by remember { mutableStateOf(false) }
         if (isAdmin) {
             IconButton(onClick = { showEditDialog = true }) {
-                Icon(Icons.Rounded.Edit, null)
+                Icon(Icons.Default.Edit, null)
             }
         }
         if (showEditDialog) {
@@ -266,7 +268,7 @@ private fun FlowRowScope.OneshotMainInfo(
                     onClick = onDownloadDelete,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
                 ) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded"))
+                    Text(stringResource(Res.string.book_delete_downloaded))
                 }
             }
         }

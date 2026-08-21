@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.People
-import androidx.compose.material.icons.rounded.PriorityHigh
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,6 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit_bulk_warning
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit_sharing_labels
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit_tab_sharing
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.StateHolder
 import snd.komelia.ui.common.components.LockableChipTextField
 import snd.komelia.ui.dialogs.tabs.DialogTab
@@ -26,8 +31,8 @@ internal class SharingTab(
 ) : DialogTab {
 
     override fun options() = TabItem(
-        title = "SHARING",
-        icon = Icons.Rounded.People
+        title = Res.string.series_edit_tab_sharing,
+        icon = Icons.Default.People
     )
 
     @Composable
@@ -50,16 +55,16 @@ private fun SharingContent(
     ) {
         val warningColor = MaterialTheme.colorScheme.tertiary
         Row(Modifier.border(Dp.Hairline, warningColor).padding(20.dp)) {
-            Icon(Icons.Rounded.PriorityHigh, null, tint = warningColor)
+            Icon(Icons.Default.PriorityHigh, null, tint = warningColor)
             Text(
-                text = "You are editing tags for multiple series. This will override existing tags of each series.",
+                text = stringResource(Res.string.series_edit_bulk_warning),
                 color = warningColor
             )
         }
 
         LockableChipTextField(
             values = labels,
-            label = "Labels",
+            label = stringResource(Res.string.series_edit_sharing_labels),
             lock = labelsLock
         )
     }

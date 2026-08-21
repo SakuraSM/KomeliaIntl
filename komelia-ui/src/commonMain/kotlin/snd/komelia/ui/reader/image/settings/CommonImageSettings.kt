@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.LocalContentColor
@@ -27,16 +26,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_color_correction
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_color_correction_active
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_crop_borders
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_flash_duration
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_flash_duration_ms
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_flash_every
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_flash_every_n_pages
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_flash_on_page_change
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_flash_on_page_change_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_flash_with
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_flash_with_black
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_flash_with_white
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_flash_with_white_and_black
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_stretch_small_images
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.settings.model.ReaderFlashColor
 import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.platform.PlatformType
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CommonImageSettings(
     stretchToFit: Boolean,
@@ -58,14 +72,12 @@ fun CommonImageSettings(
 
     modifier: Modifier = Modifier,
 ) {
-    val strings = LocalStrings.current
-    val readerStrings = strings.reader
     val platform = LocalPlatform.current
     Column(modifier = modifier) {
         SwitchWithLabel(
             checked = stretchToFit,
             onCheckedChange = onStretchToFitChange,
-            label = { Text(readerStrings.stretchToFit) },
+            label = { Text(stringResource(Res.string.reader_image_stretch_small_images)) },
             contentPadding = PaddingValues(horizontal = 10.dp)
         )
 
@@ -73,7 +85,7 @@ fun CommonImageSettings(
             SwitchWithLabel(
                 checked = cropBorders,
                 onCheckedChange = onCropBordersChange,
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Crop borders")) },
+                label = { Text(stringResource(Res.string.reader_image_crop_borders)) },
                 contentPadding = PaddingValues(horizontal = 10.dp)
             )
         }
@@ -86,17 +98,17 @@ fun CommonImageSettings(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Color Correction"))
+            Text(stringResource(Res.string.reader_image_color_correction))
             Spacer(Modifier.width(10.dp))
             Icon(
-                imageVector = Icons.Rounded.BarChart,
+                imageVector = Icons.Default.BarChart,
                 contentDescription = null,
                 tint = if (isColorCorrectionsActive) MaterialTheme.colorScheme.secondary
                 else LocalContentColor.current
             )
             if (isColorCorrectionsActive) {
                 Text(
-                    strings.legacy.forText("active"),
+                    stringResource(Res.string.reader_image_color_correction_active),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -109,8 +121,8 @@ fun CommonImageSettings(
             SwitchWithLabel(
                 checked = flashEnabled,
                 onCheckedChange = onFlashEnabledChange,
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Flash on page change")) },
-                supportingText = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Prevents ghosting on e-ink devices")) },
+                label = { Text(stringResource(Res.string.reader_image_flash_on_page_change)) },
+                supportingText = { Text(stringResource(Res.string.reader_image_flash_on_page_change_desc)) },
                 contentPadding = PaddingValues(horizontal = 10.dp)
             )
             AnimatedVisibility(flashEnabled) {
@@ -120,8 +132,14 @@ fun CommonImageSettings(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.width(100.dp)) {
-                            Text(strings.legacy.forText("Flash Duration"), style = MaterialTheme.typography.labelLarge)
-                            Text("$flashDuration ms", style = MaterialTheme.typography.labelMedium)
+                            Text(
+                                stringResource(Res.string.reader_image_flash_duration),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                            Text(
+                                stringResource(Res.string.reader_image_flash_duration_ms, flashDuration),
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
                         Slider(
                             value = flashDuration.toFloat(),
@@ -134,14 +152,16 @@ fun CommonImageSettings(
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.width(100.dp)) {
-                            Text(strings.legacy.forText("Flash every"), style = MaterialTheme.typography.labelLarge)
-                            val pagesText = remember(flashEveryNPages) {
-                                strings.legacy.forText(
-                                    if (flashEveryNPages == 1) "$flashEveryNPages page"
-                                    else "$flashEveryNPages pages"
-                                )
-                            }
-                            Text(pagesText, style = MaterialTheme.typography.labelMedium)
+                            Text(
+                                stringResource(Res.string.reader_image_flash_every),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                            Text(
+                                pluralStringResource(
+                                    Res.plurals.reader_image_flash_every_n_pages, flashEveryNPages, flashEveryNPages
+                                ),
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
                         Slider(
                             value = flashEveryNPages.toFloat(),
@@ -153,24 +173,24 @@ fun CommonImageSettings(
                     }
 
                     Column {
-                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Flash with"))
+                        Text(stringResource(Res.string.reader_image_flash_with))
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             InputChip(
                                 selected = flashWith == ReaderFlashColor.BLACK,
                                 onClick = { onFlashWithChange(ReaderFlashColor.BLACK) },
-                                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Black")) }
+                                label = { Text(stringResource(Res.string.reader_image_flash_with_black)) }
                             )
                             InputChip(
                                 selected = flashWith == ReaderFlashColor.WHITE,
                                 onClick = { onFlashWithChange(ReaderFlashColor.WHITE) },
-                                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("White")) }
+                                label = { Text(stringResource(Res.string.reader_image_flash_with_white)) }
                             )
                             InputChip(
                                 selected = flashWith == ReaderFlashColor.WHITE_AND_BLACK,
                                 onClick = { onFlashWithChange(ReaderFlashColor.WHITE_AND_BLACK) },
-                                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("White and Black")) }
+                                label = { Text(stringResource(Res.string.reader_image_flash_with_white_and_black)) }
                             )
                         }
                     }

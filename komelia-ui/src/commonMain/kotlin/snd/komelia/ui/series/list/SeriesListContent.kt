@@ -8,17 +8,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_bulk_select_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_list_series_count
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.itemlist.SeriesLazyCardGrid
@@ -133,7 +134,7 @@ private fun BulkActionsToolbar(
         when (LocalWindowWidth.current) {
             FULL, EXPANDED -> {
                 if (selectedSeries.isEmpty()) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Click on items to select or deselect them"))
+                    Text(stringResource(Res.string.series_bulk_select_desc))
                 } else {
                     Spacer(Modifier.weight(1f))
                     SeriesBulkActionsContent(selectedSeries, false)
@@ -173,26 +174,24 @@ private fun ToolBar(
                 }
             }
 
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 1.dp,
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 6.dp)
-            ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 6.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
 
                 if (seriesTotalCount != 0) {
                     SuggestionChip(
                         onClick = {},
-                        label = { Text("$seriesTotalCount series") },
+                        label = {
+                            Text(
+                                pluralStringResource(
+                                    Res.plurals.series_list_series_count,
+                                    seriesTotalCount,
+                                    seriesTotalCount
+                                )
+                            )
+                        },
                     )
 
                     Spacer(Modifier.weight(1f))
@@ -202,19 +201,13 @@ private fun ToolBar(
                             if (filterState.isChanged) MaterialTheme.colorScheme.tertiary
                             else MaterialTheme.colorScheme.primary
 
-                        IconButton(
-                            onClick = { showFilters = !showFilters },
-                            modifier = Modifier
-                                .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
-                                .cursorForHand()
-                        ) {
-                            Icon(Icons.Rounded.FilterList, null, tint = color)
+                        IconButton(onClick = { showFilters = !showFilters }, modifier = Modifier.cursorForHand()) {
+                            Icon(Icons.Default.FilterList, null, tint = color)
                         }
                     }
 
                     PageSizeSelectionDropdown(pageSize, onPageSizeChange)
                 }
-            }
             }
         }
     }

@@ -10,6 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_clear_cache
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_volume_key_navigation
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.platform.PlatformType
@@ -35,21 +39,21 @@ fun ImageReaderSettingsContent(
         SwitchWithLabel(
             checked = loadThumbnailPreviews,
             onCheckedChange = onLoadThumbnailPreviewsChange,
-            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Load small previews when dragging navigation slider")) },
-            supportingText = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("can be slow for high resolution images")) },
+            label = { Text("Load small previews when dragging navigation slider") },
+            supportingText = { Text("can be slow for high resolution images") },
         )
 
         if (platform == PlatformType.MOBILE) {
             SwitchWithLabel(
                 checked = volumeKeysNavigation,
                 onCheckedChange = onVolumeKeysNavigationChange,
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Volume keys navigation")) },
+                label = { Text(stringResource(Res.string.settings_image_volume_key_navigation)) },
             )
         }
 
         FilledTonalButton(
             onClick = onCacheClear,
-        ) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Clear image cache")) }
+        ) { Text(stringResource(Res.string.settings_image_clear_cache)) }
 
         if (isOnnxRuntimeSupported()) {
             HorizontalDivider(Modifier.padding(vertical = 10.dp))

@@ -1,29 +1,20 @@
+import org.apache.commons.io.IOUtils
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.file.DuplicatesStrategy.EXCLUDE
+import java.io.FileOutputStream
+import java.util.zip.GZIPOutputStream
 
 plugins {
     // this is necessary to avoid the plugins to be loaded multiple times
     // in each subproject's classloader
     alias(libs.plugins.androidApplication) apply false
-    alias(libs.plugins.androidLibrary) apply false
-    alias(libs.plugins.kotlinAtomicfu) apply false
+    alias(libs.plugins.androidMultiplatformLibrary) apply false
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.kotlinSerialization) apply false
     alias(libs.plugins.jetbrainsCompose) apply false
     alias(libs.plugins.compose.compiler) apply false
     alias(libs.plugins.parcelize) apply false
-}
-
-// https://youtrack.jetbrains.com/issue/CMP-5831
-allprojects {
-    configurations.all {
-        resolutionStrategy.eachDependency {
-            if (requested.group == "org.jetbrains.kotlinx" && requested.name == "atomicfu") {
-                useVersion(libs.versions.kotlinx.atomicfu.get())
-            }
-        }
-    }
 }
 
 val linuxBuildDir = "$projectDir/cmake/build"
@@ -35,32 +26,12 @@ val androidx86BuildDir = "$projectDir/cmake/build-android-x86"
 
 val resourcesDir = "$projectDir/komelia-infra/jni/src/jvmMain/resources/"
 val androidJniLibsDir = "$projectDir/komelia-infra/jni/src/androidMain/jniLibs"
-val composeDistroResourcesDir = "$projectDir/komelia-app/desktopUnpackedResources"
+val composeDistroResourcesDir = "$projectDir/komelia-app/desktopApp/desktopUnpackedResources"
 val composeCommonResources = "$projectDir/komelia-ui/src/commonMain/composeResources/files"
 
 val epubReader = "$rootDir/komelia-epub-reader"
 val epubReaderKomga = "$epubReader/komga-webui"
 val epubReaderTtsu = "$epubReader/ttu-ebook-reader"
-val nodeVersion = file(".node-version")
-    .takeIf { it.exists() }
-    ?.readText()
-    ?.trim()
-    ?.takeIf { it.isNotBlank() }
-    ?: "20"
-
-fun Exec.npmCommand(vararg args: String) {
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        commandLine("npm.cmd", *args)
-        return
-    }
-
-    val npmArgs = args.joinToString(" ")
-    commandLine(
-        "zsh",
-        "-lc",
-        "if command -v fnm >/dev/null 2>&1; then eval \"\$(fnm env --shell zsh)\" && fnm use $nodeVersion >/dev/null; fi; npm $npmArgs"
-    )
-}
 
 val linuxCommonLibs = setOf(
     "libintl.so",
@@ -137,7 +108,7 @@ val windowsLibs = setOf(
     "libgobject-2.0-0.dll",
     "libheif.dll",
     "libhwy.dll",
-    "liblcms2-2.dll",
+    "liblcms2.dll",
     "libintl-8.dll",
     "libjpeg-62.dll",
     "libjxl.dll",
@@ -145,7 +116,7 @@ val windowsLibs = setOf(
     "libjxl_threads.dll",
     "libsharpyuv.dll",
     "libpng16.dll",
-    "libtiff.dll",
+    "libtiff-6.dll",
     "libvips-42.dll",
     "libwebp.dll",
     "libwebpdecoder.dll",
@@ -164,8 +135,13 @@ val windowsLibs = setOf(
     "libkomelia_webview.dll",
 )
 
+interface Injected {
+    @get:Inject
+    val objectFactory: ObjectFactory
+}
+
 tasks.register<Sync>("linux-x86_64_copyJniLibs") {
-    group = "jni"
+    group = "komelia-build"
     from("$linuxBuildDir/sysroot/lib/")
     into(resourcesDir)
     val dependencies = desktopLinuxLibs
@@ -174,7 +150,7 @@ tasks.register<Sync>("linux-x86_64_copyJniLibs") {
 
 
 tasks.register<Sync>("android-aarch64_copyJniLibs") {
-    group = "jni"
+    group = "komelia-build"
     dependsOn(":komelia-infra:database:sqlite:android-arm64-ExtractSqliteLib")
 
     from("$androidArm64BuildDir/sysroot/lib/")
@@ -184,7 +160,7 @@ tasks.register<Sync>("android-aarch64_copyJniLibs") {
 }
 
 tasks.register<Sync>("android-arm64_copyJniLibs") {
-    group = "jni"
+    group = "komelia-build"
     dependsOn(":komelia-infra:database:sqlite:android-arm64-ExtractSqliteLib")
 
     from("$androidArm64BuildDir/sysroot/lib/")
@@ -194,7 +170,7 @@ tasks.register<Sync>("android-arm64_copyJniLibs") {
 }
 
 tasks.register<Sync>("android-armv7a_copyJniLibs") {
-    group = "jni"
+    group = "komelia-build"
     dependsOn(":komelia-infra:database:sqlite:android-armv7a-ExtractSqliteLib")
 
     from("$androidArmv7aBuildDir/sysroot/lib/")
@@ -204,7 +180,7 @@ tasks.register<Sync>("android-armv7a_copyJniLibs") {
 }
 
 tasks.register<Sync>("android-x86_64_copyJniLibs") {
-    group = "jni"
+    group = "komelia-build"
     dependsOn(":komelia-infra:database:sqlite:android-x86_64-ExtractSqliteLib")
     from("$androidx8664BuildDir/sysroot/lib/")
     into("$androidJniLibsDir/x86_64/")
@@ -213,7 +189,7 @@ tasks.register<Sync>("android-x86_64_copyJniLibs") {
 }
 
 tasks.register<Sync>("android-x86_copyJniLibs") {
-    group = "jni"
+    group = "komelia-build"
     dependsOn(":komelia-infra:database:sqlite:android-x86-ExtractSqliteLib")
     from("$androidx86BuildDir/sysroot/lib/")
     into("$androidJniLibsDir/x86/")
@@ -222,14 +198,14 @@ tasks.register<Sync>("android-x86_copyJniLibs") {
 }
 
 tasks.register<Delete>("cleanJni") {
-    group = "jni"
+    group = "komelia-build"
     delete(linuxBuildDir)
     delete(windowsBuildDir)
     delete(fileTree(resourcesDir))
 }
 
 tasks.register<Sync>("windows-x86_64_copyJniLibs") {
-    group = "jni"
+    group = "komelia-build"
 
     duplicatesStrategy = EXCLUDE
     from("$windowsBuildDir/sysroot/bin/")
@@ -247,7 +223,7 @@ tasks.register<Sync>("windows-x86_64_copyJniLibs") {
 }
 
 tasks.register<Sync>("windows-x86_64_copyJniLibsComposeResources") {
-    group = "jni"
+    group = "komelia-build"
 
     duplicatesStrategy = EXCLUDE
     from("$windowsBuildDir/sysroot/bin/")
@@ -266,41 +242,71 @@ tasks.register<Sync>("windows-x86_64_copyJniLibsComposeResources") {
 
 
 tasks.register<Exec>("komgaNpmInstall") {
-    group = "web"
+    group = "komelia-build"
     workingDir(epubReaderKomga)
     inputs.file("$epubReaderKomga/package.json")
     outputs.dir("$epubReaderKomga/node_modules")
-    npmCommand("install")
+    commandLine(
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            "npm.cmd"
+        } else {
+            "npm"
+        },
+        "install",
+    )
 }
 
 tasks.register<Exec>("komgaNpmBuild") {
-    group = "web"
+    group = "komelia-build"
     dependsOn("komgaNpmInstall")
     workingDir(epubReaderKomga)
     inputs.dir(epubReaderKomga)
     outputs.dir("$epubReaderKomga/dist")
-    npmCommand("run", "build")
+    commandLine(
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            "npm.cmd"
+        } else {
+            "npm"
+        },
+        "run",
+        "build",
+    )
 }
 
 tasks.register<Exec>("ttsuNpmInstall") {
-    group = "web"
+    group = "komelia-build"
     workingDir(epubReaderTtsu)
     inputs.file("$epubReaderTtsu/package.json")
     outputs.dir("$epubReaderTtsu/node_modules")
-    npmCommand("install")
+    commandLine(
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            "npm.cmd"
+        } else {
+            "npm"
+        },
+        "install",
+    )
 }
 
 tasks.register<Exec>("ttsuNpmBuild") {
-    group = "web"
+    group = "komelia-build"
     dependsOn("ttsuNpmInstall")
     workingDir(epubReaderTtsu)
     inputs.dir(epubReaderTtsu)
     outputs.dir("$epubReaderTtsu/dist")
-    npmCommand("run", "build")
+    commandLine(
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            "npm.cmd"
+        } else {
+            "npm"
+        },
+        "run",
+        "build",
+    )
 }
 
-tasks.register<Sync>("buildWebui") {
-    group = "web"
+tasks.register<Sync>("buildEpubReaders") {
+    group = "komelia-build"
     dependsOn("komgaNpmBuild")
     dependsOn("ttsuNpmBuild")
 
@@ -309,21 +315,8 @@ tasks.register<Sync>("buildWebui") {
     into(composeCommonResources)
 }
 
-project(":komelia-ui") {
-    tasks.configureEach {
-        if (
-            name == "generateComposeResClass" ||
-            name.startsWith("generateResourceAccessors") ||
-            name.startsWith("prepareComposeResourcesTask") ||
-            name.startsWith("copyNonXmlValueResources")
-        ) {
-            dependsOn(rootProject.tasks.named("buildWebui"))
-        }
-    }
-}
-
 tasks.register<Exec>("cmakeSystemDepsConfigure") {
-    group = "jni"
+    group = "komelia-build"
     delete("$projectDir/cmake-build")
     inputs.file("$projectDir/komelia-infra/image-decoder/vips/native/CMakeLists.txt")
     inputs.file("$projectDir/komelia-infra/webview/native/CMakeLists.txt")
@@ -337,7 +330,7 @@ tasks.register<Exec>("cmakeSystemDepsConfigure") {
 }
 
 tasks.register<Exec>("cmakeSystemDepsBuild") {
-    group = "jni"
+    group = "komelia-build"
     dependsOn("cmakeSystemDepsConfigure")
     inputs.dir("$projectDir/cmake-build")
     outputs.dir("$projectDir/cmake-build/komelia-infra/image-decoder/native")
@@ -351,7 +344,7 @@ tasks.register<Exec>("cmakeSystemDepsBuild") {
 }
 
 tasks.register<Sync>("cmakeSystemDepsCopyJniLibs") {
-    group = "jni"
+    group = "komelia-build"
     dependsOn("cmakeSystemDepsBuild")
     inputs.dir("$projectDir/cmake-build/komelia-infra/webview/native")
     inputs.dir("$projectDir/cmake-build/komelia-infra/image-decoder/vips/native")
@@ -369,7 +362,127 @@ tasks.register<Sync>("cmakeSystemDepsCopyJniLibs") {
 }
 
 tasks.register("komeliaBuildNonJvmDependencies") {
-    group = "build"
-    dependsOn("buildWebui")
+    group = "komelia-build"
+    dependsOn("buildEpubReaders")
     dependsOn("cmakeSystemDepsCopyJniLibs")
+}
+
+tasks.register("desktopRun") {
+    description = "run desktop app"
+    group = "komelia-package"
+    dependsOn(projects.komeliaApp.desktopApp.path + ":run")
+}
+
+tasks.register("desktopJar") {
+    description = "create release jar for current OS"
+    group = "komelia-package"
+    dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseUberJarForCurrentOS")
+}
+
+tasks.register("desktopDeb") {
+    description = "create linux deb package"
+    group = "komelia-package"
+    dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseDeb")
+}
+
+tasks.register("desktopMsi") {
+    description = "create windows msi installer"
+    group = "komelia-package"
+    dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseMsi")
+}
+
+tasks.register("androidDebug") {
+    description = "build debug apk"
+    group = "komelia-package"
+    dependsOn(projects.komeliaApp.androidApp.path + ":assembleDebug")
+}
+
+tasks.register("androidRelease") {
+    description = "build release apk"
+    group = "komelia-package"
+    dependsOn(projects.komeliaApp.androidApp.path + ":assembleRelease")
+}
+
+tasks.register("komfExtensionChrome") {
+    description = "build komf extension for chrome"
+    group = "komelia-package"
+    dependsOn(projects.komeliaKomfExtension.app.path + ":packageExtension_prod_chrome")
+}
+
+tasks.register("komfExtensionFirefox") {
+    description = "build komf extension for firefox"
+    group = "komelia-package"
+    dependsOn(projects.komeliaKomfExtension.app.path + ":packageExtension_prod_firefox")
+}
+
+tasks.register<DefaultTask>("komfWebUI") {
+    description = "build and package webapp"
+    group = "komelia-package"
+    dependsOn(projects.komeliaApp.webApp.path + ":wasmJsBrowserDistribution")
+    dependsOn(projects.komeliaInfra.imageDecoder.wasmImageWorker.path + ":wasmJsBrowserDistribution")
+
+    val appInput = "${project.layout.projectDirectory}/komelia-app/webApp/build/dist/wasmJs/productionExecutable/"
+    val appResourcesInput =
+        "${project.layout.projectDirectory}/komelia-app/webApp/build/dist/wasmJs/productionExecutable/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/"
+    val webWorkerInput =
+        "${project.layout.projectDirectory}/komelia-infra/image-decoder/wasm-image-worker/build/dist/wasmJs/productionExecutable/"
+
+    val output = "${project.layout.buildDirectory.get()}/komf-webui"
+    val outputResourcesFiles =
+        "${project.layout.buildDirectory.get()}/komf-webui/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/files"
+    val outputResourcesValues =
+        "${project.layout.buildDirectory.get()}/komf-webui/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/values"
+    delete(output)
+    mkdir(output)
+    mkdir(outputResourcesFiles)
+    mkdir(outputResourcesValues)
+    inputs.dir(appInput)
+    inputs.dir(appResourcesInput)
+    inputs.dir(webWorkerInput)
+    outputs.dir(output)
+    val injected = project.objects.newInstance<Injected>()
+
+    doLast {
+        fun gzipFiles(files: FileCollection, outputDir: String) {
+            files.forEach { file ->
+                val input = file.inputStream()
+                val output = FileOutputStream("$outputDir/${file.name}.gz")
+                val gzip = GZIPOutputStream(output)
+                IOUtils.copyLarge(input, gzip)
+                gzip.close()
+                output.close()
+                input.close()
+            }
+        }
+
+        gzipFiles(
+            injected.objectFactory.fileTree().from(appInput).matching {
+                include("*.wasm")
+                include("*.js")
+                include("*.html")
+                include("*.css")
+            },
+            output
+        )
+        gzipFiles(
+            injected.objectFactory.fileTree().from(webWorkerInput).matching {
+                include("*.wasm")
+                include("*.js")
+            },
+            output
+        )
+
+        gzipFiles(
+            injected.objectFactory.fileTree().from("$appResourcesInput/files").matching {
+                include("*.html")
+            },
+            "$output/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/files"
+        )
+        gzipFiles(
+            injected.objectFactory.fileTree().from("$appResourcesInput/values").matching {
+                include("*.cvr")
+            },
+            "$output/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/values"
+        )
+    }
 }

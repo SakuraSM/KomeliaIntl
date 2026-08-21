@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Cached
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.filled.Cached
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -26,6 +26,12 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_downloads_tab
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_logs_tab
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_tab
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.settings.SettingsScreenContainer
 import snd.komelia.ui.settings.offline.downloads.OfflineDownloadsContent
@@ -44,7 +50,7 @@ class OfflineSettingsScreen : Screen {
             vm.initialize(currentNavigator)
         }
 
-        SettingsScreenContainer("Offline mode") {
+        SettingsScreenContainer(stringResource(Res.string.settings_offline_mode_title)) {
             var selectedTab by rememberSaveable { mutableStateOf(0) }
 
             SecondaryTabRow(selectedTabIndex = selectedTab) {
@@ -54,8 +60,8 @@ class OfflineSettingsScreen : Screen {
                     modifier = Modifier.heightIn(min = 40.dp).pointerHoverIcon(PointerIcon.Hand),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Icon(Icons.Rounded.Person, null)
-                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Users"))
+                        Icon(Icons.Default.Person, null)
+                        Text(stringResource(Res.string.settings_offline_mode_users_tab))
                     }
                 }
                 Tab(
@@ -64,8 +70,8 @@ class OfflineSettingsScreen : Screen {
                     modifier = Modifier.heightIn(min = 40.dp).pointerHoverIcon(PointerIcon.Hand),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Icon(Icons.Rounded.Download, null)
-                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Downloads"))
+                        Icon(Icons.Default.Download, null)
+                        Text(stringResource(Res.string.settings_offline_mode_downloads_tab))
                     }
                 }
 
@@ -75,8 +81,8 @@ class OfflineSettingsScreen : Screen {
                     modifier = Modifier.heightIn(min = 40.dp).pointerHoverIcon(PointerIcon.Hand),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Icon(Icons.Rounded.Cached, null)
-                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Logs"))
+                        Icon(Icons.Default.Cached, null)
+                        Text(stringResource(Res.string.settings_offline_mode_logs_tab))
                     }
                 }
             }

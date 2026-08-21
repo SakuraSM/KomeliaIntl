@@ -10,12 +10,11 @@ private val logger = KotlinLogging.logger { }
 
 class BookContentExtractors(
     divinaExtractors: List<DivinaExtractor>,
-    private val epubExtractor: EpubExtractor,
-    private val pdfExtractor: PdfExtractor? = null,
+    private val epubExtractor: EpubExtractor?
 ) {
 
     val divinaExtractors = divinaExtractors
-        .flatMap { e -> e.mediaTypes().map { it.normalizeMediaType() to e } }
+        .flatMap { e -> e.mediaTypes().map { it to e } }
         .toMap()
 
     fun getBookPage(
@@ -36,22 +35,17 @@ class BookContentExtractors(
 
         return when (media.mediaProfile) {
             MediaProfile.DIVINA -> getDivinaExtractorOrThrow(media)
-                .getEntryBytes(book.fileDownloadPath, media.pages[page - 1].fileName, page)
+                .getEntryBytes(book.fileDownloadPath, media.pages[page - 1].fileName)
 
             MediaProfile.EPUB -> {
                 if (media.epubDivinaCompatible) {
+                    if (epubExtractor == null) throw IllegalStateException("Epub content is not supported")
                     epubExtractor.getEntryBytes(book.fileDownloadPath, media.pages[page - 1].fileName)
                 } else throw IllegalStateException("Epub profile does not support getting page content")
             }
 
             MediaProfile.PDF -> {
-                val pageMetadata = media.pages[page - 1]
-                pdfExtractor?.getPageBytes(
-                    file = book.fileDownloadPath,
-                    pageNumber = page,
-                    preferredWidth = pageMetadata.width,
-                    preferredHeight = pageMetadata.height,
-                ) ?: throw IllegalStateException("PDF local reading is not supported on this platform")
+                TODO()
             }
 
             null -> throw IllegalStateException("Media is not ready")
@@ -63,8 +57,10 @@ class BookContentExtractors(
             MediaProfile.DIVINA -> getDivinaExtractorOrThrow(media)
                 .getEntryBytes(book.fileDownloadPath, filename)
 
-            MediaProfile.EPUB -> epubExtractor
-                .getEntryBytes(book.fileDownloadPath, filename)
+            MediaProfile.EPUB -> {
+                if (epubExtractor == null) throw IllegalStateException("Extractor does not support extraction of files")
+                epubExtractor.getEntryBytes(book.fileDownloadPath, filename)
+            }
 
             MediaProfile.PDF, null -> throw IllegalStateException("Extractor does not support extraction of files")
         }
@@ -72,8 +68,6 @@ class BookContentExtractors(
 
     private fun getDivinaExtractorOrThrow(media: OfflineMedia): DivinaExtractor {
         val type = checkNotNull(media.mediaType) { "Book media type is null" }
-        return checkNotNull(divinaExtractors[type.normalizeMediaType()]) { "Unsupported book file format $type" }
+        return checkNotNull(divinaExtractors[type]) { "Unsupported book file format $type" }
     }
-
-    private fun String.normalizeMediaType() = substringBefore(";").trim().lowercase()
 }

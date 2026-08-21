@@ -1,31 +1,34 @@
 package snd.komelia.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.LocalLibrary
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalLibrary
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue.Closed
 import androidx.compose.material3.DrawerValue.Open
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,17 +48,23 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_home
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_search
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_settings
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.home.HomeScreen
 import snd.komelia.ui.library.LibraryScreen
-import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.ui.platform.WindowSizeClass.FULL
+import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.search.SearchScreen
 import snd.komelia.ui.series.seriesScreen
 import snd.komelia.ui.settings.MobileSettingsScreen
@@ -155,17 +164,11 @@ class MainScreen(
     ) {
         val coroutineScope = rememberCoroutineScope()
         Scaffold(
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
             bottomBar = {
                 BottomNavigationBar(
                     navigator = navigator,
                     toggleLibrariesDrawer = { coroutineScope.launch { vm.toggleNavBar() } },
-                    navigateFromBottom = { navigate ->
-                        coroutineScope.launch {
-                            if (vm.navBarState.isOpen) vm.navBarState.snapTo(Closed)
-                            navigate()
-                        }
-                    },
                     modifier = Modifier
                 )
             },
@@ -202,16 +205,6 @@ class MainScreen(
                     }
                 }
             )
-
-            if (vm.navBarState.isOpen || navigator.canPop) {
-                BackPressHandler {
-                    if (vm.navBarState.isOpen) {
-                        coroutineScope.launch { vm.navBarState.close() }
-                    } else if (navigator.canPop) {
-                        navigator.pop()
-                    }
-                }
-            }
         }
     }
 
@@ -219,73 +212,81 @@ class MainScreen(
     private fun BottomNavigationBar(
         navigator: Navigator,
         toggleLibrariesDrawer: () -> Unit,
-        navigateFromBottom: (() -> Unit) -> Unit,
         modifier: Modifier
     ) {
-        val strings = LocalStrings.current.mainNavigation
-        Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+        ) {
             Column {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                NavigationBar(
+                HorizontalDivider()
+                Row(
                     modifier = modifier,
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 0.dp,
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     CompactNavButton(
-                        text = strings.libraries,
-                        icon = Icons.Rounded.LocalLibrary,
+                        text = stringResource(Res.string.navbar_libraries),
+                        icon = Icons.Default.LocalLibrary,
                         onClick = { toggleLibrariesDrawer() },
                         isSelected = false,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
 
                     CompactNavButton(
-                        text = strings.home,
-                        icon = Icons.Rounded.Home,
-                        onClick = { navigateFromBottom { navigator.replaceAll(HomeScreen()) } },
+                        text = stringResource(Res.string.navbar_home),
+                        icon = Icons.Default.Home,
+                        onClick = { navigator.replaceAll(HomeScreen()) },
                         isSelected = navigator.lastItem is HomeScreen,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
 
 
                     CompactNavButton(
-                        text = strings.search,
-                        icon = Icons.Rounded.Search,
-                        onClick = { navigateFromBottom { navigator.push(SearchScreen(null)) } },
+                        text = stringResource(Res.string.navbar_search),
+                        icon = Icons.Default.Search,
+                        onClick = { navigator.push(SearchScreen(null)) },
                         isSelected = navigator.lastItem is SearchScreen,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
 
                     CompactNavButton(
-                        text = strings.settings,
-                        icon = Icons.Rounded.Settings,
-                        onClick = { navigateFromBottom { navigator.parent!!.push(MobileSettingsScreen()) } },
+                        text = stringResource(Res.string.navbar_settings),
+                        icon = Icons.Default.Settings,
+                        onClick = { navigator.parent!!.push(MobileSettingsScreen()) },
                         isSelected = navigator.lastItem is SettingsScreen,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
 
                 }
+                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
             }
         }
     }
 
     @Composable
-    private fun RowScope.CompactNavButton(
+    private fun CompactNavButton(
         text: String,
         icon: ImageVector,
         onClick: () -> Unit,
         isSelected: Boolean,
         modifier: Modifier
     ) {
-        val layout = LocalKomeliaLayout.current
-        NavigationBarItem(
-            modifier = modifier.heightIn(min = layout.minimumTouchTarget),
-            selected = isSelected,
-            onClick = onClick,
-            icon = { androidx.compose.material3.Icon(icon, contentDescription = text) },
-            label = { Text(text, style = MaterialTheme.typography.labelSmall, maxLines = 1) },
-            alwaysShowLabel = true,
-        )
+        Surface(
+            modifier = modifier,
+            contentColor =
+                if (isSelected) MaterialTheme.colorScheme.secondary
+                else contentColorFor(MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Column(
+                modifier = Modifier
+                    .clickable { onClick() }
+                    .cursorForHand()
+                    .padding(5.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(icon, null)
+                Text(text, style = MaterialTheme.typography.bodySmall)
+            }
+        }
     }
 
 
@@ -313,11 +314,7 @@ class MainScreen(
                 navigator.replaceAll(LibraryScreen(it))
                 if (width != FULL) coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
-            onSettingsClick = {
-                navigator.parent!!.push(SettingsScreen())
-                if (width != FULL) coroutineScope.launch { vm.navBarState.snapTo(Closed) }
-            },
-            onLibrariesRefreshClick = vm::refreshLibraries,
+            onSettingsClick = { navigator.parent!!.push(SettingsScreen()) },
             taskQueueStatus = vm.komgaTaskQueueStatus.collectAsState().value
         )
     }
@@ -343,7 +340,6 @@ class MainScreen(
                 navigator.replaceAll(LibraryScreen(it))
                 coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
-            onLibrariesRefreshClick = vm::refreshLibraries,
         )
     }
 }

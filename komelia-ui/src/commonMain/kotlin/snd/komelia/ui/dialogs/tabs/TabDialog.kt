@@ -15,7 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -33,7 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import snd.komelia.ui.LocalStrings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.dialogs.AppDialogLayout
 import snd.komelia.ui.dialogs.BasicAppDialog
@@ -57,6 +59,7 @@ fun TabDialog(
     confirmEnabled: Boolean = true,
     showCancelButton: Boolean = true
 ) {
+
     val sizeModifier = when (LocalWindowWidth.current) {
         COMPACT -> Modifier.fillMaxSize()
         MEDIUM, EXPANDED -> Modifier.width(840.dp)
@@ -106,7 +109,6 @@ private fun CompactTabDialog(
     onTabChange: (DialogTab) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    val strings = LocalStrings.current.legacy
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
             modifier = Modifier.padding(5.dp),
@@ -117,11 +119,11 @@ private fun CompactTabDialog(
                     onClick = onDismissRequest,
                     modifier = Modifier.cursorForHand()
                 ) {
-                    Icon(Icons.Rounded.Close, null)
+                    Icon(Icons.Default.Close, null)
                 }
             }
             Text(
-                text = strings.forText(title),
+                text = title,
                 style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -134,7 +136,7 @@ private fun CompactTabDialog(
                 colors = ButtonDefaults.elevatedButtonColors(contentColor = MaterialTheme.colorScheme.secondary),
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(strings.forText(confirmationText), fontWeight = FontWeight.Bold)
+                Text(confirmationText, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -182,11 +184,10 @@ private fun TabColumnDialog(
     onDismissRequest: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    val strings = LocalStrings.current.legacy
     AppDialogLayout(
         header = {
             Text(
-                text = strings.forText(title),
+                text = title,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(20.dp)
 
@@ -215,7 +216,7 @@ private fun TabColumnDialog(
         controlButtons = {
             DialogConfirmCancelButtons(
                 confirmText = confirmationText,
-                cancelText = strings.forText("Cancel"),
+                cancelText = stringResource(Res.string.dialog_cancel),
                 onConfirm = onConfirm,
                 confirmEnabled = canConfirm,
                 showCancelButton = showCancelButton,
@@ -245,7 +246,6 @@ private fun TabNavigationItems(
     tabs: List<DialogTab>,
     onTabChange: (DialogTab) -> Unit,
 ) {
-    val strings = LocalStrings.current.legacy
     tabs.forEachIndexed { index, tab ->
         val selected = index == currentIndex
         val enabled = tab.options().enabled
@@ -258,7 +258,7 @@ private fun TabNavigationItems(
         TabNavigationItem(
             label = {
                 Text(
-                    text = strings.forText(tab.options().title),
+                    text = stringResource(tab.options().title),
                     color = color,
                     style = MaterialTheme.typography.labelLarge
                 )

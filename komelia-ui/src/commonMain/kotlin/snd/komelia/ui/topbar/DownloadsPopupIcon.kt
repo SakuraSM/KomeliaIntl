@@ -17,8 +17,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ElevatedButton
@@ -42,7 +42,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.topbar_downloads_clear
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.topbar_downloads_recent
 import kotlinx.datetime.format
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.DefaultDateTimeFormats.localTimeFormat
 import snd.komelia.formatDecimal
 import snd.komelia.ui.platform.VerticalScrollbar
@@ -83,7 +87,7 @@ fun DownloadsPopupIcon(
             },
         ) {
             Icon(
-                Icons.Rounded.Download, null,
+                Icons.Default.Download, null,
             )
 
             if (showNotifications) {
@@ -121,11 +125,14 @@ private fun NotificationsContent(
                 modifier = Modifier.padding(5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Recent downloads"), modifier = Modifier.padding(start = 5.dp))
+                Text(
+                    stringResource(Res.string.topbar_downloads_recent),
+                    modifier = Modifier.padding(start = 5.dp)
+                )
                 Spacer(Modifier.weight(1f))
                 ElevatedButton(onClick = onNotificationsClear) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Clear all"))
-                    Icon(Icons.Rounded.Clear, null)
+                    Text(stringResource(Res.string.topbar_downloads_clear))
+                    Icon(Icons.Default.Clear, null)
                 }
             }
             HorizontalDivider()

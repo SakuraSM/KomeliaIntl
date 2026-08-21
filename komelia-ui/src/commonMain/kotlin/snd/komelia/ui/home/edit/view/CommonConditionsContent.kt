@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.DateRange
-import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -43,9 +43,24 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_add_condition
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_any
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_author
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_condition
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_datepicker_canel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_datepicker_ok
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_days
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_limit
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_operator
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_role
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_sort
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_sort_direction
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_tag
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_value
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import snd.komelia.ui.LocalStrings
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.scrollbar
@@ -80,7 +95,7 @@ fun <T> SimpleConditionLayout(
     content: @Composable RowScope.() -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onConditionRemove) { Icon(Icons.Rounded.Delete, null) }
+        IconButton(onClick = onConditionRemove) { Icon(Icons.Default.Delete, null) }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -89,7 +104,7 @@ fun <T> SimpleConditionLayout(
                 conditionType,
                 options = options,
                 onOptionChange = { onConditionTypeChange(it.value) },
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Condition")) },
+                label = { Text(stringResource(Res.string.home_filter_condition)) },
                 inputFieldModifier = Modifier.widthIn(conditionInputMinWidth)
             )
             content()
@@ -102,19 +117,18 @@ fun TagConditionContent(state: TagConditionState) {
     EqualityNullableOpDropdownSearchContent(
         state,
         state.tags.collectAsState(emptyList()).value,
-        "Tag"
+        stringResource(Res.string.home_filter_tag)
     )
 }
 
 @Composable
 fun RowScope.ReadStatusConditionContent(state: ReadStatusConditionState) {
     val value = state.value.collectAsState().value
-    val legacyStrings = LocalStrings.current.legacy
     EqualityOpDropDownContent(
         operator = state.operator.collectAsState().value,
         onOpChange = state::setOp,
-        selectedValue = value?.localizedEntry(legacyStrings),
-        valueOptions = KomgaReadStatus.entries.localizedEntries(legacyStrings),
+        selectedValue = remember(value) { value?.let { LabeledEntry(it, it.name) } },
+        valueOptions = remember { KomgaReadStatus.entries.map { LabeledEntry(it, it.name) } },
         onValueChange = state::setValue
     )
 }
@@ -159,26 +173,26 @@ fun RowScope.AuthorConditionContent(
     val roleOptions = state.roleOptions.collectAsState(emptyList()).value
     val nameOptions = state.nameOptions.collectAsState(emptyList()).value
     val currentValue = state.value.collectAsState().value
-    val legacyStrings = LocalStrings.current.legacy
     DropdownChoiceMenu(
-        selectedOption = operator.localizedEntry(legacyStrings),
-        options = EqualityOpState.Op.entries.localizedEntries(legacyStrings),
+        selectedOption = LabeledEntry(operator, operator.name),
+        options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
+        label = { Text(stringResource(Res.string.home_filter_operator)) }
     )
 
+    val stringAny = stringResource(Res.string.home_filter_any)
     DropdownChoiceMenu(
         selectedOption = remember(currentValue) {
-            LabeledEntry(currentValue?.role, currentValue?.role ?: legacyStrings.forText("Any"))
+            LabeledEntry(currentValue?.role, currentValue?.role ?: stringAny)
         },
         options = remember(roleOptions) {
-            listOf(LabeledEntry<String?>(null, legacyStrings.forText("Any")))
+            listOf(LabeledEntry<String?>(null, stringAny))
                 .plus(roleOptions.map { LabeledEntry(it, it) })
         },
         onOptionChange = { state.setRoleValue(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Role")) }
+        label = { Text(stringResource(Res.string.home_filter_role)) }
     )
 
     SearchableOptionSelectionField(
@@ -186,7 +200,7 @@ fun RowScope.AuthorConditionContent(
         onSearchTextChange = state::setSearchText,
         options = nameOptions.map { LabeledEntry.stringEntry(it) },
         onValueChange = { state.setNameValue(it) },
-        label = "Author"
+        label = stringResource(Res.string.home_filter_author)
     )
 }
 
@@ -231,13 +245,12 @@ fun RowScope.EqualityNullableOpContent(
 ) {
     val operator = state.operator.collectAsState().value
     var value by remember { mutableStateOf(state.value.value ?: "") }
-    val legacyStrings = LocalStrings.current.legacy
     DropdownChoiceMenu(
-        selectedOption = operator.localizedEntry(legacyStrings),
-        options = EqualityNullableOpState.Op.entries.localizedEntries(legacyStrings),
+        selectedOption = LabeledEntry(operator, operator.name),
+        options = EqualityNullableOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
+        label = { Text(stringResource(Res.string.home_filter_operator)) }
     )
 
     if (operator != EqualityNullableOpState.Op.IsNull && operator != EqualityNullableOpState.Op.IsNotNull)
@@ -256,13 +269,12 @@ fun RowScope.BooleanOpContent(
     operator: BooleanOpState.Op,
     onOperatorChange: (BooleanOpState.Op) -> Unit,
 ) {
-    val legacyStrings = LocalStrings.current.legacy
     DropdownChoiceMenu(
-        selectedOption = operator.localizedEntry(legacyStrings),
-        options = BooleanOpState.Op.entries.localizedEntries(legacyStrings),
+        selectedOption = LabeledEntry(operator, operator.name),
+        options = BooleanOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { onOperatorChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
+        label = { Text(stringResource(Res.string.home_filter_operator)) }
     )
 }
 
@@ -274,13 +286,12 @@ fun <T> RowScope.EqualityOpDropDownContent(
     valueOptions: List<LabeledEntry<T>>,
     onValueChange: (T) -> Unit,
 ) {
-    val legacyStrings = LocalStrings.current.legacy
     DropdownChoiceMenu(
-        selectedOption = operator.localizedEntry(legacyStrings),
-        options = EqualityOpState.Op.entries.localizedEntries(legacyStrings),
+        selectedOption = LabeledEntry(operator, operator.name),
+        options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { onOpChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
+        label = { Text(stringResource(Res.string.home_filter_operator)) }
     )
 
     DropdownChoiceMenu(
@@ -288,7 +299,7 @@ fun <T> RowScope.EqualityOpDropDownContent(
         options = valueOptions,
         onOptionChange = { onValueChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Value")) }
+        label = { Text(stringResource(Res.string.home_filter_value)) }
     )
 }
 
@@ -411,13 +422,12 @@ fun RowScope.StringOpContent(
     value: String?,
     onValueChange: (String) -> Unit,
 ) {
-    val legacyStrings = LocalStrings.current.legacy
     DropdownChoiceMenu(
-        selectedOption = operator.localizedEntry(legacyStrings),
-        options = StringOpState.Op.entries.localizedEntries(legacyStrings),
+        selectedOption = LabeledEntry(operator, operator.name),
+        options = StringOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { onOperatorChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
+        label = { Text(stringResource(Res.string.home_filter_operator)) }
     )
 
     var textValue by remember { mutableStateOf(value ?: "") }
@@ -431,7 +441,6 @@ fun RowScope.StringOpContent(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RowScope.DateOpContent(
     operator: DateOpState.Op,
@@ -443,13 +452,12 @@ private fun RowScope.DateOpContent(
     duration: Duration?,
     onDurationChange: (Duration?) -> Unit,
 ) {
-    val legacyStrings = LocalStrings.current.legacy
     DropdownChoiceMenu(
-        selectedOption = operator.localizedEntry(legacyStrings),
-        options = DateOpState.Op.entries.localizedEntries(legacyStrings),
+        selectedOption = LabeledEntry(operator, operator.name),
+        options = DateOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { onOperatorChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
+        label = { Text(stringResource(Res.string.home_filter_operator)) }
     )
 
     when (operator) {
@@ -525,9 +533,9 @@ private fun DatePickerField(
     TextField(
         value = currentDate?.toLocalDateTime(TimeZone.currentSystemDefault())?.toString() ?: "",
         onValueChange = { },
-        placeholder = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("MM/DD/YYYY")) },
+        placeholder = { Text("MM/DD/YYYY") },
         trailingIcon = {
-            Icon(Icons.Rounded.DateRange, null)
+            Icon(Icons.Default.DateRange, null)
         },
         modifier = Modifier
             .pointerInput(currentDate) {
@@ -553,12 +561,12 @@ private fun DatePickerField(
                     }
                     showDatePicker = false
                 }) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("OK"))
+                    Text(stringResource(Res.string.home_filter_datepicker_ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel"))
+                    Text(stringResource(Res.string.home_filter_datepicker_canel))
                 }
             }
         ) {
@@ -567,7 +575,6 @@ private fun DatePickerField(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PeriodPickerField(
     duration: Duration?,
@@ -590,7 +597,7 @@ private fun PeriodPickerField(
                 }
 
             },
-            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Days")) },
+            label = { Text(stringResource(Res.string.home_filter_days)) },
             modifier = Modifier.width(100.dp),
         )
     }
@@ -613,7 +620,7 @@ fun <T> ConditionAddButton(
                 .cursorForHand()
                 .menuAnchor(PrimaryNotEditable)
         ) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add condition"))
+            Text(stringResource(Res.string.home_filter_add_condition))
         }
 
         val scrollState = rememberScrollState()
@@ -648,13 +655,12 @@ fun EqualityNullableOpDropdownSearchContent(
     var suggestedOptions by remember(options) { mutableStateOf(options.take(50)) }
     val operator = state.operator.collectAsState().value
     val value = state.value.collectAsState().value
-    val legacyStrings = LocalStrings.current.legacy
     DropdownChoiceMenu(
-        selectedOption = operator.localizedEntry(legacyStrings),
-        options = EqualityNullableOpState.Op.entries.localizedEntries(legacyStrings),
+        selectedOption = LabeledEntry(operator, operator.name),
+        options = EqualityNullableOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
+        label = { Text(stringResource(Res.string.home_filter_operator)) }
     )
 
     if (operator != EqualityNullableOpState.Op.IsNull && operator != EqualityNullableOpState.Op.IsNotNull) {
@@ -681,13 +687,12 @@ fun EqualityOpDropdownSearchContent(
     var suggestedOptions by remember(options) { mutableStateOf(options.take(50)) }
     val operator = state.operator.collectAsState().value
     val value = state.value.collectAsState().value
-    val legacyStrings = LocalStrings.current.legacy
     DropdownChoiceMenu(
-        selectedOption = operator.localizedEntry(legacyStrings),
-        options = EqualityOpState.Op.entries.localizedEntries(legacyStrings),
+        selectedOption = LabeledEntry(operator, operator.name),
+        options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Operator")) }
+        label = { Text(stringResource(Res.string.home_filter_operator)) }
     )
 
     var searchText by remember { mutableStateOf(value ?: "") }
@@ -721,14 +726,14 @@ fun <T> PageSettingsContent(
             selectedOption = sort,
             options = sortOptions,
             onOptionChange = { onSortChange(it.value) },
-            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Sort")) },
+            label = { Text(stringResource(Res.string.home_filter_sort)) },
             inputFieldModifier = Modifier.widthIn(min = 150.dp)
         )
         DropdownChoiceMenu(
-            selectedOption = sortDirection.localizedEntry(LocalStrings.current.legacy),
-            options = KomgaSort.Direction.entries.localizedEntries(LocalStrings.current.legacy),
+            selectedOption = remember(sortDirection) { LabeledEntry(sortDirection, sortDirection.name) },
+            options = remember { KomgaSort.Direction.entries.map { LabeledEntry(it, it.name) } },
             onOptionChange = { onSortDirectionChange(it.value) },
-            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Direction")) },
+            label = { Text(stringResource(Res.string.home_filter_sort_direction)) },
             inputFieldModifier = Modifier.widthIn(min = 60.dp)
         )
         PageSizeSettingsContent(pageSize, onPageSizeChange)
@@ -752,7 +757,7 @@ fun PageSizeSettingsContent(pageSize: Int, onPageSizeChange: (Int) -> Unit) {
                 }
             }
         },
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Limit")) },
+        label = { Text(stringResource(Res.string.home_filter_limit)) },
         modifier = Modifier.width(70.dp),
     )
 

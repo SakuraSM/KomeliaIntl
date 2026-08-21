@@ -1,26 +1,26 @@
-@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
-
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 group = "io.github.snd_r.komelia.db.sqlite"
 version = "unspecified"
 
 kotlin {
-    jvmToolchain(17)
-
     jvm {
         compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
     }
-    androidTarget {
-        compilerOptions { jvmTarget.set(JvmTarget.JVM_1_8) }
+    android {
+        namespace = "io.github.snd_r.komelia.infra.database.sqlite"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        compilerOptions { jvmTarget = JvmTarget.JVM_17 }
+        androidResources { enable = true }
     }
 
     sourceSets {
@@ -37,8 +37,9 @@ kotlin {
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.resources)
-            implementation(libs.filekit.core)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.filekit.core)
             implementation(libs.exposed.core)
             implementation(libs.exposed.jdbc)
             implementation(libs.exposed.json)
@@ -47,19 +48,6 @@ kotlin {
             implementation(libs.flyway.core)
             implementation(libs.sqlite.xerial.jdbc)
         }
-    }
-}
-
-android {
-    namespace = "io.github.snd_r.komelia.infra.database.sqlite"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 

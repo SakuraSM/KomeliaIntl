@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,6 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.links_edit_label
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.links_edit_url
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.common.components.LockIcon
 import snd.komelia.ui.common.components.withTextFieldNavigation
 import snd.komga.client.common.KomgaWebLink
@@ -48,7 +52,7 @@ fun LinksEditContent(
                     TextField(
                         value = link.label,
                         onValueChange = { onLinkChange(index, link.copy(label = it)) },
-                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Label")) },
+                        label = { Text(stringResource(Res.string.links_edit_label)) },
                         maxLines = 2,
                         modifier = Modifier.widthIn(min = 100.dp).withTextFieldNavigation()
                     )
@@ -56,19 +60,19 @@ fun LinksEditContent(
                     TextField(
                         value = link.url,
                         onValueChange = { onLinkChange(index, link.copy(url = it)) },
-                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("URL")) },
+                        label = { Text(stringResource(Res.string.links_edit_url)) },
                         maxLines = 3,
                         modifier = Modifier.fillMaxWidth().withTextFieldNavigation()
                     )
                 }
                 IconButton(onClick = { onLinkRemove(index) }) {
-                    Icon(Icons.Rounded.Delete, contentDescription = null)
+                    Icon(Icons.Default.Delete, contentDescription = null)
                 }
             }
         }
 
         FilledTonalIconButton(onClick = onLinkAdd) {
-            Icon(Icons.Rounded.Add, contentDescription = null)
+            Icon(Icons.Default.Add, contentDescription = null)
         }
     }
 }

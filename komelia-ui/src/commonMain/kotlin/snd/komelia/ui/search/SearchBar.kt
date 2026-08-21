@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
@@ -47,8 +47,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_books_tab
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_result_in_library
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_search_all
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_search_input_placeholder
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_series_tab
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.cards.BookSimpleImageCard
 import snd.komelia.ui.common.cards.SeriesSimpleImageCard
 import snd.komelia.ui.common.components.NoPaddingTextField
@@ -148,14 +154,14 @@ private fun ColumnScope.SearchResultsDropDownBox(
                 onDismiss()
                 onSearchAllClick(currentQuery)
             }
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.shapes.small)
-            .padding(horizontal = 12.dp),
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 5.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Search all..."))
+        Text(stringResource(Res.string.search_search_all))
     }
     if (isLoading) LinearProgressIndicator(
-        color = MaterialTheme.colorScheme.primary,
+        color = MaterialTheme.colorScheme.tertiary,
         modifier = Modifier.fillMaxWidth()
     )
 
@@ -163,10 +169,9 @@ private fun ColumnScope.SearchResultsDropDownBox(
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        val strings = LocalStrings.current.legacy
         val series = searchResults.series
         if (series.isNotEmpty()) {
-            Text(text = strings.forText("Series"))
+            Text(text = stringResource(Res.string.search_series_tab))
             series.forEach {
                 SeriesSearchEntry(
                     series = it,
@@ -181,7 +186,7 @@ private fun ColumnScope.SearchResultsDropDownBox(
         val books = searchResults.books
         if (books.isNotEmpty()) {
             Text(
-                text = strings.forText("Books"),
+                text = stringResource(Res.string.search_books_tab),
                 modifier = Modifier.padding(5.dp)
             )
             books.forEach {
@@ -232,7 +237,7 @@ private fun SeriesSearchEntry(
         )
         Column {
             Text(series.metadata.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            library?.let { Text(LocalStrings.current.legacy.forText("in ${library.name}")) }
+            library?.let { Text(stringResource(Res.string.search_result_in_library, library.name)) }
         }
     }
 }
@@ -253,7 +258,7 @@ private fun BookSearchEntry(
         )
         Column {
             Text(book.metadata.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            library?.let { Text(LocalStrings.current.legacy.forText("in ${library.name}")) }
+            library?.let { Text(stringResource(Res.string.search_result_in_library, library.name)) }
         }
     }
 }
@@ -271,18 +276,14 @@ fun SearchTextField(
     val focusManager = LocalFocusManager.current
     NoPaddingTextField(
         text = query,
-        placeholder = LocalStrings.current.common.search,
+        placeholder = stringResource(Res.string.search_search_input_placeholder),
         onTextChange = onQueryChange,
         shape = CircleShape,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface
         ),
         interactionSource = interactionSource,
         modifier = modifier
@@ -308,8 +309,7 @@ fun SearchTextField(
         trailingIcon = {
             if (query.isNotBlank()) {
                 Icon(
-                    Icons.Rounded.Close,
-                    contentDescription = LocalStrings.current.legacy.forText("Clear search"),
+                    Icons.Filled.Close, null,
                     modifier = Modifier
                         .clickable(
                             interactionSource = interactionSource,
@@ -319,12 +319,11 @@ fun SearchTextField(
                                 onDismiss()
                             }
                         ).cursorForHand(),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.secondary
                 )
             } else {
                 Icon(
-                    Icons.Rounded.Search,
-                    contentDescription = LocalStrings.current.common.search,
+                    Icons.Filled.Search, null,
                     modifier = Modifier.cursorForHand()
                 )
             }

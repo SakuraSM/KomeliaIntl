@@ -1,7 +1,7 @@
 package snd.komelia.ui.common.menus.bulk
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.LayersClear
+import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -9,7 +9,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_remove_selected_series
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_remove_series
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaCollectionsApi
 import snd.komelia.ui.LocalKomgaState
@@ -43,7 +47,7 @@ fun CollectionBulkActionsDialogs(
 
     if (state.showDeleteDialog) {
         ConfirmationDialog(
-            body = "Remove selected series from this collection?",
+            body = stringResource(Res.string.collection_remove_selected_series),
             onDialogConfirm = {
                 coroutineScope.launch { state.actions.removeFromCollection(state.collection, state.series) }
                 state.showDeleteDialog = false
@@ -111,8 +115,8 @@ data class CollectionBulkActionsState(
         if (!isOffline && isAdmin) {
             add(
                 BulkActionButtonData(
-                    description = "Remove from collection",
-                    icon = Icons.Rounded.LayersClear,
+                    description = Res.string.collection_remove_series,
+                    icon = Icons.Default.LayersClear,
                     onClick = { showDeleteDialog = true }
                 )
             )

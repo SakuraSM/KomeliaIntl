@@ -4,16 +4,15 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,9 +20,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
@@ -45,11 +44,17 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_downloaded
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download_confirm
 import kotlinx.coroutines.flow.filter
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.BookReadButton
@@ -71,7 +76,6 @@ import snd.komelia.ui.readlist.BookReadListsContent
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.readlist.KomgaReadList
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BookScreenContent(
     library: KomgaLibrary?,
@@ -112,15 +116,11 @@ fun BookScreenContent(
                 horizontalAlignment = Alignment.Start
             ) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                    val thumbnailMaxWidth = when (LocalWindowWidth.current) {
-                        COMPACT, MEDIUM -> 320.dp
-                        EXPANDED, FULL -> 500.dp
-                    }
                     BookThumbnail(
                         book.id,
                         modifier = Modifier
-                            .widthIn(min = 180.dp, max = thumbnailMaxWidth)
-                            .aspectRatio(0.703f)
+                            .heightIn(min = 100.dp, max = 400.dp)
+                            .widthIn(min = 300.dp, max = 500.dp)
                             .animateContentSize()
                     )
                     BookMainInfo(
@@ -185,7 +185,7 @@ private fun ToolbarBookActions(
         Box {
             var expandActions by remember { mutableStateOf(false) }
             IconButton(onClick = { expandActions = true }) {
-                Icon(Icons.Rounded.MoreVert, contentDescription = null)
+                Icon(Icons.Default.MoreVert, contentDescription = null)
             }
             BookActionsMenu(
                 book = book,
@@ -203,7 +203,7 @@ private fun ToolbarBookActions(
 
         if (isAdmin && !isOffline) {
             IconButton(onClick = { showEditDialog = true }) {
-                Icon(Icons.Rounded.Edit, null)
+                Icon(Icons.Default.Edit, null)
             }
         }
         if (showEditDialog) {
@@ -212,7 +212,6 @@ private fun ToolbarBookActions(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FlowRowScope.BookMainInfo(
     book: KomeliaBook,
@@ -240,6 +239,7 @@ private fun FlowRowScope.BookMainInfo(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val offlineAvailable = LocalOfflineAvailable.current
 
             if (!book.deleted && !library.unavailable) {
                 if (readIsSupported(book)) {
@@ -248,16 +248,16 @@ private fun FlowRowScope.BookMainInfo(
                         onIncognitoRead = { onBookReadPress(false) },
                     )
                 }
-                if (!book.downloaded || book.isLocalFileOutdated) {
+                if (offlineAvailable && (!book.downloaded || book.isLocalFileOutdated)) {
                     DownloadButton(book, onDownload)
                 }
             }
-            if (book.downloaded) {
+            if (offlineAvailable && book.downloaded) {
                 ElevatedButton(
                     onClick = onDownloadDelete,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
                 ) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded"))
+                    Text(stringResource(Res.string.book_delete_downloaded))
                 }
             }
         }
@@ -301,7 +301,7 @@ fun DownloadButton(
                         modifier = Modifier.size(24.dp),
                     )
                     Icon(
-                        imageVector = Icons.Rounded.Download,
+                        imageVector = Icons.Default.Download,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(20.dp),
@@ -310,11 +310,11 @@ fun DownloadButton(
             }
 
             else -> {
-                Icon(Icons.Rounded.Download, null)
+                Icon(Icons.Default.Download, null)
             }
         }
         Spacer(Modifier.width(3.dp))
-        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Download"))
+        Text(stringResource(Res.string.book_download))
 
 
     }
@@ -325,7 +325,7 @@ fun DownloadButton(
 
         if (permissionRequested) {
             ConfirmationDialog(
-                body = "Download book ${book.name}",
+                body = stringResource(Res.string.book_download_confirm, book.name),
                 onDialogConfirm = onDownload,
                 onDialogDismiss = { showDownloadConfirmation = false }
             )

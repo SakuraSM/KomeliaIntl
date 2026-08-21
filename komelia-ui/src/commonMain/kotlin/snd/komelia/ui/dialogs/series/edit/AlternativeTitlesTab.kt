@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Title
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +19,11 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit_alt_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit_alt_title_label
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit_tab_alt_titles
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.StateHolder
 import snd.komelia.ui.common.components.LockIcon
 import snd.komelia.ui.common.components.withTextFieldNavigation
@@ -31,8 +36,8 @@ internal class AlternativeTitlesTab(
 ) : DialogTab {
 
     override fun options() = TabItem(
-        title = "ALTERNATE TITLES",
-        icon = Icons.Rounded.Title
+        title = Res.string.series_edit_tab_alt_titles,
+        icon = Icons.Default.Title
     )
 
     @Composable
@@ -68,7 +73,7 @@ private fun AlternativeTitlesTabContent(
                 TextField(
                     value = altTitle.label,
                     onValueChange = { onTitleChange(index, altTitle.copy(label = it)) },
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Label")) },
+                    label = { Text(stringResource(Res.string.series_edit_alt_title_label)) },
                     maxLines = 1,
                     modifier = Modifier.weight(.3f).withTextFieldNavigation(onTitleAdd)
                 )
@@ -78,19 +83,19 @@ private fun AlternativeTitlesTabContent(
                 TextField(
                     value = altTitle.title,
                     onValueChange = { onTitleChange(index, altTitle.copy(title = it)) },
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Alternate title")) },
+                    label = { Text(stringResource(Res.string.series_edit_alt_title)) },
                     maxLines = 1,
                     modifier = Modifier.weight(.7f).withTextFieldNavigation()
                 )
 
                 IconButton(onClick = { onTitleRemove(index) }) {
-                    Icon(Icons.Rounded.Delete, contentDescription = null)
+                    Icon(Icons.Default.Delete, contentDescription = null)
                 }
             }
         }
 
         FilledTonalIconButton(onClick = onTitleAdd) {
-            Icon(Icons.Rounded.Add, contentDescription = null)
+            Icon(Icons.Default.Add, contentDescription = null)
         }
     }
 

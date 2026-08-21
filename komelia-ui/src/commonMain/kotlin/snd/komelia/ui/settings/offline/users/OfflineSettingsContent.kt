@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.ExpandLess
-import androidx.compose.material.icons.rounded.ExpandMore
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.SupervisorAccount
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +33,23 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_delete_server_data
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_delete_server_data_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_delete_user_data
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_delete_user_data_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_go_offline
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_go_online
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_login_as
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_none_value
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_root
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_root_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_server
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_status
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_status_offline
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_status_online
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_user
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.offline.server.model.OfflineMediaServer
 import snd.komelia.offline.server.model.OfflineMediaServerId
 import snd.komelia.offline.user.model.OfflineUser
@@ -54,9 +71,26 @@ fun OfflineUserSettingsContent(
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
 
         Column {
-            Text("user: ${currentUser?.email ?: "none"}")
-            Text("status: ${if (isOffline) "offline" else "online"}")
-            Text("server: ${if (currentUser?.id == OfflineUser.ROOT || onlineServerUrl == null) "none" else onlineServerUrl}")
+            Text(
+                stringResource(
+                    Res.string.settings_offline_mode_users_user,
+                    currentUser?.email ?: stringResource(Res.string.settings_offline_mode_users_none_value)
+                )
+            )
+            Text(
+                stringResource(
+                    Res.string.settings_offline_mode_users_status,
+                    if (isOffline) stringResource(Res.string.settings_offline_mode_users_status_offline)
+                    else stringResource(Res.string.settings_offline_mode_users_status_online)
+                )
+            )
+            Text(
+                stringResource(
+                    Res.string.settings_offline_mode_users_server,
+                    if (currentUser?.id == OfflineUser.ROOT || onlineServerUrl == null) stringResource(Res.string.settings_offline_mode_users_none_value)
+                    else onlineServerUrl
+                )
+            )
         }
 
         Row(
@@ -71,9 +105,9 @@ fun OfflineUserSettingsContent(
             }
 
             if (isOffline) {
-                FilledTonalButton(onClick = { goOnline() }) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Go online")) }
+                FilledTonalButton(onClick = { goOnline() }) { Text(stringResource(Res.string.settings_offline_mode_users_go_online)) }
             } else if (canGoOffline) {
-                FilledTonalButton(onClick = { currentUser?.let { loginAs(it.id) } }) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Go offline as current user")) }
+                FilledTonalButton(onClick = { currentUser?.let { loginAs(it.id) } }) { Text(stringResource(Res.string.settings_offline_mode_users_go_offline)) }
             }
         }
 
@@ -126,18 +160,18 @@ fun ServerCard(
             Row {
                 Text(server.url, textDecoration = TextDecoration.Underline)
             }
-            Icon(if (showUsers) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null)
+            Icon(if (showUsers) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
             Spacer(Modifier.weight(1f))
 
             if (onServerDelete != null) {
                 IconButton(onClick = { showDeleteConfirmation = true }) {
-                    Icon(Icons.Rounded.Delete, null)
+                    Icon(Icons.Default.Delete, null)
                 }
 
                 if (showDeleteConfirmation) {
                     ConfirmationDialog(
-                        body = "Delete all server data?",
-                        confirmText = "Yes, delete all downloaded files and user data",
+                        body = stringResource(Res.string.settings_offline_mode_users_delete_server_data),
+                        confirmText = stringResource(Res.string.settings_offline_mode_users_delete_server_data_confirm),
                         onDialogConfirm = { onServerDelete(server.id) },
                         onDialogDismiss = { showDeleteConfirmation = false }
                     )
@@ -172,7 +206,7 @@ private fun UserCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            Icons.Rounded.Person,
+            Icons.Default.Person,
             null,
         )
 
@@ -181,20 +215,20 @@ private fun UserCard(
         }
 
         FilledTonalButton(onClick = { goOffline(user.id) }) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("login"))
+            Text(stringResource(Res.string.settings_offline_mode_users_login_as))
         }
 
         IconButton(
             onClick = { showDeleteConfirmation = true },
         ) {
-            Icon(Icons.Rounded.Delete, null)
+            Icon(Icons.Default.Delete, null)
         }
     }
 
     if (showDeleteConfirmation) {
         ConfirmationDialog(
-            body = "Delete user data?",
-            confirmText = "Yes, delete user data and associated read progress",
+            body = stringResource(Res.string.settings_offline_mode_users_delete_user_data),
+            confirmText = stringResource(Res.string.settings_offline_mode_users_delete_user_data_confirm),
             onDialogConfirm = { onUserDelete(user.id) },
             onDialogDismiss = { showDeleteConfirmation = false }
         )
@@ -218,20 +252,19 @@ fun RootUserCard(goOffline: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Icon(
-                    Icons.Rounded.SupervisorAccount,
+                    Icons.Default.SupervisorAccount,
                     null,
                     tint = MaterialTheme.colorScheme.tertiaryContainer
                 )
-                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("root"))
+                Text(stringResource(Res.string.settings_offline_mode_users_root))
             }
 
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Special user that has access to all downloaded books"))
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Read progress will not be synced"))
+            Text(stringResource(Res.string.settings_offline_mode_users_root_desc))
         }
 
 
         FilledTonalButton(onClick = { goOffline() }) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("login"))
+            Text(stringResource(Res.string.settings_offline_mode_users_login_as))
         }
     }
 }

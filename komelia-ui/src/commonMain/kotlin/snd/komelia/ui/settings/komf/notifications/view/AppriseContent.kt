@@ -5,7 +5,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -36,7 +35,26 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_add_url
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_add_url_cancel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_add_url_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_failed_to_parse_url
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_failed_to_parse_url_apply
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_github
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_template_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_template_save
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_template_test_send
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_template_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_upload_series_cover
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_url
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_urls
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_apprise_velocity_link
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_template
 import io.ktor.http.*
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.CheckboxWithLabel
 import snd.komelia.ui.common.components.SwitchWithLabel
@@ -67,7 +85,7 @@ fun AppriseContent(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
 
-        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Urls"))
+        Text(stringResource(Res.string.komf_notification_apprise_urls))
         urls.forEach { url ->
 
             Row {
@@ -79,7 +97,7 @@ fun AppriseContent(
                 )
 
                 IconButton(onClick = { onUrlRemove(url) }, modifier = Modifier.cursorForHand()) {
-                    Icon(Icons.Rounded.Delete, null)
+                    Icon(Icons.Default.Delete, null)
                 }
             }
         }
@@ -88,12 +106,12 @@ fun AppriseContent(
             onClick = { showAddUrlDialog = true },
             modifier = Modifier.cursorForHand()
         ) {
-            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add Url"))
+            Text(stringResource(Res.string.komf_notification_apprise_add_url))
         }
         SwitchWithLabel(
             checked = uploadSeriesCover,
             onCheckedChange = onUploadSeriesCoverChange,
-            label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Upload series cover")) }
+            label = { Text(stringResource(Res.string.komf_notification_apprise_upload_series_cover)) }
         )
 
         if (showAddUrlDialog) {
@@ -140,7 +158,10 @@ fun AddUrlDialog(
                 modifier = Modifier.padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text("Add URL", style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    stringResource(Res.string.komf_notification_apprise_add_url),
+                    style = MaterialTheme.typography.headlineSmall
+                )
                 HorizontalDivider()
             }
         },
@@ -151,18 +172,18 @@ fun AddUrlDialog(
                 TextField(
                     value = newWebhook,
                     onValueChange = { newWebhook = it },
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("URL")) },
+                    label = { Text(stringResource(Res.string.komf_notification_apprise_url)) },
                     modifier = Modifier.fillMaxWidth(),
                     isError = isError,
                     interactionSource = interactionSource,
-                    supportingText = { if (isError) Text(snd.komelia.ui.LocalStrings.current.legacy.forText("failed to parse URL")) },
+                    supportingText = { if (isError) Text(stringResource(Res.string.komf_notification_apprise_failed_to_parse_url)) },
                     visualTransformation = if (isFocused) VisualTransformation.None else PasswordVisualTransformation(),
                 )
                 if (isError) {
                     CheckboxWithLabel(
                         checked = confirmInvalidUrl,
                         onCheckedChange = { confirmInvalidUrl = !confirmInvalidUrl },
-                        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("apply anyway")) }
+                        label = { Text(stringResource(Res.string.komf_notification_apprise_failed_to_parse_url_apply)) }
                     )
                 }
             }
@@ -176,7 +197,7 @@ fun AddUrlDialog(
                 TextButton(
                     onClick = onDismissRequest,
                     modifier = Modifier.cursorForHand(),
-                    content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel")) }
+                    content = { Text(stringResource(Res.string.komf_notification_apprise_add_url_cancel)) }
                 )
 
                 FilledTonalButton(
@@ -187,14 +208,13 @@ fun AddUrlDialog(
                     modifier = Modifier.cursorForHand(),
                     enabled = !isError || confirmInvalidUrl
                 ) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Confirm"))
+                    Text(stringResource(Res.string.komf_notification_apprise_add_url_confirm))
                 }
             }
         }
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TemplatesEditor(
     titleTemplate: String,
@@ -209,11 +229,14 @@ private fun TemplatesEditor(
     var showNotificationContextDialog by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("Notification Template", style = MaterialTheme.typography.titleLarge)
+        Text(
+            stringResource(Res.string.komf_notification_template),
+            style = MaterialTheme.typography.titleLarge
+        )
         Column {
-            Text("Uses Apprise executable installed on the system.\nTemplates are rendered using Apache Velocity")
+            Text(stringResource(Res.string.komf_notification_apprise_desc))
             Text(
-                "Apprise github page",
+                text = stringResource(Res.string.komf_notification_apprise_github),
                 color = MaterialTheme.colorScheme.secondary,
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.clickable {
@@ -221,7 +244,7 @@ private fun TemplatesEditor(
                 }.padding(2.dp).cursorForHand()
             )
             Text(
-                "Velocity Template Language syntax reference",
+                stringResource(Res.string.komf_notification_apprise_velocity_link),
                 color = MaterialTheme.colorScheme.secondary,
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.clickable {
@@ -233,14 +256,14 @@ private fun TemplatesEditor(
             TextField(
                 value = titleTemplate,
                 onValueChange = onTitleTemplateChange,
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Title")) },
+                label = { Text(stringResource(Res.string.komf_notification_apprise_template_title)) },
                 maxLines = 1,
                 modifier = Modifier.fillMaxWidth()
             )
             TextField(
                 value = bodyTemplate,
                 onValueChange = onBodyTemplateChange,
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Body")) },
+                label = { Text(stringResource(Res.string.komf_notification_apprise_template_body)) },
                 minLines = 2,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -254,7 +277,7 @@ private fun TemplatesEditor(
                 onClick = { showNotificationContextDialog = true },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Notification Context"))
+                Text(stringResource(Res.string.komf_notification_context))
 
             }
 
@@ -262,7 +285,7 @@ private fun TemplatesEditor(
                 onClick = onTemplateSend,
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Test Send"))
+                Text(stringResource(Res.string.komf_notification_apprise_template_test_send))
             }
 
             FilledTonalButton(
@@ -270,7 +293,7 @@ private fun TemplatesEditor(
                 enabled = true,
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Save"))
+                Text(stringResource(Res.string.komf_notification_apprise_template_save))
             }
         }
     }

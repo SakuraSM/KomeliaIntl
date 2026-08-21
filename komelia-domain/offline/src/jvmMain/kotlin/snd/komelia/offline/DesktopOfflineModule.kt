@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import snd.komelia.offline.mediacontainer.DivinaExtractor
 import snd.komelia.offline.mediacontainer.EpubExtractor
-import snd.komelia.offline.mediacontainer.divina.DivinaRarExtractor
 import snd.komelia.offline.mediacontainer.divina.DivinaZipExtractor
 import snd.komelia.offline.mediacontainer.divina.EpubZipExtractor
 import snd.komelia.offline.mediacontainer.divina.RarExtractor
@@ -31,13 +30,9 @@ class DesktopOfflineModule(
     komgaClientFactory = komgaClientFactory,
 ) {
     private val zipExtractor = ZipExtractor()
-    private val rarExtractor = RarExtractor()
 
     override fun createDivinaExtractors(): List<DivinaExtractor> {
-        return listOf(
-            DivinaZipExtractor(zipExtractor),
-            DivinaRarExtractor(rarExtractor),
-        )
+        return listOf(DivinaZipExtractor(zipExtractor), RarExtractor())
     }
 
     override fun createEpubExtractor(): EpubExtractor {

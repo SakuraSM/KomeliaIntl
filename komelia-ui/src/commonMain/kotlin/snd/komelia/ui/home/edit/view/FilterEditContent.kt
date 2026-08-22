@@ -9,13 +9,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -96,6 +99,7 @@ fun FilterEditContent(
     onFiltersReset: () -> Unit,
 ) {
     Column {
+        androidx.compose.foundation.layout.Spacer(Modifier.windowInsetsTopHeight(WindowInsets.systemBars))
         Toolbar(onExit, onEditEnd, onFiltersReset)
         EditContent(
             filters = filters,
@@ -232,22 +236,22 @@ private fun ReorderableCollectionItemScope.FilterContent(
     var labelText by remember { mutableStateOf(label) }
     Column(
         modifier = Modifier
-            .padding(vertical = 5.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(16.dp))
             .background(
                 if (isDragging) MaterialTheme.colorScheme.surfaceBright
-                else MaterialTheme.colorScheme.surface
+                else MaterialTheme.colorScheme.surfaceContainerLowest
             )
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
             .then(
                 if (isDragging) Modifier.border(
-                    4.dp,
+                    3.dp,
                     MaterialTheme.colorScheme.secondary,
-                    RoundedCornerShape(10.dp)
+                    RoundedCornerShape(16.dp)
                 )
                 else Modifier
             )
     ) {
-        HorizontalDivider()
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp),

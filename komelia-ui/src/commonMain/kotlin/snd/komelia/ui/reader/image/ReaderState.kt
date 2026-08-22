@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import snd.komelia.AppNotification
+import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.color.repository.BookColorCorrectionRepository
 import snd.komelia.image.ReaderImage.PageId
@@ -238,7 +239,7 @@ class ReaderState(
                 previousBookPages = previousBookPages,
             )
         } else
-            appNotifications.add(AppNotification.Normal("You're at the beginning of the book"))
+            appNotifications.add(AppNotification.Normal(AppNotificationMessageKey.READER_AT_BEGINNING))
         return
     }
 

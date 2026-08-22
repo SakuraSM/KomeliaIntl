@@ -76,7 +76,7 @@ class SeriesScreen(
         ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
             when (val state = vm.state.collectAsState().value) {
                 is Error -> ErrorContent(
-                    message = state.exception.message ?: "Unknown Error",
+                    exception = state.exception,
                     onReload = vm::reload
                 )
 

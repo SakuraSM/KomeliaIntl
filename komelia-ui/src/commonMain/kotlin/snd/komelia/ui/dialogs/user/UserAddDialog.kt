@@ -54,7 +54,7 @@ fun UserAddDialog(
         emailValidation = vm.emailValidationError,
         onEmailChange = vm::onEmailChange,
         password = vm.password,
-        passwordValidation = vm.passwordValidationError,
+        passwordValidation = vm.passwordValidationError?.let { stringResource(it) },
         onPasswordChange = vm::onPasswordChange,
         administratorRole = vm.administratorRole,
         onAdministratorRoleChange = vm::administratorRole::set,

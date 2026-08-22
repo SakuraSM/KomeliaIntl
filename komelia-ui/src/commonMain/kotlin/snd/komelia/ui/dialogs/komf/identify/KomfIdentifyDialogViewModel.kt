@@ -139,7 +139,8 @@ class KomfIdentifyDialogViewModel(
                             is ProviderBookEvent -> providersProgress.addOrReplace(
                                 ProviderProgressStatus(
                                     provider = event.provider,
-                                    message = "Retrieving book data: ${event.bookProgress}/${event.totalBooks}",
+                                    message = null,
+                                    messageType = ProgressMessage.RETRIEVING_BOOK_DATA,
                                     totalProgress = event.totalBooks,
                                     currentProgress = event.bookProgress,
                                     status = ProgressStatus.RUNNING,
@@ -149,7 +150,8 @@ class KomfIdentifyDialogViewModel(
                             is ProviderSeriesEvent -> providersProgress.addOrReplace(
                                 ProviderProgressStatus(
                                     provider = event.provider,
-                                    message = "Retrieving series data",
+                                    message = null,
+                                    messageType = ProgressMessage.RETRIEVING_SERIES_DATA,
                                     totalProgress = null,
                                     currentProgress = null,
                                     status = ProgressStatus.RUNNING
@@ -207,6 +209,7 @@ class KomfIdentifyDialogViewModel(
         data class ProviderProgressStatus(
             val provider: KomfProviders,
             val message: String?,
+            val messageType: ProgressMessage? = null,
             val totalProgress: Int?,
             val currentProgress: Int?,
             val status: ProgressStatus
@@ -216,6 +219,11 @@ class KomfIdentifyDialogViewModel(
             RUNNING,
             COMPLETED,
             ERROR,
+        }
+
+        enum class ProgressMessage {
+            RETRIEVING_BOOK_DATA,
+            RETRIEVING_SERIES_DATA,
         }
     }
 

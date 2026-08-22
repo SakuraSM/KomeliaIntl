@@ -134,7 +134,7 @@ class LibraryScreen(
 
         ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
             when (val state = vm.state.collectAsState().value) {
-                is Error -> ErrorContent(message = state.exception.message ?: "Unknown Error", onReload = vm::reload)
+                is Error -> ErrorContent(exception = state.exception, onReload = vm::reload)
                 Uninitialized, Loading, is Success -> {
                     val onScopeSelected: (KomgaLibraryId?) -> Unit = { selectedId ->
                         if (selectedId != libraryId) {
@@ -197,7 +197,7 @@ class LibraryScreen(
 
         when (val state = seriesTabState.state.collectAsState().value) {
             is Error -> ErrorContent(
-                message = state.exception.message ?: "Unknown Error",
+                exception = state.exception,
                 onReload = seriesTabState::reload
             )
 
@@ -241,7 +241,7 @@ class LibraryScreen(
         when (val state = collectionsTabState.state.collectAsState().value) {
             Uninitialized -> LoadingMaxSizeIndicator()
             is Error -> ErrorContent(
-                message = state.exception.message ?: "Unknown Error",
+                exception = state.exception,
                 onReload = collectionsTabState::reload
             )
 

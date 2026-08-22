@@ -41,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.AppNotification
+import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.offline.tasks.OfflineTaskEmitter
@@ -256,31 +257,31 @@ data class LibraryMenuActions(
         scan = {
             notifications.runCatchingToNotifications(scope) {
                 libraryApi.scan(it.id)
-                notifications.add(AppNotification.Normal("Launched library scan"))
+                notifications.add(AppNotification.Normal(AppNotificationMessageKey.LIBRARY_SCAN_STARTED))
             }
         },
         deepScan = {
             notifications.runCatchingToNotifications(scope) {
                 libraryApi.scan(it.id, true)
-                notifications.add(AppNotification.Normal("Launched library deep scan"))
+                notifications.add(AppNotification.Normal(AppNotificationMessageKey.LIBRARY_DEEP_SCAN_STARTED))
             }
         },
         analyze = {
             notifications.runCatchingToNotifications(scope) {
                 libraryApi.analyze(it.id)
-                notifications.add(AppNotification.Normal("Launched library analysis"))
+                notifications.add(AppNotification.Normal(AppNotificationMessageKey.LIBRARY_ANALYSIS_STARTED))
             }
         },
         refresh = {
             notifications.runCatchingToNotifications(scope) {
                 libraryApi.refreshMetadata(it.id)
-                notifications.add(AppNotification.Normal("Launched library refresh"))
+                notifications.add(AppNotification.Normal(AppNotificationMessageKey.LIBRARY_REFRESH_STARTED))
             }
         },
         emptyTrash = {
             notifications.runCatchingToNotifications(scope) {
                 libraryApi.emptyTrash(it.id)
-                notifications.add(AppNotification.Normal("Launched library trash task"))
+                notifications.add(AppNotification.Normal(AppNotificationMessageKey.LIBRARY_TRASH_STARTED))
             }
         },
         delete = {

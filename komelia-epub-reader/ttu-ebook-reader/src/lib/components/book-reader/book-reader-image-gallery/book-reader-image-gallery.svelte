@@ -11,6 +11,7 @@
   import Fa from 'svelte-fa';
   import { fly } from 'svelte/transition';
   import {onKeyDownReaderImageGallery} from "../../../../on-keydown-reader";
+  import {t} from '$lib/i18n';
 
   export let fontColor: string;
   export let backgroundColor: string;
@@ -137,7 +138,7 @@
       style:background-color={backgroundColor}
     >
       <button
-        title="Close Image Gallery"
+        title={t('Close Image Gallery')}
         class="flex items-end md:items-center"
         on:click={closeReaderImageGallery}
       >
@@ -154,7 +155,7 @@
         >
           <button
             type="button"
-            aria-label="Select gallery image"
+            aria-label={t('Select gallery image')}
             on:click={() => {
               if (window.matchMedia('(min-width: 1024px)').matches) {
                 selectedImageIndex = urlIndex;
@@ -163,19 +164,19 @@
           >
             <img
               src={readerImageGalleryPicture.url}
-              alt="Gallery page"
+              alt={t('Gallery page')}
               class="max-h-96 lg:max-h-64"
             />
           </button>
           {#if showSpoiler}
             <button
               type="button"
-              title="Show Image"
-              aria-label="Show spoiler image"
+              title={t('Show Image')}
+              aria-label={t('Show spoiler image')}
               class="spoiler-label"
               on:click={() => toggleGalleryPictureSpoiler(readerImageGalleryPicture.url)}
             >
-              ネタバレ
+              {t('Spoiler')}
             </button>
           {/if}
         </div>
@@ -191,7 +192,7 @@
       {@const showSpoiler = $hideSpoilerImage$ && !selectedImage.unspoilered}
       <div class="flex flex-1">
         <button
-          title="Previous Image"
+          title={t('Previous Image')}
           class="mx-4 text-5xl hover:text-red-500"
           class:invisible={!selectedImageIndex}
           on:click={previousImage}
@@ -199,20 +200,20 @@
           <Fa icon={faChevronLeft} />
         </button>
         <div class="flex justify-center items-center flex-1" class:spoiler={showSpoiler}>
-          <img class="max-h-[94vh]" src={selectedImage.url} alt="currentImage" />
+          <img class="max-h-[94vh]" src={selectedImage.url} alt={t('Current image')} />
           {#if showSpoiler}
             <button
-              title="Show Image"
+              title={t('Show Image')}
               class="spoiler-label"
               aria-hidden="true"
               on:click={() => toggleGalleryPictureSpoiler(selectedImage.url)}
             >
-              ネタバレ
+              {t('Spoiler')}
             </button>
           {/if}
         </div>
         <button
-          title="Next Image"
+          title={t('Next Image')}
           class="mx-4 text-5xl hover:text-red-500"
           class:invisible={selectedImageIndex === $readerImageGalleryPictures$.length - 1}
           on:click={nextImage}

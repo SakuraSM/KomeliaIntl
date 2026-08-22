@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import snd.komelia.AppNotification
+import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.color.ColorCurvePoints
 import snd.komelia.color.ColorCurvePreset
@@ -29,7 +30,12 @@ sealed class PresetsState<T : Preset>(
     fun onPresetSelect(preset: T) {
         val selectedPreset = presets.value.firstOrNull { it.name == preset.name }
         if (selectedPreset == null) {
-            appNotifications.add(AppNotification.Error("preset with $selectedPreset does not exist"))
+            appNotifications.add(
+                AppNotification.Error(
+                    AppNotificationMessageKey.COLOR_PRESET_NOT_FOUND,
+                    preset.name,
+                )
+            )
             return
         }
         this.selectedPreset.value = selectedPreset
@@ -39,7 +45,9 @@ sealed class PresetsState<T : Preset>(
     fun onPresetDelete(preset: T) {
         val deletePreset = presets.value.firstOrNull { it.name == preset.name }
         if (deletePreset == null) {
-            appNotifications.add(AppNotification.Error("preset with $preset does not exist"))
+            appNotifications.add(
+                AppNotification.Error(AppNotificationMessageKey.COLOR_PRESET_NOT_FOUND, preset.name)
+            )
             return
         }
         presets.update { it.minus(preset) }
@@ -51,7 +59,7 @@ sealed class PresetsState<T : Preset>(
     fun onPresetAdd(presetName: String, override: Boolean = false) {
         val existingPreset = presets.value.firstOrNull { it.name == presetName }
         if (existingPreset != null && !override) {
-            appNotifications.add(AppNotification.Error("Preset with that name already exists"))
+            appNotifications.add(AppNotification.Error(AppNotificationMessageKey.COLOR_PRESET_ALREADY_EXISTS))
             return
         }
 

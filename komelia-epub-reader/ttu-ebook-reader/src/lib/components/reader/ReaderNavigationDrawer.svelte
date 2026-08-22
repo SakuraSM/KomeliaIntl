@@ -11,6 +11,7 @@
   import type {ReaderAnnotation} from '$lib/data/reader-annotation';
   import type {ReaderSearchResult} from '$lib/functions/reader-interactions';
   import ReaderSearchPanel from '$lib/components/reader/ReaderSearchPanel.svelte';
+  import {t} from '$lib/i18n';
 
   type DrawerTab = 'toc' | 'search' | 'marks';
 
@@ -79,10 +80,10 @@
     in:fly|local={{ x: -100, duration: 130, easing: quintInOut }}
     role="dialog"
     aria-modal="true"
-    aria-label="阅读导航"
+    aria-label={t('Reader navigation')}
 >
   <div class="flex items-center justify-between gap-3 border-b border-current/10 px-4 py-3">
-    <nav class="flex rounded-full bg-current/10 p-1" aria-label="导航类型">
+    <nav class="flex rounded-full bg-current/10 p-1" aria-label={t('Navigation type')}>
       <button
           type="button"
           class={`flex h-9 items-center gap-2 rounded-full px-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8e8bb8]/70 ${activeTab === 'toc' ? 'bg-[#8e8bb8]/20' : ''}`}
@@ -90,7 +91,7 @@
           onclick={() => (activeTab = 'toc')}
       >
         <Fa icon={faList}/>
-        目录
+        {t('Table of Contents')}
       </button>
       <button
           type="button"
@@ -99,7 +100,7 @@
           onclick={() => (activeTab = 'search')}
       >
         <Fa icon={faMagnifyingGlass}/>
-        搜索
+        {t('Search')}
       </button>
       <button
           type="button"
@@ -108,13 +109,13 @@
           onclick={() => (activeTab = 'marks')}
       >
         <Fa icon={faBookmark}/>
-        标记
+        {t('Marks')}
       </button>
     </nav>
     <button
         type="button"
         class="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8e8bb8]/70"
-        aria-label="关闭导航"
+        aria-label={t('Close navigation')}
         onclick={onClose}
     >
       <Fa icon={faXmark}/>
@@ -123,10 +124,10 @@
 
   <div class="min-h-0 flex-1 overflow-hidden px-4 pt-4">
     {#if activeTab === 'toc'}
-      <section class="flex h-full flex-col gap-3" aria-label="目录">
+      <section class="flex h-full flex-col gap-3" aria-label={t('Table of Contents')}>
         <div class="flex items-center justify-between text-sm text-current/65">
-          <span>{chapters.length} 个章节</span>
-          <span>{verticalMode ? '竖排' : '横排'}</span>
+          <span>{t('{count} chapters', {count: chapters.length})}</span>
+          <span>{t(verticalMode ? 'Vertical' : 'Horizontal')}</span>
         </div>
         <ol class="min-h-0 flex-1 space-y-1 overflow-auto pb-8">
           {#each chapters as chapter, index (chapter.reference)}
@@ -138,7 +139,7 @@
                   aria-current={index === currentChapterIndex ? 'location' : undefined}
                   onclick={() => goToChapter(chapter)}
               >
-                <span class="block text-sm font-medium">{chapter.label || `章节 ${index + 1}`}</span>
+                <span class="block text-sm font-medium">{chapter.label || t('Chapter {number}', {number: index + 1})}</span>
                 <span class="mt-1 block text-xs text-current/55">{getChapterProgressLabel(chapter)}</span>
               </button>
             </li>
@@ -156,8 +157,8 @@
           onResultClick={onSearchResultClick}
       />
     {:else}
-      <section class="flex h-full flex-col gap-3" aria-label="标记">
-        <div class="text-sm text-current/65">{annotations.length ? `${annotations.length} 条高亮` : '还没有高亮标记'}</div>
+      <section class="flex h-full flex-col gap-3" aria-label={t('Marks')}>
+        <div class="text-sm text-current/65">{annotations.length ? t('{count} highlights', {count: annotations.length}) : t('No highlights yet')}</div>
         <ol class="min-h-0 flex-1 space-y-2 overflow-auto pb-8">
           {#each annotations as annotation (annotation.id)}
             <li class="rounded-lg border border-current/10 p-2">
@@ -167,17 +168,17 @@
                   onclick={() => onAnnotationClick(annotation)}
               >
                 <span class="block max-h-[4.5rem] overflow-hidden text-sm leading-6">{annotation.text}</span>
-                <span class="mt-1 block text-xs text-current/55">位置 {annotation.startCharacter}</span>
+                <span class="mt-1 block text-xs text-current/55">{t('Position {position}', {position: annotation.startCharacter})}</span>
               </button>
               <div class="mt-1 flex justify-end">
                 <button
                     type="button"
                     class="flex h-8 items-center gap-2 rounded-full px-3 text-xs text-current/70 transition hover:bg-red-500/15 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/70"
-                    aria-label="删除高亮"
+                    aria-label={t('Delete highlight')}
                     onclick={() => onAnnotationDelete(annotation)}
                 >
                   <Fa icon={faTrashCan}/>
-                  删除
+                  {t('Delete')}
                 </button>
               </div>
             </li>

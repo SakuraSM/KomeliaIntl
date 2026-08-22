@@ -53,7 +53,7 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
         ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
             when (val state = vm.state.collectAsState().value) {
                 is LoadState.Error -> ErrorContent(
-                    message = state.exception.message ?: "Unknown Error",
+                    exception = state.exception,
                     onReload = vm::reload
                 )
 

@@ -2,10 +2,14 @@ package snd.komelia.ui.settings.server
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_field_required
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 import snd.komelia.AppNotification
+import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaActuatorApi
 import snd.komelia.komga.api.KomgaBookApi
@@ -49,12 +53,12 @@ class ServerSettingsViewModel(
     val deleteEmptyReadLists = MutableStateFlow(false)
 
     val rememberMeDurationDays = MutableStateFlow<Int?>(365)
-    val rememberMeDurationDaysValidationMessage = MutableStateFlow<String?>(null)
+    val rememberMeDurationDaysValidationMessage = MutableStateFlow<StringResource?>(null)
 
     val renewRememberMeKey = MutableStateFlow(false)
 
     val taskPoolSize = MutableStateFlow<Int?>(1)
-    val taskPoolSizeValidationMessage = MutableStateFlow<String?>(null)
+    val taskPoolSizeValidationMessage = MutableStateFlow<StringResource?>(null)
 
     val serverPort = MutableStateFlow<Int?>(null)
     val configServerPort = MutableStateFlow<Int?>(25600)
@@ -106,7 +110,7 @@ class ServerSettingsViewModel(
             )
             appNotifications.runCatchingToNotifications {
                 settingsApi.updateSettings(request)
-                appNotifications.add(AppNotification.Success("Updated Server Settings"))
+                appNotifications.add(AppNotification.Success(AppNotificationMessageKey.SERVER_SETTINGS_UPDATED))
                 loadSettings()
             }
         }
@@ -153,7 +157,7 @@ class ServerSettingsViewModel(
 
     fun onRememberMeDurationDaysChange(days: Int?) {
         isChanged.value = true
-        if (days == null) rememberMeDurationDaysValidationMessage.value = "Required"
+        if (days == null) rememberMeDurationDaysValidationMessage.value = Res.string.dialog_field_required
         else rememberMeDurationDaysValidationMessage.value = null
         this.rememberMeDurationDays.value = days
 
@@ -161,7 +165,7 @@ class ServerSettingsViewModel(
 
     fun onTaskPoolSizeChange(taskPoolSize: Int?) {
         isChanged.value = true
-        if (taskPoolSize == null) taskPoolSizeValidationMessage.value = "Required"
+        if (taskPoolSize == null) taskPoolSizeValidationMessage.value = Res.string.dialog_field_required
         else taskPoolSizeValidationMessage.value = null
         this.taskPoolSize.value = taskPoolSize
     }
@@ -181,14 +185,14 @@ class ServerSettingsViewModel(
     fun onScanAllLibraries(deep: Boolean) {
         appNotifications.runCatchingToNotifications(screenModelScope) {
             libraries.value.forEach { libraryApi.scan(it.id, deep) }
-            appNotifications.add(AppNotification.Success("Launched scan for all libraries"))
+            appNotifications.add(AppNotification.Success(AppNotificationMessageKey.ALL_LIBRARIES_SCAN_STARTED))
         }
     }
 
     fun onEmptyTrashForAllLibraries() {
         appNotifications.runCatchingToNotifications(screenModelScope) {
             libraries.value.forEach { libraryApi.emptyTrash(it.id) }
-            appNotifications.add(AppNotification.Success("Emptied trash for all libraries"))
+            appNotifications.add(AppNotification.Success(AppNotificationMessageKey.ALL_LIBRARIES_TRASH_EMPTIED))
         }
     }
 
@@ -197,9 +201,14 @@ class ServerSettingsViewModel(
             val cancelledTasks = taskApi.emptyTaskQueue()
 
             if (cancelledTasks == 0)
-                appNotifications.add(AppNotification.Normal("No tasks to cancel"))
+                appNotifications.add(AppNotification.Normal(AppNotificationMessageKey.NO_TASKS_TO_CANCEL))
             else
-                appNotifications.add(AppNotification.Success("$cancelledTasks tasks cancelled"))
+                appNotifications.add(
+                    AppNotification.Success(
+                        AppNotificationMessageKey.TASKS_CANCELLED,
+                        cancelledTasks.toString(),
+                    )
+                )
         }
     }
 

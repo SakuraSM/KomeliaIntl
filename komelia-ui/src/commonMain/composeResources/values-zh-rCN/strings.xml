@@ -522,6 +522,7 @@
     <string name="collection_edit">编辑</string>
     <string name="collection_delete">删除</string>
     <string name="collection_search_or_create">搜索或创建合集</string>
+    <string name="dialog_field_required">必填</string>
     <string name="collection_exists">已存在同名合集</string>
     <string name="collection_duplicate_series">已包含此系列</string>
     <string name="collection_create">创建</string>
@@ -1138,6 +1139,8 @@
     <string name="komf_identify_no_results">没有结果</string>
     <string name="komf_identify_completed">已完成</string>
     <string name="komf_identify_processing">处理中</string>
+    <string name="komf_identify_retrieving_book_data">正在获取书籍数据：%1$s/%2$s</string>
+    <string name="komf_identify_retrieving_series_data">正在获取系列数据</string>
     <string name="komf_identify_cancel">取消</string>
     <string name="komf_identify_auto_identify">自动识别</string>
     <string name="komf_identify_confirm">确认</string>
@@ -1236,11 +1239,40 @@
     </plurals>
 
     <string name="error_unknown">未知错误</string>
+    <string name="notification_http_bad_request">请求内容无效</string>
+    <string name="notification_http_not_found">找不到请求的资源</string>
+    <string name="notification_http_content_too_large">提交的内容过大</string>
+    <string name="notification_http_teapot">服务器拒绝了此请求（418）</string>
+    <string name="notification_http_error">服务器请求失败（HTTP %1$s）</string>
+    <string name="notification_library_auto_identification_started">已开始自动识别书库</string>
+    <string name="notification_library_scan_started">已开始扫描书库</string>
+    <string name="notification_library_deep_scan_started">已开始深度扫描书库</string>
+    <string name="notification_library_analysis_started">已开始分析书库</string>
+    <string name="notification_library_refresh_started">已开始刷新书库</string>
+    <string name="notification_library_trash_started">已开始清理书库回收站</string>
+    <string name="notification_series_analysis_started">已开始分析系列</string>
+    <string name="notification_series_metadata_refresh_started">已开始刷新系列元数据</string>
+    <string name="notification_book_analysis_started">已开始分析书籍</string>
+    <string name="notification_book_metadata_refresh_started">已开始刷新书籍元数据</string>
+    <string name="notification_color_preset_not_found">预设“%1$s”不存在</string>
+    <string name="notification_color_preset_already_exists">已存在同名预设</string>
+    <string name="notification_reader_at_beginning">已经到达本书开头</string>
+    <string name="notification_image_cache_cleared">图片缓存已清除</string>
+    <string name="notification_discord_webhooks_missing">尚未配置 Discord Webhook</string>
+    <string name="notification_apprise_urls_missing">尚未配置 Apprise URL</string>
+    <string name="notification_templates_saved">模板已保存</string>
+    <string name="notification_server_settings_updated">服务器设置已更新</string>
+    <string name="notification_all_libraries_scan_started">已开始扫描全部书库</string>
+    <string name="notification_all_libraries_trash_emptied">已清空全部书库回收站</string>
+    <string name="notification_no_tasks_to_cancel">没有可取消的任务</string>
+    <string name="notification_tasks_cancelled">已取消 %1$s 个任务</string>
     <string name="error_unrecoverable">遇到无法恢复的错误：%1$s</string>
     <string name="error_copy">复制错误堆栈</string>
     <string name="error_copied">已复制到剪贴板</string>
     <string name="error_restart">重启</string>
     <string name="error_reload">重新加载</string>
     <string name="error_exit">退出</string>
+    <string name="window_logs_title">Komelia 日志</string>
+    <string name="window_error_title">Komelia 错误</string>
 
 </resources>

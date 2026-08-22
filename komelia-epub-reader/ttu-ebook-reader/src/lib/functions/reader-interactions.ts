@@ -6,6 +6,7 @@
 
 import type {SectionWithProgress} from '$lib/components/book-reader/book-toc/book-toc';
 import type {BookmarkData, Section} from '$lib/data/books-db';
+import {t} from '$lib/i18n';
 import {
   DEFAULT_READER_HIGHLIGHT_COLOR,
   READER_ANNOTATION_TYPE_HIGHLIGHT,
@@ -68,7 +69,7 @@ export function buildReaderSearchIndex(
       return {
         chapterReference: section.reference,
         chapterIndex,
-        chapterLabel: section.label || `章节 ${chapterIndex + 1}`,
+        chapterLabel: section.label || t('Chapter {number}', {number: chapterIndex + 1}),
         startCharacter: section.startCharacter || 0,
         text
       } satisfies ReaderSearchIndexItem;

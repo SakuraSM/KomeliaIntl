@@ -1,6 +1,5 @@
 package snd.komelia.ui.settings.authactivity
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -15,6 +14,7 @@ import snd.komelia.ui.LoadState.Loading
 import snd.komelia.ui.LoadState.Success
 import snd.komelia.ui.LoadState.Uninitialized
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.settings.SettingsScreenContainer
 
@@ -30,7 +30,7 @@ class AuthenticationActivityScreen(val forMe: Boolean) : Screen {
         SettingsScreenContainer(stringResource(Res.string.settings_auth_activity_title)) {
             when (val state = vm.state.collectAsState().value) {
                 Uninitialized, Loading -> LoadingMaxSizeIndicator()
-                is Error -> Text(state.exception.message ?: "Error")
+                is Error -> ErrorContent(exception = state.exception)
                 is Success -> AuthenticationActivityContent(
                     activity = vm.activity,
                     forMe = forMe,

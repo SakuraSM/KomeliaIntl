@@ -11,7 +11,7 @@
   import Fa from "svelte-fa";
   import {logger} from "$lib/data/logger";
   import {tick} from 'svelte';
-  import {setLocale} from '$lib/i18n';
+  import {setLocale, t} from '$lib/i18n';
   import {externalFunctions} from '$lib/external';
 
   let showSettings = $state(false)
@@ -112,7 +112,7 @@
   <div class="writing-horizontal-tb fixed inset-0 z-50 h-full w-full" style:z-index={zIndex}>
     <button
         type="button"
-        aria-label="关闭弹窗"
+        aria-label={t('Close dialog')}
         class="tap-highlight-transparent absolute inset-0 bg-black/[.38] backdrop-blur-[2px]"
         onclick={() => {
           if (!clickOnCloseDisabled) {
@@ -125,7 +125,7 @@
         bind:this={dialogContainer}
         role="dialog"
         aria-modal="true"
-        aria-label="阅读器弹窗"
+        aria-label={t('Reader dialog')}
         tabindex="-1"
         class="relative top-1/2 left-1/2 inline-block max-w-[80vw] -translate-x-1/2 -translate-y-1/2"
     >

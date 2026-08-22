@@ -49,6 +49,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_identify_c
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_identify_confirm
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_identify_no_results
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_identify_processing
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_identify_retrieving_book_data
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_identify_retrieving_series_data
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_identify_run_in_background
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_identify_search
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_identify_title
@@ -62,6 +64,7 @@ import snd.komelia.ui.dialogs.DialogSimpleHeader
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialogViewModel.ConfigState
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialogViewModel.IdentificationState
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialogViewModel.IdentificationState.ProgressStatus
+import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialogViewModel.IdentificationState.ProgressMessage
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialogViewModel.IdentificationState.ProgressStatus.RUNNING
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialogViewModel.IdentificationState.ProviderProgressStatus
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialogViewModel.IdentifyTab.IDENTIFICATION_PROGRESS
@@ -213,6 +216,19 @@ private fun ProviderProgressCard(progress: ProviderProgressStatus) {
             Text(AppStrings.forProvider(progress.provider))
             Spacer(Modifier.weight(1f))
             progress.message?.let { Text(it) }
+            when (progress.messageType) {
+                ProgressMessage.RETRIEVING_BOOK_DATA -> Text(
+                    stringResource(
+                        Res.string.komf_identify_retrieving_book_data,
+                        progress.currentProgress ?: 0,
+                        progress.totalProgress ?: 0,
+                    )
+                )
+                ProgressMessage.RETRIEVING_SERIES_DATA -> Text(
+                    stringResource(Res.string.komf_identify_retrieving_series_data)
+                )
+                null -> Unit
+            }
 
             when (progress.status) {
                 ProgressStatus.COMPLETED -> {

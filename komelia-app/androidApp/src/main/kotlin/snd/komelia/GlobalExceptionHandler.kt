@@ -2,6 +2,7 @@ package snd.komelia
 
 import android.content.Context
 import android.content.Intent
+import io.github.snd_r.komelia.R
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -26,7 +27,7 @@ class GlobalExceptionHandler private constructor(
         try {
             logger.catching(exception)
             val exceptionData = ExceptionData(
-                exceptionName = exception::class.simpleName ?: "Unknown Error",
+                exceptionName = exception::class.simpleName ?: applicationContext.getString(R.string.unknown_error),
                 message = exception.message,
                 stacktrace = exception.stackTraceToString()
             )

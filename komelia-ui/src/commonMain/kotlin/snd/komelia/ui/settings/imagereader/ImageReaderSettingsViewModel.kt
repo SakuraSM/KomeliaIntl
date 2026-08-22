@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import snd.komelia.AppNotification
+import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.image.KomeliaPanelDetector
 import snd.komelia.image.KomeliaUpscaler
@@ -92,7 +93,7 @@ class ImageReaderSettingsViewModel(
 
     fun onClearImageCache() {
         clearImageCache()
-        appNotifications.add(AppNotification.Success("Cleared image cache"))
+        appNotifications.add(AppNotification.Success(AppNotificationMessageKey.IMAGE_CACHE_CLEARED))
     }
 
     private fun clearImageCache() {

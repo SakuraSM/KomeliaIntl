@@ -32,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.AppNotification
+import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.model.KomeliaBook
@@ -206,13 +207,13 @@ data class BookMenuActions(
         analyze = {
             notifications.runCatchingToNotifications(scope) {
                 bookApi.analyze(it.id)
-                notifications.add(AppNotification.Normal("Launched book analysis"))
+                notifications.add(AppNotification.Normal(AppNotificationMessageKey.BOOK_ANALYSIS_STARTED))
             }
         },
         refreshMetadata = {
             notifications.runCatchingToNotifications(scope) {
                 bookApi.refreshMetadata(it.id)
-                notifications.add(AppNotification.Normal("Launched book metadata refresh"))
+                notifications.add(AppNotification.Normal(AppNotificationMessageKey.BOOK_METADATA_REFRESH_STARTED))
             }
         },
         markAsRead = { book ->

@@ -1,13 +1,11 @@
 package snd.komelia.ui.settings.server
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.screen_error
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_server
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
@@ -15,6 +13,7 @@ import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.OptionsStateHolder
 import snd.komelia.ui.StateHolder
+import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.settings.SettingsScreenContainer
 import snd.komga.client.settings.KomgaThumbnailSize
@@ -30,7 +29,7 @@ class ServerSettingsScreen : Screen {
 
         SettingsScreenContainer(stringResource(Res.string.settings_server)) {
             when (state) {
-                is LoadState.Error -> Text(stringResource(Res.string.screen_error, state.exception.message ?: ""))
+                is LoadState.Error -> ErrorContent(exception = state.exception)
                 LoadState.Loading, LoadState.Uninitialized -> LoadingMaxSizeIndicator()
                 is LoadState.Success -> {
                     val thumbnailSize = vm.thumbnailSize.collectAsState()
@@ -49,12 +48,14 @@ class ServerSettingsScreen : Screen {
                             value = vm.taskPoolSize.collectAsState(Dispatchers.Main.immediate).value,
                             setValue = vm::onTaskPoolSizeChange,
                             errorMessage = vm.taskPoolSizeValidationMessage.collectAsState().value
+                                ?.let { stringResource(it) }
                         ),
 
                         rememberMeDurationDays = StateHolder(
                             value = vm.rememberMeDurationDays.collectAsState(Dispatchers.Main.immediate).value,
                             setValue = vm::onRememberMeDurationDaysChange,
                             errorMessage = vm.rememberMeDurationDaysValidationMessage.collectAsState().value
+                                ?.let { stringResource(it) }
                         ),
                         renewRememberMeKey = StateHolder(
                             vm.renewRememberMeKey.collectAsState(Dispatchers.Main.immediate).value,

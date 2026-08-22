@@ -2,6 +2,7 @@
   import {faChevronDown, faChevronUp, faMagnifyingGlass} from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
   import type {ReaderSearchResult} from '$lib/functions/reader-interactions';
+  import {t} from '$lib/i18n';
 
   interface Props {
     query: string;
@@ -24,15 +25,15 @@
   }: Props = $props();
 </script>
 
-<section class="flex min-h-0 flex-1 flex-col gap-3" aria-label="书内搜索">
+<section class="flex min-h-0 flex-1 flex-col gap-3" aria-label={t('Search this book')}>
   <label class="flex items-center gap-2 rounded-xl border border-current/15 px-3 py-2 focus-within:ring-2 focus-within:ring-[#8e8bb8]/70">
     <Fa icon={faMagnifyingGlass} class="text-current/55"/>
-    <span class="sr-only">搜索本书</span>
+    <span class="sr-only">{t('Search this book')}</span>
     <input
         class="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-current/45"
         type="search"
         value={query}
-        placeholder="搜索本书"
+        placeholder={t('Search this book')}
         autocomplete="off"
         oninput={(event) => onQueryInput(event.currentTarget.value)}
     />
@@ -41,16 +42,16 @@
   <div class="flex items-center justify-between gap-3 text-sm">
     <span class="text-current/65">
       {#if query.trim()}
-        {results.length ? `${results.length} 条结果` : '没有结果'}
+        {results.length ? t('{count} results', {count: results.length}) : t('No results')}
       {:else}
-        输入关键词后在当前书籍内查找
+        {t('Enter a keyword to search within this book')}
       {/if}
     </span>
     <div class="flex gap-1">
       <button
           type="button"
           class="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8e8bb8]/70 disabled:pointer-events-none disabled:opacity-35"
-          aria-label="上一条搜索结果"
+          aria-label={t('Previous search result')}
           disabled={!results.length}
           onclick={onPreviousResult}
       >
@@ -59,7 +60,7 @@
       <button
           type="button"
           class="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-current/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8e8bb8]/70 disabled:pointer-events-none disabled:opacity-35"
-          aria-label="下一条搜索结果"
+          aria-label={t('Next search result')}
           disabled={!results.length}
           onclick={onNextResult}
       >

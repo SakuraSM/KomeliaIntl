@@ -208,7 +208,11 @@ fun AppNotifications(
 
     LaunchedEffect(toaster) {
         val toastsFlow = appNotifications.getNotifications()
-            .map { notifications -> notifications.map { it.toToast() } }
+            .map { notifications ->
+                buildList {
+                    for (notification in notifications) add(notification.toToast())
+                }
+            }
         toaster.listenMany(toastsFlow)
     }
 

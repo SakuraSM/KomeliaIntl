@@ -56,7 +56,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabDisposable
 import cafe.adriel.voyager.navigator.tab.TabNavigator
@@ -107,15 +109,24 @@ class MainScreen(
             tabDisposable = { TabDisposable(it, tabs) },
             key = "main-destinations",
         ) { tabNavigator ->
+            val rootNavigator = LocalNavigator.currentOrThrow
+            val rootScreen = rootNavigator.lastItem
+            if (rootScreen !is AppTab) {
+                rootNavigator.saveableState("immersive-screen", rootScreen) {
+                    rootScreen.Content()
+                }
+                return@TabNavigator
+            }
+
             var activeNavigator by remember { mutableStateOf<Navigator?>(null) }
             var activeDestination by remember { mutableStateOf<AppDestination?>(null) }
             var pendingScreen by remember { mutableStateOf<Pair<AppDestination, Screen>?>(null) }
-            val currentTab = tabNavigator.current as AppTab
+            val currentTab = rootScreen
             val taskCount = vm.komgaTaskQueueStatus.collectAsState().value?.count ?: 0
 
             fun selectDestination(destination: AppDestination, screen: Screen? = null) {
                 val targetTab = tabs.first { it.destination == destination }
-                val selectedDestination = (tabNavigator.current as AppTab).destination
+                val selectedDestination = currentTab.destination
                 if (screen != null) pendingScreen = destination to screen
 
                 if (

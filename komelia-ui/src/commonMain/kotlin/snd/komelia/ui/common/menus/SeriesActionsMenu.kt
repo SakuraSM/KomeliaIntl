@@ -34,6 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.AppNotification
+import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.offline.tasks.OfflineTaskEmitter
@@ -252,13 +253,13 @@ data class SeriesMenuActions(
         analyze = {
             notifications.runCatchingToNotifications(scope) {
                 seriesApi.analyze(it.id)
-                notifications.add(AppNotification.Normal("Launched series analysis"))
+                notifications.add(AppNotification.Normal(AppNotificationMessageKey.SERIES_ANALYSIS_STARTED))
             }
         },
         refreshMetadata = {
             notifications.runCatchingToNotifications(scope) {
                 seriesApi.refreshMetadata(it.id)
-                notifications.add(AppNotification.Normal("Launched series metadata refresh"))
+                notifications.add(AppNotification.Normal(AppNotificationMessageKey.SERIES_METADATA_REFRESH_STARTED))
             }
         },
         addToCollection = { },

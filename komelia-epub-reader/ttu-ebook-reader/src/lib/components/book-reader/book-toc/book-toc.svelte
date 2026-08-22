@@ -11,6 +11,7 @@
   import {dummyFn, getWeightedAverage} from '$lib/functions/utils';
   import {onMount} from 'svelte';
   import Fa from 'svelte-fa';
+  import {t} from '$lib/i18n';
 
   export let sectionData: SectionWithProgress[] = [];
   export let exploredCharCount = 0;
@@ -107,11 +108,11 @@
 </script>
 
 <div class="flex justify-between p-4">
-  <div>章节进度：{currentChapterCharacterProgress} ({currentChapterProgress}%)</div>
+  <div>{t('Chapter progress: {current} ({percent}%)', {current: currentChapterCharacterProgress, percent: currentChapterProgress})}</div>
   <div
       tabindex="0"
       role="button"
-      title="关闭目录"
+      title={t('Close Table of Contents')}
       class="flex items-end md:items-center"
       on:click={closeTocMenu}
       on:keyup={dummyFn}
@@ -125,7 +126,7 @@
       <div
           tabindex="0"
           role="button"
-          title={`跳转到 ${chapter.label}`}
+          title={t('Go to {chapter}', {chapter: chapter.label ?? ''})}
           id={`for${chapter.reference}`}
           class="mr-4"
           class:opacity-30={chapter.progress === 100 && chapter !== currentChapter}
@@ -146,7 +147,7 @@
   <div
       tabindex="0"
       role="button"
-      title={prevChapterAvailable ? `${verticalMode ? '下一' : '上一'}章节` : ''}
+      title={prevChapterAvailable ? t(verticalMode ? 'Next chapter' : 'Previous chapter') : ''}
       class:opacity-30={!prevChapterAvailable}
       on:click={() => changeChapter(prevChapterAvailable, verticalMode ? 1 : -1)}
       on:keyup={dummyFn}
@@ -156,7 +157,7 @@
   <div
       tabindex="0"
       role="button"
-      title={nextChapterAvailable ? `${verticalMode ? '上一' : '下一'}章节` : ''}
+      title={nextChapterAvailable ? t(verticalMode ? 'Previous chapter' : 'Next chapter') : ''}
       class:opacity-30={!nextChapterAvailable}
       on:click={() => changeChapter(nextChapterAvailable, verticalMode ? -1 : 1)}
       on:keyup={dummyFn}

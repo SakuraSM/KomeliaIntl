@@ -1,23 +1,26 @@
-# Komelia 中文增强版 — Komga 媒体客户端
+# Komelia 中文增强版
 
 [English](README.md) | [简体中文](README_zh-CN.md)
 
-本仓库基于官方项目 [Snd-R/Komelia](https://github.com/Snd-R/Komelia) fork，保留原项目的 Komga 媒体客户端能力，并在此基础上补充中文汉化、Android 打包发布和若干体验修复。
+本仓库基于 [Snd-R/Komelia](https://github.com/Snd-R/Komelia) 修改。项目保留原版 Komga 客户端能力，并补充中文界面、自适应导航、移动端 UI、阅读器交互和多平台发布。
 
 Komelia 是 [Komga](https://komga.org/) 媒体服务器的跨平台客户端，支持桌面（Linux / Windows / macOS）、Android 与浏览器（WebAssembly），主要用于阅读漫画与电子书。
 
-## 本 fork 重点
+## 本仓库的改动
 
-- 补充简体中文界面，覆盖主应用、设置、登录、首页筛选、阅读器常用操作，以及 Komga WebUI 高频文案。
-- 发布本 fork 的 Android release 包，便于中文用户直接安装测试。
-- 修复 EPUB 阅读器在 Komga 滚动模式下章节边界切换不稳定的问题。
-- 增强登录 URL 校验，避免非法端口被保存后进入不可恢复状态。
-- 优化移动端阅读器交互、触控区和部分页面 UI 细节。
+- 使用底部导航和 Navigation Rail 替代全局抽屉。手机、平板和桌面按窗口宽度切换导航方式，并保留各页面的浏览状态。
+- 统一 Light、Dark、OLED 三种主题的颜色、圆角、间距、触控目标和动效。页面支持 reduced motion，并改善键盘焦点与返回逻辑。
+- 重做首页分组、书库范围选择、筛选、搜索、设置、系列详情和书籍详情。首页标签在可用宽度内显示，其余分组进入“更多”。
+- 调整封面卡片的固定标题槽位。单行和双行标题保持同排等高，状态信息改为轻量角标。
+- 优化图片和 EPUB 阅读器控制栏。阅读控件自动隐藏，拖动进度后不会误触翻页或工具栏。
+- 补充主应用、Android 系统页面和 EPUB 阅读器的简体中文。应用内可选择跟随系统、English 或简体中文。
+- 保留离线 PDF、RAR、EPUB、页面重试、局域网地址切换和数据库迁移兼容。
+- 发布 Android 通用 APK、Windows MSI、Linux DEB、macOS ARM64 DMG/JAR 和 Wasm WebUI。
 
 ## 下载
 
-- 本 fork 发布页：<https://github.com/SakuraSM/Komelia/releases>
-- 最新 Android APK：<https://github.com/SakuraSM/Komelia/releases/latest>
+- 本仓库发布页：<https://github.com/SakuraSM/KomeliaIntl/releases>
+- 最新版本：<https://github.com/SakuraSM/KomeliaIntl/releases/latest>
 - 官方上游发布页：<https://github.com/Snd-R/Komelia/releases>
 - 官方 Google Play：<https://play.google.com/store/apps/details?id=io.github.snd_r.komelia>
 - 官方 F-Droid：<https://f-droid.org/packages/io.github.snd_r.komelia/>
@@ -25,42 +28,18 @@ Komelia 是 [Komga](https://komga.org/) 媒体服务器的跨平台客户端，�
 
 > 本 fork 与官方应用的包名或签名证书可能不同。如果 Android 安装时提示签名不一致，请先卸载旧包，或安装同一发布渠道的包。
 
-## 截图
+## App 截图
 
-<details>
-  <summary>移动端</summary>
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" alt="Komelia" width="270">
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" alt="Komelia" width="270">
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" alt="Komelia" width="270">
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" alt="Komelia" width="270">
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" alt="Komelia" width="270">
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" alt="Komelia" width="270">
-</details>
+<img src="/screenshots/app-overview-v0.18.13.png" alt="Komelia Android 首页、书库筛选、书籍详情和设置页面" width="100%">
 
-<details>
-  <summary>平板</summary>
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/1.jpg" alt="Komelia" width="400" height="640">
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/2.jpg" alt="Komelia" width="400" height="640">
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/3.jpg" alt="Komelia" width="400" height="640">
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/4.jpg" alt="Komelia" width="400" height="640">
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/5.jpg" alt="Komelia" width="400" height="640">
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/6.jpg" alt="Komelia" width="400" height="640">
-</details>
-
-<details>
-  <summary>桌面</summary>
-   <img src="/screenshots/1.jpg" alt="Komelia" width="1280">
-   <img src="/screenshots/2.jpg" alt="Komelia" width="1280">
-   <img src="/screenshots/3.jpg" alt="Komelia" width="1280">
-   <img src="/screenshots/4.jpg" alt="Komelia" width="1280">
-   <img src="/screenshots/5.jpg" alt="Komelia" width="1280">
-</details>
+> 截图来自 Android App。书籍详情中的资源文件名和来源域名已打码，截图不包含账号、服务器地址或测试凭据。
 
 ## 语言切换
 
-应用启动后默认跟随系统语言；也可在 **设置 → 外观 → 语言 / Language** 中手动选择。当前内置语言：
+应用默认跟随系统语言，也可在 **设置 → 外观 → 语言 / Language** 中手动选择。当前内置选项：
 
-- English（默认）
+- 跟随系统
+- English
 - 简体中文 (Simplified Chinese)
 
 如需贡献其它语言或改进现有翻译，请参阅 [`docs/i18n/CONTRIBUTING_zh-CN.md`](docs/i18n/CONTRIBUTING_zh-CN.md) 与术语表 [`docs/i18n/glossary_zh-CN.md`](docs/i18n/glossary_zh-CN.md)。
@@ -106,8 +85,8 @@ Android 与 JVM 目标需要 C/C++ 编译器以构建原生库；EPUB 阅读器�
 
 随后选择构建选项：
 
-- `./gradlew :komelia-app:assembleDebug`：debug APK 构建（输出于 `komelia-app/build/outputs/apk/debug`）
-- `./gradlew :komelia-app:assembleRelease`：release APK 构建（输出于 `komelia-app/build/outputs/apk/release`）
+- `./gradlew androidDebug`：debug APK 构建（输出于 `komelia-app/androidApp/build/outputs/apk/debug`）
+- `./gradlew androidRelease`：release APK 构建（输出于 `komelia-app/androidApp/build/outputs/apk/release`）
 - `./scripts/build-release.sh`：本 fork 的 Android release 辅助脚本，本地签名配置完成后可用于构建并整理发布产物
 
 ## Komf 扩展构建

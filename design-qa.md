@@ -94,4 +94,13 @@
 - 无 P0/P1/P2。构建仍报告既存 Skiko 依赖版本兼容提示、Wasm 资源体积提示和 Browserslist 数据过期提示；均未由本轮 UI 变更引入，也未阻断测试或产物生成。
 - 响应式截图后模拟器已恢复为物理参数 1080 × 2400 px、420 dpi。
 
+## 下拉数据与 EPUB 设置汉化复核
+
+- 首页分组编辑：`/private/tmp/komelia-home-dropdown-i18n.png`。真实配置中的 `Custom`、`ReadDate`、`DESC`、`All`、`ReadStatus`、`Equals`、`IN_PROGRESS` 已分别显示为“自定义、阅读日期、降序、全部、阅读状态、等于、阅读中”。保存值和服务端字段保持原枚举值，不受展示文案影响。
+- EPUB 设置：`/private/tmp/komelia-epub-settings-i18n-final.png`。在真实 2184 页 EPUB 中验证“主题、阅读模式、连续滚动、分页阅读、衬线字体、无衬线字体、字体大小、行高、阅读器上下边距、阅读区域最大宽度”等文案；主题名、开关值、振假名模式和字体管理弹窗也使用同一语言表。
+- 应用语言桥接：EPUB WebView 在加载设置前读取 Komelia 的 `SYSTEM/EN/ZH_CN` 选择；英文保持英文，简体中文使用 `zh-CN`，未显式选择时回退浏览器语言。语言仅影响阅读器界面，不修改出版物正文和字体名称。
+- 构建复核发现 `buildEpubReaders` 与 `androidDebug` 同次调用时可能并行，导致 APK 打入上一版 EPUB 资源；最终验收按“先生成 EPUB、再单独执行 `:androidDebug`”完成，并直接检查 APK 内含“主题/阅读模式/连续滚动”后安装复验。
+- 共享下拉覆盖：首页书籍/系列条件、阅读状态、排序方向、媒体状态之外，继续覆盖 Komf 媒体类型、匹配模式、作者角色、阅读方向、数据源、外部链接类型，以及色彩校正通道；用户或服务器自定义名称保持原样。
+- 自动验证：EPUB `npm run check` 为 0 错误、0 警告，`npm run build` 通过；`:komelia-ui:allTests`、`:komelia-ui:compileAndroidMain`、`buildEpubReaders`、`:androidDebug`、`:desktopJar`、`:komfWebUI` 均通过。新增枚举映射测试覆盖截图中的原始值、扩展设置枚举、常见状态值和未知值回退。
+
 final result: passed

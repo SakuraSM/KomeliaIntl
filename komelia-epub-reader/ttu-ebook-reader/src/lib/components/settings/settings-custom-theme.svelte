@@ -7,6 +7,7 @@
   import { customThemes$, theme$ } from '$lib/data/store';
   import { availableThemes, type CustomThemeValue, type ThemeOption } from '$lib/data/theme-option';
   import { createEventDispatcher, onMount } from 'svelte';
+  import {t} from '$lib/i18n';
 
   export let selectedTheme: string;
   export let existingThemes: ToggleOption<string>[] = [];
@@ -132,13 +133,13 @@
     themeNameElm.setCustomValidity('');
 
     if (!themeName) {
-      themeNameElm.setCustomValidity('You have to enter a Name!');
+      themeNameElm.setCustomValidity(t('You have to enter a Name!'));
       themeNameElm.reportValidity();
       return;
     }
 
     if (availableThemes.has(themeName)) {
-      themeNameElm.setCustomValidity('This Name is reserved!');
+      themeNameElm.setCustomValidity(t('This Name is reserved!'));
       themeNameElm.reportValidity();
       return;
     }
@@ -196,47 +197,47 @@
       <select class="sm:col-span-2" bind:value={themeToCopy}>
         {#each existingThemes as theme (theme.id)}
           <option value={theme.id}>
-            {theme.id}
+            {t(theme.id)}
           </option>
         {/each}
       </select>
       <button class={buttonClasses} on:click={handleCopyTheme}
-        >Copy
+        >{t('Copy')}
         <Ripple />
       </button>
-      <span class="hidden sm:block">Attribute</span>
-      <span class="hidden sm:block">Color</span>
-      <span class="hidden sm:block">Alpha</span>
+      <span class="hidden sm:block">{t('Attribute')}</span>
+      <span class="hidden sm:block">{t('Color')}</span>
+      <span class="hidden sm:block">{t('Alpha')}</span>
       <SettingsCustomThemeInput
-        label="Font"
+        label={t('Font')}
         attribute="fontColor"
         values={customTheme.fontColor}
         on:color={handleColorValueChange}
         on:alpha={handleAlphaValueChange}
       />
       <SettingsCustomThemeInput
-        label="Background"
+        label={t('Background')}
         attribute="backgroundColor"
         values={customTheme.backgroundColor}
         on:color={handleColorValueChange}
         on:alpha={handleAlphaValueChange}
       />
       <SettingsCustomThemeInput
-        label="Furigana Partial Hide Font"
+        label={t('Furigana Partial Hide Font')}
         attribute="hintFuriganaFontColor"
         values={customTheme.hintFuriganaFontColor}
         on:color={handleColorValueChange}
         on:alpha={handleAlphaValueChange}
       />
       <SettingsCustomThemeInput
-        label="Furigana Partial/Full Hide Shadow"
+        label={t('Furigana Partial/Full Hide Shadow')}
         attribute="hintFuriganaShadowColor"
         values={customTheme.hintFuriganaShadowColor}
         on:color={handleColorValueChange}
         on:alpha={handleAlphaValueChange}
       />
       <SettingsCustomThemeInput
-        label="Footer Font"
+        label={t('Footer Font')}
         attribute="tooltipTextFontColor"
         values={customTheme.tooltipTextFontColor}
         on:color={handleColorValueChange}
@@ -245,7 +246,7 @@
       <input
         class="sm:col-span-2"
         type="text"
-        placeholder="Theme Name"
+        placeholder={t('Theme Name')}
         bind:value={themeName}
         bind:this={themeNameElm}
       />
@@ -261,11 +262,11 @@
   </div>
   <div class="mt-2 flex grow justify-between" slot="footer">
     <button class={buttonClasses} on:click={() => dispatch('close')}>
-      Cancel
+      {t('Cancel')}
       <Ripple />
     </button>
     <button class={buttonClasses} on:click={handleSave}>
-      Save
+      {t('Save')}
       <Ripple />
     </button>
   </div>

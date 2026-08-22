@@ -11,6 +11,8 @@
   import Fa from "svelte-fa";
   import {logger} from "$lib/data/logger";
   import {tick} from 'svelte';
+  import {setLocale} from '$lib/i18n';
+  import {externalFunctions} from '$lib/external';
 
   let showSettings = $state(false)
 
@@ -23,6 +25,7 @@
   let initPromise = init()
 
   async function init() {
+    setLocale((await externalFunctions.getLocale()) ?? navigator.language);
     await loadExternalSettings()
     isMobile$.next(isMobile(window));
 

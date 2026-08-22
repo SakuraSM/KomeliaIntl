@@ -11,6 +11,8 @@ import type {UserFont} from "$lib/data/fonts";
 export interface ExternalFunctionsWindow extends Window {
   getCurrentBookId(): Promise<CallbackResponse<string>>;
 
+  getLocale(): Promise<CallbackResponse<string | undefined>>;
+
   getBookData(): Promise<CallbackResponse<BookData>>;
 
   getSettings(): Promise<CallbackResponse<ReaderSettings>>;
@@ -53,6 +55,10 @@ export class ExternalFunctions {
 
   async getCurrentBookId(): Promise<string> {
     return this.windowFunctions.getCurrentBookId().then((result) => result.result)
+  }
+
+  async getLocale(): Promise<string | undefined> {
+    return this.windowFunctions.getLocale().then((result) => result.result)
   }
 
   async getBookData(): Promise<BookData> {
@@ -126,4 +132,3 @@ export class ExternalFunctions {
 }
 
 export const externalFunctions = new ExternalFunctions()
-

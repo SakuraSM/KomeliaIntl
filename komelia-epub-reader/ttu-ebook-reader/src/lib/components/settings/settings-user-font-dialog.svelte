@@ -10,6 +10,7 @@
   import {type Font, loadFont, type UserFont} from "$lib/data/fonts";
   import Fa from "svelte-fa";
   import {externalFunctions} from "$lib/external";
+  import {t} from '$lib/i18n';
 
   interface Props {
     currentFont: BehaviorSubject<Font>;
@@ -70,7 +71,7 @@
                 class:text-gray-500={currentTab !== tab}
                 onclick={() => (currentTab = tab)}
             >
-              {tab}
+              {t(tab)}
             </button>
           </li>
         {/each}
@@ -86,7 +87,7 @@
               <div
                   tabindex="0"
                   role="button"
-                  title="Click to select Font"
+                  title={t('Click to select Font')}
                   class="hover:text-blue-700"
                   onclick={() => selectFont(userFont)}
                   onkeyup={dummyFn}
@@ -96,7 +97,7 @@
               <div
                   tabindex="0"
                   role="button"
-                  title="Remove Font"
+                  title={t('Remove Font')}
                   class="hover:text-blue-700"
                   onclick={() => removeFont(userFont)}
                   onkeyup={dummyFn}
@@ -106,7 +107,7 @@
             {/each}
           </div>
         {:else}
-          <div>You have currently no stored Fonts</div>
+          <div>{t('You have currently no stored Fonts')}</div>
         {/if}
       {:else}
         <SvelteUserFontAdd bind:isLoading/>

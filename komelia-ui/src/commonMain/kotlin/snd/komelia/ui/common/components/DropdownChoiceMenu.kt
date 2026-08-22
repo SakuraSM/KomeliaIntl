@@ -82,6 +82,7 @@ import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.series.SeriesFilterState.TagExclusionMode
 import snd.komelia.ui.series.SeriesFilterState.TagInclusionMode
 import snd.komelia.ui.strings.AppStrings
+import snd.komelia.ui.strings.localizedEnumLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,13 +97,14 @@ fun <T> DropdownChoiceMenu(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val selectedLabel = selectedOption?.let { localizedEnumLabel(it.value, it.label) }.orEmpty()
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = isExpanded,
         onExpandedChange = { isExpanded = it },
     ) {
         InputField(
-            value = selectedOption?.label ?: "",
+            value = selectedLabel,
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
                 .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
@@ -122,8 +124,9 @@ fun <T> DropdownChoiceMenu(
         ) {
 
             options.forEach {
+                val optionLabel = localizedEnumLabel(it.value, it.label)
                 DropdownMenuItem(
-                    text = { Text(it.label) },
+                    text = { Text(optionLabel) },
                     onClick = {
                         onOptionChange(it)
                         isExpanded = false
@@ -148,13 +151,17 @@ fun <T> DropdownMultiChoiceMenu(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val selectedLabels = mutableListOf<String>()
+    for (option in selectedOptions) {
+        selectedLabels += localizedEnumLabel(option.value, option.label)
+    }
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = isExpanded,
         onExpandedChange = { isExpanded = it },
     ) {
         InputField(
-            value = selectedOptions.joinToString { it.label }.ifBlank {
+            value = selectedLabels.joinToString().ifBlank {
                 placeholder ?: stringResource(Res.string.filter_any_value)
             },
             modifier = Modifier
@@ -247,13 +254,17 @@ fun <T> DropdownChoiceMenuWithSearch(
         onSearch(searchText)
     }
     var isExpanded by remember { mutableStateOf(false) }
+    val selectedLabels = mutableListOf<String>()
+    for (option in selectedOptions) {
+        selectedLabels += localizedEnumLabel(option.value, option.label)
+    }
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = isExpanded,
         onExpandedChange = { isExpanded = it },
     ) {
         InputField(
-            value = selectedOptions.joinToString { it.label }.ifBlank {
+            value = selectedLabels.joinToString().ifBlank {
                 placeholder ?: stringResource(Res.string.filter_any_value)
             },
             modifier = Modifier
@@ -290,12 +301,13 @@ fun <T> DropdownChoiceMenuWithSearch(
                 verticalArrangement = Arrangement.spacedBy(5.dp),
             ) {
                 selectedOptions.forEach {
+                    val optionLabel = localizedEnumLabel(it.value, it.label)
                     NoPaddingChip(
                         color = MaterialTheme.colorScheme.surface,
                         onClick = { onOptionSelect(it) }
                     ) {
                         Icon(Icons.Default.Close, null)
-                        Text(it.label, style = MaterialTheme.typography.labelMedium)
+                        Text(optionLabel, style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
@@ -703,8 +715,9 @@ private fun <T> DropdownMultiChoiceItem(
     selected: Boolean,
 ) {
     val color = if (selected) MaterialTheme.colorScheme.tertiary else Color.Unspecified
+    val optionLabel = localizedEnumLabel(option.value, option.label)
     DropdownMenuItem(
-        text = { Text(text = option.label, color = color) },
+        text = { Text(text = optionLabel, color = color) },
         onClick = { onOptionSelect(option) },
         modifier = Modifier.cursorForHand(),
         leadingIcon = {

@@ -71,6 +71,7 @@ class TtsuReaderState(
     private val markReadProgress: Boolean,
     private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
+    private val localeTag: String?,
     private val fontsRepository: UserFontsRepository,
     private val windowState: AppWindowState,
     private val platformType: PlatformType,
@@ -139,6 +140,7 @@ class TtsuReaderState(
     @OptIn(ExperimentalResourceApi::class)
     private suspend fun loadEpub(webview: KomeliaWebview) {
         webview.bind<Unit, String>("getCurrentBookId") { bookId.value.value }
+        webview.bind<Unit, String?>("getLocale") { localeTag }
         webview.bind<Unit, TtuBookData>("getBookData") {
             val data = epubLoadTask.await()
             TtuBookData(

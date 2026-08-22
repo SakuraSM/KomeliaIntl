@@ -616,6 +616,7 @@ class ViewModelFactory(
             readListApi = komgaApi.readListApi,
             serverUrl = dependencies.serverUrlResolver.effectiveServerUrl,
             epubSettingsRepository = appRepositories.epubReaderSettingsRepository,
+            settingsRepository = appRepositories.settingsRepository,
             fontsRepository = appRepositories.fontsRepository,
             notifications = dependencies.appNotifications,
             windowState = dependencies.windowState,

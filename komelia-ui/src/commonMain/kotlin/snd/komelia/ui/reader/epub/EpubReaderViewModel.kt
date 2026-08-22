@@ -13,10 +13,12 @@ import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.settings.EpubReaderSettingsRepository
+import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.settings.model.EpubReaderType.KOMGA_EPUB
 import snd.komelia.settings.model.EpubReaderType.TTSU_EPUB
 import snd.komelia.ui.BookSiblingsContext
 import snd.komelia.ui.LoadState
+import snd.komelia.ui.explicitLocaleTag
 import snd.komelia.ui.platform.PlatformType
 import snd.komga.client.book.KomgaBookId
 import snd.webview.KomeliaWebview
@@ -30,6 +32,7 @@ class EpubReaderViewModel(
     private val readListApi: KomgaReadListApi,
     private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
+    private val settingsRepository: CommonSettingsRepository,
     private val fontsRepository: UserFontsRepository,
     private val notifications: AppNotifications,
     private val windowState: AppWindowState,
@@ -77,6 +80,7 @@ class EpubReaderViewModel(
                             markReadProgress = markReadProgress,
                             serverUrl = serverUrl,
                             epubSettingsRepository = epubSettingsRepository,
+                            localeTag = settingsRepository.getAppLanguage().first().explicitLocaleTag(),
                             fontsRepository = fontsRepository,
                             windowState = windowState,
                             platformType = platformType,

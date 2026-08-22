@@ -87,6 +87,7 @@ import snd.komelia.ui.home.edit.SeriesRecentlyUpdatedFilterState
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.platform.cursorForMove
+import snd.komelia.ui.strings.localizedEnumLabel
 
 @Composable
 fun FilterEditContent(
@@ -212,7 +213,7 @@ fun AddConditionButton(
         ) {
             FilterEditViewModel.FilterType.entries.forEach {
                 DropdownMenuItem(
-                    text = { Text(it.name) },
+                    text = { Text(localizedEnumLabel(it, it.name)) },
                     onClick = {
                         dropDownExpanded = false
                         onConditionAdd(it)

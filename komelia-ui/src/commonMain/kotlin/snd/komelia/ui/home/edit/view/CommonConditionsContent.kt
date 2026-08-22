@@ -79,6 +79,7 @@ import snd.komelia.ui.home.edit.ReleaseDateConditionState
 import snd.komelia.ui.home.edit.TagConditionState
 import snd.komelia.ui.home.edit.TitleConditionState
 import snd.komelia.ui.platform.cursorForHand
+import snd.komelia.ui.strings.localizedEnumLabel
 import snd.komga.client.book.KomgaReadStatus
 import snd.komga.client.common.KomgaSort
 import kotlin.time.Duration
@@ -634,8 +635,9 @@ fun <T> ConditionAddButton(
                 .scrollbar(scrollState, Orientation.Vertical)
         ) {
             conditions.forEach {
+                val conditionLabel = localizedEnumLabel(it.value, it.label)
                 DropdownMenuItem(
-                    text = { Text(it.label) },
+                    text = { Text(conditionLabel) },
                     onClick = {
                         dropDownExpanded = false
                         onConditionAdd(it.value)

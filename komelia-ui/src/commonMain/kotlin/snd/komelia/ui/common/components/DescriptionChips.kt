@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -54,13 +53,7 @@ fun <T> DescriptionChips(
     modifier: Modifier = Modifier,
 ) {
     if (chipValues.isEmpty() && secondaryValues.isNullOrEmpty()) return
-    Row(modifier = modifier) {
-        Text(
-            label,
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.width(120.dp)
-        )
-
+    DetailMetadataRow(label = label, modifier = modifier) {
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -79,9 +72,7 @@ fun <T> DescriptionChips(
                     icon?.let { Icon(it, null, modifier = Modifier.size(18.dp)) }
                 }
             }
-
         }
-
     }
 }
 

@@ -87,11 +87,13 @@ fun SeriesFilterContent(
     }
     val width = remember(widthClass) {
         when (widthClass) {
-            COMPACT -> 400.dp
+            COMPACT -> 0.dp
             MEDIUM -> 220.dp
             else -> 250.dp
         }
     }
+    val controlHeight = if (widthClass == COMPACT) 48.dp else 40.dp
+    val filterItemModifier = if (widthClass == COMPACT) Modifier.fillMaxWidth() else Modifier.width(width)
     val currentFilter = filterState.state.collectAsState().value
 
     Column(
@@ -113,7 +115,11 @@ fun SeriesFilterContent(
                 text = searchTerm,
                 placeholder = stringResource(Res.string.filter_search),
                 onTextChange = { searchTerm = it },
-                modifier = Modifier.weight(1f).height(40.dp).widthIn(min = 340.dp),
+                modifier = if (widthClass == COMPACT) {
+                    Modifier.fillMaxWidth().height(controlHeight)
+                } else {
+                    Modifier.weight(1f).height(controlHeight).widthIn(min = 340.dp)
+                },
             )
 
             Row(
@@ -127,7 +133,7 @@ fun SeriesFilterContent(
                         containerColor = if (filterState.isChanged) MaterialTheme.colorScheme.tertiaryContainer else Color.Unspecified,
                     ),
                     border = if (filterState.isChanged) null else ButtonDefaults.outlinedButtonBorder(true),
-                    modifier = Modifier.height(40.dp).cursorForHand()
+                    modifier = Modifier.height(controlHeight).cursorForHand()
                 ) {
                     Text(
                         stringResource(Res.string.series_filter_reset_filters),
@@ -137,7 +143,7 @@ fun SeriesFilterContent(
 
                 OutlinedButton(
                     onClick = onDismiss,
-                    modifier = Modifier.height(40.dp).cursorForHand()
+                    modifier = Modifier.height(controlHeight).cursorForHand()
                 ) {
                     Text(
                         stringResource(Res.string.series_filter_hide_filters),
@@ -166,7 +172,7 @@ fun SeriesFilterContent(
                 },
                 onOptionChange = { filterState.onSortOrderChange(it.value) },
                 label = stringResource(Res.string.series_filter_sort),
-                modifier = Modifier.width(width)
+                modifier = filterItemModifier
             )
             TagFiltersDropdownMenu(
                 allTags = filterState.tagOptions,
@@ -189,7 +195,7 @@ fun SeriesFilterContent(
                 label = stringResource(Res.string.series_filter_filter_tags_label),
                 inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier
-                    .width(width)
+                    .then(filterItemModifier)
                     .clip(RoundedCornerShape(5.dp)),
                 inputFieldModifier = Modifier.fillMaxWidth()
             )
@@ -209,7 +215,7 @@ fun SeriesFilterContent(
                 },
                 onOptionSelect = { changed -> filterState.onReadStatusSelect(changed.value) },
                 label = stringResource(Res.string.series_filter_read_status),
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             FilterDropdownMultiChoice(
@@ -229,7 +235,7 @@ fun SeriesFilterContent(
                 },
                 onOptionSelect = { changed -> filterState.onPublicationStatusSelect(changed.value) },
                 label = stringResource(Res.string.series_filter_publication_status),
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             val authorsSelectedOptions = remember(currentFilter.authors) {
@@ -244,7 +250,7 @@ fun SeriesFilterContent(
                 onOptionSelect = { author -> filterState.onAuthorSelect(author.value) },
                 onSearch = filterState::onAuthorsSearch,
                 label = stringResource(Res.string.series_filter_authors),
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             FilterDropdownMultiChoice(
@@ -252,7 +258,7 @@ fun SeriesFilterContent(
                 options = filterState.publishersOptions.map { stringEntry(it) },
                 onOptionSelect = { changed -> filterState.onPublisherSelect(changed.value) },
                 label = stringResource(Res.string.series_filter_publisher),
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             FilterDropdownMultiChoice(
@@ -260,14 +266,14 @@ fun SeriesFilterContent(
                 options = filterState.languagesOptions.map { stringEntry(it) },
                 onOptionSelect = { changed -> filterState.onLanguageSelect(changed.value) },
                 label = stringResource(Res.string.series_filter_language),
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
             FilterDropdownMultiChoice(
                 selectedOptions = currentFilter.releaseDates.map { stringEntry(it) },
                 options = filterState.releaseDateOptions.map { stringEntry(it) },
                 onOptionSelect = { changed -> filterState.onReleaseDateSelect(changed.value) },
                 label = stringResource(Res.string.series_filter_release_date),
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             FilterDropdownMultiChoice(
@@ -275,18 +281,18 @@ fun SeriesFilterContent(
                 options = filterState.ageRatingsOptions.map { stringEntry(it) },
                 onOptionSelect = { changed -> filterState.onAgeRatingSelect(changed.value) },
                 label = stringResource(Res.string.series_filter_age_rating),
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             Row(
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .height(40.dp)
+                        .height(controlHeight)
                         .clickable { filterState.onCompletionToggle() }
                         .cursorForHand()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -315,7 +321,7 @@ fun SeriesFilterContent(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .height(40.dp)
+                        .height(controlHeight)
                         .clickable { filterState.onFormatToggle() }
                         .cursorForHand()
                         .background(MaterialTheme.colorScheme.surfaceVariant)

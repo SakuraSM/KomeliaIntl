@@ -24,6 +24,7 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.strings.AppStrings
+import snd.komelia.ui.strings.localizedEnumLabel
 
 @Composable
 fun MediaAnalysisContent(
@@ -96,8 +97,8 @@ private fun BookAnalysisCard(
                 ) {
                     Text(book.url, style = MaterialTheme.typography.bodyMedium)
                     Text("${book.media.mediaType} ${book.size}")
-                    val text =
-                        "${book.media.status.name}: ${AppStrings.getMessageStringForCode(book.media.comment)}"
+                    val status = localizedEnumLabel(book.media.status, book.media.status.name)
+                    val text = "$status: ${AppStrings.getMessageStringForCode(book.media.comment)}"
                     Text(text, color = MaterialTheme.colorScheme.tertiary)
                 }
             }

@@ -7,13 +7,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,9 +37,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_bulk_select_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_filter_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_list_series_count
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.itemlist.SeriesLazyCardGrid
@@ -42,6 +54,7 @@ import snd.komelia.ui.platform.WindowSizeClass.COMPACT
 import snd.komelia.ui.platform.WindowSizeClass.EXPANDED
 import snd.komelia.ui.platform.WindowSizeClass.FULL
 import snd.komelia.ui.platform.WindowSizeClass.MEDIUM
+import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.series.SeriesFilterState
 import snd.komelia.ui.series.view.SeriesFilterContent
@@ -146,6 +159,7 @@ private fun BulkActionsToolbar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ToolBar(
     seriesTotalCount: Int,
@@ -154,6 +168,9 @@ private fun ToolBar(
     isLoading: Boolean,
     filterState: SeriesFilterState?,
 ) {
+    val layout = LocalKomeliaLayout.current
+    val platform = LocalPlatform.current
+    val widthClass = LocalWindowWidth.current
     Box {
         if (isLoading) {
             LinearProgressIndicator(
@@ -165,17 +182,32 @@ private fun ToolBar(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             var showFilters by remember { mutableStateOf(false) }
 
-            if (filterState != null) {
-                AnimatedVisibility(visible = showFilters) {
-                    SeriesFilterContent(
-                        filterState = filterState,
-                        onDismiss = { showFilters = false }
+            if (filterState != null && showFilters && platform == MOBILE) {
+                ModalBottomSheet(
+                    onDismissRequest = { showFilters = false },
+                ) {
+                    Text(
+                        text = stringResource(Res.string.series_filter_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(horizontal = layout.dialogContentPadding),
                     )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.9f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(layout.dialogContentPadding),
+                    ) {
+                        SeriesFilterContent(
+                            filterState = filterState,
+                            onDismiss = { showFilters = false },
+                        )
+                    }
                 }
             }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -201,8 +233,43 @@ private fun ToolBar(
                             if (filterState.isChanged) MaterialTheme.colorScheme.tertiary
                             else MaterialTheme.colorScheme.primary
 
-                        IconButton(onClick = { showFilters = !showFilters }, modifier = Modifier.cursorForHand()) {
-                            Icon(Icons.Default.FilterList, null, tint = color)
+                        Box {
+                            IconButton(
+                                onClick = { showFilters = true },
+                                modifier = Modifier.cursorForHand(),
+                            ) {
+                                Icon(
+                                    Icons.Default.FilterList,
+                                    contentDescription = stringResource(Res.string.series_filter_title),
+                                    tint = color,
+                                )
+                            }
+                            if (platform != MOBILE) {
+                                val panelWidth = when (widthClass) {
+                                    COMPACT -> 360.dp
+                                    MEDIUM -> 520.dp
+                                    EXPANDED, FULL -> 720.dp
+                                }
+                                DropdownMenu(
+                                    expanded = showFilters,
+                                    onDismissRequest = { showFilters = false },
+                                    scrollState = rememberScrollState(),
+                                    modifier = Modifier
+                                        .width(panelWidth)
+                                        .heightIn(max = 680.dp)
+                                        .padding(layout.dialogContentPadding),
+                                ) {
+                                    Text(
+                                        text = stringResource(Res.string.series_filter_title),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    SeriesFilterContent(
+                                        filterState = filterState,
+                                        onDismiss = { showFilters = false },
+                                    )
+                                }
+                            }
                         }
                     }
 

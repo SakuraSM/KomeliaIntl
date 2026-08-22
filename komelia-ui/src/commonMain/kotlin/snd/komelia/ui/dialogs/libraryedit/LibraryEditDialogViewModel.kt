@@ -3,6 +3,9 @@ package snd.komelia.ui.dialogs.libraryedit
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_field_required
+import org.jetbrains.compose.resources.StringResource
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.ui.dialogs.tabs.DialogTab
@@ -24,13 +27,13 @@ class LibraryEditDialogViewModel(
 
     var libraryName = mutableStateOf(library?.name ?: "")
         private set
-    var libraryNameError by mutableStateOf<String?>(null)
+    var libraryNameError by mutableStateOf<StringResource?>(null)
         private set
 
 
     var rootFolder = mutableStateOf(library?.root ?: "")
         private set
-    var rootFolderError by mutableStateOf<String?>(null)
+    var rootFolderError by mutableStateOf<StringResource?>(null)
         private set
 
     var emptyTrashAfterScan by mutableStateOf(library?.emptyTrashAfterScan ?: false)
@@ -90,7 +93,7 @@ class LibraryEditDialogViewModel(
 
     fun setLibraryName(name: String) {
         libraryNameError =
-            if (name.isBlank()) "Required"
+            if (name.isBlank()) Res.string.dialog_field_required
             else null
 
         libraryName.value = name
@@ -98,7 +101,7 @@ class LibraryEditDialogViewModel(
 
     fun setRootFolder(path: String) {
         rootFolderError =
-            if (path.isBlank()) "Required"
+            if (path.isBlank()) Res.string.dialog_field_required
             else null
 
         rootFolder.value = path
@@ -110,10 +113,10 @@ class LibraryEditDialogViewModel(
 
 
         if (!validLibraryName) {
-            libraryNameError = "Required"
+            libraryNameError = Res.string.dialog_field_required
         }
         if (!validRootFolder) {
-            rootFolderError = "Required"
+            rootFolderError = Res.string.dialog_field_required
         }
 
         return validLibraryName && validRootFolder

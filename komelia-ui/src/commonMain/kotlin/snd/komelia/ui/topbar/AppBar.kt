@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -34,8 +33,6 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.topbar_go_online
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.topbar_offline
@@ -44,6 +41,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKeyEvents
+import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.LocalWindowState
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.ReloadableScreen
@@ -58,7 +56,9 @@ import snd.komga.client.series.KomgaSeries
 
 @Composable
 fun AppBar(
-    onMenuButtonPress: suspend () -> Unit,
+    canNavigateBack: Boolean,
+    onNavigateBack: () -> Unit,
+    currentScreen: cafe.adriel.voyager.core.screen.Screen?,
     query: String,
     onQueryChange: (String) -> Unit,
     isLoading: Boolean,
@@ -73,24 +73,14 @@ fun AppBar(
     onOfflineModeChange: () -> Unit
 ) {
     PlatformTitleBar {
-        val coroutineScope = rememberCoroutineScope()
-
         IconButton(
             modifier = Modifier.align(Alignment.Start),
-            onClick = { coroutineScope.launch { onMenuButtonPress() } },
-        ) {
-            Icon(Icons.Rounded.Menu, null)
-        }
-
-        val navigator = LocalNavigator.currentOrThrow
-        IconButton(
-            modifier = Modifier.align(Alignment.Start),
-            onClick = { navigator.pop() },
-            enabled = navigator.canPop
+            onClick = onNavigateBack,
+            enabled = canNavigateBack
         ) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
         }
-        val reloadableScreen = remember(navigator.lastItem) { navigator.lastItem as? ReloadableScreen }
+        val reloadableScreen = remember(currentScreen) { currentScreen as? ReloadableScreen }
         RefreshIndicator(
             onClick = onRefreshClick,
             enabled = reloadableScreen != null,
@@ -117,6 +107,7 @@ fun AppBar(
 
 
         val windowState = LocalWindowState.current
+        val coroutineScope = rememberCoroutineScope()
         val isFullscreen = windowState.isFullscreen.collectAsState(false)
         if (isFullscreen.value) {
             IconButton(
@@ -155,6 +146,7 @@ private fun RefreshIndicator(
     modifier: Modifier
 ) {
     val keyEvents = LocalKeyEvents.current
+    val motion = LocalKomeliaMotion.current
     var isClicked by remember { mutableStateOf(false) }
     LaunchedEffect(isClicked) {
         if (isClicked) {
@@ -182,7 +174,10 @@ private fun RefreshIndicator(
     ) {
         Crossfade(
             targetState = isClicked,
-            animationSpec = tween(durationMillis = 200)
+            animationSpec = tween(
+                durationMillis = motion.duration(motion.contentDurationMillis),
+                easing = motion.standardEasing,
+            )
         ) { refreshing ->
             Box(
                 modifier = Modifier.fillMaxSize(),

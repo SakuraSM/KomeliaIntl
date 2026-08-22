@@ -42,7 +42,9 @@ val settingsDesktopNavMenuWidth = 264.dp
 val settingsDesktopContentWidth = 840.dp
 val settingsDesktopTopPadding = 32.dp
 
-class SettingsScreen : Screen {
+class SettingsScreen(
+    val topLevel: Boolean = false,
+) : Screen {
     @Composable
     override fun Content() {
         val currentNavigator = LocalNavigator.currentOrThrow
@@ -51,19 +53,23 @@ class SettingsScreen : Screen {
         val vm = rememberScreenModel { viewModelFactory.getSettingsNavigationViewModel(currentNavigator) }
 
         LaunchedEffect(Unit) { vm.initialize() }
-        LaunchedEffect(Unit) { keyEvents.collect { if (it.key == Key.Escape) currentNavigator.pop() } }
+        LaunchedEffect(Unit) {
+            keyEvents.collect {
+                if (!topLevel && it.key == Key.Escape) currentNavigator.pop()
+            }
+        }
 
         Navigator(
             screen = AppSettingsScreen(),
             onBackPressed = null
         ) { navigator ->
             Column {
-                PlatformTitleBar()
+                if (!topLevel) PlatformTitleBar()
                 SettingsScreenLayout(
                     navMenu = {
                         Row(
                             Modifier
-                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                .background(MaterialTheme.colorScheme.surface)
                                 .padding(top = settingsDesktopTopPadding, start = 16.dp, end = 16.dp)
                         ) {
                             Spacer(Modifier.weight(1f))
@@ -75,31 +81,33 @@ class SettingsScreen : Screen {
                                 updatesEnabled = vm.updatesEnabled,
                                 newVersionIsAvailable = vm.newVersionIsAvailable,
                                 onLogout = vm::logout,
-                                contentColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                contentColor = MaterialTheme.colorScheme.surface,
                                 modifier = Modifier.width(settingsDesktopNavMenuWidth),
                                 user = vm.user.collectAsState().value
                             )
                         }
                     },
                     dismissButton = {
-                        OutlinedIconButton(
-                            onClick = { currentNavigator.pop() },
-                            modifier = Modifier.cursorForHand().padding(top = settingsDesktopTopPadding),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                            content = {
-                                Icon(
-                                    Icons.Rounded.Close,
-                                    contentDescription = stringResource(Res.string.navigation_close_settings),
-                                )
-                            }
-                        )
+                        if (!topLevel) {
+                            OutlinedIconButton(
+                                onClick = { currentNavigator.pop() },
+                                modifier = Modifier.cursorForHand().padding(top = settingsDesktopTopPadding),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                                content = {
+                                    Icon(
+                                        Icons.Rounded.Close,
+                                        contentDescription = stringResource(Res.string.navigation_close_settings),
+                                    )
+                                },
+                            )
+                        }
                     },
                     content = { CrossfadeTransition(navigator) },
                 )
 
             }
         }
-        BackPressHandler { currentNavigator.pop() }
+        if (!topLevel) BackPressHandler { currentNavigator.pop() }
 
     }
 

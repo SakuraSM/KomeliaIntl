@@ -65,7 +65,7 @@ private fun Screen.FilterEditScreenContent(
 
         when (val state = vm.state.collectAsState().value) {
             is LoadState.Error -> ErrorContent(
-                message = state.exception.message ?: "Unknown Error",
+                exception = state.exception,
                 onExit = ::exitEditor,
             )
 

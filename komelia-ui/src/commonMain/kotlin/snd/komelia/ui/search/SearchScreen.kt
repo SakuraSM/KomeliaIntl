@@ -47,7 +47,7 @@ class SearchScreen(
 
                 when (val state = vm.state.collectAsState().value) {
                     is LoadState.Error -> ErrorContent(
-                        state.exception.message ?: "Error",
+                        exception = state.exception,
                         onReload = vm::reload
                     )
 

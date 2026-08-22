@@ -78,7 +78,7 @@ class OneshotScreen(
         ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
             when {
                 state is LoadState.Error -> ErrorContent(
-                    message = state.exception.message ?: "Unknown Error",
+                    exception = state.exception,
                     onReload = vm::reload
                 )
 

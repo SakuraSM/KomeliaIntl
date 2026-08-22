@@ -29,13 +29,14 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -151,7 +152,11 @@ private fun Toolbar(
             modifier = Modifier
                 .widthIn(max = layout.contentMaxWidth)
                 .fillMaxWidth()
-                .padding(horizontal = layout.pageHorizontalPadding),
+                .padding(
+                    start = layout.pageHorizontalPadding,
+                    end = layout.pageHorizontalPadding,
+                    bottom = layout.itemSpacing,
+                ),
         )
     }
 }
@@ -272,6 +277,7 @@ private fun AdaptiveHomeGroupBar(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun HomeGroupChip(
     label: String,
     selected: Boolean,
@@ -279,32 +285,37 @@ private fun HomeGroupChip(
     minimumHeight: Dp,
     onClick: () -> Unit,
 ) {
-    FilterChip(
-        onClick = onClick,
-        selected = selected,
-        label = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-        colors = colors,
-        border = null,
-        modifier = Modifier.heightIn(min = minimumHeight),
-    )
+    CompositionLocalProvider(LocalRippleConfiguration provides null) {
+        FilterChip(
+            onClick = onClick,
+            selected = selected,
+            label = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+            colors = colors,
+            border = null,
+            modifier = Modifier.heightIn(min = minimumHeight),
+        )
+    }
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun HomeMoreChip(
     label: String,
     colors: androidx.compose.material3.SelectableChipColors,
     minimumHeight: Dp,
     onClick: () -> Unit,
 ) {
-    FilterChip(
-        onClick = onClick,
-        selected = false,
-        leadingIcon = { Icon(Icons.Rounded.MoreHoriz, null) },
-        label = { Text(label, maxLines = 1) },
-        colors = colors,
-        border = null,
-        modifier = Modifier.heightIn(min = minimumHeight),
-    )
+    CompositionLocalProvider(LocalRippleConfiguration provides null) {
+        FilterChip(
+            onClick = onClick,
+            selected = false,
+            leadingIcon = { Icon(Icons.Rounded.MoreHoriz, null) },
+            label = { Text(label, maxLines = 1) },
+            colors = colors,
+            border = null,
+            modifier = Modifier.heightIn(min = minimumHeight),
+        )
+    }
 }
 
 @Composable
@@ -456,7 +467,7 @@ private fun DisplayContent(
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             contentPadding = PaddingValues(
-                top = layout.controlSpacing,
+                top = layout.sectionSpacing,
                 bottom = layout.gridBottomPadding + layout.sectionSpacing,
             )
         ) {
@@ -497,9 +508,11 @@ private fun LazyGridScope.BookFilterEntry(
     item(span = { GridItemSpan(maxLineSpan) }) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(label, style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.width(10.dp))
-            HorizontalDivider()
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
     items(books) { book ->
@@ -525,9 +538,11 @@ private fun LazyGridScope.SeriesFilterEntries(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(label, style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.width(10.dp))
-            HorizontalDivider()
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 

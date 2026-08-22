@@ -118,6 +118,7 @@
     type SelectionToolbarState
   } from '$lib/functions/reader-interactions';
   import type {ReaderAnnotation} from '$lib/data/reader-annotation';
+  import {t} from '$lib/i18n';
 
   interface Props {
     onSettingsClick: () => void;
@@ -181,7 +182,7 @@
       fullscreenAvailable = await externalFunctions.isFullscreenAvailable()
 
     } catch (error: any) {
-      const message = `Error loading book: ${error.message}`;
+      const message = t('Error loading book: {message}', {message: error.message});
 
       logger.warn(message);
 
@@ -189,7 +190,7 @@
         {
           component: MessageDialog,
           props: {
-            title: 'Load Error',
+            title: t('Load Error'),
             message
           }
         }
@@ -471,10 +472,10 @@
         {
           component: ConfirmDialog,
           props: {
-            dialogHeader: 'Complete Book',
-            dialogMessage: `Would you like to complete this Book${
-              diffToComplete ? ` and capture ${diffToComplete} characters read` : ''
-            }?`,
+            dialogHeader: t('Complete Book'),
+            dialogMessage: diffToComplete
+              ? t('Complete this book and record {count} characters as read?', {count: diffToComplete})
+              : t('Complete this book?'),
             resolver
           }
         }
@@ -509,8 +510,8 @@
         {
           component: MessageDialog,
           props: {
-            title: 'Error',
-            message: `Error completing Book: ${message}`
+            title: t('Error'),
+            message: t('Error completing book: {message}', {message})
           }
         }
       ]);
@@ -546,13 +547,13 @@
 
   function getActiveChapterLabel(sectionData: SectionWithProgress[] | undefined) {
     if (!sectionData?.length) {
-      return '读取中';
+      return t('Loading');
     }
 
     const [mainChapters, currentChapterIndex] = getChapterData(sectionData);
     const activeChapter = mainChapters[currentChapterIndex] || sectionData[sectionData.length - 1];
 
-    return activeChapter?.label || '当前章节';
+    return activeChapter?.label || t('Current chapter');
   }
 
   function showReaderMenu() {
@@ -825,7 +826,7 @@
 
   function handleAnnotationDelete(annotation: ReaderAnnotation) {
     annotationsByBook$.next(removeBookAnnotation($annotationsByBook$, annotation.bookId, annotation.id));
-    showReaderToast('已删除高亮');
+    showReaderToast(t('Highlight deleted'));
   }
 
   function highlightSelection() {
@@ -837,14 +838,14 @@
     );
 
     if (!annotation) {
-      showReaderToast('当前选择无法高亮');
+      showReaderToast(t('Current selection cannot be highlighted'));
       closeSelectionToolbar();
       return;
     }
 
     annotationsByBook$.next(upsertBookAnnotation($annotationsByBook$, annotation));
     closeSelectionToolbar();
-    showReaderToast('已高亮');
+    showReaderToast(t('Highlighted'));
   }
 
   async function bookmarkSelection() {
@@ -859,10 +860,10 @@
 
     try {
       await navigator.clipboard.writeText(selectionToolbarState.text);
-      showReaderToast('已复制');
+      showReaderToast(t('Copied'));
     } catch (error: any) {
       logger.error(`Error writing selected text to Clipboard: ${error.message}`);
-      showReaderToast('复制失败');
+      showReaderToast(t('Copy failed'));
     } finally {
       closeSelectionToolbar();
     }
@@ -883,10 +884,10 @@
     if (!openedWindow) {
       try {
         await navigator.clipboard.writeText(selectedText);
-        showReaderToast('浏览器拦截了搜索，已复制文本');
+        showReaderToast(t('Browser blocked the search, text copied'));
       } catch (error: any) {
         logger.error(`Error copying selected text after blocked web search: ${error.message}`);
-        showReaderToast('浏览器拦截了搜索');
+        showReaderToast(t('Browser blocked the search'));
       }
     }
 
@@ -949,8 +950,8 @@
             {
               component: ConfirmDialog,
               props: {
-                dialogHeader: 'Confirm Exit',
-                dialogMessage: 'Your current location was not bookmarked. Continue leaving?',
+                dialogHeader: t('Confirm Exit'),
+                dialogMessage: t('Your current location was not bookmarked. Continue leaving?'),
                 resolver
               },
 
@@ -985,7 +986,7 @@
         {
           component: MessageDialog,
           props: {
-            title: 'Error',
+            title: t('Error'),
             message
           },
           disableCloseOnClick: true

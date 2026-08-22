@@ -41,7 +41,9 @@ internal class GeneralTab(
                 onValueChange = vm::name::set,
                 label = { Text(stringResource(Res.string.collection_edit_name)) },
                 supportingText = {
-                    vm.nameValidationError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    vm.nameValidationError?.let {
+                        Text(stringResource(it), color = MaterialTheme.colorScheme.error)
+                    }
                 },
                 isError = vm.nameValidationError != null,
                 maxLines = 1,

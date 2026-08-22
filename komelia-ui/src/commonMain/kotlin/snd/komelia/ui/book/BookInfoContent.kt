@@ -2,7 +2,7 @@ package snd.komelia.ui.book
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
@@ -24,6 +24,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_ISBN
@@ -52,6 +53,7 @@ import snd.komelia.DefaultDateTimeFormats.localDateTimeFormat
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.common.TagList
 import snd.komelia.ui.common.components.DescriptionChips
+import snd.komelia.ui.common.components.DetailMetadataRow
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.LabeledEntry.Companion.stringEntry
 import snd.komelia.ui.library.SeriesScreenFilter
@@ -146,21 +148,11 @@ fun BookInfoColumn(
         }
 
         Spacer(Modifier.size(0.dp))
-        Row {
-            Text(
-                stringResource(Res.string.book_size),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.width(120.dp)
-            )
+        DetailMetadataRow(stringResource(Res.string.book_size)) {
             SelectionContainer { Text(sizeInMiB, style = MaterialTheme.typography.labelLarge) }
         }
 
-        Row {
-            Text(
-                stringResource(Res.string.book_format),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.width(120.dp)
-            )
+        DetailMetadataRow(stringResource(Res.string.book_format)) {
             if (mediaType != null) {
                 val displayType = remember(mediaType) {
                     when (mediaType.lowercase()) {
@@ -176,22 +168,12 @@ fun BookInfoColumn(
         }
 
         isbn.ifBlank { null }?.let { isbn ->
-            Row {
-                Text(
-                    stringResource(Res.string.book_ISBN),
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.width(120.dp)
-                )
+            DetailMetadataRow(stringResource(Res.string.book_ISBN)) {
                 SelectionContainer { Text(isbn, style = MaterialTheme.typography.labelLarge) }
             }
         }
 
-        Row {
-            Text(
-                stringResource(Res.string.book_file),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.width(120.dp)
-            )
+        DetailMetadataRow(stringResource(Res.string.book_file)) {
             SelectionContainer { Text(fileUrl, style = MaterialTheme.typography.labelLarge) }
         }
     }
@@ -207,7 +189,10 @@ fun BookInfoRow(
     Column(
         modifier = modifier,
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
             if (onSeriesButtonClick != null) {
                 ElevatedButton(
                     onClick = onSeriesButtonClick,
@@ -215,7 +200,12 @@ fun BookInfoRow(
                 ) {
                     Icon(Icons.AutoMirrored.Outlined.LibraryBooks, null)
                     Spacer(Modifier.width(3.dp))
-                    Text(text = book.seriesTitle, textDecoration = TextDecoration.Underline)
+                    Text(
+                        text = book.seriesTitle,
+                        textDecoration = TextDecoration.Underline,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
             if (book.deleted) {
@@ -263,13 +253,7 @@ fun BookInfoRow(
         SelectionContainer {
             Column {
                 book.metadata.releaseDate?.let {
-                    Row {
-                        Text(
-                            text = stringResource(Res.string.book_release_date),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.width(120.dp)
-                        )
-
+                    DetailMetadataRow(stringResource(Res.string.book_release_date)) {
                         Text(
                             it.toString(),
                             style = MaterialTheme.typography.bodyMedium,
@@ -291,12 +275,7 @@ fun BookInfoRow(
                             percentage to pagesLeft
                         }
 
-                        Row {
-                            Text(
-                                stringResource(Res.string.book_read_progress),
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.width(120.dp)
-                            )
+                        DetailMetadataRow(stringResource(Res.string.book_read_progress)) {
                             Text(
                                 pluralStringResource(
                                     Res.plurals.book_percentage_read_pages_left,
@@ -308,17 +287,12 @@ fun BookInfoRow(
                         }
                     }
 
-                    Row {
+                    DetailMetadataRow(stringResource(Res.string.book_last_read)) {
                         val readDate = remember(readProgress) {
                             readProgress.readDate
                                 .toLocalDateTime(TimeZone.currentSystemDefault())
                                 .format(localDateTimeFormat)
                         }
-                        Text(
-                            stringResource(Res.string.book_last_read),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.width(120.dp)
-                        )
                         Text(
                             readDate,
                             style = MaterialTheme.typography.bodyMedium

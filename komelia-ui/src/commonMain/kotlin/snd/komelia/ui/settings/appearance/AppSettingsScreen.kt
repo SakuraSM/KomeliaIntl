@@ -1,6 +1,5 @@
 package snd.komelia.ui.settings.appearance
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -11,6 +10,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_appear
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.settings.SettingsScreenContainer
 
@@ -25,7 +25,7 @@ class AppSettingsScreen : Screen {
 
         SettingsScreenContainer(stringResource(Res.string.settings_appearance_title)) {
             when (val result = state.value) {
-                is LoadState.Error -> Text("${result::class.simpleName}: ${result.exception.message}")
+                is LoadState.Error -> ErrorContent(exception = result.exception)
                 LoadState.Uninitialized, LoadState.Loading -> LoadingMaxSizeIndicator()
                 is LoadState.Success -> AppearanceSettingsContent(
                     cardWidth = vm.cardWidth,

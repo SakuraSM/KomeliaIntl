@@ -65,21 +65,22 @@ class AppNotifications {
         when (exception) {
             is CancellationException -> {}
             is ResponseException -> toErrorNotification(exception)
-            else -> add(AppNotification.Error(exception.message ?: exception.cause?.message ?: "Unknown error"))
+            else -> {
+                val message = exception.message ?: exception.cause?.message
+                if (message == null) add(AppNotification.Error(AppNotificationMessageKey.ERROR_UNKNOWN))
+                else add(AppNotification.Error(message))
+            }
         }
     }
 
     private suspend fun toErrorNotification(exception: ResponseException) {
         val contentType = exception.response.contentType()
         contentType?.toString()
-        val errorMessage =
-            if (contentType != null && contentType.contentType == "application" && contentType.contentSubtype == "json") {
-                parseJsonErrorMessage(exception)
-            } else {
-                errorMessageFromStatusCode(exception.response.status)
-            }
-
-        add(AppNotification.Error(errorMessage))
+        if (contentType != null && contentType.contentType == "application" && contentType.contentSubtype == "json") {
+            add(AppNotification.Error(parseJsonErrorMessage(exception)))
+        } else {
+            add(AppNotification.Error(errorMessageFromStatusCode(exception.response.status)))
+        }
     }
 }
 
@@ -91,19 +92,77 @@ private suspend fun parseJsonErrorMessage(exception: ResponseException): String 
         ?: exception.response.bodyAsText()
 }
 
-private fun errorMessageFromStatusCode(statusCode: HttpStatusCode): String {
-    return when (statusCode.value) {
-        400 -> "Bad Request"
-        404 -> "Not Found"
-        413 -> "Content Too Large"
-        418 -> "I'm a teapot"
-        else -> HttpStatusCode.fromValue(statusCode.value).description
+private fun errorMessageFromStatusCode(statusCode: HttpStatusCode): AppNotificationMessage {
+    val key = when (statusCode.value) {
+        400 -> AppNotificationMessageKey.HTTP_BAD_REQUEST
+        404 -> AppNotificationMessageKey.HTTP_NOT_FOUND
+        413 -> AppNotificationMessageKey.HTTP_CONTENT_TOO_LARGE
+        418 -> AppNotificationMessageKey.HTTP_TEAPOT
+        else -> AppNotificationMessageKey.HTTP_ERROR
     }
+    return AppNotificationMessage.Localized(key, listOf(statusCode.value.toString()))
+}
+
+enum class AppNotificationMessageKey {
+    ERROR_UNKNOWN,
+    HTTP_BAD_REQUEST,
+    HTTP_NOT_FOUND,
+    HTTP_CONTENT_TOO_LARGE,
+    HTTP_TEAPOT,
+    HTTP_ERROR,
+    LIBRARY_AUTO_IDENTIFICATION_STARTED,
+    LIBRARY_SCAN_STARTED,
+    LIBRARY_DEEP_SCAN_STARTED,
+    LIBRARY_ANALYSIS_STARTED,
+    LIBRARY_REFRESH_STARTED,
+    LIBRARY_TRASH_STARTED,
+    SERIES_ANALYSIS_STARTED,
+    SERIES_METADATA_REFRESH_STARTED,
+    BOOK_ANALYSIS_STARTED,
+    BOOK_METADATA_REFRESH_STARTED,
+    COLOR_PRESET_NOT_FOUND,
+    COLOR_PRESET_ALREADY_EXISTS,
+    READER_AT_BEGINNING,
+    IMAGE_CACHE_CLEARED,
+    DISCORD_WEBHOOKS_MISSING,
+    APPRISE_URLS_MISSING,
+    NOTIFICATION_TEMPLATES_SAVED,
+    SERVER_SETTINGS_UPDATED,
+    ALL_LIBRARIES_SCAN_STARTED,
+    ALL_LIBRARIES_TRASH_EMPTIED,
+    NO_TASKS_TO_CANCEL,
+    TASKS_CANCELLED,
+}
+
+sealed interface AppNotificationMessage {
+    data class Raw(val value: String) : AppNotificationMessage
+    data class Localized(
+        val key: AppNotificationMessageKey,
+        val arguments: List<String> = emptyList(),
+    ) : AppNotificationMessage
 }
 
 sealed class AppNotification(val id: Long = Clock.System.now().toEpochMilliseconds()) {
-    class Success(val message: String) : AppNotification()
-    class Normal(val message: String) : AppNotification()
-    class Error(val message: String) : AppNotification()
-}
+    abstract val message: AppNotificationMessage
 
+    class Success(override val message: AppNotificationMessage) : AppNotification() {
+        constructor(message: String) : this(AppNotificationMessage.Raw(message))
+        constructor(key: AppNotificationMessageKey, vararg arguments: String) :
+            this(AppNotificationMessage.Localized(key, arguments.toList()))
+    }
+
+    class Normal(override val message: AppNotificationMessage) : AppNotification() {
+        constructor(message: String) : this(AppNotificationMessage.Raw(message))
+        constructor(key: AppNotificationMessageKey, vararg arguments: String) :
+            this(AppNotificationMessage.Localized(key, arguments.toList()))
+    }
+
+    class Error(override val message: AppNotificationMessage) : AppNotification() {
+        constructor(message: String?) : this(
+            message?.let(AppNotificationMessage::Raw)
+                ?: AppNotificationMessage.Localized(AppNotificationMessageKey.ERROR_UNKNOWN)
+        )
+        constructor(key: AppNotificationMessageKey, vararg arguments: String) :
+            this(AppNotificationMessage.Localized(key, arguments.toList()))
+    }
+}

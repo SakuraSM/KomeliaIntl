@@ -9,6 +9,7 @@ import {filter, fromEvent, merge, NEVER, race, switchMap, take, takeUntil, tap, 
 import {FuriganaStyle} from '../../data/furigana-style';
 import {nextChapter$} from '$lib/components/book-reader/book-toc/book-toc';
 import {pulseElement} from '$lib/functions/range-util';
+import {t} from '$lib/i18n';
 import {
     toggleImageGalleryPictureSpoiler$
 } from '$lib/components/book-reader/book-reader-image-gallery/book-reader-image-gallery';
@@ -74,10 +75,10 @@ function spoilerImageListener(document: Document) {
     const elements = Array.from(contentEl.querySelectorAll('[data-ttu-spoiler-img]'));
     const obs$ = elements.map((el) => {
       const spoilerLabelEl = document.createElement('span');
-      spoilerLabelEl.title = 'Show Image';
+      spoilerLabelEl.title = t('Show Image');
       spoilerLabelEl.classList.add('spoiler-label');
       spoilerLabelEl.setAttribute('aria-hidden', 'true');
-      spoilerLabelEl.innerText = 'ネタバレ';
+      spoilerLabelEl.innerText = t('Spoiler');
       el.appendChild(spoilerLabelEl);
 
       const imageElement = el.querySelector('img,image');

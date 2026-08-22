@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import snd.komelia.AppNotification
+import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komf.api.KomfServerLibraryId
 import snd.komf.client.KomfMetadataClient
@@ -18,7 +19,7 @@ class KomfLibraryIdentifyViewmodel(
     fun autoIdentify() {
         appNotifications.runCatchingToNotifications(scope) {
             komfMetadataClient.matchLibrary(libraryId)
-            appNotifications.add(AppNotification.Normal("Launched library auto-identification"))
+            appNotifications.add(AppNotification.Normal(AppNotificationMessageKey.LIBRARY_AUTO_IDENTIFICATION_STARTED))
         }
     }
 }

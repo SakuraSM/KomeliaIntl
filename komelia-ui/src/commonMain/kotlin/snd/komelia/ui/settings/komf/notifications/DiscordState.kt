@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import snd.komelia.AppNotification
+import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.ui.settings.komf.KomfSharedState
 import snd.komf.api.PatchValue.Some
@@ -88,7 +89,7 @@ class DiscordState(
 
     fun onTemplatesSend() {
         if (discordWebhooks.isEmpty()) {
-            appNotifications.add(AppNotification.Error("No configured Discord webhooks"))
+            appNotifications.add(AppNotification.Error(AppNotificationMessageKey.DISCORD_WEBHOOKS_MISSING))
             return
         }
 
@@ -105,7 +106,7 @@ class DiscordState(
     fun onTemplatesSave() {
         appNotifications.runCatchingToNotifications(coroutineScope) {
             komfNotificationClient.updateDiscordTemplates(getKomfDiscordTemplates())
-            appNotifications.add(AppNotification.Success("Templates Saved"))
+            appNotifications.add(AppNotification.Success(AppNotificationMessageKey.NOTIFICATION_TEMPLATES_SAVED))
         }
 
     }

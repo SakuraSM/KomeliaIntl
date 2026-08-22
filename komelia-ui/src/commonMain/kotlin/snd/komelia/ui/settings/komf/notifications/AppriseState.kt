@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import snd.komelia.AppNotification
+import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.ui.settings.komf.KomfSharedState
 import snd.komf.api.PatchValue.Some
@@ -71,7 +72,7 @@ class AppriseState(
 
     fun onTemplatesSend() {
         if (appriseUrls.isEmpty()) {
-            appNotifications.add(AppNotification.Error("No configured Apprise urls"))
+            appNotifications.add(AppNotification.Error(AppNotificationMessageKey.APPRISE_URLS_MISSING))
             return
         }
 
@@ -96,7 +97,7 @@ class AppriseState(
                     bodyTemplate = bodyTemplate.ifBlank { null }
                 )
             )
-            appNotifications.add(AppNotification.Success("Templates Saved"))
+            appNotifications.add(AppNotification.Success(AppNotificationMessageKey.NOTIFICATION_TEMPLATES_SAVED))
         }
 
     }

@@ -19,6 +19,7 @@
   import {customReadingPointEnabled$, viewMode$} from '$lib/data/store';
   import {ViewMode} from '$lib/data/view-mode';
   import {isMobile$} from '$lib/functions/utils';
+  import {t} from '$lib/i18n';
   import Fa from 'svelte-fa';
 
   interface Props {
@@ -68,9 +69,9 @@
   };
 
   let customReadingPointMenuItems = $derived<HeaderMenuItem[]>([
-    ...(hasCustomReadingPoint ? [{label: '显示定位', action: showCustomReadingPoint}] : []),
-    {label: '设置定位', action: setCustomReadingPoint},
-    ...(hasCustomReadingPoint ? [{label: '重置定位', action: resetCustomReadingPoint}] : [])
+    ...(hasCustomReadingPoint ? [{label: t('Show custom reading point'), action: showCustomReadingPoint}] : []),
+    {label: t('Set custom reading point'), action: setCustomReadingPoint},
+    ...(hasCustomReadingPoint ? [{label: t('Reset custom reading point'), action: resetCustomReadingPoint}] : [])
   ]);
 
   let customReadingPointMenuElm: Popover | undefined = $state();
@@ -86,14 +87,14 @@
 
 <nav
     class="flex items-center justify-between gap-3 bg-slate-950/92 px-3 shadow-lg shadow-black/30 backdrop-blur-md md:px-6 {baseHeaderClasses}"
-    aria-label="阅读器工具栏"
+    aria-label={t('Reader toolbar')}
 >
   <div class="{toolbarGroupClasses} transform-gpu {nTranslateXHeaderFa}">
     {#if hasChapterData}
       <button
           type="button"
-          title="Open Table of Contents"
-          aria-label="打开目录"
+          title={t('Open Table of Contents')}
+          aria-label={t('Open Table of Contents')}
           class={baseIconClasses}
           onclick={tocClick}
       >
@@ -102,8 +103,8 @@
     {/if}
     <button
         type="button"
-        title="Create Bookmark"
-        aria-label={isBookmarkScreen ? '更新书签' : '创建书签'}
+        title={t('Create Bookmark')}
+        aria-label={isBookmarkScreen ? t('Update Bookmark') : t('Create Bookmark')}
         class={baseIconClasses}
         onclick={bookmarkClick}
     >
@@ -112,8 +113,8 @@
     {#if hasBookmarkData}
       <button
           type="button"
-          title="Return to Bookmark"
-          aria-label="回到书签"
+          title={t('Return to Bookmark')}
+          aria-label={t('Return to Bookmark')}
           class={baseIconClasses}
           onclick={scrollToBookmarkClick}
       >
@@ -123,9 +124,9 @@
     {#if $viewMode$ === ViewMode.Continuous && !$isMobile$}
       <div
           class="flex h-10 items-center rounded-full px-4 text-sm font-semibold tracking-wide text-white/90 xl:h-8 xl:px-3"
-          title="Current Autoscroll Speed"
+          title={t('Current Autoscroll Speed')}
       >
-        {autoScrollMultiplier}x 自动
+        {t('{speed}x Auto', {speed: autoScrollMultiplier})}
       </div>
     {/if}
   </div>
@@ -133,8 +134,8 @@
   <div class="{toolbarGroupClasses} transform-gpu {translateXHeaderFa}">
     <button
         type="button"
-        title="Complete Book"
-        aria-label="标记为已读"
+        title={t('Complete Book')}
+        aria-label={t('Mark as read')}
         class={baseIconClasses}
         onclick={completeBook}
     >
@@ -151,8 +152,8 @@
           <button
               slot="icon"
               type="button"
-              title="Open Custom Point Actions"
-              aria-label="阅读定位点"
+              title={t('Open Custom Point Actions')}
+              aria-label={t('Reading point')}
               class={baseIconClasses}
           >
             <Fa icon={faCrosshairs}/>
@@ -174,8 +175,8 @@
     {#if showFullscreenButton}
       <button
           type="button"
-          title="Toggle Fullscreen"
-          aria-label="切换全屏"
+          title={t('Toggle Fullscreen')}
+          aria-label={t('Toggle Fullscreen')}
           class={baseIconClasses}
           onclick={fullscreenClick}
       >
@@ -184,8 +185,8 @@
     {/if}
     <button
         type="button"
-        title="Images"
-        aria-label="查看图片"
+        title={t('Images')}
+        aria-label={t('View images')}
         class={baseIconClasses}
         onclick={readerImageGalleryClick}
     >
@@ -193,8 +194,8 @@
     </button>
     <button
         type="button"
-        title="Settings"
-        aria-label="阅读设置"
+        title={t('Settings')}
+        aria-label={t('Reader settings')}
         class={baseIconClasses}
         onclick={settingsClick}
     >
@@ -203,8 +204,8 @@
 
     <button
         type="button"
-        title="Close Book"
-        aria-label="关闭书籍"
+        title={t('Close Book')}
+        aria-label={t('Close Book')}
         class={baseIconClasses}
         onclick={closeBook}
     >

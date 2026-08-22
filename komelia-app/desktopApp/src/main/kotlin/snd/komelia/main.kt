@@ -63,6 +63,8 @@ import snd.komelia.ui.LocalWindow
 import snd.komelia.ui.MainView
 import snd.komelia.ui.error.ErrorView
 import snd.komelia.ui.log.LogView
+import snd.komelia.ui.errorWindowTitle
+import snd.komelia.ui.logsWindowTitle
 import snd.komelia.ui.log.LogbackFlowAppender
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.WindowSizeClass
@@ -249,7 +251,7 @@ private fun ApplicationScope.MainAppContent(
         }
 
         Window(
-            title = "Komelia Logs",
+            title = logsWindowTitle(),
             onCloseRequest = { showLogWindow = false },
             state = logWindowState,
             icon = BitmapPainter(useResource("ic_launcher.png", ::loadImageBitmap)),
@@ -275,7 +277,7 @@ private fun errorApp(
         )
 
         Window(
-            title = "Komelia Error",
+            title = errorWindowTitle(),
             onCloseRequest = {
                 onExit()
                 exitApplication()

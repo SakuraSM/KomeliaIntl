@@ -3,7 +3,7 @@
     <string name="navigation_close_settings">Close settings</string>
     <string name="screen_error">Error %1$s</string>
 
-    <string name="home_filter_all">All</string>
+    <string name="home_filter_all">Overview</string>
     <string name="home_filter_more">More</string>
     <string name="home_filter_groups">Home groups</string>
     <string name="home_filter_search_groups">Search groups</string>
@@ -21,7 +21,12 @@
     <string name="home_filter_delete_confirm">Delete %1$s?</string>
     <string name="home_filter_reset_to_default">Reset to default</string>
     <string name="home_filter_reset_to_default_confirm">Reset homescreen filters to default?</string>
-    <string name="home_filter_add_filter">Add filter</string>
+    <string name="home_filter_add_filter">Add home group</string>
+    <string name="home_filter_groups_description">Drag to reorder. Expand a group to edit what it shows.</string>
+    <string name="home_filter_group_summary">%1$s · %2$s</string>
+    <string name="home_filter_expand">Expand group</string>
+    <string name="home_filter_collapse">Collapse group</string>
+    <string name="home_filter_drag">Drag to reorder group</string>
     <string name="home_filter_add_condition">Add condition</string>
     <string name="home_filter_label">Label</string>
     <string name="home_filter_condition">Condition</string>
@@ -465,6 +470,7 @@
     <string name="filter_and_exclude">and exclude</string>
 
     <string name="series_filter_reset_filters">Reset filters</string>
+    <string name="series_filter_title">Filters</string>
     <string name="series_filter_hide_filters">Hide filters</string>
     <string name="series_filter_any_value">Any</string>
     <string name="series_filter_sort">Sort by</string>
@@ -516,6 +522,7 @@
     <string name="collection_edit">Edit</string>
     <string name="collection_delete">Delete</string>
     <string name="collection_search_or_create">Search or create collection</string>
+    <string name="dialog_field_required">Required</string>
     <string name="collection_exists">A collection with this name already exists</string>
     <string name="collection_duplicate_series">already contains this series</string>
     <string name="collection_create">Create</string>
@@ -656,6 +663,12 @@
     <string name="settings_navigation_epub_reader">Epub Reader</string>
     <string name="settings_navigation_updates">Updates</string>
     <string name="settings_navigation_offline_mode">Offline Mode</string>
+    <string name="settings_navigation_about">About</string>
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_description">Komelia Intl is based on Snd-R/Komelia and adds Simplified Chinese localization and cross-platform experience improvements.</string>
+    <string name="settings_about_source_code">Source code</string>
+    <string name="settings_about_project_repository">Project repository</string>
+    <string name="settings_about_upstream_repository">Original repository</string>
     <string name="settings_navigation_user_settings">User Settings</string>
     <string name="settings_navigation_my_account">My Account</string>
     <string name="settings_navigation_my_auth_activity">My Authentication Activity</string>
@@ -1126,6 +1139,8 @@
     <string name="komf_identify_no_results">No results</string>
     <string name="komf_identify_completed">Completed</string>
     <string name="komf_identify_processing">Processing</string>
+    <string name="komf_identify_retrieving_book_data">Retrieving book data: %1$s/%2$s</string>
+    <string name="komf_identify_retrieving_series_data">Retrieving series data</string>
     <string name="komf_identify_cancel">Cancel</string>
     <string name="komf_identify_auto_identify">Auto-Identify</string>
     <string name="komf_identify_confirm">Confirm</string>
@@ -1224,11 +1239,40 @@
     </plurals>
 
     <string name="error_unknown">Unknown error</string>
+    <string name="notification_http_bad_request">The request was invalid</string>
+    <string name="notification_http_not_found">The requested resource was not found</string>
+    <string name="notification_http_content_too_large">The submitted content is too large</string>
+    <string name="notification_http_teapot">The server refused this request (418)</string>
+    <string name="notification_http_error">Server request failed (HTTP %1$s)</string>
+    <string name="notification_library_auto_identification_started">Library auto-identification started</string>
+    <string name="notification_library_scan_started">Library scan started</string>
+    <string name="notification_library_deep_scan_started">Library deep scan started</string>
+    <string name="notification_library_analysis_started">Library analysis started</string>
+    <string name="notification_library_refresh_started">Library refresh started</string>
+    <string name="notification_library_trash_started">Library trash task started</string>
+    <string name="notification_series_analysis_started">Series analysis started</string>
+    <string name="notification_series_metadata_refresh_started">Series metadata refresh started</string>
+    <string name="notification_book_analysis_started">Book analysis started</string>
+    <string name="notification_book_metadata_refresh_started">Book metadata refresh started</string>
+    <string name="notification_color_preset_not_found">Preset %1$s does not exist</string>
+    <string name="notification_color_preset_already_exists">A preset with that name already exists</string>
+    <string name="notification_reader_at_beginning">You’re at the beginning of the book</string>
+    <string name="notification_image_cache_cleared">Image cache cleared</string>
+    <string name="notification_discord_webhooks_missing">No Discord webhooks are configured</string>
+    <string name="notification_apprise_urls_missing">No Apprise URLs are configured</string>
+    <string name="notification_templates_saved">Templates saved</string>
+    <string name="notification_server_settings_updated">Server settings updated</string>
+    <string name="notification_all_libraries_scan_started">Scan started for all libraries</string>
+    <string name="notification_all_libraries_trash_emptied">Trash emptied for all libraries</string>
+    <string name="notification_no_tasks_to_cancel">No tasks to cancel</string>
+    <string name="notification_tasks_cancelled">%1$s tasks cancelled</string>
     <string name="error_unrecoverable">Encountered unrecoverable error: %1$s</string>
     <string name="error_copy">Copy stacktrace to clipboard</string>
     <string name="error_copied">Copied to clipboard</string>
     <string name="error_restart">Restart</string>
     <string name="error_reload">Reload</string>
     <string name="error_exit">Exit</string>
+    <string name="window_logs_title">Komelia Logs</string>
+    <string name="window_error_title">Komelia Error</string>
 
 </resources>

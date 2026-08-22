@@ -48,7 +48,7 @@ class ReadListScreen(val readListId: KomgaReadListId) : ReloadableScreen {
             when (val state = vm.state.collectAsState().value) {
                 Uninitialized -> LoadingMaxSizeIndicator()
                 is Error -> ErrorContent(
-                    message = state.exception.message ?: "Unknown Error",
+                    exception = state.exception,
                     onReload = vm::reload
                 )
 

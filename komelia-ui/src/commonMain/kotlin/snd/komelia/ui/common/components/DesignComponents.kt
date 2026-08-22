@@ -39,6 +39,9 @@ import androidx.compose.ui.unit.dp
 import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomeliaMotion
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.platform.WindowSizeClass.COMPACT
+import snd.komelia.ui.platform.WindowSizeClass.MEDIUM
 import snd.komelia.ui.platform.cursorForHand
 
 enum class KomeliaIconButtonStyle {
@@ -142,7 +145,11 @@ fun SectionHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             if (supportingText != null) {
                 Spacer(Modifier.height(KomeliaSpacing.extraSmall))
                 Text(
@@ -153,6 +160,33 @@ fun SectionHeader(
             }
         }
         actions()
+    }
+}
+
+@Composable
+fun DetailMetadataRow(
+    label: String,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val labelWidth = when (LocalWindowWidth.current) {
+        COMPACT, MEDIUM -> 96.dp
+        else -> 120.dp
+    }
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(LocalKomeliaLayout.current.itemSpacing),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(labelWidth),
+        )
+        Box(modifier = Modifier.weight(1f)) {
+            content()
+        }
     }
 }
 

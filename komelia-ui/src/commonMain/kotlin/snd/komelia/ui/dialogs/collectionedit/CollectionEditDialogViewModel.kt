@@ -6,7 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
 import io.github.vinceglb.filekit.readBytes
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_exists
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_field_required
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.StringResource
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaCollectionsApi
 import snd.komelia.ui.LoadState
@@ -28,10 +32,10 @@ class CollectionEditDialogViewModel(
     private var state by mutableStateOf<LoadState<Unit>>(LoadState.Uninitialized)
     var name by mutableStateOf(collection.name)
     private var collections by mutableStateOf<List<KomgaCollection>>(emptyList())
-    val nameValidationError by derivedStateOf {
+    val nameValidationError by derivedStateOf<StringResource?> {
         when {
-            name.isBlank() -> "Required"
-            name != collection.name && collections.any { it.name == this.name } -> "A collection with this name already exists"
+            name.isBlank() -> Res.string.dialog_field_required
+            name != collection.name && collections.any { it.name == this.name } -> Res.string.collection_exists
             else -> null
         }
     }

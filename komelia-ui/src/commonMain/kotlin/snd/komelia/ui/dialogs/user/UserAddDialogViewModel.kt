@@ -5,6 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.StateScreenModel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_field_required
+import org.jetbrains.compose.resources.StringResource
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaUserApi
 import snd.komelia.ui.LoadState
@@ -25,7 +28,7 @@ class UserAddDialogViewModel(
         private set
     var password by mutableStateOf("")
         private set
-    var passwordValidationError by mutableStateOf<String?>(null)
+    var passwordValidationError by mutableStateOf<StringResource?>(null)
         private set
 
     var administratorRole by mutableStateOf(false)
@@ -42,7 +45,7 @@ class UserAddDialogViewModel(
     }
 
     fun onPasswordChange(password: String) {
-        passwordValidationError = if (password.isBlank()) "Required" else null
+        passwordValidationError = if (password.isBlank()) Res.string.dialog_field_required else null
         this.password = password
     }
 

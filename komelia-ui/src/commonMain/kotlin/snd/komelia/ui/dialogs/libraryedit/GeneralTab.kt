@@ -40,8 +40,16 @@ class GeneralTab(
     @Composable
     override fun Content() {
         GeneralTabContent(
-            name = StateHolder(vm.libraryName.value, vm::setLibraryName, vm.libraryNameError),
-            rootFolder = StateHolder(vm.rootFolder.value, vm::setRootFolder, vm.rootFolderError),
+            name = StateHolder(
+                vm.libraryName.value,
+                vm::setLibraryName,
+                vm.libraryNameError?.let { stringResource(it) },
+            ),
+            rootFolder = StateHolder(
+                vm.rootFolder.value,
+                vm::setRootFolder,
+                vm.rootFolderError?.let { stringResource(it) },
+            ),
         )
     }
 }

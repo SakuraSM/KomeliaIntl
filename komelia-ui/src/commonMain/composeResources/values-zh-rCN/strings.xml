@@ -3,7 +3,7 @@
     <string name="navigation_close_settings">关闭设置</string>
     <string name="screen_error">错误：%1$s</string>
 
-    <string name="home_filter_all">全部</string>
+    <string name="home_filter_all">概览</string>
     <string name="home_filter_more">更多</string>
     <string name="home_filter_groups">首页分组</string>
     <string name="home_filter_search_groups">搜索分组</string>
@@ -21,7 +21,12 @@
     <string name="home_filter_delete_confirm">删除“%1$s”？</string>
     <string name="home_filter_reset_to_default">重置为默认</string>
     <string name="home_filter_reset_to_default_confirm">将首页筛选重置为默认值？</string>
-    <string name="home_filter_add_filter">添加筛选</string>
+    <string name="home_filter_add_filter">添加首页分组</string>
+    <string name="home_filter_groups_description">拖动调整顺序，展开分组后编辑展示内容。</string>
+    <string name="home_filter_group_summary">%1$s · %2$s</string>
+    <string name="home_filter_expand">展开分组</string>
+    <string name="home_filter_collapse">收起分组</string>
+    <string name="home_filter_drag">拖动调整分组顺序</string>
     <string name="home_filter_add_condition">添加条件</string>
     <string name="home_filter_label">标签</string>
     <string name="home_filter_condition">条件</string>
@@ -465,6 +470,7 @@
     <string name="filter_and_exclude">并排除</string>
 
     <string name="series_filter_reset_filters">重置筛选</string>
+    <string name="series_filter_title">筛选</string>
     <string name="series_filter_hide_filters">隐藏筛选</string>
     <string name="series_filter_any_value">任意</string>
     <string name="series_filter_sort">排序方式</string>
@@ -516,6 +522,7 @@
     <string name="collection_edit">编辑</string>
     <string name="collection_delete">删除</string>
     <string name="collection_search_or_create">搜索或创建合集</string>
+    <string name="dialog_field_required">必填</string>
     <string name="collection_exists">已存在同名合集</string>
     <string name="collection_duplicate_series">已包含此系列</string>
     <string name="collection_create">创建</string>
@@ -656,6 +663,12 @@
     <string name="settings_navigation_epub_reader">EPUB 阅读器</string>
     <string name="settings_navigation_updates">应用更新</string>
     <string name="settings_navigation_offline_mode">离线模式</string>
+    <string name="settings_navigation_about">关于</string>
+    <string name="settings_about_version">版本 %1$s</string>
+    <string name="settings_about_description">Komelia Intl 基于 Snd-R/Komelia 修改，增加简体中文本地化与多平台体验优化。</string>
+    <string name="settings_about_source_code">源代码</string>
+    <string name="settings_about_project_repository">项目仓库</string>
+    <string name="settings_about_upstream_repository">原始仓库</string>
     <string name="settings_navigation_user_settings">用户设置</string>
     <string name="settings_navigation_my_account">我的账户</string>
     <string name="settings_navigation_my_auth_activity">我的登录活动</string>
@@ -1126,6 +1139,8 @@
     <string name="komf_identify_no_results">没有结果</string>
     <string name="komf_identify_completed">已完成</string>
     <string name="komf_identify_processing">处理中</string>
+    <string name="komf_identify_retrieving_book_data">正在获取书籍数据：%1$s/%2$s</string>
+    <string name="komf_identify_retrieving_series_data">正在获取系列数据</string>
     <string name="komf_identify_cancel">取消</string>
     <string name="komf_identify_auto_identify">自动识别</string>
     <string name="komf_identify_confirm">确认</string>
@@ -1224,11 +1239,40 @@
     </plurals>
 
     <string name="error_unknown">未知错误</string>
+    <string name="notification_http_bad_request">请求内容无效</string>
+    <string name="notification_http_not_found">找不到请求的资源</string>
+    <string name="notification_http_content_too_large">提交的内容过大</string>
+    <string name="notification_http_teapot">服务器拒绝了此请求（418）</string>
+    <string name="notification_http_error">服务器请求失败（HTTP %1$s）</string>
+    <string name="notification_library_auto_identification_started">已开始自动识别书库</string>
+    <string name="notification_library_scan_started">已开始扫描书库</string>
+    <string name="notification_library_deep_scan_started">已开始深度扫描书库</string>
+    <string name="notification_library_analysis_started">已开始分析书库</string>
+    <string name="notification_library_refresh_started">已开始刷新书库</string>
+    <string name="notification_library_trash_started">已开始清理书库回收站</string>
+    <string name="notification_series_analysis_started">已开始分析系列</string>
+    <string name="notification_series_metadata_refresh_started">已开始刷新系列元数据</string>
+    <string name="notification_book_analysis_started">已开始分析书籍</string>
+    <string name="notification_book_metadata_refresh_started">已开始刷新书籍元数据</string>
+    <string name="notification_color_preset_not_found">预设“%1$s”不存在</string>
+    <string name="notification_color_preset_already_exists">已存在同名预设</string>
+    <string name="notification_reader_at_beginning">已经到达本书开头</string>
+    <string name="notification_image_cache_cleared">图片缓存已清除</string>
+    <string name="notification_discord_webhooks_missing">尚未配置 Discord Webhook</string>
+    <string name="notification_apprise_urls_missing">尚未配置 Apprise URL</string>
+    <string name="notification_templates_saved">模板已保存</string>
+    <string name="notification_server_settings_updated">服务器设置已更新</string>
+    <string name="notification_all_libraries_scan_started">已开始扫描全部书库</string>
+    <string name="notification_all_libraries_trash_emptied">已清空全部书库回收站</string>
+    <string name="notification_no_tasks_to_cancel">没有可取消的任务</string>
+    <string name="notification_tasks_cancelled">已取消 %1$s 个任务</string>
     <string name="error_unrecoverable">遇到无法恢复的错误：%1$s</string>
     <string name="error_copy">复制错误堆栈</string>
     <string name="error_copied">已复制到剪贴板</string>
     <string name="error_restart">重启</string>
     <string name="error_reload">重新加载</string>
     <string name="error_exit">退出</string>
+    <string name="window_logs_title">Komelia 日志</string>
+    <string name="window_error_title">Komelia 错误</string>
 
 </resources>

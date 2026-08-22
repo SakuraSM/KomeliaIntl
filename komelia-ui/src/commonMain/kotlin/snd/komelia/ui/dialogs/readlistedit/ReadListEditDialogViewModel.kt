@@ -6,7 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
 import io.github.vinceglb.filekit.readBytes
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_field_required
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_exists
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.StringResource
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.ui.LoadState
@@ -29,10 +33,10 @@ class ReadListEditDialogViewModel(
     var name by mutableStateOf(readList.name)
     var summary by mutableStateOf(readList.summary)
     private var readLists by mutableStateOf<List<KomgaReadList>>(emptyList())
-    val nameValidationError by derivedStateOf {
+    val nameValidationError by derivedStateOf<StringResource?> {
         when {
-            name.isBlank() -> "Required"
-            name != readList.name && readLists.any { it.name == this.name } -> "A read list with this name already exists"
+            name.isBlank() -> Res.string.dialog_field_required
+            name != readList.name && readLists.any { it.name == this.name } -> Res.string.readlist_exists
             else -> null
         }
     }

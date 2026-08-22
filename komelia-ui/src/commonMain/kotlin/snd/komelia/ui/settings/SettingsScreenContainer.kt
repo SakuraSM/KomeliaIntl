@@ -7,19 +7,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,9 +32,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalKomeliaLayout
-import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.platform.BackPressHandler
-import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
@@ -59,9 +54,11 @@ fun SettingsScreenContainer(
 private fun MobileContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
     val navigator = LocalNavigator.currentOrThrow
     val layout = LocalKomeliaLayout.current
-    Column(Modifier.background(MaterialTheme.colorScheme.background)) {
-        PlatformTitleBar()
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = layout.pageVerticalPadding),
             horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -75,10 +72,8 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
             Text(title, style = MaterialTheme.typography.titleLarge)
         }
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
         Column(
-            modifier = Modifier.weight(1f, false).imePadding().verticalScroll(rememberScrollState())
+            modifier = Modifier.weight(1f).imePadding().verticalScroll(rememberScrollState())
                 .padding(
                     horizontal = layout.pageHorizontalPadding,
                     vertical = layout.pageVerticalPadding,
@@ -87,8 +82,6 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
         ) {
             content()
         }
-
-        Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
     }
     BackPressHandler { navigator.pop() }
 }

@@ -13,6 +13,7 @@
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
   import {ViewMode} from '$lib/data/view-mode';
+  import {t} from '$lib/i18n';
 
   interface Props {
     showHeader: boolean;
@@ -75,8 +76,8 @@
   <button
       type="button"
       class="writing-horizontal-tb fixed left-3 top-1/2 z-10 hidden h-14 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950/82 text-white shadow-lg shadow-black/25 backdrop-blur-md transition hover:bg-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 disabled:pointer-events-none disabled:opacity-30 md:flex"
-      aria-label="上一页"
-      title="上一页"
+      aria-label={t('Previous page')}
+      title={t('Previous page')}
       disabled={!hasPageManager}
       onclick={onPreviousPage}
   >
@@ -85,8 +86,8 @@
   <button
       type="button"
       class="writing-horizontal-tb fixed right-3 top-1/2 z-10 hidden h-14 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950/82 text-white shadow-lg shadow-black/25 backdrop-blur-md transition hover:bg-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 disabled:pointer-events-none disabled:opacity-30 md:flex"
-      aria-label="下一页"
-      title="下一页"
+      aria-label={t('Next page')}
+      title={t('Next page')}
       disabled={!hasPageManager}
       onclick={onNextPage}
   >
@@ -114,8 +115,8 @@
         <button
             type="button"
             class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 sm:flex"
-            title="上一章"
-            aria-label="上一章"
+            title={t('Previous chapter')}
+            aria-label={t('Previous chapter')}
             onclick={onPreviousChapter}
         >
           <Fa icon={faBackwardStep}/>
@@ -123,8 +124,8 @@
         <button
             type="button"
             class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
-            title="上一页"
-            aria-label="上一页"
+            title={t('Previous page')}
+            aria-label={t('Previous page')}
             disabled={!hasPageManager}
             onclick={onPreviousPage}
         >
@@ -133,8 +134,8 @@
 
         <button
             type="button"
-            title="打开导航"
-            aria-label="打开导航"
+            title={t('Open navigation')}
+            aria-label={t('Open navigation')}
             class="min-w-0 rounded-full px-3 py-2 text-left transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
             class:invisible={!showCharacterCounter && !hasChapterData}
             style:color={tooltipColor}
@@ -152,8 +153,8 @@
         <button
             type="button"
             class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
-            title="下一页"
-            aria-label="下一页"
+            title={t('Next page')}
+            aria-label={t('Next page')}
             disabled={!hasPageManager}
             onclick={onNextPage}
         >
@@ -162,8 +163,8 @@
         <button
             type="button"
             class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 sm:flex"
-            title="下一章"
-            aria-label="下一章"
+            title={t('Next chapter')}
+            aria-label={t('Next chapter')}
             onclick={onNextChapter}
         >
           <Fa icon={faForwardStep}/>
@@ -174,8 +175,8 @@
           <button
               type="button"
               class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 sm:flex"
-              title="降低自动滚动速度"
-              aria-label="降低自动滚动速度"
+              title={t('Decrease auto-scroll speed')}
+              aria-label={t('Decrease auto-scroll speed')}
               onclick={() => onAutoScrollMultiplierChange(-1)}
           >
             <Fa icon={faMinus}/>
@@ -183,8 +184,8 @@
           <button
               type="button"
               class="hidden h-10 items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold text-white transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 sm:flex"
-              title="切换自动滚动"
-              aria-label="切换自动滚动"
+              title={t('Toggle auto-scroll')}
+              aria-label={t('Toggle auto-scroll')}
               aria-pressed={autoScrollEnabled}
               onclick={onToggleAutoScroll}
           >
@@ -194,8 +195,8 @@
           <button
               type="button"
               class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 sm:flex"
-              title="提高自动滚动速度"
-              aria-label="提高自动滚动速度"
+              title={t('Increase auto-scroll speed')}
+              aria-label={t('Increase auto-scroll speed')}
               onclick={() => onAutoScrollMultiplierChange(1)}
           >
             <Fa icon={faPlus}/>

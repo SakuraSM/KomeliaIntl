@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -33,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
@@ -387,6 +390,7 @@ private val destinationItems = listOf(
 )
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun AppBottomBar(
     selected: AppDestination,
     taskCount: Int,
@@ -397,18 +401,21 @@ private fun AppBottomBar(
         tonalElevation = 0.dp,
         windowInsets = WindowInsets.navigationBars,
     ) {
-        destinationItems.forEach { item ->
-            NavigationBarItem(
-                selected = selected == item.destination,
-                onClick = { onSelect(item.destination, null) },
-                icon = { DestinationIcon(item, taskCount) },
-                label = { Text(stringResource(item.label)) },
-            )
+        CompositionLocalProvider(LocalRippleConfiguration provides null) {
+            destinationItems.forEach { item ->
+                NavigationBarItem(
+                    selected = selected == item.destination,
+                    onClick = { onSelect(item.destination, null) },
+                    icon = { DestinationIcon(item, taskCount) },
+                    label = { Text(stringResource(item.label)) },
+                )
+            }
         }
     }
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun AppNavigationRail(
     selected: AppDestination,
     taskCount: Int,
@@ -418,13 +425,15 @@ private fun AppNavigationRail(
         containerColor = MaterialTheme.colorScheme.surface,
         windowInsets = WindowInsets.navigationBars,
     ) {
-        destinationItems.forEach { item ->
-            NavigationRailItem(
-                selected = selected == item.destination,
-                onClick = { onSelect(item.destination, null) },
-                icon = { DestinationIcon(item, taskCount) },
-                label = { Text(stringResource(item.label)) },
-            )
+        CompositionLocalProvider(LocalRippleConfiguration provides null) {
+            destinationItems.forEach { item ->
+                NavigationRailItem(
+                    selected = selected == item.destination,
+                    onClick = { onSelect(item.destination, null) },
+                    icon = { DestinationIcon(item, taskCount) },
+                    label = { Text(stringResource(item.label)) },
+                )
+            }
         }
     }
 }

@@ -43,7 +43,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import snd.komelia.AppNotification
 import snd.komelia.AppNotifications
 import snd.komelia.image.BookImageLoader
 import snd.komelia.image.ReaderImage
@@ -59,7 +58,6 @@ import snd.komelia.settings.model.ContinuousReadingDirection.TOP_TO_BOTTOM
 import snd.komelia.ui.reader.image.PageMetadata
 import snd.komelia.ui.reader.image.ReaderState
 import snd.komelia.ui.reader.image.ScreenScaleState
-import snd.komelia.ui.strings.AppStrings
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.common.KomgaReadingDirection
 import kotlin.math.roundToInt
@@ -72,7 +70,6 @@ class ContinuousReaderState(
     private val imageLoader: BookImageLoader,
     private val settingsRepository: ImageReaderSettingsRepository,
     private val notifications: AppNotifications,
-    private val appStrings: Flow<AppStrings>,
     private val readerImageFactory: ReaderImageFactory,
     private val pageChangeFlow: MutableSharedFlow<Unit>,
     val screenScaleState: ScreenScaleState,
@@ -172,7 +169,7 @@ class ContinuousReaderState(
                             withContext(Dispatchers.Default) {
                                 pageIntervals.value = listOf(
                                     BookPagesInterval(
-                                        newState.previousBook!!,
+                                        newState.previousBook,
                                         // https://issuetracker.google.com/issues/273025639
                                         // can only prepend 130 elements without losing current items position
                                         newState.previousBookPages.takeLast(100)
@@ -200,7 +197,7 @@ class ContinuousReaderState(
                             withContext(Dispatchers.Default) {
                                 pageIntervals.value = currentIntervals.plus(
                                     BookPagesInterval(
-                                        newState.nextBook!!,
+                                        newState.nextBook,
                                         newState.nextBookPages
                                     )
                                 )
@@ -234,9 +231,6 @@ class ContinuousReaderState(
             }.launchIn(stateScope)
 
         imageDisplayFlow.drop(1).onEach { pageChangeFlow.emit(Unit) }.launchIn(stateScope)
-
-        val strings = appStrings.first().continuousReader
-        notifications.add(AppNotification.Normal("Continuous ${strings.forReadingDirection(readingDirection.value)}"))
     }
 
     fun stop() {
@@ -541,7 +535,7 @@ class ContinuousReaderState(
                 val width = containerSize.width - (sidePaddingPx.value * 2)
                 val maxSize = IntSize(width, Int.MAX_VALUE)
                 ImageDisplaySize(
-                    displaySize = image.calculateSizeForArea(maxSize, readerState.imageStretchToFit.value)?:maxSize,
+                    displaySize = image.calculateSizeForArea(maxSize, readerState.imageStretchToFit.value) ?: maxSize,
                     maxSize = maxSize
                 )
             }
@@ -550,7 +544,7 @@ class ContinuousReaderState(
                 val height = containerSize.height - (sidePaddingPx.value * 2)
                 val maxSize = IntSize(Int.MAX_VALUE, height)
                 ImageDisplaySize(
-                    displaySize = image.calculateSizeForArea(maxSize, readerState.imageStretchToFit.value)?:maxSize,
+                    displaySize = image.calculateSizeForArea(maxSize, readerState.imageStretchToFit.value) ?: maxSize,
                     maxSize = maxSize
                 )
             }
@@ -567,7 +561,7 @@ class ContinuousReaderState(
         } else {
             val pageId = page.toPageId()
             val image = imageDisplayFlow.first { it.pageId == pageId }
-            return image
+            image
         }
     }
 

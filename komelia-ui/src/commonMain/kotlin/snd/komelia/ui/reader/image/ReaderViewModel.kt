@@ -37,7 +37,6 @@ import snd.komelia.ui.reader.image.continuous.ContinuousReaderState
 import snd.komelia.ui.reader.image.paged.PagedReaderState
 import snd.komelia.ui.reader.image.panels.PanelsReaderState
 import snd.komelia.ui.settings.imagereader.onnxruntime.OnnxRuntimeSettingsState
-import snd.komelia.ui.strings.AppStrings
 import snd.komga.client.book.KomgaBookId
 
 private val cleanupScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -52,7 +51,6 @@ class ReaderViewModel(
     appNotifications: AppNotifications,
     readerSettingsRepository: ImageReaderSettingsRepository,
     imageLoader: BookImageLoader,
-    appStrings: Flow<AppStrings>,
     readerImageFactory: ReaderImageFactory,
     markReadProgress: Boolean,
     currentBookId: MutableStateFlow<KomgaBookId?>,
@@ -103,7 +101,6 @@ class ReaderViewModel(
         appNotifications = appNotifications,
         settingsRepository = readerSettingsRepository,
         imageLoader = imageLoader,
-        appStrings = appStrings,
         pageChangeFlow = pageChangeFlow,
         screenScaleState = screenScaleState,
     )
@@ -116,7 +113,6 @@ class ReaderViewModel(
                 appNotifications = appNotifications,
                 settingsRepository = readerSettingsRepository,
                 imageLoader = imageLoader,
-                appStrings = appStrings,
                 pageChangeFlow = pageChangeFlow,
                 screenScaleState = screenScaleState,
                 onnxRuntimeRfDetr = panelDetector
@@ -128,7 +124,6 @@ class ReaderViewModel(
         imageLoader = imageLoader,
         settingsRepository = readerSettingsRepository,
         notifications = appNotifications,
-        appStrings = appStrings,
         readerImageFactory = readerImageFactory,
         pageChangeFlow = pageChangeFlow,
         screenScaleState = screenScaleState,

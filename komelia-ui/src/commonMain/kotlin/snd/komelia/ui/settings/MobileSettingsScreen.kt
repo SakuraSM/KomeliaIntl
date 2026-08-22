@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,8 +25,11 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile_title
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
-import snd.komelia.ui.LocalStrings
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.settings.navigation.SettingsNavigationMenu
@@ -37,29 +39,30 @@ class MobileSettingsScreen : Screen {
     override fun Content() {
         val currentNavigator = LocalNavigator.currentOrThrow
         val viewModelFactory = LocalViewModelFactory.current
-        val strings = LocalStrings.current.mainNavigation
         val vm = rememberScreenModel { viewModelFactory.getSettingsNavigationViewModel(currentNavigator) }
+        val layout = LocalKomeliaLayout.current
         LaunchedEffect(Unit) { vm.initialize() }
 
         Surface(
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(
-                modifier = Modifier.padding(5.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
+                modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
+                verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             ) {
                 PlatformTitleBar()
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { currentNavigator.pop() }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, null)
                     }
-                    Text(strings.settings, style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        stringResource(Res.string.settings_mobile_title),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
                 }
-
-                HorizontalDivider()
 
                 SettingsNavigationMenu(
                     currentScreen = currentNavigator.lastItem,

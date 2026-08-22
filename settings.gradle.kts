@@ -8,21 +8,6 @@ pluginManagement {
                 includeGroup("org.jetbrains.compose")
             }
         }
-        maven("https://maven.aliyun.com/repository/google")
-        maven("https://maven.aliyun.com/repository/gradle-plugin") {
-            content {
-                excludeGroup("org.jetbrains.compose")
-                excludeGroup("io.github.snd-r")
-                excludeGroup("io.github.snd-r.komf")
-            }
-        }
-        maven("https://maven.aliyun.com/repository/public") {
-            content {
-                excludeGroup("org.jetbrains.compose")
-                excludeGroup("io.github.snd-r")
-                excludeGroup("io.github.snd-r.komf")
-            }
-        }
         google()
         gradlePluginPortal()
         mavenCentral()
@@ -32,20 +17,16 @@ pluginManagement {
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositories {
-        maven("https://maven.aliyun.com/repository/google")
-        maven("https://maven.aliyun.com/repository/public") {
-            content {
-                excludeGroup("io.github.snd-r")
-                excludeGroup("io.github.snd-r.komf")
-            }
-        }
         google()
         mavenCentral()
         mavenLocal()
     }
 }
 
-include(":komelia-app")
+include(":komelia-app:androidApp")
+include(":komelia-app:desktopApp")
+include(":komelia-app:webApp")
+include(":komelia-app:shared")
 include(":komelia-domain:core")
 include(":komelia-domain:offline")
 include(":komelia-domain:komga-api")
@@ -72,8 +53,6 @@ include(":komelia-komf-extension:shared")
 include(":third_party:ChipTextField:chiptextfield-core")
 include(":third_party:ChipTextField:chiptextfield-m3")
 include(":third_party:compose-sonner:sonner")
-include(":third_party:indexeddb:core")
-include(":third_party:indexeddb:external")
 
 includeBuild("third_party/secret-service") {
     dependencySubstitution { substitute(module("de.swiesend:secret-service")) }

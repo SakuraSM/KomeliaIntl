@@ -16,14 +16,28 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_add_to_readlist
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_analyze
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_confirm_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_confirm_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_downloaded
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_edit
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_mark_read
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_mark_unread
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_refresh_metadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.AppNotification
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.dialogs.book.edit.BookEditDialog
@@ -42,30 +56,12 @@ fun BookActionsMenu(
 ) {
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
-    var showDeleteDialog by remember { mutableStateOf(false) }
     var showDeleteDownloadedDialog by remember { mutableStateOf(false) }
-    if (showDeleteDialog) {
-        ConfirmationDialog(
-            title = "Delete Book",
-            body = "The Book ${book.metadata.title} will be removed from this server alongside with stored media files. This cannot be undone. Continue?",
-            confirmText = "Yes, delete book \"${book.metadata.title}\"",
-            onDialogConfirm = {
-                actions.delete(book)
-                onDismissRequest()
-
-            },
-            onDialogDismiss = {
-                showDeleteDialog = false
-                onDismissRequest()
-            },
-            buttonConfirmColor = MaterialTheme.colorScheme.errorContainer
-        )
-    }
 
     if (showDeleteDownloadedDialog) {
         ConfirmationDialog(
-            title = "Delete downloaded Book",
-            body = "Book ${book.metadata.title} will be removed from this device",
+            title = stringResource(Res.string.book_delete_confirm_title),
+            body = stringResource(Res.string.book_delete_confirm_body, book.metadata.title),
             onDialogConfirm = {
                 actions.deleteDownloaded(book)
                 onDismissRequest()
@@ -102,21 +98,21 @@ fun BookActionsMenu(
 
         if (permissionRequested) {
             ConfirmationDialog(
-                "Download book \"${book.metadata.title}\"?",
+                stringResource(Res.string.book_download_confirm, book.metadata.title),
                 onDialogConfirm = { actions.download(book) },
                 onDialogDismiss = { showDownloadDialog = false }
             )
         }
     }
 
-    val showDropdown = derivedStateOf { expanded && !showDeleteDialog && !showEditDialog }
+    val showDropdown = derivedStateOf { expanded && !showEditDialog }
     DropdownMenu(
         expanded = showDropdown.value,
         onDismissRequest = onDismissRequest
     ) {
         if (isAdmin && !isOffline) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Analyze")) },
+                text = { Text(stringResource(Res.string.book_analyze)) },
                 onClick = {
                     actions.analyze(book)
                     onDismissRequest()
@@ -124,7 +120,7 @@ fun BookActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Refresh metadata")) },
+                text = { Text(stringResource(Res.string.book_refresh_metadata)) },
                 onClick = {
                     actions.refreshMetadata(book)
                     onDismissRequest()
@@ -132,7 +128,7 @@ fun BookActionsMenu(
             )
 
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Add to read list")) },
+                text = { Text(stringResource(Res.string.book_add_to_readlist)) },
                 onClick = { showAddToReadListDialog = true },
             )
         }
@@ -142,7 +138,7 @@ fun BookActionsMenu(
 
         if (!isRead) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Mark as read")) },
+                text = { Text(stringResource(Res.string.book_mark_read)) },
                 onClick = {
                     actions.markAsRead(book)
                     onDismissRequest()
@@ -152,7 +148,7 @@ fun BookActionsMenu(
 
         if (!isUnread) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Mark as unread")) },
+                text = { Text(stringResource(Res.string.book_mark_unread)) },
                 onClick = {
                     actions.markAsUnread(book)
                     onDismissRequest()
@@ -162,13 +158,14 @@ fun BookActionsMenu(
 
         if (isAdmin && !isOffline && showEditOption) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit")) },
+                text = { Text(stringResource(Res.string.book_edit)) },
                 onClick = { showEditDialog = true },
             )
         }
-        if (!isOffline && showDownloadOption) {
+        val offlineAvailable = LocalOfflineAvailable.current
+        if (!isOffline && showDownloadOption && offlineAvailable) {
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Download")) },
+                text = { Text(stringResource(Res.string.book_download)) },
                 onClick = { showDownloadDialog = true },
             )
         }
@@ -180,7 +177,7 @@ fun BookActionsMenu(
                 if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
                 else Modifier
             DropdownMenuItem(
-                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded")) },
+                text = { Text(stringResource(Res.string.book_delete_downloaded)) },
                 onClick = { showDeleteDownloadedDialog = true },
                 modifier = Modifier
                     .hoverable(deleteInteractionSource)
@@ -188,21 +185,6 @@ fun BookActionsMenu(
             )
 
         }
-
-//        if (isAdmin && !isOffline) {
-//            val deleteInteractionSource = remember { MutableInteractionSource() }
-//            val deleteIsHovered = deleteInteractionSource.collectIsHoveredAsState()
-//            val deleteColor =
-//                if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
-//                else Modifier
-//            DropdownMenuItem(
-//                text = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete from server")) },
-//                onClick = { showDeleteDialog = true },
-//                modifier = Modifier
-//                    .hoverable(deleteInteractionSource)
-//                    .then(deleteColor)
-//            )
-//        }
     }
 }
 
@@ -219,7 +201,7 @@ data class BookMenuActions(
         bookApi: KomgaBookApi,
         notifications: AppNotifications,
         scope: CoroutineScope,
-        taskEmitter: OfflineTaskEmitter
+        taskEmitter: OfflineTaskEmitter?
     ) : this(
         analyze = {
             notifications.runCatchingToNotifications(scope) {
@@ -247,7 +229,7 @@ data class BookMenuActions(
         delete = {
             notifications.runCatchingToNotifications(scope) { bookApi.deleteBook(it.id) }
         },
-        download = { scope.launch { taskEmitter.downloadBook(it.id) } },
-        deleteDownloaded = { scope.launch { taskEmitter.deleteBook(it.id) } }
+        download = { scope.launch { checkNotNull(taskEmitter).downloadBook(it.id) } },
+        deleteDownloaded = { scope.launch { checkNotNull(taskEmitter).deleteBook(it.id) } }
     )
 }

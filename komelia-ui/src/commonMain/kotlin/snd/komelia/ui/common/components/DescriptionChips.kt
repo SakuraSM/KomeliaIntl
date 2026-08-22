@@ -27,7 +27,6 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import snd.komelia.ui.LocalStrings
 
 @Composable
 fun <T> DescriptionChips(
@@ -55,10 +54,9 @@ fun <T> DescriptionChips(
     modifier: Modifier = Modifier,
 ) {
     if (chipValues.isEmpty() && secondaryValues.isNullOrEmpty()) return
-    val strings = LocalStrings.current.legacy
     Row(modifier = modifier) {
         Text(
-            strings.forText(label),
+            label,
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.width(120.dp)
         )
@@ -98,8 +96,8 @@ fun NoPaddingChip(
 ) {
     Box(
         modifier = modifier
-            .border(Dp.Hairline, borderColor, RoundedCornerShape(10.dp))
-            .clip(RoundedCornerShape(10.dp))
+            .border(Dp.Hairline, borderColor, RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(color)
             .clickable { onClick() }
             .padding(10.dp, 5.dp)

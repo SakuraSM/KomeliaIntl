@@ -30,9 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,9 +52,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_home
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries_unavailable
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.sidebar_task_count
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineMode
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.menus.LibraryActionsMenu
 import snd.komelia.ui.common.menus.LibraryMenuActions
 import snd.komelia.ui.dialogs.libraryedit.LibraryEditDialogs
@@ -74,7 +79,6 @@ fun NavBarContent(
     libraryActions: LibraryMenuActions,
     onHomeClick: () -> Unit,
     onLibrariesClick: () -> Unit,
-    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
     onSettingsClick: () -> Unit,
     taskQueueStatus: TaskQueueStatus?,
@@ -86,7 +90,6 @@ fun NavBarContent(
             libraryActions = libraryActions,
             onHomeClick = onHomeClick,
             onLibrariesClick = onLibrariesClick,
-            onLibrariesRefreshClick = onLibrariesRefreshClick,
             onLibraryClick = onLibraryClick,
             onSettingsClick = onSettingsClick
         )
@@ -105,7 +108,6 @@ fun LibrariesNavBarContent(
     libraries: List<KomgaLibrary>,
     libraryActions: LibraryMenuActions,
     onLibrariesClick: () -> Unit,
-    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
 ) {
     Surface(Modifier.width(230.dp)) {
@@ -121,7 +123,6 @@ fun LibrariesNavBarContent(
                 libraries = libraries,
                 libraryActions = libraryActions,
                 onLibrariesClick = onLibrariesClick,
-                onLibrariesRefreshClick = onLibrariesRefreshClick,
                 onLibraryClick = onLibraryClick
             )
             Spacer(Modifier.size(30.dp))
@@ -136,7 +137,6 @@ fun ColumnScope.LibrariesNavBarContent(
     libraries: List<KomgaLibrary>,
     libraryActions: LibraryMenuActions,
     onLibrariesClick: () -> Unit,
-    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
 ) {
     var showLibraryAddDialog by remember { mutableStateOf(false) }
@@ -149,30 +149,18 @@ fun ColumnScope.LibrariesNavBarContent(
 
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
-    val strings = LocalStrings.current.mainNavigation
     NavButton(
         onClick = { onLibrariesClick() },
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
-        label = strings.libraries,
+        label = stringResource(Res.string.navbar_libraries),
         isSelected = false,
-        actionButton = {
-            Row {
-                IconButton(
-                    onClick = onLibrariesRefreshClick,
-                    enabled = !isOffline
-                ) {
+        actionButton = if (!isAdmin || isOffline) null else {
+            {
+                IconButton(onClick = { showLibraryAddDialog = true }) {
                     Icon(
-                        Icons.Default.Refresh,
-                        contentDescription = LocalStrings.current.legacy.forText("Refresh libraries"),
+                        Icons.Default.Add,
+                        contentDescription = null,
                     )
-                }
-                if (isAdmin && !isOffline) {
-                    IconButton(onClick = { showLibraryAddDialog = true }) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = LocalStrings.current.legacy.forText("Add library"),
-                        )
-                    }
                 }
             }
         }
@@ -183,7 +171,7 @@ fun ColumnScope.LibrariesNavBarContent(
             onClick = { onLibraryClick(library.id) },
             icon = null,
             label = library.name,
-            errorLabel = if (library.unavailable) LocalStrings.current.legacy.forText("Unavailable") else null,
+            errorLabel = if (library.unavailable) stringResource(Res.string.navbar_libraries_unavailable) else null,
             isSelected = currentScreen is LibraryScreen && currentScreen.libraryId == library.id,
             actionButton = if (!isAdmin && !isOffline) null else {
                 {
@@ -216,14 +204,12 @@ private fun NavMenu(
     libraryActions: LibraryMenuActions,
     onHomeClick: () -> Unit,
     onLibrariesClick: () -> Unit,
-    onLibrariesRefreshClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
     onSettingsClick: () -> Unit,
 ) {
     val scrollState: ScrollState = rememberScrollState()
     val navBarInteractionSource = remember { MutableInteractionSource() }
     val isHovered = navBarInteractionSource.collectIsHoveredAsState()
-    val strings = LocalStrings.current.mainNavigation
     var showLibraryAddDialog by remember { mutableStateOf(false) }
     if (showLibraryAddDialog) {
         LibraryEditDialogs(
@@ -243,7 +229,7 @@ private fun NavMenu(
             NavButton(
                 onClick = { onHomeClick() },
                 icon = Icons.Default.Home,
-                label = strings.home,
+                label = stringResource(Res.string.navbar_home),
                 isSelected = currentScreen is HomeScreen
             )
             LibrariesNavBarContent(
@@ -251,7 +237,6 @@ private fun NavMenu(
                 libraries = libraries,
                 libraryActions = libraryActions,
                 onLibrariesClick = onLibrariesClick,
-                onLibrariesRefreshClick = onLibrariesRefreshClick,
                 onLibraryClick = onLibraryClick
             )
 
@@ -259,7 +244,7 @@ private fun NavMenu(
             NavButton(
                 onClick = onSettingsClick,
                 icon = Icons.Default.Settings,
-                label = strings.settings,
+                label = stringResource(Res.string.navbar_settings),
                 isSelected = false
             )
 
@@ -324,7 +309,7 @@ private fun NavButton(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TaskQueueIndicator(queueStatus: TaskQueueStatus) {
     BasicTooltipBox(
@@ -332,10 +317,9 @@ private fun TaskQueueIndicator(queueStatus: TaskQueueStatus) {
         tooltip = {
             Surface(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .9f)) {
                 Column(Modifier.padding(10.dp)) {
-                    when (queueStatus.count) {
-                        1 -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("1 pending task"))
-                        else -> Text("${queueStatus.count} pending tasks")
-                    }
+                    Text(
+                        pluralStringResource(Res.plurals.sidebar_task_count, queueStatus.count, queueStatus.count)
+                    )
                     Spacer(Modifier.height(10.dp))
                     queueStatus.countByType.forEach { (task, count) ->
                         Text("$task: $count")

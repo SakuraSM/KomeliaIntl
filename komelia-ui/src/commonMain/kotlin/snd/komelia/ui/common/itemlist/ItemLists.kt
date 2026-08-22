@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -17,7 +19,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,6 +29,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.common.cards.ItemCard
 import snd.komelia.ui.platform.HorizontalScrollbar
 import snd.komelia.ui.platform.VerticalScrollbar
@@ -38,16 +44,21 @@ fun PlaceHolderLazyCardGrid(
     minSize: Dp = 200.dp,
     scrollState: LazyGridState = rememberLazyGridState(),
 ) {
-    Box {
+    val layout = LocalKomeliaLayout.current
+    val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize),
+            columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(minSize),
             state = scrollState,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(horizontal = 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            modifier = Modifier
+                .widthIn(max = layout.contentMaxWidth)
+                .fillMaxSize()
+                .padding(horizontal = layout.pageHorizontalPadding)
         ) {
             for (i in 0 until elements) {
-                item { ItemCard(modifier = Modifier.padding(5.dp), onClick = {}, image = {}) }
+                item { ItemCard(onClick = {}, image = {}) }
             }
         }
         VerticalScrollbar(scrollState, Modifier.align(Alignment.TopEnd))
@@ -64,9 +75,10 @@ fun ItemCardsSlider(
 ) {
     val scrollState = rememberLazyListState()
     Card {
+        val layout = LocalKomeliaLayout.current
         Column(
-            Modifier.padding(15.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            Modifier.padding(layout.cardContentPadding),
+            verticalArrangement = Arrangement.spacedBy(layout.itemSpacing)
         ) {
 
             Row(
@@ -79,12 +91,12 @@ fun ItemCardsSlider(
                     ).cursorForHand()
             ) {
                 label()
-                Icon(Icons.Default.ChevronRight, null)
+                Icon(Icons.Rounded.ChevronRight, null)
             }
             HorizontalDivider()
             LazyRow(
                 state = scrollState,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(layout.itemSpacing),
             ) {
                 content()
             }
@@ -92,4 +104,3 @@ fun ItemCardsSlider(
         }
     }
 }
-

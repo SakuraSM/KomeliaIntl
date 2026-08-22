@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -31,7 +31,7 @@ fun TitleBarScope.TitleBarContent(
             .widthIn(min = 32.dp)
     ) {
         Icon(
-            Icons.AutoMirrored.Filled.ArrowBack,
+            Icons.AutoMirrored.Rounded.ArrowBack,
             "Leave",
         )
     }

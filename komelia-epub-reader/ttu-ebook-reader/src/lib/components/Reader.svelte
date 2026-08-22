@@ -593,7 +593,7 @@
   }
 
   function handleReaderChromeClick(event: MouseEvent) {
-    if (showHeader || showFooter || showReaderImageGallery || $tocIsOpen$ || selectionToolbarState) {
+    if (showReaderImageGallery || $tocIsOpen$ || selectionToolbarState) {
       return;
     }
 
@@ -605,7 +605,11 @@
       return;
     }
 
-    showReaderMenu();
+    if (showHeader || showFooter) {
+      hideReaderChrome();
+    } else {
+      showReaderMenu();
+    }
   }
 
   function isReaderCenterClick(event: MouseEvent) {
@@ -1133,7 +1137,6 @@
       onPreviousChapter={goToPreviousChapter}
       onNextChapter={goToNextChapter}
       onCopyProgress={copyProgressWithFeedback}
-      onToggleFooter={() => (showFooter = false)}
       onToggleAutoScroll={toggleAutoScroll}
       onAutoScrollMultiplierChange={updateAutoScrollMultiplier}
   />

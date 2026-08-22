@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,8 +30,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.LocalStrings
+import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.PlatformType.DESKTOP
@@ -54,25 +58,32 @@ fun SettingsScreenContainer(
 @Composable
 private fun MobileContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
     val navigator = LocalNavigator.currentOrThrow
-    val localizedTitle = LocalStrings.current.legacy.forText(title)
-    Column(Modifier.padding()) {
+    val layout = LocalKomeliaLayout.current
+    Column(Modifier.background(MaterialTheme.colorScheme.background)) {
         PlatformTitleBar()
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { navigator.pop() }) {
-                Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                Icon(
+                    Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = stringResource(Res.string.navigation_back)
+                )
             }
 
-            Text(localizedTitle, style = MaterialTheme.typography.titleLarge)
+            Text(title, style = MaterialTheme.typography.titleLarge)
         }
 
-        HorizontalDivider()
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         Column(
-            modifier = Modifier.weight(1f, false).imePadding().verticalScroll(rememberScrollState()).padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.weight(1f, false).imePadding().verticalScroll(rememberScrollState())
+                .padding(
+                    horizontal = layout.pageHorizontalPadding,
+                    vertical = layout.pageVerticalPadding,
+                ),
+            verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing),
         ) {
             content()
         }
@@ -85,7 +96,7 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
 @Composable
 private fun DesktopContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
     val scrollState = rememberScrollState()
-    Box(Modifier.background(MaterialTheme.colorScheme.surface)) {
+    Box(Modifier.background(MaterialTheme.colorScheme.background)) {
         Box(Modifier.fillMaxSize().verticalScroll(scrollState)) {
             DesktopContent(title, content)
         }
@@ -95,15 +106,22 @@ private fun DesktopContainer(title: String, content: @Composable ColumnScope.() 
 
 @Composable
 private fun DesktopContent(title: String, content: @Composable ColumnScope.() -> Unit) {
-    val localizedTitle = LocalStrings.current.legacy.forText(title)
+    val layout = LocalKomeliaLayout.current
     Column(Modifier.widthIn(min = 0.dp, max = settingsDesktopContentWidth)) {
-        Spacer(Modifier.height(50.dp))
-        Text(localizedTitle, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 30.dp))
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(layout.pageVerticalPadding))
+        Text(
+            title,
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
+        )
+        Spacer(Modifier.height(layout.sectionSpacing))
 
         Column(
-            modifier = Modifier.padding(horizontal = 30.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(
+                horizontal = layout.pageHorizontalPadding,
+                vertical = layout.pageVerticalPadding,
+            ),
+            verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing),
             content = content
         )
     }

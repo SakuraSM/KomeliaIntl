@@ -1,6 +1,6 @@
 package snd.komelia.ui.settings.navigation
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +15,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.CloudDownload
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Lan
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,12 +38,42 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_announcements
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_app_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_appearance
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_home_groups
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_epub_reader
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_image_reader
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_connection
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_jobs
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_notifications
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_processing
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_providers
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_log_out
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_log_out_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_my_account
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_my_auth_activity
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_offline_mode
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_auth_activity
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_general
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_media_management
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_users
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_updates
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_user_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_title
+import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.dialogs.ConfirmationDialog
+import snd.komelia.ui.home.edit.HomeGroupsSettingsScreen
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
@@ -72,166 +113,169 @@ fun SettingsNavigationMenu(
     modifier: Modifier = Modifier
 ) {
     val isAdmin = remember(user) { user?.roleAdmin() ?: true }
-    val strings = LocalStrings.current.settingsNavigation
-    Column(
-        modifier = modifier.verticalScroll(rememberScrollState())
-    ) {
-        val isOffline = LocalOfflineMode.current.collectAsState().value
-        Text(strings.appSettings, style = MaterialTheme.typography.titleSmall)
-        NavigationButton(
-            label = strings.appearance,
-            onClick = { onNavigation(AppSettingsScreen()) },
-            isSelected = currentScreen is AppSettingsScreen,
-            color = contentColor,
+    val offlineAvailable = LocalOfflineAvailable.current
+    val isOffline = LocalOfflineMode.current.collectAsState().value
+    var showLogoutConfirmation by remember { mutableStateOf(false) }
+
+    val appEntries = buildList {
+        add(
+            NavigationEntry(
+                stringResource(Res.string.settings_navigation_appearance),
+                Icons.Rounded.Palette,
+                AppSettingsScreen(),
+                currentScreen is AppSettingsScreen,
+            )
         )
-        NavigationButton(
-            label = LocalStrings.current.legacy.forText("Network Connection"),
-            onClick = { onNavigation(NetworkSettingsScreen()) },
-            isSelected = currentScreen is NetworkSettingsScreen,
-            color = contentColor,
+        add(
+            NavigationEntry(
+                stringResource(Res.string.settings_navigation_home_groups),
+                Icons.Rounded.Tune,
+                HomeGroupsSettingsScreen(),
+                currentScreen is HomeGroupsSettingsScreen,
+            )
         )
-        NavigationButton(
-            label = strings.imageReader,
-            onClick = { onNavigation(ImageReaderSettingsScreen()) },
-            isSelected = currentScreen is ImageReaderSettingsScreen,
-            color = contentColor,
+        add(
+            NavigationEntry(
+                stringResource(Res.string.settings_network_title),
+                Icons.Rounded.Lan,
+                NetworkSettingsScreen(),
+                currentScreen is NetworkSettingsScreen,
+            )
+        )
+        add(
+            NavigationEntry(
+                stringResource(Res.string.settings_navigation_image_reader),
+                Icons.Rounded.Image,
+                ImageReaderSettingsScreen(),
+                currentScreen is ImageReaderSettingsScreen,
+            )
         )
         if (webviewIsAvailable()) {
-            NavigationButton(
-                label = strings.epubReader,
-                onClick = { onNavigation(EpubReaderSettingsScreen()) },
-                isSelected = currentScreen is EpubReaderSettingsScreen,
-                color = contentColor,
+            add(
+                NavigationEntry(
+                    stringResource(Res.string.settings_navigation_epub_reader),
+                    Icons.AutoMirrored.Rounded.MenuBook,
+                    EpubReaderSettingsScreen(),
+                    currentScreen is EpubReaderSettingsScreen,
+                )
             )
         }
         if (updatesEnabled) {
-            NavigationButton(
-                label = strings.updates,
-                onClick = { onNavigation(AppUpdatesScreen()) },
-                isSelected = currentScreen is AppUpdatesScreen,
-                error = newVersionIsAvailable,
-                color = contentColor,
+            add(
+                NavigationEntry(
+                    stringResource(Res.string.settings_navigation_updates),
+                    null,
+                    AppUpdatesScreen(),
+                    currentScreen is AppUpdatesScreen,
+                    error = newVersionIsAvailable,
+                )
             )
         }
-        NavigationButton(
-            label = strings.offlineMode,
-            onClick = { onNavigation(OfflineSettingsScreen()) },
-            isSelected = currentScreen is OfflineSettingsScreen,
-            color = contentColor,
+        if (offlineAvailable) {
+            add(
+                NavigationEntry(
+                    stringResource(Res.string.settings_navigation_offline_mode),
+                    Icons.Rounded.CloudDownload,
+                    OfflineSettingsScreen(),
+                    currentScreen is OfflineSettingsScreen,
+                )
+            )
+        }
+    }
+
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        SettingsNavigationSection(
+            title = stringResource(Res.string.settings_navigation_app_settings),
+            entries = appEntries,
+            contentColor = contentColor,
+            onNavigation = onNavigation,
         )
-
-        HorizontalDivider(Modifier.padding(vertical = 10.dp))
-
 
         if (!isOffline) {
-            Text(strings.userSettings, style = MaterialTheme.typography.titleSmall)
-            NavigationButton(
-                label = strings.myAccount,
-                onClick = { onNavigation(AccountSettingsScreen()) },
-                isSelected = currentScreen is AccountSettingsScreen,
-                color = contentColor,
+            SettingsNavigationSection(
+                title = stringResource(Res.string.settings_navigation_user_settings),
+                entries = listOf(
+                    NavigationEntry(
+                        stringResource(Res.string.settings_navigation_my_account),
+                        Icons.Rounded.AccountCircle,
+                        AccountSettingsScreen(),
+                        currentScreen is AccountSettingsScreen,
+                    ),
+                    NavigationEntry(
+                        stringResource(Res.string.settings_navigation_my_auth_activity),
+                        Icons.Rounded.History,
+                        AuthenticationActivityScreen(true),
+                        currentScreen is AuthenticationActivityScreen && currentScreen.forMe,
+                    ),
+                ),
+                contentColor = contentColor,
+                onNavigation = onNavigation,
             )
-
-            NavigationButton(
-                label = strings.myAuthenticationActivity,
-                onClick = { onNavigation(AuthenticationActivityScreen(true)) },
-                isSelected = currentScreen is AuthenticationActivityScreen && currentScreen.forMe,
-                color = contentColor,
-            )
-
-            HorizontalDivider(Modifier.padding(vertical = 10.dp))
             if (isAdmin) {
-                Text(strings.serverSettings, style = MaterialTheme.typography.titleSmall)
-                NavigationButton(
-                    label = strings.general,
-                    onClick = { onNavigation(ServerSettingsScreen()) },
-                    isSelected = currentScreen is ServerSettingsScreen,
-                    color = contentColor,
+                SettingsNavigationSection(
+                    title = stringResource(Res.string.settings_navigation_server_settings),
+                    entries = listOf(
+                        NavigationEntry(stringResource(Res.string.settings_navigation_server_general), null, ServerSettingsScreen(), currentScreen is ServerSettingsScreen),
+                        NavigationEntry(stringResource(Res.string.settings_navigation_server_users), null, UsersScreen(), currentScreen is UsersScreen),
+                        NavigationEntry(
+                            stringResource(Res.string.settings_navigation_server_auth_activity),
+                            null,
+                            AuthenticationActivityScreen(false),
+                            currentScreen is AuthenticationActivityScreen && !currentScreen.forMe,
+                        ),
+                        NavigationEntry(
+                            stringResource(Res.string.settings_navigation_server_media_management),
+                            null,
+                            MediaAnalysisScreen(),
+                            currentScreen is MediaAnalysisScreen,
+                            error = hasMediaErrors,
+                        ),
+                        NavigationEntry(stringResource(Res.string.settings_navigation_announcements), null, AnnouncementsScreen(), currentScreen is AnnouncementsScreen),
+                    ),
+                    contentColor = contentColor,
+                    onNavigation = onNavigation,
                 )
-
-                NavigationButton(
-                    label = strings.users,
-                    onClick = { onNavigation(UsersScreen()) },
-                    isSelected = currentScreen is UsersScreen,
-                    color = contentColor,
-                )
-                NavigationButton(
-                    label = strings.authenticationActivity,
-                    onClick = { onNavigation(AuthenticationActivityScreen(false)) },
-                    isSelected = currentScreen is AuthenticationActivityScreen && !currentScreen.forMe,
-                    color = contentColor,
-                )
-                if (hasMediaErrors) {
-                    NavigationButton(
-                        label = strings.mediaManagement,
-                        onClick = { onNavigation(MediaAnalysisScreen()) },
-                        isSelected = currentScreen is MediaAnalysisScreen,
-                        error = true,
-                        color = contentColor,
-                    )
-                }
-
-                NavigationButton(
-                    label = strings.announcements,
-                    onClick = { onNavigation(AnnouncementsScreen()) },
-                    isSelected = currentScreen is AnnouncementsScreen,
-                    color = contentColor,
-                )
-                HorizontalDivider(Modifier.padding(vertical = 10.dp))
             }
 
             if (isAdmin) {
-                Text(strings.komfSettings, style = MaterialTheme.typography.titleSmall)
-                NavigationButton(
-                    label = strings.connection,
-                    onClick = { onNavigation(KomfSettingsScreen()) },
-                    isSelected = currentScreen is KomfSettingsScreen,
-                    color = contentColor,
-                )
-                AnimatedVisibility(komfEnabled) {
-                    Column {
-                        NavigationButton(
-                            label = strings.processing,
-                            onClick = { onNavigation(KomfProcessingSettingsScreen(KOMGA)) },
-                            isSelected = currentScreen is KomfProcessingSettingsScreen,
-                            color = contentColor,
-                        )
-                        NavigationButton(
-                            label = strings.providers,
-                            onClick = { onNavigation(KomfProvidersSettingsScreen()) },
-                            isSelected = currentScreen is KomfProvidersSettingsScreen,
-                            color = contentColor,
-                        )
-                        NavigationButton(
-                            label = strings.notifications,
-                            onClick = { onNavigation(KomfNotificationSettingsScreen()) },
-                            isSelected = currentScreen is KomfNotificationSettingsScreen,
-                            color = contentColor,
-                        )
-                        NavigationButton(
-                            label = strings.jobHistory,
-                            onClick = { onNavigation(KomfJobsScreen()) },
-                            isSelected = currentScreen is KomfJobsScreen,
-                            color = contentColor,
-                        )
+                val komfEntries = buildList {
+                    add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_connection), null, KomfSettingsScreen(), currentScreen is KomfSettingsScreen))
+                    if (komfEnabled) {
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_processing), null, KomfProcessingSettingsScreen(KOMGA), currentScreen is KomfProcessingSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_providers), null, KomfProvidersSettingsScreen(), currentScreen is KomfProvidersSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_notifications), null, KomfNotificationSettingsScreen(), currentScreen is KomfNotificationSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_jobs), null, KomfJobsScreen(), currentScreen is KomfJobsScreen))
                     }
                 }
-                HorizontalDivider(Modifier.padding(vertical = 10.dp))
+                SettingsNavigationSection(
+                    title = stringResource(Res.string.settings_navigation_komf_settings),
+                    entries = komfEntries,
+                    contentColor = contentColor,
+                    onNavigation = onNavigation,
+                )
             }
         }
 
-        var showLogoutConfirmation by remember { mutableStateOf(false) }
-        NavigationButton(
-            label = strings.logOut,
-            onClick = { showLogoutConfirmation = true },
-            isSelected = false,
-            color = contentColor,
-        )
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        ) {
+            NavigationButton(
+                label = stringResource(Res.string.settings_navigation_log_out),
+                onClick = { showLogoutConfirmation = true },
+                isSelected = false,
+                color = contentColor,
+            )
+        }
         if (showLogoutConfirmation) {
             ConfirmationDialog(
-                title = strings.logOutConfirmTitle,
-                body = strings.logOutConfirmBody,
-                buttonConfirm = strings.logOut,
+                title = stringResource(Res.string.settings_navigation_log_out),
+                body = stringResource(Res.string.settings_navigation_log_out_confirm),
+                buttonConfirm = stringResource(Res.string.settings_navigation_log_out),
                 buttonConfirmColor = MaterialTheme.colorScheme.errorContainer,
 
                 onDialogConfirm = onLogout,
@@ -240,27 +284,78 @@ fun SettingsNavigationMenu(
     }
 }
 
+private data class NavigationEntry(
+    val label: String,
+    val icon: ImageVector?,
+    val screen: Screen,
+    val selected: Boolean,
+    val error: Boolean = false,
+)
+
+@Composable
+private fun SettingsNavigationSection(
+    title: String,
+    entries: List<NavigationEntry>,
+    contentColor: Color,
+    onNavigation: (Screen) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            title,
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.padding(start = 4.dp),
+        )
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        ) {
+            Column {
+                entries.forEachIndexed { index, entry ->
+                    NavigationButton(
+                        label = entry.label,
+                        icon = entry.icon,
+                        onClick = { onNavigation(entry.screen) },
+                        isSelected = entry.selected,
+                        error = entry.error,
+                        color = contentColor,
+                        showDivider = index < entries.lastIndex,
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun NavigationButton(
     label: String,
+    icon: ImageVector? = null,
     isSelected: Boolean,
     onClick: () -> Unit,
     warn: Boolean = false,
     error: Boolean = false,
-    color: Color
+    color: Color,
+    showDivider: Boolean = false,
 ) {
-    val containerColor = if (isSelected) MaterialTheme.colorScheme.surfaceContainer else color
+    val platform = LocalPlatform.current
+    val containerColor = when {
+        isSelected -> MaterialTheme.colorScheme.primaryContainer
+        platform == MOBILE -> Color.Transparent
+        else -> color
+    }
 
-    val height = when (LocalPlatform.current) {
-        MOBILE -> 50.dp
+    val height = when (platform) {
+        MOBILE -> 48.dp
         DESKTOP, WEB_KOMF -> 40.dp
     }
 
     Surface(
         onClick = { if (!isSelected) onClick() },
-        shape = RoundedCornerShape(3.dp),
+        shape = if (isSelected) RoundedCornerShape(12.dp) else RoundedCornerShape(0.dp),
         color = containerColor,
+        contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
         modifier = Modifier
             .height(height)
             .fillMaxWidth()
@@ -271,7 +366,29 @@ fun NavigationButton(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp)
         ) {
-            Text(label, style = MaterialTheme.typography.titleMedium)
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = if (isSelected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+                Spacer(Modifier.width(12.dp))
+            }
+            Text(
+                text = label,
+                style = if (platform == MOBILE) {
+                    MaterialTheme.typography.bodyLarge
+                } else {
+                    MaterialTheme.typography.titleMedium
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             Spacer(Modifier.width(5.dp))
             if (error) {
                 val color = MaterialTheme.colorScheme.error
@@ -284,7 +401,22 @@ fun NavigationButton(
                     drawCircle(color = color)
                 }
             }
+            Spacer(Modifier.weight(1f))
+            if (platform == MOBILE) {
+                Icon(
+                    Icons.Rounded.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
+    }
+
+    if (showDivider) {
+        HorizontalDivider(
+            modifier = Modifier.padding(start = if (platform == MOBILE) 46.dp else 12.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
     }
 
 }

@@ -12,13 +12,15 @@ export interface ToggleOption<T> {
   showIcons?: boolean;
 }
 
-export const optionsForToggle: ToggleOption<boolean>[] = [
-  {
-    id: false,
-    text: 'Off'
-  },
-  {
-    id: true,
-    text: 'On'
-  }
-];
+export function getOptionsForToggle(translate: (message: string) => string): ToggleOption<boolean>[] {
+  return [
+    {
+      id: false,
+      text: translate('Off')
+    },
+    {
+      id: true,
+      text: translate('On')
+    }
+  ];
+}

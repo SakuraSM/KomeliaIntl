@@ -5,18 +5,26 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_title
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState.Error
 import snd.komelia.ui.LoadState.Loading
 import snd.komelia.ui.LoadState.Success
@@ -48,11 +56,15 @@ class LoginScreen : Screen {
             when (platform) {
                 MOBILE, DESKTOP ->
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .imePadding()
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp, vertical = 24.dp),
                         contentAlignment = Alignment.Center
                     ) { ScreenContent(vm, rootNavigator) }
 
-                WEB_KOMF -> SettingsScreenContainer(title = "Komga Login") {
+                WEB_KOMF -> SettingsScreenContainer(title = stringResource(Res.string.login_title)) {
                     ScreenContent(vm, rootNavigator)
                 }
             }

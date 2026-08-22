@@ -1,7 +1,7 @@
 <script lang="ts">
   import { faPlus, faSpinner} from '@fortawesome/free-solid-svg-icons';
   import ButtonToggleGroup from '$lib/components/button-toggle-group/button-toggle-group.svelte';
-  import {optionsForToggle, type ToggleOption} from '$lib/components/button-toggle-group/toggle-option';
+  import {getOptionsForToggle, type ToggleOption} from '$lib/components/button-toggle-group/toggle-option';
   import Ripple from '$lib/components/ripple.svelte';
   import SettingsCustomTheme from '$lib/components/settings/settings-custom-theme.svelte';
   import SettingsDimensionPopover from '$lib/components/settings/settings-dimension-popover.svelte';
@@ -50,6 +50,9 @@
   import {defaultSansFont, defaultSerifFont} from "$lib/data/fonts";
   import Fa from "svelte-fa";
   import {faFolderOpen} from "@fortawesome/free-regular-svg-icons";
+  import {t} from '$lib/i18n';
+
+  const optionsForToggle = getOptionsForToggle(t);
 
   let optionsForTheme = $derived.by(() => {
     let availableThemes = [...Array.from(availableThemesMap.entries()), ...Object.entries($customThemes$)]
@@ -70,79 +73,79 @@
   const optionsForFuriganaStyle: ToggleOption<FuriganaStyle>[] = [
     {
       id: FuriganaStyle.Hide,
-      text: 'Hide'
+      text: t('Hide')
     },
     {
       id: FuriganaStyle.Partial,
-      text: 'Partial'
+      text: t('Partial')
     },
     {
       id: FuriganaStyle.Toggle,
-      text: 'Toggle'
+      text: t('Toggle')
     },
     {
       id: FuriganaStyle.Full,
-      text: 'Full'
+      text: t('Full')
     }
   ];
 
   const optionsForWritingMode: ToggleOption<WritingMode>[] = [
     {
       id: 'horizontal-tb',
-      text: 'Horizontal'
+      text: t('Horizontal')
     },
     {
       id: 'vertical-rl',
-      text: 'Vertical'
+      text: t('Vertical')
     }
   ];
 
   const optionsForViewMode: ToggleOption<ViewMode>[] = [
     {
       id: ViewMode.Continuous,
-      text: 'Continuous'
+      text: t('Continuous')
     },
     {
       id: ViewMode.Paginated,
-      text: 'Paginated'
+      text: t('Paginated')
     }
   ];
 
   const optionsForBlurMode: ToggleOption<BlurMode>[] = [
     {
       id: BlurMode.ALL,
-      text: 'All'
+      text: t('All')
     },
     {
       id: BlurMode.AFTER_TOC,
-      text: 'After ToC'
+      text: t('After ToC')
     }
   ];
 
   let showSpinner = false;
   let furiganaStyleTooltip = $state('');
 
-  let autoBookmarkTooltip = $derived(`If enabled sets a bookmark after ${$autoBookmarkTime$} seconds without scrolling/page change`);
+  let autoBookmarkTooltip = $derived(t('Auto bookmark after {seconds} seconds without scrolling or page changes', {seconds: $autoBookmarkTime$}));
   let wakeLockSupported = $derived('wakeLock' in navigator);
   let verticalMode = $derived($writingMode$ === 'vertical-rl');
   let avoidPageBreakTooltip = $derived(
     $avoidPageBreak$
-      ? 'Avoids breaking words/sentences into different pages'
-      : 'Allow words/sentences to break into different pages'
+      ? t('Avoids breaking words/sentences into different pages')
+      : t('Allow words/sentences to break into different pages')
   );
   $effect(() => {
     switch ($furiganaStyle$) {
       case FuriganaStyle.Hide:
-        furiganaStyleTooltip = 'Always hidden';
+        furiganaStyleTooltip = t('Always hidden');
         break;
       case FuriganaStyle.Toggle:
-        furiganaStyleTooltip = 'Hidden by default, can be toggled on click';
+        furiganaStyleTooltip = t('Hidden by default, can be toggled on click');
         break;
       case FuriganaStyle.Full:
-        furiganaStyleTooltip = 'Hidden by default, show on hover or click';
+        furiganaStyleTooltip = t('Hidden by default, show on hover or click');
         break;
       default:
-        furiganaStyleTooltip = 'Display furigana as grayed out text';
+        furiganaStyleTooltip = t('Display furigana as grayed out text');
         break;
     }
   })
@@ -150,7 +153,7 @@
 
 <div class="grid grid-cols-1 items-center sm:grid-cols-2 sm:gap-6 lg:md:gap-8 lg:grid-cols-3">
   <div class="lg:col-span-2">
-    <SettingsItemGroup title="Theme">
+    <SettingsItemGroup title={t('Theme')}>
       <ButtonToggleGroup
           options={optionsForTheme}
           bind:selectedOptionId={$theme$}
@@ -184,16 +187,16 @@
     </SettingsItemGroup>
   </div>
   <div class="h-full">
-    <SettingsItemGroup title="View mode">
+    <SettingsItemGroup title={t('View mode')}>
       <ButtonToggleGroup options={optionsForViewMode} bind:selectedOptionId={$viewMode$}/>
     </SettingsItemGroup>
   </div>
-  <SettingsItemGroup title="Serif Font family">
+  <SettingsItemGroup title={t('Serif Font family')}>
     <div slot="header" class="flex items-center mx-2">
       <div
           tabindex="0"
           role="button"
-          title="Open Custom Font Dialog"
+          title={t('Open Custom Font Dialog')}
           onclick={() =>
               dialogManager.dialogs$.next([
                 {
@@ -211,12 +214,12 @@
     </div>
     <SettingsFontSelector bind:fontValue={$serifFontFamily$} defaultFont={defaultSerifFont} family="Serif"/>
   </SettingsItemGroup>
-  <SettingsItemGroup title="Sans Font family">
+  <SettingsItemGroup title={t('Sans Font family')}>
     <div slot="header" class="flex items-center mx-2">
       <div
           tabindex="0"
           role="button"
-          title="Open Custom Font Dialog"
+          title={t('Open Custom Font Dialog')}
           onclick={() =>
               dialogManager.dialogs$.next([
                 {
@@ -234,14 +237,14 @@
     </div>
     <SettingsFontSelector bind:fontValue={$sansFontFamily$} defaultFont={defaultSansFont} family="Sans-Serif"/>
   </SettingsItemGroup>
-  <SettingsItemGroup title="Font size">
+  <SettingsItemGroup title={t('Font size')}>
     <input type="number"
            class={inputClasses}
            step="1"
            min="1"
            bind:value={$fontSize$}/>
   </SettingsItemGroup>
-  <SettingsItemGroup title="Line Height">
+  <SettingsItemGroup title={t('Line Height')}>
     <input
         type="number"
         class={inputClasses}
@@ -256,7 +259,7 @@
     />
   </SettingsItemGroup>
   <SettingsItemGroup
-      title={verticalMode ? 'Reader Left/right margin' : 'Reader Top/bottom margin'}
+      title={t(verticalMode ? 'Reader Left/right margin' : 'Reader Top/bottom margin')}
   >
     <SettingsDimensionPopover
         slot="header"
@@ -272,7 +275,7 @@
         bind:value={$firstDimensionMargin$}
     />
   </SettingsItemGroup>
-  <SettingsItemGroup title={verticalMode ? 'Reader Max height' : 'Reader Max width'}>
+  <SettingsItemGroup title={t(verticalMode ? 'Reader Max height' : 'Reader Max width')}>
     <SettingsDimensionPopover
         slot="header"
         isVertical={verticalMode}
@@ -287,8 +290,8 @@
     />
   </SettingsItemGroup>
   <SettingsItemGroup
-      title="Swipe Threshold"
-      tooltip={'Distance which you need to swipe in order trigger a navigation'}
+      title={t('Swipe Threshold')}
+      tooltip={t('Distance which you need to swipe in order trigger a navigation')}
   >
     <input
         type="number"
@@ -304,7 +307,7 @@
     />
   </SettingsItemGroup>
   {#if $autoBookmark$}
-    <SettingsItemGroup title="Auto Bookmark Time" tooltip={'Time in s for Auto Bookmark'}>
+    <SettingsItemGroup title={t('Auto Bookmark Time')} tooltip={t('Time in s for Auto Bookmark')}>
       <input
           type="number"
           step="1"
@@ -319,13 +322,13 @@
       />
     </SettingsItemGroup>
   {/if}
-  <SettingsItemGroup title="Writing mode">
+  <SettingsItemGroup title={t('Writing mode')}>
     <ButtonToggleGroup options={optionsForWritingMode} bind:selectedOptionId={$writingMode$}/>
   </SettingsItemGroup>
   {#if wakeLockSupported}
     <SettingsItemGroup
-        title="Enable Screen Lock"
-        tooltip={'When enabled the reader site attempts to request a WakeLock that prevents device screens from dimming or locking'}
+        title={t('Enable Screen Lock')}
+        tooltip={t('When enabled the reader site attempts to request a WakeLock that prevents device screens from dimming or locking')}
     >
       <ButtonToggleGroup
           options={optionsForToggle}
@@ -333,46 +336,46 @@
       />
     </SettingsItemGroup>
   {/if}
-  <SettingsItemGroup title="Show Character Counter">
+  <SettingsItemGroup title={t('Show Character Counter')}>
     <ButtonToggleGroup options={optionsForToggle} bind:selectedOptionId={$showCharacterCounter$}/>
   </SettingsItemGroup>
-  <SettingsItemGroup title="Disable Wheel Navigation">
+  <SettingsItemGroup title={t('Disable Wheel Navigation')}>
     <ButtonToggleGroup
         options={optionsForToggle}
         bind:selectedOptionId={$disableWheelNavigation$}
     />
   </SettingsItemGroup>
   <SettingsItemGroup
-      title="Close Confirmation"
-      tooltip={`When enabled asks for confirmation on closing/reloading a reader tab and unsaved changes were detected`}
+      title={t('Close Confirmation')}
+      tooltip={t('When enabled asks for confirmation on closing/reloading a reader tab and unsaved changes were detected')}
   >
     <ButtonToggleGroup options={optionsForToggle} bind:selectedOptionId={$confirmClose$}/>
   </SettingsItemGroup>
   <SettingsItemGroup
-      title="Manual Bookmark"
-      tooltip={'If enabled current position will not be bookmarked when leaving the reader via menu elements'}
+      title={t('Manual Bookmark')}
+      tooltip={t('If enabled current position will not be bookmarked when leaving the reader via menu elements')}
   >
     <ButtonToggleGroup options={optionsForToggle} bind:selectedOptionId={$manualBookmark$}/>
   </SettingsItemGroup>
-  <SettingsItemGroup title="Auto Bookmark" tooltip={autoBookmarkTooltip}>
+  <SettingsItemGroup title={t('Auto Bookmark')} tooltip={autoBookmarkTooltip}>
     <ButtonToggleGroup options={optionsForToggle} bind:selectedOptionId={$autoBookmark$}/>
   </SettingsItemGroup>
-  <SettingsItemGroup title="Blur image">
+  <SettingsItemGroup title={t('Blur image')}>
     <ButtonToggleGroup options={optionsForToggle} bind:selectedOptionId={$hideSpoilerImage$}/>
   </SettingsItemGroup>
   {#if $hideSpoilerImage$}
     <SettingsItemGroup
-        title="Blur Mode"
-        tooltip="Determines if all or only images after the table of contents will be blurred"
+        title={t('Blur Mode')}
+        tooltip={t('Determines if all or only images after the table of contents will be blurred')}
     >
       <ButtonToggleGroup options={optionsForBlurMode} bind:selectedOptionId={$hideSpoilerImageMode$}/>
     </SettingsItemGroup>
   {/if}
-  <SettingsItemGroup title="Hide furigana">
+  <SettingsItemGroup title={t('Hide furigana')}>
     <ButtonToggleGroup options={optionsForToggle} bind:selectedOptionId={$hideFurigana$}/>
   </SettingsItemGroup>
   {#if $hideFurigana$}
-    <SettingsItemGroup title="Hide furigana style" tooltip={furiganaStyleTooltip}>
+    <SettingsItemGroup title={t('Hide furigana style')} tooltip={furiganaStyleTooltip}>
       <ButtonToggleGroup
           options={optionsForFuriganaStyle}
           bind:selectedOptionId={$furiganaStyle$}
@@ -381,8 +384,8 @@
   {/if}
   {#if $viewMode$ === ViewMode.Continuous}
     <SettingsItemGroup
-        title="Custom Reading Point"
-        tooltip={'Allows to set a persistent custom point in the reader from which the current progress and bookmark is calculated when enabled'}
+        title={t('Custom Reading Point')}
+        tooltip={t('Allows to set a persistent custom point in the reader from which the current progress and bookmark is calculated when enabled')}
     >
       <div class="flex items-center">
         <ButtonToggleGroup
@@ -400,24 +403,24 @@
                   }}
               onkeyup={dummyFn}
           >
-            Reset Points
+            {t('Reset Points')}
           </div>
         {/if}
       </div>
     </SettingsItemGroup>
-    <SettingsItemGroup title="Auto position on resize">
+    <SettingsItemGroup title={t('Auto position on resize')}>
       <ButtonToggleGroup
           options={optionsForToggle}
           bind:selectedOptionId={$autoPositionOnResize$}
       />
     </SettingsItemGroup>
   {:else}
-    <SettingsItemGroup title="Avoid Page Break" tooltip={avoidPageBreakTooltip}>
+    <SettingsItemGroup title={t('Avoid Page Break')} tooltip={avoidPageBreakTooltip}>
       <ButtonToggleGroup options={optionsForToggle} bind:selectedOptionId={$avoidPageBreak$}/>
     </SettingsItemGroup>
     <SettingsItemGroup
-        title="Selection to Bookmark"
-        tooltip={'When enabled bookmarks will be placed to a near paragraph of current/previous selected text instead of page start'}
+        title={t('Selection to Bookmark')}
+        tooltip={t('When enabled bookmarks will be placed to a near paragraph of current/previous selected text instead of page start')}
     >
       <ButtonToggleGroup
           options={optionsForToggle}
@@ -425,7 +428,7 @@
       />
     </SettingsItemGroup>
     {#if !verticalMode}
-      <SettingsItemGroup title="Page Columns">
+      <SettingsItemGroup title={t('Page Columns')}>
         <input type="number"
                class={inputClasses}
                step="1" min="0"

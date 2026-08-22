@@ -4,11 +4,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -39,10 +39,11 @@ import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,12 +52,36 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuous_page_spacing
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuous_reading_direction
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuous_side_padding
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_downsampling_kernel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_linear_light_downsampling
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_linear_light_downsampling_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_upsampling_mode
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_layout
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_offset_pages
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_reading_direction
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_scale_type
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_settings_image_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_settings_reading_mode
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_continuous
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_paged
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_panels
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_zoom
 import kotlinx.coroutines.Dispatchers
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.image.ReduceKernel
 import snd.komelia.image.UpsamplingMode
 import snd.komelia.komga.api.model.KomeliaBook
@@ -69,8 +94,8 @@ import snd.komelia.settings.model.ReaderType
 import snd.komelia.settings.model.ReaderType.CONTINUOUS
 import snd.komelia.settings.model.ReaderType.PAGED
 import snd.komelia.settings.model.ReaderType.PANELS
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
@@ -78,6 +103,7 @@ import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.reader.image.continuous.ContinuousReaderState
 import snd.komelia.ui.reader.image.paged.PagedReaderState
 import snd.komelia.ui.reader.image.panels.PanelsReaderState
+import snd.komelia.ui.strings.AppStrings
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,31 +141,42 @@ fun BottomSheetSettingsOverlay(
     continuousReaderState: ContinuousReaderState,
     panelsReaderState: PanelsReaderState?,
     onBackPress: () -> Unit,
+    onSettingsDialogVisibilityChange: (Boolean) -> Unit,
 ) {
 
     val windowWidth = LocalWindowWidth.current
+    val layoutSpec = LocalKomeliaLayout.current
     var showSettingsDialog by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxWidth()
             .windowInsetsPadding(
                 WindowInsets.statusBars
                     .add(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
-            ),
+            )
+            .padding(
+                horizontal = layoutSpec.pageHorizontalPadding,
+                vertical = layoutSpec.controlSpacing / 2,
+            )
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             onClick = onBackPress,
-            modifier = Modifier.size(46.dp)
+            modifier = Modifier.size(layoutSpec.minimumTouchTarget)
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(Res.string.navigation_back),
+            )
         }
 
         book?.let {
             Column(
                 Modifier.weight(1f)
-                    .padding(horizontal = 10.dp)
+                    .padding(horizontal = layoutSpec.controlSpacing)
             ) {
                 val titleStyle =
                     if (windowWidth == COMPACT) MaterialTheme.typography.titleMedium
@@ -160,22 +197,33 @@ fun BottomSheetSettingsOverlay(
             }
         }
         FilledIconButton(
-            onClick = { showSettingsDialog = true },
-//            shape = RoundedCornerShape(13.dp),
-            modifier = Modifier.size(46.dp)
+            onClick = {
+                showSettingsDialog = true
+                onSettingsDialogVisibilityChange(true)
+            },
+            modifier = Modifier.size(layoutSpec.minimumTouchTarget)
 
         ) {
-            Icon(Icons.Default.Settings, null)
+            Icon(
+                Icons.Default.Settings,
+                contentDescription = stringResource(Res.string.reader_image_settings),
+            )
         }
     }
 
     BoxWithConstraints {
 
         val maxHeight = this.maxHeight
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val sheetState = rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+        )
         if (showSettingsDialog) {
             ModalBottomSheet(
-                onDismissRequest = { showSettingsDialog = false },
+                onDismissRequest = {
+                    showSettingsDialog = false
+                    onSettingsDialogVisibilityChange(false)
+                },
                 sheetState = sheetState,
                 dragHandle = {},
                 scrimColor = Color.Transparent,
@@ -185,20 +233,19 @@ fun BottomSheetSettingsOverlay(
                 SecondaryTabRow(
                     selectedTabIndex = selectedTab,
                 ) {
-                    val strings = LocalStrings.current
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
                         modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
                     ) {
-                        Text(strings.legacy.forText("Reading mode"))
+                        Text(stringResource(Res.string.reader_settings_reading_mode))
                     }
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
                         modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
                     ) {
-                        Text(strings.legacy.forText("Image settings"))
+                        Text(stringResource(Res.string.reader_settings_image_settings))
                     }
                 }
                 val focusManager = LocalFocusManager.current
@@ -273,25 +320,24 @@ private fun BottomSheetReadingModeSettings(
     continuousReaderState: ContinuousReaderState,
     panelsReaderState: PanelsReaderState?,
 ) {
-    val strings = LocalStrings.current
     Column {
-        Text(strings.legacy.forText("Reading mode"))
+        Text(stringResource(Res.string.reader_type))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             InputChip(
                 selected = readerType == PAGED,
                 onClick = { onReaderTypeChange(PAGED) },
-                label = { Text(strings.reader.readerPaged) }
+                label = { Text(stringResource(Res.string.reader_type_paged)) }
             )
             InputChip(
                 selected = readerType == CONTINUOUS,
                 onClick = { onReaderTypeChange(CONTINUOUS) },
-                label = { Text(strings.reader.readerContinuous) }
+                label = { Text(stringResource(Res.string.reader_type_continuous)) }
             )
             if (panelsReaderState != null)
                 InputChip(
                     selected = readerType == PANELS,
                     onClick = { onReaderTypeChange(PANELS) },
-                    label = { Text(strings.reader.readerPanels) }
+                    label = { Text(stringResource(Res.string.reader_type_panels)) }
                 )
         }
 
@@ -303,77 +349,107 @@ private fun BottomSheetReadingModeSettings(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PagedModeSettings(
     pageState: PagedReaderState,
 ) {
-    val strings = LocalStrings.current.pagedReader
     val scaleType = pageState.scaleType.collectAsState().value
     Column {
 
-        Text(strings.scaleType)
+        Text(stringResource(Res.string.reader_paged_scale_type))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             InputChip(
                 selected = scaleType == LayoutScaleType.SCREEN,
                 onClick = { pageState.onScaleTypeChange(LayoutScaleType.SCREEN) },
-                label = { Text(strings.forScaleType(LayoutScaleType.SCREEN)) }
+                label = { Text(stringResource(AppStrings.forScaleType(LayoutScaleType.SCREEN))) }
             )
             InputChip(
                 selected = scaleType == LayoutScaleType.FIT_WIDTH,
                 onClick = { pageState.onScaleTypeChange(LayoutScaleType.FIT_WIDTH) },
-                label = { Text(strings.forScaleType(LayoutScaleType.FIT_WIDTH)) }
+                label = {
+                    Text(
+                        stringResource(AppStrings.forScaleType(LayoutScaleType.FIT_WIDTH))
+                    )
+                }
             )
             InputChip(
                 selected = scaleType == LayoutScaleType.FIT_HEIGHT,
                 onClick = { pageState.onScaleTypeChange(LayoutScaleType.FIT_HEIGHT) },
-                label = { Text(strings.forScaleType(LayoutScaleType.FIT_HEIGHT)) }
+                label = {
+                    Text(
+                        stringResource(AppStrings.forScaleType(LayoutScaleType.FIT_HEIGHT))
+                    )
+                }
             )
             InputChip(
                 selected = scaleType == LayoutScaleType.ORIGINAL,
                 onClick = { pageState.onScaleTypeChange(LayoutScaleType.ORIGINAL) },
-                label = { Text(strings.forScaleType(LayoutScaleType.ORIGINAL)) }
+                label = {
+                    Text(
+                        stringResource(AppStrings.forScaleType(LayoutScaleType.ORIGINAL))
+                    )
+                }
             )
         }
 
         val readingDirection = pageState.readingDirection.collectAsState().value
-        Text(strings.readingDirection)
+        Text(stringResource(Res.string.reader_paged_reading_direction))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             InputChip(
                 selected = readingDirection == PagedReadingDirection.RIGHT_TO_LEFT,
                 onClick = { pageState.onReadingDirectionChange(PagedReadingDirection.RIGHT_TO_LEFT) },
-                label = { Text(strings.forReadingDirection(PagedReadingDirection.RIGHT_TO_LEFT)) }
+                label = {
+                    Text(
+                        stringResource(AppStrings.forReadingDirection(PagedReadingDirection.RIGHT_TO_LEFT))
+                    )
+                }
             )
             InputChip(
                 selected = readingDirection == PagedReadingDirection.LEFT_TO_RIGHT,
                 onClick = { pageState.onReadingDirectionChange(PagedReadingDirection.LEFT_TO_RIGHT) },
-                label = { Text(strings.forReadingDirection(PagedReadingDirection.LEFT_TO_RIGHT)) }
+                label = {
+                    Text(
+                        stringResource(AppStrings.forReadingDirection(PagedReadingDirection.LEFT_TO_RIGHT))
+                    )
+                }
             )
         }
 
         val layout = pageState.layout.collectAsState().value
-        Text(strings.layout)
+        Text(stringResource(Res.string.reader_paged_layout))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             InputChip(
                 selected = layout == PageDisplayLayout.SINGLE_PAGE,
                 onClick = { pageState.onLayoutChange(PageDisplayLayout.SINGLE_PAGE) },
-                label = { Text(strings.forLayout(PageDisplayLayout.SINGLE_PAGE)) }
+                label = {
+                    Text(
+                        stringResource(AppStrings.forLayout(PageDisplayLayout.SINGLE_PAGE))
+                    )
+                }
             )
             InputChip(
                 selected = layout == PageDisplayLayout.DOUBLE_PAGES,
                 onClick = { pageState.onLayoutChange(PageDisplayLayout.DOUBLE_PAGES) },
-                label = { Text(strings.forLayout(PageDisplayLayout.DOUBLE_PAGES)) }
+                label = {
+                    Text(
+                        stringResource(AppStrings.forLayout(PageDisplayLayout.DOUBLE_PAGES))
+                    )
+                }
             )
             InputChip(
                 selected = layout == PageDisplayLayout.DOUBLE_PAGES_NO_COVER,
                 onClick = { pageState.onLayoutChange(PageDisplayLayout.DOUBLE_PAGES_NO_COVER) },
-                label = { Text(strings.forLayout(PageDisplayLayout.DOUBLE_PAGES_NO_COVER)) }
+                label = {
+                    Text(
+                        stringResource(AppStrings.forLayout(PageDisplayLayout.DOUBLE_PAGES_NO_COVER))
+                    )
+                }
             )
         }
         AnimatedVisibility(layout == PageDisplayLayout.DOUBLE_PAGES || layout == PageDisplayLayout.DOUBLE_PAGES_NO_COVER) {
@@ -382,70 +458,65 @@ private fun PagedModeSettings(
             SwitchWithLabel(
                 checked = layoutOffset,
                 onCheckedChange = pageState::onLayoutOffsetChange,
-                label = { Text(strings.offsetPages) },
+                label = { Text(stringResource(Res.string.reader_paged_offset_pages)) },
                 contentPadding = PaddingValues(horizontal = 10.dp),
             )
         }
 
     }
-
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PanelsModeSettings(
     state: PanelsReaderState,
 ) {
-    val strings = LocalStrings.current.pagedReader
     Column {
 
         val readingDirection = state.readingDirection.collectAsState().value
-        Text(strings.readingDirection)
+        Text(stringResource(Res.string.reader_paged_reading_direction))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             InputChip(
                 selected = readingDirection == PagedReadingDirection.RIGHT_TO_LEFT,
                 onClick = { state.onReadingDirectionChange(PagedReadingDirection.RIGHT_TO_LEFT) },
-                label = { Text(strings.forReadingDirection(PagedReadingDirection.RIGHT_TO_LEFT)) }
+                label = { Text(stringResource(AppStrings.forReadingDirection(PagedReadingDirection.RIGHT_TO_LEFT))) }
             )
             InputChip(
                 selected = readingDirection == PagedReadingDirection.LEFT_TO_RIGHT,
                 onClick = { state.onReadingDirectionChange(PagedReadingDirection.LEFT_TO_RIGHT) },
-                label = { Text(strings.forReadingDirection(PagedReadingDirection.LEFT_TO_RIGHT)) }
+                label = { Text(stringResource(AppStrings.forReadingDirection(PagedReadingDirection.LEFT_TO_RIGHT))) }
             )
         }
     }
 
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ContinuousModeSettings(
     state: ContinuousReaderState,
 ) {
-    val strings = LocalStrings.current.continuousReader
     val windowWidth = LocalWindowWidth.current
     Column {
         val readingDirection = state.readingDirection.collectAsState().value
-        Text(strings.readingDirection)
+        Text(stringResource(Res.string.reader_continuous_reading_direction))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             InputChip(
                 selected = readingDirection == ContinuousReadingDirection.TOP_TO_BOTTOM,
                 onClick = { state.onReadingDirectionChange(ContinuousReadingDirection.TOP_TO_BOTTOM) },
-                label = { Text(strings.forReadingDirection(ContinuousReadingDirection.TOP_TO_BOTTOM)) }
+                label = { Text(stringResource(AppStrings.forReadingDirection(ContinuousReadingDirection.TOP_TO_BOTTOM))) }
             )
             InputChip(
                 selected = readingDirection == ContinuousReadingDirection.LEFT_TO_RIGHT,
                 onClick = { state.onReadingDirectionChange(ContinuousReadingDirection.LEFT_TO_RIGHT) },
-                label = { Text(strings.forReadingDirection(ContinuousReadingDirection.LEFT_TO_RIGHT)) }
+                label = { Text(stringResource(AppStrings.forReadingDirection(ContinuousReadingDirection.LEFT_TO_RIGHT))) }
             )
             InputChip(
                 selected = readingDirection == ContinuousReadingDirection.RIGHT_TO_LEFT,
                 onClick = { state.onReadingDirectionChange(ContinuousReadingDirection.RIGHT_TO_LEFT) },
-                label = { Text(strings.forReadingDirection(ContinuousReadingDirection.RIGHT_TO_LEFT)) }
+                label = { Text(stringResource(AppStrings.forReadingDirection(ContinuousReadingDirection.RIGHT_TO_LEFT))) }
             )
         }
 
@@ -453,7 +524,10 @@ private fun ContinuousModeSettings(
             val sidePadding = state.sidePaddingFraction.collectAsState().value
             val paddingPercentage = remember(sidePadding) { (sidePadding * 200).roundToInt() }
             Column(Modifier.width(100.dp)) {
-                Text(strings.sidePadding, style = MaterialTheme.typography.labelLarge)
+                Text(
+                    stringResource(Res.string.reader_continuous_side_padding),
+                    style = MaterialTheme.typography.labelLarge
+                )
                 Text("$paddingPercentage%", style = MaterialTheme.typography.labelMedium)
             }
             Slider(
@@ -468,7 +542,10 @@ private fun ContinuousModeSettings(
         Row(verticalAlignment = Alignment.CenterVertically) {
             val spacing = state.pageSpacing.collectAsState(Dispatchers.Main.immediate).value
             Column(Modifier.width(100.dp)) {
-                Text(strings.pageSpacing, style = MaterialTheme.typography.labelLarge)
+                Text(
+                    stringResource(Res.string.reader_continuous_page_spacing),
+                    style = MaterialTheme.typography.labelLarge
+                )
                 Text("$spacing", style = MaterialTheme.typography.labelMedium)
             }
             when (windowWidth) {
@@ -556,9 +633,8 @@ private fun BottomSheetImageSettings(
         )
         HorizontalDivider(Modifier.padding(vertical = 5.dp))
 
-        val strings = LocalStrings.current.reader
         val zoomPercentage = remember(zoom) { (zoom * 100).roundToInt() }
-        Text("${strings.zoom}: $zoomPercentage%")
+        Text(stringResource(Res.string.reader_zoom, zoomPercentage))
         when (readerType) {
             PAGED ->
                 PagedReaderPagesInfo(
@@ -589,7 +665,6 @@ private fun BottomSheetImageSettings(
 
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SamplingModeSettings(
     availableUpsamplingModes: List<UpsamplingMode>,
@@ -601,11 +676,9 @@ private fun SamplingModeSettings(
     linearLightDownsampling: Boolean,
     onLinearLightDownsamplingChange: (Boolean) -> Unit,
 ) {
-    val strings = LocalStrings.current.imageSettings
-
     if (availableUpsamplingModes.size > 1) {
         Column {
-            Text(strings.upsamplingMode)
+            Text(stringResource(Res.string.reader_image_upsampling_mode))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -613,7 +686,7 @@ private fun SamplingModeSettings(
                     InputChip(
                         selected = upsamplingMode == mode,
                         onClick = { onUpsamplingModeChange(mode) },
-                        label = { Text(strings.forUpsamplingMode(mode)) }
+                        label = { Text(stringResource(AppStrings.forUpsamplingMode(mode))) }
                     )
 
                 }
@@ -623,7 +696,7 @@ private fun SamplingModeSettings(
 
     if (availableDownsamplingKernels.size > 1) {
         Column {
-            Text(strings.downsamplingKernel)
+            Text(stringResource(Res.string.reader_image_downsampling_kernel))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -631,7 +704,7 @@ private fun SamplingModeSettings(
                     InputChip(
                         selected = downsamplingKernel == kernel,
                         onClick = { onDownsamplingKernelChange(kernel) },
-                        label = { Text(strings.forDownsamplingKernel(kernel)) }
+                        label = { Text(stringResource(AppStrings.forDownsamplingKernel(kernel))) }
                     )
 
                 }
@@ -643,10 +716,10 @@ private fun SamplingModeSettings(
     SwitchWithLabel(
         checked = linearLightDownsampling,
         onCheckedChange = onLinearLightDownsamplingChange,
-        label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Linear light downsampling")) },
+        label = { Text(stringResource(Res.string.reader_image_linear_light_downsampling)) },
         supportingText = {
             Text(
-                snd.komelia.ui.LocalStrings.current.legacy.forText("slower but potentially more accurate"),
+                stringResource(Res.string.reader_image_linear_light_downsampling_desc),
                 style = MaterialTheme.typography.labelMedium
             )
         },

@@ -10,10 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_back_to_online
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_offline_mode
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.offline.server.model.OfflineMediaServer
 import snd.komelia.offline.server.model.OfflineMediaServerId
 import snd.komelia.offline.user.model.OfflineUser
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.settings.offline.users.RootUserCard
 import snd.komelia.ui.settings.offline.users.ServerCard
 import snd.komga.client.user.KomgaUserId
@@ -26,13 +29,11 @@ fun OfflineLoginContent(
     onUserDelete: (KomgaUserId) -> Unit,
     onReturnToLogin: () -> Unit
 ) {
-    val strings = LocalStrings.current.login
-
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.widthIn(max = 600.dp)
     ) {
-        Text(strings.offlineMode, style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(Res.string.login_offline_mode), style = MaterialTheme.typography.titleLarge)
 
         for ((server, users) in serverUsers) {
             ServerCard(
@@ -50,7 +51,7 @@ fun OfflineLoginContent(
         }
 
         Button(onClick = onReturnToLogin, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            Text(strings.backToOnline)
+            Text(stringResource(Res.string.login_back_to_online))
         }
     }
 }

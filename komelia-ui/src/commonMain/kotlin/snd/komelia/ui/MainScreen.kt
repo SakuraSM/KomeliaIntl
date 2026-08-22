@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
@@ -21,7 +23,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue.Closed
 import androidx.compose.material3.DrawerValue.Open
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
@@ -36,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType.Companion.KeyUp
@@ -48,12 +50,17 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_home
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_search
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_settings
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.home.HomeScreen
 import snd.komelia.ui.library.LibraryScreen
-import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
@@ -164,12 +171,6 @@ class MainScreen(
                 BottomNavigationBar(
                     navigator = navigator,
                     toggleLibrariesDrawer = { coroutineScope.launch { vm.toggleNavBar() } },
-                    navigateFromBottom = { navigate ->
-                        coroutineScope.launch {
-                            if (vm.navBarState.isOpen) vm.navBarState.snapTo(Closed)
-                            navigate()
-                        }
-                    },
                     modifier = Modifier
                 )
             },
@@ -206,16 +207,6 @@ class MainScreen(
                     }
                 }
             )
-
-            if (vm.navBarState.isOpen || navigator.canPop) {
-                BackPressHandler {
-                    if (vm.navBarState.isOpen) {
-                        coroutineScope.launch { vm.navBarState.close() }
-                    } else if (navigator.canPop) {
-                        navigator.pop()
-                    }
-                }
-            }
         }
     }
 
@@ -223,21 +214,24 @@ class MainScreen(
     private fun BottomNavigationBar(
         navigator: Navigator,
         toggleLibrariesDrawer: () -> Unit,
-        navigateFromBottom: (() -> Unit) -> Unit,
         modifier: Modifier
     ) {
-        val strings = LocalStrings.current.mainNavigation
-        Surface(
-            color = MaterialTheme.colorScheme.surface,
-        ) {
-            Column {
-                HorizontalDivider()
+        Column {
+            Surface(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxWidth(),
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                tonalElevation = 0.dp,
+                shadowElevation = 2.dp,
+            ) {
                 Row(
-                    modifier = modifier,
+                    modifier = modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     CompactNavButton(
-                        text = strings.libraries,
+                        text = stringResource(Res.string.navbar_libraries),
                         icon = Icons.Default.LocalLibrary,
                         onClick = { toggleLibrariesDrawer() },
                         isSelected = false,
@@ -245,33 +239,32 @@ class MainScreen(
                     )
 
                     CompactNavButton(
-                        text = strings.home,
+                        text = stringResource(Res.string.navbar_home),
                         icon = Icons.Default.Home,
-                        onClick = { navigateFromBottom { navigator.replaceAll(HomeScreen()) } },
+                        onClick = { navigator.replaceAll(HomeScreen()) },
                         isSelected = navigator.lastItem is HomeScreen,
                         modifier = Modifier.weight(1f)
                     )
 
 
                     CompactNavButton(
-                        text = strings.search,
+                        text = stringResource(Res.string.navbar_search),
                         icon = Icons.Default.Search,
-                        onClick = { navigateFromBottom { navigator.push(SearchScreen(null)) } },
+                        onClick = { navigator.push(SearchScreen(null)) },
                         isSelected = navigator.lastItem is SearchScreen,
                         modifier = Modifier.weight(1f)
                     )
 
                     CompactNavButton(
-                        text = strings.settings,
+                        text = stringResource(Res.string.navbar_settings),
                         icon = Icons.Default.Settings,
-                        onClick = { navigateFromBottom { navigator.parent!!.push(MobileSettingsScreen()) } },
+                        onClick = { navigator.parent!!.push(MobileSettingsScreen()) },
                         isSelected = navigator.lastItem is SettingsScreen,
                         modifier = Modifier.weight(1f)
                     )
-
                 }
-                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
             }
+            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
         }
     }
 
@@ -285,19 +278,31 @@ class MainScreen(
     ) {
         Surface(
             modifier = modifier,
+            color = Color.Transparent,
             contentColor =
-                if (isSelected) MaterialTheme.colorScheme.secondary
-                else contentColorFor(MaterialTheme.colorScheme.surfaceVariant)
+                if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant
         ) {
             Column(
                 modifier = Modifier
                     .clickable { onClick() }
                     .cursorForHand()
-                    .padding(5.dp),
+                    .heightIn(min = 60.dp)
+                    .padding(horizontal = 4.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(icon, null)
-                Text(text, style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                Surface(
+                    shape = MaterialTheme.shapes.large,
+                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                ) {
+                    Icon(
+                        icon,
+                        contentDescription = text,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 3.dp),
+                    )
+                }
+                Text(text, style = MaterialTheme.typography.bodySmall)
             }
         }
     }
@@ -327,11 +332,7 @@ class MainScreen(
                 navigator.replaceAll(LibraryScreen(it))
                 if (width != FULL) coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
-            onSettingsClick = {
-                navigator.parent!!.push(SettingsScreen())
-                if (width != FULL) coroutineScope.launch { vm.navBarState.snapTo(Closed) }
-            },
-            onLibrariesRefreshClick = vm::refreshLibraries,
+            onSettingsClick = { navigator.parent!!.push(SettingsScreen()) },
             taskQueueStatus = vm.komgaTaskQueueStatus.collectAsState().value
         )
     }
@@ -357,7 +358,6 @@ class MainScreen(
                 navigator.replaceAll(LibraryScreen(it))
                 coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
-            onLibrariesRefreshClick = vm::refreshLibraries,
         )
     }
 }

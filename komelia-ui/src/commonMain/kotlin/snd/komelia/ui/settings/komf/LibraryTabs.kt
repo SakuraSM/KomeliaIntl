@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +37,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_settings_library_default
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_unknown_library
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.platform.cursorForHand
 import snd.komf.api.mediaserver.KomfMediaServerLibrary
 import snd.komf.api.mediaserver.KomfMediaServerLibraryId
@@ -51,7 +55,7 @@ private fun <T> tabTransitionSpec(): AnimatedContentTransitionScope<IndexedState
 
 private data class IndexedState<T>(val index: Int, val state: T)
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> LibraryTabs(
     defaultProcessingState: T,
@@ -83,7 +87,7 @@ fun <T> LibraryTabs(
                     },
                 ) {
                     Text(
-                        "Default",
+                        stringResource(Res.string.komf_settings_library_default),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                     )
@@ -103,7 +107,7 @@ fun <T> LibraryTabs(
                     ) {
                         Text(
                             libraries.firstOrNull { it.id == libraryId }?.name
-                                ?: "Unknown library ${libraryId.value}",
+                                ?: "${stringResource(Res.string.komf_unknown_library)}, ${libraryId.value}",
                             overflow = TextOverflow.Ellipsis, maxLines = 1
                         )
                         Box(
@@ -118,7 +122,7 @@ fun <T> LibraryTabs(
                                 .padding(3.dp)
                         ) {
                             Icon(
-                                Icons.Default.Close,
+                                Icons.Rounded.Close,
                                 null,
                                 modifier = Modifier.size(20.dp),
                                 tint = MaterialTheme.colorScheme.secondary
@@ -139,7 +143,7 @@ fun <T> LibraryTabs(
                         .menuAnchor(PrimaryNotEditable),
 
                     ) {
-                    Icon(Icons.Default.Add, null)
+                    Icon(Icons.Rounded.Add, null)
                 }
 
                 ExposedDropdownMenu(

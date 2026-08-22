@@ -24,11 +24,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_book_count
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_edit_mode_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_edit_mode_ordered_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_readlist_name
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.itemlist.BookLazyCardGrid
@@ -66,7 +73,7 @@ fun ReadListContent(
 
     cardMinSize: Dp,
 ) {
-
+    val layout = LocalKomeliaLayout.current
     Column {
         if (editMode)
             BulkActionsToolbar(
@@ -88,9 +95,16 @@ fun ReadListContent(
         }
 
         if (readList.summary.isNotBlank()) {
-            Text(readList.summary)
-            Spacer(Modifier.height(5.dp))
-            HorizontalDivider()
+            Column(
+                Modifier.padding(
+                    horizontal = layout.pageHorizontalPadding,
+                    vertical = layout.controlSpacing,
+                ),
+                verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+            ) {
+                Text(readList.summary)
+                HorizontalDivider()
+            }
         }
         BookLazyCardGrid(
             books = books,
@@ -115,7 +129,7 @@ fun ReadListContent(
         val width = LocalWindowWidth.current
         if ((width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedBooks.isNotEmpty()) {
             BottomPopupBulkActionsPanel {
-                ReadListBulkActionsContent(readList, books, true)
+                ReadListBulkActionsContent(readList, selectedBooks, true)
             }
         }
     }
@@ -129,27 +143,38 @@ private fun ReadListToolbar(
     pageSize: Int,
     onPageSizeChange: (Int) -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.padding(start = 10.dp),
+        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing)
         ) {
             Text(
-                "read list",
+                stringResource(
+                    Res.string.readlist_readlist_name,
+                    readList.name
+                ),
                 style = MaterialTheme.typography.labelMedium,
-                fontStyle = FontStyle.Italic
             )
-            Text(readList.name)
         }
 
         SuggestionChip(
             onClick = {},
-            label = { Text("${readList.bookIds.size} books", style = MaterialTheme.typography.bodyMedium) },
-            modifier = Modifier.padding(10.dp, 0.dp),
+            label = {
+                Text(
+                    pluralStringResource(
+                        Res.plurals.readlist_book_count,
+                        readList.bookIds.size,
+                        readList.bookIds.size
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            modifier = Modifier.padding(horizontal = layout.controlSpacing),
         )
 
         val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
@@ -194,22 +219,22 @@ private fun BulkActionsToolbar(
     ) {
         when (LocalWindowWidth.current) {
             WindowSizeClass.FULL -> {
-                if (readList.ordered) Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit mode: Click to select, drag to change order"))
-                else Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Selection mode: Click on items to select or deselect them"))
+                if (readList.ordered) Text(stringResource(Res.string.readlist_edit_mode_ordered_desc))
+                else Text(stringResource(Res.string.readlist_edit_mode_desc))
                 if (selectedBooks.isNotEmpty()) {
                     Spacer(Modifier.weight(1f))
 
-                    ReadListBulkActionsContent(readList, books, false)
+                    ReadListBulkActionsContent(readList, selectedBooks, false)
                 }
             }
 
             WindowSizeClass.EXPANDED -> {
                 if (selectedBooks.isEmpty()) {
-                    if (readList.ordered) Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Edit mode: Click to select, drag to change order"))
-                    else Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Selection mode: Click on items to select or deselect them"))
+                    if (readList.ordered) Text(stringResource(Res.string.readlist_edit_mode_ordered_desc))
+                    else Text(stringResource(Res.string.readlist_edit_mode_desc))
                 } else {
                     Spacer(Modifier.weight(1f))
-                    ReadListBulkActionsContent(readList, books, false)
+                    ReadListBulkActionsContent(readList, selectedBooks, false)
                 }
             }
 

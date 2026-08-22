@@ -16,7 +16,6 @@ import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.common.components.ErrorContent
-import snd.komelia.ui.home.edit.FilterEditScreen
 import snd.komelia.ui.platform.ScreenPullToRefreshBox
 import snd.komelia.ui.reader.readerScreen
 import snd.komelia.ui.series.seriesScreen
@@ -63,8 +62,6 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
                         filters = vm.currentFilters.collectAsState().value,
                         activeFilterNumber = vm.activeFilterNumber.collectAsState().value,
                         onFilterChange = vm::onFilterChange,
-                        onEditStart = { navigator.replaceAll(FilterEditScreen(vm.currentFilters.value)) },
-
                         cardWidth = vm.cardWidth.collectAsState().value,
                         onSeriesClick = { navigator push seriesScreen(it) },
                         seriesMenuActions = vm.seriesMenuActions(),

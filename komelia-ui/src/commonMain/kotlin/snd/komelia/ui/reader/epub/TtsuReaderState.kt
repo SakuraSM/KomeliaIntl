@@ -7,6 +7,7 @@ import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_epub_preface
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitMode
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.getString
 import snd.komelia.AppNotifications
 import snd.komelia.AppWindowState
 import snd.komelia.codepointsCount
@@ -69,6 +71,7 @@ class TtsuReaderState(
     private val markReadProgress: Boolean,
     private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
+    private val localeTag: String?,
     private val fontsRepository: UserFontsRepository,
     private val windowState: AppWindowState,
     private val platformType: PlatformType,
@@ -137,6 +140,7 @@ class TtsuReaderState(
     @OptIn(ExperimentalResourceApi::class)
     private suspend fun loadEpub(webview: KomeliaWebview) {
         webview.bind<Unit, String>("getCurrentBookId") { bookId.value.value }
+        webview.bind<Unit, String?>("getLocale") { localeTag }
         webview.bind<Unit, TtuBookData>("getBookData") {
             val data = epubLoadTask.await()
             TtuBookData(
@@ -462,7 +466,7 @@ class TtsuReaderState(
                             startCharacter = currentCharCount,
                             characters = chapterCharCount,
                             parentChapter = null,
-                            label = "Preface",
+                            label = getString(Res.string.reader_epub_preface),
                         )
                     )
                     currentMainChapterIndex = sectionData.size - 1

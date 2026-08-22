@@ -27,11 +27,19 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_unknown
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_all_libraries
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_collections
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_readlists
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_series
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState.Error
 import snd.komelia.ui.LoadState.Loading
 import snd.komelia.ui.LoadState.Success
 import snd.komelia.ui.LoadState.Uninitialized
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalReloadEvents
 import snd.komelia.ui.LocalViewModelFactory
@@ -42,7 +50,6 @@ import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.common.menus.LibraryActionsMenu
 import snd.komelia.ui.common.menus.LibraryMenuActions
-import snd.komelia.ui.home.HomeScreen
 import snd.komelia.ui.library.LibraryTab.COLLECTIONS
 import snd.komelia.ui.library.LibraryTab.READ_LISTS
 import snd.komelia.ui.library.LibraryTab.SERIES
@@ -109,10 +116,7 @@ class LibraryScreen(
                     }
                 }
             }
-            BackPressHandler {
-                if (navigator.canPop) navigator.pop()
-                else navigator.replaceAll(HomeScreen())
-            }
+            BackPressHandler { navigator.pop() }
         }
     }
 
@@ -209,7 +213,7 @@ class LibraryScreen(
 
         when (val state = readListTabState.state.collectAsState().value) {
             Uninitialized -> LoadingMaxSizeIndicator()
-            is Error -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Error"))
+            is Error -> Text(stringResource(Res.string.error_unknown))
             else -> {
                 val loading = state is Loading
                 LibraryReadListsContent(
@@ -245,13 +249,14 @@ fun LibraryToolBar(
     onReadListsClick: () -> Unit,
 ) {
 
+    val layout = LocalKomeliaLayout.current
     val chipColors = AppFilterChipDefaults.filterChipColors()
     var showOptionsMenu by remember { mutableStateOf(false) }
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
 
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         item {
@@ -274,9 +279,9 @@ fun LibraryToolBar(
                     )
                 }
             }
-            Text(library?.let { library.name } ?: "All Libraries")
+            Text(library?.let { library.name } ?: stringResource(Res.string.library_all_libraries))
 
-            Spacer(Modifier.width(5.dp))
+            Spacer(Modifier.width(layout.controlSpacing))
         }
 
 
@@ -285,7 +290,7 @@ fun LibraryToolBar(
                 FilterChip(
                     onClick = onBrowseClick,
                     selected = currentTab == SERIES,
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Series")) },
+                    label = { Text(stringResource(Res.string.library_tab_series)) },
                     colors = chipColors,
                     border = null,
                 )
@@ -296,7 +301,7 @@ fun LibraryToolBar(
                 FilterChip(
                     onClick = onCollectionsClick,
                     selected = currentTab == COLLECTIONS,
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Collections")) },
+                    label = { Text(stringResource(Res.string.library_tab_collections)) },
                     colors = chipColors,
                     border = null,
                 )
@@ -307,7 +312,7 @@ fun LibraryToolBar(
                 FilterChip(
                     onClick = onReadListsClick,
                     selected = currentTab == READ_LISTS,
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Read Lists")) },
+                    label = { Text(stringResource(Res.string.library_tab_readlists)) },
                     colors = chipColors,
                     border = null,
                 )

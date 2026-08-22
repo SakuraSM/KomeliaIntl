@@ -115,11 +115,12 @@
   const width$ = new Subject<number>();
 
   const height$ = new Subject<number>();
+  const PAGINATED_VIEW_MODE = ViewMode.Paginated;
 
   const containerEl$ = writableSubject<HTMLElement | null>(null);
 
   $: heightModifer =
-    firstDimensionMargin && ViewMode.Paginated === viewMode && !verticalMode
+    firstDimensionMargin && PAGINATED_VIEW_MODE === viewMode && !verticalMode
       ? firstDimensionMargin * 2
       : 0;
 

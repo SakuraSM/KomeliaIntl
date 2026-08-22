@@ -8,6 +8,9 @@ import androidx.compose.runtime.collectAsState
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_unknown
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState.Error
 import snd.komelia.ui.LoadState.Loading
 import snd.komelia.ui.LoadState.Success
@@ -72,7 +75,7 @@ class CollectionScreen(val collectionId: KomgaCollectionId) : ReloadableScreen {
                     )
             }
 
-            is Error -> Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Error"))
+            is Error -> Text(stringResource(Res.string.error_unknown))
         }
 
         BackPressHandler { navigator.pop() }

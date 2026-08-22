@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -26,7 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_series_count
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.images.CollectionThumbnail
 import snd.komelia.ui.common.menus.CollectionActionsMenu
 import snd.komga.client.collection.KomgaCollection
@@ -90,7 +95,7 @@ private fun CollectionCardHoverOverlay(
                     IconButton(
                         onClick = { isActionsMenuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
-                    ) { Icon(Icons.Default.MoreVert, contentDescription = null) }
+                    ) { Icon(Icons.Rounded.MoreVert, contentDescription = null) }
 
                     CollectionActionsMenu(
                         collection = collection,
@@ -110,6 +115,7 @@ private fun CollectionImageOverlay(
     collection: KomgaCollection,
     content: @Composable () -> Unit
 ) {
+    val layout = LocalKomeliaLayout.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -117,9 +123,15 @@ private fun CollectionImageOverlay(
     ) {
         content()
         CardGradientOverlay()
-        Column(Modifier.padding(10.dp)) {
+        Column(Modifier.padding(layout.cardContentPadding)) {
             CardOutlinedText(collection.name)
-            CardOutlinedText("${collection.seriesIds.size} series")
+            CardOutlinedText(
+                pluralStringResource(
+                    Res.plurals.collection_series_count,
+                    collection.seriesIds.size,
+                    collection.seriesIds.size
+                )
+            )
         }
     }
 

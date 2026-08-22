@@ -1,6 +1,7 @@
 package snd.komelia.ui.common.cards
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,11 +17,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -34,15 +34,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_unavailable
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalLibraries
-import snd.komelia.ui.common.components.NoPaddingChip
+import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.images.SeriesThumbnail
 import snd.komelia.ui.common.menus.SeriesActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.platform.cursorForHand
+import snd.komelia.ui.platform.WindowSizeClass.COMPACT
+import snd.komelia.ui.platform.WindowSizeClass.MEDIUM
 import snd.komga.client.series.KomgaSeries
 
 @Composable
@@ -63,21 +70,36 @@ fun SeriesImageCard(
         onClick = onSeriesClick,
         onLongClick = onSeriesSelect,
         image = {
-            SeriesCardHoverOverlay(
-                series = series,
-                onSeriesSelect = onSeriesSelect,
-                isSelected = isSelected,
-                seriesActions = seriesMenuActions,
-            ) {
-                SeriesImageOverlay(series = series, libraryIsDeleted = libraryIsDeleted) {
-                    SeriesThumbnail(
-                        series.id,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+            Box {
+                SeriesCardHoverOverlay(
+                    series = series,
+                    onSeriesSelect = onSeriesSelect,
+                    isSelected = isSelected,
+                    seriesActions = seriesMenuActions,
+                ) {
+                    SeriesImageOverlay(
+                        series = series,
+                        libraryIsDeleted = libraryIsDeleted,
+                        showTitle = false,
+                    ) {
+                        SeriesThumbnail(
+                            series.id,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+                if (series.deleted || libraryIsDeleted) {
+                    CardStatusBadge(stringResource(Res.string.series_unavailable))
                 }
             }
-        }
+        },
+        content = {
+            CoverCardCaption(
+                title = series.metadata.title,
+                variant = CoverCaptionVariant.TitleOnly,
+            )
+        },
     )
 }
 
@@ -151,7 +173,7 @@ private fun SeriesCardHoverOverlay(
                                 onClick = { isActionsMenuExpanded = true },
                                 colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
                             ) {
-                                Icon(Icons.Default.MoreVert, contentDescription = null)
+                                Icon(Icons.Rounded.MoreVert, contentDescription = null)
                             }
 
                             SeriesActionsMenu(
@@ -192,27 +214,34 @@ private fun SeriesImageOverlay(
                 contentAlignment = Alignment.TopEnd
             ) {
                 Box(
-                    modifier = Modifier.size(30.dp).background(MaterialTheme.colorScheme.tertiary),
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .clip(MaterialTheme.shapes.large)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(horizontal = 7.dp, vertical = 3.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "${series.booksUnreadCount}",
-                        color = MaterialTheme.colorScheme.onTertiary,
-                        style = MaterialTheme.typography.labelLarge
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.labelMedium
                     )
                 }
             }
         }
 
         Column(
-            modifier = Modifier.fillMaxSize().padding(10.dp),
+            modifier = Modifier.fillMaxSize().padding(8.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
             if (showTitle) {
 
-                CardOutlinedText(text = series.metadata.title, maxLines = 4)
+                CardOutlinedText(text = series.metadata.title, maxLines = 2)
                 if (series.deleted || libraryIsDeleted) {
-                    CardOutlinedText(text = "Unavailable", textColor = MaterialTheme.colorScheme.error)
+                    CardOutlinedText(
+                        stringResource(Res.string.series_unavailable),
+                        textColor = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }
@@ -225,20 +254,31 @@ fun SeriesDetailedListCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val layout = LocalKomeliaLayout.current
+    val width = LocalWindowWidth.current
     Card(
         modifier
             .cursorForHand()
-            .clickable { onClick() }) {
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
         Row(
             Modifier
                 .fillMaxWidth()
                 .heightIn(max = 200.dp)
-                .padding(10.dp)
+                .padding(layout.cardContentPadding)
         ) {
             SeriesSimpleImageCard(
                 series = series,
                 onSeriesClick = onClick,
-                modifier = Modifier.width(130.dp)
+                modifier = Modifier.width(
+                    when (width) {
+                        COMPACT, MEDIUM -> 96.dp
+                        else -> 130.dp
+                    }
+                )
             )
             SeriesDetails(series)
         }
@@ -251,20 +291,11 @@ private fun SeriesDetails(series: KomgaSeries) {
         Row {
             Text(series.metadata.title, fontWeight = FontWeight.Bold)
         }
-        LazyRow(
-            modifier = Modifier.padding(vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(series.metadata.genres) {
-                NoPaddingChip(
-                    borderColor = MaterialTheme.colorScheme.surface,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Text(it, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                }
-
-            }
-        }
+        MetadataTagFlow(
+            values = series.metadata.genres,
+            width = LocalWindowWidth.current,
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
         Text(series.metadata.summary, maxLines = 4, style = MaterialTheme.typography.bodyMedium)
 
     }

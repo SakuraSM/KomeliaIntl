@@ -29,7 +29,11 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import snd.komelia.ui.LocalStrings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_confirm
+import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.platform.VerticalScrollbar
 import snd.komelia.ui.platform.cursorForHand
 import kotlin.math.roundToInt
@@ -184,8 +188,8 @@ fun AppDialogLayout(
 
 @Composable
 fun DialogConfirmCancelButtons(
-    confirmText: String = "Confirm",
-    cancelText: String = "Cancel",
+    confirmText: String = stringResource(Res.string.dialog_confirm),
+    cancelText: String = stringResource(Res.string.dialog_cancel),
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
     confirmEnabled: Boolean = true,
@@ -193,17 +197,17 @@ fun DialogConfirmCancelButtons(
     isLoading: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    val strings = LocalStrings.current.legacy
+    val layout = LocalKomeliaLayout.current
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
     ) {
         if (showCancelButton)
             ElevatedButton(
                 onClick = onCancel,
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(strings.forText(cancelText))
+                Text(cancelText)
             }
 
         FilledTonalButton(
@@ -212,17 +216,17 @@ fun DialogConfirmCancelButtons(
             modifier = Modifier.cursorForHand()
         ) {
             if (isLoading) CircularProgressIndicator(Modifier.size(25.dp))
-            else Text(strings.forText(confirmText))
+            else Text(confirmText)
         }
     }
 }
 
 @Composable
 fun DialogSimpleHeader(headerText: String) {
-    val strings = LocalStrings.current.legacy
+    val layout = LocalKomeliaLayout.current
     Column {
-        Text(strings.forText(headerText), style = MaterialTheme.typography.headlineMedium)
-        HorizontalDivider(Modifier.padding(vertical = 10.dp))
+        Text(headerText, style = MaterialTheme.typography.headlineMedium)
+        HorizontalDivider(Modifier.padding(vertical = layout.controlSpacing))
     }
 
 }

@@ -89,10 +89,11 @@ Android 与 JVM 目标需要 C/C++ 编译器以构建原生库；EPUB 阅读器�
 
 随后选择打包方式：
 
-- `./gradlew :komelia-app:run`：启动桌面应用
-- `./gradlew :komelia-app:packageReleaseUberJarForCurrentOS`：打包为 jar（输出于 `komelia-app/build/compose/jars`）
-- `./gradlew :komelia-app:packageReleaseDeb`：打包为 Linux deb（输出于 `komelia-app/build/compose/binaries`）
-- `./gradlew :komelia-app:packageReleaseMsi`：打包为 Windows msi 安装包（输出于 `komelia-app/build/compose/binaries`）
+- `./gradlew :desktopRun`：启动桌面应用
+- `./gradlew :desktopJar`：打包为 jar（输出于 `komelia-app/desktopApp/build/compose/jars`）
+- `./gradlew :desktopDeb`：打包为 Linux deb（输出于 `komelia-app/desktopApp/build/compose/binaries`）
+- `./gradlew :desktopMsi`：打包为 Windows msi 安装包（输出于 `komelia-app/desktopApp/build/compose/binaries`）
+- `./gradlew :desktopDmg`：打包为 macOS dmg 安装包（输出于 `komelia-app/desktopApp/build/compose/binaries`）
 
 ## Android 端构建
 

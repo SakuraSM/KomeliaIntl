@@ -19,9 +19,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.formatDecimal
 import snd.komelia.ui.dialogs.AppDialog
 import snd.komelia.ui.platform.cursorForHand
@@ -57,7 +60,7 @@ fun DownloadDialog(
                 TextButton(
                     onClick = onDismiss,
                     modifier = Modifier.cursorForHand(),
-                    content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel")) }
+                    content = { Text(stringResource(Res.string.dialog_cancel)) }
                 )
             }
         },

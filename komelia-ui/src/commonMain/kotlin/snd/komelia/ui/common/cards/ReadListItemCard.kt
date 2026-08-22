@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -26,7 +26,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_book_count
+import org.jetbrains.compose.resources.pluralStringResource
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.images.ReadListThumbnail
 import snd.komelia.ui.common.menus.ReadListActionsMenu
 import snd.komga.client.readlist.KomgaReadList
@@ -88,7 +92,7 @@ private fun ReadListCardHoverOverlay(
                     IconButton(
                         onClick = { isActionsMenuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
-                    ) { Icon(Icons.Default.MoreVert, contentDescription = null) }
+                    ) { Icon(Icons.Rounded.MoreVert, contentDescription = null) }
 
                     ReadListActionsMenu(
                         readList = readList,
@@ -108,6 +112,7 @@ private fun ReadListImageOverlay(
     readlist: KomgaReadList,
     content: @Composable () -> Unit
 ) {
+    val layout = LocalKomeliaLayout.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -115,10 +120,13 @@ private fun ReadListImageOverlay(
     ) {
         content()
         CardGradientOverlay()
-        Column(Modifier.padding(10.dp)) {
+        Column(Modifier.padding(layout.cardContentPadding)) {
             CardOutlinedText(readlist.name)
             CardOutlinedText(
-                if (readlist.bookIds.size == 1) "1 book" else "${readlist.bookIds.size} books",
+                pluralStringResource(
+                    Res.plurals.readlist_book_count,
+                    readlist.bookIds.size, readlist.bookIds.size
+                )
             )
         }
     }

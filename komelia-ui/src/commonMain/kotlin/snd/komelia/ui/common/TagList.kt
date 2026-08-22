@@ -5,6 +5,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_tags
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_tags_other
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.tag_category
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.tag_character
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.tag_female
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.tag_group
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.tag_male
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.tag_parody
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.common.components.DescriptionChips
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.LabeledEntry.Companion.stringEntry
@@ -78,7 +88,7 @@ fun TagList(
 
         if (tagEntries.size == tags.size && secondaryTags?.size == secondaryTagEntries?.size) {
             DescriptionChips(
-                label = "Tags",
+                label = stringResource(Res.string.book_tags),
                 chipValues = tagEntries,
                 secondaryValues = secondaryTagEntries,
                 onChipClick = onTagClick,
@@ -86,7 +96,7 @@ fun TagList(
         } else {
             if (parodyTags.isNotEmpty() || !secondaryParodyTags.isNullOrEmpty()) {
                 DescriptionChips(
-                    label = "Parody",
+                    label = stringResource(Res.string.tag_parody),
                     chipValues = parodyTags,
                     secondaryValues = secondaryParodyTags,
                     onChipClick = onTagClick,
@@ -95,7 +105,7 @@ fun TagList(
 
             if (characterTags.isNotEmpty() || !secondaryCharacterTags.isNullOrEmpty()) {
                 DescriptionChips(
-                    label = "Character",
+                    label = stringResource(Res.string.tag_character),
                     chipValues = characterTags,
                     secondaryValues = secondaryCharacterTags,
                     onChipClick = onTagClick,
@@ -104,7 +114,7 @@ fun TagList(
 
             if (groupTags.isNotEmpty() || !secondaryGroupTags.isNullOrEmpty()) {
                 DescriptionChips(
-                    label = "Group",
+                    label = stringResource(Res.string.tag_group),
                     chipValues = groupTags,
                     secondaryValues = secondaryGroupTags,
                     onChipClick = onTagClick,
@@ -113,7 +123,7 @@ fun TagList(
 
             if (femaleTags.isNotEmpty() || !secondaryFemaleTags.isNullOrEmpty()) {
                 DescriptionChips(
-                    label = "Female",
+                    label = stringResource(Res.string.tag_female),
                     chipValues = femaleTags,
                     secondaryValues = secondaryFemaleTags,
                     onChipClick = onTagClick,
@@ -121,7 +131,7 @@ fun TagList(
             }
             if (maleTags.isNotEmpty() || !secondaryMaleTags.isNullOrEmpty()) {
                 DescriptionChips(
-                    label = "Male",
+                    label = stringResource(Res.string.tag_male),
                     chipValues = maleTags,
                     secondaryValues = secondaryMaleTags,
                     onChipClick = onTagClick,
@@ -129,14 +139,14 @@ fun TagList(
             }
             if (categoryTags.isNotEmpty() || !secondaryCategoryTags.isNullOrEmpty()) {
                 DescriptionChips(
-                    label = "Category",
+                    label = stringResource(Res.string.tag_category),
                     chipValues = categoryTags,
                     secondaryValues = secondaryCategoryTags,
                     onChipClick = onTagClick,
                 )
             }
             DescriptionChips(
-                label = "Other tags",
+                label = stringResource(Res.string.book_tags_other),
                 chipValues = tagEntries,
                 secondaryValues = secondaryTagEntries,
                 onChipClick = onTagClick,

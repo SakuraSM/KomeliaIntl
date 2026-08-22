@@ -36,11 +36,14 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.topbar_go_online
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.topbar_offline
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKeyEvents
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalWindowState
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.ReloadableScreen
@@ -71,7 +74,6 @@ fun AppBar(
 ) {
     PlatformTitleBar {
         val coroutineScope = rememberCoroutineScope()
-        val strings = LocalStrings.current.mainNavigation
 
         IconButton(
             modifier = Modifier.align(Alignment.Start),
@@ -132,11 +134,11 @@ fun AppBar(
                 modifier = Modifier.align(Alignment.End).padding(end = 10.dp),
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
             ) {
-                Text(strings.offline)
+                Text(stringResource(Res.string.topbar_offline))
             }
             if (showConfirmationDialog) {
                 ConfirmationDialog(
-                    body = strings.goOnlineTitle,
+                    body = stringResource(Res.string.topbar_go_online),
                     onDialogConfirm = onOfflineModeChange,
                     onDialogDismiss = { showConfirmationDialog = false }
                 )

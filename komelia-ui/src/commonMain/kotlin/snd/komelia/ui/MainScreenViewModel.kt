@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import snd.komelia.AppNotifications
-import snd.komelia.AppNotification
-import snd.komelia.KomgaAuthenticationState
 import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.offline.settings.OfflineSettingsRepository
 import snd.komelia.offline.tasks.OfflineTaskEmitter
@@ -43,15 +41,16 @@ class MainScreenViewModel(
     private val appNotifications: AppNotifications,
     private val komgaEvents: SharedFlow<KomgaEvent>,
     private val screenReloadFlow: MutableSharedFlow<Unit>,
-    private val offlineSettingsRepository: OfflineSettingsRepository,
-    private val taskEmitter: OfflineTaskEmitter,
-    private val komgaAuthenticationState: KomgaAuthenticationState,
+    private val offlineSettingsRepository: OfflineSettingsRepository?,
+    private val taskEmitter: OfflineTaskEmitter?,
     val searchBarState: SearchBarState,
     val notificationsState: NotificationsState,
     val libraries: StateFlow<List<KomgaLibrary>>,
 ) : ScreenModel {
 
-    val isOffline = offlineSettingsRepository.getOfflineMode().stateIn(screenModelScope, SharingStarted.Eagerly, false)
+    val isOffline = offlineSettingsRepository?.getOfflineMode()
+        ?.stateIn(screenModelScope, SharingStarted.Eagerly, false)
+        ?: MutableStateFlow(false)
     private val navigatorFlow = MutableStateFlow<Navigator?>(null)
     private val navigator
         get() = navigatorFlow.value ?: error("main screen navigator is not initialized")
@@ -81,23 +80,9 @@ class MainScreenViewModel(
         screenReloadFlow.tryEmit(Unit)
     }
 
-    fun refreshLibraries() {
-        if (isOffline.value) {
-            appNotifications.add(AppNotification.Normal("Library refresh is unavailable in offline mode"))
-            return
-        }
-
-        appNotifications.runCatchingToNotifications(
-            coroutineScope = screenModelScope,
-            onSuccess = { appNotifications.add(AppNotification.Success("Libraries refreshed")) }
-        ) {
-            komgaAuthenticationState.updateLibraries(libraryApi.getLibraries())
-        }
-    }
-
     fun goOnline() {
         screenModelScope.launch {
-            offlineSettingsRepository.putOfflineMode(false)
+            requireNotNull(offlineSettingsRepository).putOfflineMode(false)
 
             val rootNavigator = navigator.parent ?: return@launch
             rootNavigator.replaceAll(LoginScreen())

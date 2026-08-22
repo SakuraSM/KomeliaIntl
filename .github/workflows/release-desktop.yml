@@ -1,0 +1,158 @@
+name: Release desktop installers
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing draft release tag, for example v0.18.12
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-desktop-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          app_version=$(sed -n 's/^app-version = "\(.*\)"/\1/p' gradle/libs.versions.toml)
+          test "$RELEASE_TAG" = "v$app_version"
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY"
+
+  linux:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            komelia-epub-reader/komga-webui/package-lock.json
+            komelia-epub-reader/ttu-ebook-reader/package-lock.json
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build Linux native dependencies
+        run: |
+          docker build --tag komelia-build-linux --file cmake/linux-x86_64.Dockerfile .
+          docker run --rm --user "$(id -u):$(id -g)" --volume "$GITHUB_WORKSPACE:/build" komelia-build-linux
+          ./gradlew linux-x86_64_copyJniLibs
+      - name: Build EPUB resources and DEB
+        run: |
+          ./gradlew buildEpubReaders
+          ./gradlew desktopDeb
+      - name: Stage Linux installer
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          mkdir -p release-artifacts
+          package=$(find komelia-app/desktopApp/build/compose/binaries -type f -name '*.deb' -print -quit)
+          test -n "$package"
+          cp "$package" "release-artifacts/Komelia-linux-x86_64-${RELEASE_TAG#v}.deb"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-installer
+          path: release-artifacts/*
+          if-no-files-found: error
+
+  windows-native:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build Windows native dependencies
+        run: |
+          docker build --tag komelia-build-windows --file cmake/windows-x86_64.Dockerfile .
+          docker run --rm --user "$(id -u):$(id -g)" --volume "$GITHUB_WORKSPACE:/build" komelia-build-windows
+          ./gradlew windows-x86_64_copyJniLibs windows-x86_64_copyJniLibsComposeResources
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-native-resources
+          path: |
+            komelia-infra/jni/src/jvmMain/resources
+            komelia-app/desktopApp/desktopUnpackedResources/windows
+          if-no-files-found: error
+
+  windows:
+    needs: windows-native
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-native-resources
+          path: .
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            komelia-epub-reader/komga-webui/package-lock.json
+            komelia-epub-reader/ttu-ebook-reader/package-lock.json
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build EPUB resources and MSI
+        shell: bash
+        run: |
+          ./gradlew buildEpubReaders
+          ./gradlew desktopMsi
+      - name: Stage Windows installer
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          mkdir -p release-artifacts
+          package=$(find komelia-app/desktopApp/build/compose/binaries -type f -name '*.msi' -print -quit)
+          test -n "$package"
+          cp "$package" "release-artifacts/Komelia-windows-x86_64-${RELEASE_TAG#v}.msi"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: release-artifacts/*
+          if-no-files-found: error
+
+  upload:
+    needs: [linux, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: '*-installer'
+          merge-multiple: true
+          path: release-artifacts
+      - name: Upload desktop installers to draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"

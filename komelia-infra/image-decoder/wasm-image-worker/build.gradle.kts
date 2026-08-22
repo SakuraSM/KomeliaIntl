@@ -1,18 +1,13 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    kotlin("multiplatform")
+    alias(libs.plugins.kotlinMultiplatform)
 }
 
 group = "io.github.snd_r.komelia.infra.image_decoder"
 version = "unspecified"
 
-repositories {
-    mavenCentral()
-}
-
 kotlin {
-    jvmToolchain(17)
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
@@ -26,6 +21,9 @@ kotlin {
     }
 
     sourceSets {
+        wasmJsMain {
+            languageSettings.optIn("kotlin.js.ExperimentalWasmJsInterop")
+        }
         wasmJsMain.dependencies {
             implementation(libs.kotlin.logging)
             implementation(libs.kotlinx.browser)

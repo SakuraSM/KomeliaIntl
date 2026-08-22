@@ -5,16 +5,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.http.HttpStatusCode.Companion.Unauthorized
 import io.ktor.utils.io.*
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_error_connection
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_error_invalid_credentials
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_error_server_unavailable
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_error_timeout
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_error_unexpected_response
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import snd.komelia.AppNotification
 import snd.komelia.AppNotifications
 import snd.komelia.KomgaAuthenticationState
@@ -30,12 +38,13 @@ import snd.komelia.settings.SecretsRepository
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LoadState.Uninitialized
 import snd.komelia.ui.common.ServerUrlValidationError
-import snd.komelia.ui.error.formatExceptionMessage
 import snd.komelia.ui.common.validateServerUrl
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
+
+private val logger = KotlinLogging.logger { }
 
 class LoginViewModel(
     private val settingsRepository: CommonSettingsRepository,
@@ -46,10 +55,10 @@ class LoginViewModel(
     private val notifications: AppNotifications,
     private val platform: PlatformType,
 
-    private val offlineUserRepository: OfflineUserRepository,
-    private val offlineServerRepository: OfflineMediaServerRepository,
-    private val offlineSettingsRepository: OfflineSettingsRepository,
-    private val offlineLibraryApi: OfflineLibraryApi,
+    private val offlineUserRepository: OfflineUserRepository?,
+    private val offlineServerRepository: OfflineMediaServerRepository?,
+    private val offlineSettingsRepository: OfflineSettingsRepository?,
+    private val offlineLibraryApi: OfflineLibraryApi?,
 ) : StateScreenModel<LoadState<Unit>>(Uninitialized) {
 
     var url by mutableStateOf("")
@@ -68,12 +77,12 @@ class LoginViewModel(
         screenModelScope.launch {
             url = settingsRepository.getServerUrl().first()
             user = settingsRepository.getCurrentUser().first()
-            val offlineUsers = offlineUserRepository.findAll()
-            val offlineServer = offlineServerRepository.findByUrl(url)
+            val offlineUsers = offlineUserRepository?.findAll() ?: emptyList()
+            val offlineServer = offlineServerRepository?.findByUrl(url)
 
             offlineIsAvailable.value = offlineUsers.any { it.id != OfflineUser.ROOT }
             offlineUser.value = offlineServer?.let { server -> offlineUsers.firstOrNull { it.serverId == server.id } }
-            val isOffline = offlineSettingsRepository.getOfflineMode().first()
+            val isOffline = offlineSettingsRepository?.getOfflineMode()?.first() ?: false
 
             when (platform) {
                 MOBILE, DESKTOP -> {
@@ -122,9 +131,10 @@ class LoginViewModel(
     fun offlineLogin() {
         notifications.runCatchingToNotifications(screenModelScope) {
             val user = offlineUser.value ?: return@runCatchingToNotifications
-            offlineSettingsRepository.putOfflineMode(true)
+
+            checkNotNull(offlineSettingsRepository).putOfflineMode(true)
             offlineSettingsRepository.putUserId(user.id)
-            komgaAuthState.setStateValues(user.toKomgaUser(), offlineLibraryApi.getLibraries())
+            komgaAuthState.setStateValues(user.toKomgaUser(), checkNotNull(offlineLibraryApi).getLibraries())
             mutableState.value = LoadState.Success(Unit)
         }
     }
@@ -135,7 +145,7 @@ class LoginViewModel(
         } catch (e: CancellationException) {
             throw e
         } catch (e: NoTransformationFoundException) {
-            val message = "Unexpected response for url $url"
+            val message = getString(Res.string.login_error_unexpected_response)
             autoLoginError = message
             notifications.add(AppNotification.Error(message))
             mutableState.value = LoadState.Error(e)
@@ -143,16 +153,17 @@ class LoginViewModel(
             if (e.response.status == Unauthorized) {
                 autoLoginError = null
             } else {
-                autoLoginError = "Login error: ${e::class.simpleName} ${e.message}"
-                notifications.add(AppNotification.Error(e.message))
+                autoLoginError = userFacingLoginError(e)
+                notifications.add(AppNotification.Error(autoLoginError!!))
             }
             mutableState.value = LoadState.Error(e)
         } catch (e: Error) { // wasm fetch error
-            val errorMessage = "Login error: ${e::class.simpleName} ${e.message}"
+            val errorMessage = getString(Res.string.login_error_connection)
             mutableState.value = LoadState.Error(e)
             notifications.add(AppNotification.Error(errorMessage))
         } catch (e: Throwable) {
-            val errorMessage = "Login error: ${e::class.simpleName} ${e.message}"
+            logger.catching(e)
+            val errorMessage = userFacingLoginError(e)
             autoLoginError = errorMessage
             mutableState.value = LoadState.Error(e)
             notifications.add(AppNotification.Error(errorMessage))
@@ -165,15 +176,19 @@ class LoginViewModel(
         } catch (e: CancellationException) {
             throw e
         } catch (e: NoTransformationFoundException) {
-            val message = "Unexpected response for url $url"
+            val message = getString(Res.string.login_error_unexpected_response)
             userLoginError = message
             mutableState.value = LoadState.Error(e)
         } catch (e: ClientRequestException) {
-            userLoginError = if (e.response.status == Unauthorized) "Invalid credentials"
-            else "Login error ${e::class.simpleName}: ${e.message}"
+            userLoginError = if (e.response.status == Unauthorized) {
+                getString(Res.string.login_error_invalid_credentials)
+            } else {
+                userFacingLoginError(e)
+            }
             mutableState.value = LoadState.Error(e)
         } catch (e: Throwable) {
-            userLoginError = formatExceptionMessage(e)
+            logger.catching(e)
+            userLoginError = userFacingLoginError(e)
             mutableState.value = LoadState.Error(e)
         }
     }
@@ -191,6 +206,13 @@ class LoginViewModel(
         val libraries = libraryApi.getLibraries()
         komgaAuthState.setStateValues(user, libraries)
         mutableState.value = LoadState.Success(Unit)
+    }
+
+    private suspend fun userFacingLoginError(exception: Throwable): String = when (exception) {
+        is ServerResponseException -> getString(Res.string.login_error_server_unavailable)
+        is HttpRequestTimeoutException -> getString(Res.string.login_error_timeout)
+        is ResponseException -> getString(Res.string.login_error_unexpected_response)
+        else -> getString(Res.string.login_error_connection)
     }
 }
 

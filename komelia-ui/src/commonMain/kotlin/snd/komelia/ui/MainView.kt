@@ -5,13 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,12 +40,14 @@ import snd.komelia.KomgaAuthenticationState
 import snd.komelia.KomgaAuthenticationState.DataState.AuthenticationRequired
 import snd.komelia.KomgaAuthenticationState.DataState.Loaded
 import snd.komelia.ui.Theme.Companion.toTheme
+import snd.komelia.ui.Theme.Companion.toAppTheme
 import snd.komelia.ui.Theme.ThemeType
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.dialogs.update.UpdateDialog
 import snd.komelia.ui.dialogs.update.UpdateProgressDialog
 import snd.komelia.ui.komf.KomfMainScreen
 import snd.komelia.ui.login.LoginScreen
+import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.ConfigurePlatformTheme
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.PlatformType
@@ -53,6 +55,7 @@ import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 import snd.komelia.ui.platform.WindowSizeClass
+import snd.komelia.settings.model.AppLanguage
 import snd.komelia.updates.AppRelease
 import snd.komelia.updates.StartupUpdateChecker
 
@@ -64,14 +67,24 @@ fun MainView(
     windowWidth: WindowSizeClass,
     windowHeight: WindowSizeClass,
     platformType: PlatformType,
-    keyEvents: SharedFlow<KeyEvent>
+    keyEvents: SharedFlow<KeyEvent>,
+    appLocaleController: AppLocaleController = NoOpAppLocaleController,
 ) {
     var theme by rememberSaveable { mutableStateOf(Theme.DARK) }
+    var appLanguage by rememberSaveable { mutableStateOf(AppLanguage.SYSTEM) }
     LaunchedEffect(dependencies) {
         dependencies?.appRepositories?.settingsRepository?.getAppTheme()?.collect { theme = it.toTheme() }
     }
+    LaunchedEffect(dependencies, appLocaleController) {
+        dependencies?.appRepositories?.settingsRepository?.getAppLanguage()?.collect { language ->
+            appLocaleController.apply(language)
+            appLanguage = language
+        }
+    }
 
-    MaterialTheme(colorScheme = theme.colorScheme) {
+    val isReducedMotion = rememberSystemReducedMotion()
+    key(appLanguage) {
+        KomeliaTheme(appTheme = theme.toAppTheme(), isReducedMotion = isReducedMotion) {
         ConfigurePlatformTheme(theme)
         val focusManager = LocalFocusManager.current
         Surface(
@@ -96,27 +109,24 @@ fun MainView(
 
             if (viewModelFactory == null) return@Surface
 
-            val notificationToaster = rememberToasterState()
-
-            val appStrings = dependencies.appStrings.collectAsState()
-
             CompositionLocalProvider(
                 LocalViewModelFactory provides viewModelFactory,
-                LocalToaster provides notificationToaster,
+                LocalNotifications provides dependencies.appNotifications,
                 LocalKomgaEvents provides dependencies.komgaEvents.events,
                 LocalKomfIntegration provides dependencies.appRepositories.komfSettingsRepository.getKomfEnabled(),
                 LocalKeyEvents provides keyEvents,
                 LocalPlatform provides platformType,
-                LocalStrings provides appStrings.value,
+                LocalKomeliaLayout provides komeliaLayoutSpec(platformType, windowWidth),
                 LocalTheme provides theme,
                 LocalWindowState provides dependencies.windowState,
                 LocalWindowWidth provides windowWidth,
                 LocalWindowHeight provides windowHeight,
                 LocalLibraries provides dependencies.komgaSharedState.libraries,
                 LocalReloadEvents provides viewModelFactory.screenReloadEvents,
-                LocalBookDownloadEvents provides dependencies.offlineDependencies.bookDownloadEvents,
+                LocalBookDownloadEvents provides dependencies.offlineDependencies?.bookDownloadEvents,
                 LocalOfflineMode provides dependencies.isOffline,
-                LocalKomgaState provides dependencies.komgaSharedState
+                LocalKomgaState provides dependencies.komgaSharedState,
+                LocalOfflineAvailable provides (dependencies.offlineDependencies != null)
             ) {
                 MainContent(platformType, dependencies.komgaSharedState)
 
@@ -126,6 +136,9 @@ fun MainView(
                     StartupUpdateChecker(updateChecker)
                 }
             }
+
+            BackPressHandler {}
+        }
         }
     }
 }

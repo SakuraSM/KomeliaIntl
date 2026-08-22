@@ -9,37 +9,37 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryNotEditable
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -55,11 +55,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_add_filter
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_delete
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_delete_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_edit
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_edit_done
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_groups
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_label
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_reset_to_default
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_reset_to_default_confirm
+import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.components.DropdownChoiceMenu
@@ -77,18 +87,21 @@ import snd.komelia.ui.home.edit.SeriesRecentlyUpdatedFilterState
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.platform.cursorForMove
+import snd.komelia.ui.strings.localizedEnumLabel
 
 @Composable
 fun FilterEditContent(
     filters: List<FilterEditState>,
     onFilterMove: (Int, Int) -> Unit,
+    onExit: () -> Unit,
     onEditEnd: () -> Unit,
     onFilterAdd: (FilterEditViewModel.FilterType) -> Unit,
     onFilterRemove: (FilterEditState) -> Unit,
     onFiltersReset: () -> Unit,
 ) {
     Column {
-        Toolbar(onEditEnd, onFiltersReset)
+        androidx.compose.foundation.layout.Spacer(Modifier.windowInsetsTopHeight(WindowInsets.systemBars))
+        Toolbar(onExit, onEditEnd, onFiltersReset)
         EditContent(
             filters = filters,
             onFilterAdd = onFilterAdd,
@@ -100,49 +113,39 @@ fun FilterEditContent(
 
 @Composable
 private fun Toolbar(
+    onExit: () -> Unit,
     onEditEnd: () -> Unit,
     onReset: () -> Unit,
 ) {
-    val strings = LocalStrings.current
     Row(
-        modifier = Modifier.animateContentSize(),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Spacer(Modifier.width(20.dp))
-        FilterChip(
-            onClick = {},
-            selected = true,
-            label = {
-                Icon(Icons.Default.Tune, null)
-            },
-            colors = FilterChipDefaults.filterChipColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            border = null,
+        IconButton(onClick = onExit) {
+            Icon(Icons.AutoMirrored.Rounded.ArrowBack, null)
+        }
+        Text(
+            stringResource(Res.string.home_filter_groups),
+            style = MaterialTheme.typography.titleLarge,
+            maxLines = 1,
+            modifier = Modifier.weight(1f),
         )
 
-        ElevatedButton(
+        FilledTonalButton(
             onClick = { onEditEnd() },
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
-            Text(strings.legacy.forText("Done"))
-            Icon(Icons.Default.Check, null)
+            Text(stringResource(Res.string.home_filter_edit_done))
         }
 
         var showResetDialog by remember { mutableStateOf(false) }
-        ElevatedButton(
-            onClick = { showResetDialog = true },
-            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-        ) {
-            Text(strings.legacy.forText("Reset to default"))
+        IconButton(onClick = { showResetDialog = true }) {
             Icon(Icons.Default.Restore, null)
         }
         if (showResetDialog) {
             ConfirmationDialog(
-                body = strings.legacy.forText("Reset homescreen filters to default?"),
+                body = stringResource(Res.string.home_filter_reset_to_default_confirm),
                 onDialogConfirm = onReset,
                 onDialogDismiss = { showResetDialog = false }
             )
@@ -189,7 +192,6 @@ fun AddConditionButton(
     modifier: Modifier = Modifier
 ) {
     var dropDownExpanded by remember { mutableStateOf(false) }
-    val strings = LocalStrings.current
     ExposedDropdownMenuBox(
         expanded = dropDownExpanded,
         onExpandedChange = { dropDownExpanded = it },
@@ -201,7 +203,7 @@ fun AddConditionButton(
                 .cursorForHand()
                 .menuAnchor(PrimaryNotEditable)
         ) {
-            Text(strings.legacy.forText("Add Filter"))
+            Text(stringResource(Res.string.home_filter_add_filter))
         }
 
         ExposedDropdownMenu(
@@ -211,7 +213,7 @@ fun AddConditionButton(
         ) {
             FilterEditViewModel.FilterType.entries.forEach {
                 DropdownMenuItem(
-                    text = { Text(strings.legacy.forText(it.displayKey)) },
+                    text = { Text(localizedEnumLabel(it, it.name)) },
                     onClick = {
                         dropDownExpanded = false
                         onConditionAdd(it)
@@ -233,26 +235,24 @@ private fun ReorderableCollectionItemScope.FilterContent(
     var showEdit by remember { mutableStateOf(false) }
     val label = filterState.label.collectAsState().value
     var labelText by remember { mutableStateOf(label) }
-    val strings = LocalStrings.current
-    val localizedLabel = strings.legacy.forText(label)
     Column(
         modifier = Modifier
-            .padding(vertical = 5.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(16.dp))
             .background(
                 if (isDragging) MaterialTheme.colorScheme.surfaceBright
-                else MaterialTheme.colorScheme.surface
+                else MaterialTheme.colorScheme.surfaceContainerLowest
             )
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
             .then(
                 if (isDragging) Modifier.border(
-                    4.dp,
+                    3.dp,
                     MaterialTheme.colorScheme.secondary,
-                    RoundedCornerShape(10.dp)
+                    RoundedCornerShape(16.dp)
                 )
                 else Modifier
             )
     ) {
-        HorizontalDivider()
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -278,7 +278,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 if (showEdit) {
                     OutlinedTextField(
                         value = labelText,
-                        label = { Text(strings.legacy.forText("Label")) },
+                        label = { Text(stringResource(Res.string.home_filter_label)) },
                         onValueChange = {
                             labelText = it
                             filterState.label.value = it
@@ -287,7 +287,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                     )
                 } else {
                     Text(
-                        text = localizedLabel,
+                        text = label,
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(horizontal = 14.dp)
@@ -300,7 +300,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 onClick = { showEdit = !showEdit },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(strings.legacy.forText("Edit"))
+                Text(stringResource(Res.string.home_filter_edit))
                 Icon(
                     imageVector = if (showEdit) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = null,
@@ -313,7 +313,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(strings.legacy.forText("Delete"))
+                Text(stringResource(Res.string.home_filter_delete))
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = null,
@@ -332,42 +332,20 @@ private fun ReorderableCollectionItemScope.FilterContent(
 
     if (showDeleteConfirmation) {
         ConfirmationDialog(
-            body = strings.legacy.forText("Delete $localizedLabel?"),
+            body = stringResource(Res.string.home_filter_delete_confirm, label),
             onDialogConfirm = onFilterRemove,
             onDialogDismiss = { showDeleteConfirmation = false })
     }
 }
-
-private val FilterEditViewModel.FilterType.displayKey: String
-    get() = when (this) {
-        FilterEditViewModel.FilterType.Book -> "Book Filter"
-        FilterEditViewModel.FilterType.Series -> "Series Filter"
-    }
-
-private val BookFilterEditState.FilterType.displayKey: String
-    get() = when (this) {
-        BookFilterEditState.FilterType.Custom -> "Book Filter"
-        BookFilterEditState.FilterType.OnDeck -> "On deck"
-    }
-
-private val SeriesFilterEditState.FilterType.displayKey: String
-    get() = when (this) {
-        SeriesFilterEditState.FilterType.Custom -> "Series Filter"
-        SeriesFilterEditState.FilterType.RecentlyAdded -> "Recently added series"
-        SeriesFilterEditState.FilterType.RecentlyUpdated -> "Recently updated series"
-    }
 
 @Composable
 private fun BookFilterEditContent(state: BookFilterEditState) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         val filter = state.filter.collectAsState().value
         val type = state.type.collectAsState().value
-        val strings = LocalStrings.current
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(type, strings.legacy.forText(type.displayKey)),
-            options = BookFilterEditState.FilterType.entries.map {
-                LabeledEntry(it, strings.legacy.forText(it.displayKey))
-            },
+            selectedOption = LabeledEntry(type, type.name),
+            options = remember { BookFilterEditState.FilterType.entries.map { LabeledEntry(it, it.name) } },
             onOptionChange = { state.onTypeChange(it.value) },
         )
 
@@ -397,12 +375,9 @@ private fun SeriesFilterEditContent(state: SeriesFilterEditState) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         val filter = state.filter.collectAsState().value
         val type = state.type.collectAsState().value
-        val strings = LocalStrings.current
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(type, strings.legacy.forText(type.displayKey)),
-            options = SeriesFilterEditState.FilterType.entries.map {
-                LabeledEntry(it, strings.legacy.forText(it.displayKey))
-            },
+            selectedOption = LabeledEntry(type, type.name),
+            options = remember { SeriesFilterEditState.FilterType.entries.map { LabeledEntry(it, it.name) } },
             onOptionChange = { state.onTypeChange(it.value) },
         )
 

@@ -108,7 +108,8 @@ class SeriesScreen(
                                 else SeriesScreen(series, vm.currentTab)
                             )
                         },
-                        onDownload = vm::onDownload
+                        onDownload = vm::onDownload,
+                        onBackPress = { onBackPress(navigator, vm.series.value?.libraryId) },
                     )
                 }
             }

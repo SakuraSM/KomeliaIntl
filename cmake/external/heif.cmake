@@ -1,10 +1,8 @@
 include(ExternalProject)
 
 ExternalProject_Add(ep_heif
-        GIT_REPOSITORY https://github.com/strukturag/libheif.git
-        GIT_TAG v1.21.0
-        GIT_SHALLOW 1
-        GIT_PROGRESS 1
+        SOURCE_DIR ${THIRD_PARTY_SOURCE_PATH}/libheif
+        PATCH_COMMAND git clean -dfx
         DEPENDS ep_dav1d ep_de265 ep_zlib ep_brotli
         CMAKE_ARGS ${EP_CMAKE_ARGS}
             -DWITH_DAV1D=ON

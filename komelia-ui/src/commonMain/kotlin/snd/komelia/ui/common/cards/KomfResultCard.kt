@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,8 +34,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import snd.komelia.ui.LocalStrings
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.images.ThumbnailImage
+import snd.komelia.ui.strings.AppStrings
 import snd.komf.api.metadata.KomfMetadataSeriesSearchResult
 
 @Composable
@@ -47,7 +47,6 @@ fun KomfResultCard(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-
     ResultCardOverlay(modifier = modifier, isSelected = isSelected) {
         ItemCard(
             onClick = onClick,
@@ -72,17 +71,16 @@ fun KomfResultCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ResultDescriptionContent(result: KomfMetadataSeriesSearchResult) {
+    val layout = LocalKomeliaLayout.current
     Column(
         modifier = Modifier
             .height(120.dp)
             .fillMaxWidth()
-            .padding(10.dp),
+            .padding(layout.cardContentPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val strings = LocalStrings.current.komf.providerSettings
         TooltipBox(
             positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
             state = rememberTooltipState(),
@@ -112,10 +110,10 @@ private fun ResultDescriptionContent(result: KomfMetadataSeriesSearchResult) {
         ElevatedButton(
             onClick = { result.url?.let { uriHandler.openUri(it) } },
             enabled = result.url != null,
-            shape = RoundedCornerShape(5.dp)
+            shape = RoundedCornerShape(8.dp)
         ) {
             Text(
-                text = strings.forProvider(result.provider),
+                text = AppStrings.forProvider(result.provider),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
@@ -132,7 +130,7 @@ private fun ResultCardOverlay(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
     val selectionModifier = if (isSelected) {
-        Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.secondary), RoundedCornerShape(5.dp))
+        Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.secondary), RoundedCornerShape(8.dp))
     } else if (isHovered.value) overlayBorderModifier()
     else Modifier
 

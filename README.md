@@ -1,30 +1,11 @@
-# Komelia Chinese Fork - Komga media client
+# Komelia - Komga media client
 
-[English](README.md) | [简体中文](README_zh-CN.md)
+### Downloads:
 
-This repository is a community fork of the official [Snd-R/Komelia](https://github.com/Snd-R/Komelia) project.
-It keeps the original Komga media client experience while adding Simplified Chinese localization and practical fixes for this fork's Android builds.
-
-Komelia is a cross-platform client for the [Komga](https://komga.org/) media server. It supports reading comics and ebooks on Android, desktop, and WebAssembly targets.
-
-## Fork Highlights
-
-- Simplified Chinese UI text for the main app, Komga WebUI surfaces, settings, dialogs, and common reader workflows.
-- Android release packages signed and published from this fork.
-- Hotfixes for EPUB reader navigation, including Komga scroll-mode chapter switching at chapter boundaries.
-- Login URL validation improvements to prevent invalid host/port values from being saved.
-- UI polish and reader interaction improvements for mobile reading.
-
-## Downloads
-
-- Fork releases: https://github.com/SakuraSM/Komelia/releases
-- Latest Android APK: https://github.com/SakuraSM/Komelia/releases/latest
-- Official upstream releases: https://github.com/Snd-R/Komelia/releases
-- Google Play Store for the official app: https://play.google.com/store/apps/details?id=io.github.snd_r.komelia
-- F-Droid for the official app: https://f-droid.org/packages/io.github.snd_r.komelia/
-- AUR package for the official app: https://aur.archlinux.org/packages/komelia
-
-> Package names and signing certificates may differ between the official app and this fork. If Android reports a signature mismatch, uninstall the previous package first or install the matching release channel.
+- Latest prebuilt release is available at https://github.com/Snd-R/Komelia/releases
+- Google Play Store https://play.google.com/store/apps/details?id=io.github.snd_r.komelia
+- F-Droid https://f-droid.org/packages/io.github.snd_r.komelia/
+- AUR package https://aur.archlinux.org/packages/komelia
 
 ## Screenshots
 
@@ -57,60 +38,58 @@ Komelia is a cross-platform client for the [Komga](https://komga.org/) media ser
    <img src="/screenshots/5.jpg" alt="Komelia" width="1280">  
 </details>
 
-[//]: # (![screenshots]&#40;./screenshots/screenshot.jpg&#41;)
+## Translations
+You can help translate this project to your language by using service provided by [Weblate](https://hosted.weblate.org/engage/komelia/)
 
-## Chinese Localization
+[![Translation status](https://hosted.weblate.org/widget/komelia/horizontal-auto.svg)](https://hosted.weblate.org/engage/komelia/)
 
-The app can follow the system language or be switched manually in settings. Simplified Chinese coverage in this fork includes app navigation, settings, login, home filters, reader options, and high-frequency Komga WebUI text.
+## Build instructions
+Make sure you download all git submodules\
+`git clone --recurse-submodules https://github.com/Snd-R/Komelia` \
+if you already cloned repository without recurse command run\
+`git submodule update --init --recursive`
 
-## Native libraries build instructions
-
-Android and JVM targets require a C/C++ compiler for native libraries, and Node.js for EPUB reader builds.
-
-The recommended way to build native libraries is by using docker images that contain all required build dependencies\
+Requires jdk 17 or higher\
+Android and JVM targets require C and C++ compiler for native libraries and Node.js for epub readers build.\
+Recommended way to build is by using docker images that contain all required build dependencies.\
 If you want to build with system toolchain and dependencies try running:\
 `./gradlew komeliaBuildNonJvmDependencies` (Linux Only)
 
-## Desktop App Build
-
-Requires jdk 17 or higher
-
-To build with docker container, replace <*platform*> placeholder with your target platform\
+## Desktop App
+Replace <*platform*> placeholder with your target platform. \
 Available platforms include: `linux-x86_64`, `windows-x86_64`
 
 - `docker build -t komelia-build-<platfrom> . -f ./cmake/<paltform>.Dockerfile `
 - `docker run -v .:/build komelia-build-<paltform>`
-- `./gradlew <platform>_copyJniLibs` - copy built shared libraries to resource directory that will be bundled with the
-  app
-- `./gradlew buildWebui` - build and copy epub reader webui (npm is required for build)
+- `./gradlew <platform>_copyJniLibs`
+- `./gradlew buildEpubReaders`
 
 Then choose your packaging option:
-- `./gradlew :komelia-app:run` to launch desktop app
-- `./gradlew :komelia-app:packageReleaseUberJarForCurrentOS` package jar file (output in `komelia-app/build/compose/jars`)
-- `./gradlew :komelia-app:packageReleaseDeb` package Linux deb file (output in `komelia-app/build/compose/binaries`)
-- `./gradlew :komelia-app:packageReleaseMsi` package Windows msi installer (output in `komelia-app/build/compose/binaries`)
+- `./gradlew :desktopRun` to launch desktop app
+- `./gradlew :desktopJar` output in `./komelia-app/desktopApp/build/compose/jars`
+- `./gradlew :desktopDeb` output in `./komelia-app/desktopApp/build/compose/binaries`
+- `./gradlew :desktopMsi` output in `./komelia-app/desktopApp/build/compose/binaries`
+- `./gradlew :desktopDmg` output in `./komelia-app/desktopApp/build/compose/binaries`
 
-## Android App Build
-
-To build with docker container, replace <*arch*> placeholder with your target architecture\
+## Android App
+Replace <*arch*> placeholder with your target architecture.\
 Available architectures include:  `aarch64`, `armv7a`, `x86_64`, `x86`
 
-- `docker build --platform=linux/amd64 -t komelia-build-android . -f ./cmake/android.Dockerfile`
-- `docker run --platform=linux/amd64 -v "$PWD:/build" komelia-build-android <arch>`
-- `./gradlew <arch>_copyJniLibs` - copy built shared libraries to resource directory that will be bundled with the app
-- `./gradlew buildWebui` - build and copy epub reader webui (npm is required for build)
-
-Android native builds reuse `cmake/build-android-<arch>` by default so third-party downloads and compiled sysroot files are cached between runs.
-Use `-e KOMELIA_ANDROID_CLEAN=1` with `docker run` for a clean rebuild, or `-e KOMELIA_ANDROID_OFFLINE=1` to reuse an existing cache without checking remote Git updates.
-Use `-e KOMELIA_ANDROID_REBUILD_PROJECTS=ep_iconv` to rebuild only selected cached external projects.
+- `docker build -t komelia-build-android . -f ./cmake/android.Dockerfile `
+- `docker run -v .:/build komelia-build-android <arch>`
+- `./gradlew <arch>_copyJniLibs`
+- `./gradlew buildEpubReaders`
 
 Then choose app build option:
 
-- `./gradlew :komelia-app:assembleDebug` debug apk build (output in `komelia-app/build/outputs/apk/debug`)
-- `./gradlew :komelia-app:assembleRelease` release APK build (output in `komelia-app/build/outputs/apk/release`)
-- `./scripts/build-release.sh` fork release helper that builds and prepares the Android release artifact when local signing is configured
+- `./gradlew :androidDebug` output in `./komelia-app/androidApp/build/outputs/apk/debug`
+- `./gradlew :androidRelease` output in `./komelia-app/androidApp/build/outputs/apk/release`
 
-## Komf Extension Build
 
-run`./gradlew :komelia-komf-extension:app:packageExtension` \
+## Komf Wasm WebUI
+run `./gradlew :komfWebUI` output will be in `./build/komf-webui`
+
+## Komf Wasm Extension
+for chrome `./gradlew :komfExtensionChrome` \
+for firefox `./gradlew :komfExtensionFirefox` \
 output archive will be in `./komelia-komf-extension/app/build/distributions`

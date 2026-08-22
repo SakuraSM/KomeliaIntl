@@ -1,5 +1,6 @@
 package snd.komelia.ui.search
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,21 +9,30 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_books_tab
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_no_results_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_no_results_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_series_tab
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.BookDetailedListCard
 import snd.komelia.ui.common.cards.SeriesDetailedListCard
 import snd.komelia.ui.common.components.Pagination
@@ -54,18 +64,17 @@ fun SearchContent(
         return
     }
 
-    Box(
-        contentAlignment = Alignment.TopCenter
-    ) {
-        val widthModifier = when (LocalWindowWidth.current) {
-            WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM -> Modifier.fillMaxWidth()
-            WindowSizeClass.EXPANDED -> Modifier.fillMaxWidth(.8f)
-            WindowSizeClass.FULL -> Modifier.width(1200.dp)
-        }
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        val layout = LocalKomeliaLayout.current
+        val widthModifier = Modifier
+            .widthIn(max = layout.contentMaxWidth)
+            .fillMaxWidth()
+            .padding(horizontal = layout.pageHorizontalPadding)
         val scrollState = rememberLazyListState()
 
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             SearchToolBar(
                 searchType = searchType,
@@ -77,8 +86,9 @@ fun SearchContent(
 
             LazyColumn(
                 state = scrollState,
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(bottom = layout.pageVerticalPadding),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 when (searchType) {
@@ -126,14 +136,20 @@ fun SearchContent(
 
 @Composable
 private fun EmptySearchResults() {
-    val strings = LocalStrings.current.legacy
-    Column(
+    Box(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        contentAlignment = Alignment.Center,
     ) {
-        Spacer(Modifier.height(100.dp))
-        Text(strings.forText("The search returned no results"), style = MaterialTheme.typography.titleLarge)
-        Text(strings.forText("Try searching for something else"))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(LocalKomeliaLayout.current.controlSpacing),
+        ) {
+            Text(
+                stringResource(Res.string.search_no_results_title),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(stringResource(Res.string.search_no_results_body))
+        }
     }
 }
 
@@ -146,37 +162,55 @@ fun SearchToolBar(
     modifier: Modifier
 ) {
     if (!hasSeries && !hasBooks) return
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+    val layout = LocalKomeliaLayout.current
+    Surface(
+        modifier = modifier.padding(vertical = layout.controlSpacing),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Spacer(Modifier.width(20.dp))
-
-
-        val chipColors = FilterChipDefaults.filterChipColors(
-
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            selectedContainerColor = MaterialTheme.colorScheme.primary,
-            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-        )
-        if (hasSeries) {
-            FilterChip(
-                onClick = { onSearchTypeChange(SearchResultsTab.SERIES) },
-                selected = searchType == SearchResultsTab.SERIES,
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Series")) },
-                colors = chipColors,
-                border = null,
-            )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(layout.controlSpacing / 2),
+        ) {
+            if (hasSeries) {
+                SearchTypeSegment(
+                    text = stringResource(Res.string.search_series_tab),
+                    selected = searchType == SearchResultsTab.SERIES,
+                    onClick = { onSearchTypeChange(SearchResultsTab.SERIES) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            if (hasBooks) {
+                SearchTypeSegment(
+                    text = stringResource(Res.string.search_books_tab),
+                    selected = searchType == SearchResultsTab.BOOKS,
+                    onClick = { onSearchTypeChange(SearchResultsTab.BOOKS) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
-        if (hasBooks) {
-            FilterChip(
-                onClick = { onSearchTypeChange(SearchResultsTab.BOOKS) },
-                selected = searchType == SearchResultsTab.BOOKS,
-                label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Books")) },
-                colors = chipColors,
-                border = null,
-            )
+    }
+}
+
+@Composable
+private fun SearchTypeSegment(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val layout = LocalKomeliaLayout.current
+    Surface(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = layout.minimumTouchTarget),
+        shape = MaterialTheme.shapes.medium,
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
+        contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(text, style = MaterialTheme.typography.labelLarge)
         }
     }
 }

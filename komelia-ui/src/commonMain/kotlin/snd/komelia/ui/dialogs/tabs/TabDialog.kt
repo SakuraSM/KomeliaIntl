@@ -33,8 +33,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import snd.komelia.ui.LocalStrings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.dialogs.AppDialogLayout
 import snd.komelia.ui.dialogs.BasicAppDialog
 import snd.komelia.ui.dialogs.DialogConfirmCancelButtons
@@ -57,6 +60,7 @@ fun TabDialog(
     confirmEnabled: Boolean = true,
     showCancelButton: Boolean = true
 ) {
+
     val sizeModifier = when (LocalWindowWidth.current) {
         COMPACT -> Modifier.fillMaxSize()
         MEDIUM, EXPANDED -> Modifier.width(840.dp)
@@ -106,10 +110,10 @@ private fun CompactTabDialog(
     onTabChange: (DialogTab) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    val strings = LocalStrings.current.legacy
+    val layout = LocalKomeliaLayout.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
-            modifier = Modifier.padding(5.dp),
+            modifier = Modifier.padding(layout.controlSpacing),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (showCancelButton) {
@@ -121,7 +125,7 @@ private fun CompactTabDialog(
                 }
             }
             Text(
-                text = strings.forText(title),
+                text = title,
                 style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -134,7 +138,7 @@ private fun CompactTabDialog(
                 colors = ButtonDefaults.elevatedButtonColors(contentColor = MaterialTheme.colorScheme.secondary),
                 modifier = Modifier.cursorForHand()
             ) {
-                Text(strings.forText(confirmationText), fontWeight = FontWeight.Bold)
+                Text(confirmationText, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -158,7 +162,7 @@ private fun CompactTabDialog(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(5.dp)
+                .padding(layout.dialogContentPadding)
                 .verticalScroll(rememberScrollState())
         ) {
             currentTab.Content()
@@ -182,13 +186,13 @@ private fun TabColumnDialog(
     onDismissRequest: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    val strings = LocalStrings.current.legacy
+    val layout = LocalKomeliaLayout.current
     AppDialogLayout(
         header = {
             Text(
-                text = strings.forText(title),
+                text = title,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(layout.dialogContentPadding)
 
             )
         },
@@ -204,7 +208,11 @@ private fun TabColumnDialog(
                     Modifier
                         .verticalScroll(scrollState)
                         .heightIn(min = 500.dp)
-                        .padding(bottom = 10.dp, start = 10.dp, end = 30.dp)
+                        .padding(
+                            start = layout.dialogContentPadding,
+                            end = layout.dialogContentPadding,
+                            bottom = layout.dialogContentPadding,
+                        )
                 ) {
                     currentTab.Content()
                     Spacer(Modifier.imePadding())
@@ -215,12 +223,12 @@ private fun TabColumnDialog(
         controlButtons = {
             DialogConfirmCancelButtons(
                 confirmText = confirmationText,
-                cancelText = strings.forText("Cancel"),
+                cancelText = stringResource(Res.string.dialog_cancel),
                 onConfirm = onConfirm,
                 confirmEnabled = canConfirm,
                 showCancelButton = showCancelButton,
                 onCancel = onDismissRequest,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                modifier = Modifier.padding(layout.dialogContentPadding)
             )
         },
         contentPadding = PaddingValues(0.dp)
@@ -245,7 +253,6 @@ private fun TabNavigationItems(
     tabs: List<DialogTab>,
     onTabChange: (DialogTab) -> Unit,
 ) {
-    val strings = LocalStrings.current.legacy
     tabs.forEachIndexed { index, tab ->
         val selected = index == currentIndex
         val enabled = tab.options().enabled
@@ -258,7 +265,7 @@ private fun TabNavigationItems(
         TabNavigationItem(
             label = {
                 Text(
-                    text = strings.forText(tab.options().title),
+                    text = stringResource(tab.options().title),
                     color = color,
                     style = MaterialTheme.typography.labelLarge
                 )

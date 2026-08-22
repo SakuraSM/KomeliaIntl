@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.rounded.Edit
@@ -30,6 +31,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,12 +47,27 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_penciller
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_writers
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_genres
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_links
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_publisher
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_tab_books
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_tab_collections
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
+import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.collection.SeriesCollectionsContent
 import snd.komelia.ui.collection.SeriesCollectionsState
 import snd.komelia.ui.common.TagList
@@ -100,15 +117,13 @@ fun SeriesContent(
     onSeriesClick: (KomgaSeries) -> Unit,
 
     onDownload: () -> Unit,
+    onBackPress: () -> Unit,
 ) {
     val windowWidth = LocalWindowWidth.current
-    val contentPadding = when (windowWidth) {
-        COMPACT, MEDIUM -> Modifier.padding(5.dp)
-        EXPANDED -> Modifier.padding(start = 20.dp, end = 20.dp)
-        FULL -> Modifier.padding(start = 30.dp, end = 30.dp)
-    }
+    val layout = LocalKomeliaLayout.current
     val gridMinWidth = booksState.cardWidth.collectAsState().value
     val width = LocalWindowWidth.current
+    val fixedColumnCount = posterColumnCount(LocalPlatform.current, width)
     val booksLoadState = booksState.state.collectAsState().value
     val bookMenuActions = remember { booksState.bookMenuActions() }
 
@@ -130,16 +145,21 @@ fun SeriesContent(
             series = series,
             seriesMenuActions = seriesMenuActions,
             onDownload = onDownload,
+            onBackPress = onBackPress,
         )
 
         val scrollState = rememberLazyGridState()
 
-        Box {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyVerticalGrid(
                 state = scrollState,
-                columns = GridCells.Adaptive(gridMinWidth),
-                horizontalArrangement = Arrangement.spacedBy(15.dp),
-                modifier = contentPadding,
+                columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(gridMinWidth),
+                horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                modifier = Modifier
+                    .widthIn(max = layout.contentMaxWidth)
+                    .fillMaxSize()
+                    .padding(horizontal = layout.pageHorizontalPadding),
             ) {
 
                 if (series != null && library != null) {
@@ -226,18 +246,27 @@ fun SeriesToolBar(
     series: KomgaSeries?,
     seriesMenuActions: SeriesMenuActions,
     onDownload: () -> Unit,
+    onBackPress: () -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.padding(start = 10.dp),
+        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        IconButton(onClick = onBackPress) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(Res.string.navigation_back),
+            )
+        }
 
         if (series != null) {
             Text(
                 series.metadata.title,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, false)
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
             )
 
             Box {
@@ -265,7 +294,8 @@ fun SeriesToolBar(
                 }
             }
             var showDownloadConfirmationDialog by remember { mutableStateOf(false) }
-            if (!isOffline) {
+            val offlineAvailable = LocalOfflineAvailable.current
+            if (!isOffline && offlineAvailable) {
                 IconButton(
                     onClick = { showDownloadConfirmationDialog = true },
                 ) {
@@ -278,7 +308,7 @@ fun SeriesToolBar(
 
                 if (permissionRequested) {
                     ConfirmationDialog(
-                        "Download series \"${series.metadata.title}\"?",
+                        stringResource(Res.string.series_download_confirm, series.metadata.title),
                         onDialogConfirm = onDownload,
                         onDialogDismiss = { showDownloadConfirmationDialog = false }
                     )
@@ -300,6 +330,7 @@ fun Series(
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
     val width = LocalWindowWidth.current
+    val layout = LocalKomeliaLayout.current
     val animation: FiniteAnimationSpec<IntSize> = remember(series) {
         when (width) {
             COMPACT, MEDIUM -> spring(stiffness = Spring.StiffnessHigh)
@@ -308,16 +339,22 @@ fun Series(
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
     ) {
         Layout(
             content = {
                 SeriesThumbnail(
                     seriesId = series.id,
-                    modifier = Modifier
-                        .animateContentSize(animationSpec = animation)
-                        .heightIn(min = 100.dp, max = 400.dp)
-                        .widthIn(min = 300.dp, max = 500.dp),
+                    modifier = when (width) {
+                        COMPACT, MEDIUM -> Modifier
+                            .animateContentSize(animationSpec = animation)
+                            .heightIn(min = 180.dp, max = 240.dp)
+                            .widthIn(min = 128.dp, max = 170.dp)
+                        else -> Modifier
+                            .animateContentSize(animationSpec = animation)
+                            .heightIn(min = 100.dp, max = 400.dp)
+                            .widthIn(min = 300.dp, max = 500.dp)
+                    },
                     contentScale = ContentScale.Fit
                 )
 
@@ -335,7 +372,7 @@ fun Series(
                         onFilterClick = onFilterClick,
                         modifier = Modifier,
                     )
-                    HorizontalDivider(Modifier.padding(vertical = 10.dp))
+                    HorizontalDivider(Modifier.padding(vertical = layout.controlSpacing))
                     SeriesSummary(
                         seriesSummary = series.metadata.summary,
                         bookSummary = series.booksMetadata.summary,
@@ -345,7 +382,7 @@ fun Series(
 
             }
         ) { measurables, constraints ->
-            val spacing = 15.dp.roundToPx()
+            val spacing = layout.gridSpacing.roundToPx()
             val infoMinWidth = 350.dp.toPx().toInt()
 
             val thumbnail = measurables[0].measure(constraints)
@@ -368,7 +405,10 @@ fun Series(
 
             }
             layout(totalWidth, totalHeight) {
-                thumbnail.placeRelative(0, 0)
+                thumbnail.placeRelative(
+                    x = if (isRow) 0 else (totalWidth - thumbnail.width) / 2,
+                    y = 0,
+                )
                 if (isRow) {
                     info.placeRelative(thumbnail.width + spacing, 0)
                 } else {
@@ -386,19 +426,20 @@ fun SeriesChipTags(
     series: KomgaSeries,
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(layout.itemSpacing)
     ) {
         if (series.metadata.publisher.isNotBlank()) {
             DescriptionChips(
-                label = "Publisher",
+                label = stringResource(Res.string.series_publisher),
                 chipValue = stringEntry(series.metadata.publisher),
                 onClick = { onFilterClick(SeriesScreenFilter(publisher = listOf(it))) },
             )
         }
 
         DescriptionChips(
-            label = "Genres",
+            label = stringResource(Res.string.series_genres),
             chipValues = series.metadata.genres.map { stringEntry(it) },
             onChipClick = { onFilterClick(SeriesScreenFilter(genres = listOf(it))) },
         )
@@ -411,7 +452,7 @@ fun SeriesChipTags(
 
         val uriHandler = LocalUriHandler.current
         DescriptionChips(
-            label = "Links",
+            label = stringResource(Res.string.series_links),
             chipValues = series.metadata.links.map { LabeledEntry(it, it.label) },
             onChipClick = { entry -> uriHandler.openUri(entry.url) },
             icon = Icons.Default.Link,
@@ -424,7 +465,7 @@ fun SeriesChipTags(
             .groupBy { it.role }
             .forEach { (_, author) ->
                 DescriptionChips(
-                    label = "Writers",
+                    label = stringResource(Res.string.series_author_writers),
                     chipValues = author.map { LabeledEntry(it, it.name) },
                     onChipClick = { onFilterClick(SeriesScreenFilter(authors = listOf(it))) },
                     modifier = Modifier.cursorForHand()
@@ -436,7 +477,7 @@ fun SeriesChipTags(
             .groupBy { it.role }
             .forEach { (_, author) ->
                 DescriptionChips(
-                    label = "Pencillers",
+                    label = stringResource(Res.string.series_author_penciller),
                     chipValues = author.map { LabeledEntry(it, it.name) },
                     onChipClick = { onFilterClick(SeriesScreenFilter(authors = listOf(it))) },
                     modifier = Modifier.cursorForHand()
@@ -453,23 +494,24 @@ private fun TabRow(
     showCollectionsTab: Boolean,
 ) {
     val chipColors = AppFilterChipDefaults.filterChipColors()
+    val layout = LocalKomeliaLayout.current
     Column {
         AnimatedVisibility(showCollectionsTab) {
-            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
                 Box(Modifier.clickable { onTabChange(SeriesTab.BOOKS) }) {
 
                 }
                 FilterChip(
                     onClick = { onTabChange(SeriesTab.BOOKS) },
                     selected = currentTab == SeriesTab.BOOKS,
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Books")) },
+                    label = { Text(stringResource(Res.string.series_tab_books)) },
                     colors = chipColors,
                     border = null,
                 )
                 FilterChip(
                     onClick = { onTabChange(SeriesTab.COLLECTIONS) },
                     selected = currentTab == SeriesTab.COLLECTIONS,
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Collections")) },
+                    label = { Text(stringResource(Res.string.series_tab_collections)) },
                     colors = chipColors,
                     border = null,
                 )

@@ -1,7 +1,6 @@
 package snd.komelia.ui.dialogs
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -21,52 +20,60 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import snd.komelia.ui.LocalStrings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_confirm
+import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.components.CheckboxWithLabel
 import snd.komelia.ui.platform.cursorForHand
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ConfirmationDialog(
     body: String,
     title: String? = null,
     confirmText: String? = null,
-    buttonCancel: String = "Cancel",
-    buttonConfirm: String = "Confirm",
+    buttonCancel: String = stringResource(Res.string.dialog_cancel),
+    buttonConfirm: String = stringResource(Res.string.dialog_confirm),
     buttonAlternate: String? = null,
     buttonConfirmColor: Color = MaterialTheme.colorScheme.secondaryContainer,
     onDialogConfirm: () -> Unit,
     onDialogConfirmAlternate: () -> Unit = {},
     onDialogDismiss: () -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     var confirmed by remember { mutableStateOf(false) }
-    val strings = LocalStrings.current.legacy
     AppDialog(
         onDismissRequest = onDialogDismiss,
         modifier = Modifier.widthIn(max = 600.dp),
-        header = title?.let { { Text(strings.forText(title), fontSize = 20.sp, modifier = Modifier.padding(10.dp)) } },
+        header = title?.let {
+            { Text(title, fontSize = 20.sp, modifier = Modifier.padding(layout.dialogContentPadding)) }
+        },
         content = {
-            Column(Modifier.padding(10.dp)) {
-                Text(strings.forText(body), modifier = Modifier.padding(20.dp))
+            Column(
+                Modifier.padding(layout.dialogContentPadding),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(layout.itemSpacing),
+            ) {
+                Text(body)
                 if (confirmText != null) {
                     CheckboxWithLabel(
                         checked = confirmed,
                         onCheckedChange = { confirmed = it },
-                        label = { Text(strings.forText(confirmText)) }
+                        label = { Text(confirmText) }
                     )
                 }
             }
         },
         controlButtons = {
-            FlowRow(Modifier.padding(10.dp)) {
+            FlowRow(Modifier.padding(layout.dialogContentPadding)) {
                 Spacer(Modifier.weight(1f))
                 TextButton(
                     onClick = onDialogDismiss,
                     modifier = Modifier.cursorForHand(),
                 ) {
-                    Text(strings.forText(buttonCancel))
+                    Text(buttonCancel)
                 }
-                Spacer(Modifier.size(10.dp))
+                Spacer(Modifier.size(layout.controlSpacing))
 
                 if (buttonAlternate != null) {
                     TextButton(
@@ -76,9 +83,9 @@ fun ConfirmationDialog(
                         },
                         modifier = Modifier.cursorForHand(),
                     ) {
-                        Text(strings.forText(buttonAlternate))
+                        Text(buttonAlternate)
                     }
-                    Spacer(Modifier.size(10.dp))
+                    Spacer(Modifier.size(layout.controlSpacing))
                 }
 
                 FilledTonalButton(
@@ -93,7 +100,7 @@ fun ConfirmationDialog(
                     ),
                     modifier = Modifier.cursorForHand(),
                 ) {
-                    Text(strings.forText(buttonConfirm))
+                    Text(buttonConfirm)
                 }
             }
         }

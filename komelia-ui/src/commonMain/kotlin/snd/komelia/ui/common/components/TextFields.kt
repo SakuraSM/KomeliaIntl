@@ -16,12 +16,12 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.rounded.ArrowDownward
+import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.LockOpen
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -96,8 +96,8 @@ fun PasswordTextField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
             val image = if (passwordVisible)
-                Icons.Default.Visibility
-            else Icons.Default.VisibilityOff
+                Icons.Rounded.Visibility
+            else Icons.Rounded.VisibilityOff
 
             val description = if (passwordVisible) "Hide password" else "Show password"
 
@@ -144,7 +144,7 @@ fun NoPaddingTextField(
     text: String,
     placeholder: String,
     onTextChange: (String) -> Unit,
-    shape: Shape = RoundedCornerShape(5.dp),
+    shape: Shape = RoundedCornerShape(8.dp),
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
     trailingIcon: @Composable () -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -298,7 +298,7 @@ private fun HttpPrefixButton(
             .pointerHoverIcon(PointerIcon.Hand)
     ) {
         Icon(
-            if (https) Icons.Default.Lock else Icons.Default.LockOpen,
+            if (https) Icons.Rounded.Lock else Icons.Rounded.LockOpen,
             contentDescription = null,
             tint = if (https) MaterialTheme.colorScheme.tertiaryContainer else LocalContentColor.current
         )
@@ -401,25 +401,25 @@ fun NumberFieldWithIncrements(
         Column(Modifier.widthIn(min = 25.dp)) {
             val ripple = ripple()
             Icon(
-                imageVector = Icons.Default.ArrowUpward,
+                imageVector = Icons.Rounded.ArrowUpward,
                 contentDescription = null,
                 modifier = Modifier
                     .size(25.dp)
                     .pointerHoverIcon(PointerIcon.Hand)
                     .indication(remember { MutableInteractionSource() }, ripple)
                     .doWhilePointerPressed { value?.let { onvValueChange((it + stepSize).coerceAtMost(maxValue)) } }
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .clickable(enabled = value != null) { }
             )
             Icon(
-                imageVector = Icons.Default.ArrowDownward,
+                imageVector = Icons.Rounded.ArrowDownward,
                 contentDescription = null,
                 modifier = Modifier
                     .size(25.dp)
                     .pointerHoverIcon(PointerIcon.Hand)
                     .indication(remember { MutableInteractionSource() }, ripple)
                     .doWhilePointerPressed { value?.let { onvValueChange((it - stepSize).coerceAtLeast(minValue)) } }
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .clickable(enabled = value != null) { }
             )
         }

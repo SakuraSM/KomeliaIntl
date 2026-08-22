@@ -4,16 +4,14 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,6 +19,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
@@ -45,11 +44,19 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_downloaded
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import kotlinx.coroutines.flow.filter
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.BookReadButton
@@ -71,7 +78,6 @@ import snd.komelia.ui.readlist.BookReadListsContent
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.readlist.KomgaReadList
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BookScreenContent(
     library: KomgaLibrary?,
@@ -86,51 +92,76 @@ fun BookScreenContent(
     onReadListBookPress: (KomeliaBook, KomgaReadList) -> Unit,
     onParentSeriesPress: () -> Unit,
     onFilterClick: (SeriesScreenFilter) -> Unit,
+    onBackPress: () -> Unit,
     cardWidth: Dp
 ) {
 
     val scrollState: ScrollState = rememberScrollState()
+    val layout = LocalKomeliaLayout.current
     Column(modifier = Modifier.fillMaxSize()) {
         if (book == null || library == null) return
         BookToolBar(
             book = book,
             bookMenuActions = bookMenuActions,
+            onBackPress = onBackPress,
         )
 
-        val contentPadding = when (LocalWindowWidth.current) {
-            COMPACT, MEDIUM -> Modifier.padding(5.dp)
-            EXPANDED -> Modifier.padding(start = 20.dp, end = 20.dp)
-            FULL -> Modifier.padding(start = 30.dp, end = 30.dp)
-        }
-
-        Box {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Column(
-                modifier = contentPadding
+                modifier = Modifier
+                    .widthIn(max = layout.contentMaxWidth)
                     .fillMaxWidth()
+                    .padding(
+                        horizontal = layout.pageHorizontalPadding,
+                        vertical = layout.pageVerticalPadding,
+                    )
                     .verticalScroll(state = scrollState),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
                 horizontalAlignment = Alignment.Start
             ) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                    val thumbnailMaxWidth = when (LocalWindowWidth.current) {
-                        COMPACT, MEDIUM -> 320.dp
-                        EXPANDED, FULL -> 500.dp
+                val compact = LocalWindowWidth.current == COMPACT || LocalWindowWidth.current == MEDIUM
+                if (compact) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing),
+                    ) {
+                        BookThumbnail(
+                            book.id,
+                            modifier = Modifier
+                                .heightIn(min = 180.dp, max = 240.dp)
+                                .widthIn(min = 128.dp, max = 170.dp)
+                                .animateContentSize()
+                        )
+                        BookMainInfo(
+                            book = book,
+                            library = library,
+                            onBookReadPress = onBookReadPress,
+                            onSeriesParentSeriesPress = onParentSeriesPress,
+                            onDownload = onBookDownload,
+                            onDownloadDelete = onBookDownloadDelete,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
-                    BookThumbnail(
-                        book.id,
-                        modifier = Modifier
-                            .widthIn(min = 180.dp, max = thumbnailMaxWidth)
-                            .aspectRatio(0.703f)
-                            .animateContentSize()
-                    )
-                    BookMainInfo(
-                        book = book,
-                        library = library,
-                        onBookReadPress = onBookReadPress,
-                        onSeriesParentSeriesPress = onParentSeriesPress,
-                        onDownload = onBookDownload,
-                        onDownloadDelete = onBookDownloadDelete
-                    )
+                } else {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing)) {
+                        BookThumbnail(
+                            book.id,
+                            modifier = Modifier
+                                .heightIn(min = 100.dp, max = 400.dp)
+                                .widthIn(min = 300.dp, max = 500.dp)
+                                .animateContentSize()
+                        )
+                        BookMainInfo(
+                            book = book,
+                            library = library,
+                            onBookReadPress = onBookReadPress,
+                            onSeriesParentSeriesPress = onParentSeriesPress,
+                            onDownload = onBookDownload,
+                            onDownloadDelete = onBookDownloadDelete,
+                            modifier = Modifier.weight(1f, false),
+                        )
+                    }
                 }
 
                 BookInfoColumn(
@@ -161,16 +192,25 @@ fun BookScreenContent(
 fun BookToolBar(
     book: KomeliaBook,
     bookMenuActions: BookMenuActions,
+    onBackPress: () -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.padding(start = 10.dp),
+        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        IconButton(onClick = onBackPress) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(Res.string.navigation_back),
+            )
+        }
         Text(
             book.metadata.title,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, false)
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f)
         )
         ToolbarBookActions(book, bookMenuActions)
     }
@@ -212,24 +252,29 @@ private fun ToolbarBookActions(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun FlowRowScope.BookMainInfo(
+private fun BookMainInfo(
     book: KomeliaBook,
     library: KomgaLibrary,
     onBookReadPress: (markReadProgress: Boolean) -> Unit,
     onSeriesParentSeriesPress: () -> Unit,
     onDownload: () -> Unit,
-    onDownloadDelete: () -> Unit
+    onDownloadDelete: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val layout = LocalKomeliaLayout.current
     val maxWidth = when (LocalWindowWidth.current) {
         FULL -> 1200.dp
         else -> Dp.Unspecified
     }
+    val minWidth = when (LocalWindowWidth.current) {
+        COMPACT, MEDIUM -> Dp.Unspecified
+        else -> 350.dp
+    }
 
     Column(
-        modifier = Modifier.weight(1f, false).widthIn(min = 350.dp, max = maxWidth),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        modifier = modifier.widthIn(min = minWidth, max = maxWidth),
+        verticalArrangement = Arrangement.spacedBy(layout.itemSpacing)
     ) {
         BookInfoRow(
             book = book,
@@ -237,9 +282,10 @@ private fun FlowRowScope.BookMainInfo(
         )
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val offlineAvailable = LocalOfflineAvailable.current
 
             if (!book.deleted && !library.unavailable) {
                 if (readIsSupported(book)) {
@@ -248,16 +294,16 @@ private fun FlowRowScope.BookMainInfo(
                         onIncognitoRead = { onBookReadPress(false) },
                     )
                 }
-                if (!book.downloaded || book.isLocalFileOutdated) {
+                if (offlineAvailable && (!book.downloaded || book.isLocalFileOutdated)) {
                     DownloadButton(book, onDownload)
                 }
             }
-            if (book.downloaded) {
+            if (offlineAvailable && book.downloaded) {
                 ElevatedButton(
                     onClick = onDownloadDelete,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
                 ) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Delete downloaded"))
+                    Text(stringResource(Res.string.book_delete_downloaded))
                 }
             }
         }
@@ -314,7 +360,7 @@ fun DownloadButton(
             }
         }
         Spacer(Modifier.width(3.dp))
-        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Download"))
+        Text(stringResource(Res.string.book_download))
 
 
     }
@@ -325,7 +371,7 @@ fun DownloadButton(
 
         if (permissionRequested) {
             ConfirmationDialog(
-                body = "Download book ${book.name}",
+                body = stringResource(Res.string.book_download_confirm, book.name),
                 onDialogConfirm = onDownload,
                 onDialogDismiss = { showDownloadConfirmation = false }
             )

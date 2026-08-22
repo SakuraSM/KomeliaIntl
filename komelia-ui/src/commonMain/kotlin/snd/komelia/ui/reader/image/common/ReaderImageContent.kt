@@ -23,9 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_retry
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_downloading
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_processing
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.image.ReaderImage
 import snd.komelia.image.ReaderImageResult
-import snd.komelia.ui.LocalStrings
 
 @Composable
 fun ReaderImageContent(
@@ -42,7 +46,7 @@ fun ReaderImageContent(
             content = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(color = Color.Black)
-                    Text("Downloading...", color = Color.Black)
+                    Text(stringResource(Res.string.reader_downloading), color = Color.Black)
                 }
             }
         )
@@ -61,7 +65,7 @@ private fun ErrorContent(
         )
         if (onRetry != null) {
             Button(onClick = onRetry) {
-                Text(LocalStrings.current.common.retry)
+                Text(stringResource(Res.string.login_retry))
             }
         }
     }
@@ -108,7 +112,7 @@ private fun ImageContent(image: ReaderImage) {
             verticalArrangement = Arrangement.Center
         ) {
             CircularProgressIndicator(color = Color.Black)
-            Text("Processing...", color = Color.Black)
+            Text(stringResource(Res.string.reader_processing), color = Color.Black)
         }
 
     } else {

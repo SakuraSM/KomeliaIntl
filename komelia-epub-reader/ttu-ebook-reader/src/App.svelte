@@ -10,23 +10,29 @@
   import {loadFont} from "$lib/data/fonts";
   import Fa from "svelte-fa";
   import {logger} from "$lib/data/logger";
+  import {tick} from 'svelte';
+  import {setLocale} from '$lib/i18n';
+  import {externalFunctions} from '$lib/external';
 
   let showSettings = $state(false)
 
   let dialogs: Dialog[] = $state([]);
   let clickOnCloseDisabled = $state(false);
   let zIndex = $state('');
+  let dialogContainer: HTMLDivElement | undefined = $state();
+  let dialogTrigger: HTMLElement | null = null;
 
   let initPromise = init()
 
   async function init() {
+    setLocale((await externalFunctions.getLocale()) ?? navigator.language);
     await loadExternalSettings()
     isMobile$.next(isMobile(window));
 
     try {
       await Promise.all($userFonts$.map((font) => loadFont(font)))
-    } catch (e: any) {
-      logger.error(e.result)
+    } catch (error: unknown) {
+      logger.error(getErrorMessage(error))
     }
   }
 
@@ -36,6 +42,62 @@
     zIndex = '';
   }
 
+  function getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+  }
+
+  function getFocusableDialogElements(): HTMLElement[] {
+    if (!dialogContainer) return [];
+    const selector = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',');
+    return Array.from(dialogContainer.querySelectorAll<HTMLElement>(selector));
+  }
+
+  function handleDialogKeydown(event: KeyboardEvent): void {
+    if (!dialogs.length) return;
+    if (event.key === 'Escape' && !clickOnCloseDisabled) {
+      event.preventDefault();
+      closeAllDialogs();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    const focusableElements = getFocusableDialogElements();
+    if (!focusableElements.length) {
+      event.preventDefault();
+      dialogContainer?.focus();
+      return;
+    }
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    if (event.shiftKey && document.activeElement === firstElement) {
+      event.preventDefault();
+      lastElement.focus();
+    } else if (!event.shiftKey && document.activeElement === lastElement) {
+      event.preventDefault();
+      firstElement.focus();
+    }
+  }
+
+  $effect(() => {
+    if (!dialogs.length) {
+      dialogTrigger?.focus();
+      dialogTrigger = null;
+      return;
+    }
+    dialogTrigger ??= document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    void tick().then(() => {
+      getFocusableDialogElements()[0]?.focus();
+      if (document.activeElement === dialogTrigger) dialogContainer?.focus();
+    });
+  });
+
   dialogManager.dialogs$.subscribe((d) => {
     clickOnCloseDisabled = d[0]?.disableCloseOnClick ?? false;
     zIndex = d[0]?.zIndex ?? '';
@@ -43,6 +105,8 @@
   });
 
 </script>
+
+<svelte:window onkeydown={handleDialogKeydown}/>
 
 {#if dialogs.length > 0}
   <div class="writing-horizontal-tb fixed inset-0 z-50 h-full w-full" style:z-index={zIndex}>
@@ -58,6 +122,11 @@
     ></button>
 
     <div
+        bind:this={dialogContainer}
+        role="dialog"
+        aria-modal="true"
+        aria-label="阅读器弹窗"
+        tabindex="-1"
         class="relative top-1/2 left-1/2 inline-block max-w-[80vw] -translate-x-1/2 -translate-y-1/2"
     >
       {#each dialogs as dialog}

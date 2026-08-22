@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
@@ -24,6 +24,9 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_close_settings
+import org.jetbrains.compose.resources.stringResource
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.transitions.CrossfadeTransition
 import kotlinx.coroutines.flow.SharedFlow
@@ -35,9 +38,9 @@ import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.settings.appearance.AppSettingsScreen
 import snd.komelia.ui.settings.navigation.SettingsNavigationMenu
 
-val settingsDesktopNavMenuWidth = 250.dp
-val settingsDesktopContentWidth = 700.dp
-val settingsDesktopTopPadding = 50.dp
+val settingsDesktopNavMenuWidth = 264.dp
+val settingsDesktopContentWidth = 840.dp
+val settingsDesktopTopPadding = 32.dp
 
 class SettingsScreen : Screen {
     @Composable
@@ -60,8 +63,8 @@ class SettingsScreen : Screen {
                     navMenu = {
                         Row(
                             Modifier
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                                .padding(top = settingsDesktopTopPadding, start = 10.dp, end = 10.dp)
+                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                .padding(top = settingsDesktopTopPadding, start = 16.dp, end = 16.dp)
                         ) {
                             Spacer(Modifier.weight(1f))
                             SettingsNavigationMenu(
@@ -72,7 +75,7 @@ class SettingsScreen : Screen {
                                 updatesEnabled = vm.updatesEnabled,
                                 newVersionIsAvailable = vm.newVersionIsAvailable,
                                 onLogout = vm::logout,
-                                contentColor = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.surfaceContainerLow,
                                 modifier = Modifier.width(settingsDesktopNavMenuWidth),
                                 user = vm.user.collectAsState().value
                             )
@@ -82,8 +85,13 @@ class SettingsScreen : Screen {
                         OutlinedIconButton(
                             onClick = { currentNavigator.pop() },
                             modifier = Modifier.cursorForHand().padding(top = settingsDesktopTopPadding),
-                            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
-                            content = { Icon(Icons.Default.Close, null) }
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                            content = {
+                                Icon(
+                                    Icons.Rounded.Close,
+                                    contentDescription = stringResource(Res.string.navigation_close_settings),
+                                )
+                            }
                         )
                     },
                     content = { CrossfadeTransition(navigator) },

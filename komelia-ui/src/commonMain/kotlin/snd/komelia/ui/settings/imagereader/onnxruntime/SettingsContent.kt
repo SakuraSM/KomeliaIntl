@@ -1,10 +1,8 @@
 package snd.komelia.ui.settings.imagereader.onnxruntime
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -17,8 +15,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_download
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_load_failed
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_panel_detection
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_update
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_update_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_upscale_settings
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.image.UpscaleMode
 import snd.komelia.onnxruntime.DeviceInfo
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider
@@ -28,13 +35,11 @@ import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.DirectML
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.ROCm
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.TENSOR_RT
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.WEBGPU
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.updates.UpdateProgress
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun OnnxRuntimeSettingsContent(
     executionProvider: OnnxRuntimeExecutionProvider,
@@ -55,7 +60,6 @@ fun OnnxRuntimeSettingsContent(
     panelModelIsDownloaded: Boolean,
     onPanelDetectionModelDownloadRequest: () -> Flow<UpdateProgress>
 ) {
-    val strings = LocalStrings.current.legacy
     val loadError = remember { onnxRuntimeLoadError() }
 
     var showOrtInstallDialog by remember { mutableStateOf(false) }
@@ -77,21 +81,22 @@ fun OnnxRuntimeSettingsContent(
     val platform = LocalPlatform.current
 
 
+    val onnxruntimeString = stringResource(Res.string.settings_image_onnxruntime)
     if (!isOnnxRuntimeInstalled() || loadError != null) {
         if (platform == PlatformType.DESKTOP) {
-            Text("ONNX Runtime", style = MaterialTheme.typography.titleLarge)
+            Text(onnxruntimeString, style = MaterialTheme.typography.titleLarge)
             FilledTonalButton(
                 onClick = { showOrtInstallDialog = true },
-            ) { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Download ONNX Runtime")) }
+            ) { Text(stringResource(Res.string.settings_image_onnxruntime_download)) }
 
             if (loadError != null)
                 Text(
-                    "Failed to load ONNX Runtime:\n${loadError}",
+                    stringResource(Res.string.settings_image_onnxruntime_load_failed, loadError),
                     style = MaterialTheme.typography.bodySmall
                 )
         }
     } else {
-        Text("ONNX Runtime $ortExecutionProvider", style = MaterialTheme.typography.titleLarge)
+        Text("$onnxruntimeString $ortExecutionProvider", style = MaterialTheme.typography.titleLarge)
         if (platform == PlatformType.DESKTOP) {
             DeviceSelector(
                 availableDevices = availableDevices,
@@ -105,14 +110,19 @@ fun OnnxRuntimeSettingsContent(
             ) {
                 FilledTonalButton(
                     onClick = { showOrtInstallDialog = true },
-                    shape = RoundedCornerShape(5.dp),
                     modifier = Modifier.cursorForHand()
-                ) { Text(strings.forText("Update ONNX Runtime"), maxLines = 1) }
+                ) { Text(stringResource(Res.string.settings_image_onnxruntime_update), maxLines = 1) }
 
-                Text(strings.forText("Update or download another version of ONNX Runtime"), style = MaterialTheme.typography.labelLarge)
+                Text(
+                    stringResource(Res.string.settings_image_onnxruntime_update_desc),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
 
-            Text(strings.forText("Upscaler Settings"), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(Res.string.settings_image_onnxruntime_upscale_settings),
+                style = MaterialTheme.typography.titleMedium
+            )
             UpscalerSettings(
                 upscaleMode = upscaleMode,
                 onModeChange = onUpscaleModeChange,
@@ -125,10 +135,14 @@ fun OnnxRuntimeSettingsContent(
             )
             HorizontalDivider()
         }
-        Text(strings.forText("Panel Detection"), style = MaterialTheme.typography.titleMedium)
+        Text(
+            stringResource(Res.string.settings_image_onnxruntime_panel_detection),
+            style = MaterialTheme.typography.titleMedium
+        )
         PanelDetectionSettings(
             isDownloaded = panelModelIsDownloaded,
             onDownloadRequest = onPanelDetectionModelDownloadRequest
         )
     }
 }
+

@@ -1,6 +1,7 @@
 package snd.komelia.ui.common.cards
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -18,15 +19,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,15 +51,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_pages
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_unavailable
 import kotlinx.coroutines.flow.filter
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
 import snd.komelia.ui.LocalLibraries
-import snd.komelia.ui.LocalStrings
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.BookReadButton
-import snd.komelia.ui.common.components.NoPaddingChip
 import snd.komelia.ui.common.images.BookThumbnail
 import snd.komelia.ui.common.menus.BookActionsMenu
 import snd.komelia.ui.common.menus.BookMenuActions
@@ -87,27 +91,43 @@ fun BookImageCard(
         onClick = onBookClick,
         onLongClick = onSelect,
         image = {
-            BookHoverOverlay(
-                book = book,
-                libraryIsDeleted = libraryIsDeleted,
-                bookMenuActions = bookMenuActions,
-                onBookReadClick = onBookReadClick,
-                onSelect = onSelect,
-                isSelected = isSelected,
-            ) {
-                BookImageOverlay(
+            Box {
+                BookHoverOverlay(
                     book = book,
                     libraryIsDeleted = libraryIsDeleted,
-                    showSeriesTitle = showSeriesTitle,
+                    bookMenuActions = bookMenuActions,
+                    onBookReadClick = onBookReadClick,
+                    onSelect = onSelect,
+                    isSelected = isSelected,
                 ) {
-                    BookThumbnail(
-                        book.id,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                    BookImageOverlay(
+                        book = book,
+                        libraryIsDeleted = libraryIsDeleted,
+                        showTitle = false,
+                    ) {
+                        BookThumbnail(
+                            book.id,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+                if (book.deleted || libraryIsDeleted) {
+                    CardStatusBadge(stringResource(Res.string.book_unavailable))
                 }
             }
-        }
+        },
+        content = {
+            CoverCardCaption(
+                title = book.metadata.title,
+                variant = if (showSeriesTitle) {
+                    CoverCaptionVariant.TitleWithSupporting
+                } else {
+                    CoverCaptionVariant.TitleOnly
+                },
+                supportingText = if (showSeriesTitle && !book.oneshot) book.seriesTitle else null,
+            )
+        },
     )
 }
 
@@ -144,6 +164,7 @@ private fun BookImageOverlay(
     showSeriesTitle: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val layout = LocalKomeliaLayout.current
     Box(contentAlignment = Alignment.TopStart) {
         content()
         if (showTitle)
@@ -171,7 +192,7 @@ private fun BookImageOverlay(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Column(Modifier.padding(10.dp)) {
+            Column(Modifier.padding(layout.cardContentPadding)) {
                 if (showSeriesTitle && !book.oneshot) {
                     CardOutlinedText(
                         text = book.seriesTitle,
@@ -182,12 +203,12 @@ private fun BookImageOverlay(
                 if (showTitle) {
                     CardOutlinedText(
                         text = book.metadata.title,
-                        maxLines = 3
+                        maxLines = 2
                     )
                 }
                 if (book.deleted || libraryIsDeleted) {
                     CardOutlinedText(
-                        text = "Unavailable",
+                        text = stringResource(Res.string.book_unavailable),
                         textColor = MaterialTheme.colorScheme.error
                     )
                 }
@@ -197,9 +218,9 @@ private fun BookImageOverlay(
             if (readProgress != null && !readProgress.completed) {
                 LinearProgressIndicator(
                     progress = { getReadProgressPercentage(book) },
-                    color = MaterialTheme.colorScheme.tertiary,
-                    trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
-                    modifier = Modifier.height(6.dp).fillMaxWidth().background(Color.Black),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
+                    modifier = Modifier.height(4.dp).fillMaxWidth().background(Color.Black),
                     drawStopIndicator = {}
                 )
             }
@@ -227,11 +248,11 @@ private fun BookDownloadCardOverlay(book: KomeliaBook) {
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .8f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Download, null, tint = MaterialTheme.colorScheme.tertiary)
+                Icon(Icons.Default.Download, null, tint = MaterialTheme.colorScheme.primary)
                 CircularProgressIndicator(
                     progress = { event.completed / event.total.toFloat() },
-                    color = MaterialTheme.colorScheme.tertiary,
-                    trackColor = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
                 )
             }
         }
@@ -329,9 +350,10 @@ private fun BookHoverOverlay(
 
 private fun getReadProgressPercentage(book: KomeliaBook): Float {
     val progress = book.readProgress ?: return 0f
-    if (progress.completed) return 100f
+    if (progress.completed) return 1f
 
-    return progress.page / book.media.pagesCount.toFloat()
+    val pageCount = book.media.pagesCount.coerceAtLeast(1)
+    return (progress.page.toFloat() / pageCount).coerceIn(0f, 1f)
 }
 
 
@@ -346,14 +368,19 @@ fun BookDetailedListCard(
     onSelect: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val layout = LocalKomeliaLayout.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
+    val width = LocalWindowWidth.current
     Card(
         modifier
             .cursorForHand()
             .combinedClickable(onClick = onClick ?: {}, onLongClick = onSelect)
             .hoverable(interactionSource)
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
             modifier = Modifier
@@ -367,11 +394,19 @@ fun BookDetailedListCard(
                     )
                     else Modifier
                 )
-                .padding(10.dp),
+                .padding(layout.cardContentPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box {
-                BookSimpleImageCard(book)
+                BookSimpleImageCard(
+                    book = book,
+                    modifier = Modifier.width(
+                        when (width) {
+                            COMPACT, MEDIUM -> 96.dp
+                            else -> 130.dp
+                        }
+                    )
+                )
                 if (onSelect != null && (isSelected || isHovered.value)) {
                     SelectionRadioButton(
                         isSelected,
@@ -396,7 +431,8 @@ private fun BookDetailedListDetails(
     onBookReadClick: ((Boolean) -> Unit)? = null,
 ) {
     val width = LocalWindowWidth.current
-    Column(Modifier.padding(start = 10.dp)) {
+    val layout = LocalKomeliaLayout.current
+    Column(Modifier.padding(start = layout.itemSpacing)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 book.metadata.title,
@@ -408,30 +444,17 @@ private fun BookDetailedListDetails(
             )
         }
 
-        LazyRow(
-            modifier = Modifier.padding(vertical = 5.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            item {
-                Text(
-                    LocalStrings.current.legacy.forText("${book.media.pagesCount} pages"),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            items(book.metadata.tags) {
-                NoPaddingChip(
-                    borderColor = MaterialTheme.colorScheme.surface,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
+        Text(
+            stringResource(Res.string.book_pages, book.media.pagesCount),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = layout.controlSpacing / 2),
+        )
+        MetadataTagFlow(
+            values = book.metadata.tags,
+            width = width,
+            modifier = Modifier.padding(vertical = 6.dp),
+        )
 
         Text(
             book.metadata.summary,

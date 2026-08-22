@@ -147,32 +147,38 @@
     <div class="flex flex-col overflow-auto p-2">
       {#each $readerImageGalleryPictures$ as readerImageGalleryPicture, urlIndex (readerImageGalleryPicture.url)}
         {@const showSpoiler = $hideSpoilerImage$ && !readerImageGalleryPicture.unspoilered}
-        <button
-          class="flex justify-center my-4"
+        <div
+          class="relative my-4 flex justify-center"
           class:spoiler={showSpoiler}
           data-image-index={urlIndex}
-          on:click={() => {
-            if (window.matchMedia('(min-width: 1024px)').matches) {
-              selectedImageIndex = urlIndex;
-            }
-          }}
         >
-          <img
-            src={readerImageGalleryPicture.url}
-            alt="galleryImage"
-            class="max-h-96 lg:max-h-64"
-          />
+          <button
+            type="button"
+            aria-label="Select gallery image"
+            on:click={() => {
+              if (window.matchMedia('(min-width: 1024px)').matches) {
+                selectedImageIndex = urlIndex;
+              }
+            }}
+          >
+            <img
+              src={readerImageGalleryPicture.url}
+              alt="Gallery page"
+              class="max-h-96 lg:max-h-64"
+            />
+          </button>
           {#if showSpoiler}
             <button
+              type="button"
               title="Show Image"
+              aria-label="Show spoiler image"
               class="spoiler-label"
-              aria-hidden="true"
               on:click={() => toggleGalleryPictureSpoiler(readerImageGalleryPicture.url)}
             >
               ネタバレ
             </button>
           {/if}
-        </button>
+        </div>
       {/each}
     </div>
   </div>

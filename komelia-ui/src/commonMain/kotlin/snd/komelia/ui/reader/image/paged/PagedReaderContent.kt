@@ -23,7 +23,15 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_current_book
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_finished_book
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_next_book
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_no_next_book
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_no_previous_book
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_previous_book
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.settings.model.PageDisplayLayout.DOUBLE_PAGES
 import snd.komelia.settings.model.PageDisplayLayout.DOUBLE_PAGES_NO_COVER
 import snd.komelia.settings.model.PageDisplayLayout.SINGLE_PAGE
@@ -125,7 +133,7 @@ private fun TransitionPage(page: TransitionPage) {
         when (page) {
             is BookEnd -> {
                 Column {
-                    Text("Finished:", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(Res.string.reader_finished_book), style = MaterialTheme.typography.bodyMedium)
                     Text(
                         page.currentBook.metadata.title,
                         style = MaterialTheme.typography.titleLarge
@@ -135,14 +143,14 @@ private fun TransitionPage(page: TransitionPage) {
 
                 if (page.nextBook != null) {
                     Column {
-                        Text("Next:", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(Res.string.reader_next_book), style = MaterialTheme.typography.bodyMedium)
                         Text(
                             page.nextBook.metadata.title,
                             style = MaterialTheme.typography.titleLarge
                         )
                     }
                 } else {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("There's no next book"))
+                    Text(stringResource(Res.string.reader_no_next_book))
                 }
 
             }
@@ -150,19 +158,19 @@ private fun TransitionPage(page: TransitionPage) {
             is BookStart -> {
                 if (page.previousBook != null) {
                     Column {
-                        Text("Previous:", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(Res.string.reader_previous_book), style = MaterialTheme.typography.bodyMedium)
                         Text(
                             page.previousBook.metadata.title,
                             style = MaterialTheme.typography.titleLarge
                         )
                     }
                 } else {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("There's no previous book"))
+                    Text(stringResource(Res.string.reader_no_previous_book))
 
                 }
                 Spacer(Modifier.size(50.dp))
                 Column {
-                    Text("Current:", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(Res.string.reader_current_book), style = MaterialTheme.typography.bodyMedium)
                     Text(
                         page.currentBook.metadata.title,
                         style = MaterialTheme.typography.titleLarge

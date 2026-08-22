@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CropSquare
-import androidx.compose.material.icons.filled.FilterNone
-import androidx.compose.material.icons.filled.Minimize
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.CropSquare
+import androidx.compose.material.icons.rounded.FilterNone
+import androidx.compose.material.icons.rounded.Minimize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
@@ -66,26 +66,26 @@ internal fun TitleBarOnLinux(
     ) {
         ControlButton(
             { window.dispatchEvent(WindowEvent(window, WindowEvent.WINDOW_CLOSING)) },
-            Icons.Default.Close,
+            Icons.Rounded.Close,
             true
         )
 
         if (windowState.placement == WindowPlacement.Maximized) {
             ControlButton(
                 { window.extendedState = Frame.NORMAL },
-                Icons.Default.FilterNone,
+                Icons.Rounded.FilterNone,
                 true
             )
         } else {
             ControlButton(
                 { window.extendedState = Frame.MAXIMIZED_BOTH },
-                Icons.Default.CropSquare,
+                Icons.Rounded.CropSquare,
                 true
             )
         }
         ControlButton(
             { window.extendedState = Frame.ICONIFIED },
-            Icons.Default.Minimize,
+            Icons.Rounded.Minimize,
             true
         )
         content()

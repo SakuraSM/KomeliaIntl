@@ -47,8 +47,15 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_books_tab
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_result_in_library
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_search_all
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_search_input_placeholder
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_series_tab
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
-import snd.komelia.ui.LocalStrings
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.BookSimpleImageCard
 import snd.komelia.ui.common.cards.SeriesSimpleImageCard
 import snd.komelia.ui.common.components.NoPaddingTextField
@@ -70,6 +77,7 @@ fun SearchBar(
     onBookClick: (KomeliaBook) -> Unit,
     onSeriesClick: (KomgaSeries) -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     val interactionSource = remember { MutableInteractionSource() }
     var isFocused by remember { mutableStateOf(false) }
     LaunchedEffect(interactionSource) {
@@ -110,7 +118,7 @@ fun SearchBar(
                 modifier = Modifier
                     .width(maxWidth)
                     .heightIn(max = maxHeight - 150.dp)
-                    .padding(5.dp)
+                    .padding(layout.controlSpacing / 2)
             ) {
                 SearchResultsDropDownBox(
                     currentQuery = query,
@@ -139,6 +147,7 @@ private fun ColumnScope.SearchResultsDropDownBox(
     onDismiss: () -> Unit,
 ) {
     if (currentQuery.isBlank()) return
+    val layout = LocalKomeliaLayout.current
 
     Box(
         modifier = Modifier
@@ -149,10 +158,10 @@ private fun ColumnScope.SearchResultsDropDownBox(
                 onSearchAllClick(currentQuery)
             }
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = 5.dp),
+            .padding(horizontal = layout.controlSpacing),
         contentAlignment = Alignment.CenterStart
     ) {
-        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Search all..."))
+        Text(stringResource(Res.string.search_search_all))
     }
     if (isLoading) LinearProgressIndicator(
         color = MaterialTheme.colorScheme.tertiary,
@@ -161,12 +170,11 @@ private fun ColumnScope.SearchResultsDropDownBox(
 
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(layout.itemSpacing)
     ) {
-        val strings = LocalStrings.current.legacy
         val series = searchResults.series
         if (series.isNotEmpty()) {
-            Text(text = strings.forText("Series"))
+            Text(text = stringResource(Res.string.search_series_tab))
             series.forEach {
                 SeriesSearchEntry(
                     series = it,
@@ -181,8 +189,8 @@ private fun ColumnScope.SearchResultsDropDownBox(
         val books = searchResults.books
         if (books.isNotEmpty()) {
             Text(
-                text = strings.forText("Books"),
-                modifier = Modifier.padding(5.dp)
+                text = stringResource(Res.string.search_books_tab),
+                modifier = Modifier.padding(layout.controlSpacing)
             )
             books.forEach {
                 BookSearchEntry(
@@ -203,14 +211,15 @@ private fun EntryContainer(
     onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
             .clickable { onClick() }
             .cursorForHand()
-            .padding(5.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(layout.controlSpacing),
+        horizontalArrangement = Arrangement.spacedBy(layout.itemSpacing)
     ) {
         content()
     }
@@ -232,7 +241,7 @@ private fun SeriesSearchEntry(
         )
         Column {
             Text(series.metadata.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            library?.let { Text(LocalStrings.current.legacy.forText("in ${library.name}")) }
+            library?.let { Text(stringResource(Res.string.search_result_in_library, library.name)) }
         }
     }
 }
@@ -253,7 +262,7 @@ private fun BookSearchEntry(
         )
         Column {
             Text(book.metadata.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            library?.let { Text(LocalStrings.current.legacy.forText("in ${library.name}")) }
+            library?.let { Text(stringResource(Res.string.search_result_in_library, library.name)) }
         }
     }
 }
@@ -269,9 +278,10 @@ fun SearchTextField(
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
+    val layout = LocalKomeliaLayout.current
     NoPaddingTextField(
         text = query,
-        placeholder = LocalStrings.current.common.search,
+        placeholder = stringResource(Res.string.search_search_input_placeholder),
         onTextChange = onQueryChange,
         shape = CircleShape,
         colors = OutlinedTextFieldDefaults.colors(
@@ -282,9 +292,9 @@ fun SearchTextField(
         ),
         interactionSource = interactionSource,
         modifier = modifier
-            .height(45.dp)
+            .heightIn(min = layout.minimumTouchTarget)
             .fillMaxWidth()
-            .padding(top = 5.dp)
+            .padding(top = layout.controlSpacing / 2)
             .onKeyEvent { keyEvent ->
                 when {
                     keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyUp -> {

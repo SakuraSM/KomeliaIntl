@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,9 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -37,7 +34,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,14 +47,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_filter_authors
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_filter_read_status
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_filter_sort
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_filter_tags
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_filters
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_selection_mode
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_books_count
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_no_books
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.settings.model.BooksLayout.GRID
 import snd.komelia.settings.model.BooksLayout.LIST
 import snd.komelia.ui.LoadState
-import snd.komelia.ui.LocalStrings
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.book.BooksFilterState
 import snd.komelia.ui.book.BooksFilterState.BooksSort
@@ -83,6 +89,7 @@ import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.series.SeriesBooksState.BooksData
 import snd.komelia.ui.series.SeriesFilterState.TagExclusionMode
 import snd.komelia.ui.series.SeriesFilterState.TagInclusionMode
+import snd.komelia.ui.strings.AppStrings
 import snd.komga.client.book.KomgaReadStatus
 import snd.komga.client.common.KomgaAuthor
 import snd.komga.client.series.KomgaSeries
@@ -184,23 +191,7 @@ private fun LazyGridScope.BooksContent(
 ) {
     if (books.isEmpty()) {
         item(span = { GridItemSpan(maxLineSpan) }) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 28.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .55f),
-                    shape = RoundedCornerShape(8.dp),
-                ) {
-                    Text(
-                        LocalStrings.current.legacy.forText("No books"),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
-                    )
-                }
-            }
+            Text(stringResource(Res.string.series_no_books), modifier = Modifier.fillMaxWidth())
         }
     } else
         when (layout) {
@@ -245,38 +236,28 @@ private fun BooksToolBar(
 ) {
     val width = LocalWindowWidth.current
     var showFilters by remember { mutableStateOf(false) }
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp)
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 1.dp,
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+            modifier = Modifier.padding(bottom = 5.dp)
         ) {
-            val booksLabel = remember(series) {
-                if (series == null) null
-                else buildString {
-                    append(series.booksCount)
-                    if (series.metadata.totalBookCount != null) append(" / ${series.metadata.totalBookCount}")
-                    if (series.booksCount > 1) append(" books")
-                    else append(" book")
-                }
-            }
 
-            booksLabel?.let {
+            series?.let {
+                val label = remember(series) {
+                    buildString {
+                        append(series.booksCount)
+                        if (series.metadata.totalBookCount != null) append(" / ${series.metadata.totalBookCount}")
+                    }
+                }
                 SuggestionChip(
                     onClick = {},
-                    label = { Text(booksLabel, style = MaterialTheme.typography.bodyMedium) },
-                    modifier = Modifier.padding(end = 8.dp)
+                    label = {
+                        Text(
+                            text = pluralStringResource(Res.plurals.series_books_count, series.booksCount, label),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
+                    modifier = Modifier.padding(10.dp, 0.dp)
                 )
             }
 
@@ -292,17 +273,11 @@ private fun BooksToolBar(
             }
 
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 if (!selectionMode) {
                     if (width == COMPACT || width == MEDIUM) {
-                        IconButton(
-                            onClick = { showFilters = !showFilters },
-                            modifier = Modifier
-                                .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
-                                .cursorForHand()
-                        ) {
+                        IconButton(onClick = { showFilters = !showFilters }, modifier = Modifier.cursorForHand()) {
                             Icon(
                                 Icons.Default.FilterList,
                                 null,
@@ -314,35 +289,38 @@ private fun BooksToolBar(
                     PageSizeSelectionDropdown(booksPageSize, onBooksPageSizeChange)
                 }
 
-                Surface(
-                    color = if (booksLayout == LIST) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = if (booksLayout == LIST) MaterialTheme.colorScheme.onSecondaryContainer else LocalContentColor.current,
-                    shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp),
-                    modifier = Modifier
-                        .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
+                Box(
+                    Modifier
+                        .background(
+                            if (booksLayout == LIST) MaterialTheme.colorScheme.surfaceVariant
+                            else MaterialTheme.colorScheme.surface
+                        )
                         .clickable { onBooksLayoutChange(LIST) }
                         .cursorForHand()
+                        .padding(10.dp)
                 ) {
-                    Box(Modifier.padding(10.dp), contentAlignment = Alignment.Center) {
-                        Icon(Icons.AutoMirrored.Filled.ViewList, null)
-                    }
+                    Icon(
+                        Icons.AutoMirrored.Filled.ViewList,
+                        null,
+                    )
                 }
 
-                Surface(
-                    color = if (booksLayout == GRID) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = if (booksLayout == GRID) MaterialTheme.colorScheme.onSecondaryContainer else LocalContentColor.current,
-                    shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
-                    modifier = Modifier
-                        .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
+                Box(
+                    Modifier
+                        .background(
+                            if (booksLayout == GRID) MaterialTheme.colorScheme.surfaceVariant
+                            else MaterialTheme.colorScheme.surface
+                        )
                         .clickable { onBooksLayoutChange(GRID) }
                         .cursorForHand()
+                        .padding(10.dp)
                 ) {
-                    Box(Modifier.padding(10.dp), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.GridView, null)
-                    }
+                    Icon(
+                        Icons.Default.GridView,
+                        null,
+                    )
                 }
             }
-        }
         }
         if (showFilters) {
             BookFilterDialog(
@@ -382,7 +360,7 @@ fun BooksBulkActionsToolbar(
         when (LocalWindowWidth.current) {
             FULL, EXPANDED -> {
                 if (selectedBooks.isEmpty()) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Click on items to select or deselect them"))
+                    Text(stringResource(Res.string.series_book_selection_mode))
                 } else {
                     Spacer(Modifier.weight(1f))
                     BooksBulkActionsContent(
@@ -398,25 +376,16 @@ fun BooksBulkActionsToolbar(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ExpandableBookFiltersRow(filterState: BooksFilterState) {
     var showFilters by remember { mutableStateOf(false) }
     val currentFilter = filterState.state.collectAsState().value
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .65f),
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier.padding(vertical = 2.dp)
-    ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)
-    ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalArrangement = Arrangement.Center,
         ) {
-            val widthModifier = Modifier.widthIn(min = 190.dp, max = 240.dp)
+            val widthModifier = Modifier.width(200.dp)
 
             SortOrder(
                 sortOrder = currentFilter.sortOrder,
@@ -462,7 +431,6 @@ fun ExpandableBookFiltersRow(filterState: BooksFilterState) {
             }
         }
     }
-    }
 }
 
 @Composable
@@ -472,13 +440,11 @@ fun BookFilterDialog(
 ) {
     val currentFilter = filterState.state.collectAsState().value
     AppDialog(
-        modifier = Modifier
-            .fillMaxWidth(.94f)
-            .widthIn(max = 520.dp),
+        modifier = Modifier.fillMaxWidth(.8f),
         content = {
             Column(
-                modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 SortOrder(
                     sortOrder = currentFilter.sortOrder,
@@ -519,11 +485,7 @@ fun BookFilterDialog(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    LocalStrings.current.legacy.forText("Book Filters"),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(start = 10.dp)
-                )
+                Text(stringResource(Res.string.series_book_filters), modifier = Modifier.padding(start = 10.dp))
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, null) }
             }
@@ -540,12 +502,11 @@ private fun SortOrder(
     modifier: Modifier,
     withLabel: Boolean,
 ) {
-    val strings = LocalStrings.current.booksFilter
     FilterDropdownChoice(
-        selectedOption = LabeledEntry(sortOrder, strings.forBookSort(sortOrder)),
-        options = BooksSort.entries.map { LabeledEntry(it, strings.forBookSort(it)) },
+        selectedOption = LabeledEntry(sortOrder, stringResource(AppStrings.forBookSort(sortOrder))),
+        options = BooksSort.entries.map { LabeledEntry(it, stringResource(AppStrings.forBookSort(it))) },
         onOptionChange = { filterState.onSortOrderChange(it.value) },
-        label = if (withLabel) strings.sort else null,
+        label = if (withLabel) stringResource(Res.string.series_book_filter_sort) else null,
         modifier = modifier
     )
 }
@@ -557,13 +518,12 @@ private fun ReadStatusFilter(
     modifier: Modifier,
     withLabel: Boolean,
 ) {
-    val strings = LocalStrings.current.booksFilter
     FilterDropdownMultiChoice(
-        selectedOptions = readStatus.map { LabeledEntry(it, strings.forReadStatus(it)) },
-        options = KomgaReadStatus.entries.map { LabeledEntry(it, strings.forReadStatus(it)) },
+        selectedOptions = readStatus.map { LabeledEntry(it, stringResource(AppStrings.forReadStatus(it))) },
+        options = KomgaReadStatus.entries.map { LabeledEntry(it, stringResource(AppStrings.forReadStatus(it))) },
         onOptionSelect = { changed -> filterState.onReadStatusSelect(changed.value) },
-        label = if (withLabel) strings.readStatus else null,
-        placeholder = if (withLabel) null else strings.readStatus,
+        label = if (withLabel) stringResource(Res.string.series_book_filter_read_status) else null,
+        placeholder = if (withLabel) null else stringResource(Res.string.series_book_filter_read_status),
         modifier = modifier
     )
 }
@@ -575,13 +535,12 @@ private fun AuthorsFilter(
     modifier: Modifier,
     withLabel: Boolean,
 ) {
-    val strings = LocalStrings.current.booksFilter
     FilterDropdownMultiChoice(
         selectedOptions = authors.map { LabeledEntry(it, it.name) },
         options = filterState.authorsOptions.map { LabeledEntry(it, it.name) },
         onOptionSelect = { changed -> filterState.onAuthorSelect(changed.value) },
-        label = if (withLabel) strings.authors else null,
-        placeholder = if (withLabel) null else strings.authors,
+        label = if (withLabel) stringResource(Res.string.series_book_filter_authors) else null,
+        placeholder = if (withLabel) null else stringResource(Res.string.series_book_filter_authors),
         modifier = modifier
     )
 }
@@ -596,7 +555,6 @@ private fun TagsFilter(
     modifier: Modifier,
     withLabel: Boolean,
 ) {
-    val strings = LocalStrings.current.booksFilter
     TagFiltersDropdownMenu(
         allTags = filterState.tagOptions,
         includeTags = includeTags,
@@ -609,8 +567,8 @@ private fun TagsFilter(
         exclusionMode = exclusionMode,
         onExclusionModeChange = filterState::onExclusionModeChange,
 
-        label = if (withLabel) strings.tags else null,
-        placeholder = if (withLabel) null else strings.tags,
+        label = if (withLabel) stringResource(Res.string.series_book_filter_tags) else null,
+        placeholder = if (withLabel) null else stringResource(Res.string.series_book_filter_tags),
         contentPadding = PaddingValues(5.dp),
         modifier = modifier.clip(RoundedCornerShape(5.dp)),
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,

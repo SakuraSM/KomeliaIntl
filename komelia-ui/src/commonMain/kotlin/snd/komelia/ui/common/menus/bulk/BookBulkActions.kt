@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,13 +14,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_add_to_readlist
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_bulk_delete_confirm_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_bulk_delete_confirm_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_bulk_download_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_downloaded
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_edit
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_mark_read
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_mark_unread
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.dialogs.ConfirmationDialog
@@ -60,18 +72,14 @@ fun BookBulkActionDialogs(state: BookBulkActionsState) {
 
     if (state.showDeleteDownloadedDialog) {
         val booksToDelete = remember(state.books) { state.books.filter { it.downloaded } }
-        val textBody = remember(booksToDelete.size) {
-            buildString {
-                if (booksToDelete.size == 1) {
-                    append("Book ${booksToDelete.first().metadata.title} will be removed from this device")
-                } else {
-                    append("${booksToDelete.size} books and their files will be removed from this device")
-                }
-            }
-        }
+        val textBody = pluralStringResource(
+            Res.plurals.book_bulk_delete_confirm_body, booksToDelete.size,
+            if (booksToDelete.size == 1) booksToDelete.first().metadata.title
+            else booksToDelete.size
+        )
 
         ConfirmationDialog(
-            title = "Delete downloaded books",
+            title = stringResource(Res.string.book_bulk_delete_confirm_title),
             body = textBody,
             onDialogConfirm = {
                 coroutineScope.launch {
@@ -88,13 +96,14 @@ fun BookBulkActionDialogs(state: BookBulkActionsState) {
         var permissionRequested by remember { mutableStateOf(false) }
         DownloadNotificationRequestDialog { permissionRequested = true }
 
-        val bodyText = remember(state.books) {
-            buildString {
-                append("Download ")
-                if (state.books.size == 1) append("${state.books.first().metadata.title}?")
-                else append("${state.books.size} books?")
-            }
-        }
+        val bodyText = pluralStringResource(
+            Res.plurals.book_bulk_download_confirm,
+            state.books.size,
+            if (state.books.size == 1) state.books.first().metadata.title
+            else state.books.size
+
+        )
+
         if (permissionRequested) {
             ConfirmationDialog(
                 body = bodyText,
@@ -107,42 +116,6 @@ fun BookBulkActionDialogs(state: BookBulkActionsState) {
             )
         }
     }
-
-    if (state.showDeleteDialog) {
-        val textBody = remember(state.books.size) {
-            buildString {
-                if (state.books.size == 1) {
-                    append("Book ")
-                } else {
-                    append("${state.books.size} books ")
-                }
-                append("will be removed from this server alongside with stored media files. This cannot be undone. Continue?")
-            }
-        }
-
-        val confirmationText = remember(state.books.size) {
-            buildString {
-                append("Yes, delete ")
-                if (state.books.size == 1) {
-                    append("book and its files")
-                } else {
-                    append("${state.books.size} books and their files")
-                }
-            }
-        }
-        ConfirmationDialog(
-            title = "Delete Books",
-            body = textBody,
-            confirmText = confirmationText,
-            onDialogConfirm = {
-                coroutineScope.launch { state.actions.delete(state.books) }
-                state.showDeleteDialog = false
-            },
-            onDialogDismiss = { state.showDeleteDialog = false },
-            buttonConfirmColor = MaterialTheme.colorScheme.errorContainer
-        )
-    }
-
 }
 
 @Composable
@@ -154,14 +127,15 @@ fun rememberBookBulkActionsState(
     val factory = LocalViewModelFactory.current
     val isOffline = LocalOfflineMode.current.collectAsState().value
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
-
+    val offlineAvailable = LocalOfflineAvailable.current
     return remember(books, actions, isOffline) {
         BookBulkActionsState(
             books = books,
             actions = actions ?: factory.getBookBulkActions(),
             isOffline = isOffline,
             isAdmin = isAdmin,
-            coroutineScope = coroutineScope
+            offlineAvailable = offlineAvailable,
+            coroutineScope = coroutineScope,
         )
     }
 }
@@ -171,6 +145,7 @@ data class BookBulkActionsState(
     val actions: BookBulkActions,
     private val isOffline: Boolean,
     private val isAdmin: Boolean,
+    private val offlineAvailable: Boolean,
     private val coroutineScope: CoroutineScope,
 ) {
 
@@ -178,59 +153,49 @@ data class BookBulkActionsState(
     var showEditDialog by mutableStateOf(false)
     var showDownloadDialog by mutableStateOf(false)
     var showDeleteDownloadedDialog by mutableStateOf(false)
-    var showDeleteDialog by mutableStateOf(false)
 
     val buttons = buildList {
         add(
             BulkActionButtonData(
-                description = "Mark read",
+                description = Res.string.book_mark_read,
                 icon = Icons.Default.BookmarkAdd,
                 onClick = { coroutineScope.launch { actions.markAsRead(books) } }
             ))
 
         add(
             BulkActionButtonData(
-                description = "Mark unread",
+                description = Res.string.book_mark_unread,
                 icon = Icons.Default.BookmarkRemove,
                 onClick = { coroutineScope.launch { actions.markAsUnread(books) } }
             ))
         if (!isOffline && isAdmin) add(
             BulkActionButtonData(
-                description = "Edit",
+                description = Res.string.book_edit,
                 icon = Icons.Default.Edit,
                 onClick = { showEditDialog = true }
             ))
         if (!isOffline && isAdmin)
             add(
                 BulkActionButtonData(
-                    description = "Add to read list",
+                    description = Res.string.book_add_to_readlist,
                     icon = Icons.AutoMirrored.Default.PlaylistAdd,
                     onClick = { showAddToReadListDialog = true }
                 ))
         if (books.any { it.downloaded })
             add(
                 BulkActionButtonData(
-                    description = "Deleted downloaded",
+                    description = Res.string.book_delete_downloaded,
                     icon = Icons.Default.AutoDelete,
                     onClick = { showDeleteDownloadedDialog = true }
                 ))
-        if (!isOffline && books.any { !it.downloaded })
+
+        if (offlineAvailable && !isOffline && books.any { !it.downloaded })
             add(
                 BulkActionButtonData(
-                    description = "Download",
+                    description = Res.string.book_download,
                     icon = Icons.Default.Download,
                     onClick = { showDownloadDialog = true }
                 ))
-
-//        if (!isOffline && isAdmin) {
-//            add(
-//                BulkActionButtonData(
-//                    description = "Delete from server",
-//                    icon = Icons.Default.Delete,
-//                    onClick =
-//                        { showDeleteDialog = true }
-//                ))
-//        }
     }
 }
 
@@ -244,7 +209,7 @@ data class BookBulkActions(
 
     constructor(
         bookApi: KomgaBookApi,
-        taskEmitter: OfflineTaskEmitter,
+        taskEmitter: OfflineTaskEmitter?,
         notifications: AppNotifications,
     ) : this(
         markAsRead = { books ->
@@ -266,12 +231,12 @@ data class BookBulkActions(
         },
         download = { books ->
             books.forEach { book ->
-                taskEmitter.downloadBook(book.id)
+                checkNotNull(taskEmitter).downloadBook(book.id)
             }
         },
         deleteDownloaded = { books ->
             books.forEach { book ->
-                taskEmitter.deleteBook(book.id)
+                checkNotNull(taskEmitter).deleteBook(book.id)
             }
         }
     )

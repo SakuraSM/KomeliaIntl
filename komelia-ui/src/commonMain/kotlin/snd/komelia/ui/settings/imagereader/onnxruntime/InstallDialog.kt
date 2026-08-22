@@ -26,10 +26,31 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration.Companion.Underline
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_confirm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_choose_version
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_cuda
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_directml
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_directml_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_download_cuda
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_download_cudnn
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_download_tensorrt
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_downloading
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_experimental_warning
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_install
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_install_error
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_restart_required
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_rocm
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_tensorrt
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_tensorrt_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_webgpu
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_webgpu_desc
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.CPU
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.CUDA
@@ -76,9 +97,15 @@ fun OrtInstallDialog(
             header = {
                 Column(modifier = Modifier.padding(10.dp)) {
                     if (updateProgress == null)
-                        Text("Choose ONNX Runtime version", style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            stringResource(Res.string.settings_image_onnxruntime_choose_version),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
                     else
-                        Text("Downloading ONNX Runtime", style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            stringResource(Res.string.settings_image_onnxruntime_downloading),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
                     HorizontalDivider(Modifier.padding(top = 10.dp))
                 }
             },
@@ -102,7 +129,7 @@ fun OrtInstallDialog(
                     TextButton(
                         onClick = onDismiss,
                         modifier = Modifier.cursorForHand(),
-                        content = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cancel")) }
+                        content = { Text(stringResource(Res.string.dialog_cancel)) }
                     )
 
                     FilledTonalButton(
@@ -110,7 +137,7 @@ fun OrtInstallDialog(
                         onClick = { provider?.let { onInstall(it) } },
                         modifier = Modifier.cursorForHand(),
                     ) {
-                        Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Install"))
+                        Text(stringResource(Res.string.settings_image_onnxruntime_install))
                     }
                 }
             },
@@ -136,7 +163,7 @@ private fun OrtDownloadDialogContent(
                 .fillMaxWidth()
         ) {
             Text(
-                "ONNX Runtime support is experimental.\nMight cause crashes or other app instabilities",
+                stringResource(Res.string.settings_image_onnxruntime_experimental_warning),
                 color = MaterialTheme.colorScheme.tertiaryContainer
             )
         }
@@ -151,10 +178,10 @@ private fun OrtDownloadDialogContent(
                         labelAlignment = Alignment.Top,
                         label = {
                             Column {
-                                Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Cuda (Nvidia GPUs, requires CUDA12 and cuDNN9 system install)"))
+                                Text(stringResource(Res.string.settings_image_onnxruntime_cuda))
                                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                                     Text(
-                                        "download CUDA12",
+                                        stringResource(Res.string.settings_image_onnxruntime_download_cuda),
                                         color = MaterialTheme.colorScheme.secondary,
                                         textDecoration = Underline,
                                         modifier = Modifier
@@ -163,7 +190,7 @@ private fun OrtDownloadDialogContent(
                                             .padding(horizontal = 5.dp),
                                     )
                                     Text(
-                                        "download cuDNN9",
+                                        stringResource(Res.string.settings_image_onnxruntime_download_cudnn),
                                         color = MaterialTheme.colorScheme.secondary,
                                         textDecoration = Underline,
                                         modifier = Modifier
@@ -183,14 +210,14 @@ private fun OrtDownloadDialogContent(
                     labelAlignment = Alignment.Top,
                     label = {
                         Column {
-                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("TensorRT (Nvidia GPUs, requires CUDA12, cuDNN9 and TensorRT system install)"))
+                            Text(stringResource(Res.string.settings_image_onnxruntime_tensorrt))
                             Text(
-                                "Uses TensorRT to create optimized graph engine. Takes a significant time on model first load. After initial load engine is cached for future use",
+                                stringResource(Res.string.settings_image_onnxruntime_tensorrt_desc),
                                 style = MaterialTheme.typography.labelLarge
                             )
                             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                                 Text(
-                                    "download CUDA12",
+                                    stringResource(Res.string.settings_image_onnxruntime_download_cuda),
                                     color = MaterialTheme.colorScheme.secondary,
                                     textDecoration = Underline,
                                     modifier = Modifier
@@ -199,7 +226,7 @@ private fun OrtDownloadDialogContent(
                                         .padding(horizontal = 5.dp),
                                 )
                                 Text(
-                                    "download cuDNN9",
+                                    stringResource(Res.string.settings_image_onnxruntime_download_cudnn),
                                     color = MaterialTheme.colorScheme.secondary,
                                     textDecoration = Underline,
                                     modifier = Modifier
@@ -208,7 +235,7 @@ private fun OrtDownloadDialogContent(
                                         .padding(horizontal = 5.dp),
                                 )
                                 Text(
-                                    "download TensorRT",
+                                    stringResource(Res.string.settings_image_onnxruntime_download_tensorrt),
                                     color = MaterialTheme.colorScheme.secondary,
                                     textDecoration = Underline,
                                     modifier = Modifier
@@ -225,7 +252,7 @@ private fun OrtDownloadDialogContent(
                 ROCm -> CheckboxWithLabel(
                     checked = chosenProvider == ROCm,
                     onCheckedChange = { onProviderChoice(ROCm) },
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("ROCm (AMD GPUs, requires ROCm7 system install)")) },
+                    label = { Text(stringResource(Res.string.settings_image_onnxruntime_rocm)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -235,9 +262,9 @@ private fun OrtDownloadDialogContent(
                     labelAlignment = Alignment.Top,
                     label = {
                         Column {
-                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("DirectML (any GPU)"))
+                            Text(stringResource(Res.string.settings_image_onnxruntime_directml))
                             Text(
-                                "High-performance, hardware-accelerated DirectX 12 library for machine learning",
+                                stringResource(Res.string.settings_image_onnxruntime_directml_desc),
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
@@ -248,7 +275,7 @@ private fun OrtDownloadDialogContent(
                 CPU -> CheckboxWithLabel(
                     checked = chosenProvider == CPU,
                     onCheckedChange = { onProviderChoice(CPU) },
-                    label = { Text(snd.komelia.ui.LocalStrings.current.legacy.forText("CPU")) },
+                    label = { Text("CPU") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -258,9 +285,9 @@ private fun OrtDownloadDialogContent(
                     labelAlignment = Alignment.Top,
                     label = {
                         Column {
-                            Text(snd.komelia.ui.LocalStrings.current.legacy.forText("WebGPU (Any GPU)"))
+                            Text(stringResource(Res.string.settings_image_onnxruntime_webgpu))
                             Text(
-                                " API for cross-platform efficient GPU access using system's underlying Vulkan, Metal, or Direct3D 12 technologies",
+                                stringResource(Res.string.settings_image_onnxruntime_webgpu_desc),
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
@@ -282,9 +309,9 @@ fun RestartDialog(
         content = {
             Box(Modifier.padding(30.dp)) {
                 if (error != null)
-                    Text("An error occurred during installation:\n$error")
+                    Text(stringResource(Res.string.settings_image_onnxruntime_install_error, error))
                 else
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("App restart is required for changes to take effect"))
+                    Text(stringResource(Res.string.settings_image_onnxruntime_restart_required))
             }
         },
         controlButtons = {
@@ -293,7 +320,7 @@ fun RestartDialog(
                     onClick = onConfirm,
                     modifier = Modifier.cursorForHand(),
                 ) {
-                    Text(snd.komelia.ui.LocalStrings.current.legacy.forText("Confirm"))
+                    Text(stringResource(Res.string.dialog_confirm))
                 }
             }
         },

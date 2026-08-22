@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,11 +20,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -38,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -54,6 +58,10 @@ import coil3.request.crossfade
 import coil3.size.Precision
 import coil3.size.Size
 import coil3.size.SizeResolver
+import org.jetbrains.compose.resources.stringResource
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_next_page
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_previous_page
 import snd.komelia.image.ReaderImage
 import snd.komelia.image.coil.BookPageThumbnailRequest
 import snd.komelia.ui.common.components.AppSliderDefaults
@@ -101,7 +109,11 @@ fun PageSpreadProgressSlider(
         )
     ) {
         if (show || isHovered.value) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+            ) {
                 CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
                     Slider(
                         pageSpreads = pageSpreads,
@@ -110,13 +122,6 @@ fun PageSpreadProgressSlider(
                         layoutDirection = layoutDirection
                     )
                 }
-
-                Spacer(
-                    Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                )
             }
         }
     }
@@ -158,9 +163,18 @@ private fun Slider(
         valueRange = remember(pageSpreads.size) { 0f..(pageSpreads.size - 1).toFloat() },
     )
 
-    Layout(content = {
-        if ( showPreview) {
-            Row {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (showPreview) {
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+                    .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), RoundedCornerShape(16.dp))
+                    .padding(6.dp)
+            ) {
                 for (pageMetadata in currentSpread) {
                     BookPageThumbnail(
                         page = pageMetadata,
@@ -168,60 +182,75 @@ private fun Slider(
                     )
                 }
             }
-        } else Spacer(Modifier)
+        }
 
-        Text(
-            label,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(4.dp)
+        Surface(
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            shape = RoundedCornerShape(24.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            shadowElevation = 8.dp,
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(
+                    enabled = currentPos > 0,
+                    onClick = {
+                        currentPos = (currentPos - 1).coerceAtLeast(0)
+                        onPageNumberChange(currentPos)
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.ChevronLeft,
+                        contentDescription = stringResource(Res.string.reader_previous_page),
+                    )
+                }
+
+                Text(
+                    text = label,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.defaultMinSize(minWidth = 28.dp),
                 )
-                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.surface))
-                .padding(4.dp)
-                .defaultMinSize(minWidth = 40.dp)
-        )
 
-        Slider(
-            state = sliderState,
-            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant),
-            colors = AppSliderDefaults.colors(),
-            track = { state ->
-                SliderDefaults.Track(
-                    sliderState = state,
+                Slider(
+                    state = sliderState,
+                    modifier = Modifier.weight(1f),
                     colors = AppSliderDefaults.colors(),
+                    track = { state ->
+                        SliderDefaults.Track(
+                            sliderState = state,
+                            colors = AppSliderDefaults.colors(),
+                        )
+                    }
                 )
+
+                Text(
+                    text = pageSpreads.size.toString(),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.defaultMinSize(minWidth = 28.dp),
+                )
+
+                IconButton(
+                    enabled = currentPos < pageSpreads.lastIndex,
+                    onClick = {
+                        currentPos = (currentPos + 1).coerceAtMost(pageSpreads.lastIndex)
+                        onPageNumberChange(currentPos)
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.ChevronRight,
+                        contentDescription = stringResource(Res.string.reader_next_page),
+                    )
+                }
             }
-        )
-
-    }) { measurables, constraints ->
-        val previewPlaceable = measurables[0].measure(constraints)
-        val labelPlaceable = measurables[1].measure(constraints)
-        val sliderPlaceable = measurables[2].measure(constraints)
-
-        val previewOffsetX = (constraints.maxWidth * sliderState.coercedValueAsFraction - previewPlaceable.width / 2)
-            .roundToInt()
-            .coerceIn(0, constraints.maxWidth - previewPlaceable.width)
-
-        val labelOffsetX = (constraints.maxWidth * sliderState.coercedValueAsFraction - labelPlaceable.width / 2)
-            .roundToInt()
-            .coerceIn(0, constraints.maxWidth - labelPlaceable.width)
-
-        layout(constraints.maxWidth, previewPlaceable.height + sliderPlaceable.height + labelPlaceable.height) {
-            previewPlaceable.placeRelative(
-                x = previewOffsetX,
-                y = 0
-            )
-            labelPlaceable.placeRelative(
-                x = labelOffsetX,
-                y = previewPlaceable.height
-            )
-            sliderPlaceable.placeRelative(
-                x = 0,
-                y = previewPlaceable.height + labelPlaceable.height
-            )
         }
     }
 }
@@ -284,4 +313,3 @@ private fun rememberSliderState(
     state.value = value
     return state
 }
-

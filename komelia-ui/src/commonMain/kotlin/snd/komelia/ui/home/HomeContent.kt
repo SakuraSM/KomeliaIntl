@@ -150,7 +150,11 @@ private fun Toolbar(
             modifier = Modifier
                 .widthIn(max = layout.contentMaxWidth)
                 .fillMaxWidth()
-                .padding(horizontal = layout.pageHorizontalPadding),
+                .padding(
+                    start = layout.pageHorizontalPadding,
+                    end = layout.pageHorizontalPadding,
+                    bottom = layout.itemSpacing,
+                ),
         )
     }
 }

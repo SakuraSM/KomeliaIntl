@@ -455,7 +455,7 @@ private fun DisplayContent(
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             contentPadding = PaddingValues(
-                top = layout.controlSpacing,
+                top = layout.sectionSpacing,
                 bottom = layout.gridBottomPadding + layout.sectionSpacing,
             )
         ) {

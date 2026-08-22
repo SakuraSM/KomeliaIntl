@@ -131,4 +131,11 @@
 - 真实数据说明：书库范围选择器出现后，11 个系列需要等待服务端请求完成才显示；最终证据为 `/private/tmp/komelia-tab-fix-library-loaded.png`。该阶段透明度不再变化，属于数据加载而非第二段页面动画。
 - 自动验证：`git diff --check`、`:komelia-ui:allTests`、`:androidDebug` 均通过；修复后的 APK 已覆盖安装到 `emulator-5554`。压力回归日志无重复 `Screen.key`、SaveableState、`IllegalArgumentException` 或崩溃。
 
+## 首页顶部标签与内容节奏复核
+
+- 首页顶部筛选标签与首个内容章节原仅使用 8dp 控件间距，两个不同层级在视觉上紧贴。现改用响应式章节间距：Compact 16dp、Medium 20dp、Expanded/Full 24dp。
+- 间距复用 `KomeliaLayoutSpec.sectionSpacing`，未新增固定 dp、分隔线、背景色块或额外阴影；标签栏、章节标题和网格仍处于同一连续表面。
+- Compact 实机密度证据：`/private/tmp/komelia-home-section-spacing.png`，1080 × 2400 px、420 dpi。顶部标签与“继续阅读”标题层级清晰，首屏仍完整容纳两排卡片，无水平溢出或底部导航遮挡。
+- 自动验证：`git diff --check`、`:komelia-ui:allTests`、`:androidDebug` 均通过；新 APK 已覆盖安装到 `emulator-5554` 并使用真实首页内容复核。
+
 final result: passed

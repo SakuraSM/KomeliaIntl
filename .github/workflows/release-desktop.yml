@@ -53,7 +53,7 @@ jobs:
         run: |
           docker build --tag komelia-build-linux --file cmake/linux-x86_64.Dockerfile .
           docker run --rm --user "$(id -u):$(id -g)" --volume "$GITHUB_WORKSPACE:/build" komelia-build-linux
-          ./gradlew linux-x86_64_copyJniLibs
+          ./gradlew --no-configuration-cache linux-x86_64_copyJniLibs
       - name: Build EPUB resources and DEB
         run: |
           ./gradlew buildEpubReaders
@@ -89,7 +89,7 @@ jobs:
         run: |
           docker build --tag komelia-build-windows --file cmake/windows-x86_64.Dockerfile .
           docker run --rm --user "$(id -u):$(id -g)" --volume "$GITHUB_WORKSPACE:/build" komelia-build-windows
-          ./gradlew windows-x86_64_copyJniLibs windows-x86_64_copyJniLibsComposeResources
+          ./gradlew --no-configuration-cache windows-x86_64_copyJniLibs windows-x86_64_copyJniLibsComposeResources
       - uses: actions/upload-artifact@v4
         with:
           name: windows-native-resources

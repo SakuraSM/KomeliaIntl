@@ -36,4 +36,27 @@
 
 - 无阻断问题。真实 2184 页 EPUB 首次打开约需二十秒，加载期间显示进度状态；属于内容体积相关性能观察，不影响本次 UI 验收。
 
-Final result: passed
+## EPUB 阅读控制专项复核
+
+- 源视觉真值：`/var/folders/6k/w12ht07j5p95l2qn8_63g1zm0000gn/T/codex-clipboard-b706ed70-13aa-4983-8362-92cea5e3ef3f.png`，742 × 1572 px，底部控制栏显示状态。
+- 实现证据：`/private/tmp/komelia-epub-chrome-visible-after.png` 与 `/private/tmp/komelia-epub-chrome-hidden-retoggle.png`，均为 1080 × 2400 px、420 dpi；原生 Compose/WebView 屏幕无 CSS viewport 或浏览器缩放。
+- 归一化：源图去除设备外框，裁剪为 678 × 1506 px 后缩放至 1080 × 2400 px；实现图保持原始像素。全屏同屏对比为 `/private/tmp/komelia-epub-chrome-full-comparison.png`。
+- 重点区域：底部 480 px 控件对比为 `/private/tmp/komelia-epub-chrome-controls-comparison.png`，可清楚判断控件边界、阴影、正文遮挡及独立按钮移除情况。
+- 状态：在真实 2184 页 EPUB 中完成“沉浸态 → 中央轻触显示顶部/底部 chrome → 再次中央轻触收起”的完整交互；目录、书签、设置和翻页入口保持可用。
+
+### Findings
+
+- 无 P0/P1/P2。原 P1 问题是左下角“隐藏”按钮脱离底部导航胶囊、重复表达控制栏状态并遮挡正文；修复后独立按钮已移除，阅读控制作为单一 chrome 同步显示和隐藏。
+- 字体与文案：删除孤立“隐藏”文案后，底部只保留章节、进度和导航信息，字号与字重未发生回归。
+- 间距与布局：底部导航胶囊保持居中，左右留白对称；沉浸态不再有左下角悬浮层，正文可使用完整宽度和底部区域。
+- 色彩与令牌：保留既有 `slate-950/90` 半透明阅读控制表面、白色前景和焦点环，未引入新的强调色。
+- 图像质量：EPUB 原始封面与正文图片未做重采样或替换；本轮没有新增图像资产或自绘图标。
+- 图标与无障碍：沿用 Font Awesome 同族图标；现有控制保持语义标签、焦点环和 40px 视觉按钮，移动端整体胶囊提供足够触控空间。
+
+### Comparison history
+
+1. 修复前：底部控制栏显示时，左下角额外出现“隐藏”胶囊，形成两个视觉中心并覆盖正文。
+2. 修复：移除 `ReaderChrome` 的独立 `onToggleFooter` 按钮；将阅读区中央点击改为统一切换顶部与底部 chrome。翻页、切章和自动滚动后仍调用 `hideReaderChrome()`。
+3. 修复后：全屏及底部重点区域复核均无独立按钮；连续两次中央点击分别显示和收起整套控件，没有裁切、溢出、残影或无法恢复的问题。
+
+final result: passed

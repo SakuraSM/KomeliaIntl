@@ -37,7 +37,6 @@
     onPreviousChapter: () => void;
     onNextChapter: () => void;
     onCopyProgress: (event: MouseEvent) => void;
-    onToggleFooter: () => void;
     onToggleAutoScroll: () => void;
     onAutoScrollMultiplierChange: (offset: number) => void;
   }
@@ -65,7 +64,6 @@
     onPreviousChapter,
     onNextChapter,
     onCopyProgress,
-    onToggleFooter,
     onToggleAutoScroll,
     onAutoScrollMultiplierChange
   }: Props = $props();
@@ -205,17 +203,5 @@
         {/if}
       </div>
     </div>
-  {/if}
-
-  {#if showFooter}
-    <button
-        type="button"
-        class="pointer-events-auto fixed bottom-2 left-2 h-9 rounded-full bg-slate-950/88 px-3 text-xs font-medium text-white shadow-lg shadow-black/25 backdrop-blur-md transition hover:bg-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95"
-        aria-label="隐藏底部阅读控制"
-        aria-expanded={showFooter}
-        onclick={onToggleFooter}
-    >
-      隐藏
-    </button>
   {/if}
 </div>

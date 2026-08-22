@@ -103,4 +103,21 @@
 - 共享下拉覆盖：首页书籍/系列条件、阅读状态、排序方向、媒体状态之外，继续覆盖 Komf 媒体类型、匹配模式、作者角色、阅读方向、数据源、外部链接类型，以及色彩校正通道；用户或服务器自定义名称保持原样。
 - 自动验证：EPUB `npm run check` 为 0 错误、0 警告，`npm run build` 通过；`:komelia-ui:allTests`、`:komelia-ui:compileAndroidMain`、`buildEpubReaders`、`:androidDebug`、`:desktopJar`、`:komfWebUI` 均通过。新增枚举映射测试覆盖截图中的原始值、扩展设置枚举、常见状态值和未知值回退。
 
+## 自适应导航与动效专项复核
+
+- 问题输入：`/Users/zhengningning/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_raat75q9njlc22_6b7a/temp/RWTemp/2026-08/b6eb15e960a92630050caddb6a9b3e2b/c08291242f15f801c83c1f22cf7b4cc0.mp4`。原全局抽屉只覆盖内容区，底部导航可穿透点击，导致抽屉后页面切换且书库无正确选中态。
+- 修复后回归视频：`/private/tmp/komelia-adaptive-navigation-passed-capture.mp4`，12.67 秒、38 帧；由模拟器连续原始截图编码，规避 Android Emulator `screenrecord` 对 Compose 硬件层只记录关键帧的问题，未插入设计稿或静态替代页面。
+- Compact 证据：首页 `/private/tmp/komelia-adaptive-main-restarted-loaded.png`；搜索 `/private/tmp/komelia-live-selection-search.png`；书库直达 `/private/tmp/komelia-live-selection-library.png`；书库范围底部面板 `/private/tmp/komelia-adaptive-final-scope-sheet.png`。
+- Medium 证据：约 720dp 宽度 `/private/tmp/komelia-adaptive-final-rail-720dp.png`，一级导航切换为左侧 Navigation Rail；模拟器随后恢复 1080 × 2400 px、420 dpi。
+- 快速切换压力回归：以 250ms 间隔连续切换首页、搜索和书库，最终截图 `/private/tmp/komelia-adaptive-rapid-switch-final.png` 中书库内容与书库选中态一致，`MainActivity` 保持前台，日志无重复 SaveableState key 或崩溃。
+
+### Findings 与修复闭环
+
+1. 移除全局抽屉、`DrawerState`、汉堡按钮与 `toggleNavBar()`；书库按钮直接进入全部书库，一级导航在 Compact 使用底部栏，其余断点使用约 80dp Rail。
+2. 书库范围选择降级为页面内部控件：手机使用阻断下层点击的底部面板，桌面/Wasm 使用锚定弹层，Full 使用 232dp supporting pane。返回或 Esc 只关闭顶层面板。
+3. 一级目的地使用单层 200ms fade-through；详情使用单层 8dp/200ms 淡入位移。单层过渡避免 Compose 在快速往返时同时组合两个相同 `Screen.key`，reduced-motion 下直接切换。
+4. 首轮压力录屏发现并修复 `HomeScreen:screen was used multiple times` 竞态；同时将导航点击改为读取 Voyager 当前目的地，而非使用可能过期的组合闭包，消除“选中书库但仍显示首页”的瞬时错配。
+5. 顶部工具栏、窗口标题栏、内容区和导航使用连续 `surface`；首页分组标题不再用整行分隔线。卡片、弹窗和必要数据行仍保留语义边界。
+6. 自动验证：`git diff --check`、`:komelia-ui:allTests`、EPUB `npm run check && npm run build`、`buildEpubReaders :androidDebug :desktopJar :komfWebUI` 全部通过。APK 已单独执行 `:androidDebug`，确认包含简中 Compose Resources 后安装到 `emulator-5554`，并使用真实 Komga 内容完成上述路径复验。
+
 final result: passed

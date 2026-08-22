@@ -34,7 +34,9 @@ import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.settings.navigation.SettingsNavigationMenu
 
-class MobileSettingsScreen : Screen {
+class MobileSettingsScreen(
+    val topLevel: Boolean = false,
+) : Screen {
     @Composable
     override fun Content() {
         val currentNavigator = LocalNavigator.currentOrThrow
@@ -55,8 +57,10 @@ class MobileSettingsScreen : Screen {
                     horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { currentNavigator.pop() }) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                    if (!topLevel) {
+                        IconButton(onClick = { currentNavigator.pop() }) {
+                            Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                        }
                     }
                     Text(
                         stringResource(Res.string.settings_mobile_title),
@@ -80,6 +84,6 @@ class MobileSettingsScreen : Screen {
                 Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
             }
         }
-        BackPressHandler { currentNavigator.pop() }
+        if (!topLevel) BackPressHandler { currentNavigator.pop() }
     }
 }

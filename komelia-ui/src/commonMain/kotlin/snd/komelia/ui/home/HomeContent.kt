@@ -29,7 +29,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -498,8 +497,6 @@ private fun LazyGridScope.BookFilterEntry(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(label, style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.width(10.dp))
-            HorizontalDivider()
         }
     }
     items(books) { book ->
@@ -526,8 +523,6 @@ private fun LazyGridScope.SeriesFilterEntries(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(label, style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.width(10.dp))
-            HorizontalDivider()
         }
     }
 

@@ -1,7 +1,5 @@
 package snd.komelia.ui
 
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
@@ -12,13 +10,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import snd.komelia.AppNotifications
-import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.offline.settings.OfflineSettingsRepository
-import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.ui.book.BookScreen
 import snd.komelia.ui.collection.CollectionScreen
-import snd.komelia.ui.common.menus.LibraryMenuActions
 import snd.komelia.ui.home.HomeScreen
 import snd.komelia.ui.library.LibraryScreen
 import snd.komelia.ui.login.LoginScreen
@@ -27,7 +21,6 @@ import snd.komelia.ui.readlist.ReadListScreen
 import snd.komelia.ui.series.SeriesScreen
 import snd.komelia.ui.topbar.NotificationsState
 import snd.komelia.ui.topbar.SearchBarState
-import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.sse.KomgaEvent
 import snd.komga.client.sse.KomgaEvent.BookDeleted
 import snd.komga.client.sse.KomgaEvent.CollectionDeleted
@@ -37,15 +30,11 @@ import snd.komga.client.sse.KomgaEvent.SeriesDeleted
 import snd.komga.client.sse.KomgaEvent.TaskQueueStatus
 
 class MainScreenViewModel(
-    private val libraryApi: KomgaLibraryApi,
-    private val appNotifications: AppNotifications,
     private val komgaEvents: SharedFlow<KomgaEvent>,
     private val screenReloadFlow: MutableSharedFlow<Unit>,
     private val offlineSettingsRepository: OfflineSettingsRepository?,
-    private val taskEmitter: OfflineTaskEmitter?,
     val searchBarState: SearchBarState,
     val notificationsState: NotificationsState,
-    val libraries: StateFlow<List<KomgaLibrary>>,
 ) : ScreenModel {
 
     val isOffline = offlineSettingsRepository?.getOfflineMode()
@@ -64,17 +53,6 @@ class MainScreenViewModel(
     }
 
     val komgaTaskQueueStatus = MutableStateFlow<TaskQueueStatus?>(null)
-
-    val navBarState = DrawerState(DrawerValue.Closed)
-
-    suspend fun toggleNavBar() {
-        if (navBarState.currentValue == DrawerValue.Closed) navBarState.open()
-        else navBarState.close()
-    }
-
-    fun getLibraryActions(): LibraryMenuActions {
-        return LibraryMenuActions(libraryApi, appNotifications, taskEmitter, screenModelScope)
-    }
 
     fun onScreenReload() {
         screenReloadFlow.tryEmit(Unit)
@@ -122,7 +100,7 @@ class MainScreenViewModel(
     private fun onLibraryDeleted(event: LibraryDeleted) {
         val lastScreen = navigator.lastItem
         if (lastScreen is LibraryScreen && lastScreen.libraryId == event.libraryId)
-            navigator.replaceAll(HomeScreen())
+            navigator.replaceAll(LibraryScreen())
     }
 
     private fun onCollectionDeleted(event: CollectionDeleted) {

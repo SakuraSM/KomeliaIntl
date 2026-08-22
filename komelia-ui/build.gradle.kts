@@ -89,6 +89,7 @@ kotlin {
             }
             api(libs.voyager.screenmodel)
             api(libs.voyager.navigator)
+            api(libs.voyager.tab.navigator)
             api(libs.voyager.transition)
 
         }

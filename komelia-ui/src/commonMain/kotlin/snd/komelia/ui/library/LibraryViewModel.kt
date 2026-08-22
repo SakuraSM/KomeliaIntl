@@ -154,6 +154,10 @@ class LibraryViewModel(
         currentTab = READ_LISTS
     }
 
+    fun selectTab(tab: LibraryTab) {
+        currentTab = tab
+    }
+
     fun libraryActions() = LibraryMenuActions(libraryApi, appNotifications, taskEmitter, screenModelScope)
 
     fun stopKomgaEventHandler() {
@@ -182,4 +186,3 @@ enum class LibraryTab {
     COLLECTIONS,
     READ_LISTS
 }
-

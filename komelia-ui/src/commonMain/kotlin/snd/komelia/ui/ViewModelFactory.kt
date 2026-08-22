@@ -163,8 +163,6 @@ class ViewModelFactory(
 
     fun getNavigationViewModel(): MainScreenViewModel {
         return MainScreenViewModel(
-            libraryApi = komgaApi.libraryApi,
-            appNotifications = dependencies.appNotifications,
             komgaEvents = dependencies.komgaEvents.events,
             screenReloadFlow = screenReloadEvents,
             searchBarState = SearchBarState(
@@ -177,9 +175,7 @@ class ViewModelFactory(
                 komgaEvents = dependencies.komgaEvents.events,
                 bookDownloadEvents = dependencies.offlineDependencies?.bookDownloadEvents
             ),
-            libraries = dependencies.komgaSharedState.libraries,
             offlineSettingsRepository = dependencies.offlineDependencies?.repositories?.offlineSettingsRepository,
-            taskEmitter = dependencies.offlineDependencies?.taskEmitter,
         )
     }
 

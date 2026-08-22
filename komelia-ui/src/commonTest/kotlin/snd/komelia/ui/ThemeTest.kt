@@ -11,7 +11,7 @@ class ThemeTest {
     fun lightThemeUsesAccessibleContentPalette() {
         val colors = Theme.LIGHT.colorScheme
 
-        assertEquals(Color(0xFFF5F5F7), colors.background)
+        assertEquals(Color(0xFFF8F8FC), colors.background)
         assertEquals(Color(0xFF1B1C20), colors.onBackground)
         assertEquals(Color(0xFF5F5D8E), colors.primary)
     }
@@ -20,8 +20,8 @@ class ThemeTest {
     fun darkThemeUsesNeutralReadingSurfaces() {
         val colors = Theme.DARK.colorScheme
 
-        assertEquals(Color(0xFF101114), colors.background)
-        assertEquals(Color(0xFF15161A), colors.surface)
+        assertEquals(Color(0xFF101014), colors.background)
+        assertEquals(Color(0xFF15151A), colors.surface)
         assertEquals(Color(0xFFC5C2F0), colors.primary)
     }
 

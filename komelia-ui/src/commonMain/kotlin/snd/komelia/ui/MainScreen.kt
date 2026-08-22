@@ -222,9 +222,9 @@ class MainScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .fillMaxWidth(),
                 shape = MaterialTheme.shapes.extraLarge,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                tonalElevation = 3.dp,
-                shadowElevation = 6.dp,
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                tonalElevation = 0.dp,
+                shadowElevation = 2.dp,
             ) {
                 Row(
                     modifier = modifier.fillMaxWidth(),

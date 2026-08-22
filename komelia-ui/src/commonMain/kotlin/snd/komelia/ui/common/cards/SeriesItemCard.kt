@@ -1,6 +1,7 @@
 package snd.komelia.ui.common.cards
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,11 +17,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -43,7 +43,6 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_unavaila
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalLibraries
 import snd.komelia.ui.LocalWindowWidth
-import snd.komelia.ui.common.components.NoPaddingChip
 import snd.komelia.ui.common.images.SeriesThumbnail
 import snd.komelia.ui.common.menus.SeriesActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
@@ -70,33 +69,34 @@ fun SeriesImageCard(
         onClick = onSeriesClick,
         onLongClick = onSeriesSelect,
         image = {
-            SeriesCardHoverOverlay(
-                series = series,
-                onSeriesSelect = onSeriesSelect,
-                isSelected = isSelected,
-                seriesActions = seriesMenuActions,
-            ) {
-                SeriesImageOverlay(
+            Box {
+                SeriesCardHoverOverlay(
                     series = series,
-                    libraryIsDeleted = libraryIsDeleted,
-                    showTitle = false,
+                    onSeriesSelect = onSeriesSelect,
+                    isSelected = isSelected,
+                    seriesActions = seriesMenuActions,
                 ) {
-                    SeriesThumbnail(
-                        series.id,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                    SeriesImageOverlay(
+                        series = series,
+                        libraryIsDeleted = libraryIsDeleted,
+                        showTitle = false,
+                    ) {
+                        SeriesThumbnail(
+                            series.id,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+                if (series.deleted || libraryIsDeleted) {
+                    CardStatusBadge(stringResource(Res.string.series_unavailable))
                 }
             }
         },
         content = {
             CoverCardCaption(
                 title = series.metadata.title,
-                statusText = if (series.deleted || libraryIsDeleted) {
-                    stringResource(Res.string.series_unavailable)
-                } else {
-                    null
-                },
+                variant = CoverCaptionVariant.TitleOnly,
             )
         },
     )
@@ -257,7 +257,11 @@ fun SeriesDetailedListCard(
     Card(
         modifier
             .cursorForHand()
-            .clickable { onClick() }) {
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
         Row(
             Modifier
                 .fillMaxWidth()
@@ -285,20 +289,11 @@ private fun SeriesDetails(series: KomgaSeries) {
         Row {
             Text(series.metadata.title, fontWeight = FontWeight.Bold)
         }
-        LazyRow(
-            modifier = Modifier.padding(vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(series.metadata.genres) {
-                NoPaddingChip(
-                    borderColor = MaterialTheme.colorScheme.surface,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Text(it, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                }
-
-            }
-        }
+        MetadataTagFlow(
+            values = series.metadata.genres,
+            width = LocalWindowWidth.current,
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
         Text(series.metadata.summary, maxLines = 4, style = MaterialTheme.typography.bodyMedium)
 
     }

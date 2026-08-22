@@ -1,5 +1,6 @@
 package snd.komelia.ui.search
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,13 +9,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -62,8 +65,9 @@ fun SearchContent(
     Box(
         contentAlignment = Alignment.TopCenter
     ) {
-        val widthModifier = when (LocalWindowWidth.current) {
-            WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM -> Modifier.fillMaxWidth()
+        val windowWidth = LocalWindowWidth.current
+        val widthModifier = when (windowWidth) {
+            WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM -> Modifier.fillMaxWidth().padding(horizontal = 12.dp)
             WindowSizeClass.EXPANDED -> Modifier.fillMaxWidth(.8f)
             WindowSizeClass.FULL -> Modifier.width(1200.dp)
         }
@@ -84,6 +88,7 @@ fun SearchContent(
                 state = scrollState,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(bottom = 24.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 when (searchType) {
@@ -153,38 +158,53 @@ fun SearchToolBar(
     modifier: Modifier
 ) {
     if (!hasSeries && !hasBooks) return
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+    Surface(
+        modifier = modifier.padding(vertical = 10.dp),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Spacer(Modifier.width(20.dp))
-
-
-        val chipColors = FilterChipDefaults.filterChipColors(
-
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            selectedContainerColor = MaterialTheme.colorScheme.primary,
-            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-        )
-        if (hasSeries) {
-            FilterChip(
-                onClick = { onSearchTypeChange(SearchResultsTab.SERIES) },
-                selected = searchType == SearchResultsTab.SERIES,
-                label = { Text(stringResource(Res.string.search_series_tab)) },
-                colors = chipColors,
-                border = null,
-            )
-        }
-        if (hasBooks) {
-            FilterChip(
-                onClick = { onSearchTypeChange(SearchResultsTab.BOOKS) },
-                selected = searchType == SearchResultsTab.BOOKS,
-                label = { Text(stringResource(Res.string.search_books_tab)) },
-                colors = chipColors,
-                border = null,
-            )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(4.dp),
+        ) {
+            if (hasSeries) {
+                SearchTypeSegment(
+                    text = stringResource(Res.string.search_series_tab),
+                    selected = searchType == SearchResultsTab.SERIES,
+                    onClick = { onSearchTypeChange(SearchResultsTab.SERIES) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            if (hasBooks) {
+                SearchTypeSegment(
+                    text = stringResource(Res.string.search_books_tab),
+                    selected = searchType == SearchResultsTab.BOOKS,
+                    onClick = { onSearchTypeChange(SearchResultsTab.BOOKS) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }
 
+@Composable
+private fun SearchTypeSegment(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 40.dp),
+        shape = MaterialTheme.shapes.medium,
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
+        contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(text, style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}

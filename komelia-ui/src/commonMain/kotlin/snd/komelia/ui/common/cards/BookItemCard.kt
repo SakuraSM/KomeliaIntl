@@ -1,6 +1,7 @@
 package snd.komelia.ui.common.cards
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -20,14 +21,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,7 +62,6 @@ import snd.komelia.ui.LocalBookDownloadEvents
 import snd.komelia.ui.LocalLibraries
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.BookReadButton
-import snd.komelia.ui.common.components.NoPaddingChip
 import snd.komelia.ui.common.images.BookThumbnail
 import snd.komelia.ui.common.menus.BookActionsMenu
 import snd.komelia.ui.common.menus.BookMenuActions
@@ -91,36 +90,41 @@ fun BookImageCard(
         onClick = onBookClick,
         onLongClick = onSelect,
         image = {
-            BookHoverOverlay(
-                book = book,
-                libraryIsDeleted = libraryIsDeleted,
-                bookMenuActions = bookMenuActions,
-                onBookReadClick = onBookReadClick,
-                onSelect = onSelect,
-                isSelected = isSelected,
-            ) {
-                BookImageOverlay(
+            Box {
+                BookHoverOverlay(
                     book = book,
                     libraryIsDeleted = libraryIsDeleted,
-                    showTitle = false,
+                    bookMenuActions = bookMenuActions,
+                    onBookReadClick = onBookReadClick,
+                    onSelect = onSelect,
+                    isSelected = isSelected,
                 ) {
-                    BookThumbnail(
-                        book.id,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                    BookImageOverlay(
+                        book = book,
+                        libraryIsDeleted = libraryIsDeleted,
+                        showTitle = false,
+                    ) {
+                        BookThumbnail(
+                            book.id,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+                if (book.deleted || libraryIsDeleted) {
+                    CardStatusBadge(stringResource(Res.string.book_unavailable))
                 }
             }
         },
         content = {
             CoverCardCaption(
                 title = book.metadata.title,
-                supportingText = if (showSeriesTitle && !book.oneshot) book.seriesTitle else null,
-                statusText = if (book.deleted || libraryIsDeleted) {
-                    stringResource(Res.string.book_unavailable)
+                variant = if (showSeriesTitle) {
+                    CoverCaptionVariant.TitleWithSupporting
                 } else {
-                    null
+                    CoverCaptionVariant.TitleOnly
                 },
+                supportingText = if (showSeriesTitle && !book.oneshot) book.seriesTitle else null,
             )
         },
     )
@@ -370,7 +374,10 @@ fun BookDetailedListCard(
             .cursorForHand()
             .combinedClickable(onClick = onClick ?: {}, onLongClick = onSelect)
             .hoverable(interactionSource)
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
             modifier = Modifier
@@ -433,30 +440,17 @@ private fun BookDetailedListDetails(
             )
         }
 
-        LazyRow(
-            modifier = Modifier.padding(vertical = 5.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            item {
-                Text(
-                    stringResource(Res.string.book_pages, book.media.pagesCount),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            items(book.metadata.tags) {
-                NoPaddingChip(
-                    borderColor = MaterialTheme.colorScheme.surface,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
+        Text(
+            stringResource(Res.string.book_pages, book.media.pagesCount),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 5.dp),
+        )
+        MetadataTagFlow(
+            values = book.metadata.tags,
+            width = width,
+            modifier = Modifier.padding(vertical = 6.dp),
+        )
 
         Text(
             book.metadata.summary,

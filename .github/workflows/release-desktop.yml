@@ -7,6 +7,15 @@ on:
         description: Existing draft release tag, for example v0.18.12
         required: true
         type: string
+      platform:
+        description: Desktop platform to build
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - linux
+          - windows
 
 permissions:
   contents: write
@@ -31,6 +40,7 @@ jobs:
 
   linux:
     needs: validate
+    if: ${{ inputs.platform == 'all' || inputs.platform == 'linux' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
@@ -52,7 +62,10 @@ jobs:
       - name: Build Linux native dependencies
         run: |
           docker build --tag komelia-build-linux --file cmake/linux-x86_64.Dockerfile .
-          docker run --rm --user "$(id -u):$(id -g)" --volume "$GITHUB_WORKSPACE:/build" komelia-build-linux
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --env HOME=/tmp/komelia-build-home \
+            --env npm_config_cache=/tmp/komelia-npm-cache \
+            --volume "$GITHUB_WORKSPACE:/build" komelia-build-linux
           ./gradlew --no-configuration-cache linux-x86_64_copyJniLibs
       - name: Build EPUB resources and DEB
         run: |
@@ -74,6 +87,7 @@ jobs:
 
   windows-native:
     needs: validate
+    if: ${{ inputs.platform == 'all' || inputs.platform == 'windows' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
@@ -142,16 +156,29 @@ jobs:
           path: release-artifacts/*
           if-no-files-found: error
 
-  upload:
-    needs: [linux, windows]
+  upload-linux:
+    needs: linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: '*-installer'
-          merge-multiple: true
+          name: linux-installer
           path: release-artifacts
-      - name: Upload desktop installers to draft release
+      - name: Upload Linux installer to draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
+
+  upload-windows:
+    needs: windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: release-artifacts
+      - name: Upload Windows installer to draft release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
@@ -23,23 +22,21 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryNotEditable
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -61,6 +58,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_del
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_delete_confirm
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_edit
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_edit_done
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_groups
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_label
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_reset_to_default
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_reset_to_default_confirm
@@ -91,13 +89,14 @@ import snd.komelia.ui.platform.cursorForMove
 fun FilterEditContent(
     filters: List<FilterEditState>,
     onFilterMove: (Int, Int) -> Unit,
+    onExit: () -> Unit,
     onEditEnd: () -> Unit,
     onFilterAdd: (FilterEditViewModel.FilterType) -> Unit,
     onFilterRemove: (FilterEditState) -> Unit,
     onFiltersReset: () -> Unit,
 ) {
     Column {
-        Toolbar(onEditEnd, onFiltersReset)
+        Toolbar(onExit, onEditEnd, onFiltersReset)
         EditContent(
             filters = filters,
             onFilterAdd = onFilterAdd,
@@ -109,43 +108,34 @@ fun FilterEditContent(
 
 @Composable
 private fun Toolbar(
+    onExit: () -> Unit,
     onEditEnd: () -> Unit,
     onReset: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.animateContentSize(),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Spacer(Modifier.width(20.dp))
-        FilterChip(
-            onClick = {},
-            selected = true,
-            label = {
-                Icon(Icons.Default.Tune, null)
-            },
-            colors = FilterChipDefaults.filterChipColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            border = null,
+        IconButton(onClick = onExit) {
+            Icon(Icons.AutoMirrored.Rounded.ArrowBack, null)
+        }
+        Text(
+            stringResource(Res.string.home_filter_groups),
+            style = MaterialTheme.typography.titleLarge,
+            maxLines = 1,
+            modifier = Modifier.weight(1f),
         )
 
-        ElevatedButton(
+        FilledTonalButton(
             onClick = { onEditEnd() },
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
             Text(stringResource(Res.string.home_filter_edit_done))
-            Icon(Icons.Default.Check, null)
         }
 
         var showResetDialog by remember { mutableStateOf(false) }
-        ElevatedButton(
-            onClick = { showResetDialog = true },
-            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-        ) {
-            Text(stringResource(Res.string.home_filter_reset_to_default))
+        IconButton(onClick = { showResetDialog = true }) {
             Icon(Icons.Default.Restore, null)
         }
         if (showResetDialog) {

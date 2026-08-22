@@ -4,6 +4,10 @@
     <string name="screen_error">错误：%1$s</string>
 
     <string name="home_filter_all">全部</string>
+    <string name="home_filter_more">更多</string>
+    <string name="home_filter_groups">首页分组</string>
+    <string name="home_filter_search_groups">搜索分组</string>
+    <string name="home_filter_group_items">%1$d 项</string>
     <string name="home_filter_default_keep_reading">继续阅读</string>
     <string name="home_filter_default_on_deck">待读</string>
     <string name="home_filter_default_recently_realeased_books">最近发布的书籍</string>
@@ -533,6 +537,7 @@
     <string name="settings_mobile_title">设置</string>
     <string name="settings_navigation_app_settings">应用设置</string>
     <string name="settings_navigation_appearance">外观</string>
+    <string name="settings_navigation_home_groups">首页分组</string>
     <string name="settings_navigation_image_reader">图像阅读器</string>
     <string name="settings_navigation_epub_reader">EPUB 阅读器</string>
     <string name="settings_navigation_updates">应用更新</string>

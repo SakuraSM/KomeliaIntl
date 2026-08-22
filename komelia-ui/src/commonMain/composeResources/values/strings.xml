@@ -21,7 +21,12 @@
     <string name="home_filter_delete_confirm">Delete %1$s?</string>
     <string name="home_filter_reset_to_default">Reset to default</string>
     <string name="home_filter_reset_to_default_confirm">Reset homescreen filters to default?</string>
-    <string name="home_filter_add_filter">Add filter</string>
+    <string name="home_filter_add_filter">Add home group</string>
+    <string name="home_filter_groups_description">Drag to reorder. Expand a group to edit what it shows.</string>
+    <string name="home_filter_group_summary">%1$s · %2$s</string>
+    <string name="home_filter_expand">Expand group</string>
+    <string name="home_filter_collapse">Collapse group</string>
+    <string name="home_filter_drag">Drag to reorder group</string>
     <string name="home_filter_add_condition">Add condition</string>
     <string name="home_filter_label">Label</string>
     <string name="home_filter_condition">Condition</string>
@@ -656,6 +661,12 @@
     <string name="settings_navigation_epub_reader">Epub Reader</string>
     <string name="settings_navigation_updates">Updates</string>
     <string name="settings_navigation_offline_mode">Offline Mode</string>
+    <string name="settings_navigation_about">About</string>
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_description">Komelia Intl is based on Snd-R/Komelia and adds Simplified Chinese localization and cross-platform experience improvements.</string>
+    <string name="settings_about_source_code">Source code</string>
+    <string name="settings_about_project_repository">Project repository</string>
+    <string name="settings_about_upstream_repository">Original repository</string>
     <string name="settings_navigation_user_settings">User Settings</string>
     <string name="settings_navigation_my_account">My Account</string>
     <string name="settings_navigation_my_auth_activity">My Authentication Activity</string>

@@ -3,11 +3,9 @@ package snd.komelia.ui.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -31,7 +29,6 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.platform.BackPressHandler
-import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.settings.navigation.SettingsNavigationMenu
 
 class MobileSettingsScreen(
@@ -46,14 +43,19 @@ class MobileSettingsScreen(
         LaunchedEffect(Unit) { vm.initialize() }
 
         Surface(
+            modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = layout.pageHorizontalPadding),
                 verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             ) {
-                PlatformTitleBar()
                 Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = layout.pageVerticalPadding),
                     horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -78,10 +80,8 @@ class MobileSettingsScreen(
                     onLogout = vm::logout,
                     user = vm.user.collectAsState().value,
                     contentColor = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.weight(1f, false)
+                    modifier = Modifier.weight(1f)
                 )
-
-                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
             }
         }
         if (!topLevel) BackPressHandler { currentNavigator.pop() }

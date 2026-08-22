@@ -21,7 +21,12 @@
     <string name="home_filter_delete_confirm">删除“%1$s”？</string>
     <string name="home_filter_reset_to_default">重置为默认</string>
     <string name="home_filter_reset_to_default_confirm">将首页筛选重置为默认值？</string>
-    <string name="home_filter_add_filter">添加筛选</string>
+    <string name="home_filter_add_filter">添加首页分组</string>
+    <string name="home_filter_groups_description">拖动调整顺序，展开分组后编辑展示内容。</string>
+    <string name="home_filter_group_summary">%1$s · %2$s</string>
+    <string name="home_filter_expand">展开分组</string>
+    <string name="home_filter_collapse">收起分组</string>
+    <string name="home_filter_drag">拖动调整分组顺序</string>
     <string name="home_filter_add_condition">添加条件</string>
     <string name="home_filter_label">标签</string>
     <string name="home_filter_condition">条件</string>
@@ -656,6 +661,12 @@
     <string name="settings_navigation_epub_reader">EPUB 阅读器</string>
     <string name="settings_navigation_updates">应用更新</string>
     <string name="settings_navigation_offline_mode">离线模式</string>
+    <string name="settings_navigation_about">关于</string>
+    <string name="settings_about_version">版本 %1$s</string>
+    <string name="settings_about_description">Komelia Intl 基于 Snd-R/Komelia 修改，增加简体中文本地化与多平台体验优化。</string>
+    <string name="settings_about_source_code">源代码</string>
+    <string name="settings_about_project_repository">项目仓库</string>
+    <string name="settings_about_upstream_repository">原始仓库</string>
     <string name="settings_navigation_user_settings">用户设置</string>
     <string name="settings_navigation_my_account">我的账户</string>
     <string name="settings_navigation_my_auth_activity">我的登录活动</string>

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Lan
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Palette
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_announcements
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_about
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_app_settings
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_appearance
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_home_groups
@@ -79,6 +81,7 @@ import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.settings.account.AccountSettingsScreen
+import snd.komelia.ui.settings.about.AboutSettingsScreen
 import snd.komelia.ui.settings.analysis.MediaAnalysisScreen
 import snd.komelia.ui.settings.announcements.AnnouncementsScreen
 import snd.komelia.ui.settings.appearance.AppSettingsScreen
@@ -181,6 +184,14 @@ fun SettingsNavigationMenu(
                 )
             )
         }
+        add(
+            NavigationEntry(
+                stringResource(Res.string.settings_navigation_about),
+                Icons.Rounded.Info,
+                AboutSettingsScreen(),
+                currentScreen is AboutSettingsScreen,
+            )
+        )
     }
 
     Column(

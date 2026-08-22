@@ -65,6 +65,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.common.components.OutlinedHttpTextField
 import snd.komelia.ui.common.components.withTextFieldNavigation
@@ -93,6 +94,7 @@ fun LoginContent(
     goOfflineAsCurrentUser: () -> Unit,
 ) {
 
+    val layout = LocalKomeliaLayout.current
     var showAutoLoginError by remember { mutableStateOf(true) }
     val serverUrlErrorMessage = when (serverUrlError) {
         LoginServerUrlError.INVALID_URL -> stringResource(Res.string.login_invalid_url)
@@ -101,7 +103,7 @@ fun LoginContent(
     }
     if (autoLoginError != null && showAutoLoginError) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -112,7 +114,7 @@ fun LoginContent(
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             ) {
                 Button(onClick = {
                     showAutoLoginError = false
@@ -134,7 +136,7 @@ fun LoginContent(
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             ) {
                 Column(
-                    modifier = Modifier.padding(horizontal = KomeliaSpacing.extraLarge, vertical = 28.dp),
+                    modifier = Modifier.padding(layout.cardContentPadding),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.large),
                 ) {
@@ -180,7 +182,7 @@ fun LoginContent(
 
             PlatformType.WEB_KOMF -> Column(
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(layout.itemSpacing)
             ) {
                 val uriHandler = LocalUriHandler.current
                 Column {

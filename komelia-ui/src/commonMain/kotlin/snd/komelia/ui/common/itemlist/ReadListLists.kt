@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -42,14 +43,17 @@ fun ReadListLazyCardGrid(
     val layout = LocalKomeliaLayout.current
     val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     val coroutineScope = rememberCoroutineScope()
-    Box {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyVerticalGrid(
             columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(minSize),
             state = scrollState,
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
-            modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding)
+            modifier = Modifier
+                .widthIn(max = layout.contentMaxWidth)
+                .fillMaxSize()
+                .padding(horizontal = layout.pageHorizontalPadding)
         ) {
             item(
                 span = { GridItemSpan(maxLineSpan) },

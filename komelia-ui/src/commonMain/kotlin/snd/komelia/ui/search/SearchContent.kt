@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -31,6 +32,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_series_t
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.BookDetailedListCard
 import snd.komelia.ui.common.cards.SeriesDetailedListCard
 import snd.komelia.ui.common.components.Pagination
@@ -62,19 +64,17 @@ fun SearchContent(
         return
     }
 
-    Box(
-        contentAlignment = Alignment.TopCenter
-    ) {
-        val windowWidth = LocalWindowWidth.current
-        val widthModifier = when (windowWidth) {
-            WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM -> Modifier.fillMaxWidth().padding(horizontal = 12.dp)
-            WindowSizeClass.EXPANDED -> Modifier.fillMaxWidth(.8f)
-            WindowSizeClass.FULL -> Modifier.width(1200.dp)
-        }
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        val layout = LocalKomeliaLayout.current
+        val widthModifier = Modifier
+            .widthIn(max = layout.contentMaxWidth)
+            .fillMaxWidth()
+            .padding(horizontal = layout.pageHorizontalPadding)
         val scrollState = rememberLazyListState()
 
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             SearchToolBar(
                 searchType = searchType,
@@ -86,9 +86,9 @@ fun SearchContent(
 
             LazyColumn(
                 state = scrollState,
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(bottom = 24.dp),
+                contentPadding = PaddingValues(bottom = layout.pageVerticalPadding),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 when (searchType) {
@@ -136,16 +136,20 @@ fun SearchContent(
 
 @Composable
 private fun EmptySearchResults() {
-    Column(
+    Box(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        contentAlignment = Alignment.Center,
     ) {
-        Spacer(Modifier.height(100.dp))
-        Text(
-            stringResource(Res.string.search_no_results_title),
-            style = MaterialTheme.typography.titleLarge
-        )
-        Text(stringResource(Res.string.search_no_results_body))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(LocalKomeliaLayout.current.controlSpacing),
+        ) {
+            Text(
+                stringResource(Res.string.search_no_results_title),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(stringResource(Res.string.search_no_results_body))
+        }
     }
 }
 
@@ -158,16 +162,17 @@ fun SearchToolBar(
     modifier: Modifier
 ) {
     if (!hasSeries && !hasBooks) return
+    val layout = LocalKomeliaLayout.current
     Surface(
-        modifier = modifier.padding(vertical = 10.dp),
+        modifier = modifier.padding(vertical = layout.controlSpacing),
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier.padding(layout.controlSpacing / 2),
         ) {
             if (hasSeries) {
                 SearchTypeSegment(
@@ -196,9 +201,10 @@ private fun SearchTypeSegment(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val layout = LocalKomeliaLayout.current
     Surface(
         onClick = onClick,
-        modifier = modifier.heightIn(min = 40.dp),
+        modifier = modifier.heightIn(min = layout.minimumTouchTarget),
         shape = MaterialTheme.shapes.medium,
         color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
         contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,

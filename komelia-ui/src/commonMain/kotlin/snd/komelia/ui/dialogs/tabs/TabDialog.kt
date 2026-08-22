@@ -37,6 +37,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.dialogs.AppDialogLayout
 import snd.komelia.ui.dialogs.BasicAppDialog
 import snd.komelia.ui.dialogs.DialogConfirmCancelButtons
@@ -109,9 +110,10 @@ private fun CompactTabDialog(
     onTabChange: (DialogTab) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
-            modifier = Modifier.padding(5.dp),
+            modifier = Modifier.padding(layout.controlSpacing),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (showCancelButton) {
@@ -160,7 +162,7 @@ private fun CompactTabDialog(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(5.dp)
+                .padding(layout.dialogContentPadding)
                 .verticalScroll(rememberScrollState())
         ) {
             currentTab.Content()
@@ -184,12 +186,13 @@ private fun TabColumnDialog(
     onDismissRequest: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
+    val layout = LocalKomeliaLayout.current
     AppDialogLayout(
         header = {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(layout.dialogContentPadding)
 
             )
         },
@@ -205,7 +208,11 @@ private fun TabColumnDialog(
                     Modifier
                         .verticalScroll(scrollState)
                         .heightIn(min = 500.dp)
-                        .padding(bottom = 10.dp, start = 10.dp, end = 30.dp)
+                        .padding(
+                            start = layout.dialogContentPadding,
+                            end = layout.dialogContentPadding,
+                            bottom = layout.dialogContentPadding,
+                        )
                 ) {
                     currentTab.Content()
                     Spacer(Modifier.imePadding())
@@ -221,7 +228,7 @@ private fun TabColumnDialog(
                 confirmEnabled = canConfirm,
                 showCancelButton = showCancelButton,
                 onCancel = onDismissRequest,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                modifier = Modifier.padding(layout.dialogContentPadding)
             )
         },
         contentPadding = PaddingValues(0.dp)

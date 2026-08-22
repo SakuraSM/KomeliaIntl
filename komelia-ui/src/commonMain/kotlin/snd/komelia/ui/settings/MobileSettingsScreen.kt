@@ -29,6 +29,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile_title
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.settings.navigation.SettingsNavigationMenu
@@ -39,18 +40,19 @@ class MobileSettingsScreen : Screen {
         val currentNavigator = LocalNavigator.currentOrThrow
         val viewModelFactory = LocalViewModelFactory.current
         val vm = rememberScreenModel { viewModelFactory.getSettingsNavigationViewModel(currentNavigator) }
+        val layout = LocalKomeliaLayout.current
         LaunchedEffect(Unit) { vm.initialize() }
 
         Surface(
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
+                verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             ) {
                 PlatformTitleBar()
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { currentNavigator.pop() }) {
@@ -72,7 +74,7 @@ class MobileSettingsScreen : Screen {
                     onLogout = vm::logout,
                     user = vm.user.collectAsState().value,
                     contentColor = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.padding(horizontal = 4.dp).weight(1f, false)
+                    modifier = Modifier.weight(1f, false)
                 )
 
                 Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))

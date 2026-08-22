@@ -54,6 +54,7 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
@@ -96,6 +97,7 @@ fun BookScreenContent(
 ) {
 
     val scrollState: ScrollState = rememberScrollState()
+    val layout = LocalKomeliaLayout.current
     Column(modifier = Modifier.fillMaxSize()) {
         if (book == null || library == null) return
         BookToolBar(
@@ -104,18 +106,17 @@ fun BookScreenContent(
             onBackPress = onBackPress,
         )
 
-        val contentPadding = when (LocalWindowWidth.current) {
-            COMPACT, MEDIUM -> Modifier.padding(5.dp)
-            EXPANDED -> Modifier.padding(start = 20.dp, end = 20.dp)
-            FULL -> Modifier.padding(start = 30.dp, end = 30.dp)
-        }
-
-        Box {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Column(
-                modifier = contentPadding
+                modifier = Modifier
+                    .widthIn(max = layout.contentMaxWidth)
                     .fillMaxWidth()
+                    .padding(
+                        horizontal = layout.pageHorizontalPadding,
+                        vertical = layout.pageVerticalPadding,
+                    )
                     .verticalScroll(state = scrollState),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
                 horizontalAlignment = Alignment.Start
             ) {
                 val compact = LocalWindowWidth.current == COMPACT || LocalWindowWidth.current == MEDIUM
@@ -123,7 +124,7 @@ fun BookScreenContent(
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing),
                     ) {
                         BookThumbnail(
                             book.id,
@@ -143,7 +144,7 @@ fun BookScreenContent(
                         )
                     }
                 } else {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing)) {
                         BookThumbnail(
                             book.id,
                             modifier = Modifier
@@ -193,8 +194,9 @@ fun BookToolBar(
     bookMenuActions: BookMenuActions,
     onBackPress: () -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.padding(start = 10.dp),
+        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onBackPress) {
@@ -260,6 +262,7 @@ private fun BookMainInfo(
     onDownloadDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val layout = LocalKomeliaLayout.current
     val maxWidth = when (LocalWindowWidth.current) {
         FULL -> 1200.dp
         else -> Dp.Unspecified
@@ -271,7 +274,7 @@ private fun BookMainInfo(
 
     Column(
         modifier = modifier.widthIn(min = minWidth, max = maxWidth),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(layout.itemSpacing)
     ) {
         BookInfoRow(
             book = book,
@@ -279,7 +282,7 @@ private fun BookMainInfo(
         )
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             val offlineAvailable = LocalOfflineAvailable.current

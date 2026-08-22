@@ -45,6 +45,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.settings.model.ReaderFlashColor
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.platform.PlatformType
@@ -73,12 +74,13 @@ fun CommonImageSettings(
     modifier: Modifier = Modifier,
 ) {
     val platform = LocalPlatform.current
+    val layout = LocalKomeliaLayout.current
     Column(modifier = modifier) {
         SwitchWithLabel(
             checked = stretchToFit,
             onCheckedChange = onStretchToFitChange,
             label = { Text(stringResource(Res.string.reader_image_stretch_small_images)) },
-            contentPadding = PaddingValues(horizontal = 10.dp)
+            contentPadding = PaddingValues(horizontal = layout.cardContentPadding)
         )
 
         if (LocalPlatform.current != PlatformType.WEB_KOMF) {
@@ -86,7 +88,7 @@ fun CommonImageSettings(
                 checked = cropBorders,
                 onCheckedChange = onCropBordersChange,
                 label = { Text(stringResource(Res.string.reader_image_crop_borders)) },
-                contentPadding = PaddingValues(horizontal = 10.dp)
+                contentPadding = PaddingValues(horizontal = layout.cardContentPadding)
             )
         }
 
@@ -94,12 +96,15 @@ fun CommonImageSettings(
             modifier = Modifier
                 .clickable { onColorCorrectionClick() }
                 .pointerHoverIcon(PointerIcon.Hand)
-                .padding(horizontal = 10.dp, vertical = 15.dp)
+                .padding(
+                    horizontal = layout.cardContentPadding,
+                    vertical = layout.itemSpacing,
+                )
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(stringResource(Res.string.reader_image_color_correction))
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.width(layout.controlSpacing))
             Icon(
                 imageVector = Icons.Default.BarChart,
                 contentDescription = null,
@@ -123,12 +128,12 @@ fun CommonImageSettings(
                 onCheckedChange = onFlashEnabledChange,
                 label = { Text(stringResource(Res.string.reader_image_flash_on_page_change)) },
                 supportingText = { Text(stringResource(Res.string.reader_image_flash_on_page_change_desc)) },
-                contentPadding = PaddingValues(horizontal = 10.dp)
+                contentPadding = PaddingValues(horizontal = layout.cardContentPadding)
             )
             AnimatedVisibility(flashEnabled) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(5.dp),
-                    modifier = Modifier.padding(start = 10.dp)
+                    verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+                    modifier = Modifier.padding(start = layout.cardContentPadding)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.width(100.dp)) {
@@ -175,7 +180,7 @@ fun CommonImageSettings(
                     Column {
                         Text(stringResource(Res.string.reader_image_flash_with))
                         FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing)
                         ) {
                             InputChip(
                                 selected = flashWith == ReaderFlashColor.BLACK,

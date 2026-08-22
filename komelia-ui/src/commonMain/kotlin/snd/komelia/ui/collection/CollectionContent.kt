@@ -33,6 +33,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_seri
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.itemlist.SeriesLazyCardGrid
@@ -135,8 +136,9 @@ private fun CollectionToolbar(
     onPageSizeChange: (Int) -> Unit,
 
     ) {
+    val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.padding(start = 10.dp),
+        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
 
@@ -146,7 +148,7 @@ private fun CollectionToolbar(
                 style = MaterialTheme.typography.labelMedium,
                 fontStyle = FontStyle.Italic
             )
-            Spacer(Modifier.width(5.dp))
+            Spacer(Modifier.width(layout.controlSpacing))
             Text(collection.name, style = MaterialTheme.typography.titleMedium)
         }
         SuggestionChip(
@@ -157,7 +159,7 @@ private fun CollectionToolbar(
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
-            modifier = Modifier.padding(horizontal = 10.dp),
+            modifier = Modifier.padding(horizontal = layout.controlSpacing),
         )
 
         val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true

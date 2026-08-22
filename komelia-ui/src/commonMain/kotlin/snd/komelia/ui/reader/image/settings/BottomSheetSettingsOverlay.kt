@@ -95,6 +95,7 @@ import snd.komelia.settings.model.ReaderType.CONTINUOUS
 import snd.komelia.settings.model.ReaderType.PAGED
 import snd.komelia.settings.model.ReaderType.PANELS
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
@@ -144,6 +145,7 @@ fun BottomSheetSettingsOverlay(
 ) {
 
     val windowWidth = LocalWindowWidth.current
+    val layoutSpec = LocalKomeliaLayout.current
     var showSettingsDialog by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
@@ -152,7 +154,10 @@ fun BottomSheetSettingsOverlay(
                 WindowInsets.statusBars
                     .add(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
             )
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .padding(
+                horizontal = layoutSpec.pageHorizontalPadding,
+                vertical = layoutSpec.controlSpacing / 2,
+            )
             .clip(RoundedCornerShape(18.dp))
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp)),
@@ -160,7 +165,7 @@ fun BottomSheetSettingsOverlay(
     ) {
         IconButton(
             onClick = onBackPress,
-            modifier = Modifier.size(42.dp)
+            modifier = Modifier.size(layoutSpec.minimumTouchTarget)
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
@@ -171,7 +176,7 @@ fun BottomSheetSettingsOverlay(
         book?.let {
             Column(
                 Modifier.weight(1f)
-                    .padding(horizontal = 10.dp)
+                    .padding(horizontal = layoutSpec.controlSpacing)
             ) {
                 val titleStyle =
                     if (windowWidth == COMPACT) MaterialTheme.typography.titleMedium
@@ -196,7 +201,7 @@ fun BottomSheetSettingsOverlay(
                 showSettingsDialog = true
                 onSettingsDialogVisibilityChange(true)
             },
-            modifier = Modifier.size(42.dp)
+            modifier = Modifier.size(layoutSpec.minimumTouchTarget)
 
         ) {
             Icon(

@@ -33,6 +33,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_confirm
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.platform.VerticalScrollbar
 import snd.komelia.ui.platform.cursorForHand
 import kotlin.math.roundToInt
@@ -196,9 +197,10 @@ fun DialogConfirmCancelButtons(
     isLoading: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
+    val layout = LocalKomeliaLayout.current
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
     ) {
         if (showCancelButton)
             ElevatedButton(
@@ -221,9 +223,10 @@ fun DialogConfirmCancelButtons(
 
 @Composable
 fun DialogSimpleHeader(headerText: String) {
+    val layout = LocalKomeliaLayout.current
     Column {
         Text(headerText, style = MaterialTheme.typography.headlineMedium)
-        HorizontalDivider(Modifier.padding(vertical = 10.dp))
+        HorizontalDivider(Modifier.padding(vertical = layout.controlSpacing))
     }
 
 }

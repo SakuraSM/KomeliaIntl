@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.images.ThumbnailImage
 import snd.komelia.ui.strings.AppStrings
 import snd.komf.api.metadata.KomfMetadataSeriesSearchResult
@@ -46,7 +47,6 @@ fun KomfResultCard(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-
     ResultCardOverlay(modifier = modifier, isSelected = isSelected) {
         ItemCard(
             onClick = onClick,
@@ -73,11 +73,12 @@ fun KomfResultCard(
 
 @Composable
 private fun ResultDescriptionContent(result: KomfMetadataSeriesSearchResult) {
+    val layout = LocalKomeliaLayout.current
     Column(
         modifier = Modifier
             .height(120.dp)
             .fillMaxWidth()
-            .padding(10.dp),
+            .padding(layout.cardContentPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TooltipBox(

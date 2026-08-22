@@ -62,6 +62,7 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalPlatform
@@ -119,11 +120,7 @@ fun SeriesContent(
     onBackPress: () -> Unit,
 ) {
     val windowWidth = LocalWindowWidth.current
-    val contentPadding = when (windowWidth) {
-        COMPACT, MEDIUM -> Modifier.padding(5.dp)
-        EXPANDED -> Modifier.padding(start = 20.dp, end = 20.dp)
-        FULL -> Modifier.padding(start = 30.dp, end = 30.dp)
-    }
+    val layout = LocalKomeliaLayout.current
     val gridMinWidth = booksState.cardWidth.collectAsState().value
     val width = LocalWindowWidth.current
     val fixedColumnCount = posterColumnCount(LocalPlatform.current, width)
@@ -153,12 +150,16 @@ fun SeriesContent(
 
         val scrollState = rememberLazyGridState()
 
-        Box {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyVerticalGrid(
                 state = scrollState,
                 columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(gridMinWidth),
-                horizontalArrangement = Arrangement.spacedBy(15.dp),
-                modifier = contentPadding,
+                horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                modifier = Modifier
+                    .widthIn(max = layout.contentMaxWidth)
+                    .fillMaxSize()
+                    .padding(horizontal = layout.pageHorizontalPadding),
             ) {
 
                 if (series != null && library != null) {
@@ -247,8 +248,9 @@ fun SeriesToolBar(
     onDownload: () -> Unit,
     onBackPress: () -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.padding(start = 10.dp),
+        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = onBackPress) {
@@ -328,6 +330,7 @@ fun Series(
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
     val width = LocalWindowWidth.current
+    val layout = LocalKomeliaLayout.current
     val animation: FiniteAnimationSpec<IntSize> = remember(series) {
         when (width) {
             COMPACT, MEDIUM -> spring(stiffness = Spring.StiffnessHigh)
@@ -336,7 +339,7 @@ fun Series(
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
     ) {
         Layout(
             content = {
@@ -369,7 +372,7 @@ fun Series(
                         onFilterClick = onFilterClick,
                         modifier = Modifier,
                     )
-                    HorizontalDivider(Modifier.padding(vertical = 10.dp))
+                    HorizontalDivider(Modifier.padding(vertical = layout.controlSpacing))
                     SeriesSummary(
                         seriesSummary = series.metadata.summary,
                         bookSummary = series.booksMetadata.summary,
@@ -379,7 +382,7 @@ fun Series(
 
             }
         ) { measurables, constraints ->
-            val spacing = 15.dp.roundToPx()
+            val spacing = layout.gridSpacing.roundToPx()
             val infoMinWidth = 350.dp.toPx().toInt()
 
             val thumbnail = measurables[0].measure(constraints)
@@ -423,8 +426,9 @@ fun SeriesChipTags(
     series: KomgaSeries,
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(layout.itemSpacing)
     ) {
         if (series.metadata.publisher.isNotBlank()) {
             DescriptionChips(
@@ -490,9 +494,10 @@ private fun TabRow(
     showCollectionsTab: Boolean,
 ) {
     val chipColors = AppFilterChipDefaults.filterChipColors()
+    val layout = LocalKomeliaLayout.current
     Column {
         AnimatedVisibility(showCollectionsTab) {
-            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
                 Box(Modifier.clickable { onTabChange(SeriesTab.BOOKS) }) {
 
                 }

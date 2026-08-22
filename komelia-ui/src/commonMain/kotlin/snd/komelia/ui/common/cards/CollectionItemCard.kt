@@ -31,6 +31,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_seri
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.images.CollectionThumbnail
 import snd.komelia.ui.common.menus.CollectionActionsMenu
 import snd.komga.client.collection.KomgaCollection
@@ -114,6 +115,7 @@ private fun CollectionImageOverlay(
     collection: KomgaCollection,
     content: @Composable () -> Unit
 ) {
+    val layout = LocalKomeliaLayout.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -121,7 +123,7 @@ private fun CollectionImageOverlay(
     ) {
         content()
         CardGradientOverlay()
-        Column(Modifier.padding(10.dp)) {
+        Column(Modifier.padding(layout.cardContentPadding)) {
             CardOutlinedText(collection.name)
             CardOutlinedText(
                 pluralStringResource(

@@ -30,6 +30,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_book_count
 import org.jetbrains.compose.resources.pluralStringResource
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.images.ReadListThumbnail
 import snd.komelia.ui.common.menus.ReadListActionsMenu
 import snd.komga.client.readlist.KomgaReadList
@@ -111,6 +112,7 @@ private fun ReadListImageOverlay(
     readlist: KomgaReadList,
     content: @Composable () -> Unit
 ) {
+    val layout = LocalKomeliaLayout.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -118,7 +120,7 @@ private fun ReadListImageOverlay(
     ) {
         content()
         CardGradientOverlay()
-        Column(Modifier.padding(10.dp)) {
+        Column(Modifier.padding(layout.cardContentPadding)) {
             CardOutlinedText(readlist.name)
             CardOutlinedText(
                 pluralStringResource(

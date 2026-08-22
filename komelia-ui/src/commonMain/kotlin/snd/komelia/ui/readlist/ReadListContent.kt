@@ -35,6 +35,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.itemlist.BookLazyCardGrid
@@ -72,7 +73,7 @@ fun ReadListContent(
 
     cardMinSize: Dp,
 ) {
-
+    val layout = LocalKomeliaLayout.current
     Column {
         if (editMode)
             BulkActionsToolbar(
@@ -94,9 +95,16 @@ fun ReadListContent(
         }
 
         if (readList.summary.isNotBlank()) {
-            Text(readList.summary)
-            Spacer(Modifier.height(5.dp))
-            HorizontalDivider()
+            Column(
+                Modifier.padding(
+                    horizontal = layout.pageHorizontalPadding,
+                    vertical = layout.controlSpacing,
+                ),
+                verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+            ) {
+                Text(readList.summary)
+                HorizontalDivider()
+            }
         }
         BookLazyCardGrid(
             books = books,
@@ -135,14 +143,15 @@ private fun ReadListToolbar(
     pageSize: Int,
     onPageSizeChange: (Int) -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.padding(start = 10.dp),
+        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing)
         ) {
             Text(
                 stringResource(
@@ -165,7 +174,7 @@ private fun ReadListToolbar(
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
-            modifier = Modifier.padding(10.dp, 0.dp),
+            modifier = Modifier.padding(horizontal = layout.controlSpacing),
         )
 
         val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true

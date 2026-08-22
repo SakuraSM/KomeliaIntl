@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -54,6 +55,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.bulk_select_all
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.bulk_selected_count
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.platform.cursorForHand
 import kotlin.math.roundToInt
 
@@ -65,11 +67,12 @@ fun BulkActionsContainer(
     onSelectAll: () -> Unit,
     content: @Composable RowScope.() -> Unit
 ) {
+    val layout = LocalKomeliaLayout.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .heightIn(min = layout.minimumTouchTarget)
             .clip(RoundedCornerShape(5.dp))
             .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
     ) {
@@ -79,7 +82,7 @@ fun BulkActionsContainer(
                 .clip(RoundedCornerShape(5.dp))
                 .clickable { onSelectAll() }
                 .cursorForHand()
-                .padding(end = 15.dp),
+                .padding(end = layout.itemSpacing),
             verticalAlignment = Alignment.CenterVertically
         ) {
             RadioButton(
@@ -90,7 +93,7 @@ fun BulkActionsContainer(
         }
         Text(
             stringResource(Res.string.bulk_selected_count, selectedCount),
-            modifier = Modifier.width(110.dp).padding(start = 10.dp)
+            modifier = Modifier.width(110.dp).padding(start = layout.controlSpacing)
         )
 
         content()
@@ -133,13 +136,14 @@ private fun BulkActionButton(
     onClick: () -> Unit,
     compact: Boolean
 ) {
+    val layout = LocalKomeliaLayout.current
     if (compact) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
                 .widthIn(min = 50.dp)
                 .clickable { onClick() }
-                .padding(horizontal = 10.dp)
+                .padding(horizontal = layout.controlSpacing)
                 .pointerHoverIcon(PointerIcon.Hand),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally

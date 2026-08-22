@@ -39,6 +39,7 @@ import snd.komelia.ui.LoadState.Loading
 import snd.komelia.ui.LoadState.Success
 import snd.komelia.ui.LoadState.Uninitialized
 import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalReloadEvents
 import snd.komelia.ui.LocalViewModelFactory
@@ -248,13 +249,14 @@ fun LibraryToolBar(
     onReadListsClick: () -> Unit,
 ) {
 
+    val layout = LocalKomeliaLayout.current
     val chipColors = AppFilterChipDefaults.filterChipColors()
     var showOptionsMenu by remember { mutableStateOf(false) }
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
 
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         item {
@@ -279,7 +281,7 @@ fun LibraryToolBar(
             }
             Text(library?.let { library.name } ?: stringResource(Res.string.library_all_libraries))
 
-            Spacer(Modifier.width(5.dp))
+            Spacer(Modifier.width(layout.controlSpacing))
         }
 
 

@@ -60,6 +60,7 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
 import snd.komelia.ui.LocalLibraries
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.BookReadButton
 import snd.komelia.ui.common.images.BookThumbnail
@@ -163,6 +164,7 @@ private fun BookImageOverlay(
     showSeriesTitle: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val layout = LocalKomeliaLayout.current
     Box(contentAlignment = Alignment.TopStart) {
         content()
         if (showTitle)
@@ -190,7 +192,7 @@ private fun BookImageOverlay(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Column(Modifier.padding(10.dp)) {
+            Column(Modifier.padding(layout.cardContentPadding)) {
                 if (showSeriesTitle && !book.oneshot) {
                     CardOutlinedText(
                         text = book.seriesTitle,
@@ -366,6 +368,7 @@ fun BookDetailedListCard(
     onSelect: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val layout = LocalKomeliaLayout.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
     val width = LocalWindowWidth.current
@@ -391,7 +394,7 @@ fun BookDetailedListCard(
                     )
                     else Modifier
                 )
-                .padding(10.dp),
+                .padding(layout.cardContentPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box {
@@ -428,7 +431,8 @@ private fun BookDetailedListDetails(
     onBookReadClick: ((Boolean) -> Unit)? = null,
 ) {
     val width = LocalWindowWidth.current
-    Column(Modifier.padding(start = 10.dp)) {
+    val layout = LocalKomeliaLayout.current
+    Column(Modifier.padding(start = layout.itemSpacing)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 book.metadata.title,
@@ -444,7 +448,7 @@ private fun BookDetailedListDetails(
             stringResource(Res.string.book_pages, book.media.pagesCount),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 5.dp),
+            modifier = Modifier.padding(top = layout.controlSpacing / 2),
         )
         MetadataTagFlow(
             values = book.metadata.tags,

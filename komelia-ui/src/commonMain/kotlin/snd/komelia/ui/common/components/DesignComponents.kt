@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import snd.komelia.ui.KomeliaSpacing
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.platform.cursorForHand
 
@@ -162,12 +163,13 @@ fun SettingsSection(
     supportingText: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.small)) {
+    val layout = LocalKomeliaLayout.current
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
         SectionHeader(title = title, supportingText = supportingText)
         KomeliaCard(modifier = Modifier.fillMaxWidth()) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(KomeliaSpacing.large),
-                verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.medium),
+                modifier = Modifier.fillMaxWidth().padding(layout.cardContentPadding),
+                verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
                 content = content,
             )
         }

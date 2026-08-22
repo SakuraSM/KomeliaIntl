@@ -34,6 +34,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
@@ -57,10 +58,11 @@ fun SettingsScreenContainer(
 @Composable
 private fun MobileContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
     val navigator = LocalNavigator.currentOrThrow
+    val layout = LocalKomeliaLayout.current
     Column(Modifier.background(MaterialTheme.colorScheme.background)) {
         PlatformTitleBar()
         Row(
-            horizontalArrangement = Arrangement.spacedBy(KomeliaSpacing.small),
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { navigator.pop() }) {
@@ -77,8 +79,11 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
 
         Column(
             modifier = Modifier.weight(1f, false).imePadding().verticalScroll(rememberScrollState())
-                .padding(KomeliaSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.large),
+                .padding(
+                    horizontal = layout.pageHorizontalPadding,
+                    vertical = layout.pageVerticalPadding,
+                ),
+            verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing),
         ) {
             content()
         }
@@ -101,18 +106,22 @@ private fun DesktopContainer(title: String, content: @Composable ColumnScope.() 
 
 @Composable
 private fun DesktopContent(title: String, content: @Composable ColumnScope.() -> Unit) {
+    val layout = LocalKomeliaLayout.current
     Column(Modifier.widthIn(min = 0.dp, max = settingsDesktopContentWidth)) {
-        Spacer(Modifier.height(KomeliaSpacing.huge))
+        Spacer(Modifier.height(layout.pageVerticalPadding))
         Text(
             title,
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(horizontal = KomeliaSpacing.huge),
+            modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
         )
-        Spacer(Modifier.height(KomeliaSpacing.extraLarge))
+        Spacer(Modifier.height(layout.sectionSpacing))
 
         Column(
-            modifier = Modifier.padding(horizontal = KomeliaSpacing.huge, vertical = KomeliaSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.large),
+            modifier = Modifier.padding(
+                horizontal = layout.pageHorizontalPadding,
+                vertical = layout.pageVerticalPadding,
+            ),
+            verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing),
             content = content
         )
     }

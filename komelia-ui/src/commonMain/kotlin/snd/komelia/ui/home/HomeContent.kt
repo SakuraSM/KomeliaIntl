@@ -149,8 +149,8 @@ private fun Toolbar(
             onPickerOpenChange = { pickerOpen = it },
             onFilterChange = onFilterChange,
             modifier = Modifier
-                .fillMaxWidth()
                 .widthIn(max = layout.contentMaxWidth)
+                .fillMaxWidth()
                 .padding(horizontal = layout.pageHorizontalPadding),
         )
     }
@@ -445,35 +445,40 @@ private fun DisplayContent(
 ) {
     val layout = LocalKomeliaLayout.current
     val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
-    LazyVerticalGrid(
-        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
-        state = gridState,
-        columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(cardWidth),
-        horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-        verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-        contentPadding = PaddingValues(
-            top = 8.dp,
-            bottom = layout.gridBottomPadding + 16.dp,
-        )
-    ) {
-        for (data in filters) {
-            if (activeFilterNumber == 0 || data.filter.order == activeFilterNumber) {
-                when (data) {
-                    is BookFilterData -> BookFilterEntry(
-                        label = data.filter.label,
-                        books = data.books,
-                        bookMenuActions = bookMenuActions,
-                        onBookClick = onBookClick,
-                        onBookReadClick = onBookReadClick,
-                    )
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        LazyVerticalGrid(
+            modifier = Modifier
+                .widthIn(max = layout.contentMaxWidth)
+                .fillMaxSize()
+                .padding(horizontal = layout.pageHorizontalPadding),
+            state = gridState,
+            columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(cardWidth),
+            horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            contentPadding = PaddingValues(
+                top = layout.controlSpacing,
+                bottom = layout.gridBottomPadding + layout.sectionSpacing,
+            )
+        ) {
+            for (data in filters) {
+                if (activeFilterNumber == 0 || data.filter.order == activeFilterNumber) {
+                    when (data) {
+                        is BookFilterData -> BookFilterEntry(
+                            label = data.filter.label,
+                            books = data.books,
+                            bookMenuActions = bookMenuActions,
+                            onBookClick = onBookClick,
+                            onBookReadClick = onBookReadClick,
+                        )
 
-                    is SeriesFilterData -> SeriesFilterEntries(
-                        label = data.filter.label,
-                        series = data.series,
-                        onSeriesClick = onSeriesClick,
-                        seriesMenuActions = seriesMenuActions,
-                    )
+                        is SeriesFilterData -> SeriesFilterEntries(
+                            label = data.filter.label,
+                            series = data.series,
+                            onSeriesClick = onSeriesClick,
+                            seriesMenuActions = seriesMenuActions,
+                        )
 
+                    }
                 }
             }
         }

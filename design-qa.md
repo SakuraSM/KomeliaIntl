@@ -59,4 +59,39 @@
 2. 修复：移除 `ReaderChrome` 的独立 `onToggleFooter` 按钮；将阅读区中央点击改为统一切换顶部与底部 chrome。翻页、切章和自动滚动后仍调用 `hideReaderChrome()`。
 3. 修复后：全屏及底部重点区域复核均无独立按钮；连续两次中央点击分别显示和收起整套控件，没有裁切、溢出、残影或无法恢复的问题。
 
+## 首页标签自适应与全局间距复核
+
+### 响应式证据
+
+| 可用宽度 | 截图 | 验收结果 |
+| --- | --- | --- |
+| 360dp | `/private/tmp/komelia-home-360.png` | 单行显示“全部 + 当前分组 + 更多”；当前长中文标签受剩余宽度约束，无裁切或横向滚动。 |
+| 600dp | `/private/tmp/komelia-home-600.png` | 可见普通分组数量随宽度增加；当前分组保持顶部可见，被替换分组进入“更多”。 |
+| 1280dp | `/private/tmp/komelia-home-1280.png` | 全部分组可容纳，“更多”自动隐藏；页面内容居中并保持 1200dp 最大宽度。 |
+
+- 412dp 真实设备密度基线：`/private/tmp/komelia-home-spacing.png`；“更多”底部面板：`/private/tmp/komelia-home-more.png`；溢出分组选中并提升后：`/private/tmp/komelia-home-promoted.png`。
+- “更多”只显示顶部未出现的两个分组，并保留原配置顺序与项目数量；选择“最近添加的系列”后，该分组提升到顶部选中态，原末尾普通分组返回“更多”。
+- 窗口从 360dp、600dp 切换到 1280dp 时没有保留横向滚动状态，也没有出现换行、标签重叠或布局闪烁。
+
+### 页面族与间距
+
+- 搜索：`/private/tmp/komelia-search-spacing.png`。页面边距、结果项间隔与卡片内边距使用响应式布局令牌；标签保持三项加 `+N` 汇总，无横向溢出。
+- 设置：`/private/tmp/komelia-settings-spacing.png`。页面水平边距统一，16dp 圆角分组保持完整；分隔线只位于相邻行之间，退出登录维持独立危险操作区。
+- 共享组件：书库/首页网格、书籍与系列详情、收藏/阅读列表、登录、批量操作、编辑弹窗、设置容器和图片阅读控制均消费 `KomeliaLayoutSpec` 的页面、章节、列表项、控件、卡片和弹窗语义间距。
+- 触控目标：移动端 48dp、桌面与 Web 40dp；图片阅读顶部控制同步使用平台触控目标。功能尺寸（封面比例、滑块厚度、缩略图尺寸）未机械替换。
+- 主题：Light 实机复核通过；布局令牌不依赖色值，既有 Dark/OLED 主题映射测试继续通过。中英文超长标签、当前项提升、空分组过滤和极窄宽度由公共测试覆盖。
+
+### 自动验证
+
+- `git diff --check`：通过。
+- `./gradlew :komelia-ui:allTests`：通过，包含 JVM 与 Wasm 浏览器测试。
+- EPUB `npm run check && npm run build`：0 错误、0 警告，生产构建通过。
+- `./gradlew buildEpubReaders :androidDebug :desktopJar :komfWebUI`：通过；Android APK、macOS arm64 JAR 和 Wasm WebUI 均生成成功。
+- APK：`komelia-app/androidApp/build/outputs/apk/debug/androidApp-debug.apk`，已安装到 `emulator-5554` 并使用真实书库会话完成回归；测试凭据未写入仓库或日志。
+
+### Findings
+
+- 无 P0/P1/P2。构建仍报告既存 Skiko 依赖版本兼容提示、Wasm 资源体积提示和 Browserslist 数据过期提示；均未由本轮 UI 变更引入，也未阻断测试或产物生成。
+- 响应式截图后模拟器已恢复为物理参数 1080 × 2400 px、420 dpi。
+
 final result: passed

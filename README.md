@@ -1,42 +1,33 @@
-# Komelia - Komga media client
+# Komelia Intl - Komga media client
 
-### Downloads:
+[English](README.md) | [简体中文](README_zh-CN.md)
 
-- Latest prebuilt release is available at https://github.com/Snd-R/Komelia/releases
-- Google Play Store https://play.google.com/store/apps/details?id=io.github.snd_r.komelia
-- F-Droid https://f-droid.org/packages/io.github.snd_r.komelia/
-- AUR package https://aur.archlinux.org/packages/komelia
+This repository modifies [Snd-R/Komelia](https://github.com/Snd-R/Komelia). It keeps the upstream Komga client and adds Simplified Chinese localization, adaptive navigation, a mobile UI overhaul, reader interaction fixes, and builds for each supported platform.
 
-## Screenshots
+## Changes in this fork
 
-<details>
-  <summary>Mobile</summary>
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" alt="Komelia" width="270">  
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" alt="Komelia" width="270">  
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" alt="Komelia" width="270">  
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" alt="Komelia" width="270">  
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" alt="Komelia" width="270">  
-   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" alt="Komelia" width="270">  
-</details>
+- Replaces the global drawer with bottom navigation on phones and a Navigation Rail on wider windows. Each destination keeps its navigation and scroll state.
+- Uses one layout, spacing, color, shape, and motion system across Light, Dark, and OLED themes. Reduced motion, keyboard focus, and back navigation are supported.
+- Redesigns Home groups, Library scope selection, filters, search, Settings, series details, and book details. Home shows the groups that fit and moves the rest into More.
+- Keeps cover cards aligned with fixed title slots for one-line and two-line titles.
+- Refines image and EPUB reader controls. Reader chrome hides automatically, and progress dragging does not trigger page turns.
+- Adds Simplified Chinese to the Compose app, Android system screens, and the EPUB reader. Users can select System, English, or Simplified Chinese in the app.
+- Keeps offline PDF, RAR, and EPUB support, page retry, LAN address switching, and existing database migrations.
+- Publishes a universal Android APK, Windows MSI, Linux DEB, macOS ARM64 DMG/JAR, and Wasm WebUI.
 
-<details>
-  <summary>Tablet</summary>
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/1.jpg" alt="Komelia" width="400" height="640">  
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/2.jpg" alt="Komelia" width="400" height="640">  
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/3.jpg" alt="Komelia" width="400" height="640">  
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/4.jpg" alt="Komelia" width="400" height="640">  
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/5.jpg" alt="Komelia" width="400" height="640">  
-   <img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/6.jpg" alt="Komelia" width="400" height="640">  
-</details>
+## Downloads
 
-<details>
-  <summary>Desktop</summary>
-   <img src="/screenshots/1.jpg" alt="Komelia" width="1280">  
-   <img src="/screenshots/2.jpg" alt="Komelia" width="1280">  
-   <img src="/screenshots/3.jpg" alt="Komelia" width="1280">  
-   <img src="/screenshots/4.jpg" alt="Komelia" width="1280">  
-   <img src="/screenshots/5.jpg" alt="Komelia" width="1280">  
-</details>
+- Fork releases: <https://github.com/SakuraSM/KomeliaIntl/releases/latest>
+- Upstream releases: <https://github.com/Snd-R/Komelia/releases>
+- Upstream Google Play: <https://play.google.com/store/apps/details?id=io.github.snd_r.komelia>
+- Upstream F-Droid: <https://f-droid.org/packages/io.github.snd_r.komelia/>
+- Upstream AUR: <https://aur.archlinux.org/packages/komelia>
+
+## App screenshots
+
+<img src="/screenshots/app-overview-v0.18.13.png" alt="Komelia Android Home, Library filters, book details, and Settings" width="100%">
+
+> These screenshots come from the Android app. The resource filename and source domains in the book details screen are redacted. The montage contains no account, server address, or test credentials.
 
 ## Translations
 You can help translate this project to your language by using service provided by [Weblate](https://hosted.weblate.org/engage/komelia/)

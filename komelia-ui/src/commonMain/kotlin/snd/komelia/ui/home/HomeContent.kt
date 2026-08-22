@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -43,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -137,62 +139,212 @@ private fun Toolbar(
         if (currentFilterNumber != 0 && currentFilter == null) onFilterChange(0)
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = layout.pageHorizontalPadding),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        FilterChip(
-            onClick = { onFilterChange(0) },
-            selected = currentFilterNumber == 0,
-            label = { Text(stringResource(Res.string.home_filter_all)) },
-            colors = chipColors,
-            border = null,
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        AdaptiveHomeGroupBar(
+            filters = nonEmptyFilters,
+            currentFilterNumber = currentFilterNumber,
+            chipColors = chipColors,
+            useBottomSheet = useBottomSheet,
+            pickerOpen = pickerOpen,
+            onPickerOpenChange = { pickerOpen = it },
+            onFilterChange = onFilterChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = layout.contentMaxWidth)
+                .padding(horizontal = layout.pageHorizontalPadding),
         )
-        currentFilter?.let { data ->
-            FilterChip(
+    }
+}
+
+private enum class HomeGroupBarSlot { All, MoreProbe, More }
+private data class HomeGroupProbeSlot(val index: Int)
+private data class HomeGroupConstrainedSlot(val index: Int)
+
+@Composable
+private fun AdaptiveHomeGroupBar(
+    filters: List<HomeFilterData>,
+    currentFilterNumber: Int,
+    chipColors: androidx.compose.material3.SelectableChipColors,
+    useBottomSheet: Boolean,
+    pickerOpen: Boolean,
+    onPickerOpenChange: (Boolean) -> Unit,
+    onFilterChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val layout = LocalKomeliaLayout.current
+    val allLabel = stringResource(Res.string.home_filter_all)
+    val moreLabel = stringResource(Res.string.home_filter_more)
+    val spacing = layout.controlSpacing
+
+    SubcomposeLayout(modifier = modifier) { constraints ->
+        val chipConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+        val allPlaceable = subcompose(HomeGroupBarSlot.All) {
+            HomeGroupChip(
+                label = allLabel,
+                selected = currentFilterNumber == 0,
+                colors = chipColors,
+                minimumHeight = layout.minimumTouchTarget,
+                onClick = { onFilterChange(0) },
+            )
+        }.single().measure(chipConstraints)
+        val moreProbe = subcompose(HomeGroupBarSlot.MoreProbe) {
+            HomeMoreChip(
+                label = moreLabel,
+                colors = chipColors,
+                minimumHeight = layout.minimumTouchTarget,
                 onClick = {},
-                selected = true,
-                label = { Text(data.filter.label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                colors = chipColors,
-                border = null,
-                modifier = Modifier.weight(1f, fill = false),
             )
+        }.single().measure(chipConstraints)
+        val groupPlaceables = filters.mapIndexed { index, data ->
+            subcompose(HomeGroupProbeSlot(index)) {
+                HomeGroupChip(
+                    label = data.filter.label,
+                    selected = data.filter.order == currentFilterNumber,
+                    colors = chipColors,
+                    minimumHeight = layout.minimumTouchTarget,
+                    onClick = { onFilterChange(data.filter.order) },
+                )
+            }.single().measure(chipConstraints)
         }
-        Box {
-            FilterChip(
-                onClick = { pickerOpen = true },
-                selected = false,
-                leadingIcon = { Icon(Icons.Rounded.MoreHoriz, null) },
-                label = { Text(stringResource(Res.string.home_filter_more)) },
-                colors = chipColors,
-                border = null,
-            )
-            if (!useBottomSheet) {
-                DropdownMenu(
-                    expanded = pickerOpen,
-                    onDismissRequest = { pickerOpen = false },
-                ) {
-                    HomeGroupPickerItems(
-                        filters = nonEmptyFilters,
-                        currentFilterNumber = currentFilterNumber,
-                        onFilterChange = {
-                            pickerOpen = false
-                            onFilterChange(it)
-                        },
+        val activeIndex = filters.indexOfFirst { it.filter.order == currentFilterNumber }.takeIf { it >= 0 }
+        val spacingPx = spacing.roundToPx()
+        val result = calculateHomeGroupOverflowLayout(
+            availableWidth = constraints.maxWidth,
+            allChipWidth = allPlaceable.width,
+            moreChipWidth = moreProbe.width,
+            groupWidths = groupPlaceables.map { it.width },
+            activeGroupIndex = activeIndex,
+            spacing = spacingPx,
+        )
+        val overflowFilters = result.overflowGroupIndices.map(filters::get)
+        val promotedCapacity = (
+                constraints.maxWidth - allPlaceable.width - moreProbe.width - spacingPx * 2
+                ).coerceAtLeast(0)
+        val visibleGroupPlaceables = result.visibleGroupIndices.map { index ->
+            if (index == activeIndex && groupPlaceables[index].width > promotedCapacity) {
+                subcompose(HomeGroupConstrainedSlot(index)) {
+                    HomeGroupChip(
+                        label = filters[index].filter.label,
+                        selected = true,
+                        colors = chipColors,
+                        minimumHeight = layout.minimumTouchTarget,
+                        onClick = { onFilterChange(filters[index].filter.order) },
                     )
-                }
+                }.single().measure(
+                    chipConstraints.copy(maxWidth = promotedCapacity.coerceAtLeast(1)),
+                )
+            } else {
+                groupPlaceables[index]
+            }
+        }
+        val morePlaceable = if (overflowFilters.isNotEmpty()) {
+            subcompose(HomeGroupBarSlot.More) {
+                HomeMorePicker(
+                    label = moreLabel,
+                    filters = overflowFilters,
+                    currentFilterNumber = currentFilterNumber,
+                    colors = chipColors,
+                    minimumHeight = layout.minimumTouchTarget,
+                    useBottomSheet = useBottomSheet,
+                    pickerOpen = pickerOpen,
+                    onPickerOpenChange = onPickerOpenChange,
+                    onFilterChange = onFilterChange,
+                )
+            }.single().measure(chipConstraints)
+        } else null
+
+        val placeables = buildList {
+            add(allPlaceable)
+            addAll(visibleGroupPlaceables)
+            morePlaceable?.let(::add)
+        }
+        val contentHeight = placeables.maxOfOrNull { it.height } ?: 0
+        val width = constraints.maxWidth.coerceAtLeast(constraints.minWidth)
+        val height = contentHeight.coerceIn(constraints.minHeight, constraints.maxHeight)
+        layout(width, height) {
+            var x = 0
+            placeables.forEach { placeable ->
+                placeable.placeRelative(x, (height - placeable.height) / 2)
+                x += placeable.width + spacingPx
             }
         }
     }
+}
 
+@Composable
+private fun HomeGroupChip(
+    label: String,
+    selected: Boolean,
+    colors: androidx.compose.material3.SelectableChipColors,
+    minimumHeight: Dp,
+    onClick: () -> Unit,
+) {
+    FilterChip(
+        onClick = onClick,
+        selected = selected,
+        label = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        colors = colors,
+        border = null,
+        modifier = Modifier.heightIn(min = minimumHeight),
+    )
+}
+
+@Composable
+private fun HomeMoreChip(
+    label: String,
+    colors: androidx.compose.material3.SelectableChipColors,
+    minimumHeight: Dp,
+    onClick: () -> Unit,
+) {
+    FilterChip(
+        onClick = onClick,
+        selected = false,
+        leadingIcon = { Icon(Icons.Rounded.MoreHoriz, null) },
+        label = { Text(label, maxLines = 1) },
+        colors = colors,
+        border = null,
+        modifier = Modifier.heightIn(min = minimumHeight),
+    )
+}
+
+@Composable
+private fun HomeMorePicker(
+    label: String,
+    filters: List<HomeFilterData>,
+    currentFilterNumber: Int,
+    colors: androidx.compose.material3.SelectableChipColors,
+    minimumHeight: Dp,
+    useBottomSheet: Boolean,
+    pickerOpen: Boolean,
+    onPickerOpenChange: (Boolean) -> Unit,
+    onFilterChange: (Int) -> Unit,
+) {
+    Box {
+        HomeMoreChip(label, colors, minimumHeight) { onPickerOpenChange(true) }
+        if (!useBottomSheet) {
+            DropdownMenu(
+                expanded = pickerOpen,
+                onDismissRequest = { onPickerOpenChange(false) },
+            ) {
+                HomeGroupPickerItems(
+                    filters = filters,
+                    currentFilterNumber = currentFilterNumber,
+                    modifier = Modifier.width(320.dp),
+                    onFilterChange = {
+                        onPickerOpenChange(false)
+                        onFilterChange(it)
+                    },
+                )
+            }
+        }
+    }
     if (useBottomSheet && pickerOpen) {
         HomeGroupPickerSheet(
-            filters = nonEmptyFilters,
+            filters = filters,
             currentFilterNumber = currentFilterNumber,
-            onDismiss = { pickerOpen = false },
+            onDismiss = { onPickerOpenChange(false) },
             onFilterChange = {
-                pickerOpen = false
+                onPickerOpenChange(false)
                 onFilterChange(it)
             },
         )
@@ -207,10 +359,22 @@ private fun HomeGroupPickerSheet(
     onDismiss: () -> Unit,
     onFilterChange: (Int) -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+        Column(
+            Modifier.padding(
+                horizontal = layout.dialogContentPadding,
+                vertical = layout.controlSpacing,
+            ),
+            verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+        ) {
             Text(stringResource(Res.string.home_filter_groups), style = MaterialTheme.typography.titleLarge)
-            HomeGroupPickerItems(filters, currentFilterNumber, onFilterChange)
+            HomeGroupPickerItems(
+                filters = filters,
+                currentFilterNumber = currentFilterNumber,
+                modifier = Modifier.fillMaxWidth(),
+                onFilterChange = onFilterChange,
+            )
         }
     }
 }
@@ -219,13 +383,15 @@ private fun HomeGroupPickerSheet(
 private fun HomeGroupPickerItems(
     filters: List<HomeFilterData>,
     currentFilterNumber: Int,
+    modifier: Modifier = Modifier,
     onFilterChange: (Int) -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     var query by remember { mutableStateOf("") }
     val visibleFilters = remember(filters, query) {
         if (query.isBlank()) filters else filters.filter { it.filter.label.contains(query, ignoreCase = true) }
     }
-    Column(Modifier.width(320.dp).heightIn(max = 480.dp)) {
+    Column(modifier.heightIn(max = 480.dp)) {
         if (filters.size > 6) {
             OutlinedTextField(
                 value = query,
@@ -233,7 +399,7 @@ private fun HomeGroupPickerItems(
                 singleLine = true,
                 leadingIcon = { Icon(Icons.Rounded.Search, null) },
                 placeholder = { Text(stringResource(Res.string.home_filter_search_groups)) },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = layout.controlSpacing),
             )
         }
         LazyColumn {

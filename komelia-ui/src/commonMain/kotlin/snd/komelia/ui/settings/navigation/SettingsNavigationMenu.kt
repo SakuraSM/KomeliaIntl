@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.ChevronRight
@@ -277,6 +278,7 @@ fun SettingsNavigationMenu(
         ) {
             NavigationButton(
                 label = stringResource(Res.string.settings_navigation_log_out),
+                icon = Icons.AutoMirrored.Rounded.Logout,
                 onClick = { showLogoutConfirmation = true },
                 isSelected = false,
                 color = contentColor,
@@ -314,6 +316,7 @@ private fun SettingsNavigationSection(
         Text(
             title,
             style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 4.dp),
         )
         Surface(

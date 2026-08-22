@@ -3,10 +3,8 @@ package snd.komelia.ui.series.view
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
@@ -22,10 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_alternative_titles
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_release_year
@@ -34,6 +30,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_unavaila
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.common.components.ExpandableText
+import snd.komelia.ui.common.components.DetailMetadataRow
 import snd.komelia.ui.library.SeriesScreenFilter
 import snd.komelia.ui.strings.AppStrings
 import snd.komga.client.common.KomgaReadingDirection
@@ -65,8 +62,13 @@ fun SeriesDescriptionRow(
         horizontalAlignment = Alignment.Start
     ) {
 
-        if (releaseDate != null)
-            Text(stringResource(Res.string.series_release_year, releaseDate.year.toString()), fontSize = 10.sp)
+        if (releaseDate != null) {
+            Text(
+                text = stringResource(Res.string.series_release_year, releaseDate.year.toString()),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ElevatedButton(
@@ -142,17 +144,16 @@ fun SeriesDescriptionRow(
 
         if (alternateTitles.isNotEmpty()) {
             SelectionContainer {
-                Column {
-                    Text(stringResource(Res.string.series_alternative_titles), fontWeight = FontWeight.Bold)
+                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(
+                        text = stringResource(Res.string.series_alternative_titles),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     alternateTitles.forEach {
-                        Row {
+                        DetailMetadataRow(label = it.label) {
                             Text(
-                                it.label,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.widthIn(min = 100.dp, max = 200.dp)
-                            )
-                            Text(
-                                it.title,
+                                text = it.title,
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }

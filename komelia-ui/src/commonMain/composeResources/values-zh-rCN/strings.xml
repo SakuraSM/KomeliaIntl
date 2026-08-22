@@ -470,6 +470,7 @@
     <string name="filter_and_exclude">并排除</string>
 
     <string name="series_filter_reset_filters">重置筛选</string>
+    <string name="series_filter_title">筛选</string>
     <string name="series_filter_hide_filters">隐藏筛选</string>
     <string name="series_filter_any_value">任意</string>
     <string name="series_filter_sort">排序方式</string>

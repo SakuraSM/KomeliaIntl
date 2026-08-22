@@ -470,6 +470,7 @@
     <string name="filter_and_exclude">and exclude</string>
 
     <string name="series_filter_reset_filters">Reset filters</string>
+    <string name="series_filter_title">Filters</string>
     <string name="series_filter_hide_filters">Hide filters</string>
     <string name="series_filter_any_value">Any</string>
     <string name="series_filter_sort">Sort by</string>

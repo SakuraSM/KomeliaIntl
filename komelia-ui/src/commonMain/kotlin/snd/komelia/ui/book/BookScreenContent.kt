@@ -1,8 +1,8 @@
 package snd.komelia.ui.book
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,8 +38,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -119,49 +120,41 @@ fun BookScreenContent(
                 verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
                 horizontalAlignment = Alignment.Start
             ) {
-                val compact = LocalWindowWidth.current == COMPACT || LocalWindowWidth.current == MEDIUM
-                if (compact) {
-                    Column(
+                val coverWidth = when (LocalWindowWidth.current) {
+                    COMPACT, MEDIUM -> 116.dp
+                    EXPANDED, FULL -> 220.dp
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    BookThumbnail(
+                        book.id,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(coverWidth)
+                            .aspectRatio(0.703f)
+                            .clip(MaterialTheme.shapes.medium)
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
+                    )
+                    BookMainInfo(
+                        book = book,
+                        library = library,
+                        onBookReadPress = onBookReadPress,
+                        onSeriesParentSeriesPress = onParentSeriesPress,
+                        onDownload = onBookDownload,
+                        onDownloadDelete = onBookDownloadDelete,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+
+                if (book.metadata.summary.isNotBlank()) {
+                    ExpandableText(
+                        text = book.metadata.summary,
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing),
-                    ) {
-                        BookThumbnail(
-                            book.id,
-                            modifier = Modifier
-                                .heightIn(min = 180.dp, max = 240.dp)
-                                .widthIn(min = 128.dp, max = 170.dp)
-                                .animateContentSize()
-                        )
-                        BookMainInfo(
-                            book = book,
-                            library = library,
-                            onBookReadPress = onBookReadPress,
-                            onSeriesParentSeriesPress = onParentSeriesPress,
-                            onDownload = onBookDownload,
-                            onDownloadDelete = onBookDownloadDelete,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                } else {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing)) {
-                        BookThumbnail(
-                            book.id,
-                            modifier = Modifier
-                                .heightIn(min = 100.dp, max = 400.dp)
-                                .widthIn(min = 300.dp, max = 500.dp)
-                                .animateContentSize()
-                        )
-                        BookMainInfo(
-                            book = book,
-                            library = library,
-                            onBookReadPress = onBookReadPress,
-                            onSeriesParentSeriesPress = onParentSeriesPress,
-                            onDownload = onBookDownload,
-                            onDownloadDelete = onBookDownloadDelete,
-                            modifier = Modifier.weight(1f, false),
-                        )
-                    }
+                    )
                 }
 
                 BookInfoColumn(
@@ -281,9 +274,9 @@ private fun BookMainInfo(
             onSeriesButtonClick = onSeriesParentSeriesPress,
         )
 
-        Row(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
         ) {
             val offlineAvailable = LocalOfflineAvailable.current
 
@@ -307,11 +300,6 @@ private fun BookMainInfo(
                 }
             }
         }
-        HorizontalDivider()
-        ExpandableText(
-            text = book.metadata.summary,
-            style = MaterialTheme.typography.bodyMedium
-        )
     }
 }
 

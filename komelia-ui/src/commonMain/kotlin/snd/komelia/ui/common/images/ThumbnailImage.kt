@@ -27,14 +27,6 @@ fun ThumbnailImage(
         ImageRequest.Builder(context)
             .data(data)
             .memoryCacheKey(cacheKey)
-            .memoryCacheKeyExtra(
-                "scale",
-                when (contentScale) {
-                    ContentScale.Fit -> "Fit"
-                    ContentScale.Crop -> "Crop"
-                    else -> ""
-                }
-            )
             .diskCacheKey(cacheKey)
             .precision(Precision.EXACT)
             .crossfade(true)

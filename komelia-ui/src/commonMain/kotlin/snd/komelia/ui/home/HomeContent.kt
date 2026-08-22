@@ -496,7 +496,11 @@ private fun LazyGridScope.BookFilterEntry(
     item(span = { GridItemSpan(maxLineSpan) }) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(label, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
     items(books) { book ->
@@ -522,7 +526,11 @@ private fun LazyGridScope.SeriesFilterEntries(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(label, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 

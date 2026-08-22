@@ -3,7 +3,7 @@
     <string name="navigation_close_settings">Close settings</string>
     <string name="screen_error">Error %1$s</string>
 
-    <string name="home_filter_all">All</string>
+    <string name="home_filter_all">Overview</string>
     <string name="home_filter_more">More</string>
     <string name="home_filter_groups">Home groups</string>
     <string name="home_filter_search_groups">Search groups</string>

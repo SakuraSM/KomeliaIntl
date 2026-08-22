@@ -20,6 +20,21 @@ enum class DestinationSelection {
     ReselectCurrent,
 }
 
+internal enum class ScreenTransitionAction {
+    DisplayImmediately,
+    AnimateChange,
+    NoChange,
+}
+
+internal fun screenTransitionAction(
+    displayedScreenKey: String?,
+    targetScreenKey: String,
+): ScreenTransitionAction = when {
+    displayedScreenKey == null -> ScreenTransitionAction.DisplayImmediately
+    displayedScreenKey == targetScreenKey -> ScreenTransitionAction.NoChange
+    else -> ScreenTransitionAction.AnimateChange
+}
+
 fun destinationSelection(
     current: AppDestination,
     selected: AppDestination,

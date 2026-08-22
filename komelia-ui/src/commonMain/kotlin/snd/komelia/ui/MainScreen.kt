@@ -298,12 +298,15 @@ private fun DestinationContent(navigator: Navigator) {
     val detailOffset = with(LocalDensity.current) { 8.dp.roundToPx() }
     val targetScreen = navigator.lastItem
     var displayedScreen by remember { mutableStateOf(targetScreen) }
+    var displayedScreenKey by remember { mutableStateOf<String?>(null) }
     val alpha = remember { Animatable(1f) }
     val offset = remember { Animatable(0f) }
 
     LaunchedEffect(targetScreen, motion.isReducedMotion) {
-        if (motion.isReducedMotion) {
+        val transitionAction = screenTransitionAction(displayedScreenKey, targetScreen.key)
+        if (motion.isReducedMotion || transitionAction != ScreenTransitionAction.AnimateChange) {
             displayedScreen = targetScreen
+            displayedScreenKey = targetScreen.key
             alpha.snapTo(1f)
             offset.snapTo(0f)
             return@LaunchedEffect
@@ -316,6 +319,7 @@ private fun DestinationContent(navigator: Navigator) {
             launch { offset.animateTo(-detailOffset.toFloat(), tween(exitDuration, easing = motion.standardEasing)) }
         }
         displayedScreen = targetScreen
+        displayedScreenKey = targetScreen.key
         offset.snapTo(detailOffset.toFloat())
         val enterDuration = totalDuration - exitDuration
         coroutineScope {

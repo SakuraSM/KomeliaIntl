@@ -3,7 +3,7 @@
     <string name="navigation_close_settings">关闭设置</string>
     <string name="screen_error">错误：%1$s</string>
 
-    <string name="home_filter_all">全部</string>
+    <string name="home_filter_all">概览</string>
     <string name="home_filter_more">更多</string>
     <string name="home_filter_groups">首页分组</string>
     <string name="home_filter_search_groups">搜索分组</string>

@@ -30,6 +30,22 @@ class AppNavigationTest {
     }
 
     @Test
+    fun screenTransitionSkipsInitialMountAndSameScreenReset() {
+        assertEquals(
+            ScreenTransitionAction.DisplayImmediately,
+            screenTransitionAction(displayedScreenKey = null, targetScreenKey = "library-root"),
+        )
+        assertEquals(
+            ScreenTransitionAction.NoChange,
+            screenTransitionAction(displayedScreenKey = "library-root", targetScreenKey = "library-root"),
+        )
+        assertEquals(
+            ScreenTransitionAction.AnimateChange,
+            screenTransitionAction(displayedScreenKey = "library-root", targetScreenKey = "series-detail"),
+        )
+    }
+
+    @Test
     fun missingLibraryFallsBackToAllLibraries() {
         val selected = KomgaLibraryId("missing")
         val state = LibraryScopeState(selected, setOf(KomgaLibraryId("available")))

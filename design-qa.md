@@ -120,4 +120,15 @@
 5. 顶部工具栏、窗口标题栏、内容区和导航使用连续 `surface`；首页分组标题不再用整行分隔线。卡片、弹窗和必要数据行仍保留语义边界。
 6. 自动验证：`git diff --check`、`:komelia-ui:allTests`、EPUB `npm run check && npm run build`、`buildEpubReaders :androidDebug :desktopJar :komfWebUI` 全部通过。APK 已单独执行 `:androidDebug`，确认包含简中 Compose Resources 后安装到 `emulator-5554`，并使用真实 Komga 内容完成上述路径复验。
 
+## 首页/书库职责与 Tab 双闪复核
+
+- 职责边界：首页负责“继续阅读、待读、最近添加/更新”等动态聚合和快捷恢复；书库负责全部系列、合集、阅读列表、书库范围、筛选排序与批量管理。两者共享内容卡片但服务于不同任务，保留为独立一级入口。
+- 语义修订：首页聚合入口由“全部”改为“概览”，避免与书库中的“全部书库”混淆；筛选结果、排序和业务数据均未改变。
+- 根因证据：将系统动画时长临时放大 10 倍后，一次“首页 → 书库”点击先执行目的地容器淡出/淡入，再执行书库根页面首次挂载的详情淡出/淡入，形成两个连续明暗脉冲。修复前序列保存在 `/private/tmp/komelia-double-flash-01.png` 至 `/private/tmp/komelia-double-flash-14.png`，动画倍率已恢复系统默认。
+- 修复策略：保留一次一级目的地 fade-through；详情过渡仅在已显示页面的 `Screen.key` 真正变化时执行。根页面首次挂载和同 key 重置直接显示，详情前进/返回仍保留 8dp/200ms 克制动效，reduced-motion 行为不变。
+- 回归保护：纯状态决策测试覆盖首次挂载、同页面重置和详情切换三条路径，防止未来再次把根页面初始化当成详情导航动画。
+- 修复后证据：同样以 10 倍时长采集 `/private/tmp/komelia-single-transition-01.png` 至 `/private/tmp/komelia-single-transition-10.png`，书库根页面随一级容器单次出现，未再发生第二次淡出；恢复正常时长后快速切换书库、首页、搜索、书库、首页，最终截图 `/private/tmp/komelia-tab-fix-settled.png` 仅首页保持选中，正文与选中态一致。
+- 真实数据说明：书库范围选择器出现后，11 个系列需要等待服务端请求完成才显示；最终证据为 `/private/tmp/komelia-tab-fix-library-loaded.png`。该阶段透明度不再变化，属于数据加载而非第二段页面动画。
+- 自动验证：`git diff --check`、`:komelia-ui:allTests`、`:androidDebug` 均通过；修复后的 APK 已覆盖安装到 `emulator-5554`。压力回归日志无重复 `Screen.key`、SaveableState、`IllegalArgumentException` 或崩溃。
+
 final result: passed

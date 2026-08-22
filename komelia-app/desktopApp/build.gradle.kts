@@ -41,7 +41,7 @@ compose.desktop {
         )
 
         nativeDistributions {
-            targetFormats(TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Dmg)
             packageName = "Komelia"
             packageVersion = libs.versions.app.version.get()
             description = "Komga media client"
@@ -59,6 +59,11 @@ compose.desktop {
 
             linux {
                 iconFile.set(project.file("src/main/resources/ic_launcher.png"))
+            }
+
+            macOS {
+                // jpackage requires CFBundleVersion to start with a positive integer.
+                packageVersion = libs.versions.app.version.get().removePrefix("0.")
             }
         }
 

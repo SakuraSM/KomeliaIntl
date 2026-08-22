@@ -391,6 +391,12 @@ tasks.register("desktopMsi") {
     dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseMsi")
 }
 
+tasks.register("desktopDmg") {
+    description = "create macOS dmg installer"
+    group = "komelia-package"
+    dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseDmg")
+}
+
 tasks.register("androidDebug") {
     description = "build debug apk"
     group = "komelia-package"

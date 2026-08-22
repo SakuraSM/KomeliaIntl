@@ -69,6 +69,7 @@ Then choose your packaging option:
 - `./gradlew :desktopJar` output in `./komelia-app/desktopApp/build/compose/jars`
 - `./gradlew :desktopDeb` output in `./komelia-app/desktopApp/build/compose/binaries`
 - `./gradlew :desktopMsi` output in `./komelia-app/desktopApp/build/compose/binaries`
+- `./gradlew :desktopDmg` output in `./komelia-app/desktopApp/build/compose/binaries`
 
 ## Android App
 Replace <*arch*> placeholder with your target architecture.\

@@ -18,7 +18,7 @@ data class AppVersion(
 
     companion object {
         // Keep in sync with gradle/libs.versions.toml app-version.
-        val current = AppVersion(0, 18, 13)
+        val current = AppVersion(0, 18, 14)
 
         fun fromString(value: String): AppVersion {
             val version = value.split(".")

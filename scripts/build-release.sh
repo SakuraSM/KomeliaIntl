@@ -141,7 +141,7 @@ if [[ -z "$target_version_code" ]]; then
   target_version_code=$((current_version_code + 1))
 fi
 
-if [[ ! "$target_version_code" =~ ^[0-9]+$ ]]; then
+if [[ ! "$target_version_code" =~ ^[1-9][0-9]*$ ]]; then
   echo "--version-code must be a positive integer, got: $target_version_code" >&2
   exit 1
 fi
@@ -173,9 +173,9 @@ if [[ "$skip_build" == "true" ]]; then
   exit 0
 fi
 
-gradle_task=":komelia-app:assembleRelease"
+gradle_task=":komelia-app:androidApp:assembleRelease"
 if [[ "$artifact" == "bundle" ]]; then
-  gradle_task=":komelia-app:bundleRelease"
+  gradle_task=":komelia-app:androidApp:bundleRelease"
 fi
 
 exec "$ROOT_DIR/gradlew" "-Psnd.android.variant=$variant" -PrequireReleaseSigning=true "$gradle_task"

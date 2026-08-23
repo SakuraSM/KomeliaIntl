@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +72,7 @@ import snd.komelia.ui.collection.SeriesCollectionsState
 import snd.komelia.ui.common.TagList
 import snd.komelia.ui.common.components.AppFilterChipDefaults
 import snd.komelia.ui.common.components.DescriptionChips
+import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.LabeledEntry.Companion.stringEntry
 import snd.komelia.ui.common.images.SeriesThumbnail
@@ -127,24 +130,32 @@ fun SeriesContent(
         if (booksLoadState is LoadState.Success<BooksData>) booksLoadState.value
         else BooksData()
     }
+    val scrollState = rememberLazyGridState()
+    val isContentScrolled by remember(scrollState) {
+        derivedStateOf {
+            scrollState.firstVisibleItemIndex > 0 || scrollState.firstVisibleItemScrollOffset > 0
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (booksData.selectionMode) {
-            BooksBulkActionsToolbar(
-                onCancel = { booksState.setSelectionMode(false) },
-                books = booksData.books,
-                actions = booksState.bookBulkMenuActions(),
-                selectedBooks = booksData.selectedBooks,
-                onBookSelect = booksState::onBookSelect
-            )
-        } else SeriesToolBar(
-            series = series,
-            seriesMenuActions = seriesMenuActions,
-            onDownload = onDownload,
-            onBackPress = onBackPress,
-        )
-
-        val scrollState = rememberLazyGridState()
+        KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
+            if (booksData.selectionMode) {
+                BooksBulkActionsToolbar(
+                    onCancel = { booksState.setSelectionMode(false) },
+                    books = booksData.books,
+                    actions = booksState.bookBulkMenuActions(),
+                    selectedBooks = booksData.selectedBooks,
+                    onBookSelect = booksState::onBookSelect
+                )
+            } else {
+                SeriesToolBar(
+                    series = series,
+                    seriesMenuActions = seriesMenuActions,
+                    onDownload = onDownload,
+                    onBackPress = onBackPress,
+                )
+            }
+        }
 
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyVerticalGrid(
@@ -152,6 +163,10 @@ fun SeriesContent(
                 columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(gridMinWidth),
                 horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
                 verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                contentPadding = PaddingValues(
+                    top = layout.topBarContentSpacing,
+                    bottom = layout.gridBottomPadding,
+                ),
                 modifier = Modifier
                     .widthIn(max = layout.contentMaxWidth)
                     .fillMaxSize()

@@ -45,6 +45,7 @@ import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.LocalWindowState
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.ReloadableScreen
+import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.WindowSizeClass.FULL
@@ -70,69 +71,71 @@ fun AppBar(
     onRefreshClick: () -> Unit,
     notificationsState: NotificationsState,
     isOffline: Boolean,
-    onOfflineModeChange: () -> Unit
+    onOfflineModeChange: () -> Unit,
+    isContentScrolled: Boolean,
 ) {
-    PlatformTitleBar {
-        IconButton(
-            modifier = Modifier.align(Alignment.Start),
-            onClick = onNavigateBack,
-            enabled = canNavigateBack
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
-        }
-        val reloadableScreen = remember(currentScreen) { currentScreen as? ReloadableScreen }
-        RefreshIndicator(
-            onClick = onRefreshClick,
-            enabled = reloadableScreen != null,
-            modifier = Modifier.align(Alignment.Start),
-        )
-        DownloadsPopupIcon(notificationsState, Modifier.align(Alignment.Start))
-
-        val searchBarModifier = when (LocalWindowWidth.current) {
-            FULL -> Modifier.align(Alignment.CenterHorizontally).width(600.dp)
-            else -> Modifier.align(Alignment.Start).width(300.dp)
-        }
-
-        SearchBar(
-            modifier = searchBarModifier,
-            searchResults = searchResults,
-            query = query,
-            onQueryChange = onQueryChange,
-            isLoading = isLoading,
-            onSearchAllClick = onSearchAllClick,
-            libraryById = libraryById,
-            onBookClick = onBookClick,
-            onSeriesClick = onSeriesClick
-        )
-
-
-        val windowState = LocalWindowState.current
-        val coroutineScope = rememberCoroutineScope()
-        val isFullscreen = windowState.isFullscreen.collectAsState(false)
-        if (isFullscreen.value) {
+    KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
+        PlatformTitleBar {
             IconButton(
-                modifier = Modifier.align(Alignment.End),
-                onClick = { coroutineScope.launch { windowState.setFullscreen(false) } },
+                modifier = Modifier.align(Alignment.Start),
+                onClick = onNavigateBack,
+                enabled = canNavigateBack,
             ) {
-                Icon(Icons.Default.FullscreenExit, null)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
             }
-        }
+            val reloadableScreen = remember(currentScreen) { currentScreen as? ReloadableScreen }
+            RefreshIndicator(
+                onClick = onRefreshClick,
+                enabled = reloadableScreen != null,
+                modifier = Modifier.align(Alignment.Start),
+            )
+            DownloadsPopupIcon(notificationsState, Modifier.align(Alignment.Start))
 
-        if (isOffline) {
-            var showConfirmationDialog by remember { mutableStateOf(false) }
-            ElevatedButton(
-                onClick = { showConfirmationDialog = true },
-                modifier = Modifier.align(Alignment.End).padding(end = 10.dp),
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
-            ) {
-                Text(stringResource(Res.string.topbar_offline))
+            val searchBarModifier = when (LocalWindowWidth.current) {
+                FULL -> Modifier.align(Alignment.CenterHorizontally).width(600.dp)
+                else -> Modifier.align(Alignment.Start).width(300.dp)
             }
-            if (showConfirmationDialog) {
-                ConfirmationDialog(
-                    body = stringResource(Res.string.topbar_go_online),
-                    onDialogConfirm = onOfflineModeChange,
-                    onDialogDismiss = { showConfirmationDialog = false }
-                )
+
+            SearchBar(
+                modifier = searchBarModifier,
+                searchResults = searchResults,
+                query = query,
+                onQueryChange = onQueryChange,
+                isLoading = isLoading,
+                onSearchAllClick = onSearchAllClick,
+                libraryById = libraryById,
+                onBookClick = onBookClick,
+                onSeriesClick = onSeriesClick,
+            )
+
+            val windowState = LocalWindowState.current
+            val coroutineScope = rememberCoroutineScope()
+            val isFullscreen = windowState.isFullscreen.collectAsState(false)
+            if (isFullscreen.value) {
+                IconButton(
+                    modifier = Modifier.align(Alignment.End),
+                    onClick = { coroutineScope.launch { windowState.setFullscreen(false) } },
+                ) {
+                    Icon(Icons.Default.FullscreenExit, null)
+                }
+            }
+
+            if (isOffline) {
+                var showConfirmationDialog by remember { mutableStateOf(false) }
+                ElevatedButton(
+                    onClick = { showConfirmationDialog = true },
+                    modifier = Modifier.align(Alignment.End).padding(end = 10.dp),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer),
+                ) {
+                    Text(stringResource(Res.string.topbar_offline))
+                }
+                if (showConfirmationDialog) {
+                    ConfirmationDialog(
+                        body = stringResource(Res.string.topbar_go_online),
+                        onDialogConfirm = onOfflineModeChange,
+                        onDialogDismiss = { showConfirmationDialog = false },
+                    )
+                }
             }
         }
     }

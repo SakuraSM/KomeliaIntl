@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -79,7 +80,10 @@ import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.collection.CollectionScreen
 import snd.komelia.ui.common.components.AppFilterChipDefaults
 import snd.komelia.ui.common.components.ErrorContent
+import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
+import snd.komelia.ui.common.components.komeliaTopBarScroll
+import snd.komelia.ui.common.components.rememberKomeliaTopBarScrollState
 import snd.komelia.ui.common.menus.LibraryActionsMenu
 import snd.komelia.ui.common.menus.LibraryMenuActions
 import snd.komelia.ui.dialogs.libraryedit.LibraryEditDialogs
@@ -160,22 +164,31 @@ class LibraryScreen(
                             )
                         }
 
-                        Column(Modifier.weight(1f)) {
+                        val topBarScrollState = rememberKomeliaTopBarScrollState()
+                        Column(
+                            Modifier
+                                .weight(1f)
+                                .komeliaTopBarScroll(topBarScrollState)
+                        ) {
                             if (vm.showToolbar.collectAsState().value) {
-                                LibraryToolBar(
-                                    library = vm.library.collectAsState().value,
-                                    libraries = libraries,
-                                    showScopeSelector = width != FULL,
-                                    selectedLibraryId = libraryId,
-                                    onLibrarySelect = onScopeSelected,
-                                    currentTab = vm.currentTab,
-                                    libraryActions = libraryActions,
-                                    collectionsCount = vm.collectionsCount,
-                                    readListsCount = vm.readListsCount,
-                                    onBrowseClick = vm::toBrowseTab,
-                                    onCollectionsClick = vm::toCollectionsTab,
-                                    onReadListsClick = vm::toReadListsTab
-                                )
+                                KomeliaTopBarSurface(
+                                    isContentScrolled = topBarScrollState.isContentScrolled,
+                                ) {
+                                    LibraryToolBar(
+                                        library = vm.library.collectAsState().value,
+                                        libraries = libraries,
+                                        showScopeSelector = width != FULL,
+                                        selectedLibraryId = libraryId,
+                                        onLibrarySelect = onScopeSelected,
+                                        currentTab = vm.currentTab,
+                                        libraryActions = libraryActions,
+                                        collectionsCount = vm.collectionsCount,
+                                        readListsCount = vm.readListsCount,
+                                        onBrowseClick = vm::toBrowseTab,
+                                        onCollectionsClick = vm::toCollectionsTab,
+                                        onReadListsClick = vm::toReadListsTab
+                                    )
+                                }
                             }
 
                             when (vm.currentTab) {
@@ -330,7 +343,10 @@ fun LibraryToolBar(
     val isOffline = LocalOfflineMode.current.collectAsState().value
     val platform = LocalPlatform.current
 
-    Column(verticalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
+    Column(
+        modifier = Modifier.padding(vertical = layout.controlSpacing),
+        verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+    ) {
         if (showScopeSelector && platform == MOBILE) {
             MobileLibraryScopeBar(
                 libraries = libraries,
@@ -340,10 +356,11 @@ fun LibraryToolBar(
         }
 
         LazyRow(
+            contentPadding = PaddingValues(horizontal = layout.pageHorizontalPadding),
             horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            item {
+            if (platform != MOBILE || library != null) item {
                 if (showScopeSelector && platform != MOBILE) {
                     LibraryScopeSelector(
                         libraries = libraries,
@@ -437,6 +454,7 @@ private fun MobileLibraryScopeBar(
     }
 
     LazyRow(
+        contentPadding = PaddingValues(horizontal = layout.pageHorizontalPadding),
         horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +65,7 @@ import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
+import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komga.client.series.KomgaSeries
@@ -83,10 +85,16 @@ fun HomeContent(
 ) {
     val gridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
+    val isContentScrolled by remember(gridState) {
+        derivedStateOf {
+            gridState.firstVisibleItemIndex > 0 || gridState.firstVisibleItemScrollOffset > 0
+        }
+    }
     Column {
         Toolbar(
             filters = filters,
             currentFilterNumber = activeFilterNumber,
+            isContentScrolled = isContentScrolled,
             onFilterChange = {
                 onFilterChange(it)
                 coroutineScope.launch { gridState.animateScrollToItem(0) }
@@ -111,6 +119,7 @@ fun HomeContent(
 private fun Toolbar(
     filters: List<HomeFilterData>,
     currentFilterNumber: Int,
+    isContentScrolled: Boolean,
     onFilterChange: (Int) -> Unit,
 ) {
     val layout = LocalKomeliaLayout.current
@@ -140,24 +149,25 @@ private fun Toolbar(
         if (currentFilterNumber != 0 && currentFilter == null) onFilterChange(0)
     }
 
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        AdaptiveHomeGroupBar(
-            filters = nonEmptyFilters,
-            currentFilterNumber = currentFilterNumber,
-            chipColors = chipColors,
-            useBottomSheet = useBottomSheet,
-            pickerOpen = pickerOpen,
-            onPickerOpenChange = { pickerOpen = it },
-            onFilterChange = onFilterChange,
-            modifier = Modifier
-                .widthIn(max = layout.contentMaxWidth)
-                .fillMaxWidth()
-                .padding(
-                    start = layout.pageHorizontalPadding,
-                    end = layout.pageHorizontalPadding,
-                    bottom = layout.itemSpacing,
-                ),
-        )
+    KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            AdaptiveHomeGroupBar(
+                filters = nonEmptyFilters,
+                currentFilterNumber = currentFilterNumber,
+                chipColors = chipColors,
+                useBottomSheet = useBottomSheet,
+                pickerOpen = pickerOpen,
+                onPickerOpenChange = { pickerOpen = it },
+                onFilterChange = onFilterChange,
+                modifier = Modifier
+                    .widthIn(max = layout.contentMaxWidth)
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = layout.pageHorizontalPadding,
+                        vertical = layout.controlSpacing,
+                    ),
+            )
+        }
     }
 }
 
@@ -467,7 +477,7 @@ private fun DisplayContent(
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             contentPadding = PaddingValues(
-                top = layout.sectionSpacing,
+                top = layout.topBarContentSpacing,
                 bottom = layout.gridBottomPadding + layout.sectionSpacing,
             )
         ) {

@@ -22,8 +22,6 @@ import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
@@ -121,12 +119,13 @@ class MainScreen(
             var activeNavigator by remember { mutableStateOf<Navigator?>(null) }
             var activeDestination by remember { mutableStateOf<AppDestination?>(null) }
             var pendingScreen by remember { mutableStateOf<Pair<AppDestination, Screen>?>(null) }
-            val currentTab = rootScreen
-            val taskCount = vm.komgaTaskQueueStatus.collectAsState().value?.count ?: 0
-
+            // TabNavigator.current is the reactive source of truth. LocalNavigator.lastItem
+            // can briefly lag behind a tab selection and caused destination taps to be
+            // interpreted as reselections, most visibly when returning to Home.
+            val currentTab = tabNavigator.current as AppTab
             fun selectDestination(destination: AppDestination, screen: Screen? = null) {
                 val targetTab = tabs.first { it.destination == destination }
-                val selectedDestination = currentTab.destination
+                val selectedDestination = (tabNavigator.current as AppTab).destination
                 if (screen != null) pendingScreen = destination to screen
 
                 if (
@@ -183,7 +182,7 @@ class MainScreen(
                                     tween(motion.duration(motion.containerDurationMillis), easing = motion.standardEasing),
                                 ),
                             ) {
-                                AppBottomBar(currentTab.destination, taskCount, ::selectDestination)
+                                AppBottomBar(currentTab.destination, ::selectDestination)
                             }
                         },
                     ) { contentPadding ->
@@ -201,7 +200,7 @@ class MainScreen(
                                     tween(motion.duration(motion.containerDurationMillis), easing = motion.standardEasing),
                                 ),
                             ) {
-                                AppNavigationRail(currentTab.destination, taskCount, ::selectDestination)
+                                AppNavigationRail(currentTab.destination, ::selectDestination)
                             }
 
                             SingleLayerDestinationTransition(
@@ -404,7 +403,6 @@ private val destinationItems = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun AppBottomBar(
     selected: AppDestination,
-    taskCount: Int,
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
     NavigationBar(
@@ -417,7 +415,7 @@ private fun AppBottomBar(
                 NavigationBarItem(
                     selected = selected == item.destination,
                     onClick = { onSelect(item.destination, null) },
-                    icon = { DestinationIcon(item, taskCount) },
+                    icon = { DestinationIcon(item) },
                     label = { Text(stringResource(item.label)) },
                 )
             }
@@ -429,7 +427,6 @@ private fun AppBottomBar(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun AppNavigationRail(
     selected: AppDestination,
-    taskCount: Int,
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
     NavigationRail(
@@ -441,7 +438,7 @@ private fun AppNavigationRail(
                 NavigationRailItem(
                     selected = selected == item.destination,
                     onClick = { onSelect(item.destination, null) },
-                    icon = { DestinationIcon(item, taskCount) },
+                    icon = { DestinationIcon(item) },
                     label = { Text(stringResource(item.label)) },
                 )
             }
@@ -450,17 +447,6 @@ private fun AppNavigationRail(
 }
 
 @Composable
-private fun DestinationIcon(item: DestinationItem, taskCount: Int) {
-    val icon = @Composable {
-        Icon(item.icon, contentDescription = stringResource(item.label))
-    }
-    if (item.destination == AppDestination.LIBRARY && taskCount > 0) {
-        BadgedBox(
-            badge = {
-                Badge { Text(taskCount.coerceAtMost(99).toString()) }
-            },
-        ) { icon() }
-    } else {
-        icon()
-    }
+private fun DestinationIcon(item: DestinationItem) {
+    Icon(item.icon, contentDescription = stringResource(item.label))
 }

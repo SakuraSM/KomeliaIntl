@@ -22,6 +22,8 @@
     <string name="home_filter_reset_to_default">Reset to default</string>
     <string name="home_filter_reset_to_default_confirm">Reset homescreen filters to default?</string>
     <string name="home_filter_add_filter">Add home group</string>
+    <string name="home_filter_new_book_group">New book group</string>
+    <string name="home_filter_new_series_group">New series group</string>
     <string name="home_filter_groups_description">Drag to reorder. Expand a group to edit what it shows.</string>
     <string name="home_filter_group_summary">%1$s · %2$s</string>
     <string name="home_filter_expand">Expand group</string>
@@ -193,6 +195,7 @@
     <string name="library_reset_metadata">Reset metadata (Komf)</string>
 
     <string name="library_all_libraries">All libraries</string>
+    <string name="library_more">More libraries</string>
     <string name="library_tab_series">Series</string>
     <string name="library_tab_collections">Collections</string>
     <plurals name="library_tab_collections_count">

@@ -42,8 +42,6 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_release_da
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_remote_unavailable
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_size
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_unavailable
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_penciller
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_writers
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
@@ -57,6 +55,7 @@ import snd.komelia.ui.common.components.DetailMetadataRow
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.LabeledEntry.Companion.stringEntry
 import snd.komelia.ui.library.SeriesScreenFilter
+import snd.komelia.ui.strings.enumDisplayResource
 import snd.komga.client.common.KomgaAuthor
 import snd.komga.client.common.KomgaWebLink
 import snd.komga.client.common.coloristRole
@@ -130,19 +129,15 @@ fun BookInfoColumn(
         val authorEntries = remember(authors) {
             authors
                 .groupBy { it.role }
-                .map { (role, authors) ->
-                    role.replaceFirstChar { it.uppercase() } to authors.map { LabeledEntry(it, it.name) }
-                }
+                .toList()
                 .sortedBy { (role, _) -> authorsOrder.indexOf(role.lowercase()) }
         }
         authorEntries.forEach { (role, authors) ->
+            val roleLabel = enumDisplayResource(role.uppercase())?.let { stringResource(it) }
+                ?: role.replaceFirstChar { it.uppercase() }
             DescriptionChips(
-                label = when (role.lowercase()) {
-                    "writer" -> stringResource(Res.string.series_author_writers)
-                    "penciller" -> stringResource(Res.string.series_author_penciller)
-                    else -> role
-                },
-                chipValues = authors,
+                label = roleLabel,
+                chipValues = authors.map { LabeledEntry(it, it.name) },
                 onChipClick = { onFilterClick(SeriesScreenFilter(authors = listOf(it))) },
             )
         }

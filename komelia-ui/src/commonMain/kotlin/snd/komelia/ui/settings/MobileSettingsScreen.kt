@@ -28,6 +28,9 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.common.components.KomeliaTopBarSurface
+import snd.komelia.ui.common.components.komeliaTopBarScroll
+import snd.komelia.ui.common.components.rememberKomeliaTopBarScrollState
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.settings.navigation.SettingsNavigationMenu
 
@@ -40,6 +43,7 @@ class MobileSettingsScreen(
         val viewModelFactory = LocalViewModelFactory.current
         val vm = rememberScreenModel { viewModelFactory.getSettingsNavigationViewModel(currentNavigator) }
         val layout = LocalKomeliaLayout.current
+        val topBarScrollState = rememberKomeliaTopBarScrollState()
         LaunchedEffect(Unit) { vm.initialize() }
 
         Surface(
@@ -49,25 +53,30 @@ class MobileSettingsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = layout.pageHorizontalPadding),
+                    .komeliaTopBarScroll(topBarScrollState),
                 verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = layout.pageVerticalPadding),
-                    horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
-                    verticalAlignment = Alignment.CenterVertically
+                KomeliaTopBarSurface(
+                    isContentScrolled = topBarScrollState.isContentScrolled,
                 ) {
-                    if (!topLevel) {
-                        IconButton(onClick = { currentNavigator.pop() }) {
-                            Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = layout.pageHorizontalPadding)
+                            .padding(vertical = layout.controlSpacing),
+                        horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (!topLevel) {
+                            IconButton(onClick = { currentNavigator.pop() }) {
+                                Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                            }
                         }
+                        Text(
+                            stringResource(Res.string.settings_mobile_title),
+                            style = MaterialTheme.typography.headlineSmall
+                        )
                     }
-                    Text(
-                        stringResource(Res.string.settings_mobile_title),
-                        style = MaterialTheme.typography.headlineSmall
-                    )
                 }
 
                 SettingsNavigationMenu(
@@ -80,7 +89,9 @@ class MobileSettingsScreen(
                     onLogout = vm::logout,
                     user = vm.user.collectAsState().value,
                     contentColor = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = layout.pageHorizontalPadding)
                 )
             }
         }

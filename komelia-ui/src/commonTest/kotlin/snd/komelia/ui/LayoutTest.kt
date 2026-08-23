@@ -8,10 +8,12 @@ import snd.komelia.ui.common.cards.CoverCaptionVariant
 import snd.komelia.ui.common.cards.coverCaptionHeight
 import snd.komelia.ui.common.cards.metadataTagLimit
 import snd.komelia.ui.common.cards.summarizeMetadataTags
+import snd.komelia.ui.common.components.komeliaTopBarElevation
 import snd.komelia.ui.home.calculateHomeGroupOverflowLayout
 import snd.komelia.ui.home.HomeGroupOverflowLayout
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.WindowSizeClass
+import snd.komelia.updates.AppProjectMetadata
 
 class LayoutTest {
     @Test
@@ -44,6 +46,7 @@ class LayoutTest {
 
         assertEquals(12.dp, layout.pageHorizontalPadding)
         assertEquals(12.dp, layout.pageVerticalPadding)
+        assertEquals(12.dp, layout.topBarContentSpacing)
         assertEquals(12.dp, layout.gridSpacing)
         assertEquals(16.dp, layout.sectionSpacing)
         assertEquals(12.dp, layout.itemSpacing)
@@ -59,9 +62,9 @@ class LayoutTest {
         val expanded = komeliaLayoutSpec(PlatformType.DESKTOP, WindowSizeClass.EXPANDED)
         val full = komeliaLayoutSpec(PlatformType.DESKTOP, WindowSizeClass.FULL)
 
-        assertEquals(listOf(16.dp, 16.dp, 16.dp, 20.dp, 12.dp, 8.dp, 16.dp, 20.dp), medium.spacingValues())
-        assertEquals(listOf(24.dp, 20.dp, 16.dp, 24.dp, 12.dp, 8.dp, 16.dp, 24.dp), expanded.spacingValues())
-        assertEquals(listOf(24.dp, 24.dp, 16.dp, 24.dp, 12.dp, 8.dp, 16.dp, 24.dp), full.spacingValues())
+        assertEquals(listOf(16.dp, 16.dp, 16.dp, 16.dp, 20.dp, 12.dp, 8.dp, 16.dp, 20.dp), medium.spacingValues())
+        assertEquals(listOf(24.dp, 20.dp, 16.dp, 16.dp, 24.dp, 12.dp, 8.dp, 16.dp, 24.dp), expanded.spacingValues())
+        assertEquals(listOf(24.dp, 24.dp, 16.dp, 16.dp, 24.dp, 12.dp, 8.dp, 16.dp, 24.dp), full.spacingValues())
         assertEquals(48.dp, medium.minimumTouchTarget)
         assertEquals(40.dp, expanded.minimumTouchTarget)
         assertEquals(1200.dp, full.contentMaxWidth)
@@ -132,6 +135,39 @@ class LayoutTest {
     }
 
     @Test
+    fun detailCoverWidthBalancesCompactAndExpandedLayouts() {
+        assertEquals(136.dp, detailCoverWidth(336.dp, WindowSizeClass.COMPACT))
+        assertEquals(155.2.dp, detailCoverWidth(388.dp, WindowSizeClass.COMPACT))
+        assertEquals(168.dp, detailCoverWidth(568.dp, WindowSizeClass.MEDIUM))
+        assertEquals(220.dp, detailCoverWidth(792.dp, WindowSizeClass.EXPANDED))
+        assertEquals(260.dp, detailCoverWidth(1200.dp, WindowSizeClass.FULL))
+    }
+
+    @Test
+    fun topBarOnlyElevatesAfterContentScrolls() {
+        assertEquals(0.dp, komeliaTopBarElevation(false).tonal)
+        assertEquals(0.dp, komeliaTopBarElevation(false).shadow)
+        assertEquals(1.dp, komeliaTopBarElevation(true).tonal)
+        assertEquals(2.dp, komeliaTopBarElevation(true).shadow)
+    }
+
+    @Test
+    fun appUpdatesUseTheKomeliaIntlRepository() {
+        assertEquals(
+            "https://api.github.com/repos/SakuraSM/KomeliaIntl/releases",
+            AppProjectMetadata.releasesApiUrl,
+        )
+        assertEquals(
+            "https://github.com/SakuraSM/KomeliaIntl",
+            AppProjectMetadata.projectRepositoryUrl,
+        )
+        assertEquals(
+            "https://github.com/Snd-R/Komelia",
+            AppProjectMetadata.upstreamRepositoryUrl,
+        )
+    }
+
+    @Test
     fun metadataTagsWrapWithinAStableVisibleBudget() {
         val summary = summarizeMetadataTags(
             listOf(" 轻小说 ", "冒险", "异世界", "冒险", "暗黑奇幻"),
@@ -146,6 +182,7 @@ class LayoutTest {
 private fun KomeliaLayoutSpec.spacingValues() = listOf(
     pageHorizontalPadding,
     pageVerticalPadding,
+    topBarContentSpacing,
     gridSpacing,
     sectionSpacing,
     itemSpacing,

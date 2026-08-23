@@ -22,6 +22,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -32,6 +35,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
@@ -54,29 +58,38 @@ fun SettingsScreenContainer(
 private fun MobileContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
     val navigator = LocalNavigator.currentOrThrow
     val layout = LocalKomeliaLayout.current
+    val scrollState = rememberScrollState()
+    val isContentScrolled by remember(scrollState) { derivedStateOf { scrollState.value > 0 } }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = layout.pageVerticalPadding),
-            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navigator.pop() }) {
-                Icon(
-                    Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = stringResource(Res.string.navigation_back)
-                )
-            }
+        KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = layout.pageHorizontalPadding)
+                    .padding(vertical = layout.controlSpacing),
+                horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { navigator.pop() }) {
+                    Icon(
+                        Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = stringResource(Res.string.navigation_back)
+                    )
+                }
 
-            Text(title, style = MaterialTheme.typography.titleLarge)
+                Text(title, style = MaterialTheme.typography.titleLarge)
+            }
         }
 
         Column(
-            modifier = Modifier.weight(1f).imePadding().verticalScroll(rememberScrollState())
+            modifier = Modifier
+                .weight(1f)
+                .imePadding()
+                .verticalScroll(scrollState)
+                .padding(horizontal = layout.pageHorizontalPadding)
                 .padding(
-                    horizontal = layout.pageHorizontalPadding,
-                    vertical = layout.pageVerticalPadding,
+                    top = layout.topBarContentSpacing,
+                    bottom = layout.pageVerticalPadding,
                 ),
             verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing),
         ) {

@@ -2,9 +2,11 @@ package snd.komelia.ui.book
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -36,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,8 +63,10 @@ import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.detailCoverWidth
 import snd.komelia.ui.common.BookReadButton
 import snd.komelia.ui.common.components.ExpandableText
+import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.images.BookThumbnail
 import snd.komelia.ui.common.menus.BookActionsMenu
 import snd.komelia.ui.common.menus.BookMenuActions
@@ -99,54 +104,58 @@ fun BookScreenContent(
 
     val scrollState: ScrollState = rememberScrollState()
     val layout = LocalKomeliaLayout.current
+    val isContentScrolled by remember(scrollState) { derivedStateOf { scrollState.value > 0 } }
     Column(modifier = Modifier.fillMaxSize()) {
         if (book == null || library == null) return
-        BookToolBar(
-            book = book,
-            bookMenuActions = bookMenuActions,
-            onBackPress = onBackPress,
-        )
+        KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
+            BookToolBar(
+                book = book,
+                bookMenuActions = bookMenuActions,
+                onBackPress = onBackPress,
+            )
+        }
 
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Column(
                 modifier = Modifier
                     .widthIn(max = layout.contentMaxWidth)
                     .fillMaxWidth()
+                    .padding(horizontal = layout.pageHorizontalPadding)
                     .padding(
-                        horizontal = layout.pageHorizontalPadding,
-                        vertical = layout.pageVerticalPadding,
+                        top = layout.topBarContentSpacing,
+                        bottom = layout.pageVerticalPadding,
                     )
                     .verticalScroll(state = scrollState),
                 verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
                 horizontalAlignment = Alignment.Start
             ) {
-                val coverWidth = when (LocalWindowWidth.current) {
-                    COMPACT, MEDIUM -> 116.dp
-                    EXPANDED, FULL -> 220.dp
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    BookThumbnail(
-                        book.id,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(coverWidth)
-                            .aspectRatio(0.703f)
-                            .clip(MaterialTheme.shapes.medium)
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
-                    )
-                    BookMainInfo(
-                        book = book,
-                        library = library,
-                        onBookReadPress = onBookReadPress,
-                        onSeriesParentSeriesPress = onParentSeriesPress,
-                        onDownload = onBookDownload,
-                        onDownloadDelete = onBookDownloadDelete,
-                        modifier = Modifier.weight(1f),
-                    )
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val coverWidth = detailCoverWidth(maxWidth, LocalWindowWidth.current)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        BookThumbnail(
+                            book.id,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .width(coverWidth)
+                                .aspectRatio(0.703f)
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
+                        )
+                        BookMainInfo(
+                            book = book,
+                            library = library,
+                            onBookReadPress = onBookReadPress,
+                            onSeriesParentSeriesPress = onParentSeriesPress,
+                            onDownload = onBookDownload,
+                            onDownloadDelete = onBookDownloadDelete,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
 
                 if (book.metadata.summary.isNotBlank()) {

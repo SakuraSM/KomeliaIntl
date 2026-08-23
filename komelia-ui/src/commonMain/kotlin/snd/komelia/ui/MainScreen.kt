@@ -74,6 +74,8 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.book.BookScreen
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.collection.CollectionScreen
+import snd.komelia.ui.common.components.komeliaTopBarScroll
+import snd.komelia.ui.common.components.rememberKomeliaTopBarScrollState
 import snd.komelia.ui.home.HomeScreen
 import snd.komelia.ui.library.LibraryScreen
 import snd.komelia.ui.oneshot.OneshotScreen
@@ -119,6 +121,7 @@ class MainScreen(
             var activeNavigator by remember { mutableStateOf<Navigator?>(null) }
             var activeDestination by remember { mutableStateOf<AppDestination?>(null) }
             var pendingScreen by remember { mutableStateOf<Pair<AppDestination, Screen>?>(null) }
+            val topBarScrollState = rememberKomeliaTopBarScrollState()
             // TabNavigator.current is the reactive source of truth. LocalNavigator.lastItem
             // can briefly lag behind a tab selection and caused destination taps to be
             // interpreted as reselections, most visibly when returning to Home.
@@ -144,7 +147,7 @@ class MainScreen(
                 color = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.fillMaxSize(),
             ) {
-                Column {
+                Column(Modifier.komeliaTopBarScroll(topBarScrollState)) {
                     if (platform != MOBILE) {
                         AppBar(
                             canNavigateBack = activeNavigator?.canPop == true,
@@ -162,6 +165,7 @@ class MainScreen(
                             notificationsState = vm.notificationsState,
                             isOffline = vm.isOffline.collectAsState().value,
                             onOfflineModeChange = vm::goOnline,
+                            isContentScrolled = topBarScrollState.isContentScrolled,
                         )
                     }
 

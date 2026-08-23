@@ -1,10 +1,12 @@
 package snd.komelia.ui.settings.offline.logs
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import snd.komelia.offline.sync.model.OfflineLogEntry
 import snd.komelia.offline.sync.repository.LogJournalRepository
+import snd.komelia.ui.LoadState
 
 class OfflineLogsState(
     private val logJournalRepository: LogJournalRepository,
@@ -12,6 +14,7 @@ class OfflineLogsState(
 ) {
 
     val logs = MutableStateFlow<List<OfflineLogEntry>>(emptyList())
+    val loadState = MutableStateFlow<LoadState<Unit>>(LoadState.Uninitialized)
 
     val tab = MutableStateFlow(TaskTab.ERROR)
     val pageNumber = MutableStateFlow(1)
@@ -23,32 +26,33 @@ class OfflineLogsState(
     }
 
     private suspend fun loadTasks() {
-        val pageIndex = pageNumber.value - 1
-        when (tab.value) {
-            TaskTab.INFO -> {
-                val page = logJournalRepository
-                    .findAllByType(
-                        type = OfflineLogEntry.Type.INFO,
-                        limit = pageSize,
-                        offset = pageIndex.toLong() * pageSize
-                    )
-                logs.value = page.content
-                pageNumber.value = page.number + 1
-                totalPages.value = page.totalPages
+        loadState.value = LoadState.Loading
+        try {
+            val pageIndex = pageNumber.value - 1
+            val type = when (tab.value) {
+                TaskTab.INFO -> OfflineLogEntry.Type.INFO
+                TaskTab.ERROR -> OfflineLogEntry.Type.ERROR
             }
-
-            TaskTab.ERROR -> {
-                val page = logJournalRepository
-                    .findAllByType(
-                        type = OfflineLogEntry.Type.ERROR,
-                        limit = pageSize,
-                        offset = (pageIndex).toLong() * pageSize
-                    )
-                logs.value = page.content
-                pageNumber.value = page.number + 1
-                totalPages.value = page.totalPages
-            }
+            val page = logJournalRepository.findAllByType(
+                type = type,
+                limit = pageSize,
+                offset = pageIndex.toLong() * pageSize,
+            )
+            logs.value = page.content
+            pageNumber.value = page.number + 1
+            totalPages.value = page.totalPages
+            loadState.value = LoadState.Success(Unit)
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Throwable) {
+            logs.value = emptyList()
+            totalPages.value = 0
+            loadState.value = LoadState.Error(error)
         }
+    }
+
+    fun retry() {
+        coroutineScope.launch { loadTasks() }
     }
 
     fun onPageChange(page: Int) {
@@ -64,8 +68,15 @@ class OfflineLogsState(
 
     fun onLogsDelete() {
         coroutineScope.launch {
-            logJournalRepository.deleteAll()
-            loadTasks()
+            try {
+                logJournalRepository.deleteAll()
+                pageNumber.value = 1
+                loadTasks()
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (error: Throwable) {
+                loadState.value = LoadState.Error(error)
+            }
         }
     }
 

@@ -34,7 +34,10 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offlin
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.DefaultDateTimeFormats.toSystemTimeString
 import snd.komelia.offline.sync.model.OfflineLogEntry
+import snd.komelia.ui.LoadState
 import snd.komelia.ui.common.components.AppFilterChipDefaults
+import snd.komelia.ui.common.components.ErrorContent
+import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.settings.offline.logs.OfflineLogsState.TaskTab
@@ -42,28 +45,52 @@ import snd.komelia.ui.settings.offline.logs.OfflineLogsState.TaskTab
 @Composable
 fun OfflineLogsContent(
     logs: List<OfflineLogEntry>,
+    loadState: LoadState<Unit>,
     totalPages: Int,
     currentPage: Int,
     onPageChange: (Int) -> Unit,
     selectedTab: TaskTab,
     onTabSelect: (TaskTab) -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         StatusFilters(selectedTab, onTabSelect, onDelete)
 
+        when (loadState) {
+            is LoadState.Error -> ErrorContent(loadState.exception, onReload = onRetry)
+            LoadState.Loading, LoadState.Uninitialized -> LoadingMaxSizeIndicator()
+            is LoadState.Success -> LogResults(
+                logs = logs,
+                totalPages = totalPages,
+                currentPage = currentPage,
+                onPageChange = onPageChange,
+            )
+        }
+
+        Spacer(Modifier.height(30.dp))
+    }
+}
+
+@Composable
+private fun LogResults(
+    logs: List<OfflineLogEntry>,
+    totalPages: Int,
+    currentPage: Int,
+    onPageChange: (Int) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Pagination(
             totalPages = totalPages,
             currentPage = currentPage,
             onPageChange = onPageChange,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier.align(Alignment.CenterHorizontally),
         )
 
         if (logs.isEmpty()) {
             Text(stringResource(Res.string.settings_offline_mode_logs_nothing_to_show))
         } else {
             LogsContent(logs)
-
         }
 
         if (logs.size > 10) {
@@ -75,7 +102,6 @@ fun OfflineLogsContent(
             )
         }
 
-        Spacer(Modifier.height(30.dp))
     }
 }
 

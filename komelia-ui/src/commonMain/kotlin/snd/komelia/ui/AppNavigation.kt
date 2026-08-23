@@ -1,5 +1,6 @@
 package snd.komelia.ui
 
+import cafe.adriel.voyager.navigator.Navigator
 import snd.komelia.ui.platform.WindowSizeClass
 import snd.komga.client.library.KomgaLibraryId
 
@@ -40,6 +41,22 @@ internal fun screenTransitionAction(
     displayedScreenKey == targetScreenKey -> ScreenTransitionAction.NoChange
     else -> ScreenTransitionAction.AnimateChange
 }
+
+internal fun immersiveScreenSaveableStateKey(screenKey: String): String =
+    "immersive-screen:$screenKey"
+
+internal fun <T> outermostNavigationTarget(
+    current: T,
+    parentOf: (T) -> T?,
+): T {
+    var target = current
+    while (true) {
+        target = parentOf(target) ?: return target
+    }
+}
+
+internal fun Navigator.appRootNavigator(): Navigator =
+    outermostNavigationTarget(this) { it.parent }
 
 fun destinationSelection(
     current: AppDestination,

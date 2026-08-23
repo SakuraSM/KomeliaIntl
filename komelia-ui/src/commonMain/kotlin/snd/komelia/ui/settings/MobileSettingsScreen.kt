@@ -27,6 +27,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile_title
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.appRootNavigator
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.komeliaTopBarScroll
@@ -41,7 +42,9 @@ class MobileSettingsScreen(
     override fun Content() {
         val currentNavigator = LocalNavigator.currentOrThrow
         val viewModelFactory = LocalViewModelFactory.current
-        val vm = rememberScreenModel { viewModelFactory.getSettingsNavigationViewModel(currentNavigator) }
+        val vm = rememberScreenModel {
+            viewModelFactory.getSettingsNavigationViewModel(currentNavigator.appRootNavigator())
+        }
         val layout = LocalKomeliaLayout.current
         val topBarScrollState = rememberKomeliaTopBarScrollState()
         LaunchedEffect(Unit) { vm.initialize() }

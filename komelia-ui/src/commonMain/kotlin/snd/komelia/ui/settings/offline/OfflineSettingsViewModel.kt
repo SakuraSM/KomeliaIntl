@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import snd.komelia.AppNotifications
 import snd.komelia.KomgaAuthenticationState
 import snd.komelia.offline.server.actions.MediaServerDeleteAction
+import snd.komelia.offline.api.OfflineLibraryApi
 import snd.komelia.offline.server.repository.OfflineMediaServerRepository
 import snd.komelia.offline.settings.OfflineSettingsRepository
 import snd.komelia.offline.sync.model.DownloadEvent
@@ -25,6 +26,7 @@ class OfflineSettingsViewModel(
     private val offlineSettingsRepository: OfflineSettingsRepository,
     private val userRepository: OfflineUserRepository,
     private val serverRepository: OfflineMediaServerRepository,
+    private val offlineLibraryApi: OfflineLibraryApi,
     private val logJournalRepository: LogJournalRepository,
     private val serverDeleteAction: MediaServerDeleteAction,
     private val userDeleteAction: UserDeleteAction,
@@ -40,6 +42,8 @@ class OfflineSettingsViewModel(
         offlineSettingsRepository = offlineSettingsRepository,
         userRepository = userRepository,
         serverRepository = serverRepository,
+        offlineLibraryApi = offlineLibraryApi,
+        logJournalRepository = logJournalRepository,
         coroutineScope = screenModelScope,
         userDeleteAction = userDeleteAction,
         serverDeleteAction = serverDeleteAction
@@ -57,8 +61,8 @@ class OfflineSettingsViewModel(
         coroutineScope = screenModelScope,
     )
 
-    suspend fun initialize(navigator: Navigator) {
-        usersState.initialize(navigator)
+    suspend fun initialize(rootNavigator: Navigator) {
+        usersState.initialize(rootNavigator)
         logsState.initialize()
     }
 }

@@ -271,6 +271,7 @@ class ViewModelFactory(
             offlineServerRepository = dependencies.offlineDependencies?.repositories?.mediaServerRepository,
             offlineSettingsRepository = dependencies.offlineDependencies?.repositories?.offlineSettingsRepository,
             offlineLibraryApi = dependencies.offlineDependencies?.komgaApi?.libraryApi,
+            logJournalRepository = dependencies.offlineDependencies?.repositories?.logJournalRepository,
         )
     }
 
@@ -454,6 +455,7 @@ class ViewModelFactory(
             komgaSharedState = dependencies.komgaSharedState,
             secretsRepository = appRepositories.secretsRepository,
             offlineSettingsRepository = dependencies.offlineDependencies?.repositories?.offlineSettingsRepository,
+            logJournalRepository = dependencies.offlineDependencies?.repositories?.logJournalRepository,
             isOffline = dependencies.isOffline,
             currentServerUrl = appRepositories.settingsRepository.getServerUrl(),
             bookApi = komgaApi.bookApi,
@@ -692,6 +694,7 @@ class ViewModelFactory(
             offlineSettingsRepository = offlineDependencies.repositories.offlineSettingsRepository,
             userRepository = offlineDependencies.repositories.userRepository,
             serverRepository = offlineDependencies.repositories.mediaServerRepository,
+            offlineLibraryApi = offlineDependencies.komgaApi.libraryApi,
             logJournalRepository = offlineDependencies.repositories.logJournalRepository,
             serverDeleteAction = offlineDependencies.actions.get(),
             userDeleteAction = offlineDependencies.actions.get(),
@@ -711,6 +714,7 @@ class ViewModelFactory(
             serverRepository = offlineDependencies.repositories.mediaServerRepository,
             komgaAuthState = dependencies.komgaSharedState,
             offlineLibraryApi = offlineDependencies.komgaApi.libraryApi,
+            logJournalRepository = offlineDependencies.repositories.logJournalRepository,
             serverDeleteAction = offlineDependencies.actions.get(),
             userDeleteAction = offlineDependencies.actions.get(),
         )

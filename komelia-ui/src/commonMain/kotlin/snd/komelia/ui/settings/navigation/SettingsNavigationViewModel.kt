@@ -16,9 +16,12 @@ import snd.komelia.KomgaAuthenticationState
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaUserApi
 import snd.komelia.offline.settings.OfflineSettingsRepository
+import snd.komelia.offline.sync.model.OfflineLogEntry
+import snd.komelia.offline.sync.repository.LogJournalRepository
 import snd.komelia.settings.SecretsRepository
 import snd.komelia.ui.komf.KomfMainScreen
 import snd.komelia.ui.login.LoginScreen
+import snd.komelia.ui.settings.offline.OfflineOperationLogger
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
@@ -36,6 +39,7 @@ class SettingsNavigationViewModel(
     private val komgaSharedState: KomgaAuthenticationState,
     private val secretsRepository: SecretsRepository,
     private val offlineSettingsRepository: OfflineSettingsRepository?,
+    logJournalRepository: LogJournalRepository?,
     private val isOffline: StateFlow<Boolean>,
     private val currentServerUrl: Flow<String>,
     private val bookApi: KomgaBookApi,
@@ -45,6 +49,9 @@ class SettingsNavigationViewModel(
     val user: StateFlow<KomgaUser?>,
     komfEnabled: Flow<Boolean>,
 ) : ScreenModel {
+    private val offlineOperationLogger = logJournalRepository?.let {
+        OfflineOperationLogger(it, screenModelScope)
+    }
     var hasMediaErrors by mutableStateOf(false)
         private set
     var newVersionIsAvailable by mutableStateOf(false)
@@ -69,8 +76,16 @@ class SettingsNavigationViewModel(
     }
 
     fun logout() {
-        appNotifications.runCatchingToNotifications(screenModelScope) {
-            if (isOffline.value) {
+        val offlineLogout = isOffline.value
+        appNotifications.runCatchingToNotifications(
+            coroutineScope = screenModelScope,
+            onFailure = { error ->
+                if (offlineLogout) {
+                    offlineOperationLogger?.record(OfflineLogEntry.Operation.LOGOUT, error)
+                }
+            },
+        ) {
+            if (offlineLogout) {
                 checkNotNull(offlineSettingsRepository).putOfflineMode(false)
             } else {
                 runCatching { userApi.logout() }

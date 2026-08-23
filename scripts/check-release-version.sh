@@ -9,15 +9,19 @@ APP_VERSION_TEST_FILE="$ROOT_DIR/komelia-ui/src/commonTest/kotlin/snd/komelia/ui
 
 expected_version=""
 release_tag=""
+previous_version=""
+release_level=""
 
 usage() {
   cat <<'EOF'
 Usage: scripts/check-release-version.sh [options]
 
 Options:
-  --version X.Y.Z  Require this application version.
-  --tag vX.Y.Z     Require this release tag to match the application version.
-  -h, --help       Show this help.
+  --version X.Y.Z   Require this application version.
+  --tag vX.Y.Z      Require this release tag to match the application version.
+  --previous X.Y.Z  Previous stable release version. Use with --level.
+  --level LEVEL     Require an exact patch, minor, or major increment from --previous.
+  -h, --help        Show this help.
 EOF
 }
 
@@ -29,6 +33,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --tag)
       release_tag="${2:-}"
+      shift 2
+      ;;
+    --previous)
+      previous_version="${2:-}"
+      shift 2
+      ;;
+    --level)
+      release_level="${2:-}"
       shift 2
       ;;
     -h|--help)
@@ -81,6 +93,17 @@ fi
 if [[ -n "$release_tag" && "$release_tag" != "v$catalog_version" ]]; then
   echo "Release tag mismatch: tag=$release_tag, expected=v$catalog_version" >&2
   exit 1
+fi
+
+if [[ -n "$previous_version" || -n "$release_level" ]]; then
+  if [[ -z "$previous_version" || -z "$release_level" ]]; then
+    echo "--previous and --level must be used together." >&2
+    exit 2
+  fi
+  "$ROOT_DIR/scripts/check-semver-bump.sh" \
+    --previous "$previous_version" \
+    --next "$catalog_version" \
+    --level "$release_level"
 fi
 
 echo "Release version check passed: v$catalog_version (Android versionCode $version_code)"

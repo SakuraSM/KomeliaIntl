@@ -32,6 +32,7 @@ import cafe.adriel.voyager.transitions.CrossfadeTransition
 import kotlinx.coroutines.flow.SharedFlow
 import snd.komelia.ui.LocalKeyEvents
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.appRootNavigator
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.cursorForHand
@@ -50,7 +51,9 @@ class SettingsScreen(
         val currentNavigator = LocalNavigator.currentOrThrow
         val viewModelFactory = LocalViewModelFactory.current
         val keyEvents: SharedFlow<KeyEvent> = LocalKeyEvents.current
-        val vm = rememberScreenModel { viewModelFactory.getSettingsNavigationViewModel(currentNavigator) }
+        val vm = rememberScreenModel {
+            viewModelFactory.getSettingsNavigationViewModel(currentNavigator.appRootNavigator())
+        }
 
         LaunchedEffect(Unit) { vm.initialize() }
         LaunchedEffect(Unit) {

@@ -81,8 +81,7 @@ private fun Screen.FilterEditScreenContent(
                 onExit = ::exitEditor,
                 onEditEnd = {
                     coroutineScope.launch {
-                        vm.onEditEnd()
-                        exitEditor()
+                        if (vm.onEditEnd().isSuccess) exitEditor()
                     }
                 },
                 onFilterAdd = { type ->

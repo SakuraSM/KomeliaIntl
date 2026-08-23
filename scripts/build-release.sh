@@ -32,7 +32,7 @@ Options:
 Examples:
   scripts/build-release.sh
   scripts/build-release.sh --bump minor
-  scripts/build-release.sh --version 0.19.0 --version-code 20 --bundle --variant play
+  scripts/build-release.sh --bump minor --version 0.19.0 --version-code 20 --bundle --variant play
 EOF
 }
 
@@ -136,6 +136,11 @@ if [[ ! "$target_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 
 IFS='.' read -r target_major target_minor target_patch <<<"$target_version"
+
+"$ROOT_DIR/scripts/check-semver-bump.sh" \
+  --previous "$current_version" \
+  --next "$target_version" \
+  --level "$bump"
 
 if [[ -z "$target_version_code" ]]; then
   target_version_code=$((current_version_code + 1))

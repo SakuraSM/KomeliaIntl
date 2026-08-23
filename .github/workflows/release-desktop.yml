@@ -7,6 +7,14 @@ on:
         description: Existing draft release tag, for example v0.18.12
         required: true
         type: string
+      level:
+        description: Semantic version increment from the previous stable Release
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
       platform:
         description: Desktop platform to build
         required: true
@@ -33,9 +41,23 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_LEVEL: ${{ inputs.level }}
         run: |
-          scripts/check-release-version.sh --tag "$RELEASE_TAG"
-          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY"
+          scripts/test-release-policy.sh
+          previous_tag=$(gh release list --repo "$GITHUB_REPOSITORY" \
+            --exclude-drafts --exclude-pre-releases --limit 1 \
+            --json tagName --jq '.[0].tagName')
+          test -n "$previous_tag"
+          scripts/check-release-version.sh \
+            --tag "$RELEASE_TAG" \
+            --previous "${previous_tag#v}" \
+            --level "$RELEASE_LEVEL"
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --json body --jq .body > /tmp/komelia-release-notes.md
+          scripts/check-release-notes.sh \
+            --file /tmp/komelia-release-notes.md \
+            --version "${RELEASE_TAG#v}" \
+            --level "$RELEASE_LEVEL"
 
   linux:
     needs: validate

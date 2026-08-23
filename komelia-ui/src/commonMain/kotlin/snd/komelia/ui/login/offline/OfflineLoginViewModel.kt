@@ -4,7 +4,6 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import snd.komelia.AppNotifications
 import snd.komelia.KomgaAuthenticationState
 import snd.komelia.offline.api.OfflineLibraryApi
@@ -13,10 +12,13 @@ import snd.komelia.offline.server.model.OfflineMediaServer
 import snd.komelia.offline.server.model.OfflineMediaServerId
 import snd.komelia.offline.server.repository.OfflineMediaServerRepository
 import snd.komelia.offline.settings.OfflineSettingsRepository
+import snd.komelia.offline.sync.model.OfflineLogEntry
+import snd.komelia.offline.sync.repository.LogJournalRepository
 import snd.komelia.offline.user.actions.UserDeleteAction
 import snd.komelia.offline.user.model.OfflineUser
 import snd.komelia.offline.user.repository.OfflineUserRepository
 import snd.komelia.ui.MainScreen
+import snd.komelia.ui.settings.offline.OfflineOperationLogger
 import snd.komga.client.user.KomgaUserId
 
 class OfflineLoginViewModel(
@@ -26,9 +28,11 @@ class OfflineLoginViewModel(
     private val serverRepository: OfflineMediaServerRepository,
     private val komgaAuthState: KomgaAuthenticationState,
     private val offlineLibraryApi: OfflineLibraryApi,
+    logJournalRepository: LogJournalRepository,
     private val serverDeleteAction: MediaServerDeleteAction,
     private val userDeleteAction: UserDeleteAction,
 ) : ScreenModel {
+    private val operationLogger = OfflineOperationLogger(logJournalRepository, screenModelScope)
 
     val offlineUsers = MutableStateFlow<Map<OfflineMediaServer, List<OfflineUser>>>(emptyMap())
     private val navigator = MutableStateFlow<Navigator?>(null)
@@ -45,8 +49,11 @@ class OfflineLoginViewModel(
     }
 
     fun loginAs(userId: KomgaUserId) {
-        appNotifications.runCatchingToNotifications(screenModelScope) {
-            val user = userRepository.get(userId)
+        appNotifications.runCatchingToNotifications(
+            coroutineScope = screenModelScope,
+            onFailure = { operationLogger.record(OfflineLogEntry.Operation.LOGIN, it) },
+        ) {
+            val user = if (userId == OfflineUser.ROOT) OfflineUser.ROOT_USER else userRepository.get(userId)
             offlineSettingsRepository.putUserId(user.id)
             offlineSettingsRepository.putOfflineMode(true)
             komgaAuthState.setStateValues(user.toKomgaUser(), offlineLibraryApi.getLibraries())
@@ -55,14 +62,20 @@ class OfflineLoginViewModel(
     }
 
     fun onServerDelete(serverId: OfflineMediaServerId) {
-        screenModelScope.launch {
+        appNotifications.runCatchingToNotifications(
+            coroutineScope = screenModelScope,
+            onFailure = { operationLogger.record(OfflineLogEntry.Operation.DELETE_SERVER, it) },
+        ) {
             serverDeleteAction.execute(serverId)
             loadServers()
         }
     }
 
     fun onUserDelete(userId: KomgaUserId) {
-        screenModelScope.launch {
+        appNotifications.runCatchingToNotifications(
+            coroutineScope = screenModelScope,
+            onFailure = { operationLogger.record(OfflineLogEntry.Operation.DELETE_USER, it) },
+        ) {
             userDeleteAction.execute(userId)
             loadServers()
         }

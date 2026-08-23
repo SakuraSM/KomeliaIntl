@@ -5,6 +5,14 @@
 - Do not prefix branch names with `codex`.
 - Follow an existing repository branch pattern. Use `fix/`, `feat/`, or `docs/` when no narrower pattern exists.
 
+## Development workflow
+
+- Follow [Develop and ship a Komelia change](docs/maintainers/development-harness.md).
+- Use one isolated worktree for each task. Do not mix unrelated platform work in one worktree or pull request.
+- Reproduce a defect and add a regression test before changing production code when the failure can be tested.
+- Run the checks required for every changed platform before you report completion.
+- Use `.github/pull_request_template.md` for every pull request.
+
 ## Release versions
 
 - Use stable Semantic Versioning tags in the form `vMAJOR.MINOR.PATCH`.
@@ -15,4 +23,5 @@
 - Do not reuse or modify a published tag. Publish a new patch version for a correction.
 - Run `scripts/check-release-version.sh` and `scripts/check-release-notes.sh` before publication.
 - Write Release notes in paired Chinese and English entries with `.github/RELEASE_TEMPLATE.md`.
+- Keep Release notes limited to user-visible changes. Do not add test logs, implementation details, omitted platforms, a full changelog, or repository attribution.
 - Keep fixed issues open until the Release and its listed artifacts are published and verified.

@@ -8,11 +8,10 @@ Choose the version with [Version releases](versioning.md) before you prepare the
 
 1. Copy `.github/RELEASE_TEMPLATE.md` to a temporary notes file.
 2. Replace every `{{PLACEHOLDER}}`.
-3. Describe every user-visible change in paired Chinese and English entries. Do not list internal refactors unless users need the information to upgrade or troubleshoot.
-4. List only the packages attached to this Release. Write `Not included in this Release` for a platform without an asset.
-5. Include the SHA-256 digest for each attached package.
-6. Link the comparison between the previous tag and the new tag in **Full changelog**.
-7. Run the policy test and both checks:
+3. Describe user-visible changes in paired Chinese and English entries. Combine closely related fixes into one entry.
+4. Include an Issue or pull request number in the change entry when it helps users find details.
+5. Keep test commands, internal refactors, omitted platforms, the full changelog, and repository attribution out of the Release body.
+6. Run the policy test and both checks:
 
    ```shell
    scripts/test-release-policy.sh
@@ -22,9 +21,9 @@ Choose the version with [Version releases](versioning.md) before you prepare the
 
    Replace `LEVEL` with `patch`, `minor`, or `major`.
 
-8. Create a draft Release first. Attach and verify the assets before publication.
+7. Create a draft Release first. Attach and verify the packages before publication. GitHub displays the attached packages outside the Release body.
 
-GitHub uses `.github/release.yml` when maintainers generate release notes. Its bilingual categories match the headings in `.github/RELEASE_TEMPLATE.md`.
+`.github/RELEASE_TEMPLATE.md` is the canonical format. If a maintainer generates notes with GitHub, remove documentation, dependency maintenance, test details, and other changes that users do not need.
 
 ## Reply to a fixed issue
 

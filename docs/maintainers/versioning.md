@@ -24,8 +24,6 @@ The project currently uses `0.x` versions. During this period, use a minor relea
 - A database reset, incompatible stored-data change, removed platform, or incompatible protocol change requires the breaking-change rule.
 - Documentation and CI changes do not require a Release by themselves. If maintainers publish them with app changes, they follow the app change's level.
 
-For the fixes on `fix/offline-home-regressions`, the next Release after `0.18.16` is `0.18.17`.
-
 ## Validate the version
 
 Build the next patch version with the default command:

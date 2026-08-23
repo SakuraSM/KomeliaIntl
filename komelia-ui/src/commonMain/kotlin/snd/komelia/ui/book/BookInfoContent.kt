@@ -49,6 +49,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.DefaultDateTimeFormats.localDateTimeFormat
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.common.TagList
 import snd.komelia.ui.common.components.DescriptionChips
 import snd.komelia.ui.common.components.DetailMetadataRow
@@ -92,7 +93,7 @@ fun BookInfoColumn(
     fileUrl: String,
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.extraSmall)) {
         if (!publisher.isNullOrBlank()) {
             DescriptionChips(
                 label = stringResource(Res.string.book_publisher),
@@ -246,7 +247,7 @@ fun BookInfoRow(
 
         Spacer(Modifier.heightIn(5.dp))
         SelectionContainer {
-            Column {
+            Column(verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.extraSmall)) {
                 book.metadata.releaseDate?.let {
                     DetailMetadataRow(stringResource(Res.string.book_release_date)) {
                         Text(

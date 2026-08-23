@@ -79,6 +79,10 @@ compose.desktop {
     }
 }
 
+tasks.matching { it.name.startsWith("packageRelease") }.configureEach {
+    dependsOn(rootProject.tasks.named("releaseVersionCheck"))
+}
+
 tasks.withType<Zip>().named {
     it.matches(Regex("package(Release)?UberJarForCurrentOS"))
 }.configureEach {

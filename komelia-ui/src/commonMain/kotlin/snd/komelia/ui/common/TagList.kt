@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_tags
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_tags_other
@@ -15,6 +14,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.tag_group
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.tag_male
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.tag_parody
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.common.components.DescriptionChips
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.LabeledEntry.Companion.stringEntry
@@ -26,7 +26,7 @@ fun TagList(
     onTagClick: (String) -> Unit = {}
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.extraSmall)
     ) {
         val mutableTagList = remember(tags) { tags.toMutableList() }
         val mutableSecondaryTagList = remember(secondaryTags) { secondaryTags?.toMutableList() }

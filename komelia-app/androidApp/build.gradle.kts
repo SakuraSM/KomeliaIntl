@@ -150,3 +150,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
+
+tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }.configureEach {
+    dependsOn(rootProject.tasks.named("releaseVersionCheck"))
+}

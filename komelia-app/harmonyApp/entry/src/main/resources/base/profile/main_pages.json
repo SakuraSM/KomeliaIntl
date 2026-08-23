@@ -3,6 +3,16 @@
     "pages/Index",
     "pages/SeriesDetail",
     "pages/BookDetail",
+    "pages/CollectionDetail",
+    "pages/ReadListDetail",
+    "pages/OfflineDownloads",
+    "pages/Management",
+    "pages/KomfSettings",
+    "pages/AppearanceSettings",
+    "pages/HomeGroupSettings",
+    "pages/ServerManagement",
+    "pages/ImageReaderSettings",
+    "pages/EpubSettings",
     "pages/ImageReader",
     "pages/EpubReader"
   ]

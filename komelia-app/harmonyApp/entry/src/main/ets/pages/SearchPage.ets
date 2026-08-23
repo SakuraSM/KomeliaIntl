@@ -1,8 +1,8 @@
 import { router } from '@kit.ArkUI';
 import { BookCard, SeriesCard } from '../components/CoverCards';
 import { EmptyState, LoadingState, PageTitle } from '../components/CommonUi';
+import { catalogRepository } from '../data/repository/DefaultRepositories';
 import { KomgaBook, KomgaSeries } from '../model/KomgaModels';
-import { komgaClient } from '../network/KomgaClient';
 
 @Component
 export struct SearchPage {
@@ -23,9 +23,9 @@ export struct SearchPage {
     this.isLoading = true;
     try {
       if (this.selectedType === 0) {
-        this.series = (await komgaClient.searchSeries(value, 0, 60)).content;
+        this.series = (await catalogRepository.series(value, 0, 60)).content;
       } else {
-        this.books = (await komgaClient.searchBooks(value, 0, 60)).content;
+        this.books = (await catalogRepository.books(value, 0, 60)).content;
       }
     } finally {
       this.isLoading = false;

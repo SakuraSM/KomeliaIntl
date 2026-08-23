@@ -1,7 +1,10 @@
-import { image } from '@kit.ImageKit';
 import { router } from '@kit.ArkUI';
+import { namespaceOf, OfflinePageRecord } from '../data/local/DatabaseModels';
+import { offlineRepository } from '../data/repository/DefaultRepositories';
+import { readerEngine } from '../domain/service/ReaderEngine';
 import { KomgaBookPage } from '../model/KomgaModels';
 import { komgaClient } from '../network/KomgaClient';
+import { AppState } from '../state/AppState';
 
 interface ReaderParams {
   bookId: string;
@@ -10,6 +13,7 @@ interface ReaderParams {
 
 @Component
 struct RemotePage {
+  @Prop namespace: string;
   @Prop bookId: string;
   @Prop page: number;
   @State source: PixelMap | Resource = $r('app.media.app_icon');
@@ -21,10 +25,7 @@ struct RemotePage {
 
   private async load(): Promise<void> {
     try {
-      const bytes = await komgaClient.getBookPage(this.bookId, this.page);
-      const imageSource = image.createImageSource(bytes);
-      this.source = await imageSource.createPixelMap({ editable: false });
-      imageSource.release();
+      this.source = await readerEngine.pageSource(this.namespace, this.bookId, this.page);
     } finally {
       this.loading = false;
     }
@@ -51,12 +52,15 @@ struct ImageReader {
   @State chromeVisible: boolean = true;
   @State isLoading: boolean = true;
   private bookId: string = '';
+  private namespace: string = '';
   private swiperController: SwiperController = new SwiperController();
   private hideTimer: number = -1;
 
   aboutToAppear(): void {
     const params = router.getParams() as ReaderParams;
     this.bookId = params.bookId;
+    const key = AppState.getInstance().namespace;
+    this.namespace = key === undefined ? '' : namespaceOf(key);
     this.currentPage = Math.max(0, params.initialPage || 0);
     this.load();
     this.scheduleHide();
@@ -68,7 +72,17 @@ struct ImageReader {
 
   private async load(): Promise<void> {
     try {
-      this.pages = await komgaClient.getBookPages(this.bookId);
+      try {
+        this.pages = await komgaClient.getBookPages(this.bookId);
+      } catch (_) {
+        const localPages = await offlineRepository.listPages(this.namespace, this.bookId);
+        this.pages = localPages.map((page: OfflinePageRecord) => ({
+          number: page.pageNumber,
+          fileName: page.localPath,
+          mediaType: page.mediaType,
+          sizeBytes: page.sizeBytes
+        }));
+      }
     } finally {
       this.isLoading = false;
     }
@@ -91,13 +105,13 @@ struct ImageReader {
       } else {
         Swiper(this.swiperController) {
           ForEach(this.pages, (page: KomgaBookPage) => {
-            RemotePage({ bookId: this.bookId, page: page.number })
+            RemotePage({ namespace: this.namespace, bookId: this.bookId, page: page.number })
           }, (page: KomgaBookPage) => `${page.number}`)
         }
         .index(this.currentPage).indicator(false).loop(false).width('100%').height('100%')
         .onChange((index: number) => {
           this.currentPage = index;
-          komgaClient.updateReadProgress(this.bookId, index, index === this.pages.length - 1);
+          readerEngine.updateProgress(this.namespace, this.bookId, index, index === this.pages.length - 1);
         })
         .onClick(() => this.toggleChrome())
       }

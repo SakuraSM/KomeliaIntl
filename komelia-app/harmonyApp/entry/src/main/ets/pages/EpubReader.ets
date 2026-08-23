@@ -26,6 +26,8 @@ struct EpubReader {
   @State catalog: bookParser.CatalogItem[] = [];
   @State fontSize: number = 18;
   @State lineHeight: number = 1.8;
+  @State horizontalMargin: number = 16;
+  @State paginated: boolean = true;
   @State nightMode: boolean = false;
   private bookId: string = '';
   private localPath: string = '';
@@ -66,6 +68,19 @@ struct EpubReader {
 
   private async prepareAndStart(): Promise<void> {
     try {
+      const readerPreferences = await Promise.all([
+        AppPreferences.getString('epub.fontSize', '18'),
+        AppPreferences.getString('epub.lineHeight', '1.8'),
+        AppPreferences.getString('epub.margin', '16'),
+        AppPreferences.getBoolean('epub.paginated', true)
+      ]);
+      this.fontSize = Number(readerPreferences[0]);
+      this.lineHeight = Number(readerPreferences[1]);
+      this.horizontalMargin = Number(readerPreferences[2]);
+      this.paginated = readerPreferences[3];
+      this.readerSetting.fontSize = this.fontSize;
+      this.readerSetting.lineHeight = this.lineHeight;
+      this.readerSetting.flipMode = this.paginated ? '1' : '0';
       const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
       const directory = `${context.filesDir}/reader`;
       try {
@@ -141,12 +156,17 @@ struct EpubReader {
     this.readerSetting.fontSize = this.fontSize;
     this.readerSetting.lineHeight = this.lineHeight;
     this.readerSetting.nightMode = this.nightMode;
+    this.readerSetting.flipMode = this.paginated ? '1' : '0';
     this.readerSetting.fontColor = this.nightMode ? '#F2EEF8' : '#202027';
     this.readerSetting.themeColor = this.nightMode ? '#121217' : '#FAF9FE';
     try {
       this.controller.setPageConfig(this.readerSetting);
     } catch (_) {
     }
+    AppPreferences.putString('epub.fontSize', `${this.fontSize}`);
+    AppPreferences.putString('epub.lineHeight', `${this.lineHeight}`);
+    AppPreferences.putString('epub.margin', `${this.horizontalMargin}`);
+    AppPreferences.putBoolean('epub.paginated', this.paginated);
   }
 
   private async openCatalogItem(item: bookParser.CatalogItem): Promise<void> {
@@ -182,6 +202,15 @@ struct EpubReader {
       Slider({ value: this.lineHeight, min: 1.2, max: 2.4, step: 0.1 })
         .selectedColor($r('app.color.primary'))
         .onChange((value: number) => { this.lineHeight = value; this.applySettings(); })
+      Text(`页边距 ${this.horizontalMargin}`).fontSize(15).width('100%')
+      Slider({ value: this.horizontalMargin, min: 0, max: 48, step: 4 })
+        .selectedColor($r('app.color.primary'))
+        .onChange((value: number) => { this.horizontalMargin = value; this.applySettings(); })
+      Row() {
+        Text('横滑翻页').fontSize(16).layoutWeight(1)
+        Toggle({ type: ToggleType.Switch, isOn: this.paginated })
+          .onChange((value: boolean) => { this.paginated = value; this.applySettings(); })
+      }.width('100%')
       Row() {
         Text('深色阅读背景').fontSize(16).layoutWeight(1)
         Toggle({ type: ToggleType.Switch, isOn: this.nightMode })
@@ -200,7 +229,9 @@ struct EpubReader {
           if (!error) this.controller = controller;
         }
       })
-      .width('100%').height('100%').onClick(() => this.toggleChrome())
+      .width('100%').height('100%')
+      .padding({ left: this.horizontalMargin, right: this.horizontalMargin })
+      .onClick(() => this.toggleChrome())
 
       if (this.isLoading) {
         Column({ space: 12 }) {

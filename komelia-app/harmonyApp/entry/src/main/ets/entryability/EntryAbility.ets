@@ -1,14 +1,16 @@
 import { AbilityConstant, Configuration, UIAbility, Want, common } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
-import { AppPreferences } from '../persistence/AppPreferences';
+import { AppContainer } from '../core/di/AppContainer';
 
 const DOMAIN = 0x0000;
 const TAG = 'KomeliaEntryAbility';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
-    AppPreferences.initialize(this.context as common.UIAbilityContext);
+    AppContainer.initialize(this.context as common.UIAbilityContext).catch((error: Error) => {
+      hilog.error(DOMAIN, TAG, `Failed to initialize native data layer: ${error.message}`);
+    });
     AppStorage.setOrCreate('colorMode', this.context.config.colorMode);
     hilog.info(DOMAIN, TAG, 'Komelia HarmonyOS ability created');
   }

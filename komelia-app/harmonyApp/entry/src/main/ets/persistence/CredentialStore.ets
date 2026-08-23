@@ -7,7 +7,7 @@ export interface StoredCredential {
   password: string;
 }
 
-const CREDENTIAL_ALIAS = 'komelia.komga.credentials';
+const CREDENTIAL_ALIAS_PREFIX = 'komelia.komga.credentials';
 
 function encode(value: string): Uint8Array {
   return new util.TextEncoder().encodeInto(value);
@@ -18,19 +18,23 @@ function decode(value: Uint8Array): string {
 }
 
 export class CredentialStore {
-  static async save(value: StoredCredential): Promise<void> {
-    await CredentialStore.remove();
+  static createAlias(): string {
+    return `${CREDENTIAL_ALIAS_PREFIX}.${util.generateRandomUUID(true)}`;
+  }
+
+  static async save(alias: string, value: StoredCredential): Promise<void> {
+    await CredentialStore.remove(alias);
     const attributes: asset.AssetMap = new Map();
-    attributes.set(asset.Tag.ALIAS, encode(CREDENTIAL_ALIAS));
+    attributes.set(asset.Tag.ALIAS, encode(alias));
     attributes.set(asset.Tag.SECRET, encode(JSON.stringify(value)));
     attributes.set(asset.Tag.ACCESSIBILITY, asset.Accessibility.DEVICE_FIRST_UNLOCKED);
     attributes.set(asset.Tag.SYNC_TYPE, asset.SyncType.NEVER);
     await asset.add(attributes);
   }
 
-  static async load(): Promise<StoredCredential | undefined> {
+  static async load(alias: string): Promise<StoredCredential | undefined> {
     const query: asset.AssetMap = new Map();
-    query.set(asset.Tag.ALIAS, encode(CREDENTIAL_ALIAS));
+    query.set(asset.Tag.ALIAS, encode(alias));
     query.set(asset.Tag.RETURN_TYPE, asset.ReturnType.ALL);
     try {
       const result = await asset.query(query);
@@ -48,9 +52,9 @@ export class CredentialStore {
     }
   }
 
-  static async remove(): Promise<void> {
+  static async remove(alias: string): Promise<void> {
     const query: asset.AssetMap = new Map();
-    query.set(asset.Tag.ALIAS, encode(CREDENTIAL_ALIAS));
+    query.set(asset.Tag.ALIAS, encode(alias));
     try {
       await asset.remove(query);
     } catch (error) {

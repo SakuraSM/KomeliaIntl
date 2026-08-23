@@ -1,8 +1,11 @@
 import { router } from '@kit.ArkUI';
 import { AuthenticatedImage } from '../components/AuthenticatedImage';
 import { LoadingState, SectionTitle } from '../components/CommonUi';
+import { namespaceOf } from '../data/local/DatabaseModels';
+import { catalogRepository } from '../data/repository/DefaultRepositories';
+import { offlineDownloadService } from '../domain/service/OfflineDownloadService';
 import { KomgaAuthor, KomgaBook } from '../model/KomgaModels';
-import { komgaClient } from '../network/KomgaClient';
+import { AppState } from '../state/AppState';
 
 interface BookParams {
   bookId: string;
@@ -13,6 +16,7 @@ interface BookParams {
 struct BookDetail {
   @State book?: KomgaBook;
   @State isLoading: boolean = true;
+  @State downloadLabel: string = '下载';
   private bookId: string = '';
 
   aboutToAppear(): void {
@@ -23,7 +27,7 @@ struct BookDetail {
 
   private async load(): Promise<void> {
     try {
-      this.book = await komgaClient.getBook(this.bookId);
+      this.book = await catalogRepository.bookDetail(this.bookId);
     } finally {
       this.isLoading = false;
     }
@@ -36,6 +40,18 @@ struct BookDetail {
       url: target,
       params: { bookId: this.bookId, initialPage: this.book?.readProgress?.page || 0 }
     });
+  }
+
+  private async download(): Promise<void> {
+    const key = AppState.getInstance().namespace;
+    if (key === undefined) return;
+    this.downloadLabel = '正在下载…';
+    try {
+      await offlineDownloadService.download(namespaceOf(key), this.bookId);
+      this.downloadLabel = '已离线';
+    } catch (error) {
+      this.downloadLabel = `重试：${(error as Error).message}`;
+    }
   }
 
   @Builder
@@ -80,9 +96,14 @@ struct BookDetail {
                   .fontSize(15).fontColor($r('app.color.primary')).maxLines(2).width('100%')
                 Text(`第 ${this.book?.metadata?.number || this.book?.number || '-'} 本 · ${this.book?.media?.pagesCount || 0} 页`)
                   .fontSize(14).fontColor($r('app.color.on_surface_variant')).width('100%')
-                Button('阅读')
-                  .height(48).borderRadius(16).backgroundColor($r('app.color.primary'))
-                  .onClick(() => this.openReader())
+                Row({ space: 8 }) {
+                  Button('阅读')
+                    .height(48).borderRadius(16).backgroundColor($r('app.color.primary'))
+                    .onClick(() => this.openReader())
+                  Button(this.downloadLabel)
+                    .height(48).borderRadius(16).backgroundColor($r('app.color.primary_container'))
+                    .fontColor($r('app.color.primary')).onClick(() => this.download())
+                }
               }
               .layoutWeight(1).alignItems(HorizontalAlign.Start)
             }

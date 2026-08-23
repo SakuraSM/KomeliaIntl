@@ -2,8 +2,8 @@ import { router } from '@kit.ArkUI';
 import { AuthenticatedImage } from '../components/AuthenticatedImage';
 import { BookCard } from '../components/CoverCards';
 import { LoadingState, SectionTitle } from '../components/CommonUi';
+import { catalogRepository } from '../data/repository/DefaultRepositories';
 import { KomgaBook, KomgaSeries } from '../model/KomgaModels';
-import { komgaClient } from '../network/KomgaClient';
 
 interface SeriesParams {
   seriesId: string;
@@ -26,7 +26,9 @@ struct SeriesDetail {
 
   private async load(): Promise<void> {
     try {
-      const values = await Promise.all([komgaClient.getSeries(this.seriesId), komgaClient.getSeriesBooks(this.seriesId)]);
+      const values = await Promise.all([
+        catalogRepository.seriesDetail(this.seriesId), catalogRepository.seriesBooks(this.seriesId)
+      ]);
       this.series = values[0];
       this.books = values[1];
     } finally {

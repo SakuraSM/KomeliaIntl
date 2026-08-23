@@ -6,6 +6,17 @@ export interface KomgaUser {
   sharedLibrariesIds: string[];
 }
 
+export interface KomgaAuthenticationActivity {
+  userId: string;
+  email: string;
+  ip: string;
+  userAgent: string;
+  success: boolean;
+  error: string;
+  dateTime: string;
+  source: string;
+}
+
 export interface KomgaLibrary {
   id: string;
   name: string;
@@ -107,6 +118,52 @@ export interface HomeFeed {
   onDeck: KomgaBook[];
   latest: KomgaBook[];
   series: KomgaSeries[];
+}
+
+export interface KomgaCollection {
+  id: string;
+  name: string;
+  ordered: boolean;
+  seriesIds: string[];
+  createdDate: string;
+  lastModifiedDate: string;
+  filtered: boolean;
+}
+
+export interface KomgaReadList {
+  id: string;
+  name: string;
+  summary: string;
+  ordered: boolean;
+  bookIds: string[];
+  createdDate: string;
+  lastModifiedDate: string;
+  filtered: boolean;
+}
+
+export interface CollectionUpdateRequest {
+  name: string;
+  ordered: boolean;
+  seriesIds: string[];
+}
+
+export interface ReadListUpdateRequest {
+  name: string;
+  summary: string;
+  ordered: boolean;
+  bookIds: string[];
+}
+
+export interface KomgaTaskCount {
+  count: number;
+}
+
+export interface ReadiumLocator {
+  href?: string;
+  type?: string;
+  title?: string;
+  locations?: Record<string, number | string>;
+  text?: Record<string, string>;
 }
 
 export function emptyPage<T>(): PageResult<T> {

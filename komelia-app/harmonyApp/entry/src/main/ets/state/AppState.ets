@@ -1,7 +1,8 @@
 import { HomeFeed, KomgaLibrary, KomgaUser } from '../model/KomgaModels';
+import { AppContainer } from '../core/di/AppContainer';
+import { NamespaceKey } from '../data/local/DatabaseModels';
+import { catalogRepository, progressOutbox, sessionRepository } from '../data/repository/DefaultRepositories';
 import { komgaClient } from '../network/KomgaClient';
-import { AppPreferences } from '../persistence/AppPreferences';
-import { CredentialStore } from '../persistence/CredentialStore';
 
 export enum AppDestination {
   LIBRARY = 0,
@@ -20,6 +21,7 @@ export class AppState {
   errorMessage: string = '';
   destination: AppDestination = AppDestination.HOME;
   user?: KomgaUser;
+  namespace?: NamespaceKey;
   libraries: KomgaLibrary[] = [];
   homeFeed: HomeFeed = { onDeck: [], latest: [], series: [] };
 
@@ -30,11 +32,15 @@ export class AppState {
   async bootstrap(): Promise<void> {
     this.isBootstrapping = true;
     try {
-      const server = await AppPreferences.getString('serverUrl');
-      const allowHttp = await AppPreferences.getBoolean('allowInsecureHttp');
-      const credential = await CredentialStore.load();
-      if (server.length > 0 && credential !== undefined) {
-        await this.signIn(server, credential.email, credential.password, allowHttp, false);
+      await AppContainer.ready();
+      const snapshot = await sessionRepository.restore();
+      if (snapshot !== undefined) {
+        this.namespace = snapshot.namespace;
+        this.user = snapshot.user;
+        this.libraries = snapshot.libraries;
+        this.isAuthenticated = true;
+        await this.refreshHome();
+        progressOutbox.flush(`${snapshot.namespace.serverId}:${snapshot.namespace.userId}`);
       }
     } catch (error) {
       this.errorMessage = `自动登录失败：${(error as Error).message}`;
@@ -48,18 +54,16 @@ export class AppState {
     this.isLoading = true;
     this.errorMessage = '';
     try {
-      komgaClient.configure(server, email, password, allowHttp);
-      const values = await Promise.all([komgaClient.login(), komgaClient.getLibraries()]);
-      this.user = values[0];
-      this.libraries = values[1];
+      const snapshot = await sessionRepository.signIn({
+        serverUrl: server,
+        email: email,
+        password: password,
+        allowInsecureHttp: allowHttp
+      }, persist);
+      this.namespace = snapshot.namespace;
+      this.user = snapshot.user;
+      this.libraries = snapshot.libraries;
       this.isAuthenticated = true;
-      if (persist) {
-        await Promise.all([
-          AppPreferences.putString('serverUrl', komgaClient.getServerUrl()),
-          AppPreferences.putBoolean('allowInsecureHttp', allowHttp),
-          CredentialStore.save({ email: email, password: password })
-        ]);
-      }
       await this.refreshHome();
     } catch (error) {
       komgaClient.clear();
@@ -72,13 +76,13 @@ export class AppState {
   }
 
   async refreshHome(): Promise<void> {
-    this.homeFeed = await komgaClient.getHomeFeed();
+    this.homeFeed = await catalogRepository.homeFeed();
   }
 
   async signOut(): Promise<void> {
-    komgaClient.clear();
-    await CredentialStore.remove();
+    await sessionRepository.signOut();
     this.user = undefined;
+    this.namespace = undefined;
     this.libraries = [];
     this.homeFeed = { onDeck: [], latest: [], series: [] };
     this.isAuthenticated = false;

@@ -2,12 +2,18 @@ import { http } from '@kit.NetworkKit';
 import { util } from '@kit.ArkTS';
 import {
   HomeFeed,
+  CollectionUpdateRequest,
+  KomgaAuthenticationActivity,
   KomgaBook,
   KomgaBookPage,
+  KomgaCollection,
   KomgaLibrary,
+  KomgaReadList,
   KomgaSeries,
   KomgaUser,
-  PageResult
+  PageResult,
+  ReadListUpdateRequest,
+  ReadiumLocator
 } from '../model/KomgaModels';
 
 export class KomgaHttpError extends Error {
@@ -65,6 +71,46 @@ export class KomgaClient {
 
   async getLibraries(): Promise<KomgaLibrary[]> {
     return this.getJson<KomgaLibrary[]>('/api/v1/libraries');
+  }
+
+  async getCollections(query: string = '', page: number = 0, size: number = 100): Promise<PageResult<KomgaCollection>> {
+    const search = query.trim().length > 0 ? `&search=${encodeURIComponent(query.trim())}` : '';
+    return this.getJson<PageResult<KomgaCollection>>(
+      `/api/v1/collections?page=${page}&size=${size}&sort=name,asc${search}`);
+  }
+
+  async getReadLists(query: string = '', page: number = 0, size: number = 100): Promise<PageResult<KomgaReadList>> {
+    const search = query.trim().length > 0 ? `&search=${encodeURIComponent(query.trim())}` : '';
+    return this.getJson<PageResult<KomgaReadList>>(
+      `/api/v1/readlists?page=${page}&size=${size}&sort=name,asc${search}`);
+  }
+
+  async getCollectionSeries(id: string, page: number = 0, size: number = 100): Promise<PageResult<KomgaSeries>> {
+    return this.getJson<PageResult<KomgaSeries>>(
+      `/api/v1/collections/${encodeURIComponent(id)}/series?page=${page}&size=${size}`);
+  }
+
+  async getReadListBooks(id: string, page: number = 0, size: number = 100): Promise<PageResult<KomgaBook>> {
+    return this.getJson<PageResult<KomgaBook>>(
+      `/api/v1/readlists/${encodeURIComponent(id)}/books?page=${page}&size=${size}`);
+  }
+
+  async updateCollection(id: string, request: CollectionUpdateRequest): Promise<void> {
+    await this.sendJson(`/api/v1/collections/${encodeURIComponent(id)}`, http.RequestMethod.PATCH, request);
+  }
+
+  async updateReadList(id: string, request: ReadListUpdateRequest): Promise<void> {
+    await this.sendJson(`/api/v1/readlists/${encodeURIComponent(id)}`, http.RequestMethod.PATCH, request);
+  }
+
+  async deleteCollection(id: string): Promise<void> {
+    await this.request(`/api/v1/collections/${encodeURIComponent(id)}`, http.RequestMethod.DELETE,
+      http.HttpDataType.STRING);
+  }
+
+  async deleteReadList(id: string): Promise<void> {
+    await this.request(`/api/v1/readlists/${encodeURIComponent(id)}`, http.RequestMethod.DELETE,
+      http.HttpDataType.STRING);
   }
 
   async getHomeFeed(): Promise<HomeFeed> {
@@ -137,6 +183,60 @@ export class KomgaClient {
       http.HttpDataType.STRING);
   }
 
+  async getReadiumProgression(id: string): Promise<ReadiumLocator> {
+    return this.getJson<ReadiumLocator>(`/api/v1/books/${encodeURIComponent(id)}/progression`);
+  }
+
+  async updateReadiumProgression(id: string, locator: ReadiumLocator): Promise<void> {
+    await this.sendJson(`/api/v1/books/${encodeURIComponent(id)}/progression`, http.RequestMethod.PUT, locator);
+  }
+
+  async getUsers(): Promise<KomgaUser[]> {
+    return this.getJson<KomgaUser[]>('/api/v2/users');
+  }
+
+  async getAuthenticationActivity(forMe: boolean, page: number = 0,
+    size: number = 50): Promise<PageResult<KomgaAuthenticationActivity>> {
+    const root = forMe ? '/api/v2/users/me/authentication-activity' : '/api/v2/users/authentication-activity';
+    return this.getJson<PageResult<KomgaAuthenticationActivity>>(`${root}?page=${page}&size=${size}&sort=dateTime,desc`);
+  }
+
+  async updateSeriesMetadata(id: string, metadata: Object): Promise<void> {
+    await this.sendJson(`/api/v1/series/${encodeURIComponent(id)}/metadata`, http.RequestMethod.PATCH, metadata);
+  }
+
+  async updateBookMetadata(id: string, metadata: Object): Promise<void> {
+    await this.sendJson(`/api/v1/books/${encodeURIComponent(id)}/metadata`, http.RequestMethod.PATCH, metadata);
+  }
+
+  async runLibraryAction(id: string, action: string, deep: boolean = false): Promise<void> {
+    const allowed = ['scan', 'analyze', 'metadata/refresh', 'empty-trash'];
+    if (!allowed.includes(action)) throw new Error('不支持的书库操作');
+    const query = action === 'scan' ? `?deep=${deep}` : '';
+    await this.request(`/api/v1/libraries/${encodeURIComponent(id)}/${action}${query}`,
+      http.RequestMethod.POST, http.HttpDataType.STRING);
+  }
+
+  async runSeriesAction(id: string, action: string): Promise<void> {
+    const allowed = ['analyze', 'metadata/refresh'];
+    if (!allowed.includes(action)) throw new Error('不支持的系列操作');
+    await this.request(`/api/v1/series/${encodeURIComponent(id)}/${action}`,
+      http.RequestMethod.POST, http.HttpDataType.STRING);
+  }
+
+  async runBookAction(id: string, action: string): Promise<void> {
+    const allowed = ['analyze', 'metadata/refresh'];
+    if (!allowed.includes(action)) throw new Error('不支持的书籍操作');
+    await this.request(`/api/v1/books/${encodeURIComponent(id)}/${action}`,
+      http.RequestMethod.POST, http.HttpDataType.STRING);
+  }
+
+  async emptyTaskQueue(): Promise<number> {
+    const response = await this.request('/api/v1/tasks', http.RequestMethod.DELETE, http.HttpDataType.STRING);
+    if ((response.result as string).length === 0) return 0;
+    return Number(response.result as string);
+  }
+
   private async getJson<T>(path: string): Promise<T> {
     const response = await this.request(path, http.RequestMethod.GET, http.HttpDataType.STRING);
     return JSON.parse(response.result as string) as T;
@@ -146,6 +246,10 @@ export class KomgaClient {
     const response = await this.request(path, http.RequestMethod.POST, http.HttpDataType.STRING,
       JSON.stringify(body));
     return JSON.parse(response.result as string) as T;
+  }
+
+  private async sendJson(path: string, method: http.RequestMethod, body: Object): Promise<void> {
+    await this.request(path, method, http.HttpDataType.STRING, JSON.stringify(body));
   }
 
   private async getBytes(path: string, timeout: number = 60000): Promise<ArrayBuffer> {

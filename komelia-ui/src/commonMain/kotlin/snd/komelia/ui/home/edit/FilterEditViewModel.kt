@@ -89,32 +89,34 @@ class FilterEditViewModel(
         appNotifications.runCatchingToNotifications {
             if (initialFilters == null) {
                 // FIXME initial data will remain empty until filter is modified
-                filters.value = filterRepository.getFilters().first().map {
-                    when (it) {
-                        is BooksHomeScreenFilter -> BookFilterEditState(
-                            seriesApi = seriesApi,
-                            bookApi = bookApi,
-                            readListApi = readListApi,
-                            appNotifications = appNotifications,
-                            coroutineScope = screenModelScope,
-                            options = filterSuggestionOptions,
-                            cardWidth = cardWidth,
-                            initialFilter = it,
-                            initialBooks = null,
-                        )
+                filters.value = filterRepository.getFilters().first()
+                    .map { it.withLocalizedDefaultLabel() }
+                    .map {
+                        when (it) {
+                            is BooksHomeScreenFilter -> BookFilterEditState(
+                                seriesApi = seriesApi,
+                                bookApi = bookApi,
+                                readListApi = readListApi,
+                                appNotifications = appNotifications,
+                                coroutineScope = screenModelScope,
+                                options = filterSuggestionOptions,
+                                cardWidth = cardWidth,
+                                initialFilter = it,
+                                initialBooks = null,
+                            )
 
-                        is SeriesHomeScreenFilter -> SeriesFilterEditState(
-                            seriesApi = seriesApi,
-                            collectionApi = collectionApi,
-                            appNotifications = appNotifications,
-                            coroutineScope = screenModelScope,
-                            options = filterSuggestionOptions,
-                            cardWidth = cardWidth,
-                            initialFilter = it,
-                            initialSeries = null,
-                        )
+                            is SeriesHomeScreenFilter -> SeriesFilterEditState(
+                                seriesApi = seriesApi,
+                                collectionApi = collectionApi,
+                                appNotifications = appNotifications,
+                                coroutineScope = screenModelScope,
+                                options = filterSuggestionOptions,
+                                cardWidth = cardWidth,
+                                initialFilter = it,
+                                initialSeries = null,
+                            )
+                        }
                     }
-                }
             }
 
             val tags = referentialApi.getBookTags()
@@ -144,7 +146,7 @@ class FilterEditViewModel(
         }
     }
 
-    fun onFilterAdd(type: FilterType) {
+    fun onFilterAdd(type: FilterType, localizedLabel: String) {
         val newFilter = when (type) {
             FilterType.Series -> SeriesFilterEditState(
                 seriesApi = seriesApi,
@@ -155,6 +157,7 @@ class FilterEditViewModel(
                 cardWidth = cardWidth,
                 initialFilter = null,
                 initialSeries = null,
+                newFilterLabel = localizedLabel,
             )
 
             FilterType.Book -> BookFilterEditState(
@@ -167,6 +170,7 @@ class FilterEditViewModel(
                 cardWidth = cardWidth,
                 initialFilter = null,
                 initialBooks = null,
+                newFilterLabel = localizedLabel,
             )
         }
         filters.update { current -> current.plus(newFilter) }

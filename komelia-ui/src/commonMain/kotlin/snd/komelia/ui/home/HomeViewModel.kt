@@ -32,6 +32,7 @@ import snd.komelia.ui.LoadState.Uninitialized
 import snd.komelia.ui.common.cards.defaultCardWidth
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.common.menus.SeriesMenuActions
+import snd.komelia.ui.home.edit.withLocalizedDefaultLabel
 import snd.komga.client.book.KomgaBookSearch
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.series.KomgaSeriesSearch
@@ -82,6 +83,7 @@ class HomeViewModel(
             mutableState.value = LoadState.Loading
 
             currentFilters.value = filterRepository.getFilters().first()
+                .map { it.withLocalizedDefaultLabel() }
                 .map { screenModelScope.async { fetchFilterData(it) } }
                 .awaitAll()
                 .filterNotNull()

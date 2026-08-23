@@ -40,8 +40,9 @@ class BookFilterEditState(
     val cardWidth: StateFlow<Dp>,
     initialFilter: BooksHomeScreenFilter?,
     initialBooks: List<KomeliaBook>?,
+    newFilterLabel: String? = null,
 ) : FilterEditState {
-    override val label = MutableStateFlow(initialFilter?.label ?: "Book Filter")
+    override val label = MutableStateFlow(initialFilter?.label ?: requireNotNull(newFilterLabel))
 
     val filter: MutableStateFlow<BookFilterStateType> = MutableStateFlow(
         initialFilter?.let { initial ->

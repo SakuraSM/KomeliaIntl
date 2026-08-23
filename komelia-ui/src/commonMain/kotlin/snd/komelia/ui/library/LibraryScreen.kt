@@ -12,13 +12,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -53,11 +56,12 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_unknown
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_add
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_all_libraries
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_collections
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_readlists
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_series
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries_unavailable
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries_unavailable
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState.Error
 import snd.komelia.ui.LoadState.Loading
@@ -324,79 +328,182 @@ fun LibraryToolBar(
     var showOptionsMenu by remember { mutableStateOf(false) }
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
+    val platform = LocalPlatform.current
+
+    Column(verticalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
+        if (showScopeSelector && platform == MOBILE) {
+            MobileLibraryScopeBar(
+                libraries = libraries,
+                selectedLibraryId = selectedLibraryId,
+                onSelect = onLibrarySelect,
+            )
+        }
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            item {
+                if (showScopeSelector && platform != MOBILE) {
+                    LibraryScopeSelector(
+                        libraries = libraries,
+                        selectedLibraryId = selectedLibraryId,
+                        onSelect = onLibrarySelect,
+                    )
+                } else if (!showScopeSelector) {
+                    Text(library?.name ?: stringResource(Res.string.library_all_libraries))
+                }
+
+                if (library != null && (isAdmin || isOffline)) {
+                    Box {
+                        IconButton(
+                            onClick = { showOptionsMenu = true }
+                        ) {
+                            Icon(
+                                Icons.Rounded.MoreVert,
+                                contentDescription = null,
+                            )
+                        }
+
+                        LibraryActionsMenu(
+                            library = library,
+                            actions = libraryActions,
+                            expanded = showOptionsMenu,
+                            onDismissRequest = { showOptionsMenu = false }
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(layout.controlSpacing))
+            }
+
+            if (collectionsCount > 0 || readListsCount > 0)
+                item {
+                    FilterChip(
+                        onClick = onBrowseClick,
+                        selected = currentTab == SERIES,
+                        label = { Text(stringResource(Res.string.library_tab_series)) },
+                        colors = chipColors,
+                        border = null,
+                    )
+                }
+
+            if (collectionsCount > 0)
+                item {
+                    FilterChip(
+                        onClick = onCollectionsClick,
+                        selected = currentTab == COLLECTIONS,
+                        label = { Text(stringResource(Res.string.library_tab_collections)) },
+                        colors = chipColors,
+                        border = null,
+                    )
+                }
+
+            if (readListsCount > 0)
+                item {
+                    FilterChip(
+                        onClick = onReadListsClick,
+                        selected = currentTab == READ_LISTS,
+                        label = { Text(stringResource(Res.string.library_tab_readlists)) },
+                        colors = chipColors,
+                        border = null,
+                    )
+                }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MobileLibraryScopeBar(
+    libraries: List<KomgaLibrary>,
+    selectedLibraryId: KomgaLibraryId?,
+    onSelect: (KomgaLibraryId?) -> Unit,
+) {
+    val layout = LocalKomeliaLayout.current
+    val colors = AppFilterChipDefaults.filterChipColors()
+    var expanded by remember { mutableStateOf(false) }
+    var showLibraryAddDialog by remember { mutableStateOf(false) }
+    val selectedLibrary = libraries.firstOrNull { it.id == selectedLibraryId }
+    val orderedLibraries = remember(libraries, selectedLibraryId) {
+        buildList {
+            selectedLibrary?.let(::add)
+            addAll(libraries.filterNot { it.id == selectedLibraryId })
+        }
+    }
+
+    if (showLibraryAddDialog) {
+        LibraryEditDialogs(library = null, onDismissRequest = { showLibraryAddDialog = false })
+    }
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        item {
-            if (showScopeSelector) {
-                LibraryScopeSelector(
-                    libraries = libraries,
-                    selectedLibraryId = selectedLibraryId,
-                    onSelect = onLibrarySelect,
-                )
-            } else {
-                Text(library?.name ?: stringResource(Res.string.library_all_libraries))
-            }
-
-            if (library != null && (isAdmin || isOffline)) {
-                Box {
-                    IconButton(
-                        onClick = { showOptionsMenu = true }
-                    ) {
-                        Icon(
-                            Icons.Rounded.MoreVert,
-                            contentDescription = null,
-                        )
-                    }
-
-                    LibraryActionsMenu(
-                        library = library,
-                        actions = libraryActions,
-                        expanded = showOptionsMenu,
-                        onDismissRequest = { showOptionsMenu = false }
-                    )
-                }
-            }
-
-            Spacer(Modifier.width(layout.controlSpacing))
+        item("all-libraries") {
+            FilterChip(
+                selected = selectedLibraryId == null,
+                onClick = { onSelect(null) },
+                label = { Text(stringResource(Res.string.library_all_libraries)) },
+                colors = colors,
+                border = null,
+            )
         }
-
-
-        if (collectionsCount > 0 || readListsCount > 0)
-            item {
+        if (libraries.size > 3) {
+            item("more-libraries") {
                 FilterChip(
-                    onClick = onBrowseClick,
-                    selected = currentTab == SERIES,
-                    label = { Text(stringResource(Res.string.library_tab_series)) },
-                    colors = chipColors,
+                    selected = false,
+                    onClick = { expanded = true },
+                    leadingIcon = { Icon(Icons.Rounded.MoreHoriz, contentDescription = null) },
+                    label = { Text(stringResource(Res.string.library_more)) },
+                    colors = colors,
                     border = null,
                 )
             }
+        }
+        items(orderedLibraries, key = { it.id.value }) { item ->
+            FilterChip(
+                selected = item.id == selectedLibraryId,
+                onClick = { onSelect(item.id) },
+                label = {
+                    Text(
+                        item.name,
+                        maxLines = 1,
+                        modifier = Modifier.widthIn(max = 140.dp),
+                    )
+                },
+                colors = colors,
+                border = null,
+            )
+        }
+    }
 
-        if (collectionsCount > 0)
-            item {
-                FilterChip(
-                    onClick = onCollectionsClick,
-                    selected = currentTab == COLLECTIONS,
-                    label = { Text(stringResource(Res.string.library_tab_collections)) },
-                    colors = chipColors,
-                    border = null,
-                )
-            }
-
-        if (readListsCount > 0)
-            item {
-                FilterChip(
-                    onClick = onReadListsClick,
-                    selected = currentTab == READ_LISTS,
-                    label = { Text(stringResource(Res.string.library_tab_readlists)) },
-                    colors = chipColors,
-                    border = null,
-                )
-            }
-
+    if (expanded) {
+        ModalBottomSheet(onDismissRequest = { expanded = false }) {
+            Text(
+                stringResource(Res.string.navbar_libraries),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = layout.dialogContentPadding),
+            )
+            LibraryScopeItems(
+                libraries = libraries,
+                selectedLibraryId = selectedLibraryId,
+                onSelect = {
+                    expanded = false
+                    onSelect(it)
+                },
+                onAddLibrary = {
+                    expanded = false
+                    showLibraryAddDialog = true
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 600.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = layout.dialogContentPadding)
+                    .padding(bottom = layout.dialogContentPadding),
+            )
+        }
     }
 }
 

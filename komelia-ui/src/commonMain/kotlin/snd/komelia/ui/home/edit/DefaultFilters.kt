@@ -8,6 +8,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_def
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_default_recently_read_books
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_default_recently_realeased_books
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_default_recently_updated_series
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import snd.komelia.homefilters.BooksHomeScreenFilter
 import snd.komelia.homefilters.HomeScreenFilter
@@ -67,4 +68,35 @@ suspend fun getDefaultFilters(): List<HomeScreenFilter> {
             pageRequest = KomgaPageRequest(sort = KomgaSort.KomgaBooksSort.byReadDateDesc())
         ),
     ).sortedBy { it.order }
+}
+
+/**
+ * Default group labels are persisted because users can edit them. Older builds
+ * created that persisted data before the in-app locale was applied, so a
+ * Chinese UI could retain English defaults forever. Recognise only known
+ * untouched defaults and resolve them again in the active resource locale.
+ */
+internal fun defaultHomeFilterLabelResource(label: String): StringResource? = when (label) {
+    "Keep reading", "继续阅读" -> Res.string.home_filter_default_keep_reading
+    "On deck", "待读" -> Res.string.home_filter_default_on_deck
+    "Recently released books", "最近发布的书籍" -> Res.string.home_filter_default_recently_realeased_books
+    "Recently added books", "最近添加的书籍" -> Res.string.home_filter_default_recently_added_books
+    "Recently added series", "最近添加的系列" -> Res.string.home_filter_default_recently_added_series
+    "Recently updated series", "最近更新的系列" -> Res.string.home_filter_default_recently_updated_series
+    "Recently read books", "最近阅读的书籍" -> Res.string.home_filter_default_recently_read_books
+    else -> null
+}
+
+internal suspend fun HomeScreenFilter.withLocalizedDefaultLabel(): HomeScreenFilter {
+    val resource = defaultHomeFilterLabelResource(label) ?: return this
+    val localizedLabel = getString(resource)
+    if (localizedLabel == label) return this
+
+    return when (this) {
+        is BooksHomeScreenFilter.CustomFilter -> copy(label = localizedLabel)
+        is BooksHomeScreenFilter.OnDeck -> copy(label = localizedLabel)
+        is SeriesHomeScreenFilter.CustomFilter -> copy(label = localizedLabel)
+        is SeriesHomeScreenFilter.RecentlyAdded -> copy(label = localizedLabel)
+        is SeriesHomeScreenFilter.RecentlyUpdated -> copy(label = localizedLabel)
+    }
 }

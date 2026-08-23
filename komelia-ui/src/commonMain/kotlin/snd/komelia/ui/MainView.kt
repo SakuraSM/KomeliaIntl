@@ -154,7 +154,9 @@ private fun MainContent(
 
     Navigator(
         screen = loginScreen,
-        disposeBehavior = NavigatorDisposeBehavior(disposeNestedNavigators = false),
+        // Authentication replacement must dispose the previous tab navigators. Keeping them
+        // alive creates nested MainScreen instances after repeated login/logout cycles.
+        disposeBehavior = NavigatorDisposeBehavior(disposeNestedNavigators = true),
         onBackPressed = null
     ) { navigator ->
         var canProceed by remember { mutableStateOf(komgaSharedState.authenticationState.value == Loaded) }

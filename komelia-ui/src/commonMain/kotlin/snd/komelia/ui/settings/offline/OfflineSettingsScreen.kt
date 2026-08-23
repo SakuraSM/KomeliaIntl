@@ -33,6 +33,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offlin
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_tab
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.appRootNavigator
 import snd.komelia.ui.settings.SettingsScreenContainer
 import snd.komelia.ui.settings.offline.downloads.OfflineDownloadsContent
 import snd.komelia.ui.settings.offline.logs.OfflineLogsContent
@@ -47,7 +48,7 @@ class OfflineSettingsScreen : Screen {
         val vm = rememberScreenModel { viewModelFactory.getOfflineModeSettingsViewModel() }
 
         LaunchedEffect(Unit) {
-            vm.initialize(currentNavigator)
+            vm.initialize(currentNavigator.appRootNavigator())
         }
 
         SettingsScreenContainer(stringResource(Res.string.settings_offline_mode_title)) {
@@ -116,12 +117,14 @@ class OfflineSettingsScreen : Screen {
                     val state = vm.logsState
                     OfflineLogsContent(
                         logs = state.logs.collectAsState().value,
+                        loadState = state.loadState.collectAsState().value,
                         totalPages = state.totalPages.collectAsState().value,
                         currentPage = state.pageNumber.collectAsState().value,
                         onPageChange = state::onPageChange,
                         selectedTab = state.tab.collectAsState().value,
                         onTabSelect = state::onTabChange,
-                        onDelete = state::onLogsDelete
+                        onDelete = state::onLogsDelete,
+                        onRetry = state::retry,
                     )
                 }
             }

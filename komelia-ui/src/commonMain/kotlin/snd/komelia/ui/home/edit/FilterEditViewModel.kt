@@ -179,39 +179,41 @@ class FilterEditViewModel(
     fun onResetFiltersToDefault() {
         screenModelScope.launch {
             val defaultFilters = getDefaultFilters()
-            filters.value = defaultFilters.map {
-                when (it) {
-                    is BooksHomeScreenFilter -> BookFilterEditState(
-                        seriesApi = seriesApi,
-                        bookApi = bookApi,
-                        readListApi = readListApi,
-                        appNotifications = appNotifications,
-                        coroutineScope = screenModelScope,
-                        options = filterSuggestionOptions,
-                        cardWidth = cardWidth,
-                        initialFilter = it,
-                        initialBooks = null,
-                    )
+            appNotifications.runCatchingToNotifications {
+                filterRepository.putFilters(defaultFilters)
+                filters.value = defaultFilters.map {
+                    when (it) {
+                        is BooksHomeScreenFilter -> BookFilterEditState(
+                            seriesApi = seriesApi,
+                            bookApi = bookApi,
+                            readListApi = readListApi,
+                            appNotifications = appNotifications,
+                            coroutineScope = screenModelScope,
+                            options = filterSuggestionOptions,
+                            cardWidth = cardWidth,
+                            initialFilter = it,
+                            initialBooks = null,
+                        )
 
-                    is SeriesHomeScreenFilter -> SeriesFilterEditState(
-                        seriesApi = seriesApi,
-                        collectionApi = collectionApi,
-                        appNotifications = appNotifications,
-                        coroutineScope = screenModelScope,
-                        options = filterSuggestionOptions,
-                        cardWidth = cardWidth,
-                        initialFilter = it,
-                        initialSeries = null,
-                    )
+                        is SeriesHomeScreenFilter -> SeriesFilterEditState(
+                            seriesApi = seriesApi,
+                            collectionApi = collectionApi,
+                            appNotifications = appNotifications,
+                            coroutineScope = screenModelScope,
+                            options = filterSuggestionOptions,
+                            cardWidth = cardWidth,
+                            initialFilter = it,
+                            initialSeries = null,
+                        )
+                    }
                 }
             }
-            filterRepository.putFilters(defaultFilters)
         }
     }
 
-    suspend fun onEditEnd() {
+    suspend fun onEditEnd(): Result<Unit> = appNotifications.runCatchingToNotifications {
         filterRepository.putFilters(
-            filters.value.mapIndexed { index, state -> state.toFilter(index + 1) }
+            filters.value.mapIndexed { index, state -> state.toFilter(index + 1) },
         )
     }
 

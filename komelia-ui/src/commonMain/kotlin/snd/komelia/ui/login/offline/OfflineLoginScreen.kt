@@ -1,13 +1,16 @@
 package snd.komelia.ui.login.offline
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,6 +22,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.appRootNavigator
 import snd.komelia.ui.login.LoginScreen
 import snd.komelia.ui.platform.PlatformTitleBar
 
@@ -26,24 +30,28 @@ class OfflineLoginScreen : Screen {
 
     @Composable
     override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+        val rootNavigator = LocalNavigator.currentOrThrow.appRootNavigator()
         val viewModelFactory = LocalViewModelFactory.current
         val vm = rememberScreenModel { viewModelFactory.getOfflineLoginViewModel() }
-        LaunchedEffect(Unit) { vm.initialize(navigator) }
+        LaunchedEffect(Unit) { vm.initialize(rootNavigator) }
 
-        Column {
+        Column(Modifier.fillMaxSize()) {
             PlatformTitleBar { }
-            Box(
-                modifier = Modifier.fillMaxSize().padding(30.dp),
-                contentAlignment = Alignment.Center
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
             ) {
-
                 OfflineLoginContent(
                     serverUsers = vm.offlineUsers.collectAsState().value,
                     loginAs = vm::loginAs,
                     onServerDelete = vm::onServerDelete,
                     onUserDelete = vm::onUserDelete,
-                    onReturnToLogin = { navigator.replaceAll(LoginScreen()) },
+                    onReturnToLogin = { rootNavigator.replaceAll(LoginScreen()) },
                 )
             }
             Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))

@@ -25,6 +25,17 @@ data class OfflineUser(
 
     companion object {
         val ROOT = KomgaUserId("0")
+        val ROOT_USER = OfflineUser(
+            id = ROOT,
+            serverId = null,
+            email = "root",
+            roles = setOf("ADMIN"),
+            sharedAllLibraries = true,
+            sharedLibrariesIds = emptySet(),
+            labelsAllow = emptySet(),
+            labelsExclude = emptySet(),
+            ageRestriction = null,
+        )
     }
 
     fun toKomgaUser() = KomgaUser(

@@ -2,6 +2,7 @@ package snd.komelia.ui.login.offline
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +32,7 @@ fun OfflineLoginContent(
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.widthIn(max = 600.dp)
+        modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
     ) {
         Text(stringResource(Res.string.login_offline_mode), style = MaterialTheme.typography.titleLarge)
 

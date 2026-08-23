@@ -138,12 +138,7 @@ class FilterEditViewModel(
     }
 
     fun onFilterReorder(from: Int, to: Int) {
-        filters.update { current ->
-            val updated = current.toMutableList()
-            val moved = updated.removeAt(from)
-            updated.add(to, moved)
-            updated
-        }
+        filters.update { current -> moveItemSafely(current, from, to) }
     }
 
     fun onFilterAdd(type: FilterType, localizedLabel: String) {
@@ -222,5 +217,13 @@ class FilterEditViewModel(
 
     enum class FilterType {
         Series, Book
+    }
+}
+
+internal fun <T> moveItemSafely(items: List<T>, from: Int, to: Int): List<T> {
+    if (from !in items.indices || to !in items.indices || from == to) return items
+
+    return items.toMutableList().apply {
+        add(to, removeAt(from))
     }
 }

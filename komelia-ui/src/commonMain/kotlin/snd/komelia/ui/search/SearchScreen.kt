@@ -18,7 +18,6 @@ import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
-import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.ScreenPullToRefreshBox
 import snd.komelia.ui.series.seriesScreen
@@ -75,7 +74,6 @@ class SearchScreen(
                     }
                 }
             }
-            BackPressHandler { navigator.pop() }
         }
     }
 

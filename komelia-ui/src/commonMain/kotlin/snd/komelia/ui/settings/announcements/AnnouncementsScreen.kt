@@ -27,7 +27,7 @@ class AnnouncementsScreen : Screen {
 
         SettingsScreenContainer(stringResource(Res.string.settings_announcements_title)) {
             when (val result = state.value) {
-                is Success -> AnnouncementsContent(result.value.items)
+                is Success -> AnnouncementsContent(result.value)
                 LoadState.Uninitialized, Loading -> LoadingMaxSizeIndicator()
 
                 is Error -> Text(stringResource(Res.string.error_unknown))

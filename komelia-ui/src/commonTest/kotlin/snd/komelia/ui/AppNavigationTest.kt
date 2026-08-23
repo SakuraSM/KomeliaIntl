@@ -30,6 +30,15 @@ class AppNavigationTest {
     }
 
     @Test
+    fun backActionPopsDetailsReturnsOtherRootsHomeAndLetsHomeExit() {
+        assertEquals(AppBackAction.PopDetail, appBackAction(canPop = true, AppDestination.SEARCH))
+        assertEquals(AppBackAction.ReturnHome, appBackAction(canPop = false, AppDestination.LIBRARY))
+        assertEquals(AppBackAction.ReturnHome, appBackAction(canPop = false, AppDestination.SEARCH))
+        assertEquals(AppBackAction.ReturnHome, appBackAction(canPop = false, AppDestination.SETTINGS))
+        assertEquals(AppBackAction.ExitApp, appBackAction(canPop = false, AppDestination.HOME))
+    }
+
+    @Test
     fun screenTransitionSkipsInitialMountAndSameScreenReset() {
         assertEquals(
             ScreenTransitionAction.DisplayImmediately,

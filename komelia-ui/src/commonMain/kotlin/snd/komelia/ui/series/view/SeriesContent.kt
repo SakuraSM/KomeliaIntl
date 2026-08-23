@@ -60,6 +60,7 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.ui.LoadState
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalOfflineAvailable
@@ -395,9 +396,8 @@ fun SeriesChipTags(
     series: KomgaSeries,
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
-    val layout = LocalKomeliaLayout.current
     Column(
-        verticalArrangement = Arrangement.spacedBy(layout.itemSpacing)
+        verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.extraSmall)
     ) {
         if (series.metadata.publisher.isNotBlank()) {
             DescriptionChips(
@@ -427,8 +427,6 @@ fun SeriesChipTags(
             icon = Icons.Default.Link,
         )
 
-        Spacer(Modifier.height(2.dp))
-
         series.booksMetadata.authors
             .filter { it.role == "writer" }
             .groupBy { it.role }
@@ -452,7 +450,6 @@ fun SeriesChipTags(
                     modifier = Modifier.cursorForHand()
                 )
             }
-        Spacer(Modifier.height(2.dp))
     }
 }
 

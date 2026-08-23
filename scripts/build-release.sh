@@ -3,7 +3,9 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION_FILE="$ROOT_DIR/gradle/libs.versions.toml"
-APP_BUILD_FILE="$ROOT_DIR/komelia-app/build.gradle.kts"
+APP_BUILD_FILE="$ROOT_DIR/komelia-app/androidApp/build.gradle.kts"
+APP_VERSION_FILE="$ROOT_DIR/komelia-domain/core/src/commonMain/kotlin/snd/komelia/updates/AppVersion.kt"
+APP_VERSION_TEST_FILE="$ROOT_DIR/komelia-ui/src/commonTest/kotlin/snd/komelia/ui/AppVersionTest.kt"
 
 bump="patch"
 target_version=""
@@ -133,11 +135,13 @@ if [[ ! "$target_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   exit 1
 fi
 
+IFS='.' read -r target_major target_minor target_patch <<<"$target_version"
+
 if [[ -z "$target_version_code" ]]; then
   target_version_code=$((current_version_code + 1))
 fi
 
-if [[ ! "$target_version_code" =~ ^[0-9]+$ ]]; then
+if [[ ! "$target_version_code" =~ ^[1-9][0-9]*$ ]]; then
   echo "--version-code must be a positive integer, got: $target_version_code" >&2
   exit 1
 fi
@@ -147,18 +151,31 @@ if [[ "$target_version" == "$current_version" && "$target_version_code" == "$cur
 else
   sed -i.bak -E "s/^app-version = \"[^\"]+\"/app-version = \"$target_version\"/" "$VERSION_FILE"
   sed -i.bak -E "s/^([[:space:]]*)versionCode = [0-9]+/\1versionCode = $target_version_code/" "$APP_BUILD_FILE"
-  rm -f "$VERSION_FILE.bak" "$APP_BUILD_FILE.bak"
 fi
 
+sed -i.bak -E \
+  "s/val current = AppVersion\([0-9]+, [0-9]+, [0-9]+\)/val current = AppVersion($target_major, $target_minor, $target_patch)/" \
+  "$APP_VERSION_FILE"
+sed -i.bak -E \
+  "s/assertEquals\(\"[0-9]+\.[0-9]+\.[0-9]+\", AppVersion.current.toString\(\)\)/assertEquals(\"$target_version\", AppVersion.current.toString())/" \
+  "$APP_VERSION_TEST_FILE"
+rm -f \
+  "$VERSION_FILE.bak" \
+  "$APP_BUILD_FILE.bak" \
+  "$APP_VERSION_FILE.bak" \
+  "$APP_VERSION_TEST_FILE.bak"
+
 echo "App version: $current_version ($current_version_code) -> $target_version ($target_version_code)"
+
+"$ROOT_DIR/scripts/check-release-version.sh" --version "$target_version"
 
 if [[ "$skip_build" == "true" ]]; then
   exit 0
 fi
 
-gradle_task=":komelia-app:assembleRelease"
+gradle_task=":komelia-app:androidApp:assembleRelease"
 if [[ "$artifact" == "bundle" ]]; then
-  gradle_task=":komelia-app:bundleRelease"
+  gradle_task=":komelia-app:androidApp:bundleRelease"
 fi
 
 exec "$ROOT_DIR/gradlew" "-Psnd.android.variant=$variant" -PrequireReleaseSigning=true "$gradle_task"

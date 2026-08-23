@@ -167,23 +167,37 @@ fun SectionHeader(
 fun DetailMetadataRow(
     label: String,
     modifier: Modifier = Modifier,
+    alignLabelToFirstControl: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    val layout = LocalKomeliaLayout.current
     val labelWidth = when (LocalWindowWidth.current) {
         COMPACT, MEDIUM -> 96.dp
         else -> 120.dp
     }
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(LocalKomeliaLayout.current.itemSpacing),
+        horizontalArrangement = Arrangement.spacedBy(layout.itemSpacing),
         verticalAlignment = Alignment.Top,
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(labelWidth),
-        )
+        Box(
+            modifier = Modifier
+                .width(labelWidth)
+                .then(
+                    if (alignLabelToFirstControl) {
+                        Modifier.sizeIn(minHeight = layout.minimumTouchTarget)
+                    } else {
+                        Modifier
+                    }
+                ),
+            contentAlignment = if (alignLabelToFirstControl) Alignment.CenterStart else Alignment.TopStart,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         Box(modifier = Modifier.weight(1f)) {
             content()
         }

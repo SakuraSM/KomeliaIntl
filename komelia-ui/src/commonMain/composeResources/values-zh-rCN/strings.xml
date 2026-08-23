@@ -697,6 +697,11 @@
     <string name="settings_media_analysis_title">媒体分析</string>
     <string name="settings_media_analysis_nothing_to_show">暂无内容</string>
     <string name="settings_announcements_title">公告</string>
+    <string name="settings_announcements_project_releases">Komelia Intl 更新日志</string>
+    <string name="settings_announcements_upstream_releases">上游 Komelia 更新日志</string>
+    <string name="settings_announcements_server">Komga 服务器公告</string>
+    <string name="settings_announcements_source_unavailable">该来源暂时无法加载</string>
+    <string name="settings_announcements_empty">暂无公告或更新日志</string>
     <string name="settings_appearance_title">外观</string>
     <string name="settings_app_theme">应用主题</string>
     <string name="settings_app_theme_dark">深色</string>

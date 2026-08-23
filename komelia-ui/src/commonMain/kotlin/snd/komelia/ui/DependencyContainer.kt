@@ -21,6 +21,7 @@ import snd.komelia.settings.ServerUrlResolver
 import snd.komelia.updates.AppUpdater
 import snd.komelia.updates.OnnxModelDownloader
 import snd.komelia.updates.OnnxRuntimeInstaller
+import snd.komelia.updates.UpdateClient
 import snd.komf.client.KomfClientFactory
 
 data class DependencyContainer(
@@ -34,6 +35,7 @@ data class DependencyContainer(
     val komgaSharedState: KomgaAuthenticationState,
     val komgaEvents: ManagedKomgaEvents,
     val appUpdater: AppUpdater?,
+    val updateClient: UpdateClient,
 
     val coilContext: PlatformContext,
     val coilImageLoader: ImageLoader,

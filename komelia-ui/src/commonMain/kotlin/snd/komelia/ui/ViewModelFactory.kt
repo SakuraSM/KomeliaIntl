@@ -439,7 +439,11 @@ class ViewModelFactory(
     }
 
     fun getAnnouncementsViewModel(): AnnouncementsViewModel {
-        return AnnouncementsViewModel(dependencies.appNotifications, komgaApi.announcementsApi)
+        return AnnouncementsViewModel(
+            appNotifications = dependencies.appNotifications,
+            announcementsApi = komgaApi.announcementsApi,
+            updateClient = dependencies.updateClient,
+        )
     }
 
     fun getSettingsNavigationViewModel(rootNavigator: Navigator): SettingsNavigationViewModel {

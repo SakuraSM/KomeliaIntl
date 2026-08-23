@@ -36,6 +36,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.platform.cursorForHand
@@ -66,10 +67,14 @@ fun <T> DescriptionChips(
     modifier: Modifier = Modifier,
 ) {
     if (chipValues.isEmpty() && secondaryValues.isNullOrEmpty()) return
-    DetailMetadataRow(label = label, modifier = modifier) {
+    DetailMetadataRow(
+        label = label,
+        modifier = modifier,
+        alignLabelToFirstControl = true,
+    ) {
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
+            horizontalArrangement = Arrangement.spacedBy(KomeliaSpacing.extraSmall),
+            verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.extraSmall),
         ) {
             chipValues.forEach { entry ->
                 MetadataValueChip(onClick = { onChipClick(entry.value) }) {

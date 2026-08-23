@@ -34,8 +34,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          app_version=$(sed -n 's/^app-version = "\(.*\)"/\1/p' gradle/libs.versions.toml)
-          test "$RELEASE_TAG" = "v$app_version"
+          scripts/check-release-version.sh --tag "$RELEASE_TAG"
           gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY"
 
   linux:

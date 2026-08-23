@@ -18,16 +18,19 @@ data class AppVersion(
 
     companion object {
         // Keep in sync with gradle/libs.versions.toml app-version.
-        val current = AppVersion(0, 18, 14)
+        val current = AppVersion(0, 18, 16)
 
         fun fromString(value: String): AppVersion {
-            val version = value.split(".")
-            return when (version.size) {
-                3 -> AppVersion(version[0].toInt(), version[1].toInt(), version[2].toInt())
-                2 -> AppVersion(version[0].toInt(), version[1].toInt(), 0)
-                else -> error("Can't parse version number")
-            }
+            val match = VERSION_PATTERN.matchEntire(value.trim())
+                ?: error("Can't parse version number: $value")
+            return AppVersion(
+                major = match.groupValues[1].toInt(),
+                minor = match.groupValues[2].toInt(),
+                patch = match.groupValues[3].ifEmpty { "0" }.toInt(),
+            )
         }
+
+        private val VERSION_PATTERN = Regex("^[vV]?(\\d+)\\.(\\d+)(?:\\.(\\d+))?(?:[-+].*)?$")
     }
 
     override fun compareTo(other: AppVersion): Int {

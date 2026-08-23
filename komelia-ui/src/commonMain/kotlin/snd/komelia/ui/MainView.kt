@@ -47,7 +47,6 @@ import snd.komelia.ui.dialogs.update.UpdateDialog
 import snd.komelia.ui.dialogs.update.UpdateProgressDialog
 import snd.komelia.ui.komf.KomfMainScreen
 import snd.komelia.ui.login.LoginScreen
-import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.ConfigurePlatformTheme
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.PlatformType
@@ -136,8 +135,6 @@ fun MainView(
                     StartupUpdateChecker(updateChecker)
                 }
             }
-
-            BackPressHandler {}
         }
         }
     }

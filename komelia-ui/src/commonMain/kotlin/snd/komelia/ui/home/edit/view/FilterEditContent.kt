@@ -176,7 +176,9 @@ private fun EditContent(
     val layout = LocalKomeliaLayout.current
     val lazyListState = rememberLazyListState()
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        onFilterMove(from.index, to.index)
+        filterReorderIndices(from.index, to.index, filters.size)?.let { (fromIndex, toIndex) ->
+            onFilterMove(fromIndex, toIndex)
+        }
     }
 
     LazyColumn(
@@ -218,6 +220,22 @@ private fun EditContent(
         }
     }
 }
+
+internal fun filterReorderIndices(
+    fromLazyListIndex: Int,
+    toLazyListIndex: Int,
+    filterCount: Int,
+): Pair<Int, Int>? {
+    val fromIndex = fromLazyListIndex - FILTER_LIST_HEADER_COUNT
+    val toIndex = toLazyListIndex - FILTER_LIST_HEADER_COUNT
+    return if (fromIndex in 0 until filterCount && toIndex in 0 until filterCount) {
+        fromIndex to toIndex
+    } else {
+        null
+    }
+}
+
+private const val FILTER_LIST_HEADER_COUNT = 1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

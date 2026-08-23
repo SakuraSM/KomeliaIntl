@@ -240,13 +240,13 @@ class MainScreen(
                 }
             }
 
-            val handlesBack = activeNavigator?.canPop == true || currentTab.destination != AppDestination.HOME
-            if (handlesBack) {
+            val backAction = appBackAction(activeNavigator?.canPop == true, currentTab.destination)
+            if (backAction != AppBackAction.ExitApp) {
                 BackPressHandler {
-                    if (activeNavigator?.canPop == true) {
-                        activeNavigator?.pop()
-                    } else {
-                        selectDestination(AppDestination.HOME)
+                    when (backAction) {
+                        AppBackAction.PopDetail -> activeNavigator?.pop()
+                        AppBackAction.ReturnHome -> selectDestination(AppDestination.HOME)
+                        AppBackAction.ExitApp -> Unit
                     }
                 }
             }

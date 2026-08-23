@@ -20,6 +20,12 @@ enum class DestinationSelection {
     ReselectCurrent,
 }
 
+enum class AppBackAction {
+    PopDetail,
+    ReturnHome,
+    ExitApp,
+}
+
 internal enum class ScreenTransitionAction {
     DisplayImmediately,
     AnimateChange,
@@ -40,6 +46,15 @@ fun destinationSelection(
     selected: AppDestination,
 ): DestinationSelection =
     if (current == selected) DestinationSelection.ReselectCurrent else DestinationSelection.SwitchDestination
+
+fun appBackAction(
+    canPop: Boolean,
+    destination: AppDestination,
+): AppBackAction = when {
+    canPop -> AppBackAction.PopDetail
+    destination != AppDestination.HOME -> AppBackAction.ReturnHome
+    else -> AppBackAction.ExitApp
+}
 
 fun navigationPresentation(windowSizeClass: WindowSizeClass): NavigationPresentation =
     if (windowSizeClass == WindowSizeClass.COMPACT) {

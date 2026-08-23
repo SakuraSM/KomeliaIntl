@@ -17,8 +17,12 @@ class UpdateClient(
 ) {
 
     suspend fun getKomeliaReleases(): List<GithubRelease> {
-        return ktor.get(appReleasesApiUrl) {
-            parameter("per_page", 5)
+        return getReleases(appReleasesApiUrl)
+    }
+
+    suspend fun getReleases(apiUrl: String, limit: Int = 5): List<GithubRelease> {
+        return ktor.get(apiUrl) {
+            parameter("per_page", limit)
         }.body()
     }
 

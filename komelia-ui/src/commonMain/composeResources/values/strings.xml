@@ -697,6 +697,11 @@
     <string name="settings_media_analysis_title">Media Analysis</string>
     <string name="settings_media_analysis_nothing_to_show">Nothing to show</string>
     <string name="settings_announcements_title">Announcements</string>
+    <string name="settings_announcements_project_releases">Komelia Intl release notes</string>
+    <string name="settings_announcements_upstream_releases">Upstream Komelia release notes</string>
+    <string name="settings_announcements_server">Komga server announcements</string>
+    <string name="settings_announcements_source_unavailable">This source is temporarily unavailable</string>
+    <string name="settings_announcements_empty">No announcements yet</string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_app_theme">App Theme</string>
     <string name="settings_app_theme_dark">Dark</string>

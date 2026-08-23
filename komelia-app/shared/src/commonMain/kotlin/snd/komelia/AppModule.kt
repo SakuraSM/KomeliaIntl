@@ -237,6 +237,7 @@ abstract class AppModule {
             komgaSharedState = komgaSharedState,
             komgaEvents = komgaEvents,
             appUpdater = createAppUpdater(updateClient),
+            updateClient = updateClient,
 
             coilContext = androidContext,
             coilImageLoader = coil,

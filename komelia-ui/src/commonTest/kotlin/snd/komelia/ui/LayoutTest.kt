@@ -165,6 +165,10 @@ class LayoutTest {
             "https://github.com/Snd-R/Komelia",
             AppProjectMetadata.upstreamRepositoryUrl,
         )
+        assertEquals(
+            "https://api.github.com/repos/Snd-R/Komelia/releases",
+            AppProjectMetadata.upstreamReleasesApiUrl,
+        )
     }
 
     @Test

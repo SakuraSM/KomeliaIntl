@@ -3,10 +3,11 @@ set -euo pipefail
 
 NOTES_FILE=""
 EXPECTED_VERSION=""
+EXPECTED_LEVEL=""
 
 usage() {
   cat <<'EOF'
-Usage: scripts/check-release-notes.sh --file PATH [--version X.Y.Z]
+Usage: scripts/check-release-notes.sh --file PATH [--version X.Y.Z] [--level patch|minor|major]
 
 Validate release notes against .github/RELEASE_TEMPLATE.md.
 EOF
@@ -20,6 +21,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --version)
       EXPECTED_VERSION="${2:-}"
+      shift 2
+      ;;
+    --level)
+      EXPECTED_LEVEL="${2:-}"
       shift 2
       ;;
     -h|--help)
@@ -90,6 +95,32 @@ fi
 
 if [[ -n "$EXPECTED_VERSION" ]] && ! rg -Fxq "## Komelia Intl v$EXPECTED_VERSION" "$NOTES_FILE"; then
   echo "Release notes version mismatch: expected v$EXPECTED_VERSION" >&2
+  exit 1
+fi
+
+if [[ -n "$EXPECTED_LEVEL" ]]; then
+  case "$EXPECTED_LEVEL" in
+    patch)
+      expected_release_type="版本类型 / Release type: 补丁 / Patch"
+      ;;
+    minor)
+      expected_release_type="版本类型 / Release type: 次版本 / Minor"
+      ;;
+    major)
+      expected_release_type="版本类型 / Release type: 主版本 / Major"
+      ;;
+    *)
+      echo "--level must be patch, minor, or major: $EXPECTED_LEVEL" >&2
+      exit 2
+      ;;
+  esac
+
+  if ! rg -Fxq "$expected_release_type" "$NOTES_FILE"; then
+    echo "Release notes type mismatch: expected $expected_release_type" >&2
+    exit 1
+  fi
+elif ! rg -q '^版本类型 / Release type: (补丁 / Patch|次版本 / Minor|主版本 / Major)$' "$NOTES_FILE"; then
+  echo "Release notes are missing a valid bilingual release type." >&2
   exit 1
 fi
 

@@ -2,6 +2,8 @@
 
 Use the repository templates for every Release and fixed-issue reply. Do not rewrite the structure for each version.
 
+Choose the version with [Version releases](versioning.md) before you prepare the notes.
+
 ## Prepare release notes
 
 1. Copy `.github/RELEASE_TEMPLATE.md` to a temporary notes file.
@@ -10,12 +12,15 @@ Use the repository templates for every Release and fixed-issue reply. Do not rew
 4. List only the packages attached to this Release. Write `Not included in this Release` for a platform without an asset.
 5. Include the SHA-256 digest for each attached package.
 6. Link the comparison between the previous tag and the new tag in **Full changelog**.
-7. Run both checks:
+7. Run the policy test and both checks:
 
    ```shell
-   scripts/check-release-version.sh --tag vX.Y.Z
-   scripts/check-release-notes.sh --file /path/to/release-notes.md --version X.Y.Z
+   scripts/test-release-policy.sh
+   scripts/check-release-version.sh --tag vX.Y.Z --previous A.B.C --level LEVEL
+   scripts/check-release-notes.sh --file /path/to/release-notes.md --version X.Y.Z --level LEVEL
    ```
+
+   Replace `LEVEL` with `patch`, `minor`, or `major`.
 
 8. Create a draft Release first. Attach and verify the assets before publication.
 

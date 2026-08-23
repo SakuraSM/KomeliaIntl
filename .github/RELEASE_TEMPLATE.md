@@ -1,5 +1,7 @@
 ## Komelia Intl v{{VERSION}}
 
+版本类型 / Release type: {{RELEASE_TYPE_ZH}} / {{RELEASE_TYPE_EN}}
+
 ### 修复 / Fixed
 
 - 中文：{{USER_VISIBLE_FIX_ZH}}

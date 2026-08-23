@@ -14,6 +14,7 @@ This repository modifies [Snd-R/Komelia](https://github.com/Snd-R/Komelia). It k
 - Adds Simplified Chinese to the Compose app, Android system screens, and the EPUB reader. Users can select System, English, or Simplified Chinese in the app.
 - Keeps offline PDF, RAR, and EPUB support, page retry, LAN address switching, and existing database migrations.
 - Publishes a universal Android APK, Windows MSI, Linux DEB, macOS ARM64 DMG/JAR, and Wasm WebUI.
+- Includes an in-progress native HarmonyOS 6+ client written with ArkTS/ArkUI. It uses native Network Kit, Asset Store, Core File Kit, Image Kit, and Reader Kit instead of an APK compatibility layer or ArkWeb wrapper.
 
 ## Downloads
 
@@ -75,6 +76,16 @@ Then choose app build option:
 
 - `./gradlew :androidDebug` output in `./komelia-app/androidApp/build/outputs/apk/debug`
 - `./gradlew :androidRelease` output in `./komelia-app/androidApp/build/outputs/apk/release`
+
+## HarmonyOS App (native preview)
+
+The HarmonyOS client is a separate DevEco project under `komelia-app/harmonyApp`. It targets HarmonyOS 6 / API 20 while retaining API 16 compatibility. Install DevEco Studio 6.1.1 or newer with the matching HarmonyOS SDK and configure a signing profile first.
+
+- `./gradlew :harmonyDebug` builds the debug HAP.
+- `./gradlew :harmonyRelease` builds the signed release HAP.
+- `./gradlew :harmonyDeviceRun` builds, installs, and launches the app on a connected HarmonyOS device.
+
+The preview implements encrypted Komga sign-in, adaptive phone/tablet navigation, home/library/search, series and book details, native image/PDF page reading, and Reader Kit EPUB rendering. Offline download management, complete Readium locator synchronization, and AppGallery release validation remain gated until real-device QA is complete. See [`komelia-app/harmonyApp/README.md`](komelia-app/harmonyApp/README.md).
 
 
 ## Komf Wasm WebUI

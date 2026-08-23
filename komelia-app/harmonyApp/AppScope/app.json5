@@ -1,0 +1,10 @@
+{
+  "app": {
+    "bundleName": "io.github.zhengningning.komelia.harmony",
+    "vendor": "SakuraSM",
+    "versionCode": 181300,
+    "versionName": "0.18.13-harmony-preview",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name"
+  }
+}

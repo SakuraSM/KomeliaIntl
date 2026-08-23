@@ -1,0 +1,16 @@
+{
+  "string": [
+    { "name": "login", "value": "Sign in" },
+    { "name": "server", "value": "Server URL" },
+    { "name": "email", "value": "Email" },
+    { "name": "password", "value": "Password" },
+    { "name": "library", "value": "Library" },
+    { "name": "home", "value": "Home" },
+    { "name": "search", "value": "Search" },
+    { "name": "settings", "value": "Settings" },
+    { "name": "retry", "value": "Retry" },
+    { "name": "empty", "value": "Nothing here" },
+    { "name": "loading", "value": "Loading" },
+    { "name": "logout", "value": "Sign out" }
+  ]
+}

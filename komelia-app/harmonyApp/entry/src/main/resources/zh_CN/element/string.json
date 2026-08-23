@@ -1,0 +1,16 @@
+{
+  "string": [
+    { "name": "login", "value": "登录" },
+    { "name": "server", "value": "服务器地址" },
+    { "name": "email", "value": "邮箱" },
+    { "name": "password", "value": "密码" },
+    { "name": "library", "value": "书库" },
+    { "name": "home", "value": "首页" },
+    { "name": "search", "value": "搜索" },
+    { "name": "settings", "value": "设置" },
+    { "name": "retry", "value": "重试" },
+    { "name": "empty", "value": "暂无内容" },
+    { "name": "loading", "value": "正在加载" },
+    { "name": "logout", "value": "退出登录" }
+  ]
+}

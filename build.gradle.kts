@@ -409,6 +409,46 @@ tasks.register("androidRelease") {
     dependsOn(projects.komeliaApp.androidApp.path + ":assembleRelease")
 }
 
+tasks.register<Exec>("harmonyDebug") {
+    description = "build native HarmonyOS debug HAP"
+    group = "komelia-package"
+    workingDir("$projectDir/komelia-app/harmonyApp")
+    commandLine(
+        "devecocli",
+        "build",
+        "--product", "default",
+        "--modules", "entry@default",
+        "--build-mode", "debug",
+    )
+}
+
+tasks.register<Exec>("harmonyRelease") {
+    description = "build native HarmonyOS release HAP"
+    group = "komelia-package"
+    workingDir("$projectDir/komelia-app/harmonyApp")
+    commandLine(
+        "devecocli",
+        "build",
+        "--product", "default",
+        "--modules", "entry@default",
+        "--build-mode", "release",
+    )
+}
+
+tasks.register<Exec>("harmonyDeviceRun") {
+    description = "build, install and launch native HarmonyOS app on a connected device"
+    group = "komelia-run"
+    workingDir("$projectDir/komelia-app/harmonyApp")
+    commandLine(
+        "devecocli",
+        "run",
+        "--product", "default",
+        "--module", "entry@default",
+        "--build-mode", "debug",
+        "--ability", "EntryAbility",
+    )
+}
+
 tasks.register("komfExtensionChrome") {
     description = "build komf extension for chrome"
     group = "komelia-package"

@@ -16,3 +16,15 @@ build/
 /output
 /.kotlin
 /cmake/build*
+
+# HarmonyOS / DevEco Studio
+komelia-app/harmonyApp/.hvigor/
+komelia-app/harmonyApp/.idea/
+komelia-app/harmonyApp/local.properties
+komelia-app/harmonyApp/oh_modules/
+komelia-app/harmonyApp/build/
+komelia-app/harmonyApp/entry/build/
+komelia-app/harmonyApp/entry/oh_modules/
+komelia-app/harmonyApp/signing-configs/
+*.p12
+*.cer

@@ -1,0 +1,9 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/SeriesDetail",
+    "pages/BookDetail",
+    "pages/ImageReader",
+    "pages/EpubReader"
+  ]
+}

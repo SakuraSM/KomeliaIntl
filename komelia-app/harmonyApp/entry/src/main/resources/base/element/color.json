@@ -1,0 +1,14 @@
+{
+  "color": [
+    { "name": "surface", "value": "#FAF9FE" },
+    { "name": "surface_container", "value": "#F2F0F8" },
+    { "name": "surface_high", "value": "#FFFFFF" },
+    { "name": "primary", "value": "#6963A8" },
+    { "name": "primary_container", "value": "#E8E5FA" },
+    { "name": "on_surface", "value": "#202027" },
+    { "name": "on_surface_variant", "value": "#62616D" },
+    { "name": "outline", "value": "#DBD8E7" },
+    { "name": "error", "value": "#BA1A1A" },
+    { "name": "scrim", "value": "#66000000" }
+  ]
+}

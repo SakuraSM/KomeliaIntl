@@ -127,6 +127,8 @@ class NoopOfflineBookRepository : OfflineBookRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun findAll(): List<OfflineBook> = emptyList()
+
     override suspend fun findFirstIdInSeriesOrNull(seriesId: KomgaSeriesId): KomgaBookId? {
         TODO("Not yet implemented")
     }
@@ -348,6 +350,8 @@ class NoopOfflineSeriesRepository : OfflineSeriesRepository {
     override suspend fun find(id: KomgaSeriesId): OfflineSeries? {
         TODO("Not yet implemented")
     }
+
+    override suspend fun findAll(): List<OfflineSeries> = emptyList()
 
     override suspend fun findAllByLibraryId(libraryId: KomgaLibraryId): List<OfflineSeries> {
         TODO("Not yet implemented")

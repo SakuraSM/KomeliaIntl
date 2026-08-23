@@ -699,6 +699,11 @@ class ViewModelFactory(
             serverDeleteAction = offlineDependencies.actions.get(),
             userDeleteAction = offlineDependencies.actions.get(),
             platformContext = dependencies.coilContext,
+            bookRepository = offlineDependencies.repositories.bookRepository,
+            seriesRepository = offlineDependencies.repositories.seriesRepository,
+            mediaRepository = offlineDependencies.repositories.mediaRepository,
+            bookDeleteAction = offlineDependencies.actions.get(),
+            seriesDeleteAction = offlineDependencies.actions.get(),
 
             taskEmitter = offlineDependencies.taskEmitter,
             downloadEvents = offlineDependencies.bookDownloadEvents

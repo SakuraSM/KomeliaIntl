@@ -87,6 +87,7 @@ class ImageReaderScreen(
     override fun Content() {
         val coroutineScope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow
+        val exitController = remember { ReaderExitController() }
         val viewModelFactory = LocalViewModelFactory.current
         val vm = rememberScreenModel(bookId.value) {
             viewModelFactory.getBookReaderViewModel(
@@ -127,7 +128,7 @@ class ImageReaderScreen(
                     if (currentBook != null && !isFullscreen.value) {
                         TitleBarContent(
                             title = currentBook.metadata.title,
-                            onExit = { onExit(navigator, currentBook) }
+                            onExit = { onExit(navigator, currentBook, exitController) }
                         )
                     }
                 }
@@ -136,18 +137,18 @@ class ImageReaderScreen(
             when (val result = vmState.value) {
                 is LoadState.Error -> ErrorContent(
                     exception = result.exception,
-                    onExit = { onExit(navigator, currentBook) },
+                    onExit = { onExit(navigator, currentBook, exitController) },
                     onReload = { coroutineScope.launch { vm.initialize(bookId) } }
                 )
 
                 LoadState.Loading, LoadState.Uninitialized -> LoadIndicator()
-                is Success -> ReaderScreenContent(vm)
+                is Success -> ReaderScreenContent(vm, exitController)
             }
         }
     }
 
     @Composable
-    fun ReaderScreenContent(vm: ReaderViewModel) {
+    private fun ReaderScreenContent(vm: ReaderViewModel, exitController: ReaderExitController) {
         val navigator = LocalNavigator.currentOrThrow
 
         ReaderContent(
@@ -164,7 +165,7 @@ class ImageReaderScreen(
                     navigator push ColorCorrectionScreen(book.id, page)
                 }
             },
-            onExit = { onExit(navigator, vm.readerState.booksState.value?.currentBook) }
+            onExit = { onExit(navigator, vm.readerState.booksState.value?.currentBook, exitController) }
         )
     }
 
@@ -190,11 +191,15 @@ class ImageReaderScreen(
 
     }
 
-    private fun onExit(navigator: Navigator, book: KomeliaBook?) {
-        if (navigator.canPop) {
-            navigator.pop()
-        } else if (book != null) {
-            navigator.replace(MainScreen(bookScreen(book)))
+    private fun onExit(
+        navigator: Navigator,
+        book: KomeliaBook?,
+        exitController: ReaderExitController,
+    ) {
+        when (exitController.requestExit(navigator.canPop, book != null)) {
+            ReaderExitAction.Pop -> navigator.pop()
+            ReaderExitAction.RestoreBookDetails -> navigator.replace(MainScreen(bookScreen(checkNotNull(book))))
+            ReaderExitAction.Ignore -> Unit
         }
     }
 }

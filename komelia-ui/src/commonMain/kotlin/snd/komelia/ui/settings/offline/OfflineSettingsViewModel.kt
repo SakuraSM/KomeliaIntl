@@ -14,9 +14,15 @@ import snd.komelia.offline.settings.OfflineSettingsRepository
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.offline.sync.repository.LogJournalRepository
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.book.actions.BookDeleteAction
+import snd.komelia.offline.book.repository.OfflineBookRepository
+import snd.komelia.offline.media.repository.OfflineMediaRepository
+import snd.komelia.offline.series.actions.SeriesDeleteAction
+import snd.komelia.offline.series.repository.OfflineSeriesRepository
 import snd.komelia.offline.user.actions.UserDeleteAction
 import snd.komelia.offline.user.repository.OfflineUserRepository
 import snd.komelia.ui.settings.offline.downloads.OfflineDownloadsState
+import snd.komelia.ui.settings.offline.cache.OfflineCacheState
 import snd.komelia.ui.settings.offline.logs.OfflineLogsState
 import snd.komelia.ui.settings.offline.users.OfflineUsersState
 
@@ -31,6 +37,11 @@ class OfflineSettingsViewModel(
     private val serverDeleteAction: MediaServerDeleteAction,
     private val userDeleteAction: UserDeleteAction,
     private val platformContext: PlatformContext,
+    bookRepository: OfflineBookRepository,
+    seriesRepository: OfflineSeriesRepository,
+    mediaRepository: OfflineMediaRepository,
+    bookDeleteAction: BookDeleteAction,
+    seriesDeleteAction: SeriesDeleteAction,
 
     private val taskEmitter: OfflineTaskEmitter,
     private val downloadEvents: SharedFlow<DownloadEvent>,
@@ -60,9 +71,19 @@ class OfflineSettingsViewModel(
         platformContext = platformContext,
         coroutineScope = screenModelScope,
     )
+    internal val cacheState = OfflineCacheState(
+        bookRepository = bookRepository,
+        seriesRepository = seriesRepository,
+        mediaRepository = mediaRepository,
+        bookDeleteAction = bookDeleteAction,
+        seriesDeleteAction = seriesDeleteAction,
+        notifications = appNotifications,
+        coroutineScope = screenModelScope,
+    )
 
     suspend fun initialize(rootNavigator: Navigator) {
         usersState.initialize(rootNavigator)
         logsState.initialize()
+        cacheState.initialize()
     }
 }

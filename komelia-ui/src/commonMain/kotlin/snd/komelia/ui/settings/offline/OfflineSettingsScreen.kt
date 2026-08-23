@@ -1,13 +1,6 @@
 package snd.komelia.ui.settings.offline
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cached
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Icon
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -28,27 +21,36 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_downloads_tab
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_cache_tab
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_logs_tab
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_tab
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.BookSiblingsContext
+import snd.komelia.ui.MainScreen
 import snd.komelia.ui.appRootNavigator
+import snd.komelia.ui.book.BookScreen
+import snd.komelia.ui.series.SeriesScreen
 import snd.komelia.ui.settings.SettingsScreenContainer
+import snd.komelia.ui.settings.offline.cache.OfflineCacheContent
 import snd.komelia.ui.settings.offline.downloads.OfflineDownloadsContent
 import snd.komelia.ui.settings.offline.logs.OfflineLogsContent
 import snd.komelia.ui.settings.offline.users.OfflineUserSettingsContent
+import snd.komga.client.book.KomgaBookId
+import snd.komga.client.series.KomgaSeriesId
 
 class OfflineSettingsScreen : Screen {
 
     @Composable
     override fun Content() {
         val currentNavigator = LocalNavigator.currentOrThrow
+        val rootNavigator = currentNavigator.appRootNavigator()
         val viewModelFactory = LocalViewModelFactory.current
         val vm = rememberScreenModel { viewModelFactory.getOfflineModeSettingsViewModel() }
 
         LaunchedEffect(Unit) {
-            vm.initialize(currentNavigator.appRootNavigator())
+            vm.initialize(rootNavigator)
         }
 
         SettingsScreenContainer(stringResource(Res.string.settings_offline_mode_title)) {
@@ -60,20 +62,14 @@ class OfflineSettingsScreen : Screen {
                     onClick = { selectedTab = 0 },
                     modifier = Modifier.heightIn(min = 40.dp).pointerHoverIcon(PointerIcon.Hand),
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Icon(Icons.Default.Person, null)
-                        Text(stringResource(Res.string.settings_offline_mode_users_tab))
-                    }
+                    Text(stringResource(Res.string.settings_offline_mode_users_tab))
                 }
                 Tab(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
                     modifier = Modifier.heightIn(min = 40.dp).pointerHoverIcon(PointerIcon.Hand),
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Icon(Icons.Default.Download, null)
-                        Text(stringResource(Res.string.settings_offline_mode_downloads_tab))
-                    }
+                    Text(stringResource(Res.string.settings_offline_mode_downloads_tab))
                 }
 
                 Tab(
@@ -81,10 +77,15 @@ class OfflineSettingsScreen : Screen {
                     onClick = { selectedTab = 2 },
                     modifier = Modifier.heightIn(min = 40.dp).pointerHoverIcon(PointerIcon.Hand),
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Icon(Icons.Default.Cached, null)
-                        Text(stringResource(Res.string.settings_offline_mode_logs_tab))
-                    }
+                    Text(stringResource(Res.string.settings_offline_mode_cache_tab))
+                }
+
+                Tab(
+                    selected = selectedTab == 3,
+                    onClick = { selectedTab = 3 },
+                    modifier = Modifier.heightIn(min = 40.dp).pointerHoverIcon(PointerIcon.Hand),
+                ) {
+                    Text(stringResource(Res.string.settings_offline_mode_logs_tab))
                 }
             }
             when (selectedTab) {
@@ -114,6 +115,28 @@ class OfflineSettingsScreen : Screen {
                 }
 
                 2 -> {
+                    val state = vm.cacheState
+                    OfflineCacheContent(
+                        catalog = state.catalog.collectAsState().value,
+                        loadState = state.loadState.collectAsState().value,
+                        selectedMediaKind = state.selectedMediaKind.collectAsState().value,
+                        onMediaKindSelect = state::selectMediaKind,
+                        onRetry = state::retry,
+                        onOpenBook = { id ->
+                            rootNavigator.replaceAll(
+                                MainScreen(BookScreen(KomgaBookId(id), BookSiblingsContext.Series))
+                            )
+                        },
+                        onOpenSeries = { id ->
+                            rootNavigator.replaceAll(MainScreen(SeriesScreen(KomgaSeriesId(id))))
+                        },
+                        onDeleteBook = state::deleteBook,
+                        onDeleteSeries = state::deleteSeries,
+                        onDeleteAll = state::deleteAll,
+                    )
+                }
+
+                3 -> {
                     val state = vm.logsState
                     OfflineLogsContent(
                         logs = state.logs.collectAsState().value,

@@ -35,7 +35,11 @@ jobs:
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
           scripts/check-release-version.sh --tag "$RELEASE_TAG"
-          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY"
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --json body --jq .body > /tmp/komelia-release-notes.md
+          scripts/check-release-notes.sh \
+            --file /tmp/komelia-release-notes.md \
+            --version "${RELEASE_TAG#v}"
 
   linux:
     needs: validate

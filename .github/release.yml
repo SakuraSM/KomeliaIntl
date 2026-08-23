@@ -1,0 +1,20 @@
+changelog:
+  exclude:
+    labels:
+      - duplicate
+      - invalid
+      - question
+      - wontfix
+  categories:
+    - title: 修复 / Fixed
+      labels:
+        - bug
+    - title: 优化 / Improved
+      labels:
+        - enhancement
+    - title: 文档 / Documentation
+      labels:
+        - documentation
+    - title: 其他变更 / Other changes
+      labels:
+        - "*"

@@ -1,6 +1,7 @@
 import { image } from '@kit.ImageKit';
 import { ProgressOutboxRecord } from '../../data/local/DatabaseModels';
 import { offlineRepository, progressOutbox } from '../../data/repository/DefaultRepositories';
+import { ReadiumLocator } from '../../model/KomgaModels';
 import { komgaClient } from '../../network/KomgaClient';
 
 export class ReaderEngine {
@@ -30,6 +31,23 @@ export class ReaderEngine {
         attempts: 0
       };
       await progressOutbox.enqueue(record);
+    }
+  }
+
+  async updateEpubProgress(namespace: string, bookId: string, page: number,
+    locator: ReadiumLocator): Promise<void> {
+    try {
+      await komgaClient.updateReadiumProgression(bookId, locator);
+    } catch (_) {
+      await progressOutbox.enqueue({
+        namespace: namespace,
+        bookId: bookId,
+        page: page,
+        completed: false,
+        readDate: new Date().toISOString(),
+        attempts: 0,
+        locatorJson: JSON.stringify(locator)
+      });
     }
   }
 }

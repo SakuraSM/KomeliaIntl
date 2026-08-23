@@ -55,4 +55,5 @@ export interface ProgressOutboxRecord {
   completed: boolean;
   readDate: string;
   attempts: number;
+  locatorJson?: string;
 }

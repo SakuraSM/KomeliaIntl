@@ -8,12 +8,18 @@ import {
   KomgaBookPage,
   KomgaCollection,
   KomgaLibrary,
+  KomgaLibraryCreateRequest,
+  KomgaLibraryUpdateRequest,
   KomgaReadList,
   KomgaSeries,
   KomgaUser,
+  KomgaUserCreateRequest,
+  KomgaUserUpdateRequest,
+  BookMetadataUpdateRequest,
   PageResult,
   ReadListUpdateRequest,
-  ReadiumLocator
+  ReadiumLocator,
+  SeriesMetadataUpdateRequest
 } from '../model/KomgaModels';
 
 export class KomgaHttpError extends Error {
@@ -71,6 +77,19 @@ export class KomgaClient {
 
   async getLibraries(): Promise<KomgaLibrary[]> {
     return this.getJson<KomgaLibrary[]>('/api/v1/libraries');
+  }
+
+  async addLibrary(request: KomgaLibraryCreateRequest): Promise<KomgaLibrary> {
+    return this.postJson<KomgaLibrary>('/api/v1/libraries', request);
+  }
+
+  async updateLibrary(id: string, request: KomgaLibraryUpdateRequest): Promise<void> {
+    await this.sendJson(`/api/v1/libraries/${encodeURIComponent(id)}`, http.RequestMethod.PATCH, request);
+  }
+
+  async deleteLibrary(id: string): Promise<void> {
+    await this.request(`/api/v1/libraries/${encodeURIComponent(id)}`, http.RequestMethod.DELETE,
+      http.HttpDataType.STRING);
   }
 
   async getCollections(query: string = '', page: number = 0, size: number = 100): Promise<PageResult<KomgaCollection>> {
@@ -195,17 +214,35 @@ export class KomgaClient {
     return this.getJson<KomgaUser[]>('/api/v2/users');
   }
 
+  async addUser(request: KomgaUserCreateRequest): Promise<KomgaUser> {
+    return this.postJson<KomgaUser>('/api/v2/users', request);
+  }
+
+  async updateUser(id: string, request: KomgaUserUpdateRequest): Promise<void> {
+    await this.sendJson(`/api/v2/users/${encodeURIComponent(id)}`, http.RequestMethod.PATCH, request);
+  }
+
+  async updateUserPassword(id: string, password: string): Promise<void> {
+    await this.sendJson(`/api/v2/users/${encodeURIComponent(id)}/password`, http.RequestMethod.PATCH,
+      { password: password });
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await this.request(`/api/v2/users/${encodeURIComponent(id)}`, http.RequestMethod.DELETE,
+      http.HttpDataType.STRING);
+  }
+
   async getAuthenticationActivity(forMe: boolean, page: number = 0,
     size: number = 50): Promise<PageResult<KomgaAuthenticationActivity>> {
     const root = forMe ? '/api/v2/users/me/authentication-activity' : '/api/v2/users/authentication-activity';
     return this.getJson<PageResult<KomgaAuthenticationActivity>>(`${root}?page=${page}&size=${size}&sort=dateTime,desc`);
   }
 
-  async updateSeriesMetadata(id: string, metadata: Object): Promise<void> {
+  async updateSeriesMetadata(id: string, metadata: SeriesMetadataUpdateRequest): Promise<void> {
     await this.sendJson(`/api/v1/series/${encodeURIComponent(id)}/metadata`, http.RequestMethod.PATCH, metadata);
   }
 
-  async updateBookMetadata(id: string, metadata: Object): Promise<void> {
+  async updateBookMetadata(id: string, metadata: BookMetadataUpdateRequest): Promise<void> {
     await this.sendJson(`/api/v1/books/${encodeURIComponent(id)}/metadata`, http.RequestMethod.PATCH, metadata);
   }
 
@@ -224,11 +261,31 @@ export class KomgaClient {
       http.RequestMethod.POST, http.HttpDataType.STRING);
   }
 
+  async setSeriesReadStatus(id: string, completed: boolean): Promise<void> {
+    if (completed) {
+      await this.request(`/api/v1/series/${encodeURIComponent(id)}/read-progress`, http.RequestMethod.PUT,
+        http.HttpDataType.STRING);
+    } else {
+      await this.request(`/api/v1/series/${encodeURIComponent(id)}/read-progress`, http.RequestMethod.DELETE,
+        http.HttpDataType.STRING);
+    }
+  }
+
+  async deleteSeriesFiles(id: string): Promise<void> {
+    await this.request(`/api/v1/series/${encodeURIComponent(id)}/file`, http.RequestMethod.DELETE,
+      http.HttpDataType.STRING);
+  }
+
   async runBookAction(id: string, action: string): Promise<void> {
     const allowed = ['analyze', 'metadata/refresh'];
     if (!allowed.includes(action)) throw new Error('不支持的书籍操作');
     await this.request(`/api/v1/books/${encodeURIComponent(id)}/${action}`,
       http.RequestMethod.POST, http.HttpDataType.STRING);
+  }
+
+  async deleteBookFile(id: string): Promise<void> {
+    await this.request(`/api/v1/books/${encodeURIComponent(id)}/file`, http.RequestMethod.DELETE,
+      http.HttpDataType.STRING);
   }
 
   async emptyTaskQueue(): Promise<number> {

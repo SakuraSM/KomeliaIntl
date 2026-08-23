@@ -1,5 +1,6 @@
 import { router } from '@kit.ArkUI';
 import { AppPreferences } from '../persistence/AppPreferences';
+import { AppState } from '../state/AppState';
 
 @Entry
 @Component
@@ -25,6 +26,7 @@ struct ImageReaderSettings {
       AppPreferences.putBoolean('image.aiEnabled', this.aiEnabled),
       AppPreferences.putBoolean('reducedMotion', this.reducedMotion)
     ]);
+    AppState.getInstance().reducedMotion = this.reducedMotion;
   }
   @Builder
   private toggleRow(title: string, value: boolean, onChange: (value: boolean) => void) {

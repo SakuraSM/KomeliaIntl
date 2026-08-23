@@ -1,12 +1,17 @@
 import { http } from '@kit.NetworkKit';
+import { KomfMediaServerConnectionResponse, KomfMediaServerLibrary, KomfMetadataJob,
+  KomfMetadataJobResponse, KomfPage } from '../model/KomfModels';
 
 export class KomfClient {
   private origin: string = '';
 
-  configure(origin: string): void {
+  configure(origin: string, allowInsecureHttp: boolean = false): void {
     const normalized = origin.trim().replace(/\/+$/, '');
     if (!normalized.startsWith('https://') && !normalized.startsWith('http://')) {
       throw new Error('Komf 地址必须以 https:// 或 http:// 开头');
+    }
+    if (normalized.startsWith('http://') && !allowInsecureHttp) {
+      throw new Error('Komf HTTP 连接未加密，请确认局域网风险后重试');
     }
     this.origin = normalized;
   }
@@ -30,24 +35,62 @@ export class KomfClient {
     await this.request('/api/config', http.RequestMethod.PUT, config);
   }
 
-  async getJobs(): Promise<Object[]> {
-    const response = await this.request('/api/jobs', http.RequestMethod.GET);
-    return JSON.parse(response.result as string) as Object[];
+  async getJobs(page: number = 0, size: number = 50, status: string = ''): Promise<KomfPage<KomfMetadataJob>> {
+    const statusQuery = status.length === 0 ? '' : `&status=${encodeURIComponent(status)}`;
+    const response = await this.request(`/api/jobs?page=${page}&size=${size}${statusQuery}`, http.RequestMethod.GET);
+    return JSON.parse(response.result as string) as KomfPage<KomfMetadataJob>;
   }
 
-  async runAllJobs(): Promise<void> {
-    await this.request('/api/jobs/all', http.RequestMethod.POST);
+  async deleteAllJobs(): Promise<void> {
+    await this.request('/api/jobs/all', http.RequestMethod.DELETE);
   }
 
-  async identifySeries(mediaServer: string, libraryId: string, seriesId: string): Promise<void> {
-    await this.request(`/api/${encodeURIComponent(mediaServer)}/metadata/${encodeURIComponent(libraryId)}/series/` +
-      `${encodeURIComponent(seriesId)}/identify`, http.RequestMethod.POST);
+  async getProviders(): Promise<string[]> {
+    const response = await this.request('/api/metadata/providers', http.RequestMethod.GET);
+    return JSON.parse(response.result as string) as string[];
+  }
+
+  async checkMediaServer(mediaServer: string = 'komga'): Promise<KomfMediaServerConnectionResponse> {
+    const response = await this.request(`/api/${encodeURIComponent(mediaServer)}/media-server`, http.RequestMethod.GET);
+    return JSON.parse(response.result as string) as KomfMediaServerConnectionResponse;
+  }
+
+  async getMediaServerLibraries(mediaServer: string = 'komga'): Promise<KomfMediaServerLibrary[]> {
+    const response = await this.request(`/api/${encodeURIComponent(mediaServer)}/media-server/libraries`,
+      http.RequestMethod.GET);
+    return JSON.parse(response.result as string) as KomfMediaServerLibrary[];
+  }
+
+  async identifySeries(mediaServer: string, libraryId: string,
+    seriesId: string): Promise<KomfMetadataJobResponse> {
+    const response = await this.request(`/api/${encodeURIComponent(mediaServer)}/metadata/match/library/` +
+      `${encodeURIComponent(libraryId)}/series/${encodeURIComponent(seriesId)}`, http.RequestMethod.POST);
+    return JSON.parse(response.result as string) as KomfMetadataJobResponse;
   }
 
   async resetSeries(mediaServer: string, libraryId: string, seriesId: string,
     removeComicInfo: boolean): Promise<void> {
-    await this.request(`/api/${encodeURIComponent(mediaServer)}/metadata/${encodeURIComponent(libraryId)}/series/` +
-      `${encodeURIComponent(seriesId)}/metadata?removeComicInfo=${removeComicInfo}`, http.RequestMethod.DELETE);
+    await this.request(`/api/${encodeURIComponent(mediaServer)}/metadata/reset/library/` +
+      `${encodeURIComponent(libraryId)}/series/${encodeURIComponent(seriesId)}` +
+      `?removeComicInfo=${removeComicInfo}`, http.RequestMethod.POST);
+  }
+
+  async getDiscordTemplates(): Promise<Object> {
+    const response = await this.request('/api/notifications/discord/templates', http.RequestMethod.GET);
+    return JSON.parse(response.result as string) as Object;
+  }
+
+  async updateDiscordTemplates(value: Object): Promise<void> {
+    await this.request('/api/notifications/discord/templates', http.RequestMethod.PUT, value);
+  }
+
+  async getAppriseTemplates(): Promise<Object> {
+    const response = await this.request('/api/notifications/apprise/templates', http.RequestMethod.GET);
+    return JSON.parse(response.result as string) as Object;
+  }
+
+  async updateAppriseTemplates(value: Object): Promise<void> {
+    await this.request('/api/notifications/apprise/templates', http.RequestMethod.PUT, value);
   }
 
   private async request(path: string, method: http.RequestMethod, body?: Object): Promise<http.HttpResponse> {

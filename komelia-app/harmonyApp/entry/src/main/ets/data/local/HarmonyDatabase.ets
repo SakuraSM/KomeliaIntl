@@ -1,7 +1,7 @@
 import { common } from '@kit.AbilityKit';
 import { relationalStore } from '@kit.ArkData';
 
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 const STORE_CONFIG: relationalStore.StoreConfig = {
   name: 'komelia_harmony.db',
   securityLevel: relationalStore.SecurityLevel.S3
@@ -37,6 +37,10 @@ export class HarmonyDatabase {
     if (store.version === 1) {
       await store.execute('ALTER TABLE USER_PROFILE ADD COLUMN CREDENTIAL_ALIAS TEXT NOT NULL DEFAULT ""');
       store.version = 2;
+    }
+    if (store.version === 2) {
+      await store.execute('ALTER TABLE PROGRESS_OUTBOX ADD COLUMN LOCATOR TEXT NOT NULL DEFAULT ""');
+      store.version = 3;
     }
     if (store.version !== DATABASE_VERSION) {
       throw new Error(`不支持的 HarmonyOS 数据库版本：${store.version}`);

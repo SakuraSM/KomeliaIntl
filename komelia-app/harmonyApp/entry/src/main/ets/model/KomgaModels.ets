@@ -4,6 +4,39 @@ export interface KomgaUser {
   roles: string[];
   sharedAllLibraries: boolean;
   sharedLibrariesIds: string[];
+  labelsAllow?: string[];
+  labelsExclude?: string[];
+}
+
+export interface KomgaUserCreateRequest {
+  email: string;
+  password: string;
+  roles: string[];
+}
+
+export interface KomgaUserUpdateRequest {
+  roles?: string[];
+  labelsAllow?: string[];
+  labelsExclude?: string[];
+  sharedLibraries?: Record<string, Object>;
+}
+
+export interface KomgaPasswordUpdateRequest { password: string; }
+
+export interface KomgaLibraryCreateRequest {
+  name: string;
+  root: string;
+  scanCbx: boolean;
+  scanPdf: boolean;
+  scanEpub: boolean;
+}
+
+export interface KomgaLibraryUpdateRequest {
+  name?: string;
+  root?: string;
+  scanCbx?: boolean;
+  scanPdf?: boolean;
+  scanEpub?: boolean;
 }
 
 export interface KomgaAuthenticationActivity {
@@ -70,6 +103,28 @@ export interface BookMetadata {
   authors: KomgaAuthor[];
   tags: string[];
   isbn: string;
+}
+
+export interface SeriesMetadataUpdateRequest {
+  title?: string;
+  titleSort?: string;
+  summary?: string;
+  publisher?: string;
+  language?: string;
+  status?: string;
+  genres?: string[];
+  tags?: string[];
+}
+
+export interface BookMetadataUpdateRequest {
+  title?: string;
+  summary?: string;
+  number?: string;
+  numberSort?: number;
+  releaseDate?: string;
+  authors?: KomgaAuthor[];
+  tags?: string[];
+  isbn?: string;
 }
 
 export interface ReadProgress {

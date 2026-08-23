@@ -2,6 +2,8 @@ import { HomeFeed, KomgaBook, KomgaLibrary, KomgaSeries, KomgaUser, PageResult }
 import { DownloadJobRecord, NamespaceKey, OfflineBookRecord, OfflinePageRecord,
   ProgressOutboxRecord } from '../../data/local/DatabaseModels';
 import { TaskPhase } from '../../core/model/UiState';
+import { KomfMediaServerConnectionResponse, KomfMediaServerLibrary, KomfMetadataJob,
+  KomfMetadataJobResponse, KomfPage } from '../../model/KomfModels';
 
 export interface SessionCredentials {
   serverUrl: string;
@@ -61,14 +63,33 @@ export interface ProgressOutbox {
 }
 
 export interface AdminRepository {
+  addUser(email: string, password: string, roles: string[]): Promise<KomgaUser>;
+  updateUserRoles(userId: string, roles: string[]): Promise<void>;
+  updateUserPassword(userId: string, password: string): Promise<void>;
+  deleteUser(userId: string): Promise<void>;
+  addLibrary(name: string, root: string): Promise<KomgaLibrary>;
+  updateLibrary(libraryId: string, name: string, root: string): Promise<void>;
+  deleteLibrary(libraryId: string): Promise<void>;
   scanLibrary(libraryId: string, deep: boolean): Promise<void>;
   analyzeLibrary(libraryId: string): Promise<void>;
   emptyLibraryTrash(libraryId: string): Promise<void>;
+  emptyTaskQueue(): Promise<number>;
 }
 
 export interface KomfRepository {
-  configure(origin: string): void;
+  configure(origin: string, allowInsecureHttp?: boolean): void;
   ping(): Promise<boolean>;
-  identifySeries(libraryId: string, seriesId: string): Promise<void>;
+  config(): Promise<Object>;
+  updateConfig(value: Object): Promise<void>;
+  providers(): Promise<string[]>;
+  mediaServerStatus(): Promise<KomfMediaServerConnectionResponse>;
+  mediaServerLibraries(): Promise<KomfMediaServerLibrary[]>;
+  jobs(page?: number, size?: number, status?: string): Promise<KomfPage<KomfMetadataJob>>;
+  deleteAllJobs(): Promise<void>;
+  identifySeries(libraryId: string, seriesId: string): Promise<KomfMetadataJobResponse>;
   resetSeries(libraryId: string, seriesId: string, removeComicInfo: boolean): Promise<void>;
+  discordTemplates(): Promise<Object>;
+  updateDiscordTemplates(value: Object): Promise<void>;
+  appriseTemplates(): Promise<Object>;
+  updateAppriseTemplates(value: Object): Promise<void>;
 }

@@ -3,7 +3,8 @@ import { TaskPhase } from '../../core/model/UiState';
 import { DownloadJobRecord, OfflineBookRecord, OfflineMediaKind, OfflinePageRecord,
   ProgressOutboxRecord } from '../local/DatabaseModels';
 import { HarmonyDatabase } from '../local/HarmonyDatabase';
-import { HomeFeed, KomgaBook, KomgaLibrary, KomgaSeries, KomgaUser, PageResult } from '../../model/KomgaModels';
+import { HomeFeed, KomgaBook, KomgaLibrary, KomgaSeries, KomgaUser, PageResult,
+  ReadiumLocator } from '../../model/KomgaModels';
 import { komfClient } from '../../network/KomfClient';
 import { komgaClient } from '../../network/KomgaClient';
 import { AppPreferences } from '../../persistence/AppPreferences';
@@ -393,7 +394,8 @@ export class RdbProgressOutbox implements ProgressOutbox {
       'PAGE': record.page,
       'COMPLETED': record.completed ? 1 : 0,
       'READ_DATE': record.readDate,
-      'ATTEMPTS': record.attempts
+      'ATTEMPTS': record.attempts,
+      'LOCATOR': record.locatorJson || ''
     });
   }
 
@@ -410,7 +412,8 @@ export class RdbProgressOutbox implements ProgressOutbox {
             page: result.getLong(result.getColumnIndex('PAGE')),
             completed: result.getLong(result.getColumnIndex('COMPLETED')) === 1,
             readDate: result.getString(result.getColumnIndex('READ_DATE')),
-            attempts: result.getLong(result.getColumnIndex('ATTEMPTS'))
+            attempts: result.getLong(result.getColumnIndex('ATTEMPTS')),
+            locatorJson: result.getString(result.getColumnIndex('LOCATOR'))
           });
         } while (result.goToNextRow());
       }
@@ -421,7 +424,12 @@ export class RdbProgressOutbox implements ProgressOutbox {
     for (let index = 0; index < pending.length; index++) {
       const item = pending[index];
       try {
-        await komgaClient.updateReadProgress(item.bookId, item.page, item.completed);
+        if ((item.locatorJson || '').length > 0) {
+          await komgaClient.updateReadiumProgression(item.bookId,
+            JSON.parse(item.locatorJson || '{}') as ReadiumLocator);
+        } else {
+          await komgaClient.updateReadProgress(item.bookId, item.page, item.completed);
+        }
         await HarmonyDatabase.execute(
           'DELETE FROM PROGRESS_OUTBOX WHERE NAMESPACE = ? AND BOOK_ID = ?', [namespace, item.bookId]);
         flushed++;
@@ -531,6 +539,34 @@ export class RdbDownloadScheduler implements DownloadScheduler {
 }
 
 export class DefaultAdminRepository implements AdminRepository {
+  addUser(email: string, password: string, roles: string[]): Promise<KomgaUser> {
+    return komgaClient.addUser({ email: email, password: password, roles: roles });
+  }
+
+  updateUserRoles(userId: string, roles: string[]): Promise<void> {
+    return komgaClient.updateUser(userId, { roles: roles });
+  }
+
+  updateUserPassword(userId: string, password: string): Promise<void> {
+    return komgaClient.updateUserPassword(userId, password);
+  }
+
+  deleteUser(userId: string): Promise<void> {
+    return komgaClient.deleteUser(userId);
+  }
+
+  addLibrary(name: string, root: string): Promise<KomgaLibrary> {
+    return komgaClient.addLibrary({ name: name, root: root, scanCbx: true, scanPdf: true, scanEpub: true });
+  }
+
+  updateLibrary(libraryId: string, name: string, root: string): Promise<void> {
+    return komgaClient.updateLibrary(libraryId, { name: name, root: root });
+  }
+
+  deleteLibrary(libraryId: string): Promise<void> {
+    return komgaClient.deleteLibrary(libraryId);
+  }
+
   scanLibrary(libraryId: string, deep: boolean): Promise<void> {
     return komgaClient.runLibraryAction(libraryId, 'scan', deep);
   }
@@ -542,24 +578,52 @@ export class DefaultAdminRepository implements AdminRepository {
   emptyLibraryTrash(libraryId: string): Promise<void> {
     return komgaClient.runLibraryAction(libraryId, 'empty-trash');
   }
+
+  emptyTaskQueue(): Promise<number> {
+    return komgaClient.emptyTaskQueue();
+  }
 }
 
 export class DefaultKomfRepository implements KomfRepository {
-  configure(origin: string): void {
-    komfClient.configure(origin);
+  configure(origin: string, allowInsecureHttp: boolean = false): void {
+    komfClient.configure(origin, allowInsecureHttp);
   }
 
   ping(): Promise<boolean> {
     return komfClient.ping();
   }
 
-  identifySeries(libraryId: string, seriesId: string): Promise<void> {
+  config(): Promise<Object> { return komfClient.getConfig(); }
+
+  updateConfig(value: Object): Promise<void> { return komfClient.updateConfig(value); }
+
+  providers(): Promise<string[]> { return komfClient.getProviders(); }
+
+  mediaServerStatus() { return komfClient.checkMediaServer('komga'); }
+
+  mediaServerLibraries() { return komfClient.getMediaServerLibraries('komga'); }
+
+  jobs(page: number = 0, size: number = 50, status: string = '') {
+    return komfClient.getJobs(page, size, status);
+  }
+
+  deleteAllJobs(): Promise<void> { return komfClient.deleteAllJobs(); }
+
+  identifySeries(libraryId: string, seriesId: string) {
     return komfClient.identifySeries('komga', libraryId, seriesId);
   }
 
   resetSeries(libraryId: string, seriesId: string, removeComicInfo: boolean): Promise<void> {
     return komfClient.resetSeries('komga', libraryId, seriesId, removeComicInfo);
   }
+
+  discordTemplates(): Promise<Object> { return komfClient.getDiscordTemplates(); }
+
+  updateDiscordTemplates(value: Object): Promise<void> { return komfClient.updateDiscordTemplates(value); }
+
+  appriseTemplates(): Promise<Object> { return komfClient.getAppriseTemplates(); }
+
+  updateAppriseTemplates(value: Object): Promise<void> { return komfClient.updateAppriseTemplates(value); }
 }
 
 export const sessionRepository = new DefaultSessionRepository();

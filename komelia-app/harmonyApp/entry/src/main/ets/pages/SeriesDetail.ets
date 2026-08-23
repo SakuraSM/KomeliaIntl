@@ -4,6 +4,7 @@ import { BookCard } from '../components/CoverCards';
 import { LoadingState, SectionTitle } from '../components/CommonUi';
 import { catalogRepository } from '../data/repository/DefaultRepositories';
 import { KomgaBook, KomgaSeries } from '../model/KomgaModels';
+import { komgaClient } from '../network/KomgaClient';
 
 interface SeriesParams {
   seriesId: string;
@@ -16,6 +17,9 @@ struct SeriesDetail {
   @State books: KomgaBook[] = [];
   @State isLoading: boolean = true;
   @State columns: number = 3;
+  @State selecting: boolean = false;
+  @State selectedBookIds: string[] = [];
+  @State message: string = '';
   private seriesId: string = '';
 
   aboutToAppear(): void {
@@ -42,6 +46,28 @@ struct SeriesDetail {
     return '1fr 1fr 1fr';
   }
 
+  private toggleBook(id: string): void {
+    this.selectedBookIds = this.selectedBookIds.includes(id)
+      ? this.selectedBookIds.filter((value: string) => value !== id)
+      : this.selectedBookIds.concat([id]);
+  }
+
+  private async batchBookAction(action: string): Promise<void> {
+    if (this.selectedBookIds.length === 0) return;
+    this.message = `正在处理 ${this.selectedBookIds.length} 本书籍…`;
+    try {
+      for (let index = 0; index < this.selectedBookIds.length; index++) {
+        const id = this.selectedBookIds[index];
+        if (action === 'deleteProgress') await komgaClient.deleteReadProgress(id);
+        else await komgaClient.runBookAction(id, action);
+      }
+      this.message = '批量操作已完成';
+      this.selectedBookIds = [];
+      this.selecting = false;
+      await this.load();
+    } catch (error) { this.message = (error as Error).message; }
+  }
+
   build() {
     Column() {
       Row({ space: 12 }) {
@@ -52,6 +78,10 @@ struct SeriesDetail {
         Text(this.series?.metadata?.title || this.series?.name || '系列详情')
           .fontSize(20).fontWeight(FontWeight.Bold).maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+        Button('编辑').height(40).backgroundColor($r('app.color.primary_container'))
+          .fontColor($r('app.color.primary')).onClick(() => router.pushUrl({
+            url: 'pages/SeriesEdit', params: { seriesId: this.seriesId }
+          }))
       }
       .height(56).width('100%').padding({ left: 8, right: 12 })
 
@@ -93,18 +123,48 @@ struct SeriesDetail {
                 .fontSize(15).lineHeight(23).fontColor($r('app.color.on_surface_variant')).width('100%')
             }
 
-            SectionTitle('书籍', this.books.length)
+            Row() {
+              SectionTitle('书籍', this.books.length)
+              Button(this.selecting ? '取消' : '批量').height(40).backgroundColor(Color.Transparent)
+                .fontColor($r('app.color.primary')).onClick(() => {
+                  this.selecting = !this.selecting;
+                  if (!this.selecting) this.selectedBookIds = [];
+                })
+            }.width('100%')
+            if (this.selecting) {
+              Flex({ wrap: FlexWrap.Wrap }) {
+                Text(`已选 ${this.selectedBookIds.length} 本`).fontSize(14).margin({ right: 8, bottom: 8 })
+                Button('清除进度').height(40).margin({ right: 8, bottom: 8 })
+                  .onClick(() => this.batchBookAction('deleteProgress'))
+                Button('分析').height(40).margin({ right: 8, bottom: 8 })
+                  .onClick(() => this.batchBookAction('analyze'))
+                Button('刷新元数据').height(40).margin({ right: 8, bottom: 8 })
+                  .onClick(() => this.batchBookAction('metadata/refresh'))
+              }.width('100%').padding(10).backgroundColor($r('app.color.surface_high')).borderRadius(16)
+            }
             Grid() {
               ForEach(this.books, (book: KomgaBook) => {
                 GridItem() {
-                  BookCard({
-                    book: book,
-                    onOpen: (id: string) => router.pushUrl({ url: 'pages/BookDetail', params: { bookId: id } })
-                  })
+                  Stack({ alignContent: Alignment.TopEnd }) {
+                    BookCard({ book: book, onOpen: (id: string) => {
+                      if (this.selecting) this.toggleBook(id);
+                      else router.pushUrl({ url: 'pages/BookDetail', params: { bookId: id } });
+                    } })
+                    if (this.selecting) {
+                      Text(this.selectedBookIds.includes(book.id) ? '✓' : '○').fontSize(18)
+                        .fontColor(this.selectedBookIds.includes(book.id) ? Color.White : $r('app.color.primary'))
+                        .width(32).height(32).textAlign(TextAlign.Center)
+                        .backgroundColor(this.selectedBookIds.includes(book.id) ? $r('app.color.primary') : '#EFFFFFFF')
+                        .borderRadius(16).margin(8).onClick(() => this.toggleBook(book.id))
+                    }
+                  }.width('100%')
                 }
               }, (book: KomgaBook) => book.id)
             }
             .columnsTemplate(this.gridTemplate()).columnsGap(12).rowsGap(12).width('100%')
+            if (this.message.length > 0) {
+              Text(this.message).fontSize(13).fontColor($r('app.color.on_surface_variant')).width('100%')
+            }
           }
           .width('100%').padding({ left: 12, right: 12, bottom: 32 })
           .onAreaChange((_, area) => {

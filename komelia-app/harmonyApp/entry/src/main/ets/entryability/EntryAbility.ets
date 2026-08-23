@@ -1,7 +1,10 @@
-import { AbilityConstant, Configuration, UIAbility, Want, common } from '@kit.AbilityKit';
+import { AbilityConstant, Configuration, ConfigurationConstant, UIAbility, Want, common } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
+import { i18n } from '@kit.LocalizationKit';
 import { AppContainer } from '../core/di/AppContainer';
+import { AppLanguage, AppThemeMode } from '../core/design/KomeliaDesign';
+import { AppPreferences } from '../persistence/AppPreferences';
 
 const DOMAIN = 0x0000;
 const TAG = 'KomeliaEntryAbility';
@@ -16,18 +19,29 @@ export default class EntryAbility extends UIAbility {
   }
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
-    windowStage.getMainWindow().then((mainWindow: window.Window) => {
+    this.prepareWindow(windowStage);
+  }
+
+  private async prepareWindow(windowStage: window.WindowStage): Promise<void> {
+    try {
+      await AppContainer.ready();
+      const theme = await AppPreferences.getString('appTheme', AppThemeMode.LIGHT);
+      const language = await AppPreferences.getString('appLanguage', AppLanguage.SYSTEM);
+      AppStorage.setOrCreate('oledMode', theme === AppThemeMode.DARKER);
+      this.context.getApplicationContext().setColorMode(theme === AppThemeMode.LIGHT
+        ? ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT : ConfigurationConstant.ColorMode.COLOR_MODE_DARK);
+      i18n.System.setAppPreferredLanguage(language === AppLanguage.EN ? 'en' :
+        language === AppLanguage.ZH_CN ? 'zh-Hans' : 'default');
+      const mainWindow = await windowStage.getMainWindow();
       mainWindow.setWindowLayoutFullScreen(true);
       mainWindow.setWindowSystemBarProperties({
-        statusBarColor: '#00000000',
-        navigationBarColor: '#00000000',
-        statusBarContentColor: '#202027',
-        navigationBarContentColor: '#202027'
+        statusBarColor: '#00000000', navigationBarColor: '#00000000',
+        statusBarContentColor: theme === AppThemeMode.LIGHT ? '#202027' : '#F2EEF8',
+        navigationBarContentColor: theme === AppThemeMode.LIGHT ? '#202027' : '#F2EEF8'
       });
-    }).catch(() => {
-      hilog.warn(DOMAIN, TAG, 'Unable to configure transparent system bars');
-    });
-
+    } catch (error) {
+      hilog.warn(DOMAIN, TAG, `Unable to restore presentation settings: ${(error as Error).message}`);
+    }
     windowStage.loadContent('pages/Index', (error) => {
       if (error.code !== 0) {
         hilog.error(DOMAIN, TAG, `Failed to load Index: ${error.code} ${error.message}`);

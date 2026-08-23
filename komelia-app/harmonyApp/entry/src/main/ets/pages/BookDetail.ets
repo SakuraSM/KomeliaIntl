@@ -73,6 +73,10 @@ struct BookDetail {
         Text(this.book?.metadata?.title || this.book?.name || '书籍详情')
           .fontSize(20).fontWeight(FontWeight.Bold).maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+        Button('编辑').height(40).backgroundColor($r('app.color.primary_container'))
+          .fontColor($r('app.color.primary')).onClick(() => router.pushUrl({
+            url: 'pages/BookEdit', params: { bookId: this.bookId }
+          }))
       }
       .height(56).width('100%').padding({ left: 8, right: 12 })
 

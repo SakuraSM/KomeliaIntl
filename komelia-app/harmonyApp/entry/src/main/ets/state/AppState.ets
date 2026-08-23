@@ -3,6 +3,7 @@ import { AppContainer } from '../core/di/AppContainer';
 import { NamespaceKey } from '../data/local/DatabaseModels';
 import { catalogRepository, progressOutbox, sessionRepository } from '../data/repository/DefaultRepositories';
 import { komgaClient } from '../network/KomgaClient';
+import { AppPreferences } from '../persistence/AppPreferences';
 
 export enum AppDestination {
   LIBRARY = 0,
@@ -24,6 +25,7 @@ export class AppState {
   namespace?: NamespaceKey;
   libraries: KomgaLibrary[] = [];
   homeFeed: HomeFeed = { onDeck: [], latest: [], series: [] };
+  reducedMotion: boolean = false;
 
   static getInstance(): AppState {
     return AppState.shared;
@@ -33,6 +35,7 @@ export class AppState {
     this.isBootstrapping = true;
     try {
       await AppContainer.ready();
+      this.reducedMotion = await AppPreferences.getBoolean('reducedMotion');
       const snapshot = await sessionRepository.restore();
       if (snapshot !== undefined) {
         this.namespace = snapshot.namespace;

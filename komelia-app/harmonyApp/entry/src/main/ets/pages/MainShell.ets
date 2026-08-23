@@ -40,7 +40,7 @@ export struct MainShell {
     .borderRadius(20)
     .backgroundColor(this.state.destination === destination ? $r('app.color.primary_container') :
       Color.Transparent)
-    .animation({ duration: 160, curve: Curve.EaseOut })
+    .animation({ duration: this.state.reducedMotion ? 0 : 160, curve: Curve.EaseOut })
     .onClick(() => this.state.destination = destination)
   }
 

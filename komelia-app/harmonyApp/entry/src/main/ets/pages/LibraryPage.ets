@@ -19,6 +19,9 @@ export struct LibraryPage {
   @State selectedSection: LibrarySection = LibrarySection.SERIES;
   @State columns: number = 3;
   @State query: string = '';
+  @State selecting: boolean = false;
+  @State selectedSeriesIds: string[] = [];
+  @State message: string = '';
 
   aboutToAppear(): void { this.load(); }
 
@@ -53,6 +56,29 @@ export struct LibraryPage {
     return '1fr 1fr 1fr';
   }
 
+  private toggleSeries(id: string): void {
+    this.selectedSeriesIds = this.selectedSeriesIds.includes(id)
+      ? this.selectedSeriesIds.filter((value: string) => value !== id)
+      : this.selectedSeriesIds.concat([id]);
+  }
+
+  private async batchSeriesAction(action: string): Promise<void> {
+    if (this.selectedSeriesIds.length === 0) return;
+    this.message = `正在处理 ${this.selectedSeriesIds.length} 个系列…`;
+    try {
+      for (let index = 0; index < this.selectedSeriesIds.length; index++) {
+        const id = this.selectedSeriesIds[index];
+        if (action === 'read') await komgaClient.setSeriesReadStatus(id, true);
+        else if (action === 'unread') await komgaClient.setSeriesReadStatus(id, false);
+        else await komgaClient.runSeriesAction(id, action);
+      }
+      this.message = '批量操作已完成';
+      this.selectedSeriesIds = [];
+      this.selecting = false;
+      await this.load();
+    } catch (error) { this.message = (error as Error).message; }
+  }
+
   @Builder
   private sectionButton(section: LibrarySection, label: string) {
     Button(label).height(44).borderRadius(14)
@@ -81,7 +107,28 @@ export struct LibraryPage {
         this.sectionButton(LibrarySection.SERIES, '系列')
         this.sectionButton(LibrarySection.COLLECTIONS, '收藏')
         this.sectionButton(LibrarySection.READ_LISTS, '阅读列表')
+        Blank()
+        if (this.selectedSection === LibrarySection.SERIES) {
+          Button(this.selecting ? '取消' : '批量').height(40).backgroundColor(Color.Transparent)
+            .fontColor($r('app.color.primary')).onClick(() => {
+              this.selecting = !this.selecting;
+              if (!this.selecting) this.selectedSeriesIds = [];
+            })
+        }
       }.width('100%')
+      if (this.selecting) {
+        Flex({ wrap: FlexWrap.Wrap, alignItems: ItemAlign.Center }) {
+          Text(`已选 ${this.selectedSeriesIds.length} 项`).fontSize(14).margin({ right: 8, bottom: 8 })
+          Button('标为已读').height(40).margin({ right: 8, bottom: 8 })
+            .onClick(() => this.batchSeriesAction('read'))
+          Button('标为未读').height(40).margin({ right: 8, bottom: 8 })
+            .onClick(() => this.batchSeriesAction('unread'))
+          Button('分析').height(40).margin({ right: 8, bottom: 8 })
+            .onClick(() => this.batchSeriesAction('analyze'))
+          Button('刷新元数据').height(40).margin({ right: 8, bottom: 8 })
+            .onClick(() => this.batchSeriesAction('metadata/refresh'))
+        }.width('100%').padding(10).backgroundColor($r('app.color.surface_high')).borderRadius(16)
+      }
       Row({ space: 8 }) {
         if (this.selectedSection === LibrarySection.SERIES) {
           Select([{ value: '全部书库' }].concat(
@@ -100,8 +147,21 @@ export struct LibraryPage {
       else if (this.selectedSection === LibrarySection.SERIES) {
         Grid() {
           ForEach(this.series, (item: KomgaSeries) => {
-            GridItem() { SeriesCard({ series: item, onOpen: (id: string) =>
-              router.pushUrl({ url: 'pages/SeriesDetail', params: { seriesId: id } }) }) }
+            GridItem() {
+              Stack({ alignContent: Alignment.TopEnd }) {
+                SeriesCard({ series: item, onOpen: (id: string) => {
+                  if (this.selecting) this.toggleSeries(id);
+                  else router.pushUrl({ url: 'pages/SeriesDetail', params: { seriesId: id } });
+                } })
+                if (this.selecting) {
+                  Text(this.selectedSeriesIds.includes(item.id) ? '✓' : '○').fontSize(18)
+                    .fontColor(this.selectedSeriesIds.includes(item.id) ? Color.White : $r('app.color.primary'))
+                    .width(32).height(32).textAlign(TextAlign.Center)
+                    .backgroundColor(this.selectedSeriesIds.includes(item.id) ? $r('app.color.primary') : '#EFFFFFFF')
+                    .borderRadius(16).margin(8).onClick(() => this.toggleSeries(item.id))
+                }
+              }.width('100%')
+            }
           }, (item: KomgaSeries) => item.id)
         }.columnsTemplate(this.gridTemplate()).columnsGap(12).rowsGap(12)
         .layoutWeight(1).width('100%').edgeEffect(EdgeEffect.Spring)
@@ -119,6 +179,9 @@ export struct LibraryPage {
               router.pushUrl({ url: 'pages/ReadListDetail', params: { readListId: item.id, title: item.name } })) }
           }, (item: KomgaReadList) => item.id)
         }.layoutWeight(1).width('100%')
+      }
+      if (this.message.length > 0) {
+        Text(this.message).fontSize(13).fontColor($r('app.color.on_surface_variant')).width('100%')
       }
     }.padding({ left: 12, right: 12, top: 16, bottom: 12 }).width('100%').height('100%')
     .onAreaChange((_, area) => {

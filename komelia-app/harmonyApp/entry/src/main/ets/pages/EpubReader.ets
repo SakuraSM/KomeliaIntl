@@ -7,8 +7,13 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { display, router } from '@kit.ArkUI';
 import { ReadPageComponent, bookParser, readerCore } from '@kit.ReaderKit';
+import { namespaceOf, OfflineMediaKind } from '../data/local/DatabaseModels';
+import { offlineRepository } from '../data/repository/DefaultRepositories';
+import { epubLocatorMapper } from '../domain/service/EpubLocatorMapper';
+import { readerEngine } from '../domain/service/ReaderEngine';
 import { komgaClient } from '../network/KomgaClient';
 import { AppPreferences } from '../persistence/AppPreferences';
+import { AppState } from '../state/AppState';
 
 interface EpubReaderParams {
   bookId: string;
@@ -31,6 +36,7 @@ struct EpubReader {
   @State nightMode: boolean = false;
   private bookId: string = '';
   private localPath: string = '';
+  private namespace: string = '';
   private currentData: readerCore.PageDataInfo | null = null;
   private handler: bookParser.BookParserHandler | null = null;
   private controller: readerCore.ReaderComponentController = new readerCore.ReaderComponentController();
@@ -54,6 +60,8 @@ struct EpubReader {
   aboutToAppear(): void {
     const params = router.getParams() as EpubReaderParams;
     this.bookId = params.bookId;
+    const key = AppState.getInstance().namespace;
+    this.namespace = key === undefined ? '' : namespaceOf(key);
     this.registerCallbacks();
     this.prepareAndStart();
     this.scheduleHide();
@@ -87,7 +95,9 @@ struct EpubReader {
         fs.mkdirSync(directory, true);
       } catch (_) {
       }
-      this.localPath = `${directory}/${this.bookId}.epub`;
+      const offline = await offlineRepository.getBook(this.namespace, this.bookId);
+      this.localPath = offline !== undefined && offline.mediaKind === OfflineMediaKind.EPUB_FILE &&
+        fs.accessSync(offline.localPath) ? offline.localPath : `${directory}/${this.bookId}.epub`;
       if (!fs.accessSync(this.localPath)) {
         const bytes = await komgaClient.getBookFile(this.bookId);
         const file = fs.openSync(this.localPath,
@@ -100,8 +110,19 @@ struct EpubReader {
       this.readerSetting.scaledDensity = screen.scaledDensity > 0 ? screen.scaledDensity : 1;
       this.readerSetting.viewPortWidth = screen.width;
       this.readerSetting.viewPortHeight = screen.height;
-      const savedResource = Number(await AppPreferences.getString(`epub.${this.bookId}.resource`, '0'));
-      const savedDomPos = await AppPreferences.getString(`epub.${this.bookId}.domPos`, '');
+      const hasLocalPosition = await AppPreferences.getBoolean(`epub.${this.bookId}.saved`);
+      let savedResource = Number(await AppPreferences.getString(`epub.${this.bookId}.resource`, '0'));
+      let savedDomPos = await AppPreferences.getString(`epub.${this.bookId}.domPos`, '');
+      if (!hasLocalPosition) {
+        try {
+          const serverPosition = epubLocatorMapper.fromLocator(await komgaClient.getReadiumProgression(this.bookId));
+          if (serverPosition !== undefined) {
+            savedResource = serverPosition.resourceIndex;
+            savedDomPos = serverPosition.domPos;
+          }
+        } catch (_) {
+        }
+      }
 
       const values = await Promise.all([
         bookParser.getDefaultHandler(this.localPath),
@@ -131,11 +152,18 @@ struct EpubReader {
   }
 
   private async persistPosition(data: readerCore.PageDataInfo): Promise<void> {
+    let href = '';
+    if (this.handler !== null) {
+      const spine = this.handler.getSpineList() || [];
+      href = spine.find(value => value.index === data.resourceIndex)?.href || '';
+    }
     await Promise.all([
       AppPreferences.putString(`epub.${this.bookId}.resource`, `${data.resourceIndex}`),
-      AppPreferences.putString(`epub.${this.bookId}.domPos`, data.domPos || '')
+      AppPreferences.putString(`epub.${this.bookId}.domPos`, data.domPos || ''),
+      AppPreferences.putBoolean(`epub.${this.bookId}.saved`, true)
     ]);
-    await komgaClient.updateReadProgress(this.bookId, data.resourceIndex, false);
+    await readerEngine.updateEpubProgress(this.namespace, this.bookId, data.resourceIndex,
+      epubLocatorMapper.toLocator(data.resourceIndex, data.domPos || '', href, this.currentChapter));
   }
 
   private loadFile(filePath: string): ArrayBuffer {

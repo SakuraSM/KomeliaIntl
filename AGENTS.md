@@ -22,6 +22,7 @@
 - Reset PATCH to `0` for a minor release. Reset MINOR and PATCH to `0` for a major release.
 - Do not reuse or modify a published tag. Publish a new patch version for a correction.
 - Run `scripts/check-release-version.sh` and `scripts/check-release-notes.sh` before publication.
-- Write Release notes in paired Chinese and English entries with `.github/RELEASE_TEMPLATE.md`.
+- Name every GitHub Release `Komelia vMAJOR.MINOR.PATCH`.
+- Write Release notes as separate `## 中文` and `## English` sections with `.github/RELEASE_TEMPLATE.md`. Keep translated items in the same order.
 - Keep Release notes limited to user-visible changes. Do not add test logs, implementation details, omitted platforms, a full changelog, or repository attribution.
 - Keep fixed issues open until the Release and its listed artifacts are published and verified.

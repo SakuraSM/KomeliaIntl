@@ -32,67 +32,83 @@ expect_fail 1.4.9 1.4.9 patch
 expect_fail 01.4.9 1.4.10 patch
 
 cat > "$TEST_DIR/valid-notes.md" <<'EOF'
-## Komelia Intl v0.18.17
+## 中文
 
-### 变更 / Changes
+- 修复阅读器返回问题。
+- 增加离线缓存管理。
 
-- 中文：修复阅读器返回和离线缓存管理问题。
-  English: Fixed reader back navigation and offline cache management.
+## English
+
+- Fixed reader back navigation.
+- Added offline cache management.
 EOF
 
 "$NOTES_CHECK" \
   --file "$TEST_DIR/valid-notes.md" \
   --version 0.18.17 \
+  --title "Komelia v0.18.17" \
   --level patch >/dev/null
 
 expect_notes_fail() {
-  if "$NOTES_CHECK" --file "$1" --version 0.18.17 --level patch >/dev/null 2>&1; then
+  local title="${2:-Komelia v0.18.17}"
+  if "$NOTES_CHECK" --file "$1" --version 0.18.17 --title "$title" --level patch >/dev/null 2>&1; then
     echo "Expected release notes check to fail: $1" >&2
     exit 1
   fi
 }
 
-cat > "$TEST_DIR/unpaired-notes.md" <<'EOF'
-## Komelia Intl v0.18.17
+expect_notes_fail "$TEST_DIR/valid-notes.md" "v0.18.17"
 
-### 变更 / Changes
+cat > "$TEST_DIR/missing-language-notes.md" <<'EOF'
+## 中文
 
-- 中文：修复阅读器返回问题。
+- 修复阅读器返回问题。
 EOF
-expect_notes_fail "$TEST_DIR/unpaired-notes.md"
+expect_notes_fail "$TEST_DIR/missing-language-notes.md"
 
-cat > "$TEST_DIR/misaligned-notes.md" <<'EOF'
-## Komelia Intl v0.18.17
+cat > "$TEST_DIR/wrong-language-order.md" <<'EOF'
+## English
 
-### 变更 / Changes
+- Fixed reader back navigation.
 
-- 中文：修复阅读器返回问题。
-- 中文：增加离线缓存管理。
-  English: Added offline cache management.
+## 中文
+
+- 修复阅读器返回问题。
 EOF
-expect_notes_fail "$TEST_DIR/misaligned-notes.md"
+expect_notes_fail "$TEST_DIR/wrong-language-order.md"
 
-cat > "$TEST_DIR/verbose-notes.md" <<'EOF'
-## Komelia Intl v0.18.17
+cat > "$TEST_DIR/mismatched-lists.md" <<'EOF'
+## 中文
 
-### 变更 / Changes
+- 修复阅读器返回问题。
+- 增加离线缓存管理。
+
+## English
+
+- Fixed reader back navigation.
+EOF
+expect_notes_fail "$TEST_DIR/mismatched-lists.md"
+
+cat > "$TEST_DIR/legacy-interleaved-notes.md" <<'EOF'
+## 中文
 
 - 中文：修复阅读器返回问题。
   English: Fixed reader back navigation.
 
-### 验证 / Verification
+## English
 
-- Ran internal build commands.
+- Fixed reader back navigation.
 EOF
-expect_notes_fail "$TEST_DIR/verbose-notes.md"
+expect_notes_fail "$TEST_DIR/legacy-interleaved-notes.md"
 
 cat > "$TEST_DIR/extra-section-notes.md" <<'EOF'
-## Komelia Intl v0.18.17
+## 中文
 
-### 变更 / Changes
+- 修复阅读器返回问题。
 
-- 中文：修复阅读器返回问题。
-  English: Fixed reader back navigation.
+## English
+
+- Fixed reader back navigation.
 
 ## 下载 / Downloads
 
@@ -101,12 +117,13 @@ EOF
 expect_notes_fail "$TEST_DIR/extra-section-notes.md"
 
 cat > "$TEST_DIR/placeholder-notes.md" <<'EOF'
-## Komelia Intl v{{VERSION}}
+## 中文
 
-### 变更 / Changes
+- {{CHANGE_ZH}}
 
-- 中文：{{CHANGE_ZH}}
-  English: {{CHANGE_EN}}
+## English
+
+- {{CHANGE_EN}}
 EOF
 expect_notes_fail "$TEST_DIR/placeholder-notes.md"
 

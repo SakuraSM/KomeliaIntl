@@ -6,24 +6,33 @@ Choose the version with [Version releases](versioning.md) before you prepare the
 
 ## Prepare release notes
 
-1. Copy `.github/RELEASE_TEMPLATE.md` to a temporary notes file.
-2. Replace every `{{PLACEHOLDER}}`.
-3. Describe user-visible changes in paired Chinese and English entries. Combine closely related fixes into one entry.
-4. Include an Issue or pull request number in the change entry when it helps users find details.
-5. Keep test commands, internal refactors, omitted platforms, the full changelog, and repository attribution out of the Release body.
-6. Run the policy test and both checks:
+1. Set the Release title to `Komelia vMAJOR.MINOR.PATCH`. Do not use `Komelia Intl`. Do not omit the `v` or use only the version number.
+2. Copy `.github/RELEASE_TEMPLATE.md` to a temporary notes file.
+3. Replace every `{{PLACEHOLDER}}`.
+4. Put Chinese changes under `## 中文` and English changes under `## English`.
+5. Keep the translated lists the same length and order. One Chinese item must map to one English item.
+6. Do not repeat the version or project name in the body. Short Release notes do not need category subheadings.
+7. Combine closely related fixes into one item. Include an Issue or pull request number when it helps users find details.
+8. Keep test commands, internal refactors, omitted platforms, the full changelog, checksums, download lists, and repository attribution out of the Release body.
+9. Run the policy test and both checks:
 
    ```shell
    scripts/test-release-policy.sh
    scripts/check-release-version.sh --tag vX.Y.Z --previous A.B.C --level LEVEL
-   scripts/check-release-notes.sh --file /path/to/release-notes.md --version X.Y.Z --level LEVEL
+   scripts/check-release-notes.sh \
+     --file /path/to/release-notes.md \
+     --version X.Y.Z \
+     --title "Komelia vX.Y.Z" \
+     --level LEVEL
    ```
 
    Replace `LEVEL` with `patch`, `minor`, or `major`.
 
-7. Create a draft Release first. Attach and verify the packages before publication. GitHub displays the attached packages outside the Release body.
+10. Create a draft Release first. Attach and verify the packages before publication. GitHub displays the attached packages outside the Release body.
 
 `.github/RELEASE_TEMPLATE.md` is the canonical format. If a maintainer generates notes with GitHub, remove documentation, dependency maintenance, test details, and other changes that users do not need.
+
+You may correct the title or body of an existing Release to match this format. Do not move its tag, replace its assets, or change its published version.
 
 ## Reply to a fixed issue
 

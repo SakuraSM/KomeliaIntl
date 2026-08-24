@@ -54,9 +54,12 @@ jobs:
             --level "$RELEASE_LEVEL"
           gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
             --json body --jq .body > /tmp/komelia-release-notes.md
+          release_title=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --json name --jq .name)
           scripts/check-release-notes.sh \
             --file /tmp/komelia-release-notes.md \
             --version "${RELEASE_TAG#v}" \
+            --title "$release_title" \
             --level "$RELEASE_LEVEL"
 
   linux:

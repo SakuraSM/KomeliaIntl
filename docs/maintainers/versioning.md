@@ -56,10 +56,11 @@ scripts/check-release-version.sh \
 scripts/check-release-notes.sh \
   --file /path/to/release-notes.md \
   --version 0.18.17 \
+  --title "Komelia v0.18.17" \
   --level patch
 ```
 
-The scripts reject skipped versions, a level that does not match the numeric increment, mismatched application version files, and Release notes with the wrong release type.
+The scripts reject skipped versions, a level that does not match the numeric increment, mismatched application version files, a nonstandard Release title, and invalid language sections.
 
 ## Publish without changing a released version
 

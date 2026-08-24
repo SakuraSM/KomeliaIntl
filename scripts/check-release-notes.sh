@@ -4,10 +4,12 @@ set -euo pipefail
 NOTES_FILE=""
 EXPECTED_VERSION=""
 EXPECTED_LEVEL=""
+RELEASE_TITLE=""
 
 usage() {
   cat <<'EOF'
-Usage: scripts/check-release-notes.sh --file PATH [--version X.Y.Z] [--level patch|minor|major]
+Usage: scripts/check-release-notes.sh --file PATH --version X.Y.Z \
+  --title "Komelia vX.Y.Z" [--level patch|minor|major]
 
 Validate release notes against .github/RELEASE_TEMPLATE.md.
 EOF
@@ -27,6 +29,10 @@ while [[ $# -gt 0 ]]; do
       EXPECTED_LEVEL="${2:-}"
       shift 2
       ;;
+    --title)
+      RELEASE_TITLE="${2:-}"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -44,6 +50,21 @@ if [[ -z "$NOTES_FILE" ]]; then
   exit 2
 fi
 
+if [[ ! "$EXPECTED_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "--version must be numeric SemVer X.Y.Z: ${EXPECTED_VERSION:-missing}" >&2
+  exit 2
+fi
+
+if [[ -z "$RELEASE_TITLE" ]]; then
+  echo "Missing required --title argument." >&2
+  exit 2
+fi
+
+if [[ "$RELEASE_TITLE" != "Komelia v$EXPECTED_VERSION" ]]; then
+  echo "Release title must be exactly: Komelia v$EXPECTED_VERSION" >&2
+  exit 1
+fi
+
 if [[ ! -f "$NOTES_FILE" ]]; then
   echo "Release notes file not found: $NOTES_FILE" >&2
   exit 1
@@ -54,47 +75,55 @@ if rg -q '\{\{[^}]+\}\}' "$NOTES_FILE"; then
   exit 1
 fi
 
-if [[ "$(rg -Fxc "### 变更 / Changes" "$NOTES_FILE")" -ne 1 ]]; then
-  echo "Release notes must contain one Changes heading." >&2
+if [[ "$(rg -Fxc "## 中文" "$NOTES_FILE")" -ne 1 ]]; then
+  echo "Release notes must contain one Chinese section." >&2
   exit 1
 fi
 
-if ! awk '
-  /^- 中文：/ {
-    chinese_entries++
-  }
-  /^  English:/ {
-    if (previous_line !~ /^- 中文：/) {
-      invalid = 1
-    }
-    english_entries++
-  }
-  {
-    previous_line = $0
-  }
-  END {
-    exit(invalid || chinese_entries == 0 || chinese_entries != english_entries)
-  }
-' "$NOTES_FILE"; then
-  echo "Release notes must include paired Chinese and English entries." >&2
+if [[ "$(rg -Fxc "## English" "$NOTES_FILE")" -ne 1 ]]; then
+  echo "Release notes must contain one English section." >&2
+  exit 1
+fi
+
+chinese_line="$(rg -Fnx "## 中文" "$NOTES_FILE" | cut -d: -f1)"
+english_line="$(rg -Fnx "## English" "$NOTES_FILE" | cut -d: -f1)"
+if (( chinese_line >= english_line )); then
+  echo "The Chinese section must appear before the English section." >&2
   exit 1
 fi
 
 while IFS= read -r heading; do
-  if [[ "$heading" == "### 变更 / Changes" ]]; then
-    continue
-  fi
-  if [[ "$heading" =~ ^##\ Komelia\ Intl\ v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    continue
-  fi
-  if [[ -n "$heading" ]]; then
-    echo "Release notes contain an unsupported section: $heading" >&2
-    exit 1
-  fi
+  case "$heading" in
+    "## 中文"|"## English") ;;
+    *)
+      echo "Release notes contain an unsupported heading: $heading" >&2
+      exit 1
+      ;;
+  esac
 done < <(rg '^#{1,6} ' "$NOTES_FILE" || true)
 
-if ! rg -q '^## Komelia Intl v[0-9]+\.[0-9]+\.[0-9]+$' "$NOTES_FILE"; then
-  echo "Release notes are missing a semantic version title." >&2
+if ! awk '
+  /^## 中文$/ {
+    section = "zh"
+    next
+  }
+  /^## English$/ {
+    section = "en"
+    next
+  }
+  /^- / {
+    if (section == "zh") chinese_entries++
+    else if (section == "en") english_entries++
+    else invalid = 1
+    next
+  }
+  /^[[:space:]]*$/ { next }
+  { invalid = 1 }
+  END {
+    exit(invalid || chinese_entries == 0 || english_entries == 0 || chinese_entries != english_entries)
+  }
+' "$NOTES_FILE"; then
+  echo "Release notes must contain matching Chinese and English bullet lists." >&2
   exit 1
 fi
 
@@ -102,17 +131,15 @@ for forbidden_text in \
   "版本类型 / Release type:" \
   "完整变更 / Full changelog:" \
   "本项目基于 [Snd-R/Komelia]" \
-  "This fork is based on [Snd-R/Komelia]"; do
-  if rg -Fq "$forbidden_text" "$NOTES_FILE"; then
+  "This fork is based on [Snd-R/Komelia]" \
+  "SHA-256" \
+  "- 中文：" \
+  "  English:"; do
+  if rg -Fq -- "$forbidden_text" "$NOTES_FILE"; then
     echo "Release notes contain maintainer-only information: $forbidden_text" >&2
     exit 1
   fi
 done
-
-if [[ -n "$EXPECTED_VERSION" ]] && ! rg -Fxq "## Komelia Intl v$EXPECTED_VERSION" "$NOTES_FILE"; then
-  echo "Release notes version mismatch: expected v$EXPECTED_VERSION" >&2
-  exit 1
-fi
 
 if [[ -n "$EXPECTED_LEVEL" ]]; then
   case "$EXPECTED_LEVEL" in
@@ -124,4 +151,4 @@ if [[ -n "$EXPECTED_LEVEL" ]]; then
   esac
 fi
 
-echo "Release notes check passed: $NOTES_FILE"
+echo "Release notes check passed: $RELEASE_TITLE"

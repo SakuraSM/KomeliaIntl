@@ -1,6 +1,7 @@
-## Komelia Intl v{{VERSION}}
+## 中文
 
-### 变更 / Changes
+- {{CHANGE_ZH}}
 
-- 中文：{{CHANGE_ZH}}
-  English: {{CHANGE_EN}}
+## English
+
+- {{CHANGE_EN}}

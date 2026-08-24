@@ -134,12 +134,15 @@ Follow [Version releases](versioning.md) and [Publish a Release and reply to fix
 
 1. Choose the highest SemVer level required by the included changes.
 2. Update every application version source with `scripts/build-release.sh`.
-3. Copy `.github/RELEASE_TEMPLATE.md` and write paired Chinese and English change entries.
-4. Keep the Release body limited to user-visible changes. GitHub displays attached assets separately.
-5. Create a draft Release. Build, attach, and verify only the packages in scope.
-6. Publish after the tag, application version, notes, and attached assets agree.
-7. Install or launch each attached package before marking it verified.
-8. Reply to fixed issues with `.github/ISSUE_REPLY_TEMPLATE.md`, then close them.
+3. Name the GitHub Release `Komelia vMAJOR.MINOR.PATCH`.
+4. Copy `.github/RELEASE_TEMPLATE.md`.
+5. Put Chinese items under `## 中文` and English items under `## English`.
+6. Keep both lists in the same order.
+7. Keep the Release body limited to user-visible changes. GitHub displays attached assets separately.
+8. Create a draft Release. Build, attach, and verify only the packages in scope.
+9. Publish after the tag, application version, title, language sections, and attached assets agree.
+10. Install or launch each attached package before marking it verified.
+11. Reply to fixed issues with `.github/ISSUE_REPLY_TEMPLATE.md`, then close them.
 
 Do not put test commands, implementation details, missing-platform notices, a full commit list, or repository attribution in the Release body. Keep those facts in the pull request and maintainer documentation.
 

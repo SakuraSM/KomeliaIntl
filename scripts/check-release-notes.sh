@@ -54,44 +54,60 @@ if rg -q '\{\{[^}]+\}\}' "$NOTES_FILE"; then
   exit 1
 fi
 
-required_headings=(
-  "### 修复 / Fixed"
-  "### 优化 / Improved"
-  "### 验证 / Verification"
-  "### 下载 / Downloads"
-)
-
-for heading in "${required_headings[@]}"; do
-  if ! rg -Fxq "$heading" "$NOTES_FILE"; then
-    echo "Release notes are missing required heading: $heading" >&2
-    exit 1
-  fi
-done
-
-if ! rg -q '^关联 Issue / Related issues: ' "$NOTES_FILE"; then
-  echo "Release notes are missing the bilingual Related issues line." >&2
+if [[ "$(rg -Fxc "### 变更 / Changes" "$NOTES_FILE")" -ne 1 ]]; then
+  echo "Release notes must contain one Changes heading." >&2
   exit 1
 fi
 
-if ! rg -q '^完整变更 / Full changelog: https://github.com/SakuraSM/KomeliaIntl/compare/' "$NOTES_FILE"; then
-  echo "Release notes are missing the bilingual full changelog comparison URL." >&2
-  exit 1
-fi
-
-if ! rg -Fq '本项目基于 [Snd-R/Komelia](https://github.com/Snd-R/Komelia)' "$NOTES_FILE"; then
-  echo "Release notes are missing the Chinese upstream attribution." >&2
-  exit 1
-fi
-
-if ! rg -Fq 'This fork is based on [Snd-R/Komelia](https://github.com/Snd-R/Komelia)' "$NOTES_FILE"; then
-  echo "Release notes are missing the English upstream attribution." >&2
-  exit 1
-fi
-
-if ! rg -q '^- 中文：.+' "$NOTES_FILE" || ! rg -q '^  English: .+' "$NOTES_FILE"; then
+if ! awk '
+  /^- 中文：/ {
+    chinese_entries++
+  }
+  /^  English:/ {
+    if (previous_line !~ /^- 中文：/) {
+      invalid = 1
+    }
+    english_entries++
+  }
+  {
+    previous_line = $0
+  }
+  END {
+    exit(invalid || chinese_entries == 0 || chinese_entries != english_entries)
+  }
+' "$NOTES_FILE"; then
   echo "Release notes must include paired Chinese and English entries." >&2
   exit 1
 fi
+
+while IFS= read -r heading; do
+  if [[ "$heading" == "### 变更 / Changes" ]]; then
+    continue
+  fi
+  if [[ "$heading" =~ ^##\ Komelia\ Intl\ v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    continue
+  fi
+  if [[ -n "$heading" ]]; then
+    echo "Release notes contain an unsupported section: $heading" >&2
+    exit 1
+  fi
+done < <(rg '^#{1,6} ' "$NOTES_FILE" || true)
+
+if ! rg -q '^## Komelia Intl v[0-9]+\.[0-9]+\.[0-9]+$' "$NOTES_FILE"; then
+  echo "Release notes are missing a semantic version title." >&2
+  exit 1
+fi
+
+for forbidden_text in \
+  "版本类型 / Release type:" \
+  "完整变更 / Full changelog:" \
+  "本项目基于 [Snd-R/Komelia]" \
+  "This fork is based on [Snd-R/Komelia]"; do
+  if rg -Fq "$forbidden_text" "$NOTES_FILE"; then
+    echo "Release notes contain maintainer-only information: $forbidden_text" >&2
+    exit 1
+  fi
+done
 
 if [[ -n "$EXPECTED_VERSION" ]] && ! rg -Fxq "## Komelia Intl v$EXPECTED_VERSION" "$NOTES_FILE"; then
   echo "Release notes version mismatch: expected v$EXPECTED_VERSION" >&2
@@ -100,28 +116,12 @@ fi
 
 if [[ -n "$EXPECTED_LEVEL" ]]; then
   case "$EXPECTED_LEVEL" in
-    patch)
-      expected_release_type="版本类型 / Release type: 补丁 / Patch"
-      ;;
-    minor)
-      expected_release_type="版本类型 / Release type: 次版本 / Minor"
-      ;;
-    major)
-      expected_release_type="版本类型 / Release type: 主版本 / Major"
-      ;;
+    patch|minor|major) ;;
     *)
       echo "--level must be patch, minor, or major: $EXPECTED_LEVEL" >&2
       exit 2
       ;;
   esac
-
-  if ! rg -Fxq "$expected_release_type" "$NOTES_FILE"; then
-    echo "Release notes type mismatch: expected $expected_release_type" >&2
-    exit 1
-  fi
-elif ! rg -q '^版本类型 / Release type: (补丁 / Patch|次版本 / Minor|主版本 / Major)$' "$NOTES_FILE"; then
-  echo "Release notes are missing a valid bilingual release type." >&2
-  exit 1
 fi
 
 echo "Release notes check passed: $NOTES_FILE"

@@ -43,6 +43,7 @@ private suspend fun AppNotificationMessage.localizedText(): String = when (this)
             AppNotificationMessageKey.COLOR_PRESET_ALREADY_EXISTS -> Res.string.notification_color_preset_already_exists
             AppNotificationMessageKey.READER_AT_BEGINNING -> Res.string.notification_reader_at_beginning
             AppNotificationMessageKey.IMAGE_CACHE_CLEARED -> Res.string.notification_image_cache_cleared
+            AppNotificationMessageKey.OFFLINE_CACHE_CLEARED -> Res.string.notification_offline_cache_cleared
             AppNotificationMessageKey.DISCORD_WEBHOOKS_MISSING -> Res.string.notification_discord_webhooks_missing
             AppNotificationMessageKey.APPRISE_URLS_MISSING -> Res.string.notification_apprise_urls_missing
             AppNotificationMessageKey.NOTIFICATION_TEMPLATES_SAVED -> Res.string.notification_templates_saved

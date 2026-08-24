@@ -2,19 +2,16 @@ changelog:
   exclude:
     labels:
       - duplicate
+      - dependencies
+      - documentation
       - invalid
+      - internal
       - question
+      - skip-changelog
       - wontfix
+    authors:
+      - dependabot[bot]
   categories:
-    - title: 修复 / Fixed
-      labels:
-        - bug
-    - title: 优化 / Improved
-      labels:
-        - enhancement
-    - title: 文档 / Documentation
-      labels:
-        - documentation
-    - title: 其他变更 / Other changes
+    - title: 变更 / Changes
       labels:
         - "*"

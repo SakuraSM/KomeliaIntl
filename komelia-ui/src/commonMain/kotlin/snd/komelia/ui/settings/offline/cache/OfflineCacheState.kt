@@ -30,7 +30,9 @@ internal class OfflineCacheState(
     val loadState = _loadState.asStateFlow()
     val selectedMediaKind = MutableStateFlow<OfflineCacheMediaKind?>(null)
 
-    suspend fun initialize() = load()
+    suspend fun initialize() {
+        if (_loadState.value == LoadState.Uninitialized) load()
+    }
 
     fun selectMediaKind(kind: OfflineCacheMediaKind?) {
         selectedMediaKind.value = kind

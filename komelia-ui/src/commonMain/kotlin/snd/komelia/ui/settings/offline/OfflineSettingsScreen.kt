@@ -56,6 +56,10 @@ class OfflineSettingsScreen : Screen {
         SettingsScreenContainer(stringResource(Res.string.settings_offline_mode_title)) {
             var selectedTab by rememberSaveable { mutableStateOf(0) }
 
+            LaunchedEffect(selectedTab) {
+                if (selectedTab == 2) vm.initializeCache()
+            }
+
             SecondaryTabRow(selectedTabIndex = selectedTab) {
                 Tab(
                     selected = selectedTab == 0,

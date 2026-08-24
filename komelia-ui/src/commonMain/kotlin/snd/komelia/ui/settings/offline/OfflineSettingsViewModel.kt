@@ -84,6 +84,7 @@ class OfflineSettingsViewModel(
     suspend fun initialize(rootNavigator: Navigator) {
         usersState.initialize(rootNavigator)
         logsState.initialize()
-        cacheState.initialize()
     }
+
+    suspend fun initializeCache() = cacheState.initialize()
 }

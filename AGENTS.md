@@ -19,6 +19,7 @@ This file is the entry map. The versioned engineering contract lives under [`doc
 ## Common commands
 
 - Harness check: `node scripts/check-harness.mjs`
+- Harness regression tests: `node --test scripts/check-harness.test.mjs`
 - Shared UI tests: `./gradlew :komelia-ui:allTests`
 - Android debug: `./gradlew androidDebug`
 - Desktop JAR: `./gradlew desktopJar`

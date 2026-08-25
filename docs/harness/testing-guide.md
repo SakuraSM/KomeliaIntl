@@ -33,7 +33,8 @@ Run shared UI tests for every application code change:
 | Wasm-only | Targeted Wasm test | `./gradlew komfWebUI` and browser smoke test |
 | Native decoder, JNI, WebView, or ONNX | Module tests where available | Platform-native dependency build and consuming package |
 | Version or Release policy | `scripts/test-release-policy.sh` | Version and notes checks plus artifact verification |
-| Documentation or harness only | Harness check and link review | `git diff --check` |
+| Documentation only | Harness check and link review | `git diff --check` |
+| Harness checker | `node --test scripts/check-harness.test.mjs` | Harness check and `git diff --check` |
 
 For the EPUB readers, run package commands from their directories:
 

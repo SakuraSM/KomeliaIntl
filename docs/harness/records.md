@@ -12,3 +12,9 @@ This is an append-only record of material harness changes. Record contract chang
 - Reconciled: `docs/harness/` is canonical; the former maintainer harness path is retained as a compatibility entry.
 - Deliberately not changed: branch protection, CI triggers, publication permissions, versions, product code, and platform packages.
 - Known gap: `.node-version` declares Node 20 while Release CI declares Node 24. Both are documented; compatibility was not established by this documentation review.
+
+## 2026-08-25 — Harness path-boundary hardening
+
+- Fixed: manifest-controlled filesystem paths must remain inside the canonical repository root before existence checks or reads.
+- Covered: parent traversal, absolute paths, sibling-prefix confusion, and symlinks resolving outside the repository.
+- Preserved: valid repository-relative Harness paths and the local advisory rollout level.

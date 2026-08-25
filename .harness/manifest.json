@@ -51,6 +51,12 @@
       "source": "scripts/check-harness.mjs",
       "status": "declared"
     },
+    "testHarnessCheck": {
+      "command": "node --test scripts/check-harness.test.mjs",
+      "cwd": ".",
+      "source": "scripts/check-harness.test.mjs",
+      "status": "observed"
+    },
     "testSharedUi": {
       "command": "./gradlew :komelia-ui:allTests",
       "cwd": ".",

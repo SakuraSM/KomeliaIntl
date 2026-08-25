@@ -7,6 +7,7 @@ Guards convert stable repository rules into repeatable feedback. They must be de
 | Guard | Purpose | Invocation | Enforcement |
 |---|---|---|---|
 | Harness structure | Manifest shape, required documents, local links, source paths, placeholders, personal paths, and entry-map size | `node scripts/check-harness.mjs` | Local, advisory |
+| Harness regression | Valid repository paths plus traversal, absolute-path, prefix-confusion, and symlink rejection fixtures | `node --test scripts/check-harness.test.mjs` | Required when changing the Harness checker |
 | Diff hygiene | Whitespace errors | `git diff --check` | Required by repository policy |
 | Conflict markers | Unresolved merge markers outside vendored code | Command in the [testing guide](testing-guide.md) | Required by repository policy |
 | Release policy | SemVer, version-source agreement, bilingual note shape, and templates | `scripts/test-release-policy.sh` | Required before publication |

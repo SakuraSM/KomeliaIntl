@@ -71,7 +71,7 @@ The montage uses test content. The resource filename and source domain are redac
 
 ## Build from source
 
-Use JDK 21 and Node.js 24 to match the repository workflows. Android and desktop packages also need the platform's native image and WebView libraries. The files under `cmake/` build those dependencies with Docker for supported targets.
+Release workflows use JDK 21 and Node.js 24. The local `.node-version` currently declares Node.js 20; the [Harness scorecard](docs/harness/scorecard.md) records this toolchain split until the repository adopts one declaration. Android and desktop packages also need the platform's native image and WebView libraries. The files under `cmake/` build those dependencies with Docker for supported targets.
 
 Clone this fork with its submodules:
 
@@ -100,7 +100,7 @@ Use the root build aliases for common targets:
 ./gradlew komfWebUI
 ```
 
-The outputs are under the corresponding module's `build/` directory. For release packaging and native dependency commands, follow [the desktop Release workflow](.github/workflows/release-desktop.yml) and [the maintainer development guide](docs/maintainers/development-harness.md).
+The outputs are under the corresponding module's `build/` directory. For release packaging and native dependency commands, follow [the desktop Release workflow](.github/workflows/release-desktop.yml) and [the engineering harness](docs/harness/README.md).
 
 ## Contribute
 

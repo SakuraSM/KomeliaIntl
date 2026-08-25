@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "Komelia Intl",
+    "root": ".",
+    "baseBranch": "main",
+    "primaryLanguages": ["Kotlin", "TypeScript", "C/C++", "SQL", "Shell"]
+  },
+  "toolchain": [
+    {
+      "name": "Gradle wrapper",
+      "version": "9.7.0",
+      "source": "gradle/wrapper/gradle-wrapper.properties",
+      "status": "observed"
+    },
+    {
+      "name": "JDK runtime",
+      "version": "21 in Release CI",
+      "source": ".github/workflows/release-desktop.yml",
+      "status": "observed"
+    },
+    {
+      "name": "Kotlin JVM target",
+      "version": "17",
+      "source": "komelia-ui/build.gradle.kts",
+      "status": "observed"
+    },
+    {
+      "name": "Node local declaration",
+      "version": "20",
+      "source": ".node-version",
+      "status": "observed"
+    },
+    {
+      "name": "Node Release CI",
+      "version": "24",
+      "source": ".github/workflows/release-desktop.yml",
+      "status": "observed"
+    }
+  ],
+  "commands": {
+    "bootstrapSubmodules": {
+      "command": "git submodule update --init --recursive",
+      "cwd": ".",
+      "source": ".gitmodules",
+      "status": "declared"
+    },
+    "harnessCheck": {
+      "command": "node scripts/check-harness.mjs",
+      "cwd": ".",
+      "source": "scripts/check-harness.mjs",
+      "status": "declared"
+    },
+    "testSharedUi": {
+      "command": "./gradlew :komelia-ui:allTests",
+      "cwd": ".",
+      "source": "komelia-ui/build.gradle.kts",
+      "status": "declared"
+    },
+    "buildAndroidDebug": {
+      "command": "./gradlew androidDebug",
+      "cwd": ".",
+      "source": "build.gradle.kts",
+      "status": "declared"
+    },
+    "buildDesktopJar": {
+      "command": "./gradlew desktopJar",
+      "cwd": ".",
+      "source": "build.gradle.kts",
+      "status": "declared"
+    },
+    "buildWasm": {
+      "command": "./gradlew komfWebUI",
+      "cwd": ".",
+      "source": "build.gradle.kts",
+      "status": "declared"
+    },
+    "buildEpubReaders": {
+      "command": "./gradlew buildEpubReaders",
+      "cwd": ".",
+      "source": "build.gradle.kts",
+      "status": "declared"
+    },
+    "testReleasePolicy": {
+      "command": "scripts/test-release-policy.sh",
+      "cwd": ".",
+      "source": "scripts/test-release-policy.sh",
+      "status": "declared"
+    }
+  },
+  "boundaries": {
+    "noTouch": [
+      "paths and revisions declared in .gitmodules without explicit dependency scope",
+      "credentials and signing material",
+      "local.properties and machine-local SDK configuration",
+      "unrelated worktrees and user-owned changes"
+    ],
+    "generated": [
+      "**/build/**",
+      "**/dist/**",
+      "release-artifacts/**"
+    ],
+    "externalConsumers": [
+      "Komga server API",
+      "persisted database and settings values",
+      "Android application identity and signing",
+      "reader progress and offline cache formats",
+      "GitHub Release tags, notes, and assets"
+    ]
+  },
+  "riskDomains": [
+    "database migrations",
+    "offline downloads and logs",
+    "remote and LAN switching",
+    "navigation and Back behavior",
+    "image, PDF, and EPUB readers",
+    "localization and Compose Resources",
+    "native dependencies",
+    "versioning and Release artifacts"
+  ],
+  "knowledge": {
+    "root": "docs/project-knowledge",
+    "entries": ["README.md", "dev-map.md", "contexts.md", "flows.md"]
+  },
+  "harness": {
+    "tier": "standard",
+    "docsRoot": "docs/harness",
+    "instructionEntry": "AGENTS.md",
+    "generatedAt": "2026-08-25",
+    "sourceCommit": "e477f486"
+  }
+}

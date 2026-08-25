@@ -1,6 +1,12 @@
 # Contributing to Komelia Intl
 
-For application changes, follow [Develop and ship a Komelia change](docs/maintainers/development-harness.md). It defines branch isolation, diagnosis, tests, platform builds, pull request review, releases, and issue replies.
+For application changes, start with the [Komelia engineering harness](docs/harness/README.md). It defines branch isolation, diagnosis, module boundaries, task routes, tests, platform builds, pull request review, Releases, and issue replies.
+
+Run the repository-local structural check after changing engineering guidance:
+
+```shell
+node scripts/check-harness.mjs
+```
 
 Use the repository templates:
 

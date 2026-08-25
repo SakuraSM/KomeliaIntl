@@ -7,17 +7,24 @@
 
 - Issue:
 - Release level: none / patch / minor / major
+- Scope and explicit non-goals:
 
 ## 验证 / Verification
 
-- [ ] Added or updated regression tests
-- [ ] `git diff --check`
-- [ ] `./gradlew :komelia-ui:allTests`
-- [ ] Built every affected platform
-- [ ] Reproduced the reported flow after the fix
-- [ ] Checked English and Simplified Chinese
-- [ ] Checked accessibility, Back, Esc, and reduced motion when applicable
+| Check or scenario | Target/environment | Result: passed / failed / blocked / skipped |
+|---|---|---|
+| Regression test | | |
+| `node scripts/check-harness.mjs` | | |
+| `git diff --check` | | |
+| Focused tests | | |
+| Affected platform builds | | |
+| Reported runtime flow | | |
+| Locale, accessibility, navigation, and motion as applicable | | |
 
-Blocked or out-of-scope checks:
+## 风险与边界 / Risks and boundaries
 
-<!-- Remove empty sections and unchecked items that do not apply before submitting. -->
+- Persisted data or API compatibility:
+- Privacy or redaction:
+- Residual risk and blocked verification:
+
+Remove rows and sections that do not apply. Do not mark an unrun check as passed.

@@ -71,7 +71,7 @@ Komelia Intl 是 [Komelia](https://github.com/Snd-R/Komelia) 的 `SakuraSM/Komel
 
 ## 从源码构建
 
-使用 JDK 21 和 Node.js 24 可与仓库工作流保持一致。Android 和桌面安装包还需要对应平台的原生图片库与 WebView 库。`cmake/` 目录提供了部分目标平台的 Docker 构建文件。
+Release 工作流使用 JDK 21 和 Node.js 24；本地 `.node-version` 当前声明 Node.js 20。在仓库统一版本前，请以 [Harness 评分表](docs/harness/scorecard.md)记录的工具链差异为准。Android 和桌面安装包还需要对应平台的原生图片库与 WebView 库。`cmake/` 目录提供了部分目标平台的 Docker 构建文件。
 
 克隆本仓库并初始化子模块：
 
@@ -100,7 +100,7 @@ git submodule update --init --recursive
 ./gradlew komfWebUI
 ```
 
-产物位于对应模块的 `build/` 目录。发布安装包和原生依赖的完整命令请参考[桌面端 Release 工作流](.github/workflows/release-desktop.yml)和[维护者开发流程](docs/maintainers/development-harness.md)。
+产物位于对应模块的 `build/` 目录。发布安装包和原生依赖的完整命令请参考[桌面端 Release 工作流](.github/workflows/release-desktop.yml)和[工程 Harness](docs/harness/README.md)。
 
 ## 参与贡献
 

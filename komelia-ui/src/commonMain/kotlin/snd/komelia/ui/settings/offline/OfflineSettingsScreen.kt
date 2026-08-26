@@ -27,8 +27,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offlin
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_users_tab
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.LocalAppNavigationController
 import snd.komelia.ui.BookSiblingsContext
-import snd.komelia.ui.MainScreen
 import snd.komelia.ui.appRootNavigator
 import snd.komelia.ui.book.BookScreen
 import snd.komelia.ui.series.SeriesScreen
@@ -46,6 +46,7 @@ class OfflineSettingsScreen : Screen {
     override fun Content() {
         val currentNavigator = LocalNavigator.currentOrThrow
         val rootNavigator = currentNavigator.appRootNavigator()
+        val appNavigationController = LocalAppNavigationController.current
         val viewModelFactory = LocalViewModelFactory.current
         val vm = rememberScreenModel { viewModelFactory.getOfflineModeSettingsViewModel() }
 
@@ -127,12 +128,12 @@ class OfflineSettingsScreen : Screen {
                         onMediaKindSelect = state::selectMediaKind,
                         onRetry = state::retry,
                         onOpenBook = { id ->
-                            rootNavigator.replaceAll(
-                                MainScreen(BookScreen(KomgaBookId(id), BookSiblingsContext.Series))
+                            appNavigationController.open(
+                                BookScreen(KomgaBookId(id), BookSiblingsContext.Series)
                             )
                         },
                         onOpenSeries = { id ->
-                            rootNavigator.replaceAll(MainScreen(SeriesScreen(KomgaSeriesId(id))))
+                            appNavigationController.open(SeriesScreen(KomgaSeriesId(id)))
                         },
                         onDeleteBook = state::deleteBook,
                         onDeleteSeries = state::deleteSeries,

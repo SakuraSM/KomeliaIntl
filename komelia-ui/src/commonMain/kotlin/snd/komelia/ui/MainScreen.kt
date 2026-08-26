@@ -143,95 +143,115 @@ class MainScreen(
                 }
             }
 
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                Column(Modifier.komeliaTopBarScroll(topBarScrollState)) {
-                    if (platform != MOBILE) {
-                        AppBar(
-                            canNavigateBack = activeNavigator?.canPop == true,
-                            onNavigateBack = { activeNavigator?.pop() },
-                            currentScreen = activeNavigator?.lastItem,
-                            query = vm.searchBarState.currentQuery(),
-                            onQueryChange = vm.searchBarState::onQueryChange,
-                            isLoading = vm.searchBarState.isLoading,
-                            onSearchAllClick = { selectDestination(AppDestination.SEARCH, SearchScreen(it)) },
-                            searchResults = vm.searchBarState.searchResults(),
-                            libraryById = vm.searchBarState::getLibraryById,
-                            onBookClick = { selectDestination(AppDestination.LIBRARY, bookScreen(it)) },
-                            onSeriesClick = { selectDestination(AppDestination.LIBRARY, seriesScreen(it)) },
-                            onRefreshClick = vm::onScreenReload,
-                            notificationsState = vm.notificationsState,
-                            isOffline = vm.isOffline.collectAsState().value,
-                            onOfflineModeChange = vm::goOnline,
-                            isContentScrolled = topBarScrollState.isContentScrolled,
-                        )
-                    }
+            val appNavigationController = remember(tabNavigator, tabs) {
+                AppNavigationController { screen ->
+                    selectDestination(destinationFor(screen), screen)
+                }
+            }
 
-                    Scaffold(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentWindowInsets = if (platform == MOBILE) {
-                            WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
-                        } else {
-                            WindowInsets(0.dp)
-                        },
-                        bottomBar = {
-                            AnimatedVisibility(
-                                visible = navigationPresentation(width) == NavigationPresentation.BottomBar,
-                                enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
-                                    tween(motion.duration(motion.containerDurationMillis), easing = motion.standardEasing),
-                                ),
-                                exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
-                                    tween(motion.duration(motion.containerDurationMillis), easing = motion.standardEasing),
-                                ),
-                            ) {
-                                AppBottomBar(currentTab.destination, ::selectDestination)
-                            }
-                        },
-                    ) { contentPadding ->
-                        Row(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(contentPadding),
-                        ) {
-                            AnimatedVisibility(
-                                visible = navigationPresentation(width) == NavigationPresentation.Rail,
-                                enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
-                                    tween(motion.duration(motion.containerDurationMillis), easing = motion.standardEasing),
-                                ),
-                                exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
-                                    tween(motion.duration(motion.containerDurationMillis), easing = motion.standardEasing),
-                                ),
-                            ) {
-                                AppNavigationRail(currentTab.destination, ::selectDestination)
-                            }
+            CompositionLocalProvider(LocalAppNavigationController provides appNavigationController) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Column(Modifier.komeliaTopBarScroll(topBarScrollState)) {
+                        if (platform != MOBILE) {
+                            AppBar(
+                                canNavigateBack = activeNavigator?.canPop == true,
+                                onNavigateBack = { activeNavigator?.pop() },
+                                currentScreen = activeNavigator?.lastItem,
+                                query = vm.searchBarState.currentQuery(),
+                                onQueryChange = vm.searchBarState::onQueryChange,
+                                isLoading = vm.searchBarState.isLoading,
+                                onSearchAllClick = { selectDestination(AppDestination.SEARCH, SearchScreen(it)) },
+                                searchResults = vm.searchBarState.searchResults(),
+                                libraryById = vm.searchBarState::getLibraryById,
+                                onBookClick = { selectDestination(AppDestination.LIBRARY, bookScreen(it)) },
+                                onSeriesClick = { selectDestination(AppDestination.LIBRARY, seriesScreen(it)) },
+                                onRefreshClick = vm::onScreenReload,
+                                notificationsState = vm.notificationsState,
+                                isOffline = vm.isOffline.collectAsState().value,
+                                onOfflineModeChange = vm::goOnline,
+                                isContentScrolled = topBarScrollState.isContentScrolled,
+                            )
+                        }
 
-                            SingleLayerDestinationTransition(
-                                targetTab = currentTab,
-                                modifier = Modifier.weight(1f),
-                            ) { tab ->
-                                tabNavigator.saveableState("destination", tab) {
-                                    Navigator(
-                                        screens = tab.initialScreens,
-                                        onBackPressed = null,
-                                        key = "destination-${tab.destination.name.lowercase()}",
-                                    ) { navigator ->
-                                        SideEffect {
-                                            if (tabNavigator.current == tab) {
-                                                activeNavigator = navigator
-                                                activeDestination = tab.destination
-                                                vm.initialize(navigator)
+                        Scaffold(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentWindowInsets = if (platform == MOBILE) {
+                                WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+                            } else {
+                                WindowInsets(0.dp)
+                            },
+                            bottomBar = {
+                                AnimatedVisibility(
+                                    visible = navigationPresentation(width) == NavigationPresentation.BottomBar,
+                                    enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
+                                        tween(
+                                            motion.duration(motion.containerDurationMillis),
+                                            easing = motion.standardEasing,
+                                        ),
+                                    ),
+                                    exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
+                                        tween(
+                                            motion.duration(motion.containerDurationMillis),
+                                            easing = motion.standardEasing,
+                                        ),
+                                    ),
+                                ) {
+                                    AppBottomBar(currentTab.destination, ::selectDestination)
+                                }
+                            },
+                        ) { contentPadding ->
+                            Row(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(contentPadding),
+                            ) {
+                                AnimatedVisibility(
+                                    visible = navigationPresentation(width) == NavigationPresentation.Rail,
+                                    enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
+                                        tween(
+                                            motion.duration(motion.containerDurationMillis),
+                                            easing = motion.standardEasing,
+                                        ),
+                                    ),
+                                    exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
+                                        tween(
+                                            motion.duration(motion.containerDurationMillis),
+                                            easing = motion.standardEasing,
+                                        ),
+                                    ),
+                                ) {
+                                    AppNavigationRail(currentTab.destination, ::selectDestination)
+                                }
+
+                                SingleLayerDestinationTransition(
+                                    targetTab = currentTab,
+                                    modifier = Modifier.weight(1f),
+                                ) { tab ->
+                                    tabNavigator.saveableState("destination", tab) {
+                                        Navigator(
+                                            screens = tab.initialScreens,
+                                            onBackPressed = null,
+                                            key = "destination-${tab.destination.name.lowercase()}",
+                                        ) { navigator ->
+                                            SideEffect {
+                                                if (tabNavigator.current == tab) {
+                                                    activeNavigator = navigator
+                                                    activeDestination = tab.destination
+                                                    vm.initialize(navigator)
+                                                }
                                             }
-                                        }
-                                        LaunchedEffect(tab, pendingScreen) {
-                                            val pending = pendingScreen
-                                            if (tabNavigator.current == tab && pending?.first == tab.destination) {
-                                                navigator.replaceAll(pending.second)
-                                                pendingScreen = null
+                                            LaunchedEffect(tab, pendingScreen) {
+                                                val pending = pendingScreen
+                                                if (tabNavigator.current == tab && pending?.first == tab.destination) {
+                                                    navigator.replaceAll(destinationStack(tab.rootScreen, pending.second))
+                                                    pendingScreen = null
+                                                }
                                             }
+                                            DestinationContent(navigator)
                                         }
-                                        DestinationContent(navigator)
                                     }
                                 }
                             }
@@ -280,11 +300,10 @@ private class AppTab(
 private fun createTabs(defaultScreen: Screen, isMobile: Boolean): List<AppTab> {
     val initialDestination = destinationFor(defaultScreen)
     fun tab(destination: AppDestination, rootScreen: Screen): AppTab {
-        val initialScreens = when {
-            initialDestination != destination -> listOf(rootScreen)
-            defaultScreen is LibraryScreen && defaultScreen.libraryId != null -> listOf(rootScreen, defaultScreen)
-            defaultScreen::class != rootScreen::class -> listOf(rootScreen, defaultScreen)
-            else -> listOf(defaultScreen)
+        val initialScreens = if (initialDestination == destination) {
+            destinationStack(rootScreen, defaultScreen)
+        } else {
+            listOf(rootScreen)
         }
         return AppTab(destination, rootScreen, initialScreens)
     }

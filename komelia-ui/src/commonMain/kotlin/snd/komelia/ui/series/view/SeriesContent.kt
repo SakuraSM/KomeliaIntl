@@ -33,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -132,9 +133,25 @@ fun SeriesContent(
         else BooksData()
     }
     val scrollState = rememberLazyGridState()
+    val pageNavigationState = remember(series?.id) { SeriesPageNavigationState() }
     val isContentScrolled by remember(scrollState) {
         derivedStateOf {
             scrollState.firstVisibleItemIndex > 0 || scrollState.firstVisibleItemScrollOffset > 0
+        }
+    }
+
+    LaunchedEffect(booksLoadState, pageNavigationState.pendingPage) {
+        when (booksLoadState) {
+            is LoadState.Success<BooksData> -> {
+                val loadedPage = booksLoadState.value.currentPage
+                if (pageNavigationState.isRequestedPage(loadedPage)) {
+                    scrollState.scrollToItem(SERIES_BOOKS_SECTION_INDEX)
+                    pageNavigationState.onPageScrollCompleted(loadedPage)
+                }
+            }
+
+            is LoadState.Error -> pageNavigationState.onPageLoadFailed()
+            LoadState.Loading, LoadState.Uninitialized -> Unit
         }
     }
 
@@ -197,11 +214,12 @@ fun SeriesContent(
                             series = series,
                             onBookClick = onBookClick,
                             onBookReadClick = onBookReadClick,
-                            scrollState = scrollState,
                             booksLoadState = booksLoadState,
                             onBooksLayoutChange = booksState::onBookLayoutChange,
                             onBooksPageSizeChange = booksState::onBookPageSizeChange,
-                            onPageChange = booksState::onPageChange,
+                            onPageChange = { page ->
+                                pageNavigationState.request(page, booksState::onPageChange)
+                            },
                             onBookSelect = booksState::onBookSelect,
                             booksFilterState = booksState.filterState,
                             bookContextMenuActions = bookMenuActions,
@@ -250,6 +268,28 @@ fun SeriesContent(
                 compact = true
             )
         }
+    }
+}
+
+internal const val SERIES_BOOKS_SECTION_INDEX = 2
+
+internal class SeriesPageNavigationState {
+    var pendingPage by mutableStateOf<Int?>(null)
+        private set
+
+    fun request(page: Int, onPageChange: (Int) -> Unit) {
+        pendingPage = page
+        onPageChange(page)
+    }
+
+    fun isRequestedPage(page: Int): Boolean = pendingPage == page
+
+    fun onPageScrollCompleted(page: Int) {
+        if (pendingPage == page) pendingPage = null
+    }
+
+    fun onPageLoadFailed() {
+        pendingPage = null
     }
 }
 

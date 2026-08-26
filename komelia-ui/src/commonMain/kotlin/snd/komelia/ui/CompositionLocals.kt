@@ -33,3 +33,6 @@ val LocalBookDownloadEvents =
 val LocalOfflineAvailable = compositionLocalOf { false }
 val LocalOfflineMode = staticCompositionLocalOf<StateFlow<Boolean>> { error("offline mode flow was not initialized") }
 val LocalKomgaState = staticCompositionLocalOf<KomgaAuthenticationState> { error("komga state was not initialized") }
+internal val LocalAppNavigationController = staticCompositionLocalOf<AppNavigationController> {
+    error("App navigation controller was not initialized")
+}

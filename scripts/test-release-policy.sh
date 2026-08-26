@@ -43,7 +43,7 @@ cat > "$TEST_DIR/valid-notes.md" <<'EOF'
 - Added offline cache management.
 EOF
 
-"$NOTES_CHECK" \
+env PATH="/usr/bin:/bin" "$NOTES_CHECK" \
   --file "$TEST_DIR/valid-notes.md" \
   --version 0.18.17 \
   --title "Komelia v0.18.17" \

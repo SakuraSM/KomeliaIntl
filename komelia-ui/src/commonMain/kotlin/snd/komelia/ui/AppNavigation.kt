@@ -1,6 +1,8 @@
 package snd.komelia.ui
 
+import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
+import snd.komelia.ui.library.LibraryScreen
 import snd.komelia.ui.platform.WindowSizeClass
 import snd.komga.client.library.KomgaLibraryId
 
@@ -9,6 +11,19 @@ enum class AppDestination {
     HOME,
     SEARCH,
     SETTINGS,
+}
+
+internal fun interface AppNavigationController {
+    fun open(screen: Screen)
+}
+
+internal fun destinationStack(
+    rootScreen: Screen,
+    targetScreen: Screen,
+): List<Screen> = when {
+    targetScreen is LibraryScreen && targetScreen.libraryId != null -> listOf(rootScreen, targetScreen)
+    targetScreen::class == rootScreen::class -> listOf(targetScreen)
+    else -> listOf(rootScreen, targetScreen)
 }
 
 enum class NavigationPresentation {

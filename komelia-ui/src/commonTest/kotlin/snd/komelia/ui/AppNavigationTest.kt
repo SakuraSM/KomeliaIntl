@@ -6,8 +6,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import snd.komelia.ui.BookSiblingsContext
+import snd.komelia.ui.book.BookScreen
+import snd.komelia.ui.library.LibraryScreen
 import snd.komelia.ui.platform.WindowSizeClass
+import snd.komelia.ui.search.SearchScreen
+import snd.komelia.ui.series.SeriesScreen
+import snd.komga.client.book.KomgaBookId
 import snd.komga.client.library.KomgaLibraryId
+import snd.komga.client.series.KomgaSeriesId
 
 class AppNavigationTest {
     private data class NavigationNode(
@@ -79,6 +86,32 @@ class AppNavigationTest {
         repeat(10) {
             assertEquals(root, outermostNavigationTarget(settings) { it.parent })
         }
+    }
+
+    @Test
+    fun libraryDetailsKeepTheLibraryRootUnderTheTargetScreen() {
+        val root = LibraryScreen()
+        val book = BookScreen(KomgaBookId("book-1"), BookSiblingsContext.Series)
+        val series = SeriesScreen(KomgaSeriesId("series-1"))
+
+        assertEquals(listOf(root, book), destinationStack(root, book))
+        assertEquals(listOf(root, series), destinationStack(root, series))
+    }
+
+    @Test
+    fun aSpecificLibraryKeepsAllLibrariesAsItsBackTarget() {
+        val root = LibraryScreen()
+        val selectedLibrary = LibraryScreen(KomgaLibraryId("library-1"))
+
+        assertEquals(listOf(root, selectedLibrary), destinationStack(root, selectedLibrary))
+    }
+
+    @Test
+    fun sameTypeParameterizedRootsAreNotDuplicated() {
+        val root = SearchScreen(null)
+        val query = SearchScreen("komelia")
+
+        assertEquals(listOf(query), destinationStack(root, query))
     }
 
     @Test

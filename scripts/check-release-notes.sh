@@ -70,23 +70,23 @@ if [[ ! -f "$NOTES_FILE" ]]; then
   exit 1
 fi
 
-if rg -q '\{\{[^}]+\}\}' "$NOTES_FILE"; then
+if grep -Eq '\{\{[^}]+\}\}' "$NOTES_FILE"; then
   echo "Release notes still contain template placeholders: $NOTES_FILE" >&2
   exit 1
 fi
 
-if [[ "$(rg -Fxc "## 中文" "$NOTES_FILE")" -ne 1 ]]; then
+if [[ "$(grep -Fxc "## 中文" "$NOTES_FILE")" -ne 1 ]]; then
   echo "Release notes must contain one Chinese section." >&2
   exit 1
 fi
 
-if [[ "$(rg -Fxc "## English" "$NOTES_FILE")" -ne 1 ]]; then
+if [[ "$(grep -Fxc "## English" "$NOTES_FILE")" -ne 1 ]]; then
   echo "Release notes must contain one English section." >&2
   exit 1
 fi
 
-chinese_line="$(rg -Fnx "## 中文" "$NOTES_FILE" | cut -d: -f1)"
-english_line="$(rg -Fnx "## English" "$NOTES_FILE" | cut -d: -f1)"
+chinese_line="$(grep -Fnx "## 中文" "$NOTES_FILE" | cut -d: -f1)"
+english_line="$(grep -Fnx "## English" "$NOTES_FILE" | cut -d: -f1)"
 if (( chinese_line >= english_line )); then
   echo "The Chinese section must appear before the English section." >&2
   exit 1
@@ -100,7 +100,7 @@ while IFS= read -r heading; do
       exit 1
       ;;
   esac
-done < <(rg '^#{1,6} ' "$NOTES_FILE" || true)
+done < <(grep -E '^#{1,6} ' "$NOTES_FILE" || true)
 
 if ! awk '
   /^## 中文$/ {
@@ -135,7 +135,7 @@ for forbidden_text in \
   "SHA-256" \
   "- 中文：" \
   "  English:"; do
-  if rg -Fq -- "$forbidden_text" "$NOTES_FILE"; then
+  if grep -Fq -- "$forbidden_text" "$NOTES_FILE"; then
     echo "Release notes contain maintainer-only information: $forbidden_text" >&2
     exit 1
   fi

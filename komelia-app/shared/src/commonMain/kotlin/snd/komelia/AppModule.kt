@@ -39,6 +39,7 @@ import snd.komelia.api.RemoteSettingsApi
 import snd.komelia.api.RemoteTaskApi
 import snd.komelia.api.RemoteUserApi
 import snd.komelia.http.RememberMePersistingCookieStore
+import snd.komelia.homefilters.KomgaSearchRequestSerializersModule
 import snd.komelia.image.BookImageLoader
 import snd.komelia.image.KomeliaImageDecoder
 import snd.komelia.image.KomeliaPanelDetector
@@ -79,16 +80,20 @@ abstract class AppModule {
         beforeInit()
         val appRepositories = createAppRepositories()
         val offlineRepositories = createOfflineRepositories()
-        val ktor = createKtorClient()
-        val ktorWithoutCache = createKtorClientWithoutCache()
+        val appJson = Json {
+            ignoreUnknownKeys = true
+            serializersModule = KomgaSearchRequestSerializersModule
+        }
+        val ktor = createKtorClient().config {
+            install(ContentNegotiation) { json(appJson) }
+        }
+        val ktorWithoutCache = createKtorClientWithoutCache().config {
+            install(ContentNegotiation) { json(appJson) }
+        }
 
         val updateClient = UpdateClient(
-            ktor = ktor.config {
-                install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
-            },
-            ktorWithoutCache = ktorWithoutCache.config {
-                install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
-            }
+            ktor = ktor,
+            ktorWithoutCache = ktorWithoutCache,
         )
 
         val primaryServerUrl = appRepositories.settingsRepository.getServerUrl().stateIn(initScope)

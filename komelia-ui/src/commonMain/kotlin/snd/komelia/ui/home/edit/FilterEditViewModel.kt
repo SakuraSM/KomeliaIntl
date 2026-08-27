@@ -26,6 +26,7 @@ import snd.komelia.ui.common.cards.defaultCardWidth
 import snd.komelia.ui.home.BookFilterData
 import snd.komelia.ui.home.HomeFilterData
 import snd.komelia.ui.home.SeriesFilterData
+import snd.komelia.ui.home.orderedHomeScreenFilters
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.library.KomgaLibrary
 
@@ -56,7 +57,7 @@ class FilterEditViewModel(
     val cardWidth = cardWidthFlow.stateIn(screenModelScope, Eagerly, defaultCardWidth.dp)
     val filters = MutableStateFlow(
 
-        initialFilters?.map {
+        initialFilters?.sortedBy { it.filter.order }?.map {
             when (it) {
                 is BookFilterData -> BookFilterEditState(
                     seriesApi = seriesApi,
@@ -89,7 +90,7 @@ class FilterEditViewModel(
         appNotifications.runCatchingToNotifications {
             if (initialFilters == null) {
                 // FIXME initial data will remain empty until filter is modified
-                filters.value = filterRepository.getFilters().first()
+                filters.value = orderedHomeScreenFilters(filterRepository.getFilters().first())
                     .map { it.withLocalizedDefaultLabel() }
                     .map {
                         when (it) {

@@ -85,7 +85,7 @@ class HomeViewModel(
             mutableState.value = LoadState.Loading
 
             currentFilters.value = coroutineScope {
-                filters
+                orderedHomeScreenFilters(filters)
                     .map { it.withLocalizedDefaultLabel() }
                     .map { async { fetchFilterData(it) } }
                     .awaitAll()
@@ -201,3 +201,6 @@ internal fun reconcileActiveHomeFilter(
     activeFilterNumber: Int,
     filterCount: Int,
 ): Int = activeFilterNumber.takeIf { it in 0..filterCount } ?: 0
+
+internal fun orderedHomeScreenFilters(filters: List<HomeScreenFilter>): List<HomeScreenFilter> =
+    filters.sortedBy { it.order }

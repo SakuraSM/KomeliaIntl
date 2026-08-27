@@ -48,6 +48,9 @@ kotlin {
             implementation(libs.flyway.core)
             implementation(libs.sqlite.xerial.jdbc)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 

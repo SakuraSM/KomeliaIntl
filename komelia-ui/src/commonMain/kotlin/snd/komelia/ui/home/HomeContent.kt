@@ -129,30 +129,23 @@ private fun Toolbar(
         selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
-    val nonEmptyFilters = remember(filters) {
-        filters.filter {
-            when (it) {
-                is BookFilterData -> it.books.isNotEmpty()
-                is SeriesFilterData -> it.series.isNotEmpty()
-            }
-        }
-    }
-    if (nonEmptyFilters.size <= 1) return
+    val toolbarFilters = remember(filters) { homeGroupToolbarFilters(filters) }
+    if (toolbarFilters.size <= 1) return
 
     val windowWidth = LocalWindowWidth.current
     val useBottomSheet = windowWidth == snd.komelia.ui.platform.WindowSizeClass.COMPACT ||
             windowWidth == snd.komelia.ui.platform.WindowSizeClass.MEDIUM
-    val currentFilter = nonEmptyFilters.firstOrNull { it.filter.order == currentFilterNumber }
+    val currentFilter = toolbarFilters.firstOrNull { it.filter.order == currentFilterNumber }
     var pickerOpen by remember { mutableStateOf(false) }
 
-    LaunchedEffect(currentFilterNumber, nonEmptyFilters) {
+    LaunchedEffect(currentFilterNumber, toolbarFilters) {
         if (currentFilterNumber != 0 && currentFilter == null) onFilterChange(0)
     }
 
     KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             AdaptiveHomeGroupBar(
-                filters = nonEmptyFilters,
+                filters = toolbarFilters,
                 currentFilterNumber = currentFilterNumber,
                 chipColors = chipColors,
                 useBottomSheet = useBottomSheet,
@@ -451,6 +444,9 @@ private fun HomeFilterData.itemCount(): Int = when (this) {
     is BookFilterData -> books.size
     is SeriesFilterData -> series.size
 }
+
+internal fun homeGroupToolbarFilters(filters: List<HomeFilterData>): List<HomeFilterData> =
+    filters.sortedBy { it.filter.order }
 
 @Composable
 private fun DisplayContent(

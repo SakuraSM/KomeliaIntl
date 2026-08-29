@@ -1285,6 +1285,8 @@
     <string name="notification_series_metadata_refresh_started">已开始刷新系列元数据</string>
     <string name="notification_book_analysis_started">已开始分析书籍</string>
     <string name="notification_book_metadata_refresh_started">已开始刷新书籍元数据</string>
+    <string name="notification_book_marked_read">已标记为已读</string>
+    <string name="notification_book_marked_unread">已标记为未读</string>
     <string name="notification_color_preset_not_found">预设“%1$s”不存在</string>
     <string name="notification_color_preset_already_exists">已存在同名预设</string>
     <string name="notification_reader_at_beginning">已经到达本书开头</string>

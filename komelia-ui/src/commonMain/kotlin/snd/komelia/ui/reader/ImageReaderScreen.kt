@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -83,6 +84,8 @@ class ImageReaderScreen(
     private val markReadProgress: Boolean = true,
 ) : Screen {
 
+    override val key: ScreenKey = bookId.value
+
     @Composable
     override fun Content() {
         val coroutineScope = rememberCoroutineScope()
@@ -100,8 +103,8 @@ class ImageReaderScreen(
 
         //FIXME: do outside of composition? No proper multiplatform way to do it in viewmodel
         // restore current book when app process is killed in background on Android
-        var currentBookId by rememberSaveable { mutableStateOf(bookId.value) }
-        LaunchedEffect(Unit) {
+        var currentBookId by rememberSaveable(bookId.value) { mutableStateOf(bookId.value) }
+        LaunchedEffect(bookId) {
             val bookId = KomgaBookId(currentBookId)
             vm.initialize(bookId)
             val book = vm.readerState.booksState.value?.currentBook

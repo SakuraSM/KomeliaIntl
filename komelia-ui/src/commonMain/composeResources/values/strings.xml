@@ -1285,6 +1285,8 @@
     <string name="notification_series_metadata_refresh_started">Series metadata refresh started</string>
     <string name="notification_book_analysis_started">Book analysis started</string>
     <string name="notification_book_metadata_refresh_started">Book metadata refresh started</string>
+    <string name="notification_book_marked_read">Marked as read</string>
+    <string name="notification_book_marked_unread">Marked as unread</string>
     <string name="notification_color_preset_not_found">Preset %1$s does not exist</string>
     <string name="notification_color_preset_already_exists">A preset with that name already exists</string>
     <string name="notification_reader_at_beginning">You’re at the beginning of the book</string>

@@ -152,7 +152,13 @@ class HomeViewModel(
     }
 
     fun seriesMenuActions() = SeriesMenuActions(seriesApi, appNotifications, taskEmitter, screenModelScope)
-    fun bookMenuActions() = BookMenuActions(bookApi, appNotifications, screenModelScope, taskEmitter)
+    fun bookMenuActions() = BookMenuActions(
+        bookApi = bookApi,
+        notifications = appNotifications,
+        scope = screenModelScope,
+        taskEmitter = taskEmitter,
+        onReadProgressChanged = { reload() },
+    )
 
     fun stopKomgaEventsHandler() {
         reloadEventsEnabled.value = false

@@ -330,24 +330,31 @@ private fun LazyListScope.continuousPagesLayout(
 }
 
 private suspend fun handlePageScrollEvents(state: ContinuousReaderState) {
-    var previousFistPage = state.lazyListState.layoutInfo.visibleItemsInfo
-        .first { it.key is PageMetadata }.key as PageMetadata
-    var previousLastPage = state.lazyListState.layoutInfo.visibleItemsInfo
-        .last { it.key is PageMetadata }.key as PageMetadata
+    var previousPages: VisiblePageBounds? = visiblePageBounds(
+        state.lazyListState.layoutInfo.visibleItemsInfo.map { it.key }
+    )
 
     snapshotFlow { state.lazyListState.layoutInfo }.collect { layout ->
-        val firstPage = layout.visibleItemsInfo.first { it.key is PageMetadata }.key as PageMetadata
-        val lastPage = layout.visibleItemsInfo.last { it.key is PageMetadata }.key as PageMetadata
+        val pages = visiblePageBounds(layout.visibleItemsInfo.map { it.key }) ?: return@collect
+        val previous = previousPages
+        if (previous == null) {
+            previousPages = pages
+            return@collect
+        }
+        val previousFirstPage = previous.first
+        val previousLastPage = previous.last
+        val firstPage = pages.first
+        val lastPage = pages.last
 
         when {
-            previousFistPage.bookId != firstPage.bookId -> state.onCurrentPageChange(firstPage)
+            previousFirstPage.bookId != firstPage.bookId -> state.onCurrentPageChange(firstPage)
             previousLastPage.bookId != lastPage.bookId -> state.onCurrentPageChange(lastPage)
 
             // scrolled back
-            previousFistPage.pageNumber > firstPage.pageNumber -> state.onCurrentPageChange(firstPage)
+            previousFirstPage.pageNumber > firstPage.pageNumber -> state.onCurrentPageChange(firstPage)
 
             // scrolled through more than 1 item (possible navigation jump)
-            (firstPage.pageNumber - previousFistPage.pageNumber) > 2 -> state.onCurrentPageChange(firstPage)
+            (firstPage.pageNumber - previousFirstPage.pageNumber) > 2 -> state.onCurrentPageChange(firstPage)
 
             // scrolled forward
             previousLastPage.pageNumber < lastPage.pageNumber -> state.onCurrentPageChange(lastPage)
@@ -355,9 +362,19 @@ private suspend fun handlePageScrollEvents(state: ContinuousReaderState) {
             else -> return@collect
         }
 
-        previousFistPage = firstPage
-        previousLastPage = lastPage
+        previousPages = pages
     }
+}
+
+internal data class VisiblePageBounds(
+    val first: PageMetadata,
+    val last: PageMetadata,
+)
+
+internal fun visiblePageBounds(keys: List<Any>): VisiblePageBounds? {
+    val pages = keys.filterIsInstance<PageMetadata>()
+    if (pages.isEmpty()) return null
+    return VisiblePageBounds(pages.first(), pages.last())
 }
 
 @Composable

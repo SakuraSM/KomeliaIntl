@@ -145,8 +145,8 @@ fun OneshotActionsMenu(
             )
         }
 
-        val isRead = remember { book.readProgress?.completed ?: false }
-        val isUnread = remember { book.readProgress == null }
+        val isRead = book.readProgress?.completed ?: false
+        val isUnread = book.readProgress == null
 
         if (!isRead) {
             DropdownMenuItem(

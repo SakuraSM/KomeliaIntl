@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Search
@@ -56,6 +57,11 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_gro
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_groups
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_search_groups
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_books
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_remote_downloaded_books
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_sort_file_modified
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_sort_recently_added
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_sort_title
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
@@ -71,8 +77,12 @@ import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komga.client.series.KomgaSeries
 
 @Composable
-fun HomeContent(
+internal fun HomeContent(
     filters: List<HomeFilterData>,
+    localBooks: List<KomeliaBook>,
+    remoteDownloadedBooks: List<KomeliaBook>,
+    localBookSort: LocalHomeBookSort,
+    onLocalBookSortChange: (LocalHomeBookSort) -> Unit,
     activeFilterNumber: Int,
     onFilterChange: (Int) -> Unit,
 
@@ -102,6 +112,10 @@ fun HomeContent(
         )
         DisplayContent(
             filters = filters,
+            localBooks = localBooks,
+            remoteDownloadedBooks = remoteDownloadedBooks,
+            localBookSort = localBookSort,
+            onLocalBookSortChange = onLocalBookSortChange,
             activeFilterNumber = activeFilterNumber,
 
             gridState = gridState,
@@ -451,6 +465,10 @@ internal fun homeGroupToolbarFilters(filters: List<HomeFilterData>): List<HomeFi
 @Composable
 private fun DisplayContent(
     filters: List<HomeFilterData>,
+    localBooks: List<KomeliaBook>,
+    remoteDownloadedBooks: List<KomeliaBook>,
+    localBookSort: LocalHomeBookSort,
+    onLocalBookSortChange: (LocalHomeBookSort) -> Unit,
     activeFilterNumber: Int,
     gridState: LazyGridState,
     cardWidth: Dp,
@@ -461,6 +479,8 @@ private fun DisplayContent(
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
 ) {
     val layout = LocalKomeliaLayout.current
+    val localBooksLabel = stringResource(Res.string.home_local_books)
+    val remoteDownloadedBooksLabel = stringResource(Res.string.home_remote_downloaded_books)
     val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyVerticalGrid(
@@ -477,6 +497,28 @@ private fun DisplayContent(
                 bottom = layout.gridBottomPadding + layout.sectionSpacing,
             )
         ) {
+            if (activeFilterNumber == 0) {
+                BookFilterEntry(
+                    label = localBooksLabel,
+                    books = localBooks,
+                    bookMenuActions = bookMenuActions,
+                    onBookClick = onBookClick,
+                    onBookReadClick = onBookReadClick,
+                    headerAction = {
+                        LocalBookSortMenu(
+                            selected = localBookSort,
+                            onSelect = onLocalBookSortChange,
+                        )
+                    },
+                )
+                BookFilterEntry(
+                    label = remoteDownloadedBooksLabel,
+                    books = remoteDownloadedBooks,
+                    bookMenuActions = bookMenuActions,
+                    onBookClick = onBookClick,
+                    onBookReadClick = onBookReadClick,
+                )
+            }
             for (data in filters) {
                 if (activeFilterNumber == 0 || data.filter.order == activeFilterNumber) {
                     when (data) {
@@ -508,17 +550,24 @@ private fun LazyGridScope.BookFilterEntry(
     bookMenuActions: BookMenuActions,
     onBookClick: (KomeliaBook) -> Unit,
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
+    headerAction: (@Composable () -> Unit)? = null,
 ) {
     if (books.isEmpty()) return
 
     item(span = { GridItemSpan(maxLineSpan) }) {
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(LocalKomeliaLayout.current.controlSpacing),
+        ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
             )
+            headerAction?.invoke()
         }
     }
     items(books) { book ->
@@ -530,6 +579,58 @@ private fun LazyGridScope.BookFilterEntry(
             showSeriesTitle = true,
             modifier = Modifier.fillMaxSize()
         )
+    }
+}
+
+@Composable
+private fun LocalBookSortMenu(
+    selected: LocalHomeBookSort,
+    onSelect: (LocalHomeBookSort) -> Unit,
+) {
+    val layout = LocalKomeliaLayout.current
+    var expanded by remember { mutableStateOf(false) }
+    val labels = mapOf(
+        LocalHomeBookSort.RECENTLY_ADDED to stringResource(Res.string.home_local_sort_recently_added),
+        LocalHomeBookSort.FILE_MODIFIED to stringResource(Res.string.home_local_sort_file_modified),
+        LocalHomeBookSort.TITLE to stringResource(Res.string.home_local_sort_title),
+    )
+
+    Box {
+        FilterChip(
+            selected = false,
+            onClick = { expanded = true },
+            leadingIcon = { Icon(Icons.AutoMirrored.Rounded.Sort, contentDescription = null) },
+            label = {
+                Text(
+                    text = labels.getValue(selected),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            border = null,
+            colors = FilterChipDefaults.filterChipColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+            modifier = Modifier.heightIn(min = layout.minimumTouchTarget),
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            LocalHomeBookSort.entries.forEach { sort ->
+                DropdownMenuItem(
+                    text = { Text(labels.getValue(sort)) },
+                    leadingIcon = if (sort == selected) {
+                        { Icon(Icons.Rounded.Check, contentDescription = null) }
+                    } else null,
+                    onClick = {
+                        expanded = false
+                        onSelect(sort)
+                    },
+                )
+            }
+        }
     }
 }
 

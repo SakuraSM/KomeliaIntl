@@ -36,6 +36,7 @@ import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineAvailable
@@ -57,6 +58,7 @@ fun BookActionsMenu(
 ) {
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
+    val isLocalBook = book.libraryId.isLocalLibrary()
     var showDeleteDownloadedDialog by remember { mutableStateOf(false) }
 
     if (showDeleteDownloadedDialog) {
@@ -111,7 +113,7 @@ fun BookActionsMenu(
         expanded = showDropdown.value,
         onDismissRequest = onDismissRequest
     ) {
-        if (isAdmin && !isOffline) {
+        if (isAdmin && !isOffline && !isLocalBook) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.book_analyze)) },
                 onClick = {
@@ -157,21 +159,21 @@ fun BookActionsMenu(
             )
         }
 
-        if (isAdmin && !isOffline && showEditOption) {
+        if (isAdmin && !isOffline && !isLocalBook && showEditOption) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.book_edit)) },
                 onClick = { showEditDialog = true },
             )
         }
         val offlineAvailable = LocalOfflineAvailable.current
-        if (!isOffline && showDownloadOption && offlineAvailable) {
+        if (!isOffline && !isLocalBook && showDownloadOption && offlineAvailable) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.book_download)) },
                 onClick = { showDownloadDialog = true },
             )
         }
 
-        if (book.downloaded) {
+        if (!isLocalBook && book.downloaded) {
             val deleteInteractionSource = remember { MutableInteractionSource() }
             val deleteIsHovered = deleteInteractionSource.collectIsHoveredAsState()
             val deleteColor =

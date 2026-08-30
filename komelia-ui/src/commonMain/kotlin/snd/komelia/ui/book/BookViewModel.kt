@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
+import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.tasks.OfflineTaskEmitter
@@ -44,6 +45,7 @@ class BookViewModel(
     book: KomeliaBook?,
     private val bookId: KomgaBookId,
     private val bookApi: KomgaBookApi,
+    private val libraryApi: KomgaLibraryApi,
     private val notifications: AppNotifications,
     private val komgaEvents: SharedFlow<KomgaEvent>,
     private val libraries: StateFlow<List<KomgaLibrary>>,
@@ -111,9 +113,10 @@ class BookViewModel(
             .onFailure { mutableState.value = Error(it) }
     }
 
-    private fun loadLibrary() {
+    private suspend fun loadLibrary() {
         val book = requireNotNull(book.value)
         library = libraries.value.firstOrNull { library -> library.id == book.libraryId }
+            ?: runCatching { libraryApi.getLibrary(book.libraryId) }.getOrNull()
     }
 
     fun stopKomgaEventHandler() {

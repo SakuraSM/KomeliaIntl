@@ -56,6 +56,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
 import snd.komelia.ui.LocalKomeliaLayout
@@ -243,7 +244,7 @@ private fun ToolbarBookActions(
         val isOffline = LocalOfflineMode.current.collectAsState().value
         var showEditDialog by remember { mutableStateOf(false) }
 
-        if (isAdmin && !isOffline) {
+        if (isAdmin && !isOffline && !book.libraryId.isLocalLibrary()) {
             IconButton(onClick = { showEditDialog = true }) {
                 Icon(Icons.Default.Edit, null)
             }
@@ -288,6 +289,7 @@ private fun BookMainInfo(
             verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
         ) {
             val offlineAvailable = LocalOfflineAvailable.current
+            val isLocalBook = book.libraryId.isLocalLibrary()
 
             if (!book.deleted && !library.unavailable) {
                 if (readIsSupported(book)) {
@@ -296,11 +298,11 @@ private fun BookMainInfo(
                         onIncognitoRead = { onBookReadPress(false) },
                     )
                 }
-                if (offlineAvailable && (!book.downloaded || book.isLocalFileOutdated)) {
+                if (!isLocalBook && offlineAvailable && (!book.downloaded || book.isLocalFileOutdated)) {
                     DownloadButton(book, onDownload)
                 }
             }
-            if (offlineAvailable && book.downloaded) {
+            if (!isLocalBook && offlineAvailable && book.downloaded) {
                 ElevatedButton(
                     onClick = onDownloadDelete,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)

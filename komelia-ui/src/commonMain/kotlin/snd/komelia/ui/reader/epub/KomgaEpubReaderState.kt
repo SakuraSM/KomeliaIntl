@@ -20,6 +20,7 @@ import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.settings.EpubReaderSettingsRepository
 import snd.komelia.ui.BookSiblingsContext
 import snd.komelia.ui.LoadState
@@ -37,8 +38,6 @@ import snd.webview.KomeliaWebview
 import snd.webview.ResourceLoadResult
 
 private val logger = KotlinLogging.logger {}
-private val resourceBaseUriRegex = "^http(s)?://.*/resource/".toRegex()
-
 class KomgaEpubReaderState(
     bookId: KomgaBookId,
     book: KomeliaBook?,
@@ -195,9 +194,15 @@ class KomgaEpubReaderState(
 
     private suspend fun progressionToWebview(progress: R2Progression): R2Progression {
         val baseUrl = serverUrl.first()
+        val resourceName = epubResourceName(progress.locator.href)
+        val href = if (book.value?.libraryId?.isLocalLibrary() == true) {
+            bookResourceUrl(bookId.value, resourceName)
+        } else {
+            "$baseUrl/api/v1/books/${bookId.value}/resource/$resourceName"
+        }
         return progress.copy(
             locator = progress.locator.copy(
-                href = "$baseUrl/api/v1/books/${bookId.value}/resource/${progress.locator.href}"
+                href = href,
             )
         )
     }
@@ -205,7 +210,7 @@ class KomgaEpubReaderState(
     private fun progressionFromWebview(progress: R2Progression): R2Progression {
         return progress.copy(
             locator = progress.locator.copy(
-                href = progress.locator.href.replace(resourceBaseUriRegex, "")
+                href = epubResourceName(progress.locator.href),
             )
         )
     }

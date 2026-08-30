@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaCollectionsApi
+import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.komga.api.KomgaReferentialApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.offline.tasks.OfflineTaskEmitter
@@ -46,6 +47,7 @@ class SeriesViewModel(
     private val seriesId: KomgaSeriesId,
     private val notifications: AppNotifications,
     private val events: SharedFlow<KomgaEvent>,
+    private val libraryApi: KomgaLibraryApi,
     private val seriesApi: KomgaSeriesApi,
     private val taskEmitter: OfflineTaskEmitter?,
     bookApi: KomgaBookApi,
@@ -99,8 +101,8 @@ class SeriesViewModel(
 
         series.filterNotNull()
             .combine(libraries) { series, libraries ->
-                val newLibrary = libraries.firstOrNull { it.id == series.libraryId }
-                library.value = newLibrary
+                library.value = libraries.firstOrNull { it.id == series.libraryId }
+                    ?: runCatching { libraryApi.getLibrary(series.libraryId) }.getOrNull()
             }.launchIn(screenModelScope)
 
         booksState.initialize()
@@ -145,14 +147,14 @@ class SeriesViewModel(
         }.onFailure { mutableState.value = Error(it) }
     }
 
-    private fun getLibraryOrThrow(series: KomgaSeries): KomgaLibrary {
-        val library = this.libraries.value.firstOrNull { it.id == series.libraryId }
-        if (library == null) {
-            throw IllegalStateException("Failed to find library for series ${series.metadata.title}")
-        }
-        return library
-
-    }
+    private suspend fun getLibraryOrThrow(series: KomgaSeries): KomgaLibrary =
+        this.libraries.value.firstOrNull { it.id == series.libraryId }
+            ?: runCatching { libraryApi.getLibrary(series.libraryId) }.getOrElse {
+                throw IllegalStateException(
+                    "Failed to find library for series ${series.metadata.title}",
+                    it,
+                )
+            }
 
     fun stopKomgaEventHandler() {
         reloadEventsEnabled.value = false

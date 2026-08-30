@@ -2,6 +2,16 @@ diff --git a/node_modules/@d-i-t-a/reader/dist/esm/index.js b/node_modules/@d-i-
 index bbea068..155e7bb 100644
 --- a/node_modules/@d-i-t-a/reader/dist/esm/index.js
 +++ b/node_modules/@d-i-t-a/reader/dist/esm/index.js
+@@ -46717,8 +46717,8 @@ var ScrollBookView = class {
+       const wrapper = findRequiredElement(
+         document,
+         "#iframe-wrapper"
+       );
+-      return Math.ceil(this.scrollingElement.scrollHeight - wrapper.scrollTop) - 1 <= getHeight();
++      return wrapper.scrollTop + wrapper.clientHeight >= wrapper.scrollHeight - 2;
+     } else {
+       const rightWidth = Math.floor(this.getRightColumnsWidth());
+       return rightWidth <= 0 || Math.ceil(this.getCurrentPage()) === this.getPageCount();
 @@ -58931,8 +58931,8 @@ var _TouchEventHandler = class _TouchEventHandler {
                return;
              }
@@ -22,3 +32,14 @@ index bbea068..155e7bb 100644
              if (Math.abs(slope) > 0.5) {
                touchEventStart = null;
                return;
+@@ -65624,6 +65624,9 @@ var _D2Reader = class _D2Reader {
+     } else {
+       if (rights.autoGeneratePositions) {
+-        await publication.autoGeneratePositions(initialConfig.requestConfig);
++        await publication.autoGeneratePositions(
++          initialConfig.requestConfig,
++          initialConfig.api?.getContentBytesLength
++        );
+       } else {
+         if ((_a = initialConfig.services) == null ? void 0 : _a.positions) {
+           await publication.fetchPositionsFromService(

@@ -41,6 +41,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_downloaded
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.book.BookInfoColumn
@@ -201,7 +202,7 @@ private fun ToolbarOneshotActions(
 
         val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
         var showEditDialog by remember { mutableStateOf(false) }
-        if (isAdmin) {
+        if (isAdmin && !book.libraryId.isLocalLibrary()) {
             IconButton(onClick = { showEditDialog = true }) {
                 Icon(Icons.Default.Edit, null)
             }
@@ -258,12 +259,12 @@ private fun FlowRowScope.OneshotMainInfo(
                     onRead = { onBookReadClick(true) },
                     onIncognitoRead = { onBookReadClick(false) }
                 )
-                if (!book.downloaded || book.isLocalFileOutdated) {
+                if (!book.libraryId.isLocalLibrary() && (!book.downloaded || book.isLocalFileOutdated)) {
                     DownloadButton(book, onDownload)
                 }
             }
 
-            if (book.downloaded) {
+            if (!book.libraryId.isLocalLibrary() && book.downloaded) {
                 ElevatedButton(
                     onClick = onDownloadDelete,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)

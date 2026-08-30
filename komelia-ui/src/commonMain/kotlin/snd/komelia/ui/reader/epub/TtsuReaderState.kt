@@ -61,8 +61,6 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 private val logger = KotlinLogging.logger {}
-private val resourceBaseUriRegex = "^http(s)?://.*/resource/".toRegex()
-
 class TtsuReaderState(
     bookId: KomgaBookId,
     book: KomeliaBook?,
@@ -251,6 +249,7 @@ class TtsuReaderState(
                         font
                     }
 
+                    isBookResourceRequest(urlString) -> proxyResourceRequest(bookApi, urlString, serverUrl)
                     urlString.startsWith("http://komelia") -> error("invalid request uri $urlString")
                     else -> proxyResourceRequest(bookApi, urlString, serverUrl)
                 }
@@ -276,7 +275,7 @@ class TtsuReaderState(
             )
 
         val chapterIndex = data.manifest.readingOrder
-            .indexOfFirst { it.href?.replace(resourceBaseUriRegex, "") == progress.locator.href }
+            .indexOfFirst { it.href?.let(::epubResourceName) == epubResourceName(progress.locator.href) }
             .takeIf { it >= 0 }
             ?: 0
         val section = data.sections[chapterIndex]
@@ -301,7 +300,7 @@ class TtsuReaderState(
             progress = totalProgress,
             lastBookmarkModified = Clock.System.now().toEpochMilliseconds(),
             chapterIndex = chapterIndex,
-            chapterReference = requireNotNull(data.manifest.readingOrder.first().href),
+            chapterReference = requireNotNull(data.manifest.readingOrder[chapterIndex].href),
         )
     }
 
@@ -323,7 +322,7 @@ class TtsuReaderState(
                 else ((it - epubSection.startCharacter).toDouble() / epubSection.characters).toFloat()
             } ?: 0f
 
-        val chapterHref = bookmark.chapterReference.replace(resourceBaseUriRegex, "")
+        val chapterHref = epubResourceName(bookmark.chapterReference)
         val matchingPositions = epubData.positions.positions.filter { it.href == chapterHref }
         val before = matchingPositions
             .filter { it.locations?.progression != null && it.locations?.position != null }
@@ -340,7 +339,7 @@ class TtsuReaderState(
             modified = Instant.fromEpochMilliseconds(bookmark.lastBookmarkModified),
             device = R2Device("unused", "Komelia"),
             locator = R2Locator(
-                href = bookmark.chapterReference.replace(resourceBaseUriRegex, ""),
+                href = epubResourceName(bookmark.chapterReference),
                 type = type,
                 title = manifestLink.title,
                 locations = R2Location(

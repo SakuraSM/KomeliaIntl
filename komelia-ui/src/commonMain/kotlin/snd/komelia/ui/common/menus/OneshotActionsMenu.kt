@@ -30,6 +30,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_identify
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_reset_metadata
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LocalKomfIntegration
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineMode
@@ -187,7 +188,7 @@ fun OneshotActionsMenu(
             if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
             else Modifier
 
-        if (isOffline) {
+        if (isOffline && !book.libraryId.isLocalLibrary()) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.book_delete_downloaded)) },
                 onClick = { showDeleteDownloadedDialog = true },

@@ -7,7 +7,7 @@
 
 Komelia Intl 是 [Komelia](https://github.com/Snd-R/Komelia) 的 `SakuraSM/KomeliaIntl` 分支版本。Komelia 是 [Komga](https://komga.org/) 媒体服务器的跨平台客户端。本仓库增加了简体中文、自适应界面、阅读器问题修复和独立发布支持。
 
-使用本应用前，你需要一个可以访问的 Komga 服务器和 Komga 账号。本仓库不包含 Komga 服务端。
+使用 Komga 相关功能时，你需要一个可以访问的 Komga 服务器和 Komga 账号。Android 与桌面端也可不连接服务器，直接进入本地书库模式并索引设备文件夹中的受支持书籍。
 
 ## 本仓库的重要改动
 
@@ -22,6 +22,10 @@ Komelia Intl 是 [Komelia](https://github.com/Snd-R/Komelia) 的 `SakuraSM/Komel
 ### 本地下载与离线阅读
 
 在受支持的原生平台，你可以下载书籍，按系列、书籍或媒体类型查看本地缓存，并删除缓存内容。下载后的 CBZ、CBR、PDF 和 EPUB 文件可在离线模式中继续阅读。
+
+### 本地文件夹书库
+
+Android 与桌面端无需登录 Komga 即可添加本地文件夹。Komelia 会递归索引受支持的文件，按父目录生成系列，重启后继续保留目录权限，并在应用启动或定时扫描时发现新增与删除的书籍。Android 支持 CBZ/ZIP、CBR/RAR、EPUB 和 PDF；桌面端当前支持 CBZ/ZIP、CBR/RAR 和 EPUB。书籍仍保存在原目录，从 Komelia 移除本地书库不会删除源文件。浏览器/Wasm 版本暂不提供持久化文件夹书库。
 
 ## 其他改动
 

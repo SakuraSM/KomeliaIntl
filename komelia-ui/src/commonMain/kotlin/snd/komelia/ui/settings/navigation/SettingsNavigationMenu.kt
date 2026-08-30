@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Group
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Lan
@@ -73,6 +74,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_naviga
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_my_account
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_my_auth_activity
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_offline_mode
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_local_library
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_auth_activity
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_general
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_media_management
@@ -106,6 +108,7 @@ import snd.komelia.ui.settings.komf.processing.KomfProcessingSettingsScreen
 import snd.komelia.ui.settings.komf.providers.KomfProvidersSettingsScreen
 import snd.komelia.ui.settings.network.NetworkSettingsScreen
 import snd.komelia.ui.settings.offline.OfflineSettingsScreen
+import snd.komelia.ui.settings.local.LocalLibrarySettingsScreen
 import snd.komelia.ui.settings.server.ServerSettingsScreen
 import snd.komelia.ui.settings.updates.AppUpdatesScreen
 import snd.komelia.ui.settings.users.UsersScreen
@@ -186,6 +189,14 @@ fun SettingsNavigationMenu(
             )
         }
         if (offlineAvailable) {
+            add(
+                NavigationEntry(
+                    stringResource(Res.string.settings_navigation_local_library),
+                    Icons.Rounded.Folder,
+                    LocalLibrarySettingsScreen(),
+                    currentScreen is LocalLibrarySettingsScreen,
+                )
+            )
             add(
                 NavigationEntry(
                     stringResource(Res.string.settings_navigation_offline_mode),

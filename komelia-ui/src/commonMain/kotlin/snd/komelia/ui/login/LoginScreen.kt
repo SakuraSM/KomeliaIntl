@@ -98,7 +98,9 @@ class LoginScreen : Screen {
                 offlineIsAvailable = viewModel.offlineIsAvailable.collectAsState().value,
                 onOfflineSelect = { rootNavigator.replaceAll(OfflineLoginScreen()) },
                 canGoOfflineAsCurrentUser = viewModel.canGoOfflineAsCurrentUser.collectAsState(false).value,
-                goOfflineAsCurrentUser = viewModel::offlineLogin
+                goOfflineAsCurrentUser = viewModel::offlineLogin,
+                localLibraryIsAvailable = viewModel.localLibraryIsAvailable,
+                onLocalLibrarySelect = viewModel::localLibraryLogin,
             )
 
             is Success -> rootNavigator.replaceAll(MainScreen())

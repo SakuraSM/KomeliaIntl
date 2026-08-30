@@ -5,13 +5,14 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.NotificationManagerCompat.IMPORTANCE_LOW
 import androidx.work.Configuration
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
+import snd.komelia.offline.local.LocalLibraryScanWorker
 import snd.komelia.offline.sync.downloadChannelId
 import snd.komelia.ui.DependencyContainer
+import java.util.concurrent.TimeUnit
 
 val dependencies = MutableStateFlow<DependencyContainer?>(null)
 class App : Application() {
@@ -38,9 +39,18 @@ class App : Application() {
     private fun initWorkManager() {
         val config = Configuration.Builder()
             .setMinimumLoggingLevel(android.util.Log.DEBUG)
-            .setWorkerFactory(MyWorkerFactory(dependencies.filterNotNull().map { it.offlineDependencies }))
-            .setWorkerCoroutineContext(Dispatchers.IO)
+            .setWorkerFactory(
+                MyWorkerFactory { context ->
+                    initializeDependencies(context).offlineDependencies
+                }
+            )
             .build()
         WorkManager.initialize(this, config)
+        val request = PeriodicWorkRequestBuilder<LocalLibraryScanWorker>(1, TimeUnit.HOURS).build()
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "local-library-scan",
+            ExistingPeriodicWorkPolicy.KEEP,
+            request,
+        )
     }
 }

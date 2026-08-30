@@ -16,6 +16,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import snd.komelia.komga.api.KomgaApi
+import snd.komelia.komga.api.KomgaBookApi
 import snd.komga.client.KomgaClientFactory
 import snd.komga.client.sse.KomgaEvent
 import snd.komga.client.sse.KomgaSSESession
@@ -23,7 +24,7 @@ import snd.komga.client.sse.KomgaSSESession
 data class RemoteApi(
     override val actuatorApi: RemoteActuatorApi,
     override val announcementsApi: RemoteAnnouncementsApi,
-    override val bookApi: RemoteBookApi,
+    override val bookApi: KomgaBookApi,
     override val collectionsApi: RemoteCollectionsApi,
     override val fileSystemApi: RemoteFileSystemApi,
     override val libraryApi: RemoteLibraryApi,

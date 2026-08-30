@@ -208,7 +208,7 @@ class ExposedOfflineBookDtoRepository(
                 if (userId != OfflineUser.ROOT) {
                     andWhere { bookTable.libraryId.inSubQuery(librariesCondition) }
                 }
-            }.groupBy(bookTable.id)
+            }
             .firstOrNull()
             ?.let { it[bookTable.id.countDistinct()] } ?: 0
 
@@ -562,7 +562,7 @@ class ExposedOfflineBookDtoRepository(
     private fun ResultRow.toKomgaMedia(): Media {
         return Media(
             status = KomgaMediaStatus.valueOf(this[mediaTable.status]),
-            mediaType = this[mediaTable.status],
+            mediaType = this[mediaTable.mediaType],
             pagesCount = this[mediaTable.pageCount],
             comment = this[mediaTable.comment],
             epubDivinaCompatible = this[mediaTable.epubDivinaCompatible],

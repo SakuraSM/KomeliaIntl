@@ -7,7 +7,7 @@
 
 Komelia Intl is the `SakuraSM/KomeliaIntl` fork of [Komelia](https://github.com/Snd-R/Komelia), a cross-platform client for a [Komga](https://komga.org/) media server. It adds Simplified Chinese localization, an adaptive interface, reader fixes, and fork-specific release support.
 
-You need a reachable Komga server and a Komga account. This repository does not include the server.
+Komga-backed features need a reachable Komga server and account. Android and desktop can also start in local-library mode without a server and index supported books from a folder on the device.
 
 ## Core changes in this fork
 
@@ -22,6 +22,10 @@ You can configure a primary remote URL and an optional LAN URL. When automatic s
 ### Local downloads and offline reading
 
 On supported native targets, you can download books, browse the local cache by series, book, or media type, and remove cached items. Downloaded CBZ, CBR, PDF, and EPUB files remain available in Offline mode.
+
+### Local folder libraries
+
+Android and desktop can add a local folder without signing in to Komga. Komelia indexes supported files recursively, groups books by their parent folder, keeps the folder permission across restarts, and detects additions and removals on startup or during the scheduled scan. Android supports CBZ/ZIP, CBR/RAR, EPUB, and PDF; desktop currently supports CBZ/ZIP, CBR/RAR, and EPUB. Source files stay in place and are never deleted by removing a local library from Komelia. Browser/Wasm builds do not provide persistent folder libraries.
 
 ## Other changes
 

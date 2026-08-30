@@ -29,6 +29,7 @@ import snd.komelia.KomgaAuthenticationState
 import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.komga.api.KomgaUserApi
 import snd.komelia.offline.api.OfflineLibraryApi
+import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.offline.server.repository.OfflineMediaServerRepository
 import snd.komelia.offline.settings.OfflineSettingsRepository
 import snd.komelia.offline.sync.model.OfflineLogEntry
@@ -62,6 +63,7 @@ class LoginViewModel(
     private val offlineServerRepository: OfflineMediaServerRepository?,
     private val offlineSettingsRepository: OfflineSettingsRepository?,
     private val offlineLibraryApi: OfflineLibraryApi?,
+    private val localLibraryManager: LocalLibraryManager?,
     logJournalRepository: LogJournalRepository?,
 ) : StateScreenModel<LoadState<Unit>>(Uninitialized) {
 
@@ -147,6 +149,25 @@ class LoginViewModel(
             mutableState.value = LoadState.Success(Unit)
         }
     }
+
+    fun localLibraryLogin() {
+        notifications.runCatchingToNotifications(
+            coroutineScope = screenModelScope,
+            onFailure = { operationLogger?.record(OfflineLogEntry.Operation.LOGIN, it) },
+        ) {
+            checkNotNull(localLibraryManager).prepareLocalMode()
+            checkNotNull(offlineSettingsRepository).putOfflineMode(true)
+            offlineSettingsRepository.putUserId(OfflineUser.ROOT)
+            komgaAuthState.setStateValues(
+                OfflineUser.ROOT_USER.toKomgaUser(),
+                checkNotNull(offlineLibraryApi).getLibraries(),
+            )
+            mutableState.value = LoadState.Success(Unit)
+        }
+    }
+
+    val localLibraryIsAvailable: Boolean
+        get() = localLibraryManager != null
 
     private suspend fun tryAutologin() {
         try {

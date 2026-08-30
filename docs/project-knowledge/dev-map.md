@@ -18,7 +18,7 @@
 | `komelia-ui` | Compose screens, presentation state, navigation, shared resources, design system, reader UI | database implementation or platform package wiring |
 | `komelia-domain/core` | application behavior, repositories/contracts, Komga-facing orchestration | Compose UI |
 | `komelia-domain/komga-api` | Komga API models and client boundary | screen state or storage implementation |
-| `komelia-domain/offline` | download/cache domain behavior and offline contracts | platform UI |
+| `komelia-domain/offline` | download/cache behavior, local-folder indexing, offline APIs, and platform content extraction | platform UI |
 | `komelia-infra/database/*` | transactions and SQLite/Wasm persistence implementations | user interaction policy |
 | `komelia-infra/image-decoder/*` | shared decoder contract and VIPS/Wasm implementations | reader navigation state |
 | `komelia-infra/webview` | platform WebView bridge used by EPUB and web content | publication business rules |
@@ -31,6 +31,8 @@
 Applications assemble platform implementations and depend on shared app/UI/domain modules. UI consumes domain contracts and selected infrastructure abstractions. Domain code may expose infrastructure contracts used for transactions, decoding, and inference, but must remain free of Compose presentation state. Platform implementations stay in Android, JVM, or Wasm source sets.
 
 Some Gradle project dependencies are not a textbook layered graph because shared interfaces and implementations are split across modules. Before moving a type, inspect every `build.gradle.kts` consumer and source-set actual implementation rather than relying only on directory names.
+
+Local-folder libraries enter through `komelia-ui/.../settings/local`, are orchestrated by `komelia-domain/offline/.../local/LocalLibraryManager`, and reuse the offline SQLite repositories and reader APIs. Android storage access and hourly background work live in the offline Android source set; JVM folder/archive implementations live in the JVM source set; Wasm exposes the unsupported boundary explicitly.
 
 ## Build and dependency surfaces
 

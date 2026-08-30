@@ -30,6 +30,17 @@ Risk points: probe races, stale active URL, destructive settings rewrites, and t
 
 Risk points: partial files, cancellation, record/file divergence, missing error details, deleting paths not owned by Komelia, and format-specific reader differences.
 
+## Local folder libraries
+
+1. A native app can prepare a local-only root user and media server, allowing startup without Komga credentials.
+2. The user grants a folder; Android persists the Storage Access Framework tree permission and desktop keeps the selected platform path.
+3. `LocalLibraryManager` recursively lists supported files, creates stable library/series/book identities from relative paths, and stores metadata in the existing offline database.
+4. Unchanged size and modified-time pairs are skipped; changed and new files are inspected; missing records are removed without deleting source files.
+5. Image/PDF pages and EPUB resources are served through the existing offline reader APIs. Local EPUB manifest links are resolved to the internal book-resource route before reaching either EPUB reader.
+6. Startup scanning and Android WorkManager discover later changes according to the stored scan interval.
+
+Risk points: revoked folder permissions, unstable IDs after moving files, archive path encoding, relative EPUB resources, duplicate scans, unsupported desktop PDF extraction, and accidentally treating local source files as app-owned cache.
+
 ## Reader navigation
 
 1. Detail or library navigation opens an image, PDF, or EPUB reader with a stable content/progress identity.

@@ -65,6 +65,7 @@ import snd.komelia.ui.settings.komf.providers.KomfProvidersSettingsViewModel
 import snd.komelia.ui.settings.navigation.SettingsNavigationViewModel
 import snd.komelia.ui.settings.network.NetworkSettingsViewModel
 import snd.komelia.ui.settings.offline.OfflineSettingsViewModel
+import snd.komelia.ui.settings.local.LocalLibraryViewModel
 import snd.komelia.ui.settings.server.ServerSettingsViewModel
 import snd.komelia.ui.settings.updates.AppUpdatesViewModel
 import snd.komelia.ui.settings.users.UsersViewModel
@@ -271,6 +272,7 @@ class ViewModelFactory(
             offlineServerRepository = dependencies.offlineDependencies?.repositories?.mediaServerRepository,
             offlineSettingsRepository = dependencies.offlineDependencies?.repositories?.offlineSettingsRepository,
             offlineLibraryApi = dependencies.offlineDependencies?.komgaApi?.libraryApi,
+            localLibraryManager = dependencies.offlineDependencies?.localLibraryManager,
             logJournalRepository = dependencies.offlineDependencies?.repositories?.logJournalRepository,
         )
     }
@@ -709,6 +711,9 @@ class ViewModelFactory(
             downloadEvents = offlineDependencies.bookDownloadEvents
         )
     }
+
+    fun getLocalLibraryViewModel(): LocalLibraryViewModel =
+        LocalLibraryViewModel(dependencies.offlineDependencies?.localLibraryManager)
 
     fun getOfflineLoginViewModel(): OfflineLoginViewModel {
         val offlineDependencies = checkNotNull(dependencies.offlineDependencies)

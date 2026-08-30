@@ -58,6 +58,7 @@ import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.sync.model.DownloadEvent
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LocalBookDownloadEvents
 import snd.komelia.ui.LocalLibraries
 import snd.komelia.ui.LocalKomeliaLayout
@@ -113,7 +114,9 @@ fun BookImageCard(
                     }
                 }
                 if (book.deleted || libraryIsDeleted) {
-                    CardStatusBadge(stringResource(Res.string.book_unavailable))
+                    Box(Modifier.align(Alignment.BottomStart)) {
+                        CardStatusBadge(stringResource(Res.string.book_unavailable))
+                    }
                 }
             }
         },
@@ -167,11 +170,14 @@ private fun BookImageOverlay(
     val layout = LocalKomeliaLayout.current
     Box(contentAlignment = Alignment.TopStart) {
         content()
+        if (book.libraryId.isLocalLibrary()) {
+            LocalSourceBadge(Modifier.padding(6.dp))
+        }
         if (showTitle)
             CardGradientOverlay()
         Column {
             Row {
-                if (book.downloaded) {
+                if (book.downloaded && !book.libraryId.isLocalLibrary()) {
                     val tint =
                         if (book.isLocalFileOutdated || book.remoteFileUnavailable) MaterialTheme.colorScheme.errorContainer
                         else MaterialTheme.colorScheme.secondary
@@ -433,15 +439,20 @@ private fun BookDetailedListDetails(
     val width = LocalWindowWidth.current
     val layout = LocalKomeliaLayout.current
     Column(Modifier.padding(start = layout.itemSpacing)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+        ) {
             Text(
                 book.metadata.title,
                 fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
                 maxLines = when (width) {
                     COMPACT, MEDIUM -> 2
                     else -> 4
                 }
             )
+            if (book.libraryId.isLocalLibrary()) LocalSourceBadge()
         }
 
         Text(

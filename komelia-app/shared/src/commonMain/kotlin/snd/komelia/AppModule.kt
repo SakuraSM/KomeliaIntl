@@ -31,6 +31,7 @@ import snd.komelia.api.RemoteApi
 import snd.komelia.api.RemoteBookApi
 import snd.komelia.api.RemoteCollectionsApi
 import snd.komelia.api.RemoteFileSystemApi
+import snd.komelia.api.LocalFirstBookApi
 import snd.komelia.api.RemoteLibraryApi
 import snd.komelia.api.RemoteReadListApi
 import snd.komelia.api.RemoteReferentialApi
@@ -164,6 +165,7 @@ abstract class AppModule {
             else createRemoteApi(
                 komgaClientFactory = komgaClientFactory,
                 offlineRepositories = offlineRepositories,
+                offlineApi = offlineModule?.komgaApi,
                 offlineEvents = offlineModule?.komgaEvents
             )
         }.stateIn(initScope)
@@ -173,6 +175,7 @@ abstract class AppModule {
             else createRemoteApi(
                 komgaClientFactory = komgaClientFactoryNoCache,
                 offlineRepositories = offlineRepositories,
+                offlineApi = offlineModule?.komgaApi,
                 offlineEvents = offlineModule?.komgaEvents
             )
         }.stateIn(initScope)
@@ -272,29 +275,41 @@ abstract class AppModule {
     protected fun createRemoteApi(
         komgaClientFactory: KomgaClientFactory,
         offlineRepositories: OfflineRepositories?,
+        offlineApi: snd.komelia.offline.api.OfflineKomgaApi?,
         offlineEvents: SharedFlow<KomgaEvent>?,
-    ) = RemoteApi(
-        actuatorApi = RemoteActuatorApi(komgaClientFactory.actuatorClient()),
-        announcementsApi = RemoteAnnouncementsApi(komgaClientFactory.announcementClient()),
-        bookApi = RemoteBookApi(
+    ): RemoteApi {
+        val remoteBookApi = RemoteBookApi(
             bookClient = komgaClientFactory.bookClient(),
-            offlineBookRepository = offlineRepositories?.bookRepository
-        ),
-        collectionsApi = RemoteCollectionsApi(komgaClientFactory.collectionClient()),
-        fileSystemApi = RemoteFileSystemApi(komgaClientFactory.fileSystemClient()),
-        libraryApi = RemoteLibraryApi(komgaClientFactory.libraryClient()),
-        readListApi = RemoteReadListApi(
-            readListClient = komgaClientFactory.readListClient(),
-            offlineBookRepository = offlineRepositories?.bookRepository
-        ),
-        referentialApi = RemoteReferentialApi(komgaClientFactory.referentialClient()),
-        seriesApi = RemoteSeriesApi(komgaClientFactory.seriesClient()),
-        settingsApi = RemoteSettingsApi(komgaClientFactory.settingsClient()),
-        tasksApi = RemoteTaskApi(komgaClientFactory.taskClient()),
-        userApi = RemoteUserApi(komgaClientFactory.userClient()),
-        komgaClientFactory = komgaClientFactory,
-        offlineEvents = offlineEvents ?: MutableSharedFlow()
-    )
+            offlineBookRepository = offlineRepositories?.bookRepository,
+        )
+        val bookApi = if (offlineRepositories != null && offlineApi != null) {
+            LocalFirstBookApi(
+                remoteBookApi = remoteBookApi,
+                offlineBookApi = offlineApi.bookApi,
+                offlineBookRepository = offlineRepositories.bookRepository,
+            )
+        } else remoteBookApi
+
+        return RemoteApi(
+            actuatorApi = RemoteActuatorApi(komgaClientFactory.actuatorClient()),
+            announcementsApi = RemoteAnnouncementsApi(komgaClientFactory.announcementClient()),
+            bookApi = bookApi,
+            collectionsApi = RemoteCollectionsApi(komgaClientFactory.collectionClient()),
+            fileSystemApi = RemoteFileSystemApi(komgaClientFactory.fileSystemClient()),
+            libraryApi = RemoteLibraryApi(komgaClientFactory.libraryClient()),
+            readListApi = RemoteReadListApi(
+                readListClient = komgaClientFactory.readListClient(),
+                offlineBookRepository = offlineRepositories?.bookRepository
+            ),
+            referentialApi = RemoteReferentialApi(komgaClientFactory.referentialClient()),
+            seriesApi = RemoteSeriesApi(komgaClientFactory.seriesClient()),
+            settingsApi = RemoteSettingsApi(komgaClientFactory.settingsClient()),
+            tasksApi = RemoteTaskApi(komgaClientFactory.taskClient()),
+            userApi = RemoteUserApi(komgaClientFactory.userClient()),
+            komgaClientFactory = komgaClientFactory,
+            offlineEvents = offlineEvents ?: MutableSharedFlow()
+        )
+    }
 
     protected fun createCoil(
         komgaApi: StateFlow<KomgaApi>,

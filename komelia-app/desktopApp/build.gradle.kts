@@ -8,7 +8,27 @@ plugins {
 }
 
 group = "io.github.snd-r.komelia"
-version = libs.versions.app.version.get()
+val appVersion = libs.versions.app.version.get()
+version = appVersion
+
+val appVersionMatch = requireNotNull(
+    Regex("""^(\d+)\.(\d+)\.(\d+)(?:-beta\.([1-9]\d*))?$""").matchEntire(appVersion)
+) { "Desktop packaging requires X.Y.Z or X.Y.Z-beta.N, got: $appVersion" }
+val appVersionMajor = appVersionMatch.groupValues[1].toInt()
+val appVersionMinor = appVersionMatch.groupValues[2].toInt()
+val appVersionPatch = appVersionMatch.groupValues[3].toInt()
+val betaNumber = appVersionMatch.groupValues[4].toIntOrNull()
+require(betaNumber == null || betaNumber <= 998) {
+    "Beta number must be between 1 and 998 for native installer ordering: $betaNumber"
+}
+val packageBuild = appVersionPatch * 1000 + (betaNumber ?: 999)
+require(packageBuild <= 65535) { "Desktop package build exceeds the MSI limit: $packageBuild" }
+val desktopPackageVersion = "$appVersionMajor.$appVersionMinor.$packageBuild"
+val macOsPackageVersion = if (appVersionMajor == 0) {
+    "$appVersionMinor.$packageBuild"
+} else {
+    desktopPackageVersion
+}
 
 dependencies {
 
@@ -43,7 +63,9 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Dmg)
             packageName = "Komelia"
-            packageVersion = libs.versions.app.version.get()
+            // Native installers require numeric versions. Reserve build 999 for the stable
+            // release so X.Y.Z-beta.N sorts below X.Y.Z and the next patch sorts above it.
+            packageVersion = desktopPackageVersion
             description = "Komga media client"
             vendor = "Snd-R"
             appResourcesRootDir.set(
@@ -63,7 +85,7 @@ compose.desktop {
 
             macOS {
                 // jpackage requires CFBundleVersion to start with a positive integer.
-                packageVersion = libs.versions.app.version.get().removePrefix("0.")
+                packageVersion = macOsPackageVersion
             }
         }
 

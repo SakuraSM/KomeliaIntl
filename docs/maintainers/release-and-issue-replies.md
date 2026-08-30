@@ -6,7 +6,7 @@ Choose the version with [Version releases](versioning.md) before you prepare the
 
 ## Prepare release notes
 
-1. Set the Release title to `Komelia vMAJOR.MINOR.PATCH`. Do not use `Komelia Intl`. Do not omit the `v` or use only the version number.
+1. Set the Release title to `Komelia vMAJOR.MINOR.PATCH` for stable releases or `Komelia vMAJOR.MINOR.PATCH-beta.N` for Beta releases. Do not use `Komelia Intl`. Do not omit the `v` or use only the version number.
 2. Copy `.github/RELEASE_TEMPLATE.md` to a temporary notes file.
 3. Replace every `{{PLACEHOLDER}}`.
 4. Put Chinese changes under `## 中文` and English changes under `## English`.
@@ -18,17 +18,17 @@ Choose the version with [Version releases](versioning.md) before you prepare the
 
    ```shell
    scripts/test-release-policy.sh
-   scripts/check-release-version.sh --tag vX.Y.Z --previous A.B.C --level LEVEL
+   scripts/check-release-version.sh --tag vX.Y.Z[-PRERELEASE] --previous A.B.C --level LEVEL
    scripts/check-release-notes.sh \
      --file /path/to/release-notes.md \
-     --version X.Y.Z \
-     --title "Komelia vX.Y.Z" \
+     --version X.Y.Z[-PRERELEASE] \
+     --title "Komelia vX.Y.Z[-PRERELEASE]" \
      --level LEVEL
    ```
 
    Replace `LEVEL` with `patch`, `minor`, or `major`.
 
-10. Create a draft Release first. Attach and verify the packages before publication. GitHub displays the attached packages outside the Release body.
+10. Create a draft Release first. Mark Beta versions as pre-releases. Attach and verify the packages before publication. GitHub displays the attached packages outside the Release body.
 
 `.github/RELEASE_TEMPLATE.md` is the canonical format. If a maintainer generates notes with GitHub, remove documentation, dependency maintenance, test details, and other changes that users do not need.
 

@@ -17,8 +17,10 @@ usage() {
 Usage: scripts/check-release-version.sh [options]
 
 Options:
-  --version X.Y.Z   Require this application version.
-  --tag vX.Y.Z      Require this release tag to match the application version.
+  --version X.Y.Z[-PRERELEASE]
+                    Require this application version.
+  --tag vX.Y.Z[-PRERELEASE]
+                    Require this release tag to match the application version.
   --previous X.Y.Z  Previous stable release version. Use with --level.
   --level LEVEL     Require an exact patch, minor, or major increment from --previous.
   -h, --help        Show this help.
@@ -56,13 +58,20 @@ while [[ $# -gt 0 ]]; do
 done
 
 catalog_version="$(sed -nE 's/^app-version = "([^"]+)"/\1/p' "$VERSION_FILE")"
-runtime_version="$(sed -nE 's/^[[:space:]]*val current = AppVersion\(([0-9]+), ([0-9]+), ([0-9]+)\)/\1.\2.\3/p' "$APP_VERSION_FILE")"
-test_version="$(sed -nE 's/^[[:space:]]*assertEquals\("([0-9]+\.[0-9]+\.[0-9]+)", AppVersion.current.toString\(\)\)/\1/p' "$APP_VERSION_TEST_FILE")"
+runtime_version="$(sed -nE 's/^[[:space:]]*val current = AppVersion\(([0-9]+), ([0-9]+), ([0-9]+)(, "([^"]+)")?\)/\1.\2.\3-\5/p' "$APP_VERSION_FILE" | sed 's/-$//')"
+test_version="$(sed -nE 's/^[[:space:]]*assertEquals\("([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?)", AppVersion.current.toString\(\)\)/\1/p' "$APP_VERSION_TEST_FILE")"
 version_code="$(sed -nE 's/^[[:space:]]*versionCode = ([0-9]+)/\1/p' "$ANDROID_BUILD_FILE" | head -n 1)"
 
-if [[ ! "$catalog_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+if [[ ! "$catalog_version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-beta\.([1-9][0-9]*))?$ ]]; then
   echo "Invalid app-version in $VERSION_FILE: ${catalog_version:-missing}" >&2
   exit 1
+fi
+if [[ "$catalog_version" == *-beta.* ]]; then
+  beta_number="${catalog_version##*.}"
+  if (( beta_number > 998 )); then
+    echo "Beta number must be between 1 and 998 for native installer ordering: $beta_number" >&2
+    exit 1
+  fi
 fi
 
 if [[ "$runtime_version" != "$catalog_version" ]]; then

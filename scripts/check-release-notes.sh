@@ -8,8 +8,8 @@ RELEASE_TITLE=""
 
 usage() {
   cat <<'EOF'
-Usage: scripts/check-release-notes.sh --file PATH --version X.Y.Z \
-  --title "Komelia vX.Y.Z" [--level patch|minor|major]
+Usage: scripts/check-release-notes.sh --file PATH --version X.Y.Z[-PRERELEASE] \
+  --title "Komelia vX.Y.Z[-PRERELEASE]" [--level patch|minor|major]
 
 Validate release notes against .github/RELEASE_TEMPLATE.md.
 EOF
@@ -50,8 +50,8 @@ if [[ -z "$NOTES_FILE" ]]; then
   exit 2
 fi
 
-if [[ ! "$EXPECTED_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  echo "--version must be numeric SemVer X.Y.Z: ${EXPECTED_VERSION:-missing}" >&2
+if [[ ! "$EXPECTED_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-beta\.([1-9][0-9]*))?$ ]]; then
+  echo "--version must be X.Y.Z or X.Y.Z-beta.N: ${EXPECTED_VERSION:-missing}" >&2
   exit 2
 fi
 

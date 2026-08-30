@@ -129,7 +129,7 @@ abstract class AppModule {
             .build()
 
         val komgaClientFactoryNoCache = KomgaClientFactory.Builder()
-            .ktor(ktor)
+            .ktor(ktorWithoutCache)
             .baseUrl { baseUrl.value }
             .cookieStorage(cookiesStorage)
             .build()
@@ -150,7 +150,7 @@ abstract class AppModule {
         val offlineModule: OfflineDependencies? = offlineRepositories?.let {
             createOfflineModule(
                 repositories = offlineRepositories,
-                komgaClientFactory = komgaClientFactory,
+                komgaClientFactory = komgaClientFactoryNoCache,
                 onlineUser = currentUserFlow
                     .combine(isOffline) { user, isOffline -> if (isOffline) null else user }
                     .stateIn(initScope),

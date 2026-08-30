@@ -55,6 +55,22 @@ class OfflineLogsStateTest {
     }
 
     @Test
+    fun persistedDownloadErrorIsExposedOnTheErrorTab() = runTest {
+        val downloadError = OfflineLogEntry(
+            message = "Book download failed\nDownloadProtocolException: use a direct LAN address",
+            type = OfflineLogEntry.Type.ERROR,
+        )
+        val repository = FakeLogRepository(entries = listOf(downloadError))
+        val state = OfflineLogsState(repository, this)
+
+        state.initialize()
+
+        assertEquals(listOf(downloadError), state.logs.value)
+        assertEquals(OfflineLogEntry.Type.ERROR, repository.requestedTypes.single())
+        assertIs<LoadState.Success<Unit>>(state.loadState.value)
+    }
+
+    @Test
     fun deleteResetsPaginationAndReloadsTheCurrentTab() = runTest {
         val repository = FakeLogRepository()
         val state = OfflineLogsState(repository, this)
@@ -73,6 +89,7 @@ class OfflineLogsStateTest {
 
     private class FakeLogRepository(
         private val failReads: Boolean = false,
+        private val entries: List<OfflineLogEntry> = emptyList(),
     ) : LogJournalRepository {
         val saved = mutableListOf<OfflineLogEntry>()
         val requestedTypes = mutableListOf<OfflineLogEntry.Type>()
@@ -93,7 +110,18 @@ class OfflineLogsStateTest {
         ): Page<OfflineLogEntry> {
             if (failReads) error("database unavailable")
             requestedTypes += type
-            return Page.empty()
+            val filteredEntries = entries.filter { it.type == type }
+            return Page.empty<OfflineLogEntry>().copy(
+                content = filteredEntries,
+                totalElements = filteredEntries.size,
+                totalPages = if (filteredEntries.isEmpty()) 0 else 1,
+                last = true,
+                number = 0,
+                first = true,
+                numberOfElements = filteredEntries.size,
+                size = filteredEntries.size,
+                empty = filteredEntries.isEmpty(),
+            )
         }
 
         override suspend fun deleteAll() {

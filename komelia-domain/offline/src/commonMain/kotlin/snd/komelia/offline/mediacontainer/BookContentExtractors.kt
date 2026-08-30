@@ -10,7 +10,8 @@ private val logger = KotlinLogging.logger { }
 
 class BookContentExtractors(
     divinaExtractors: List<DivinaExtractor>,
-    private val epubExtractor: EpubExtractor?
+    private val epubExtractor: EpubExtractor?,
+    private val pdfExtractor: PdfExtractor?,
 ) {
 
     val divinaExtractors = divinaExtractors
@@ -44,8 +45,14 @@ class BookContentExtractors(
                 } else throw IllegalStateException("Epub profile does not support getting page content")
             }
 
-            MediaProfile.PDF -> {
-                TODO()
+            MediaProfile.PDF -> media.pages[page - 1].let { pageMetadata ->
+                checkNotNull(pdfExtractor) { "PDF content is not supported" }
+                    .getPageBytes(
+                        file = book.fileDownloadPath,
+                        pageNumber = page,
+                        preferredWidth = pageMetadata.width,
+                        preferredHeight = pageMetadata.height,
+                    )
             }
 
             null -> throw IllegalStateException("Media is not ready")

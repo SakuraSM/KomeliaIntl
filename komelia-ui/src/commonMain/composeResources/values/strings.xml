@@ -715,12 +715,14 @@
     <string name="settings_network_title">Network connection</string>
     <string name="settings_network_auto_lan">Automatically use LAN address</string>
     <string name="settings_network_lan_address">LAN server address</string>
+    <string name="settings_network_lan_not_configured">Add a LAN server address to enable local connections</string>
+    <string name="settings_network_lan_auto_disabled">Automatic LAN switching is off; turn it on to check and use this address</string>
     <string name="settings_network_check">Check connection</string>
     <string name="settings_network_current_server">Current server address: %1$s</string>
     <string name="settings_network_using_primary">Using primary server address</string>
     <string name="settings_network_checking_lan">Checking LAN address</string>
     <string name="settings_network_using_lan">Using LAN address: %1$s</string>
-    <string name="settings_network_lan_unreachable">LAN address is unreachable</string>
+    <string name="settings_network_lan_unreachable">LAN address is unreachable; check the address, port, firewall, and server status</string>
     <string name="settings_network_invalid_url">Enter a valid HTTP or HTTPS server address</string>
     <string name="settings_network_invalid_port">Port must be between 1 and 65535</string>
     <string name="settings_auth_activity_title">Authentication Activity</string>

@@ -21,6 +21,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_networ
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_invalid_port
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_invalid_url
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_lan_address
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_lan_auto_disabled
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_lan_not_configured
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_lan_unreachable
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_using_lan
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_using_primary
@@ -40,6 +42,11 @@ fun NetworkSettingsContent(
     onLanAutoSwitchEnabledChange: (Boolean) -> Unit,
     onCheckLanConnection: () -> Unit,
 ) {
+    val lanConnectionUiState = resolveLanConnectionUiState(
+        lanServerUrl = lanServerUrl,
+        lanAutoSwitchEnabled = lanAutoSwitchEnabled,
+        connectionStatus = connectionStatus,
+    )
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -47,7 +54,18 @@ fun NetworkSettingsContent(
         SwitchWithLabel(
             checked = lanAutoSwitchEnabled,
             onCheckedChange = onLanAutoSwitchEnabledChange,
-            label = { Text(stringResource(Res.string.settings_network_auto_lan)) }
+            label = { Text(stringResource(Res.string.settings_network_auto_lan)) },
+            supportingText = {
+                when (lanConnectionUiState) {
+                    LanConnectionUiState.NotConfigured -> {
+                        Text(stringResource(Res.string.settings_network_lan_not_configured))
+                    }
+                    LanConnectionUiState.AutoSwitchDisabled -> {
+                        Text(stringResource(Res.string.settings_network_lan_auto_disabled))
+                    }
+                    else -> Unit
+                }
+            },
         )
 
         OutlinedTextField(
@@ -69,11 +87,24 @@ fun NetworkSettingsContent(
         ) {
             FilledTonalButton(
                 onClick = onCheckLanConnection,
-                enabled = lanServerUrlError == null && lanServerUrl.isNotBlank(),
+                enabled = lanAutoSwitchEnabled && lanServerUrlError == null && lanServerUrl.isNotBlank(),
             ) {
                 Text(stringResource(Res.string.settings_network_check))
             }
-            Text(connectionStatus.localizedText(), style = MaterialTheme.typography.bodyMedium)
+            if (
+                lanConnectionUiState != LanConnectionUiState.NotConfigured &&
+                lanConnectionUiState != LanConnectionUiState.AutoSwitchDisabled
+            ) {
+                Text(
+                    lanConnectionUiState.localizedText(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (lanConnectionUiState is LanConnectionUiState.Unreachable) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+            }
         }
 
         Text(
@@ -92,11 +123,38 @@ private fun ServerUrlValidationError.localizedMessage(): String {
 }
 
 @Composable
-private fun ServerConnectionStatus.localizedText(): String {
+private fun LanConnectionUiState.localizedText(): String {
     return when (this) {
-        ServerConnectionStatus.Primary -> stringResource(Res.string.settings_network_using_primary)
-        ServerConnectionStatus.CheckingLan -> stringResource(Res.string.settings_network_checking_lan)
-        is ServerConnectionStatus.Lan -> stringResource(Res.string.settings_network_using_lan, url)
-        is ServerConnectionStatus.LanUnavailable -> stringResource(Res.string.settings_network_lan_unreachable)
+        LanConnectionUiState.NotConfigured -> stringResource(Res.string.settings_network_lan_not_configured)
+        LanConnectionUiState.AutoSwitchDisabled -> stringResource(Res.string.settings_network_lan_auto_disabled)
+        LanConnectionUiState.UsingPrimary -> stringResource(Res.string.settings_network_using_primary)
+        LanConnectionUiState.Checking -> stringResource(Res.string.settings_network_checking_lan)
+        is LanConnectionUiState.Connected -> stringResource(Res.string.settings_network_using_lan, url)
+        LanConnectionUiState.Unreachable -> stringResource(Res.string.settings_network_lan_unreachable)
+    }
+}
+
+internal sealed interface LanConnectionUiState {
+    data object NotConfigured : LanConnectionUiState
+    data object AutoSwitchDisabled : LanConnectionUiState
+    data object UsingPrimary : LanConnectionUiState
+    data object Checking : LanConnectionUiState
+    data class Connected(val url: String) : LanConnectionUiState
+    data object Unreachable : LanConnectionUiState
+}
+
+internal fun resolveLanConnectionUiState(
+    lanServerUrl: String,
+    lanAutoSwitchEnabled: Boolean,
+    connectionStatus: ServerConnectionStatus,
+): LanConnectionUiState {
+    if (lanServerUrl.isBlank()) return LanConnectionUiState.NotConfigured
+    if (!lanAutoSwitchEnabled) return LanConnectionUiState.AutoSwitchDisabled
+
+    return when (connectionStatus) {
+        ServerConnectionStatus.Primary -> LanConnectionUiState.UsingPrimary
+        ServerConnectionStatus.CheckingLan -> LanConnectionUiState.Checking
+        is ServerConnectionStatus.Lan -> LanConnectionUiState.Connected(connectionStatus.url)
+        is ServerConnectionStatus.LanUnavailable -> LanConnectionUiState.Unreachable
     }
 }

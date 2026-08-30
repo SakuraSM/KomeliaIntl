@@ -715,12 +715,14 @@
     <string name="settings_network_title">网络连接</string>
     <string name="settings_network_auto_lan">自动使用局域网地址</string>
     <string name="settings_network_lan_address">局域网服务器地址</string>
+    <string name="settings_network_lan_not_configured">请先填写局域网服务器地址，以启用本地连接</string>
+    <string name="settings_network_lan_auto_disabled">局域网自动切换已关闭；开启后才能检查并使用该地址</string>
     <string name="settings_network_check">检查连接</string>
     <string name="settings_network_current_server">当前服务器地址：%1$s</string>
     <string name="settings_network_using_primary">正在使用主服务器地址</string>
     <string name="settings_network_checking_lan">正在检查局域网地址</string>
     <string name="settings_network_using_lan">正在使用局域网地址：%1$s</string>
-    <string name="settings_network_lan_unreachable">局域网地址不可用</string>
+    <string name="settings_network_lan_unreachable">局域网地址不可用，请检查地址、端口、防火墙和服务器状态</string>
     <string name="settings_network_invalid_url">请输入有效的 HTTP 或 HTTPS 服务器地址</string>
     <string name="settings_network_invalid_port">端口必须在 1 到 65535 之间</string>
     <string name="settings_auth_activity_title">登录活动</string>

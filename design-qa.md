@@ -105,7 +105,7 @@
 
 ## 自适应导航与动效专项复核
 
-- 问题输入：`/Users/zhengningning/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_raat75q9njlc22_6b7a/temp/RWTemp/2026-08/b6eb15e960a92630050caddb6a9b3e2b/c08291242f15f801c83c1f22cf7b4cc0.mp4`。原全局抽屉只覆盖内容区，底部导航可穿透点击，导致抽屉后页面切换且书库无正确选中态。
+- 问题输入：用户提供的录屏附件。原全局抽屉只覆盖内容区，底部导航可穿透点击，导致抽屉后页面切换且书库无正确选中态。
 - 修复后回归视频：`/private/tmp/komelia-adaptive-navigation-passed-capture.mp4`，12.67 秒、38 帧；由模拟器连续原始截图编码，规避 Android Emulator `screenrecord` 对 Compose 硬件层只记录关键帧的问题，未插入设计稿或静态替代页面。
 - Compact 证据：首页 `/private/tmp/komelia-adaptive-main-restarted-loaded.png`；搜索 `/private/tmp/komelia-live-selection-search.png`；书库直达 `/private/tmp/komelia-live-selection-library.png`；书库范围底部面板 `/private/tmp/komelia-adaptive-final-scope-sheet.png`。
 - Medium 证据：约 720dp 宽度 `/private/tmp/komelia-adaptive-final-rail-720dp.png`，一级导航切换为左侧 Navigation Rail；模拟器随后恢复 1080 × 2400 px、420 dpi。

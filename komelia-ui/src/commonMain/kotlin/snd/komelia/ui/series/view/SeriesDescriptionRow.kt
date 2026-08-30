@@ -29,6 +29,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_summary_
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_unavailable
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.common.components.ExpandableText
 import snd.komelia.ui.common.components.DetailMetadataRow
 import snd.komelia.ui.library.SeriesScreenFilter
@@ -144,7 +145,7 @@ fun SeriesDescriptionRow(
 
         if (alternateTitles.isNotEmpty()) {
             SelectionContainer {
-                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.extraSmall)) {
                     Text(
                         text = stringResource(Res.string.series_alternative_titles),
                         style = MaterialTheme.typography.labelLarge,

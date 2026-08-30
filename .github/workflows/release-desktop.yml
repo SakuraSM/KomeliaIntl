@@ -4,9 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing draft release tag, for example v0.18.12
+        description: Existing draft release tag, for example v0.20.0-beta.1
         required: true
         type: string
+      level:
+        description: Semantic version increment from the previous stable Release
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
       platform:
         description: Desktop platform to build
         required: true
@@ -33,10 +41,26 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_LEVEL: ${{ inputs.level }}
         run: |
-          app_version=$(sed -n 's/^app-version = "\(.*\)"/\1/p' gradle/libs.versions.toml)
-          test "$RELEASE_TAG" = "v$app_version"
-          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY"
+          scripts/test-release-policy.sh
+          previous_tag=$(gh release list --repo "$GITHUB_REPOSITORY" \
+            --exclude-drafts --exclude-pre-releases --limit 1 \
+            --json tagName --jq '.[0].tagName')
+          test -n "$previous_tag"
+          scripts/check-release-version.sh \
+            --tag "$RELEASE_TAG" \
+            --previous "${previous_tag#v}" \
+            --level "$RELEASE_LEVEL"
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --json body --jq .body > /tmp/komelia-release-notes.md
+          release_title=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --json name --jq .name)
+          scripts/check-release-notes.sh \
+            --file /tmp/komelia-release-notes.md \
+            --version "${RELEASE_TAG#v}" \
+            --title "$release_title" \
+            --level "$RELEASE_LEVEL"
 
   linux:
     needs: validate

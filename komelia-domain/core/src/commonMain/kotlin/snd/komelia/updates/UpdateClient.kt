@@ -8,22 +8,26 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
-private const val komeliaBaseUrl = "https://api.github.com/repos/Snd-R/Komelia"
 private const val onnxRuntimeBaseUrl = "https://api.github.com/repos/microsoft/onnxruntime"
 
 class UpdateClient(
     private val ktor: HttpClient,
-    private val ktorWithoutCache: HttpClient
+    private val ktorWithoutCache: HttpClient,
+    private val appReleasesApiUrl: String = AppProjectMetadata.releasesApiUrl,
 ) {
 
     suspend fun getKomeliaReleases(): List<GithubRelease> {
-        return ktor.get("$komeliaBaseUrl/releases") {
-            parameter("per_page", 5)
+        return getReleases(appReleasesApiUrl)
+    }
+
+    suspend fun getReleases(apiUrl: String, limit: Int = 5): List<GithubRelease> {
+        return ktor.get(apiUrl) {
+            parameter("per_page", limit)
         }.body()
     }
 
     suspend fun getKomeliaLatestRelease(): GithubRelease {
-        return ktor.get("$komeliaBaseUrl/releases/latest").body()
+        return ktor.get(appReleaseEndpoint(appReleasesApiUrl, "latest")).body()
     }
 
     suspend fun getOnnxRuntimeRelease(tagName: String): GithubRelease {
@@ -34,6 +38,9 @@ class UpdateClient(
         ktorWithoutCache.prepareGet(url).execute(block)
     }
 }
+
+internal fun appReleaseEndpoint(baseUrl: String, path: String): String =
+    "${baseUrl.trimEnd('/')}/${path.trimStart('/')}"
 
 @Serializable
 data class GithubRelease(

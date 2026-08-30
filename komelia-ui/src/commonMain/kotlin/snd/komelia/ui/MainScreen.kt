@@ -22,8 +22,6 @@ import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +74,8 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.book.BookScreen
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.collection.CollectionScreen
+import snd.komelia.ui.common.components.komeliaTopBarScroll
+import snd.komelia.ui.common.components.rememberKomeliaTopBarScrollState
 import snd.komelia.ui.home.HomeScreen
 import snd.komelia.ui.library.LibraryScreen
 import snd.komelia.ui.oneshot.OneshotScreen
@@ -112,7 +112,7 @@ class MainScreen(
             val rootNavigator = LocalNavigator.currentOrThrow
             val rootScreen = rootNavigator.lastItem
             if (rootScreen !is AppTab) {
-                rootNavigator.saveableState("immersive-screen", rootScreen) {
+                rootNavigator.saveableState(immersiveScreenSaveableStateKey(rootScreen.key), rootScreen) {
                     rootScreen.Content()
                 }
                 return@TabNavigator
@@ -121,12 +121,14 @@ class MainScreen(
             var activeNavigator by remember { mutableStateOf<Navigator?>(null) }
             var activeDestination by remember { mutableStateOf<AppDestination?>(null) }
             var pendingScreen by remember { mutableStateOf<Pair<AppDestination, Screen>?>(null) }
-            val currentTab = rootScreen
-            val taskCount = vm.komgaTaskQueueStatus.collectAsState().value?.count ?: 0
-
+            val topBarScrollState = rememberKomeliaTopBarScrollState()
+            // TabNavigator.current is the reactive source of truth. LocalNavigator.lastItem
+            // can briefly lag behind a tab selection and caused destination taps to be
+            // interpreted as reselections, most visibly when returning to Home.
+            val currentTab = tabNavigator.current as AppTab
             fun selectDestination(destination: AppDestination, screen: Screen? = null) {
                 val targetTab = tabs.first { it.destination == destination }
-                val selectedDestination = currentTab.destination
+                val selectedDestination = (tabNavigator.current as AppTab).destination
                 if (screen != null) pendingScreen = destination to screen
 
                 if (
@@ -141,94 +143,115 @@ class MainScreen(
                 }
             }
 
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                Column {
-                    if (platform != MOBILE) {
-                        AppBar(
-                            canNavigateBack = activeNavigator?.canPop == true,
-                            onNavigateBack = { activeNavigator?.pop() },
-                            currentScreen = activeNavigator?.lastItem,
-                            query = vm.searchBarState.currentQuery(),
-                            onQueryChange = vm.searchBarState::onQueryChange,
-                            isLoading = vm.searchBarState.isLoading,
-                            onSearchAllClick = { selectDestination(AppDestination.SEARCH, SearchScreen(it)) },
-                            searchResults = vm.searchBarState.searchResults(),
-                            libraryById = vm.searchBarState::getLibraryById,
-                            onBookClick = { selectDestination(AppDestination.LIBRARY, bookScreen(it)) },
-                            onSeriesClick = { selectDestination(AppDestination.LIBRARY, seriesScreen(it)) },
-                            onRefreshClick = vm::onScreenReload,
-                            notificationsState = vm.notificationsState,
-                            isOffline = vm.isOffline.collectAsState().value,
-                            onOfflineModeChange = vm::goOnline,
-                        )
-                    }
+            val appNavigationController = remember(tabNavigator, tabs) {
+                AppNavigationController { screen ->
+                    selectDestination(destinationFor(screen), screen)
+                }
+            }
 
-                    Scaffold(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentWindowInsets = if (platform == MOBILE) {
-                            WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
-                        } else {
-                            WindowInsets(0.dp)
-                        },
-                        bottomBar = {
-                            AnimatedVisibility(
-                                visible = navigationPresentation(width) == NavigationPresentation.BottomBar,
-                                enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
-                                    tween(motion.duration(motion.containerDurationMillis), easing = motion.standardEasing),
-                                ),
-                                exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
-                                    tween(motion.duration(motion.containerDurationMillis), easing = motion.standardEasing),
-                                ),
-                            ) {
-                                AppBottomBar(currentTab.destination, taskCount, ::selectDestination)
-                            }
-                        },
-                    ) { contentPadding ->
-                        Row(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(contentPadding),
-                        ) {
-                            AnimatedVisibility(
-                                visible = navigationPresentation(width) == NavigationPresentation.Rail,
-                                enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
-                                    tween(motion.duration(motion.containerDurationMillis), easing = motion.standardEasing),
-                                ),
-                                exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
-                                    tween(motion.duration(motion.containerDurationMillis), easing = motion.standardEasing),
-                                ),
-                            ) {
-                                AppNavigationRail(currentTab.destination, taskCount, ::selectDestination)
-                            }
+            CompositionLocalProvider(LocalAppNavigationController provides appNavigationController) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Column(Modifier.komeliaTopBarScroll(topBarScrollState)) {
+                        if (platform != MOBILE) {
+                            AppBar(
+                                canNavigateBack = activeNavigator?.canPop == true,
+                                onNavigateBack = { activeNavigator?.pop() },
+                                currentScreen = activeNavigator?.lastItem,
+                                query = vm.searchBarState.currentQuery(),
+                                onQueryChange = vm.searchBarState::onQueryChange,
+                                isLoading = vm.searchBarState.isLoading,
+                                onSearchAllClick = { selectDestination(AppDestination.SEARCH, SearchScreen(it)) },
+                                searchResults = vm.searchBarState.searchResults(),
+                                libraryById = vm.searchBarState::getLibraryById,
+                                onBookClick = { selectDestination(AppDestination.LIBRARY, bookScreen(it)) },
+                                onSeriesClick = { selectDestination(AppDestination.LIBRARY, seriesScreen(it)) },
+                                onRefreshClick = vm::onScreenReload,
+                                notificationsState = vm.notificationsState,
+                                isOffline = vm.isOffline.collectAsState().value,
+                                onOfflineModeChange = vm::goOnline,
+                                isContentScrolled = topBarScrollState.isContentScrolled,
+                            )
+                        }
 
-                            SingleLayerDestinationTransition(
-                                targetTab = currentTab,
-                                modifier = Modifier.weight(1f),
-                            ) { tab ->
-                                tabNavigator.saveableState("destination", tab) {
-                                    Navigator(
-                                        screens = tab.initialScreens,
-                                        onBackPressed = null,
-                                        key = "destination-${tab.destination.name.lowercase()}",
-                                    ) { navigator ->
-                                        SideEffect {
-                                            if (tabNavigator.current == tab) {
-                                                activeNavigator = navigator
-                                                activeDestination = tab.destination
-                                                vm.initialize(navigator)
+                        Scaffold(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentWindowInsets = if (platform == MOBILE) {
+                                WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+                            } else {
+                                WindowInsets(0.dp)
+                            },
+                            bottomBar = {
+                                AnimatedVisibility(
+                                    visible = navigationPresentation(width) == NavigationPresentation.BottomBar,
+                                    enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
+                                        tween(
+                                            motion.duration(motion.containerDurationMillis),
+                                            easing = motion.standardEasing,
+                                        ),
+                                    ),
+                                    exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
+                                        tween(
+                                            motion.duration(motion.containerDurationMillis),
+                                            easing = motion.standardEasing,
+                                        ),
+                                    ),
+                                ) {
+                                    AppBottomBar(currentTab.destination, ::selectDestination)
+                                }
+                            },
+                        ) { contentPadding ->
+                            Row(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(contentPadding),
+                            ) {
+                                AnimatedVisibility(
+                                    visible = navigationPresentation(width) == NavigationPresentation.Rail,
+                                    enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
+                                        tween(
+                                            motion.duration(motion.containerDurationMillis),
+                                            easing = motion.standardEasing,
+                                        ),
+                                    ),
+                                    exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
+                                        tween(
+                                            motion.duration(motion.containerDurationMillis),
+                                            easing = motion.standardEasing,
+                                        ),
+                                    ),
+                                ) {
+                                    AppNavigationRail(currentTab.destination, ::selectDestination)
+                                }
+
+                                SingleLayerDestinationTransition(
+                                    targetTab = currentTab,
+                                    modifier = Modifier.weight(1f),
+                                ) { tab ->
+                                    tabNavigator.saveableState("destination", tab) {
+                                        Navigator(
+                                            screens = tab.initialScreens,
+                                            onBackPressed = null,
+                                            key = "destination-${tab.destination.name.lowercase()}",
+                                        ) { navigator ->
+                                            SideEffect {
+                                                if (tabNavigator.current == tab) {
+                                                    activeNavigator = navigator
+                                                    activeDestination = tab.destination
+                                                    vm.initialize(navigator)
+                                                }
                                             }
-                                        }
-                                        LaunchedEffect(tab, pendingScreen) {
-                                            val pending = pendingScreen
-                                            if (tabNavigator.current == tab && pending?.first == tab.destination) {
-                                                navigator.replaceAll(pending.second)
-                                                pendingScreen = null
+                                            LaunchedEffect(tab, pendingScreen) {
+                                                val pending = pendingScreen
+                                                if (tabNavigator.current == tab && pending?.first == tab.destination) {
+                                                    navigator.replaceAll(destinationStack(tab.rootScreen, pending.second))
+                                                    pendingScreen = null
+                                                }
                                             }
+                                            DestinationContent(navigator)
                                         }
-                                        DestinationContent(navigator)
                                     }
                                 }
                             }
@@ -237,13 +260,13 @@ class MainScreen(
                 }
             }
 
-            val handlesBack = activeNavigator?.canPop == true || currentTab.destination != AppDestination.HOME
-            if (handlesBack) {
+            val backAction = appBackAction(activeNavigator?.canPop == true, currentTab.destination)
+            if (backAction != AppBackAction.ExitApp) {
                 BackPressHandler {
-                    if (activeNavigator?.canPop == true) {
-                        activeNavigator?.pop()
-                    } else {
-                        selectDestination(AppDestination.HOME)
+                    when (backAction) {
+                        AppBackAction.PopDetail -> activeNavigator?.pop()
+                        AppBackAction.ReturnHome -> selectDestination(AppDestination.HOME)
+                        AppBackAction.ExitApp -> Unit
                     }
                 }
             }
@@ -277,11 +300,10 @@ private class AppTab(
 private fun createTabs(defaultScreen: Screen, isMobile: Boolean): List<AppTab> {
     val initialDestination = destinationFor(defaultScreen)
     fun tab(destination: AppDestination, rootScreen: Screen): AppTab {
-        val initialScreens = when {
-            initialDestination != destination -> listOf(rootScreen)
-            defaultScreen is LibraryScreen && defaultScreen.libraryId != null -> listOf(rootScreen, defaultScreen)
-            defaultScreen::class != rootScreen::class -> listOf(rootScreen, defaultScreen)
-            else -> listOf(defaultScreen)
+        val initialScreens = if (initialDestination == destination) {
+            destinationStack(rootScreen, defaultScreen)
+        } else {
+            listOf(rootScreen)
         }
         return AppTab(destination, rootScreen, initialScreens)
     }
@@ -404,7 +426,6 @@ private val destinationItems = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun AppBottomBar(
     selected: AppDestination,
-    taskCount: Int,
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
     NavigationBar(
@@ -417,7 +438,7 @@ private fun AppBottomBar(
                 NavigationBarItem(
                     selected = selected == item.destination,
                     onClick = { onSelect(item.destination, null) },
-                    icon = { DestinationIcon(item, taskCount) },
+                    icon = { DestinationIcon(item) },
                     label = { Text(stringResource(item.label)) },
                 )
             }
@@ -429,7 +450,6 @@ private fun AppBottomBar(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun AppNavigationRail(
     selected: AppDestination,
-    taskCount: Int,
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
     NavigationRail(
@@ -441,7 +461,7 @@ private fun AppNavigationRail(
                 NavigationRailItem(
                     selected = selected == item.destination,
                     onClick = { onSelect(item.destination, null) },
-                    icon = { DestinationIcon(item, taskCount) },
+                    icon = { DestinationIcon(item) },
                     label = { Text(stringResource(item.label)) },
                 )
             }
@@ -450,17 +470,6 @@ private fun AppNavigationRail(
 }
 
 @Composable
-private fun DestinationIcon(item: DestinationItem, taskCount: Int) {
-    val icon = @Composable {
-        Icon(item.icon, contentDescription = stringResource(item.label))
-    }
-    if (item.destination == AppDestination.LIBRARY && taskCount > 0) {
-        BadgedBox(
-            badge = {
-                Badge { Text(taskCount.coerceAtMost(99).toString()) }
-            },
-        ) { icon() }
-    } else {
-        icon()
-    }
+private fun DestinationIcon(item: DestinationItem) {
+    Icon(item.icon, contentDescription = stringResource(item.label))
 }

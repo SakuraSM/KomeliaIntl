@@ -29,8 +29,11 @@ import snd.komelia.KomgaAuthenticationState
 import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.komga.api.KomgaUserApi
 import snd.komelia.offline.api.OfflineLibraryApi
+import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.offline.server.repository.OfflineMediaServerRepository
 import snd.komelia.offline.settings.OfflineSettingsRepository
+import snd.komelia.offline.sync.model.OfflineLogEntry
+import snd.komelia.offline.sync.repository.LogJournalRepository
 import snd.komelia.offline.user.model.OfflineUser
 import snd.komelia.offline.user.repository.OfflineUserRepository
 import snd.komelia.settings.CommonSettingsRepository
@@ -43,6 +46,7 @@ import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
+import snd.komelia.ui.settings.offline.OfflineOperationLogger
 
 private val logger = KotlinLogging.logger { }
 
@@ -59,7 +63,11 @@ class LoginViewModel(
     private val offlineServerRepository: OfflineMediaServerRepository?,
     private val offlineSettingsRepository: OfflineSettingsRepository?,
     private val offlineLibraryApi: OfflineLibraryApi?,
+    private val localLibraryManager: LocalLibraryManager?,
+    logJournalRepository: LogJournalRepository?,
 ) : StateScreenModel<LoadState<Unit>>(Uninitialized) {
+
+    private val operationLogger = logJournalRepository?.let { OfflineOperationLogger(it, screenModelScope) }
 
     var url by mutableStateOf("")
     var user by mutableStateOf("")
@@ -129,7 +137,10 @@ class LoginViewModel(
     }
 
     fun offlineLogin() {
-        notifications.runCatchingToNotifications(screenModelScope) {
+        notifications.runCatchingToNotifications(
+            coroutineScope = screenModelScope,
+            onFailure = { operationLogger?.record(OfflineLogEntry.Operation.LOGIN, it) },
+        ) {
             val user = offlineUser.value ?: return@runCatchingToNotifications
 
             checkNotNull(offlineSettingsRepository).putOfflineMode(true)
@@ -138,6 +149,25 @@ class LoginViewModel(
             mutableState.value = LoadState.Success(Unit)
         }
     }
+
+    fun localLibraryLogin() {
+        notifications.runCatchingToNotifications(
+            coroutineScope = screenModelScope,
+            onFailure = { operationLogger?.record(OfflineLogEntry.Operation.LOGIN, it) },
+        ) {
+            checkNotNull(localLibraryManager).prepareLocalMode()
+            checkNotNull(offlineSettingsRepository).putOfflineMode(true)
+            offlineSettingsRepository.putUserId(OfflineUser.ROOT)
+            komgaAuthState.setStateValues(
+                OfflineUser.ROOT_USER.toKomgaUser(),
+                checkNotNull(offlineLibraryApi).getLibraries(),
+            )
+            mutableState.value = LoadState.Success(Unit)
+        }
+    }
+
+    val localLibraryIsAvailable: Boolean
+        get() = localLibraryManager != null
 
     private suspend fun tryAutologin() {
         try {

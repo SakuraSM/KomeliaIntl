@@ -30,7 +30,10 @@ actual fun StoragePermissionRequestDialog(onComplete: (directory: PlatformFile?)
     val context = LocalContext.current
 
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocumentTree()) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
+        if (uri == null) {
+            onComplete(null)
+            return@rememberLauncherForActivityResult
+        }
 
 
         val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION

@@ -1,0 +1,17 @@
+changelog:
+  exclude:
+    labels:
+      - duplicate
+      - dependencies
+      - documentation
+      - invalid
+      - internal
+      - question
+      - skip-changelog
+      - wontfix
+    authors:
+      - dependabot[bot]
+  categories:
+    - title: 变更 / Changes
+      labels:
+        - "*"

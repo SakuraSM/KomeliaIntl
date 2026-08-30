@@ -11,6 +11,7 @@ import snd.komelia.ui.platform.WindowSizeClass
 internal data class KomeliaLayoutSpec(
     val pageHorizontalPadding: Dp,
     val pageVerticalPadding: Dp,
+    val topBarContentSpacing: Dp,
     val gridSpacing: Dp,
     val sectionSpacing: Dp,
     val itemSpacing: Dp,
@@ -26,6 +27,7 @@ internal val LocalKomeliaLayout = staticCompositionLocalOf {
     KomeliaLayoutSpec(
         pageHorizontalPadding = 24.dp,
         pageVerticalPadding = 24.dp,
+        topBarContentSpacing = 16.dp,
         gridSpacing = 16.dp,
         sectionSpacing = 24.dp,
         itemSpacing = 12.dp,
@@ -47,6 +49,7 @@ internal fun komeliaLayoutSpec(
         WindowSizeClass.COMPACT -> KomeliaLayoutSpec(
             pageHorizontalPadding = 12.dp,
             pageVerticalPadding = 12.dp,
+            topBarContentSpacing = 12.dp,
             gridSpacing = 12.dp,
             sectionSpacing = 16.dp,
             itemSpacing = 12.dp,
@@ -61,6 +64,7 @@ internal fun komeliaLayoutSpec(
         WindowSizeClass.MEDIUM -> KomeliaLayoutSpec(
             pageHorizontalPadding = 16.dp,
             pageVerticalPadding = 16.dp,
+            topBarContentSpacing = 16.dp,
             gridSpacing = 16.dp,
             sectionSpacing = 20.dp,
             itemSpacing = 12.dp,
@@ -75,6 +79,7 @@ internal fun komeliaLayoutSpec(
         WindowSizeClass.EXPANDED -> KomeliaLayoutSpec(
             pageHorizontalPadding = 24.dp,
             pageVerticalPadding = 20.dp,
+            topBarContentSpacing = 16.dp,
             gridSpacing = 16.dp,
             sectionSpacing = 24.dp,
             itemSpacing = 12.dp,
@@ -89,6 +94,7 @@ internal fun komeliaLayoutSpec(
         WindowSizeClass.FULL -> KomeliaLayoutSpec(
             pageHorizontalPadding = 24.dp,
             pageVerticalPadding = 24.dp,
+            topBarContentSpacing = 16.dp,
             gridSpacing = 16.dp,
             sectionSpacing = 24.dp,
             itemSpacing = 12.dp,
@@ -100,6 +106,17 @@ internal fun komeliaLayoutSpec(
             contentMaxWidth = 1200.dp,
         )
     }
+}
+
+internal fun detailCoverWidth(
+    availableWidth: Dp,
+    windowWidth: WindowSizeClass,
+): Dp = when (windowWidth) {
+    WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM ->
+        (availableWidth * 0.4f).coerceIn(136.dp, 168.dp)
+
+    WindowSizeClass.EXPANDED, WindowSizeClass.FULL ->
+        (availableWidth * 0.25f).coerceIn(220.dp, 260.dp)
 }
 
 /** Returns null when the home grid should continue using the configured adaptive card width. */

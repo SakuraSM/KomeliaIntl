@@ -65,6 +65,7 @@ import snd.komelia.ui.settings.komf.providers.KomfProvidersSettingsViewModel
 import snd.komelia.ui.settings.navigation.SettingsNavigationViewModel
 import snd.komelia.ui.settings.network.NetworkSettingsViewModel
 import snd.komelia.ui.settings.offline.OfflineSettingsViewModel
+import snd.komelia.ui.settings.local.LocalLibraryViewModel
 import snd.komelia.ui.settings.server.ServerSettingsViewModel
 import snd.komelia.ui.settings.updates.AppUpdatesViewModel
 import snd.komelia.ui.settings.users.UsersViewModel
@@ -271,6 +272,8 @@ class ViewModelFactory(
             offlineServerRepository = dependencies.offlineDependencies?.repositories?.mediaServerRepository,
             offlineSettingsRepository = dependencies.offlineDependencies?.repositories?.offlineSettingsRepository,
             offlineLibraryApi = dependencies.offlineDependencies?.komgaApi?.libraryApi,
+            localLibraryManager = dependencies.offlineDependencies?.localLibraryManager,
+            logJournalRepository = dependencies.offlineDependencies?.repositories?.logJournalRepository,
         )
     }
 
@@ -439,7 +442,11 @@ class ViewModelFactory(
     }
 
     fun getAnnouncementsViewModel(): AnnouncementsViewModel {
-        return AnnouncementsViewModel(dependencies.appNotifications, komgaApi.announcementsApi)
+        return AnnouncementsViewModel(
+            appNotifications = dependencies.appNotifications,
+            announcementsApi = komgaApi.announcementsApi,
+            updateClient = dependencies.updateClient,
+        )
     }
 
     fun getSettingsNavigationViewModel(rootNavigator: Navigator): SettingsNavigationViewModel {
@@ -450,6 +457,7 @@ class ViewModelFactory(
             komgaSharedState = dependencies.komgaSharedState,
             secretsRepository = appRepositories.secretsRepository,
             offlineSettingsRepository = dependencies.offlineDependencies?.repositories?.offlineSettingsRepository,
+            logJournalRepository = dependencies.offlineDependencies?.repositories?.logJournalRepository,
             isOffline = dependencies.isOffline,
             currentServerUrl = appRepositories.settingsRepository.getServerUrl(),
             bookApi = komgaApi.bookApi,
@@ -688,15 +696,24 @@ class ViewModelFactory(
             offlineSettingsRepository = offlineDependencies.repositories.offlineSettingsRepository,
             userRepository = offlineDependencies.repositories.userRepository,
             serverRepository = offlineDependencies.repositories.mediaServerRepository,
+            offlineLibraryApi = offlineDependencies.komgaApi.libraryApi,
             logJournalRepository = offlineDependencies.repositories.logJournalRepository,
             serverDeleteAction = offlineDependencies.actions.get(),
             userDeleteAction = offlineDependencies.actions.get(),
             platformContext = dependencies.coilContext,
+            bookRepository = offlineDependencies.repositories.bookRepository,
+            seriesRepository = offlineDependencies.repositories.seriesRepository,
+            mediaRepository = offlineDependencies.repositories.mediaRepository,
+            bookDeleteAction = offlineDependencies.actions.get(),
+            seriesDeleteAction = offlineDependencies.actions.get(),
 
             taskEmitter = offlineDependencies.taskEmitter,
             downloadEvents = offlineDependencies.bookDownloadEvents
         )
     }
+
+    fun getLocalLibraryViewModel(): LocalLibraryViewModel =
+        LocalLibraryViewModel(dependencies.offlineDependencies?.localLibraryManager)
 
     fun getOfflineLoginViewModel(): OfflineLoginViewModel {
         val offlineDependencies = checkNotNull(dependencies.offlineDependencies)
@@ -707,6 +724,7 @@ class ViewModelFactory(
             serverRepository = offlineDependencies.repositories.mediaServerRepository,
             komgaAuthState = dependencies.komgaSharedState,
             offlineLibraryApi = offlineDependencies.komgaApi.libraryApi,
+            logJournalRepository = offlineDependencies.repositories.logJournalRepository,
             serverDeleteAction = offlineDependencies.actions.get(),
             userDeleteAction = offlineDependencies.actions.get(),
         )

@@ -21,9 +21,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoStories
 import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +54,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_go_offlin
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_komf_desc
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_komf_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_login
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_local_library
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_invalid_port
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_invalid_url
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_offline_mode
@@ -92,6 +95,8 @@ fun LoginContent(
     onOfflineSelect: () -> Unit,
     canGoOfflineAsCurrentUser: Boolean,
     goOfflineAsCurrentUser: () -> Unit,
+    localLibraryIsAvailable: Boolean,
+    onLocalLibrarySelect: () -> Unit,
 ) {
 
     val layout = LocalKomeliaLayout.current
@@ -175,6 +180,8 @@ fun LoginContent(
                         onLogin = onLogin,
                         offlineIsAvailable = offlineIsAvailable,
                         onOfflineSelect = onOfflineSelect,
+                        localLibraryIsAvailable = localLibraryIsAvailable,
+                        onLocalLibrarySelect = onLocalLibrarySelect,
                         textFieldsModifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -208,6 +215,8 @@ fun LoginContent(
                         onLogin = onLogin,
                         offlineIsAvailable = offlineIsAvailable,
                         onOfflineSelect = onOfflineSelect,
+                        localLibraryIsAvailable = false,
+                        onLocalLibrarySelect = {},
                         textFieldsModifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -230,6 +239,8 @@ fun ColumnScope.LoginForm(
     onLogin: () -> Unit,
     offlineIsAvailable: Boolean,
     onOfflineSelect: () -> Unit,
+    localLibraryIsAvailable: Boolean,
+    onLocalLibrarySelect: () -> Unit,
     textFieldsModifier: Modifier
 ) {
 
@@ -311,6 +322,15 @@ fun ColumnScope.LoginForm(
             onClick = { onLogin() },
             modifier = Modifier.weight(1f).heightIn(min = 48.dp),
         ) { Text(stringResource(Res.string.login_login)) }
+    }
+    if (localLibraryIsAvailable) {
+        OutlinedButton(
+            onClick = onLocalLibrarySelect,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        ) {
+            Icon(Icons.Rounded.FolderOpen, contentDescription = null)
+            Text(stringResource(Res.string.login_local_library))
+        }
     }
 }
 

@@ -21,6 +21,14 @@ data class OfflineLogEntry(
     val timestamp: Instant = Clock.System.now(),
 ) {
     companion object {
+        fun operationError(operation: Operation, error: Throwable): OfflineLogEntry {
+            val errorType = error::class.simpleName ?: "Error"
+            return OfflineLogEntry(
+                message = "${operation.name}: $errorType",
+                type = Type.ERROR,
+            )
+        }
+
         internal suspend fun LogJournalRepository.logInfo(message: () -> String) {
             val entry = OfflineLogEntry(
                 message = message(),
@@ -69,6 +77,15 @@ data class OfflineLogEntry(
         DEBUG,
         INFO,
         ERROR,
+    }
+
+    enum class Operation {
+        LOGIN,
+        LOGOUT,
+        USER_SWITCH,
+        GO_ONLINE,
+        DELETE_SERVER,
+        DELETE_USER,
     }
 
 //    companion object {

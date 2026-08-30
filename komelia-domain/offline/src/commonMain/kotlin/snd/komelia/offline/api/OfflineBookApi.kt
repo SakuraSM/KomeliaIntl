@@ -16,6 +16,7 @@ import snd.komelia.offline.book.model.OfflineThumbnailBook
 import snd.komelia.offline.book.repository.OfflineBookRepository
 import snd.komelia.offline.book.repository.OfflineThumbnailBookRepository
 import snd.komelia.offline.media.model.MediaExtensionEpub
+import snd.komelia.offline.local.withLocalBookResourceUrls
 import snd.komelia.offline.media.repository.OfflineMediaRepository
 import snd.komelia.offline.mediacontainer.BookContentExtractors
 import snd.komelia.offline.readprogress.OfflineReadProgressRepository
@@ -305,9 +306,14 @@ class OfflineBookApi(
     }
 
     override suspend fun getWebPubManifest(bookId: KomgaBookId): WPPublication {
+        val book = bookRepository.get(bookId)
         val media = mediaRepository.get(bookId)
         return when (val extension = media.extension) {
-            is MediaExtensionEpub -> extension.manifest
+            is MediaExtensionEpub -> if (book.url.startsWith("local://")) {
+                extension.manifest.withLocalBookResourceUrls(bookId)
+            } else {
+                extension.manifest
+            }
             null -> throw IllegalStateException("Unsupported book type")
         }
     }

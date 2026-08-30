@@ -121,7 +121,13 @@ class ReadListViewModel(
 
     }
 
-    fun bookMenuActions() = BookMenuActions(bookApi, notifications, screenModelScope, taskEmitter)
+    fun bookMenuActions() = BookMenuActions(
+        bookApi = bookApi,
+        notifications = notifications,
+        scope = screenModelScope,
+        taskEmitter = taskEmitter,
+        onReadProgressChanged = { reload() },
+    )
 
     fun onReadListDelete() {
         notifications.runCatchingToNotifications(screenModelScope) {

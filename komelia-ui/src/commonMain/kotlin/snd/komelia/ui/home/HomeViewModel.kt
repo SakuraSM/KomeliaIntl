@@ -5,18 +5,22 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.Eagerly
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import snd.komelia.AppNotifications
@@ -32,6 +36,7 @@ import snd.komelia.ui.LoadState.Uninitialized
 import snd.komelia.ui.common.cards.defaultCardWidth
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.common.menus.SeriesMenuActions
+import snd.komelia.ui.home.edit.withLocalizedDefaultLabel
 import snd.komga.client.book.KomgaBookSearch
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.series.KomgaSeriesSearch
@@ -55,7 +60,7 @@ class HomeViewModel(
     val cardWidth = cardWidthFlow.stateIn(screenModelScope, Eagerly, defaultCardWidth.dp)
 
     private val reloadEventsEnabled = MutableStateFlow(true)
-    private val reloadJobsFlow = MutableSharedFlow<Unit>(1, 0, DROP_OLDEST)
+    private val reloadJobsFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = DROP_OLDEST)
 
     val currentFilters = MutableStateFlow(emptyList<HomeFilterData>())
     val activeFilterNumber = MutableStateFlow(0)
@@ -63,28 +68,34 @@ class HomeViewModel(
     suspend fun initialize() {
         if (state.value !is Uninitialized) return
 
-        load()
+        mutableState.value = LoadState.Loading
+        screenModelScope.launch {
+            homeConfigurationRefreshFlow(filterRepository.getFilters(), reloadJobsFlow)
+                .collectLatest(::load)
+        }
         startKomgaEventListener()
-
-        reloadJobsFlow.onEach {
-            reloadEventsEnabled.first { it }
-            load()
-            delay(5000)
-        }.launchIn(screenModelScope)
     }
 
     fun reload() {
-        screenModelScope.launch { load() }
+        reloadJobsFlow.tryEmit(Unit)
     }
 
-    private suspend fun load() {
+    private suspend fun load(filters: List<HomeScreenFilter>) {
         appNotifications.runCatchingToNotifications {
             mutableState.value = LoadState.Loading
 
-            currentFilters.value = filterRepository.getFilters().first()
-                .map { screenModelScope.async { fetchFilterData(it) } }
-                .awaitAll()
-                .filterNotNull()
+            currentFilters.value = coroutineScope {
+                orderedHomeScreenFilters(filters)
+                    .map { it.withLocalizedDefaultLabel() }
+                    .map { async { fetchFilterData(it) } }
+                    .awaitAll()
+                    .filterNotNull()
+            }
+
+            activeFilterNumber.value = reconcileActiveHomeFilter(
+                activeFilterNumber = activeFilterNumber.value,
+                filterCount = currentFilters.value.size,
+            )
 
             mutableState.value = LoadState.Success(Unit)
         }.onFailure { mutableState.value = LoadState.Error(it) }
@@ -141,7 +152,13 @@ class HomeViewModel(
     }
 
     fun seriesMenuActions() = SeriesMenuActions(seriesApi, appNotifications, taskEmitter, screenModelScope)
-    fun bookMenuActions() = BookMenuActions(bookApi, appNotifications, screenModelScope, taskEmitter)
+    fun bookMenuActions() = BookMenuActions(
+        bookApi = bookApi,
+        notifications = appNotifications,
+        scope = screenModelScope,
+        taskEmitter = taskEmitter,
+        onReadProgressChanged = { reload() },
+    )
 
     fun stopKomgaEventsHandler() {
         reloadEventsEnabled.value = false
@@ -152,16 +169,22 @@ class HomeViewModel(
     }
 
     private fun startKomgaEventListener() {
-        komgaEvents.onEach { event ->
-            when (event) {
-                is BookEvent,
-                is SeriesEvent,
-                is ReadProgressEvent,
-                is ReadProgressSeriesEvent -> reloadJobsFlow.tryEmit(Unit)
+        screenModelScope.launch {
+            komgaEvents.collect { event ->
+                when (event) {
+                    is BookEvent,
+                    is SeriesEvent,
+                    is ReadProgressEvent,
+                    is ReadProgressSeriesEvent -> {
+                        reloadEventsEnabled.first { it }
+                        reloadJobsFlow.emit(Unit)
+                        delay(5000)
+                    }
 
-                else -> {}
+                    else -> {}
+                }
             }
-        }.launchIn(screenModelScope)
+        }
     }
 
     fun onFilterChange(number: Int) {
@@ -169,3 +192,21 @@ class HomeViewModel(
     }
 
 }
+
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun <T> homeConfigurationRefreshFlow(
+    configurations: Flow<T>,
+    reloads: Flow<Unit>,
+): Flow<T> = configurations.flatMapLatest { configuration ->
+    reloads
+        .map { configuration }
+        .onStart { emit(configuration) }
+}
+
+internal fun reconcileActiveHomeFilter(
+    activeFilterNumber: Int,
+    filterCount: Int,
+): Int = activeFilterNumber.takeIf { it in 0..filterCount } ?: 0
+
+internal fun orderedHomeScreenFilters(filters: List<HomeScreenFilter>): List<HomeScreenFilter> =
+    filters.sortedBy { it.order }

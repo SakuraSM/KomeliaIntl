@@ -11,6 +11,7 @@ interface OfflineBookRepository {
     suspend fun find(id: KomgaBookId): OfflineBook?
     suspend fun exists(id: KomgaBookId): Boolean
     suspend fun findIn(ids: Collection<KomgaBookId>): List<OfflineBook>
+    suspend fun findAll(): List<OfflineBook>
 
 
     suspend fun findFirstIdInSeriesOrNull(seriesId: KomgaSeriesId): KomgaBookId?

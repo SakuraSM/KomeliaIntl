@@ -38,9 +38,10 @@ class SeriesFilterEditState(
     private val options: StateFlow<FilterSuggestionOptions>,
     val cardWidth: StateFlow<Dp>,
     initialFilter: SeriesHomeScreenFilter?,
-    initialSeries: List<KomgaSeries>?
+    initialSeries: List<KomgaSeries>?,
+    newFilterLabel: String? = null,
 ) : FilterEditState {
-    override val label = MutableStateFlow(initialFilter?.label ?: "Series Filter")
+    override val label = MutableStateFlow(initialFilter?.label ?: requireNotNull(newFilterLabel))
 
     val filter: MutableStateFlow<SeriesFilterStateType> = MutableStateFlow(
         initialFilter?.let { initial ->

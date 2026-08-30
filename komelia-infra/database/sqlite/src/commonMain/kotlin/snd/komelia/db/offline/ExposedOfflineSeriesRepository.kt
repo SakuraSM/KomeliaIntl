@@ -48,6 +48,12 @@ class ExposedOfflineSeriesRepository(database: Database) : ExposedRepository(dat
         }
     }
 
+    override suspend fun findAll(): List<OfflineSeries> {
+        return transaction {
+            seriesTable.selectAll().map { it.toModel() }
+        }
+    }
+
     override suspend fun findAllByLibraryId(libraryId: KomgaLibraryId): List<OfflineSeries> {
         return transaction {
             seriesTable.selectAll()

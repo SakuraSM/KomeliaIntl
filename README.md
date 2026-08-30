@@ -1,97 +1,129 @@
-# Komelia Intl - Komga media client
+# Komelia Intl
 
 [English](README.md) | [简体中文](README_zh-CN.md)
 
-This repository modifies [Snd-R/Komelia](https://github.com/Snd-R/Komelia). It keeps the upstream Komga client and adds Simplified Chinese localization, adaptive navigation, a mobile UI overhaul, reader interaction fixes, and builds for each supported platform.
+[![Latest release](https://img.shields.io/github/v/release/SakuraSM/KomeliaIntl?display_name=tag&sort=semver)](https://github.com/SakuraSM/KomeliaIntl/releases/latest)
+[![License](https://img.shields.io/github/license/SakuraSM/KomeliaIntl)](LICENSE)
 
-## Changes in this fork
+Komelia Intl is the `SakuraSM/KomeliaIntl` fork of [Komelia](https://github.com/Snd-R/Komelia), a cross-platform client for a [Komga](https://komga.org/) media server. It adds Simplified Chinese localization, an adaptive interface, reader fixes, and fork-specific release support.
 
-- Replaces the global drawer with bottom navigation on phones and a Navigation Rail on wider windows. Each destination keeps its navigation and scroll state.
-- Uses one layout, spacing, color, shape, and motion system across Light, Dark, and OLED themes. Reduced motion, keyboard focus, and back navigation are supported.
-- Redesigns Home groups, Library scope selection, filters, search, Settings, series details, and book details. Home shows the groups that fit and moves the rest into More.
-- Keeps cover cards aligned with fixed title slots for one-line and two-line titles.
-- Refines image and EPUB reader controls. Reader chrome hides automatically, and progress dragging does not trigger page turns.
-- Adds Simplified Chinese to the Compose app, Android system screens, and the EPUB reader. Users can select System, English, or Simplified Chinese in the app.
-- Keeps offline PDF, RAR, and EPUB support, page retry, LAN address switching, and existing database migrations.
-- Publishes a universal Android APK, Windows MSI, Linux DEB, macOS ARM64 DMG/JAR, and Wasm WebUI.
-- Includes an in-progress native HarmonyOS 6+ client written with ArkTS/ArkUI. It uses native Network Kit, Asset Store, Core File Kit, Image Kit, and Reader Kit instead of an APK compatibility layer or ArkWeb wrapper.
+Komga-backed features need a reachable Komga server and account. Android and desktop can also start in local-library mode without a server and index supported books from a folder on the device.
 
-## Downloads
+## Core changes in this fork
 
-- Fork releases: <https://github.com/SakuraSM/KomeliaIntl/releases/latest>
-- Upstream releases: <https://github.com/Snd-R/Komelia/releases>
-- Upstream Google Play: <https://play.google.com/store/apps/details?id=io.github.snd_r.komelia>
-- Upstream F-Droid: <https://f-droid.org/packages/io.github.snd_r.komelia/>
-- Upstream AUR: <https://aur.archlinux.org/packages/komelia>
+### UI redesign
 
-## App screenshots
+The fork reworks navigation, Home groups, Library filters, search, Settings, and detail pages for phones and wide screens. Light, Dark, and OLED themes share the same spacing, color, shape, and motion rules. The UI also supports reduced motion and keyboard focus.
 
-<img src="/screenshots/app-overview-v0.18.13.png" alt="Komelia Android Home, Library filters, book details, and Settings" width="100%">
+### Automatic remote and LAN switching
 
-> These screenshots come from the Android app. The resource filename and source domains in the book details screen are redacted. The montage contains no account, server address, or test credentials.
+You can configure a primary remote URL and an optional LAN URL. When automatic switching is enabled, Komelia probes the LAN address and uses it when reachable. Otherwise, it keeps the primary remote address. Android checks again when network connectivity changes.
 
-## Translations
-You can help translate this project to your language by using service provided by [Weblate](https://hosted.weblate.org/engage/komelia/)
+### Local downloads and offline reading
 
-[![Translation status](https://hosted.weblate.org/widget/komelia/horizontal-auto.svg)](https://hosted.weblate.org/engage/komelia/)
+On supported native targets, you can download books, browse the local cache by series, book, or media type, and remove cached items. Downloaded CBZ, CBR, PDF, and EPUB files remain available in Offline mode.
 
-## Build instructions
-Make sure you download all git submodules\
-`git clone --recurse-submodules https://github.com/Snd-R/Komelia` \
-if you already cloned repository without recurse command run\
-`git submodule update --init --recursive`
+### Local folder libraries
 
-Requires jdk 17 or higher\
-Android and JVM targets require C and C++ compiler for native libraries and Node.js for epub readers build.\
-Recommended way to build is by using docker images that contain all required build dependencies.\
-If you want to build with system toolchain and dependencies try running:\
-`./gradlew komeliaBuildNonJvmDependencies` (Linux Only)
+Android and desktop can add a local folder without signing in to Komga. Komelia indexes supported files recursively, groups books by their parent folder, keeps the folder permission across restarts, and detects additions and removals on startup or during the scheduled scan. Android supports CBZ/ZIP, CBR/RAR, EPUB, and PDF; desktop currently supports CBZ/ZIP, CBR/RAR, and EPUB. Source files stay in place and are never deleted by removing a local library from Komelia. Browser/Wasm builds do not provide persistent folder libraries.
 
-## Desktop App
-Replace <*platform*> placeholder with your target platform. \
-Available platforms include: `linux-x86_64`, `windows-x86_64`
+## Other changes
 
-- `docker build -t komelia-build-<platfrom> . -f ./cmake/<paltform>.Dockerfile `
-- `docker run -v .:/build komelia-build-<paltform>`
-- `./gradlew <platform>_copyJniLibs`
-- `./gradlew buildEpubReaders`
+- Adds in-app language selection for System, English, and Simplified Chinese. The Compose app, Android system pages, and EPUB controls use the selected language.
+- Refines image and EPUB reader controls, page retry, progress dragging, and Back behavior.
+- Uses this repository for app updates and shows announcements from both this fork and upstream Komelia.
+- Includes an in-progress native HarmonyOS 6+ client written with ArkTS and ArkUI. It uses HarmonyOS platform services instead of an APK compatibility layer or an ArkWeb wrapper.
 
-Then choose your packaging option:
-- `./gradlew :desktopRun` to launch desktop app
-- `./gradlew :desktopJar` output in `./komelia-app/desktopApp/build/compose/jars`
-- `./gradlew :desktopDeb` output in `./komelia-app/desktopApp/build/compose/binaries`
-- `./gradlew :desktopMsi` output in `./komelia-app/desktopApp/build/compose/binaries`
-- `./gradlew :desktopDmg` output in `./komelia-app/desktopApp/build/compose/binaries`
+## What you can do
 
-## Android App
-Replace <*arch*> placeholder with your target architecture.\
-Available architectures include:  `aarch64`, `armv7a`, `x86_64`, `x86`
+- Browse libraries, collections, and read lists. Search and filter series and books.
+- Read CBZ, CBR, PDF, and EPUB files with the built-in image and EPUB readers.
+- Edit series and book metadata. Connect to Komf for supported metadata workflows.
 
-- `docker build -t komelia-build-android . -f ./cmake/android.Dockerfile `
-- `docker run -v .:/build komelia-build-android <arch>`
-- `./gradlew <arch>_copyJniLibs`
-- `./gradlew buildEpubReaders`
+## Maintenance
 
-Then choose app build option:
+I maintain this repository independently. I track upstream Komelia and aim to ship an iteration about once a week. The schedule may shift based on upstream changes, test results, and available time. Thanks for using Komelia Intl.
 
-- `./gradlew :androidDebug` output in `./komelia-app/androidApp/build/outputs/apk/debug`
-- `./gradlew :androidRelease` output in `./komelia-app/androidApp/build/outputs/apk/release`
+## Supported targets
 
-## HarmonyOS App (native preview)
+The source tree contains these build targets. A GitHub Release can contain only the platforms built for that version, so use its **Assets** list as the source of truth.
+
+| Target | Gradle task | Typical package |
+|---|---|---|
+| Android | `androidRelease` | APK |
+| Windows x86_64 | `desktopMsi` | MSI |
+| Linux x86_64 | `desktopDeb` | DEB |
+| macOS | `desktopDmg` | DMG |
+| Desktop on the current OS | `desktopJar` | JAR |
+| Browser, WebAssembly | `komfWebUI` | Static web files |
+| Komf extension for Chrome | `komfExtensionChrome` | ZIP |
+| Komf extension for Firefox | `komfExtensionFirefox` | ZIP |
+| HarmonyOS 6+ preview | `harmonyDebug` | HAP |
+
+### HarmonyOS native preview
 
 The HarmonyOS client is a separate DevEco project under `komelia-app/harmonyApp`. It targets HarmonyOS 6 / API 20 while retaining API 16 compatibility. Install DevEco Studio 6.1.1 or newer with the matching HarmonyOS SDK and configure a signing profile first.
 
-- `./gradlew :harmonyDebug` builds the debug HAP.
-- `./gradlew :harmonyRelease` builds the signed release HAP.
-- `./gradlew :harmonyDeviceRun` builds, installs, and launches the app on a connected HarmonyOS device.
+- `./gradlew harmonyDebug` builds the debug HAP.
+- `./gradlew harmonyRelease` builds the signed release HAP when signing is configured.
+- `./gradlew harmonyDeviceRun` builds, installs, and launches the app on a connected HarmonyOS device.
 
-The preview implements encrypted Komga sign-in, adaptive phone/tablet navigation, home/library/search, series and book details, native image/PDF page reading, and Reader Kit EPUB rendering. Offline download management, complete Readium locator synchronization, and AppGallery release validation remain gated until real-device QA is complete. See [`komelia-app/harmonyApp/README.md`](komelia-app/harmonyApp/README.md).
+The native client currently covers Komga sign-in, adaptive navigation, catalog and detail flows, image/PDF reading, EPUB integration, offline state, and management surfaces. Signed physical-device validation and AppGallery release checks remain in progress. See [`komelia-app/harmonyApp/README.md`](komelia-app/harmonyApp/README.md) for the verified scope and current limitations.
 
+## Download the app
 
-## Komf Wasm WebUI
-run `./gradlew :komfWebUI` output will be in `./build/komf-webui`
+- [Latest Komelia Intl Release](https://github.com/SakuraSM/KomeliaIntl/releases/latest)
+- [All Komelia Intl Releases](https://github.com/SakuraSM/KomeliaIntl/releases)
 
-## Komf Wasm Extension
-for chrome `./gradlew :komfExtensionChrome` \
-for firefox `./gradlew :komfExtensionFirefox` \
-output archive will be in `./komelia-komf-extension/app/build/distributions`
+The standalone Android build uses the package ID `io.github.zhengningning.komelia` and this repository's signing certificate. Android cannot update an installation signed by another distributor. If Android reports a signature conflict, uninstall the other build first or keep using the same distribution channel.
+
+The [upstream Releases](https://github.com/Snd-R/Komelia/releases), [Google Play package](https://play.google.com/store/apps/details?id=io.github.snd_r.komelia), [F-Droid package](https://f-droid.org/packages/io.github.snd_r.komelia/), and [AUR package](https://aur.archlinux.org/packages/komelia) contain upstream Komelia, not this fork's changes.
+
+## Android UI preview
+
+<img src="screenshots/app-overview-v0.18.13.png" alt="Komelia Android Home, Library filters, book details, and Settings" width="100%">
+
+The montage uses test content. The resource filename and source domain are redacted. It contains no account, server address, or test credentials.
+
+## Build from source
+
+Release workflows use JDK 21 and Node.js 24. The local `.node-version` currently declares Node.js 20; the [Harness scorecard](docs/harness/scorecard.md) records this toolchain split until the repository adopts one declaration. Android and desktop packages also need the platform's native image and WebView libraries. The files under `cmake/` build those dependencies with Docker for supported targets.
+
+Clone this fork with its submodules:
+
+```shell
+git clone --recurse-submodules https://github.com/SakuraSM/KomeliaIntl.git
+cd KomeliaIntl
+```
+
+If you already cloned the repository, initialize the submodules before building:
+
+```shell
+git submodule update --init --recursive
+```
+
+Build the EPUB reader resources before packaging an app:
+
+```shell
+./gradlew buildEpubReaders
+```
+
+Use the root build aliases for common targets:
+
+```shell
+./gradlew androidDebug
+./gradlew desktopJar
+./gradlew komfWebUI
+```
+
+The outputs are under the corresponding module's `build/` directory. For release packaging and native dependency commands, follow [the desktop Release workflow](.github/workflows/release-desktop.yml) and [the engineering harness](docs/harness/README.md).
+
+## Contribute
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Translation changes also use the [Simplified Chinese contribution guide](docs/i18n/CONTRIBUTING_zh-CN.md) and [glossary](docs/i18n/glossary_zh-CN.md).
+
+Report bugs and request changes in [GitHub Issues](https://github.com/SakuraSM/KomeliaIntl/issues). Do not include credentials, private server addresses, or unredacted library content.
+
+## License and upstream
+
+Komelia Intl is available under the [Apache License 2.0](LICENSE). The project is based on [Snd-R/Komelia](https://github.com/Snd-R/Komelia); upstream and fork changes keep their respective copyright notices.

@@ -1,98 +1,117 @@
-# Komelia 中文增强版
+# Komelia Intl
 
 [English](README.md) | [简体中文](README_zh-CN.md)
 
-本仓库基于 [Snd-R/Komelia](https://github.com/Snd-R/Komelia) 修改。项目保留原版 Komga 客户端能力，并补充中文界面、自适应导航、移动端 UI、阅读器交互和多平台发布。
+[![最新版本](https://img.shields.io/github/v/release/SakuraSM/KomeliaIntl?display_name=tag&sort=semver)](https://github.com/SakuraSM/KomeliaIntl/releases/latest)
+[![许可证](https://img.shields.io/github/license/SakuraSM/KomeliaIntl)](LICENSE)
 
-Komelia 是 [Komga](https://komga.org/) 媒体服务器的跨平台客户端，支持桌面（Linux / Windows / macOS）、Android 与浏览器（WebAssembly），主要用于阅读漫画与电子书。
+Komelia Intl 是 [Komelia](https://github.com/Snd-R/Komelia) 的 `SakuraSM/KomeliaIntl` 分支版本。Komelia 是 [Komga](https://komga.org/) 媒体服务器的跨平台客户端。本仓库增加了简体中文、自适应界面、阅读器问题修复和独立发布支持。
 
-## 本仓库的改动
+使用 Komga 相关功能时，你需要一个可以访问的 Komga 服务器和 Komga 账号。Android 与桌面端也可不连接服务器，直接进入本地书库模式并索引设备文件夹中的受支持书籍。
 
-- 使用底部导航和 Navigation Rail 替代全局抽屉。手机、平板和桌面按窗口宽度切换导航方式，并保留各页面的浏览状态。
-- 统一 Light、Dark、OLED 三种主题的颜色、圆角、间距、触控目标和动效。页面支持 reduced motion，并改善键盘焦点与返回逻辑。
-- 重做首页分组、书库范围选择、筛选、搜索、设置、系列详情和书籍详情。首页标签在可用宽度内显示，其余分组进入“更多”。
-- 调整封面卡片的固定标题槽位。单行和双行标题保持同排等高，状态信息改为轻量角标。
-- 优化图片和 EPUB 阅读器控制栏。阅读控件自动隐藏，拖动进度后不会误触翻页或工具栏。
-- 补充主应用、Android 系统页面和 EPUB 阅读器的简体中文。应用内可选择跟随系统、English 或简体中文。
-- 保留离线 PDF、RAR、EPUB、页面重试、局域网地址切换和数据库迁移兼容。
-- 发布 Android 通用 APK、Windows MSI、Linux DEB、macOS ARM64 DMG/JAR 和 Wasm WebUI。
+## 本仓库的重要改动
 
-## 下载
+### UI 优化
 
-- 本仓库发布页：<https://github.com/SakuraSM/KomeliaIntl/releases>
-- 最新版本：<https://github.com/SakuraSM/KomeliaIntl/releases/latest>
-- 官方上游发布页：<https://github.com/Snd-R/Komelia/releases>
-- 官方 Google Play：<https://play.google.com/store/apps/details?id=io.github.snd_r.komelia>
-- 官方 F-Droid：<https://f-droid.org/packages/io.github.snd_r.komelia/>
-- 官方 AUR：<https://aur.archlinux.org/packages/komelia>
+本仓库重新设计了一级导航、首页分组、书库筛选、搜索、设置和详情页，使其适配手机与宽屏。Light、Dark 和 OLED 主题共用间距、颜色、圆角与动效规则，界面同时支持 reduced motion 和键盘焦点。
 
-> 本 fork 与官方应用的包名或签名证书可能不同。如果 Android 安装时提示签名不一致，请先卸载旧包，或安装同一发布渠道的包。
+### 远程与本地网络动态切换
 
-## App 截图
+你可以配置主要远程地址和可选的局域网地址。启用自动切换后，Komelia 会检测局域网地址。局域网可用时优先连接，不可用时继续使用主要远程地址。Android 会在网络状态变化后重新检测。
 
-<img src="/screenshots/app-overview-v0.18.13.png" alt="Komelia Android 首页、书库筛选、书籍详情和设置页面" width="100%">
+### 本地下载与离线阅读
 
-> 截图来自 Android App。书籍详情中的资源文件名和来源域名已打码，截图不包含账号、服务器地址或测试凭据。
+在受支持的原生平台，你可以下载书籍，按系列、书籍或媒体类型查看本地缓存，并删除缓存内容。下载后的 CBZ、CBR、PDF 和 EPUB 文件可在离线模式中继续阅读。
 
-## 语言切换
+### 本地文件夹书库
 
-应用默认跟随系统语言，也可在 **设置 → 外观 → 语言 / Language** 中手动选择。当前内置选项：
+Android 与桌面端无需登录 Komga 即可添加本地文件夹。Komelia 会递归索引受支持的文件，按父目录生成系列，重启后继续保留目录权限，并在应用启动或定时扫描时发现新增与删除的书籍。Android 支持 CBZ/ZIP、CBR/RAR、EPUB 和 PDF；桌面端当前支持 CBZ/ZIP、CBR/RAR 和 EPUB。书籍仍保存在原目录，从 Komelia 移除本地书库不会删除源文件。浏览器/Wasm 版本暂不提供持久化文件夹书库。
 
-- 跟随系统
-- English
-- 简体中文 (Simplified Chinese)
+## 其他改动
 
-如需贡献其它语言或改进现有翻译，请参阅 [`docs/i18n/CONTRIBUTING_zh-CN.md`](docs/i18n/CONTRIBUTING_zh-CN.md) 与术语表 [`docs/i18n/glossary_zh-CN.md`](docs/i18n/glossary_zh-CN.md)。
+- 增加跟随系统、English 和简体中文三种应用内语言选项。Compose 界面、Android 系统页面和 EPUB 控件会使用所选语言。
+- 修复图片与 EPUB 阅读器的控制栏、页面重试、进度拖动和返回行为。
+- 应用更新使用本仓库的 Release，并同时展示本仓库和上游 Komelia 的公告。
 
-## 原生库构建说明
+## 主要功能
 
-Android 与 JVM 目标需要 C/C++ 编译器以构建原生库；EPUB 阅读器还需要 Node.js。
+- 浏览书库、合集和阅读列表，搜索并筛选系列与书籍。
+- 使用内置图片阅读器和 EPUB 阅读器打开 CBZ、CBR、PDF 与 EPUB 文件。
+- 编辑系列和书籍元数据，并通过 Komf 完成受支持的元数据处理。
 
-推荐使用包含全部构建依赖的 Docker 镜像构建原生库。
-若希望直接使用系统工具链与依赖，可尝试运行（仅限 Linux）：
+## 维护说明
 
-```
-./gradlew komeliaBuildNonJvmDependencies
-```
+本项目由我个人独立维护。我会持续跟进并同步上游 Komelia 的改动，以约一周一个迭代为目标。迭代时间会根据上游改动规模、测试结果和个人时间调整。感谢使用 Komelia Intl。
 
-## 桌面端构建
+## 支持的平台
 
-需要 JDK 17 或更高版本。
+源码包含下列构建目标。每个 GitHub Release 只会附带该版本实际构建的平台，请以 Release 页的 **Assets** 列表为准。
 
-使用 Docker 容器构建（将 `<platform>` 占位符替换为目标平台，可选 `linux-x86_64`、`windows-x86_64`）：
+| 平台 | Gradle 任务 | 常见产物 |
+|---|---|---|
+| Android | `androidRelease` | APK |
+| Windows x86_64 | `desktopMsi` | MSI |
+| Linux x86_64 | `desktopDeb` | DEB |
+| macOS | `desktopDmg` | DMG |
+| 当前操作系统的桌面端 | `desktopJar` | JAR |
+| 浏览器、WebAssembly | `komfWebUI` | 静态网页文件 |
+| Chrome 版 Komf 扩展 | `komfExtensionChrome` | ZIP |
+| Firefox 版 Komf 扩展 | `komfExtensionFirefox` | ZIP |
 
-- `docker build -t komelia-build-<platform> . -f ./cmake/<platform>.Dockerfile`
-- `docker run -v .:/build komelia-build-<platform>`
-- `./gradlew <platform>_copyJniLibs`：将构建好的共享库复制到将随应用一起打包的资源目录
-- `./gradlew buildWebui`：构建并复制 EPUB 阅读器 webui（构建需要 npm）
+## 下载应用
 
-随后选择打包方式：
+- [下载 Komelia Intl 最新版本](https://github.com/SakuraSM/KomeliaIntl/releases/latest)
+- [查看 Komelia Intl 全部版本](https://github.com/SakuraSM/KomeliaIntl/releases)
 
-- `./gradlew :desktopRun`：启动桌面应用
-- `./gradlew :desktopJar`：打包为 jar（输出于 `komelia-app/desktopApp/build/compose/jars`）
-- `./gradlew :desktopDeb`：打包为 Linux deb（输出于 `komelia-app/desktopApp/build/compose/binaries`）
-- `./gradlew :desktopMsi`：打包为 Windows msi 安装包（输出于 `komelia-app/desktopApp/build/compose/binaries`）
-- `./gradlew :desktopDmg`：打包为 macOS dmg 安装包（输出于 `komelia-app/desktopApp/build/compose/binaries`）
+本仓库的独立 Android 版本使用包名 `io.github.zhengningning.komelia` 和本仓库的签名证书。Android 无法直接覆盖由其他发布者签名的安装包。如果安装时提示签名冲突，请先卸载其他版本，或继续使用原来的发布渠道。
 
-## Android 端构建
+[上游 Releases](https://github.com/Snd-R/Komelia/releases)、[Google Play 版本](https://play.google.com/store/apps/details?id=io.github.snd_r.komelia)、[F-Droid 版本](https://f-droid.org/packages/io.github.snd_r.komelia/)和 [AUR 版本](https://aur.archlinux.org/packages/komelia)均为上游 Komelia，不包含本仓库的改动。
 
-使用 Docker 容器构建（将 `<arch>` 占位符替换为目标架构，可选 `aarch64`、`armv7a`、`x86_64`、`x86`）：
+## Android 界面预览
 
-- `docker build -t komelia-build-android . -f ./cmake/android.Dockerfile`
-- `docker run -v .:/build komelia-build-android <arch>`
-- `./gradlew <arch>_copyJniLibs`：将构建好的共享库复制到将随应用一起打包的资源目录
-- `./gradlew buildWebui`：构建并复制 EPUB 阅读器 webui（构建需要 npm）
+<img src="screenshots/app-overview-v0.18.13.png" alt="Komelia Android 首页、书库筛选、书籍详情和设置页面" width="100%">
 
-随后选择构建选项：
+拼图使用测试内容。资源文件名和来源域名已经打码，其中不包含账号、服务器地址或测试凭据。
 
-- `./gradlew androidDebug`：debug APK 构建（输出于 `komelia-app/androidApp/build/outputs/apk/debug`）
-- `./gradlew androidRelease`：release APK 构建（输出于 `komelia-app/androidApp/build/outputs/apk/release`）
-- `./scripts/build-release.sh`：本 fork 的 Android release 辅助脚本，本地签名配置完成后可用于构建并整理发布产物
+## 从源码构建
 
-## Komf 扩展构建
+Release 工作流使用 JDK 21 和 Node.js 24；本地 `.node-version` 当前声明 Node.js 20。在仓库统一版本前，请以 [Harness 评分表](docs/harness/scorecard.md)记录的工具链差异为准。Android 和桌面安装包还需要对应平台的原生图片库与 WebView 库。`cmake/` 目录提供了部分目标平台的 Docker 构建文件。
 
-```
-./gradlew :komelia-komf-extension:app:packageExtension
+克隆本仓库并初始化子模块：
+
+```shell
+git clone --recurse-submodules https://github.com/SakuraSM/KomeliaIntl.git
+cd KomeliaIntl
 ```
 
-输出归档位于 `./komelia-komf-extension/app/build/distributions`。
+如果已经克隆仓库，请先初始化子模块：
+
+```shell
+git submodule update --init --recursive
+```
+
+打包应用前先构建 EPUB 阅读器资源：
+
+```shell
+./gradlew buildEpubReaders
+```
+
+常用目标使用根项目的构建别名：
+
+```shell
+./gradlew androidDebug
+./gradlew desktopJar
+./gradlew komfWebUI
+```
+
+产物位于对应模块的 `build/` 目录。发布安装包和原生依赖的完整命令请参考[桌面端 Release 工作流](.github/workflows/release-desktop.yml)和[工程 Harness](docs/harness/README.md)。
+
+## 参与贡献
+
+提交 Pull Request 前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。翻译改动还需要遵循[简体中文贡献指南](docs/i18n/CONTRIBUTING_zh-CN.md)和[术语表](docs/i18n/glossary_zh-CN.md)。
+
+请在 [GitHub Issues](https://github.com/SakuraSM/KomeliaIntl/issues) 报告问题或提出需求。请勿提交凭据、私有服务器地址或未打码的书库内容。
+
+## 许可证与上游
+
+Komelia Intl 使用 [Apache License 2.0](LICENSE)。本项目基于 [Snd-R/Komelia](https://github.com/Snd-R/Komelia)，上游与本仓库的改动分别保留各自的版权声明。

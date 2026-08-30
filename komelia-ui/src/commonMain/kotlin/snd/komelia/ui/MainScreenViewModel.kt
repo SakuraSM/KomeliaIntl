@@ -62,8 +62,7 @@ class MainScreenViewModel(
         screenModelScope.launch {
             requireNotNull(offlineSettingsRepository).putOfflineMode(false)
 
-            val rootNavigator = navigator.parent ?: return@launch
-            rootNavigator.replaceAll(LoginScreen())
+            navigator.appRootNavigator().replaceAll(LoginScreen())
         }
     }
 

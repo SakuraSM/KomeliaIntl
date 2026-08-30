@@ -54,10 +54,13 @@ import snd.komelia.offline.library.actions.LibraryPatchAction
 import snd.komelia.offline.library.actions.LibraryRefreshMetadataAction
 import snd.komelia.offline.library.actions.LibraryScanAction
 import snd.komelia.offline.library.repository.OfflineLibraryRepository
+import snd.komelia.offline.local.LocalLibraryManager
+import snd.komelia.offline.local.createLocalLibraryPlatform
 import snd.komelia.offline.media.repository.OfflineMediaRepository
 import snd.komelia.offline.mediacontainer.BookContentExtractors
 import snd.komelia.offline.mediacontainer.DivinaExtractor
 import snd.komelia.offline.mediacontainer.EpubExtractor
+import snd.komelia.offline.mediacontainer.PdfExtractor
 import snd.komelia.offline.readprogress.OfflineReadProgressRepository
 import snd.komelia.offline.readprogress.actions.ProgressCompleteForBookAction
 import snd.komelia.offline.readprogress.actions.ProgressCompleteForSeriesAction
@@ -160,6 +163,7 @@ abstract class OfflineModule(
         val downloadService = BookDownloadService(
             libraryDownloadPath = repositories.offlineSettingsRepository.getDownloadDirectory(),
             bookClient = komgaClientFactory.bookClient(),
+            downloadClient = komgaClientFactory.ktor(),
             seriesClient = komgaClientFactory.seriesClient(),
             libraryClient = komgaClientFactory.libraryClient(),
             userClient = komgaClientFactory.userClient(),
@@ -182,7 +186,18 @@ abstract class OfflineModule(
             logJournalRepository = repositories.logJournalRepository,
             events = bookDownloadEvents
         )
-        val fileService = BookContentExtractors(createDivinaExtractors(), createEpubExtractor())
+        val fileService = BookContentExtractors(
+            divinaExtractors = createDivinaExtractors(),
+            epubExtractor = createEpubExtractor(),
+            pdfExtractor = createPdfExtractor(),
+        )
+        val localLibraryManager = createLocalLibraryPlatform()?.let { platform ->
+            LocalLibraryManager(
+                repositories = repositories,
+                platform = platform,
+                scope = moduleScope,
+            ).also { it.startScheduledScanning() }
+        }
 
         val offlineServerFlow = offlineUserId
             .map { repositories.mediaServerRepository.findByUserId(it) }
@@ -276,7 +291,8 @@ abstract class OfflineModule(
             downloadService = downloadService,
             repositories = repositories,
             fileService = fileService,
-            komgaApi = komgaApi
+            komgaApi = komgaApi,
+            localLibraryManager = localLibraryManager,
         )
     }
 
@@ -480,6 +496,7 @@ abstract class OfflineModule(
 
     protected abstract fun createDivinaExtractors(): List<DivinaExtractor>
     protected abstract fun createEpubExtractor(): EpubExtractor?
+    protected abstract fun createPdfExtractor(): PdfExtractor?
     protected abstract fun createPlatformDownloadManager(
         downloadService: BookDownloadService,
         logJournalRepository: LogJournalRepository,

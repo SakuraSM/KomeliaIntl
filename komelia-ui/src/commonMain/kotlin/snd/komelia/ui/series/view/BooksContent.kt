@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,7 +40,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,7 +55,6 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_sel
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_books_count
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_no_books
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
@@ -105,7 +102,6 @@ fun LazyGridScope.SeriesBooksContent(
     onBookSelect: (KomeliaBook) -> Unit,
     booksFilterState: BooksFilterState,
     bookContextMenuActions: BookMenuActions,
-    scrollState: LazyGridState,
 ) {
     if (booksLoadState is LoadState.Success<BooksData>) {
         val booksState = booksLoadState.value
@@ -136,16 +132,10 @@ fun LazyGridScope.SeriesBooksContent(
 
         if (!booksState.selectionMode) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                val coroutineScope = rememberCoroutineScope()
                 Pagination(
                     totalPages = booksState.totalPages,
                     currentPage = booksState.currentPage,
-                    onPageChange = {
-                        coroutineScope.launch {
-                            scrollState.scrollToItem(scrollState.layoutInfo.totalItemsCount - (booksState.books.size + 2))
-                            onPageChange(it)
-                        }
-                    },
+                    onPageChange = onPageChange,
                     modifier = Modifier.fillMaxSize()
                 )
             }

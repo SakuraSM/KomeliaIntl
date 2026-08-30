@@ -34,9 +34,7 @@ import snd.komelia.ui.common.components.SettingsSection
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.settings.SettingsScreenContainer
 import snd.komelia.updates.AppVersion
-
-private const val PROJECT_REPOSITORY_URL = "https://github.com/SakuraSM/KomeliaIntl"
-private const val UPSTREAM_REPOSITORY_URL = "https://github.com/Snd-R/Komelia"
+import snd.komelia.updates.AppProjectMetadata
 
 class AboutSettingsScreen : Screen {
     @Composable
@@ -70,13 +68,13 @@ class AboutSettingsScreen : Screen {
             SettingsSection(title = stringResource(Res.string.settings_about_source_code)) {
                 AboutRepositoryRow(
                     title = stringResource(Res.string.settings_about_project_repository),
-                    url = PROJECT_REPOSITORY_URL,
-                    onClick = { uriHandler.openUri(PROJECT_REPOSITORY_URL) },
+                    url = AppProjectMetadata.projectRepositoryUrl,
+                    onClick = { uriHandler.openUri(AppProjectMetadata.projectRepositoryUrl) },
                 )
                 AboutRepositoryRow(
                     title = stringResource(Res.string.settings_about_upstream_repository),
-                    url = UPSTREAM_REPOSITORY_URL,
-                    onClick = { uriHandler.openUri(UPSTREAM_REPOSITORY_URL) },
+                    url = AppProjectMetadata.upstreamRepositoryUrl,
+                    onClick = { uriHandler.openUri(AppProjectMetadata.upstreamRepositoryUrl) },
                 )
             }
         }

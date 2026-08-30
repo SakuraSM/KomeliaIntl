@@ -47,7 +47,6 @@ import snd.komelia.ui.dialogs.update.UpdateDialog
 import snd.komelia.ui.dialogs.update.UpdateProgressDialog
 import snd.komelia.ui.komf.KomfMainScreen
 import snd.komelia.ui.login.LoginScreen
-import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.ConfigurePlatformTheme
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.PlatformType
@@ -136,8 +135,6 @@ fun MainView(
                     StartupUpdateChecker(updateChecker)
                 }
             }
-
-            BackPressHandler {}
         }
         }
     }
@@ -157,7 +154,9 @@ private fun MainContent(
 
     Navigator(
         screen = loginScreen,
-        disposeBehavior = NavigatorDisposeBehavior(disposeNestedNavigators = false),
+        // Authentication replacement must dispose the previous tab navigators. Keeping them
+        // alive creates nested MainScreen instances after repeated login/logout cycles.
+        disposeBehavior = NavigatorDisposeBehavior(disposeNestedNavigators = true),
         onBackPressed = null
     ) { navigator ->
         var canProceed by remember { mutableStateOf(komgaSharedState.authenticationState.value == Loaded) }

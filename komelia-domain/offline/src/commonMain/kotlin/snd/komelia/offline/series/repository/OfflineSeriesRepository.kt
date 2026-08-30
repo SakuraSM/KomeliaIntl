@@ -9,6 +9,7 @@ interface OfflineSeriesRepository {
 
     suspend fun get(id: KomgaSeriesId): OfflineSeries
     suspend fun find(id: KomgaSeriesId): OfflineSeries?
+    suspend fun findAll(): List<OfflineSeries>
     suspend fun findAllByLibraryId(libraryId: KomgaLibraryId): List<OfflineSeries>
     suspend fun delete(id: KomgaSeriesId)
     suspend fun delete(seriesids: List<KomgaSeriesId>)

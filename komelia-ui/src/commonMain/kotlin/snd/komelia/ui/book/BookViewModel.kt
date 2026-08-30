@@ -70,7 +70,13 @@ class BookViewModel(
     val cardWidth = settingsRepository.getCardWidth().map { it.dp }
         .stateIn(screenModelScope, Eagerly, defaultCardWidth.dp)
 
-    val bookMenuActions = BookMenuActions(bookApi, notifications, screenModelScope, taskEmitter)
+    val bookMenuActions = BookMenuActions(
+        bookApi = bookApi,
+        notifications = notifications,
+        scope = screenModelScope,
+        taskEmitter = taskEmitter,
+        onReadProgressChanged = { reload() },
+    )
 
     suspend fun initialize() {
         if (state.value != Uninitialized) return

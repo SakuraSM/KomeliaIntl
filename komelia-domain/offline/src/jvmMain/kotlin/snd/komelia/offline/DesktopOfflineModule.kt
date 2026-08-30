@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import snd.komelia.offline.mediacontainer.DivinaExtractor
 import snd.komelia.offline.mediacontainer.EpubExtractor
+import snd.komelia.offline.mediacontainer.PdfExtractor
 import snd.komelia.offline.mediacontainer.divina.DivinaZipExtractor
 import snd.komelia.offline.mediacontainer.divina.EpubZipExtractor
 import snd.komelia.offline.mediacontainer.divina.RarExtractor
@@ -38,6 +39,8 @@ class DesktopOfflineModule(
     override fun createEpubExtractor(): EpubExtractor {
         return EpubZipExtractor(zipExtractor)
     }
+
+    override fun createPdfExtractor(): PdfExtractor? = null
 
     override fun createPlatformDownloadManager(
         downloadService: BookDownloadService,

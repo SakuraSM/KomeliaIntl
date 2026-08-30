@@ -8,7 +8,11 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_new_book_group
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_new_series_group
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.LocalPlatform
@@ -50,6 +54,8 @@ private fun Screen.FilterEditScreenContent(
         val navigator = LocalNavigator.currentOrThrow
         val coroutineScope = rememberCoroutineScope()
         val platform = LocalPlatform.current
+        val newBookGroupLabel = stringResource(Res.string.home_filter_new_book_group)
+        val newSeriesGroupLabel = stringResource(Res.string.home_filter_new_series_group)
 
         fun exitEditor() {
             when {
@@ -75,11 +81,18 @@ private fun Screen.FilterEditScreenContent(
                 onExit = ::exitEditor,
                 onEditEnd = {
                     coroutineScope.launch {
-                        vm.onEditEnd()
-                        exitEditor()
+                        if (vm.onEditEnd().isSuccess) exitEditor()
                     }
                 },
-                onFilterAdd = vm::onFilterAdd,
+                onFilterAdd = { type ->
+                    vm.onFilterAdd(
+                        type = type,
+                        localizedLabel = when (type) {
+                            FilterEditViewModel.FilterType.Book -> newBookGroupLabel
+                            FilterEditViewModel.FilterType.Series -> newSeriesGroupLabel
+                        },
+                    )
+                },
                 onFilterRemove = vm::onFilterRemove,
                 onFiltersReset = vm::onResetFiltersToDefault
             )

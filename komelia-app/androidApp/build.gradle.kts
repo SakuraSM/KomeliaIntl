@@ -89,7 +89,7 @@ android {
         applicationId = "io.github.zhengningning.komelia"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 27
+        versionCode = 37
         versionName = libs.versions.app.version.get()
 
         val enableSelfUpdates = when (androidVariant) {
@@ -149,4 +149,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
+
+tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }.configureEach {
+    dependsOn(rootProject.tasks.named("releaseVersionCheck"))
 }

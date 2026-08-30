@@ -67,7 +67,13 @@ class OneshotViewModel(
     val series = MutableStateFlow(series)
     val library = MutableStateFlow<KomgaLibrary?>(null)
     val book = MutableStateFlow(book)
-    val bookMenuActions = BookMenuActions(bookApi, notifications, screenModelScope, taskEmitter)
+    val bookMenuActions = BookMenuActions(
+        bookApi = bookApi,
+        notifications = notifications,
+        scope = screenModelScope,
+        taskEmitter = taskEmitter,
+        onReadProgressChanged = { reload() },
+    )
 
     val cardWidth = settingsRepository.getCardWidth().map { it.dp }
         .stateIn(screenModelScope, Eagerly, defaultCardWidth.dp)

@@ -33,6 +33,7 @@ import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.MainScreen
+import snd.komelia.ui.appRootNavigator
 import snd.komelia.ui.login.offline.OfflineLoginScreen
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.PlatformType.DESKTOP
@@ -44,7 +45,7 @@ class LoginScreen : Screen {
 
     @Composable
     override fun Content() {
-        val rootNavigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+        val rootNavigator = LocalNavigator.currentOrThrow.appRootNavigator()
         val platform = LocalPlatform.current
         val viewModelFactory = LocalViewModelFactory.current
         val isOffline = LocalOfflineMode.current
@@ -97,7 +98,9 @@ class LoginScreen : Screen {
                 offlineIsAvailable = viewModel.offlineIsAvailable.collectAsState().value,
                 onOfflineSelect = { rootNavigator.replaceAll(OfflineLoginScreen()) },
                 canGoOfflineAsCurrentUser = viewModel.canGoOfflineAsCurrentUser.collectAsState(false).value,
-                goOfflineAsCurrentUser = viewModel::offlineLogin
+                goOfflineAsCurrentUser = viewModel::offlineLogin,
+                localLibraryIsAvailable = viewModel.localLibraryIsAvailable,
+                onLocalLibrarySelect = viewModel::localLibraryLogin,
             )
 
             is Success -> rootNavigator.replaceAll(MainScreen())

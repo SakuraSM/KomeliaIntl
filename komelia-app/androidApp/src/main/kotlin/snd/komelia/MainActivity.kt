@@ -1,6 +1,7 @@
 package snd.komelia
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -27,12 +28,21 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import snd.komelia.ui.MainView
+import snd.komelia.ui.DependencyContainer
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.WindowSizeClass
 
 private val initScope = CoroutineScope(Dispatchers.Default)
 private val initMutex = Mutex()
 private val mainActivity = MutableStateFlow<MainActivity?>(null)
+
+internal suspend fun initializeDependencies(context: Context): DependencyContainer =
+    initMutex.withLock {
+        dependencies.value ?: AndroidAppModule(
+            context = context.applicationContext,
+            mainActivity = mainActivity,
+        ).initDependencies().also { dependencies.value = it }
+    }
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,18 +52,7 @@ class MainActivity : AppCompatActivity() {
         FileKit.init(this)
         mainActivity.value = this
 
-        initScope.launch {
-            initMutex.withLock {
-                if (dependencies.value == null) {
-                    val module = AndroidAppModule(
-                        context = applicationContext,
-                        mainActivity = mainActivity
-                    )
-                    val deps = module.initDependencies()
-                    dependencies.value = deps
-                }
-            }
-        }
+        initScope.launch { initializeDependencies(applicationContext) }
 
         enableEdgeToEdge(
             navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)

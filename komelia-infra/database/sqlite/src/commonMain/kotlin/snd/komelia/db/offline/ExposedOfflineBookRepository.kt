@@ -112,6 +112,12 @@ class ExposedOfflineBookRepository(database: Database) : OfflineBookRepository, 
         }
     }
 
+    override suspend fun findAll(): List<OfflineBook> {
+        return transaction {
+            bookTable.selectAll().map { it.toModel() }
+        }
+    }
+
     override suspend fun findFirstIdInSeriesOrNull(seriesId: KomgaSeriesId): KomgaBookId? {
         return transaction {
             bookTable

@@ -51,6 +51,7 @@ import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
 import snd.komelia.ui.platform.WindowSizeClass.MEDIUM
 import snd.komga.client.series.KomgaSeries
+import snd.komelia.offline.local.isLocalLibrary
 
 @Composable
 fun SeriesImageCard(
@@ -90,7 +91,9 @@ fun SeriesImageCard(
                     }
                 }
                 if (series.deleted || libraryIsDeleted) {
-                    CardStatusBadge(stringResource(Res.string.series_unavailable))
+                    Box(Modifier.align(Alignment.BottomStart)) {
+                        CardStatusBadge(stringResource(Res.string.series_unavailable))
+                    }
                 }
             }
         },
@@ -204,6 +207,9 @@ private fun SeriesImageOverlay(
         contentAlignment = Alignment.TopStart,
     ) {
         content()
+        if (series.libraryId.isLocalLibrary()) {
+            LocalSourceBadge(Modifier.padding(6.dp))
+        }
         if (showTitle) {
             CardGradientOverlay()
         }
@@ -287,9 +293,18 @@ fun SeriesDetailedListCard(
 
 @Composable
 private fun SeriesDetails(series: KomgaSeries) {
-    Column(Modifier.padding(start = 10.dp)) {
-        Row {
-            Text(series.metadata.title, fontWeight = FontWeight.Bold)
+    val layout = LocalKomeliaLayout.current
+    Column(Modifier.padding(start = layout.itemSpacing)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                series.metadata.title,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+            )
+            if (series.libraryId.isLocalLibrary()) LocalSourceBadge()
         }
         MetadataTagFlow(
             values = series.metadata.genres,

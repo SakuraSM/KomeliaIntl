@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,7 +33,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +61,7 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.ui.LoadState
+import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalOfflineAvailable
@@ -70,6 +74,7 @@ import snd.komelia.ui.collection.SeriesCollectionsState
 import snd.komelia.ui.common.TagList
 import snd.komelia.ui.common.components.AppFilterChipDefaults
 import snd.komelia.ui.common.components.DescriptionChips
+import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.LabeledEntry.Companion.stringEntry
 import snd.komelia.ui.common.images.SeriesThumbnail
@@ -127,24 +132,48 @@ fun SeriesContent(
         if (booksLoadState is LoadState.Success<BooksData>) booksLoadState.value
         else BooksData()
     }
+    val scrollState = rememberLazyGridState()
+    val pageNavigationState = remember(series?.id) { SeriesPageNavigationState() }
+    val isContentScrolled by remember(scrollState) {
+        derivedStateOf {
+            scrollState.firstVisibleItemIndex > 0 || scrollState.firstVisibleItemScrollOffset > 0
+        }
+    }
+
+    LaunchedEffect(booksLoadState, pageNavigationState.pendingPage) {
+        when (booksLoadState) {
+            is LoadState.Success<BooksData> -> {
+                val loadedPage = booksLoadState.value.currentPage
+                if (pageNavigationState.isRequestedPage(loadedPage)) {
+                    scrollState.scrollToItem(SERIES_BOOKS_SECTION_INDEX)
+                    pageNavigationState.onPageScrollCompleted(loadedPage)
+                }
+            }
+
+            is LoadState.Error -> pageNavigationState.onPageLoadFailed()
+            LoadState.Loading, LoadState.Uninitialized -> Unit
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (booksData.selectionMode) {
-            BooksBulkActionsToolbar(
-                onCancel = { booksState.setSelectionMode(false) },
-                books = booksData.books,
-                actions = booksState.bookBulkMenuActions(),
-                selectedBooks = booksData.selectedBooks,
-                onBookSelect = booksState::onBookSelect
-            )
-        } else SeriesToolBar(
-            series = series,
-            seriesMenuActions = seriesMenuActions,
-            onDownload = onDownload,
-            onBackPress = onBackPress,
-        )
-
-        val scrollState = rememberLazyGridState()
+        KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
+            if (booksData.selectionMode) {
+                BooksBulkActionsToolbar(
+                    onCancel = { booksState.setSelectionMode(false) },
+                    books = booksData.books,
+                    actions = booksState.bookBulkMenuActions(),
+                    selectedBooks = booksData.selectedBooks,
+                    onBookSelect = booksState::onBookSelect
+                )
+            } else {
+                SeriesToolBar(
+                    series = series,
+                    seriesMenuActions = seriesMenuActions,
+                    onDownload = onDownload,
+                    onBackPress = onBackPress,
+                )
+            }
+        }
 
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyVerticalGrid(
@@ -152,6 +181,10 @@ fun SeriesContent(
                 columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(gridMinWidth),
                 horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
                 verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                contentPadding = PaddingValues(
+                    top = layout.topBarContentSpacing,
+                    bottom = layout.gridBottomPadding,
+                ),
                 modifier = Modifier
                     .widthIn(max = layout.contentMaxWidth)
                     .fillMaxSize()
@@ -181,11 +214,12 @@ fun SeriesContent(
                             series = series,
                             onBookClick = onBookClick,
                             onBookReadClick = onBookReadClick,
-                            scrollState = scrollState,
                             booksLoadState = booksLoadState,
                             onBooksLayoutChange = booksState::onBookLayoutChange,
                             onBooksPageSizeChange = booksState::onBookPageSizeChange,
-                            onPageChange = booksState::onPageChange,
+                            onPageChange = { page ->
+                                pageNavigationState.request(page, booksState::onPageChange)
+                            },
                             onBookSelect = booksState::onBookSelect,
                             booksFilterState = booksState.filterState,
                             bookContextMenuActions = bookMenuActions,
@@ -234,6 +268,28 @@ fun SeriesContent(
                 compact = true
             )
         }
+    }
+}
+
+internal const val SERIES_BOOKS_SECTION_INDEX = 2
+
+internal class SeriesPageNavigationState {
+    var pendingPage by mutableStateOf<Int?>(null)
+        private set
+
+    fun request(page: Int, onPageChange: (Int) -> Unit) {
+        pendingPage = page
+        onPageChange(page)
+    }
+
+    fun isRequestedPage(page: Int): Boolean = pendingPage == page
+
+    fun onPageScrollCompleted(page: Int) {
+        if (pendingPage == page) pendingPage = null
+    }
+
+    fun onPageLoadFailed() {
+        pendingPage = null
     }
 }
 
@@ -380,9 +436,8 @@ fun SeriesChipTags(
     series: KomgaSeries,
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
-    val layout = LocalKomeliaLayout.current
     Column(
-        verticalArrangement = Arrangement.spacedBy(layout.itemSpacing)
+        verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.extraSmall)
     ) {
         if (series.metadata.publisher.isNotBlank()) {
             DescriptionChips(
@@ -412,8 +467,6 @@ fun SeriesChipTags(
             icon = Icons.Default.Link,
         )
 
-        Spacer(Modifier.height(2.dp))
-
         series.booksMetadata.authors
             .filter { it.role == "writer" }
             .groupBy { it.role }
@@ -437,7 +490,6 @@ fun SeriesChipTags(
                     modifier = Modifier.cursorForHand()
                 )
             }
-        Spacer(Modifier.height(2.dp))
     }
 }
 

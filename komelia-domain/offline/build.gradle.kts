@@ -51,6 +51,10 @@ kotlin {
             implementation(libs.ktor.client.core)
         }
 
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
+        }
+
         androidMain.dependencies {
             implementation(libs.commons.compress)
             implementation(libs.junrar)
@@ -68,4 +72,3 @@ kotlin {
         }
     }
 }
-

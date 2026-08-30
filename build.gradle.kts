@@ -367,6 +367,12 @@ tasks.register("komeliaBuildNonJvmDependencies") {
     dependsOn("cmakeSystemDepsCopyJniLibs")
 }
 
+val releaseVersionCheck = tasks.register<Exec>("releaseVersionCheck") {
+    description = "verify all release version declarations are synchronized"
+    group = "verification"
+    commandLine("bash", "$rootDir/scripts/check-release-version.sh")
+}
+
 tasks.register("desktopRun") {
     description = "run desktop app"
     group = "komelia-package"
@@ -376,24 +382,28 @@ tasks.register("desktopRun") {
 tasks.register("desktopJar") {
     description = "create release jar for current OS"
     group = "komelia-package"
+    dependsOn(releaseVersionCheck)
     dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseUberJarForCurrentOS")
 }
 
 tasks.register("desktopDeb") {
     description = "create linux deb package"
     group = "komelia-package"
+    dependsOn(releaseVersionCheck)
     dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseDeb")
 }
 
 tasks.register("desktopMsi") {
     description = "create windows msi installer"
     group = "komelia-package"
+    dependsOn(releaseVersionCheck)
     dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseMsi")
 }
 
 tasks.register("desktopDmg") {
     description = "create macOS dmg installer"
     group = "komelia-package"
+    dependsOn(releaseVersionCheck)
     dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseDmg")
 }
 
@@ -406,6 +416,7 @@ tasks.register("androidDebug") {
 tasks.register("androidRelease") {
     description = "build release apk"
     group = "komelia-package"
+    dependsOn(releaseVersionCheck)
     dependsOn(projects.komeliaApp.androidApp.path + ":assembleRelease")
 }
 
@@ -464,6 +475,7 @@ tasks.register("komfExtensionFirefox") {
 tasks.register<DefaultTask>("komfWebUI") {
     description = "build and package webapp"
     group = "komelia-package"
+    dependsOn(releaseVersionCheck)
     dependsOn(projects.komeliaApp.webApp.path + ":wasmJsBrowserDistribution")
     dependsOn(projects.komeliaInfra.imageDecoder.wasmImageWorker.path + ":wasmJsBrowserDistribution")
 

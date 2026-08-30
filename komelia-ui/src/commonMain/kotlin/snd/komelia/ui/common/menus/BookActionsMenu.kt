@@ -134,8 +134,8 @@ fun BookActionsMenu(
             )
         }
 
-        val isRead = remember { book.readProgress?.completed ?: false }
-        val isUnread = remember { book.readProgress == null }
+        val isRead = book.readProgress?.completed ?: false
+        val isUnread = book.readProgress == null
 
         if (!isRead) {
             DropdownMenuItem(
@@ -202,7 +202,8 @@ data class BookMenuActions(
         bookApi: KomgaBookApi,
         notifications: AppNotifications,
         scope: CoroutineScope,
-        taskEmitter: OfflineTaskEmitter?
+        taskEmitter: OfflineTaskEmitter?,
+        onReadProgressChanged: (KomeliaBook) -> Unit = {},
     ) : this(
         analyze = {
             notifications.runCatchingToNotifications(scope) {
@@ -218,14 +219,30 @@ data class BookMenuActions(
         },
         markAsRead = { book ->
             notifications.runCatchingToNotifications(scope) {
-                bookApi.markReadProgress(
-                    book.id,
-                    KomgaBookReadProgressUpdateRequest(completed = true)
+                runBookReadProgressMutation(
+                    mutation = {
+                        bookApi.markReadProgress(
+                            book.id,
+                            KomgaBookReadProgressUpdateRequest(completed = true)
+                        )
+                    },
+                    onSuccess = {
+                        notifications.add(AppNotification.Success(AppNotificationMessageKey.BOOK_MARKED_READ))
+                        onReadProgressChanged(book)
+                    },
                 )
             }
         },
-        markAsUnread = {
-            notifications.runCatchingToNotifications(scope) { bookApi.deleteReadProgress(it.id) }
+        markAsUnread = { book ->
+            notifications.runCatchingToNotifications(scope) {
+                runBookReadProgressMutation(
+                    mutation = { bookApi.deleteReadProgress(book.id) },
+                    onSuccess = {
+                        notifications.add(AppNotification.Success(AppNotificationMessageKey.BOOK_MARKED_UNREAD))
+                        onReadProgressChanged(book)
+                    },
+                )
+            }
         },
         delete = {
             notifications.runCatchingToNotifications(scope) { bookApi.deleteBook(it.id) }
@@ -233,4 +250,12 @@ data class BookMenuActions(
         download = { scope.launch { checkNotNull(taskEmitter).downloadBook(it.id) } },
         deleteDownloaded = { scope.launch { checkNotNull(taskEmitter).deleteBook(it.id) } }
     )
+}
+
+internal suspend fun runBookReadProgressMutation(
+    mutation: suspend () -> Unit,
+    onSuccess: () -> Unit,
+) {
+    mutation()
+    onSuccess()
 }

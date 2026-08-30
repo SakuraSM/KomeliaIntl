@@ -5,17 +5,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.LastPage
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.FirstPage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -24,8 +29,56 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.pagination_first_page
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.pagination_last_page
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.pagination_more_pages
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.pagination_next_page
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.pagination_page
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.pagination_page_status
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.pagination_previous_page
+import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.components.LabeledEntry.Companion.intEntry
+
+internal sealed interface PaginationItem {
+    data class Page(val number: Int) : PaginationItem
+    data object Ellipsis : PaginationItem
+}
+
+internal fun paginationItems(
+    totalPages: Int,
+    currentPage: Int,
+    maxSlots: Int,
+): List<PaginationItem> {
+    if (totalPages <= 0) return emptyList()
+    val current = currentPage.coerceIn(1, totalPages)
+    val slots = maxSlots.coerceAtLeast(5)
+    if (totalPages <= slots) return (1..totalPages).map(PaginationItem::Page)
+
+    val pageNumbers = when {
+        current <= slots - 3 -> 1..(slots - 2)
+        current >= totalPages - (slots - 4) -> (totalPages - (slots - 3))..totalPages
+        else -> {
+            val middleSlots = slots - 4
+            val start = current - middleSlots / 2
+            start..(start + middleSlots - 1)
+        }
+    }
+
+    return buildList {
+        add(PaginationItem.Page(1))
+        if (pageNumbers.first > 2) add(PaginationItem.Ellipsis)
+        pageNumbers.filter { it != 1 && it != totalPages }.forEach { add(PaginationItem.Page(it)) }
+        if (pageNumbers.last < totalPages - 1) add(PaginationItem.Ellipsis)
+        add(PaginationItem.Page(totalPages))
+    }
+}
 
 @Composable
 fun Pagination(
@@ -42,64 +95,156 @@ fun Pagination(
 
     BoxWithConstraints(
         modifier = modifier,
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
-        val buttonsRange = remember(maxWidth, currentPage, totalPages) {
-            val buttonDistance = when (maxWidth) {
-                in 0.dp..500.dp -> 1
-                in 0.dp..600.dp -> 2
-                in 600.dp..700.dp -> 3
-                in 700.dp..800.dp -> 4
-                else -> 5
+        val current = currentPage.coerceIn(1, totalPages)
+        if (maxWidth < 420.dp && navigationButtons) {
+            CompactPagination(
+                totalPages = totalPages,
+                currentPage = current,
+                onPageChange = onPageChange,
+            )
+        } else {
+            val maxSlots = when {
+                maxWidth < 560.dp -> 5
+                maxWidth < 800.dp -> 7
+                else -> 9
             }
-            val minValue = (currentPage - buttonDistance).coerceAtLeast(2)
-            val maxValue = (currentPage + buttonDistance).coerceAtMost(totalPages - 1)
-            minValue..maxValue
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (navigationButtons)
-                IconButton(
-                    enabled = currentPage != 1,
-                    onClick = { onPageChange(currentPage - 1) },
-                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                ) {
-                    Icon(
-                        Icons.Rounded.ChevronLeft,
-                        contentDescription = null,
-                    )
-                }
-
-            PageNumberButton(1, currentPage, onPageChange)
-
-            if (buttonsRange.first > 2) {
-                Text("...", Modifier.width(20.dp))
-            }
-            for (pageNumber in buttonsRange) {
-                PageNumberButton(pageNumber, currentPage, onPageChange)
-            }
-            if (buttonsRange.last < totalPages - 1) {
-                Text("...", Modifier.width(20.dp))
-            }
-
-            PageNumberButton(totalPages, currentPage, onPageChange)
-
-            if (navigationButtons)
-                IconButton(
-                    enabled = currentPage != totalPages,
-                    onClick = { onPageChange(currentPage + 1) },
-                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                ) {
-                    Icon(
-                        Icons.Rounded.ChevronRight,
-                        contentDescription = null,
-                    )
-                }
+            NumberedPagination(
+                items = remember(totalPages, current, maxSlots) {
+                    paginationItems(totalPages, current, maxSlots)
+                },
+                totalPages = totalPages,
+                currentPage = current,
+                navigationButtons = navigationButtons,
+                onPageChange = onPageChange,
+            )
         }
     }
+}
+
+@Composable
+private fun CompactPagination(
+    totalPages: Int,
+    currentPage: Int,
+    onPageChange: (Int) -> Unit,
+) {
+    val layout = LocalKomeliaLayout.current
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        PaginationNavigationButton(
+            enabled = currentPage > 1,
+            onClick = { onPageChange(1) },
+            icon = { Icon(Icons.Rounded.FirstPage, contentDescription = null) },
+            contentDescription = stringResource(Res.string.pagination_first_page),
+        )
+        PaginationNavigationButton(
+            enabled = currentPage > 1,
+            onClick = { onPageChange(currentPage - 1) },
+            icon = { Icon(Icons.Rounded.ChevronLeft, contentDescription = null) },
+            contentDescription = stringResource(Res.string.pagination_previous_page),
+        )
+        val status = stringResource(Res.string.pagination_page_status, currentPage, totalPages)
+        Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier
+                .heightIn(min = layout.minimumTouchTarget)
+                .widthIn(min = 72.dp)
+                .semantics { contentDescription = status },
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = status,
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                )
+            }
+        }
+        PaginationNavigationButton(
+            enabled = currentPage < totalPages,
+            onClick = { onPageChange(currentPage + 1) },
+            icon = { Icon(Icons.Rounded.ChevronRight, contentDescription = null) },
+            contentDescription = stringResource(Res.string.pagination_next_page),
+        )
+        PaginationNavigationButton(
+            enabled = currentPage < totalPages,
+            onClick = { onPageChange(totalPages) },
+            icon = { Icon(Icons.AutoMirrored.Rounded.LastPage, contentDescription = null) },
+            contentDescription = stringResource(Res.string.pagination_last_page),
+        )
+    }
+}
+
+@Composable
+private fun NumberedPagination(
+    items: List<PaginationItem>,
+    totalPages: Int,
+    currentPage: Int,
+    navigationButtons: Boolean,
+    onPageChange: (Int) -> Unit,
+) {
+    val layout = LocalKomeliaLayout.current
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (navigationButtons) {
+            PaginationNavigationButton(
+                enabled = currentPage > 1,
+                onClick = { onPageChange(currentPage - 1) },
+                icon = { Icon(Icons.Rounded.ChevronLeft, contentDescription = null) },
+                contentDescription = stringResource(Res.string.pagination_previous_page),
+            )
+        }
+
+        val morePagesDescription = stringResource(Res.string.pagination_more_pages)
+        items.forEach { item ->
+            when (item) {
+                is PaginationItem.Page -> PageNumberButton(item.number, currentPage, onPageChange)
+                PaginationItem.Ellipsis -> Text(
+                    text = "…",
+                    modifier = Modifier
+                        .width(layout.minimumTouchTarget / 2)
+                        .semantics { contentDescription = morePagesDescription },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Clip,
+                )
+            }
+        }
+
+        if (navigationButtons) {
+            PaginationNavigationButton(
+                enabled = currentPage < totalPages,
+                onClick = { onPageChange(currentPage + 1) },
+                icon = { Icon(Icons.Rounded.ChevronRight, contentDescription = null) },
+                contentDescription = stringResource(Res.string.pagination_next_page),
+            )
+        }
+    }
+}
+
+@Composable
+private fun PaginationNavigationButton(
+    enabled: Boolean,
+    onClick: () -> Unit,
+    icon: @Composable () -> Unit,
+    contentDescription: String,
+) {
+    val layout = LocalKomeliaLayout.current
+    IconButton(
+        enabled = enabled,
+        onClick = onClick,
+        modifier = Modifier
+            .size(layout.minimumTouchTarget)
+            .pointerHoverIcon(PointerIcon.Hand)
+            .semantics { this.contentDescription = contentDescription },
+        content = icon,
+    )
 }
 
 @Composable
@@ -108,20 +253,27 @@ private fun PageNumberButton(
     currentPage: Int,
     onClick: (Int) -> Unit
 ) {
+    val layout = LocalKomeliaLayout.current
+    val isCurrent = pageNumber == currentPage
+    val pageDescription = stringResource(Res.string.pagination_page, pageNumber)
     IconButton(
-        enabled = pageNumber != currentPage,
+        enabled = !isCurrent,
         onClick = { onClick(pageNumber) },
         colors = IconButtonDefaults.iconButtonColors(
             disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
-        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-
+        modifier = Modifier
+            .size(layout.minimumTouchTarget)
+            .pointerHoverIcon(PointerIcon.Hand)
+            .semantics {
+                contentDescription = pageDescription
+                selected = isCurrent
+            },
     ) {
         Text(pageNumber.toString())
     }
 }
-
 
 @Composable
 fun PageSizeSelectionDropdown(

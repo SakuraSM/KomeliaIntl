@@ -89,6 +89,26 @@ class LocalLibraryManager(
             )
     }
 
+    suspend fun getRemoteDownloadedBooks(
+        pageRequest: KomgaPageRequest = KomgaPageRequest(unpaged = true),
+    ): Page<KomeliaBook> {
+        val remoteLibraryIds = repositories.libraryRepository.findAll()
+            .filterNot { it.mediaServerId == LOCAL_SERVER_ID }
+            .map { it.id }
+            .toSet()
+        if (remoteLibraryIds.isEmpty()) return Page.empty()
+
+        return repositories.bookDtoRepository.findAll(
+            userId = OfflineUser.ROOT,
+            search = KomgaBookSearch(
+                condition = anyOfBooks {
+                    remoteLibraryIds.forEach { libraryId -> library { isEqualTo(libraryId) } }
+                }.toBookCondition(),
+            ),
+            pageRequest = pageRequest,
+        )
+    }
+
     suspend fun addLibrary(
         root: PlatformFile,
         name: String,
@@ -187,13 +207,13 @@ class LocalLibraryManager(
                 .toList()
                 .sortedBy { it.first }
             for ((seriesPath, seriesFiles) in seriesGroups) {
-                val seriesId = KomgaSeriesId("local-series-${stableId("${library.id.value}/$seriesPath")}")
+                val seriesId = KomgaSeriesId("$LOCAL_SERIES_ID_PREFIX${stableId("${library.id.value}/$seriesPath")}")
                 val seriesName = seriesPath.substringAfterLast('/').ifBlank { library.name }
                 // Books reference their parent series, so create the stable parent first.
                 // The final save below replaces the placeholder counts and timestamps.
                 saveSeries(seriesId, libraryId, seriesName, emptyList())
                 val inspectedBooks = seriesFiles.sortedByNaturalName().mapIndexedNotNull { index, localFile ->
-                    val bookId = KomgaBookId("local-book-${stableId("${library.id.value}/${localFile.relativePath}")}")
+                    val bookId = KomgaBookId("$LOCAL_BOOK_ID_PREFIX${stableId("${library.id.value}/${localFile.relativePath}")}")
                     scannedBookIds += bookId
                     val existing = existingBooks[bookId]
                     val modified = Instant.fromEpochMilliseconds(localFile.lastModifiedEpochMillis.coerceAtLeast(0))

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.komga.api.KomgaApi
 import snd.komelia.ui.book.BookViewModel
 import snd.komelia.ui.collection.CollectionViewModel
 import snd.komelia.ui.color.ColorCorrectionViewModel
@@ -97,6 +98,18 @@ class ViewModelFactory(
     private val komgaApi
         get() = dependencies.komgaApi.value
 
+    private fun komgaApiFor(
+        book: KomeliaBook? = null,
+        series: KomgaSeries? = null,
+        bookId: KomgaBookId? = null,
+        seriesId: KomgaSeriesId? = null,
+    ): KomgaApi =
+        if (shouldUseOfflineContentApi(book?.libraryId, series?.libraryId, bookId, seriesId)) {
+            dependencies.offlineDependencies?.komgaApi ?: komgaApi
+        } else {
+            komgaApi
+        }
+
     private val releases = MutableStateFlow<List<AppRelease>>(emptyList())
     private val imageReaderCurrentBook = MutableStateFlow<KomgaBookId?>(null)
         .also { dependencies.colorCorrectionStep.setBookFlow(it) }
@@ -143,6 +156,7 @@ class ViewModelFactory(
             komgaEvents = dependencies.komgaEvents.events,
             filterRepository = appRepositories.homeScreenFilterRepository,
             taskEmitter = dependencies.offlineDependencies?.taskEmitter,
+            localLibraryManager = dependencies.offlineDependencies?.localLibraryManager,
             cardWidthFlow = getGridCardWidth(),
         )
     }
@@ -184,31 +198,37 @@ class ViewModelFactory(
         seriesId: KomgaSeriesId,
         series: KomgaSeries? = null,
         defaultTab: SeriesTab? = null,
-    ) = SeriesViewModel(
-        seriesId = seriesId,
-        series = series,
-        libraries = dependencies.komgaSharedState.libraries,
-        seriesApi = komgaApi.seriesApi,
-        taskEmitter = dependencies.offlineDependencies?.taskEmitter,
-        bookApi = komgaApi.bookApi,
-        collectionApi = komgaApi.collectionsApi,
-        notifications = dependencies.appNotifications,
-        events = dependencies.komgaEvents.events,
-        settingsRepository = appRepositories.settingsRepository,
-        referentialApi = komgaApi.referentialApi,
-        defaultTab = defaultTab ?: SeriesTab.BOOKS,
-    )
+    ): SeriesViewModel {
+        val selectedApi = komgaApiFor(series = series, seriesId = seriesId)
+        return SeriesViewModel(
+            seriesId = seriesId,
+            series = series,
+            libraries = dependencies.komgaSharedState.libraries,
+            libraryApi = selectedApi.libraryApi,
+            seriesApi = selectedApi.seriesApi,
+            taskEmitter = dependencies.offlineDependencies?.taskEmitter,
+            bookApi = selectedApi.bookApi,
+            collectionApi = selectedApi.collectionsApi,
+            notifications = dependencies.appNotifications,
+            events = dependencies.komgaEvents.events,
+            settingsRepository = appRepositories.settingsRepository,
+            referentialApi = selectedApi.referentialApi,
+            defaultTab = defaultTab ?: SeriesTab.BOOKS,
+        )
+    }
 
     fun getBookViewModel(bookId: KomgaBookId, book: KomeliaBook?): BookViewModel {
+        val selectedApi = komgaApiFor(book = book, bookId = bookId)
         return BookViewModel(
             book = book,
             bookId = bookId,
-            bookApi = komgaApi.bookApi,
+            bookApi = selectedApi.bookApi,
+            libraryApi = selectedApi.libraryApi,
             notifications = dependencies.appNotifications,
             komgaEvents = dependencies.komgaEvents.events,
             libraries = dependencies.komgaSharedState.libraries,
             settingsRepository = appRepositories.settingsRepository,
-            readListApi = komgaApi.readListApi,
+            readListApi = selectedApi.readListApi,
             taskEmitter = dependencies.offlineDependencies?.taskEmitter,
         )
     }
@@ -217,20 +237,24 @@ class ViewModelFactory(
         seriesId: KomgaSeriesId,
         series: KomgaSeries? = null,
         book: KomeliaBook? = null,
-    ) = OneshotViewModel(
-        series = series,
-        book = book,
-        seriesId = seriesId,
-        seriesApi = komgaApi.seriesApi,
-        bookApi = komgaApi.bookApi,
-        events = dependencies.komgaEvents.events,
-        notifications = dependencies.appNotifications,
-        libraries = dependencies.komgaSharedState.libraries,
-        taskEmitter = dependencies.offlineDependencies?.taskEmitter,
-        settingsRepository = appRepositories.settingsRepository,
-        readListApi = komgaApi.readListApi,
-        collectionApi = komgaApi.collectionsApi,
-    )
+    ): OneshotViewModel {
+        val selectedApi = komgaApiFor(book = book, series = series, seriesId = seriesId)
+        return OneshotViewModel(
+            series = series,
+            book = book,
+            seriesId = seriesId,
+            seriesApi = selectedApi.seriesApi,
+            bookApi = selectedApi.bookApi,
+            libraryApi = selectedApi.libraryApi,
+            events = dependencies.komgaEvents.events,
+            notifications = dependencies.appNotifications,
+            libraries = dependencies.komgaSharedState.libraries,
+            taskEmitter = dependencies.offlineDependencies?.taskEmitter,
+            settingsRepository = appRepositories.settingsRepository,
+            readListApi = selectedApi.readListApi,
+            collectionApi = selectedApi.collectionsApi,
+        )
+    }
 
     fun getBookReaderViewModel(
         book: KomeliaBook? = null,
@@ -238,11 +262,12 @@ class ViewModelFactory(
         markReadProgress: Boolean,
         bookSiblingsContext: BookSiblingsContext
     ): ReaderViewModel {
+        val selectedApi = komgaApiFor(book)
         return ReaderViewModel(
             book = book,
-            bookApi = komgaApi.bookApi,
-            seriesApi = komgaApi.seriesApi,
-            readListApi = komgaApi.readListApi,
+            bookApi = selectedApi.bookApi,
+            seriesApi = selectedApi.seriesApi,
+            readListApi = selectedApi.readListApi,
             navigator = navigator,
             appNotifications = dependencies.appNotifications,
             readerSettingsRepository = appRepositories.imageReaderSettingsRepository,
@@ -611,13 +636,14 @@ class ViewModelFactory(
         book: KomeliaBook? = null,
         markReadProgress: Boolean = true
     ): EpubReaderViewModel {
+        val selectedApi = komgaApiFor(book)
         return EpubReaderViewModel(
             bookId = bookId,
             book = book,
             markReadProgress = markReadProgress,
-            bookApi = komgaApi.bookApi,
-            seriesApi = komgaApi.seriesApi,
-            readListApi = komgaApi.readListApi,
+            bookApi = selectedApi.bookApi,
+            seriesApi = selectedApi.seriesApi,
+            readListApi = selectedApi.readListApi,
             serverUrl = dependencies.serverUrlResolver.effectiveServerUrl,
             epubSettingsRepository = appRepositories.epubReaderSettingsRepository,
             settingsRepository = appRepositories.settingsRepository,

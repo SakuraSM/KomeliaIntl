@@ -998,6 +998,7 @@ async function setupState(currentBookId: string) {
   bookId.value = currentBookId
   book.value = await externalFunctions.bookGet(currentBookId)
   series.value = await externalFunctions.getOneSeries(book.value.seriesId)
+  const isLocalPublication = book.value.libraryId.startsWith('local-library-')
 
   const progression = await externalFunctions.bookGetProgression(currentBookId)
   const serverUrl = await externalFunctions.getServerUrl()
@@ -1068,14 +1069,14 @@ async function setupState(currentBookId: string) {
       enableContentProtection: false,
       enableMediaOverlays: false,
       enablePageBreaks: false,
-      autoGeneratePositions: false,
+      autoGeneratePositions: isLocalPublication,
       enableLineFocus: false,
       customKeyboardEvents: false,
       enableHistory: true,
       enableCitations: false,
       enableConsumption: false,
     },
-    services: {
+    services: isLocalPublication ? {} : {
       positions: new URL(`${serverUrl}/api/v1/books/${currentBookId}/positions`),
     },
     api: {

@@ -15,7 +15,9 @@ internal fun isSupportedLocalBook(name: String): Boolean =
     name.substringAfterLast('.', "").lowercase() in setOf("cbz", "zip", "cbr", "rar", "pdf", "epub")
 
 internal fun WPPublication.withLocalBookResourceUrls(bookId: KomgaBookId): WPPublication {
-    val resourceBase = "local://device/api/v1/books/${bookId.value}/resource/"
+    // Keep publication resources on the reader's internal HTTP origin. WebViews and
+    // EPUB JavaScript engines do not consistently allow fetches from custom schemes.
+    val resourceBase = "http://komelia/api/v1/books/${bookId.value}/resource/"
 
     fun WPLink.withResourceUrl(): WPLink = copy(
         href = href?.let { value ->
@@ -70,7 +72,7 @@ internal fun inspectEpubArchive(
 ): LocalBookInspection {
     val container = readEntry("META-INF/container.xml").decodeToString()
     val opfPath = Regex("full-path\\s*=\\s*[\"']([^\"']+)[\"']", RegexOption.IGNORE_CASE)
-        .find(container)?.groupValues?.get(1)
+        .find(container)?.groupValues?.get(1)?.decodeXmlEntities()
         ?: error("EPUB package path is missing")
     val opf = readEntry(opfPath).decodeToString()
     val opfDirectory = opfPath.substringBeforeLast('/', "")
@@ -138,11 +140,24 @@ internal fun inspectEpubArchive(
 
 private fun attribute(attributes: String, name: String): String? =
     Regex("(?:^|\\s)${Regex.escape(name)}\\s*=\\s*[\"']([^\"']*)[\"']", RegexOption.IGNORE_CASE)
-        .find(attributes)?.groupValues?.get(1)
+        .find(attributes)?.groupValues?.get(1)?.decodeXmlEntities()
 
 private fun xmlText(xml: String, tag: String): String? =
     Regex("<${Regex.escape(tag)}(?:\\s[^>]*)?>(.*?)</${Regex.escape(tag)}>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
-        .find(xml)?.groupValues?.get(1)?.replace(Regex("<[^>]+>"), "")?.trim()
+        .find(xml)?.groupValues?.get(1)?.replace(Regex("<[^>]+>"), "")?.decodeXmlEntities()?.trim()
+
+private fun String.decodeXmlEntities(): String =
+    replace(Regex("&#x([0-9a-fA-F]+);")) { match ->
+        match.groupValues[1].toIntOrNull(16)?.toChar()?.toString() ?: match.value
+    }
+        .replace(Regex("&#([0-9]+);")) { match ->
+            match.groupValues[1].toIntOrNull()?.toChar()?.toString() ?: match.value
+        }
+        .replace("&quot;", "\"")
+        .replace("&apos;", "'")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&amp;", "&")
 
 private fun resolveArchivePath(parent: String, child: String): String {
     val parts = (if (parent.isBlank()) child else "$parent/$child").replace('\\', '/').split('/')

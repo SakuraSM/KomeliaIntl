@@ -8,6 +8,11 @@
     <string name="home_filter_groups">Home groups</string>
     <string name="home_filter_search_groups">Search groups</string>
     <string name="home_filter_group_items">%1$d items</string>
+    <string name="home_local_books">Local books</string>
+    <string name="home_remote_downloaded_books">Downloaded from server</string>
+    <string name="home_local_sort_recently_added">Recently added</string>
+    <string name="home_local_sort_file_modified">File modified</string>
+    <string name="home_local_sort_title">Title</string>
     <string name="home_filter_default_keep_reading">Keep reading</string>
     <string name="home_filter_default_on_deck">On deck</string>
     <string name="home_filter_default_recently_realeased_books">Recently released books</string>

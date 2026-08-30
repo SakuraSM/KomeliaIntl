@@ -34,11 +34,11 @@ class LocalArchiveInspectionTest {
 
         val resolved = publication.withLocalBookResourceUrls(KomgaBookId("book-1"))
 
-        assertEquals("local://device/api/v1/books/book-1/resource/text/chapter.xhtml", resolved.readingOrder.single().href)
-        assertEquals("local://device/api/v1/books/book-1/resource/styles/book.css", resolved.resources.single().href)
-        assertEquals("local://device/api/v1/books/book-1/resource/images/cover.jpg", resolved.images.single().href)
+        assertEquals("http://komelia/api/v1/books/book-1/resource/text/chapter.xhtml", resolved.readingOrder.single().href)
+        assertEquals("http://komelia/api/v1/books/book-1/resource/styles/book.css", resolved.resources.single().href)
+        assertEquals("http://komelia/api/v1/books/book-1/resource/images/cover.jpg", resolved.images.single().href)
         assertEquals(
-            "local://device/api/v1/books/book-1/resource/text/chapter-2.xhtml",
+            "http://komelia/api/v1/books/book-1/resource/text/chapter-2.xhtml",
             resolved.toc.single().children.single().href,
         )
         assertEquals("https://example.test/absolute.xhtml", resolved.landmarks.single().href)
@@ -102,5 +102,30 @@ class LocalArchiveInspectionTest {
         assertEquals("Local Novel", extension.manifest.metadata.title)
         assertEquals("OPS/text/chapter1.xhtml", extension.manifest.readingOrder.single().href)
         assertContentEquals(byteArrayOf(1, 2, 3), inspection.thumbnail)
+    }
+
+    @Test
+    fun `epub manifest decodes XML entities in metadata and archive paths`() {
+        val files = mapOf(
+            "META-INF/container.xml" to """
+                <container><rootfiles><rootfile full-path="OPS/package.opf"/></rootfiles></container>
+            """.trimIndent().encodeToByteArray(),
+            "OPS/package.opf" to """
+                <package>
+                  <metadata><dc:title>Books &amp; Stories</dc:title></metadata>
+                  <manifest>
+                    <item id="chapter" href="text/Foo &amp; Bar.xhtml" media-type="application/xhtml+xml"/>
+                  </manifest>
+                  <spine><itemref idref="chapter"/></spine>
+                </package>
+            """.trimIndent().encodeToByteArray(),
+            "OPS/text/Foo & Bar.xhtml" to "chapter".encodeToByteArray(),
+        )
+
+        val inspection = inspectEpubArchive(files.keys.toList(), files::getValue)
+        val extension = inspection.extension as MediaExtensionEpub
+
+        assertEquals("Books & Stories", extension.manifest.metadata.title)
+        assertEquals("OPS/text/Foo & Bar.xhtml", extension.manifest.readingOrder.single().href)
     }
 }

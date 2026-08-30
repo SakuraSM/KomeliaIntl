@@ -8,6 +8,11 @@
     <string name="home_filter_groups">首页分组</string>
     <string name="home_filter_search_groups">搜索分组</string>
     <string name="home_filter_group_items">%1$d 项</string>
+    <string name="home_local_books">本地书籍</string>
+    <string name="home_remote_downloaded_books">服务器下载</string>
+    <string name="home_local_sort_recently_added">最近添加</string>
+    <string name="home_local_sort_file_modified">文件修改时间</string>
+    <string name="home_local_sort_title">标题</string>
     <string name="home_filter_default_keep_reading">继续阅读</string>
     <string name="home_filter_default_on_deck">待读</string>
     <string name="home_filter_default_recently_realeased_books">最近发布的书籍</string>

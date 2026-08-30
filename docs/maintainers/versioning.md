@@ -1,6 +1,14 @@
 # Version releases
 
-Komelia Intl uses stable Semantic Versioning values in the form `MAJOR.MINOR.PATCH`. The Git tag adds a `v` prefix.
+Komelia Intl uses Semantic Versioning. Stable versions use `MAJOR.MINOR.PATCH`; public test builds use `MAJOR.MINOR.PATCH-beta.N`. The Git tag adds a `v` prefix.
+
+## Pre-release versions
+
+- Use `beta.1`, `beta.2`, and so on for public test builds, up to `beta.998`. Do not publish an unlabeled test build.
+- Use the next stable version as the numeric core. For example, a Beta for the minor release after `0.19.4` is `0.20.0-beta.1`.
+- Increment `beta.N` for every replacement package. Never move an existing tag or replace a published binary.
+- Mark the GitHub Release as a pre-release. The application version, Git tag, Release title, and package filenames must all include the same Beta suffix.
+- A stable version has higher precedence than a pre-release with the same numeric core: `0.20.0-beta.2 < 0.20.0`.
 
 ## Pick the release level
 
@@ -43,6 +51,7 @@ If you provide a version, it must match the selected level:
 
 ```shell
 scripts/build-release.sh --bump minor --version 0.19.0
+scripts/build-release.sh --bump minor --version 0.20.0-beta.1
 ```
 
 Run the policy tests and preflight checks before you create a tag:
@@ -50,17 +59,17 @@ Run the policy tests and preflight checks before you create a tag:
 ```shell
 scripts/test-release-policy.sh
 scripts/check-release-version.sh \
-  --tag v0.18.17 \
-  --previous 0.18.16 \
-  --level patch
+  --tag v0.20.0-beta.1 \
+  --previous 0.19.4 \
+  --level minor
 scripts/check-release-notes.sh \
   --file /path/to/release-notes.md \
-  --version 0.18.17 \
-  --title "Komelia v0.18.17" \
-  --level patch
+  --version 0.20.0-beta.1 \
+  --title "Komelia v0.20.0-beta.1" \
+  --level minor
 ```
 
-The scripts reject skipped versions, a level that does not match the numeric increment, mismatched application version files, a nonstandard Release title, and invalid language sections.
+The scripts reject skipped version cores, a level that does not match the numeric increment, malformed pre-release labels, mismatched application version files, a nonstandard Release title, and invalid language sections.
 
 ## Publish without changing a released version
 

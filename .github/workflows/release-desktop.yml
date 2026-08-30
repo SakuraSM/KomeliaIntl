@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing draft release tag, for example v0.18.12
+        description: Existing draft release tag, for example v0.20.0-beta.1
         required: true
         type: string
       level:

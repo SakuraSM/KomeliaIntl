@@ -22,7 +22,7 @@ Usage:
     --change TEXT [--change TEXT ...] --test TEXT [--test TEXT ...]
   scripts/render-issue-reply.sh implementation zh|en --pr REF \
     --change TEXT [--change TEXT ...] --test TEXT [--test TEXT ...]
-  scripts/render-issue-reply.sh release zh|en --version X.Y.Z --release-url URL \
+  scripts/render-issue-reply.sh release zh|en --version X.Y.Z[-PRERELEASE] --release-url URL \
     --asset TEXT [--asset TEXT ...] --test TEXT [--test TEXT ...]
 EOF
 }

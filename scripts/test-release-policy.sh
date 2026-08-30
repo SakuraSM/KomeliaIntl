@@ -24,12 +24,18 @@ expect_pass 0.18.16 1.0.0 major
 expect_pass 1.4.9 1.4.10 patch
 expect_pass 1.4.9 1.5.0 minor
 expect_pass 1.4.9 2.0.0 major
+expect_pass 0.19.4 0.20.0-beta.1 minor
+expect_pass 1.4.9 1.5.0-beta.2 minor
 
 expect_fail 0.18.16 0.19.0 patch
 expect_fail 0.18.16 0.18.17 minor
 expect_fail 0.18.16 1.0.1 major
 expect_fail 1.4.9 1.4.9 patch
 expect_fail 01.4.9 1.4.10 patch
+expect_fail 0.19.4 0.20.1-beta.1 minor
+expect_fail 0.19.4 0.20.0-beta.01 minor
+expect_fail 0.19.4 0.20.0-rc.1 minor
+expect_fail 0.19.4 0.20.0-beta.999 minor
 
 cat > "$TEST_DIR/valid-notes.md" <<'EOF'
 ## 中文
@@ -48,6 +54,12 @@ env PATH="/usr/bin:/bin" "$NOTES_CHECK" \
   --version 0.18.17 \
   --title "Komelia v0.18.17" \
   --level patch >/dev/null
+
+env PATH="/usr/bin:/bin" "$NOTES_CHECK" \
+  --file "$TEST_DIR/valid-notes.md" \
+  --version 0.20.0-beta.1 \
+  --title "Komelia v0.20.0-beta.1" \
+  --level minor >/dev/null
 
 expect_notes_fail() {
   local title="${2:-Komelia v0.18.17}"

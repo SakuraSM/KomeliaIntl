@@ -24,11 +24,13 @@ class LocalHomeBooksTest {
             (LocalHomeBookSort.TITLE.pageRequest().sort as KomgaSort.KomgaBooksSort).orders,
         )
         assertEquals(LOCAL_HOME_BOOK_PAGE_SIZE, LocalHomeBookSort.RECENTLY_ADDED.pageRequest().size)
-        assertEquals(REMOTE_DOWNLOADED_HOME_BOOK_PAGE_SIZE, remoteDownloadedBooksPageRequest().size)
-        assertEquals(
-            KomgaSort.KomgaBooksSort.byLastModifiedDateDesc().orders,
-            (remoteDownloadedBooksPageRequest().sort as KomgaSort.KomgaBooksSort).orders,
-        )
+        LocalHomeBookSort.entries.forEach { sort ->
+            assertEquals(REMOTE_DOWNLOADED_HOME_BOOK_PAGE_SIZE, remoteDownloadedBooksPageRequest(sort).size)
+            assertEquals(
+                (sort.pageRequest().sort as KomgaSort.KomgaBooksSort).orders,
+                (remoteDownloadedBooksPageRequest(sort).sort as KomgaSort.KomgaBooksSort).orders,
+            )
+        }
     }
 
     @Test

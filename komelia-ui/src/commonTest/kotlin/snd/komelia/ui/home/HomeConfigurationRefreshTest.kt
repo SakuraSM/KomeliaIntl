@@ -51,6 +51,44 @@ class HomeConfigurationRefreshTest {
     }
 
     @Test
+    fun builtInSourceTabsSurviveReloadsWhileTheirContentExists() {
+        assertEquals(
+            HOME_LOCAL_BOOKS_TAB_ID,
+            reconcileActiveHomeFilter(
+                activeFilterNumber = HOME_LOCAL_BOOKS_TAB_ID,
+                filterCount = 3,
+                hasLocalBooks = true,
+            ),
+        )
+        assertEquals(
+            HOME_SERVER_DOWNLOADS_TAB_ID,
+            reconcileActiveHomeFilter(
+                activeFilterNumber = HOME_SERVER_DOWNLOADS_TAB_ID,
+                filterCount = 3,
+                hasRemoteDownloadedBooks = true,
+            ),
+        )
+    }
+
+    @Test
+    fun emptyBuiltInSourceTabFallsBackToOverview() {
+        assertEquals(
+            0,
+            reconcileActiveHomeFilter(
+                activeFilterNumber = HOME_LOCAL_BOOKS_TAB_ID,
+                filterCount = 3,
+            ),
+        )
+        assertEquals(
+            0,
+            reconcileActiveHomeFilter(
+                activeFilterNumber = HOME_SERVER_DOWNLOADS_TAB_ID,
+                filterCount = 3,
+            ),
+        )
+    }
+
+    @Test
     fun homeContentUsesPersistedOrderAcrossRepositoryImplementations() {
         val filters = listOf(
             SeriesHomeScreenFilter.RecentlyAdded(order = 3, label = "Third", pageSize = 20),

@@ -1,6 +1,8 @@
 package snd.komelia.offline.api
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withContext
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.action.OfflineActions
@@ -308,6 +310,9 @@ class OfflineBookApi(
     override suspend fun getWebPubManifest(bookId: KomgaBookId): WPPublication {
         val book = bookRepository.get(bookId)
         val media = mediaRepository.get(bookId)
+        withContext(Dispatchers.Default) {
+            fileContentExtractors.prepareEpub(book, media)
+        }
         return when (val extension = media.extension) {
             is MediaExtensionEpub -> if (book.url.startsWith("local://")) {
                 extension.manifest.withLocalBookResourceUrls(bookId)
@@ -324,9 +329,11 @@ class OfflineBookApi(
     ): ByteArray {
         val book = bookRepository.get(bookId)
         val media = mediaRepository.get(bookId)
-        return when (media.mediaProfile) {
-            MediaProfile.EPUB -> fileContentExtractors.getFileContent(book, media, resourceName)
-            else -> throw IllegalStateException("Unsupported media profile ${media.mediaProfile}")
+        return withContext(Dispatchers.Default) {
+            when (media.mediaProfile) {
+                MediaProfile.EPUB -> fileContentExtractors.getFileContent(book, media, resourceName)
+                else -> throw IllegalStateException("Unsupported media profile ${media.mediaProfile}")
+            }
         }
     }
 

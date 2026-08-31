@@ -7,24 +7,27 @@ import io.github.vinceglb.filekit.context
 import io.ktor.http.decodeURLPart
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipFile
+import java.util.LinkedHashMap
 import kotlin.sequences.asSequence
 
 class ZipExtractor {
+    private val archiveLock = Any()
+    private val openArchives = LinkedHashMap<String, ZipFile>(MAX_OPEN_ARCHIVES, 0.75f, true)
+
+    fun prepare(file: PlatformFile) = synchronized(archiveLock) {
+        val key = file.toString()
+        openArchives.remove(key)?.close()
+        openArchives[key] = openArchive(file)
+        trimOpenArchives()
+    }
+
     fun getEntryBytes(file: PlatformFile, entryName: String): ByteArray {
-        val zipFileBuilder = ZipFile
-            .builder()
-            .setUseUnicodeExtraFields(true)
-            .setIgnoreLocalFileHeader(true)
-
-        when (val androidFile = file.androidFile) {
-            is AndroidFile.FileWrapper -> zipFileBuilder.file = androidFile.file
-            is AndroidFile.UriWrapper -> zipFileBuilder.setSeekableByteChannel(
-                SafSeekableReadByteChannel(androidFile.uri, FileKit.context)
-            )
-        }
-
-        val zipFile = zipFileBuilder.get()
-        val bytes = zipFile.use { zip ->
+        val bytes = synchronized(archiveLock) {
+            val key = file.toString()
+            val zip = openArchives[key] ?: openArchive(file).also {
+                openArchives[key] = it
+                trimOpenArchives()
+            }
             val entry = zip.getEntry(entryName)
                 ?: findBestMatch(zip.entries.asSequence().filterNot { it.isDirectory }.toList(), entryName)
 
@@ -34,6 +37,29 @@ class ZipExtractor {
 
         if (bytes == null) error("zip entry does not exist: $entryName")
         return bytes
+    }
+
+    private fun openArchive(file: PlatformFile): ZipFile {
+        val builder = ZipFile.builder()
+            .setUseUnicodeExtraFields(true)
+            .setIgnoreLocalFileHeader(true)
+
+        when (val androidFile = file.androidFile) {
+            is AndroidFile.FileWrapper -> builder.file = androidFile.file
+            is AndroidFile.UriWrapper -> builder.setSeekableByteChannel(
+                SafSeekableReadByteChannel(androidFile.uri, FileKit.context),
+            )
+        }
+        return builder.get()
+    }
+
+    private fun trimOpenArchives() {
+        while (openArchives.size > MAX_OPEN_ARCHIVES) {
+            val eldest = openArchives.entries.iterator().next()
+            val archive = eldest.value
+            openArchives.remove(eldest.key)
+            archive.close()
+        }
     }
 
     private fun findBestMatch(entries: List<ZipArchiveEntry>, entryName: String): ZipArchiveEntry? {
@@ -58,4 +84,8 @@ class ZipExtractor {
     }
 
     private fun String.safeDecodeURLPart(): String = runCatching { decodeURLPart() }.getOrDefault(this)
+
+    private companion object {
+        const val MAX_OPEN_ARCHIVES = 2
+    }
 }

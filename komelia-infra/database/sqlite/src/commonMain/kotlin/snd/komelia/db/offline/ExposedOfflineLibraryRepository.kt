@@ -56,6 +56,13 @@ class ExposedOfflineLibraryRepository( database: Database) : ExposedRepository(d
                 it[libraryTable.oneshotsDirectory] = library.oneshotsDirectory
                 it[libraryTable.unavailable] = library.unavailable
             }
+            libraryExclusionsTable.deleteWhere { libraryExclusionsTable.libraryId.eq(library.id.value) }
+            library.scanDirectoryExclusions.distinct().forEach { exclusion ->
+                libraryExclusionsTable.upsert {
+                    it[libraryExclusionsTable.libraryId] = library.id.value
+                    it[libraryExclusionsTable.exclusion] = exclusion
+                }
+            }
         }
     }
 
@@ -112,7 +119,7 @@ class ExposedOfflineLibraryRepository( database: Database) : ExposedRepository(d
     private fun Query.fetchAndMap(): List<OfflineLibrary> {
         return this.groupBy({ it[libraryTable.id] }, { it }).values
             .map { rows ->
-                val exclusions = rows.map { it[libraryExclusionsTable.exclusion] }
+                val exclusions = rows.mapNotNull { it.getOrNull(libraryExclusionsTable.exclusion) }
                 rows.first().toModel(exclusions)
             }
     }

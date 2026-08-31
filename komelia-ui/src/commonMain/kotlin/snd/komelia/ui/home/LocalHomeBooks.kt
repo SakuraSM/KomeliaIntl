@@ -27,7 +27,9 @@ internal fun didLocalLibraryScanFinish(
     current: LocalLibraryScanState,
 ): Boolean = previous.scanningLibraryId != null && current.scanningLibraryId == null
 
-internal fun remoteDownloadedBooksPageRequest(): KomgaPageRequest = KomgaPageRequest(
+internal fun remoteDownloadedBooksPageRequest(
+    sort: LocalHomeBookSort = LocalHomeBookSort.RECENTLY_ADDED,
+): KomgaPageRequest = KomgaPageRequest(
     size = REMOTE_DOWNLOADED_HOME_BOOK_PAGE_SIZE,
-    sort = KomgaSort.KomgaBooksSort.byLastModifiedDateDesc(),
+    sort = sort.pageRequest().sort,
 )

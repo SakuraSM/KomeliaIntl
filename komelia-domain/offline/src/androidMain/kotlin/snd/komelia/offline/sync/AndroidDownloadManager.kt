@@ -5,6 +5,7 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import kotlinx.coroutines.flow.first
 import snd.komga.client.book.KomgaBookId
 
 /**
@@ -25,8 +26,9 @@ class AndroidDownloadManager(
                     .build()
             ).build()
 
-        WorkManager.getInstance(context)
-            .enqueueUniqueWork(bookId.value, ExistingWorkPolicy.REPLACE, request)
+        val workManager = WorkManager.getInstance(context)
+        workManager.enqueueUniqueWork(bookId.value, ExistingWorkPolicy.REPLACE, request)
+        workManager.getWorkInfoByIdFlow(request.id).first { it?.state?.isFinished == true }
     }
 
     override suspend fun cancelBookDownload(bookId: KomgaBookId) {

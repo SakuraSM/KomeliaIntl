@@ -43,6 +43,7 @@ declare global {
 
         isFullscreenAvailable: () => Promise<CallbackResponse<boolean>>
         toggleFullscreen: () => Promise<CallbackResponse<undefined>>
+        readerContentReady: () => Promise<CallbackResponse<undefined>>
     }
 }
 
@@ -126,6 +127,10 @@ export default class ExternalFunctions {
 
     async toggleFullscreen(): Promise<undefined> {
         return window.toggleFullscreen().then((value) => value.result)
+    }
+
+    async readerContentReady(): Promise<undefined> {
+        return window.readerContentReady().then((value) => value.result)
     }
 
     async callbackResult<T>(promise: Promise<CallbackResponse<T>>): Promise<T> {

@@ -24,6 +24,7 @@ import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LoadState.Error
@@ -50,6 +51,7 @@ class BookViewModel(
     private val komgaEvents: SharedFlow<KomgaEvent>,
     private val libraries: StateFlow<List<KomgaLibrary>>,
     private val taskEmitter: OfflineTaskEmitter?,
+    localLibraryManager: LocalLibraryManager?,
     settingsRepository: CommonSettingsRepository,
     readListApi: KomgaReadListApi,
 ) : StateScreenModel<LoadState<Unit>>(Uninitialized) {
@@ -77,6 +79,7 @@ class BookViewModel(
         notifications = notifications,
         scope = screenModelScope,
         taskEmitter = taskEmitter,
+        localLibraryManager = localLibraryManager,
         onReadProgressChanged = { reload() },
     )
 

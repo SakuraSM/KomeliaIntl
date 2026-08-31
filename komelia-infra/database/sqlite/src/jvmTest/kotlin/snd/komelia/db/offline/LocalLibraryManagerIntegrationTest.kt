@@ -19,18 +19,182 @@ import snd.komelia.offline.local.LocalLibraryFile
 import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.offline.local.LocalLibraryPlatform
 import snd.komelia.offline.media.model.OfflineBookPage
+import snd.komelia.offline.server.model.OfflineMediaServer
+import snd.komelia.offline.server.model.OfflineMediaServerId
+import snd.komelia.offline.series.model.OfflineBookMetadataAggregation
 import snd.komelia.offline.user.model.OfflineUser
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.common.KomgaPageRequest
+import snd.komga.client.common.KomgaSort.KomgaBooksSort
 import snd.komga.client.book.MediaProfile
+import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.library.ScanInterval
+import snd.komga.client.series.KomgaSeriesId
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class LocalLibraryManagerIntegrationTest {
+    @Test
+    fun separatesLocalSourceBooksFromRemoteDownloads() = runBlocking {
+        val tempDirectory = createTempDirectory("komelia-local-source-isolation-test")
+        val sourceDirectory = tempDirectory.resolve("source").createDirectories()
+        val database = KomeliaDatabase(tempDirectory.toString())
+        val repositories = createRepositories(database, tempDirectory)
+        val platform = FakeLocalLibraryPlatform(sourceDirectory).apply {
+            files = listOf(file("Local Series/Local Book.epub", size = 101, modified = 101_000))
+        }
+        val manager = LocalLibraryManager(
+            repositories = repositories,
+            platform = platform,
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        )
+        val localLibrary = manager.addLibrary(PlatformFile(sourceDirectory.toFile()), "Local")
+        val localSeries = repositories.seriesRepository.findAllByLibraryId(localLibrary.id).single()
+        val localBook = repositories.bookRepository.findAll().single()
+
+        val remoteServerId = OfflineMediaServerId("remote-server")
+        val remoteLibraryId = KomgaLibraryId("remote-library")
+        val remoteSeriesId = KomgaSeriesId("remote-series")
+        val remoteBookId = KomgaBookId("remote-book")
+        repositories.mediaServerRepository.save(OfflineMediaServer(id = remoteServerId, url = "https://example.invalid"))
+        repositories.libraryRepository.save(
+            localLibrary.copy(id = remoteLibraryId, mediaServerId = remoteServerId, name = "Remote"),
+        )
+        repositories.seriesRepository.save(
+            localSeries.copy(id = remoteSeriesId, libraryId = remoteLibraryId, name = "Remote Series"),
+        )
+        repositories.seriesMetadataRepository.save(
+            checkNotNull(repositories.seriesMetadataRepository.find(localSeries.id)).copy(
+                seriesId = remoteSeriesId,
+                title = "Remote Series",
+            ),
+        )
+        repositories.bookMetadataAggregationRepository.save(
+            OfflineBookMetadataAggregation(seriesId = remoteSeriesId),
+        )
+        repositories.bookRepository.save(
+            localBook.copy(
+                id = remoteBookId,
+                seriesId = remoteSeriesId,
+                libraryId = remoteLibraryId,
+                name = "Remote Download.epub",
+            ),
+        )
+        repositories.bookMetadataRepository.save(
+            repositories.bookMetadataRepository.get(localBook.id).copy(
+                bookId = remoteBookId,
+                title = "Remote Download",
+            ),
+        )
+        repositories.mediaRepository.save(
+            repositories.mediaRepository.get(localBook.id).copy(bookId = remoteBookId),
+        )
+
+        assertEquals(listOf("Local Book.epub"), manager.getBooks().content.map { it.name })
+        assertEquals(listOf("Remote Download.epub"), manager.getRemoteDownloadedBooks().content.map { it.name })
+    }
+
+    @Test
+    fun excludesOneLocalBookWithoutDeletingTheSourceAndRestoresItAfterRestart() = runBlocking {
+        val tempDirectory = createTempDirectory("komelia-local-exclusion-test")
+        val sourceDirectory = tempDirectory.resolve("source").createDirectories()
+        val database = KomeliaDatabase(tempDirectory.toString())
+        val repositories = createRepositories(database, tempDirectory)
+        val platform = FakeLocalLibraryPlatform(sourceDirectory).apply {
+            files = listOf(
+                file("Series/Chapter 01.cbz", size = 101, modified = 101_000),
+                file("Series/Chapter 02.cbz", size = 102, modified = 102_000),
+            )
+        }
+        val manager = LocalLibraryManager(
+            repositories = repositories,
+            platform = platform,
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        )
+        val library = manager.addLibrary(PlatformFile(sourceDirectory.toFile()), "Local")
+        val excludedBook = manager.getBooks(KomgaPageRequest(unpaged = true)).content
+            .first { it.name == "Chapter 01.cbz" }
+
+        manager.excludeBook(excludedBook.id)
+        assertEquals(listOf("Chapter 02.cbz"), manager.getBooks(KomgaPageRequest(unpaged = true)).content.map { it.name })
+        assertEquals(listOf("Series/Chapter 01.cbz"), manager.getExcludedBooks().map { it.relativePath })
+        assertTrue(platform.files.any { it.relativePath == "Series/Chapter 01.cbz" }, "source file must remain untouched")
+
+        val restartedManager = LocalLibraryManager(
+            repositories = repositories,
+            platform = platform,
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        )
+        restartedManager.scanAll()
+        assertEquals(listOf("Chapter 02.cbz"), restartedManager.getBooks(KomgaPageRequest(unpaged = true)).content.map { it.name })
+
+        restartedManager.restoreExcludedBook(library.id, "Series/Chapter 01.cbz")
+        assertEquals(
+            listOf("Chapter 01.cbz", "Chapter 02.cbz"),
+            restartedManager.getBooks(
+                KomgaPageRequest(unpaged = true, sort = KomgaBooksSort.byNumberAsc()),
+            ).content.map { it.name },
+        )
+        assertTrue(restartedManager.getExcludedBooks().isEmpty())
+    }
+
+    @Test
+    fun sortsLocalChaptersByThePrimaryChapterNumberInsteadOfTrailingReleaseHash() = runBlocking {
+        val tempDirectory = createTempDirectory("komelia-local-number-sort-test")
+        val sourceDirectory = tempDirectory.resolve("source").createDirectories()
+        val database = KomeliaDatabase(tempDirectory.toString())
+        val repositories = createRepositories(database, tempDirectory)
+        val platform = FakeLocalLibraryPlatform(sourceDirectory).apply {
+            files = listOf(
+                file("Series/Chapter 105_020862.cbz", size = 105, modified = 105_000),
+                file("Series/Chapter 106_50ae17.cbz", size = 106, modified = 106_000),
+                file("Series/Chapter 107_44b33f.cbz", size = 107, modified = 107_000),
+                file("Series/Chapter 108_536edb.cbz", size = 108, modified = 108_000),
+                file("Series/Chapter 109_2015a8.cbz", size = 109, modified = 109_000),
+            )
+        }
+        val manager = LocalLibraryManager(
+            repositories = repositories,
+            platform = platform,
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        )
+
+        manager.addLibrary(PlatformFile(sourceDirectory.toFile()), "Local")
+
+        val legacyNumbers = listOf(20_862f, 17f, 33f, 536f, 8f)
+        repositories.bookRepository.findAll()
+            .sortedBy { it.name }
+            .zip(legacyNumbers)
+            .forEach { (book, legacyNumber) ->
+                val metadata = repositories.bookMetadataRepository.get(book.id)
+                repositories.bookMetadataRepository.save(
+                    metadata.copy(number = legacyNumber.toInt().toString(), numberSort = legacyNumber),
+                )
+            }
+
+        manager.scanAll()
+        assertEquals(5, platform.inspectionCount, "metadata repair must not re-open unchanged archives")
+
+        val books = manager.getBooks(
+            KomgaPageRequest(unpaged = true, sort = KomgaBooksSort.byNumberAsc()),
+        ).content
+
+        assertEquals(
+            listOf(
+                "Chapter 105_020862.cbz",
+                "Chapter 106_50ae17.cbz",
+                "Chapter 107_44b33f.cbz",
+                "Chapter 108_536edb.cbz",
+                "Chapter 109_2015a8.cbz",
+            ),
+            books.map { it.name },
+        )
+    }
+
     @Test
     fun paginatesLargeLocalLibraryWithAccurateTotals() = runBlocking {
         val tempDirectory = createTempDirectory("komelia-local-pagination-test")

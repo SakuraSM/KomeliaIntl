@@ -10,6 +10,7 @@ sealed interface DownloadEvent {
         val book: KomgaBook,
         val total: Long,
         val completed: Long,
+        val speedBytesPerSecond: Long = 0,
     ) : DownloadEvent {
         override val bookId: KomgaBookId = book.id
 

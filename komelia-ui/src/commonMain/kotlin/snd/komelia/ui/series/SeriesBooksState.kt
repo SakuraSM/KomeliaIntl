@@ -23,6 +23,7 @@ import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaReferentialApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.ui.LoadState
@@ -44,6 +45,7 @@ class SeriesBooksState(
     private val bookApi: KomgaBookApi,
     private val events: SharedFlow<KomgaEvent>,
     private val taskEmitter: OfflineTaskEmitter?,
+    private val localLibraryManager: LocalLibraryManager?,
     private val screenModelScope: CoroutineScope,
     val cardWidth: StateFlow<Dp>,
     referentialApi: KomgaReferentialApi,
@@ -172,6 +174,7 @@ class SeriesBooksState(
         notifications = notifications,
         scope = screenModelScope,
         taskEmitter = taskEmitter,
+        localLibraryManager = localLibraryManager,
         onReadProgressChanged = { screenModelScope.launch { reload() } },
     )
     fun bookBulkMenuActions() = BookBulkActions(

@@ -22,10 +22,19 @@ data class TaskEntry(
     val priority: Int = DEFAULT_PRIORITY,
     val status: TaskStatus = NEW,
     val uniqueName: String = task.uniqueName,
+    val completedBytes: Long = 0,
+    val totalBytes: Long = 0,
+    val speedBytesPerSecond: Long = 0,
+    val displayTitle: String? = null,
+    val errorMessage: String? = null,
 ) {
     enum class TaskStatus {
         NEW,
         RUNNING,
+        PAUSED,
+        COMPLETED,
+        FAILED,
+        CANCELED,
     }
 }
 
@@ -112,5 +121,10 @@ sealed interface TaskData {
     data class DownloadBookCancel(val bookId: KomgaBookId) : TaskData {
         override val uniqueName = "DownloadBookCancel_${bookId}"
     }
-}
 
+    @Serializable
+    @SerialName("DownloadBookPause")
+    data class DownloadBookPause(val bookId: KomgaBookId) : TaskData {
+        override val uniqueName = "DownloadBookPause_${bookId}"
+    }
+}

@@ -87,7 +87,8 @@ class EpubScreen(
 
                 is LoadState.Success -> EpubContent(
                     onWebviewCreated = { state.value.onWebviewCreated(it) },
-                    onBackButtonPress = state.value::onBackButtonPress
+                    onBackButtonPress = state.value::onBackButtonPress,
+                    contentReady = state.value.contentReady.collectAsState().value,
                 )
             }
         }

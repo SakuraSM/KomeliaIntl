@@ -122,6 +122,19 @@
 
     <header id="headerMenu"/>
 
+    <v-fade-transition>
+      <div
+          v-if="readerLoading"
+          class="reader-loading-overlay"
+          :class="appearanceClass('bg')"
+          role="status"
+          aria-live="polite"
+      >
+        <v-progress-circular indeterminate color="primary" size="40" width="3"/>
+        <span>{{ t('epubreader.loading_book') }}</span>
+      </div>
+    </v-fade-transition>
+
     <div id="D2Reader-Container" style="height: 100vh" :class="appearanceClass('bg')">
       <main
           tabindex=-1
@@ -329,7 +342,7 @@
 
 <script setup lang="ts">
 import {useI18n} from 'vue-i18n'
-import {computed, ComputedRef, onBeforeUnmount, onMounted, reactive, Ref, ref} from 'vue'
+import {computed, ComputedRef, nextTick, onBeforeUnmount, onMounted, reactive, Ref, ref} from 'vue'
 import D2Reader, {Locator, ReadingPosition} from '@d-i-t-a/reader'
 import {Locations} from "@d-i-t-a/reader/dist/types/model/Locator";
 import {BookDto} from '@/types/komga-books'
@@ -382,6 +395,8 @@ const showSettings = ref(false)
 const showToolbars = ref(false)
 const showToc = ref(false)
 const showHelp = ref(false)
+const readerLoading = ref(true)
+let readerLoadGeneration = 0
 const tab: Ref<string> = ref("hasToc")
 const readingDirs = ref(
     [
@@ -995,6 +1010,8 @@ function navigateResourceAfterUnchangedBoundary(
 }
 
 async function setupState(currentBookId: string) {
+  const loadGeneration = ++readerLoadGeneration
+  readerLoading.value = true
   bookId.value = currentBookId
   book.value = await externalFunctions.bookGet(currentBookId)
   series.value = await externalFunctions.getOneSeries(book.value.seriesId)
@@ -1069,7 +1086,9 @@ async function setupState(currentBookId: string) {
       enableContentProtection: false,
       enableMediaOverlays: false,
       enablePageBreaks: false,
-      autoGeneratePositions: isLocalPublication,
+      // Generating positions walks the complete publication before the first resource is shown.
+      // Local books persist their exact locator instead, keeping first paint independent of book size.
+      autoGeneratePositions: false,
       enableLineFocus: false,
       customKeyboardEvents: false,
       enableHistory: true,
@@ -1085,7 +1104,7 @@ async function setupState(currentBookId: string) {
       updateCurrentLocation: updateCurrentLocation,
       keydownFallthrough: keyPressed,
       clickThrough: clickThrough,
-      resourceReady: scheduleReaderContentSwipeNavigationSetup,
+      resourceReady: handleResourceReady,
       positionInfo: updatePositionInfo,
       chapterInfo: updateChapterInfo,
       direction: updateDirection,
@@ -1093,6 +1112,8 @@ async function setupState(currentBookId: string) {
   })
 
   fixedLayout.value = d2Reader.value.publicationLayout === 'fixed'
+
+  if (loadGeneration !== readerLoadGeneration) return
 
   tocs.toc = d2Reader.value.tableOfContents
   tocs.landmarks = d2Reader.value.landmarks
@@ -1114,6 +1135,71 @@ async function setupState(currentBookId: string) {
     // }
   } catch (e) {
   }
+}
+
+function handleResourceReady(): void {
+  scheduleReaderContentSwipeNavigationSetup()
+  const loadGeneration = readerLoadGeneration
+  void hideReaderLoadingAfterFirstPaint(loadGeneration)
+}
+
+async function hideReaderLoadingAfterFirstPaint(loadGeneration: number): Promise<void> {
+  await nextTick()
+  const deadline = performance.now() + 15_000
+
+  while (loadGeneration === readerLoadGeneration && performance.now() < deadline) {
+    const readerFrame = await readyReaderFrame()
+    if (readerFrame) {
+      // Image.complete can become true before Android WebView has decoded and
+      // composited the resource. Wait for both the publication frame and the
+      // host frame so the loading overlay never reveals an intermediate white
+      // canvas.
+      await nextAnimationFrame(readerFrame)
+      await nextAnimationFrame(readerFrame)
+      await nextAnimationFrame()
+      await nextAnimationFrame()
+      if (loadGeneration === readerLoadGeneration) {
+        await externalFunctions.readerContentReady()
+        readerLoading.value = false
+      }
+      return
+    }
+    await new Promise(resolve => window.setTimeout(resolve, 80))
+  }
+
+  if (loadGeneration === readerLoadGeneration) {
+    await externalFunctions.readerContentReady()
+    readerLoading.value = false
+  }
+}
+
+async function readyReaderFrame(): Promise<Window | null> {
+  const iframes = Array.from(document.querySelectorAll<HTMLIFrameElement>('#iframe-wrapper iframe'))
+  for (const iframe of iframes) {
+    try {
+      const document = iframe.contentDocument
+      if (!document || document.readyState !== 'complete') continue
+      const images = Array.from(document.images)
+      if (images.some(image => !image.complete)) continue
+
+      const renderedImages = images.filter(image => image.naturalWidth > 0 && image.naturalHeight > 0)
+      if (renderedImages.length > 0) {
+        await Promise.all(renderedImages.map(image => image.decode().catch(() => undefined)))
+      }
+
+      const hasImage = renderedImages.some(image => image.complete && image.naturalWidth > 0)
+      const hasText = (document.body?.innerText.trim().length ?? 0) > 0
+      const hasRenderedMedia = document.querySelector('svg, canvas, video') !== null
+      if (hasImage || hasText || hasRenderedMedia) return document.defaultView
+    } catch {
+      continue
+    }
+  }
+  return null
+}
+
+function nextAnimationFrame(frameWindow: Window = window): Promise<void> {
+  return new Promise(resolve => frameWindow.requestAnimationFrame(() => resolve()))
 }
 
 function historyBack() {
@@ -1244,8 +1330,15 @@ function sendNotification(message: string, timeout: number = 4000) {
   notification.enabled = true
 }
 
-function markProgress(location: Locator) {
-  externalFunctions.bookUpdateProgression(bookId.value, createR2Progression(location))
+async function markProgress(location: Locator) {
+  if (incognito.value) return
+  try {
+    await externalFunctions.bookUpdateProgression(bookId.value, createR2Progression(location))
+  } catch (error) {
+    // A provisional first locator can be emitted before the reader has stable location data.
+    // The next location update will retry without breaking the reader's Promise chain.
+    console.warn('Unable to persist the current EPUB location', error)
+  }
   // debounce(() => {
   //   if (!incognito.value) {
   //     externalFunctions.bookUpdateProgression(bookId.value, createR2Progression(location))
@@ -1294,5 +1387,23 @@ function markProgress(location: Locator) {
 
 .hidden {
   display: none !important;
+}
+
+.reader-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 13;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 0.95rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reader-loading-overlay {
+    transition: none !important;
+  }
 }
 </style>

@@ -732,6 +732,7 @@
   },
   "epubreader": {
     "current_chapter": "当前章节",
+    "loading_book": "正在准备书籍…",
     "page_of": "第 {page} 页，共 {count} 页",
     "settings": {
       "column_count": "栏数",

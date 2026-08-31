@@ -14,6 +14,8 @@ import snd.komelia.offline.sync.DesktopDownloadManager
 import snd.komelia.offline.sync.PlatformDownloadManager
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.offline.sync.repository.LogJournalRepository
+import snd.komelia.offline.tasks.DownloadTaskTracker
+import snd.komelia.offline.tasks.repository.OfflineTasksRepository
 import snd.komga.client.KomgaClientFactory
 import snd.komga.client.user.KomgaUser
 
@@ -46,11 +48,13 @@ class DesktopOfflineModule(
         downloadService: BookDownloadService,
         logJournalRepository: LogJournalRepository,
         events: MutableSharedFlow<DownloadEvent>,
+        tasksRepository: OfflineTasksRepository,
     ): PlatformDownloadManager {
         return DesktopDownloadManager(
             bookDownloadService = downloadService,
             logsJournalRepository = logJournalRepository,
-            sharedEvents = events
+            sharedEvents = events,
+            downloadTaskTracker = DownloadTaskTracker(tasksRepository),
         )
     }
 }

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import snd.komelia.offline.book.model.OfflineBook
 import snd.komelia.offline.model.BookMetadataPatchCapability
 import snd.komelia.offline.tasks.model.DEFAULT_PRIORITY
+import snd.komelia.offline.tasks.model.HIGHEST_PRIORITY
 import snd.komelia.offline.tasks.model.TaskAddedEvent
 import snd.komelia.offline.tasks.model.TaskData
 import snd.komelia.offline.tasks.model.TaskData.AggregateSeriesMetadata
@@ -15,6 +16,8 @@ import snd.komelia.offline.tasks.model.TaskData.DownloadSeries
 import snd.komelia.offline.tasks.model.TaskData.RefreshBookMetadata
 import snd.komelia.offline.tasks.model.TaskData.RefreshSeriesMetadata
 import snd.komelia.offline.tasks.model.TaskEntry
+import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.CANCELED
+import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.PAUSED
 import snd.komelia.offline.tasks.repository.OfflineTasksRepository
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.library.KomgaLibraryId
@@ -174,14 +177,47 @@ class OfflineTaskEmitter(
 
     suspend fun cancelBookDownload(
         bookId: KomgaBookId,
-        priority: Int = DEFAULT_PRIORITY,
+        priority: Int = HIGHEST_PRIORITY,
     ) {
+        updateDownloadStatus(bookId, CANCELED)
         submitTask(
             TaskEntry(
                 priority = priority,
                 task = TaskData.DownloadBookCancel(bookId),
             )
         )
+    }
+
+    suspend fun pauseBookDownload(
+        bookId: KomgaBookId,
+        priority: Int = HIGHEST_PRIORITY,
+    ) {
+        updateDownloadStatus(bookId, PAUSED)
+        submitTask(
+            TaskEntry(
+                priority = priority,
+                task = TaskData.DownloadBookPause(bookId),
+            )
+        )
+    }
+
+    suspend fun retryBookDownload(bookId: KomgaBookId) {
+        downloadBook(bookId)
+    }
+
+    suspend fun removeDownloadTask(bookId: KomgaBookId) {
+        tasksRepository.delete(DownloadBook(bookId).uniqueName)
+    }
+
+    suspend fun removeDownloadTaskAndFiles(bookId: KomgaBookId) {
+        submitTask(TaskEntry(task = DeleteBook(bookId)))
+        removeDownloadTask(bookId)
+    }
+
+    private suspend fun updateDownloadStatus(bookId: KomgaBookId, status: TaskEntry.TaskStatus) {
+        val task = DownloadBook(bookId)
+        val existing = tasksRepository.find(task.uniqueName) ?: TaskEntry(task = task)
+        tasksRepository.save(existing.copy(status = status, speedBytesPerSecond = 0))
     }
 
     private suspend fun submitTask(entry: TaskEntry) {

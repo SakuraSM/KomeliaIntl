@@ -21,11 +21,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.OfflinePin
+import androidx.compose.material.icons.rounded.DownloadDone
+import androidx.compose.material.icons.rounded.SyncProblem
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,7 +45,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
@@ -54,6 +54,8 @@ import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_pages
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_unavailable
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_downloaded_status
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_downloaded_outdated_status
 import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
@@ -178,18 +180,9 @@ private fun BookImageOverlay(
         Column {
             Row {
                 if (book.downloaded && !book.libraryId.isLocalLibrary()) {
-                    val tint =
-                        if (book.isLocalFileOutdated || book.remoteFileUnavailable) MaterialTheme.colorScheme.errorContainer
-                        else MaterialTheme.colorScheme.secondary
-                    Icon(
-                        imageVector = Icons.Filled.OfflinePin,
-                        contentDescription = null,
-                        tint = tint,
-                        modifier = Modifier
-                            .padding(1.dp)
-                            .size(26.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black)
+                    DownloadedBookBadge(
+                        needsUpdate = book.isLocalFileOutdated || book.remoteFileUnavailable,
+                        modifier = Modifier.padding(6.dp),
                     )
                 }
 
@@ -233,6 +226,32 @@ private fun BookImageOverlay(
         }
         BookDownloadCardOverlay(book)
 
+    }
+}
+
+@Composable
+private fun DownloadedBookBadge(
+    needsUpdate: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    Surface(
+        modifier = modifier.size(30.dp),
+        shape = MaterialTheme.shapes.small,
+        color = if (needsUpdate) colorScheme.errorContainer else colorScheme.secondaryContainer,
+        contentColor = if (needsUpdate) colorScheme.onErrorContainer else colorScheme.onSecondaryContainer,
+        border = BorderStroke(1.dp, colorScheme.outlineVariant),
+        tonalElevation = 1.dp,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = if (needsUpdate) Icons.Rounded.SyncProblem else Icons.Rounded.DownloadDone,
+                contentDescription = stringResource(
+                    if (needsUpdate) Res.string.book_downloaded_outdated_status else Res.string.book_downloaded_status,
+                ),
+                modifier = Modifier.size(17.dp),
+            )
+        }
     }
 }
 

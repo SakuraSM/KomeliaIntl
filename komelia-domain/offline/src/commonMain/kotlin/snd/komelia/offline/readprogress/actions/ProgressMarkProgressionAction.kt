@@ -61,44 +61,53 @@ class ProgressMarkProgressionAction(
 
                     val extension = media.extension
                     check(extension is MediaExtensionEpub) { "Epub extension not found" }
-                    // match progression with positions
-                    val matchingPositions = extension.positions.filter { it.href == href }
-                    val matchedPosition =
-                        if (extension.isFixedLayout && matchingPositions.size == 1)
-                            matchingPositions.first()
-                        else
-                            matchingPositions.firstOrNull { it.locations!!.progression == newProgression.locator.locations!!.progression }
-                                ?: run {
-                                    // no exact match
-                                    val before =
-                                        matchingPositions.filter { it.locations!!.progression!! < newProgression.locator.locations!!.progression!! }
-                                            .maxByOrNull { it.locations!!.position!! }
-                                    val after =
-                                        matchingPositions.filter { it.locations!!.progression!! > newProgression.locator.locations!!.progression!! }
-                                            .minByOrNull { it.locations!!.position!! }
-                                    if (before == null || after == null || before.locations!!.position!! > after.locations!!.position!!)
-                                        throw IllegalArgumentException("Invalid progression")
-                                    before
-                                }
+                    if (extension.positions.isEmpty()) {
+                        positionlessEpubProgress(
+                            bookId = bookId,
+                            userId = userId,
+                            pageCount = media.pageCount,
+                            newProgression = newProgression,
+                        )
+                    } else {
+                        // match progression with positions
+                        val matchingPositions = extension.positions.filter { it.href == href }
+                        val matchedPosition =
+                            if (extension.isFixedLayout && matchingPositions.size == 1)
+                                matchingPositions.first()
+                            else
+                                matchingPositions.firstOrNull { it.locations!!.progression == newProgression.locator.locations!!.progression }
+                                    ?: run {
+                                        // no exact match
+                                        val before =
+                                            matchingPositions.filter { it.locations!!.progression!! < newProgression.locator.locations!!.progression!! }
+                                                .maxByOrNull { it.locations!!.position!! }
+                                        val after =
+                                            matchingPositions.filter { it.locations!!.progression!! > newProgression.locator.locations!!.progression!! }
+                                                .minByOrNull { it.locations!!.position!! }
+                                        if (before == null || after == null || before.locations!!.position!! > after.locations!!.position!!)
+                                            throw IllegalArgumentException("Invalid progression")
+                                        before
+                                    }
 
-                    val totalProgression = matchedPosition.locations?.totalProgression
-                    OfflineReadProgress(
-                        bookId = bookId,
-                        userId = userId,
-                        page = totalProgression?.let { (media.pageCount * it).roundToInt() } ?: 0,
-                        completed = totalProgression?.let { it >= 0.99F } ?: false,
-                        readDate = newProgression.modified,
-                        deviceId = newProgression.device.id,
-                        deviceName = newProgression.device.name,
-                        locator = newProgression.locator.copy(
-                            // use the type we have instead of the one provided
-                            type = matchedPosition.type,
-                            // if no koboSpan is provided, use the one we matched
-                            koboSpan = newProgression.locator.koboSpan ?: matchedPosition.koboSpan,
-                            // don't trust the provided total progression, the one from Kobo can be wrong
-                            locations = newProgression.locator.locations?.copy(totalProgression = totalProgression),
-                        ),
-                    )
+                        val totalProgression = matchedPosition.locations?.totalProgression
+                        OfflineReadProgress(
+                            bookId = bookId,
+                            userId = userId,
+                            page = totalProgression?.let { (media.pageCount * it).roundToInt() } ?: 0,
+                            completed = totalProgression?.let { it >= 0.99F } ?: false,
+                            readDate = newProgression.modified,
+                            deviceId = newProgression.device.id,
+                            deviceName = newProgression.device.name,
+                            locator = newProgression.locator.copy(
+                                // use the type we have instead of the one provided
+                                type = matchedPosition.type,
+                                // if no koboSpan is provided, use the one we matched
+                                koboSpan = newProgression.locator.koboSpan ?: matchedPosition.koboSpan,
+                                // don't trust the provided total progression, the one from Kobo can be wrong
+                                locations = newProgression.locator.locations?.copy(totalProgression = totalProgression),
+                            ),
+                        )
+                    }
                 }
             }
 
@@ -107,4 +116,23 @@ class ProgressMarkProgressionAction(
 
         komgaEvents.emit(KomgaEvent.ReadProgressChanged(bookId, userId))
     }
+}
+
+internal fun positionlessEpubProgress(
+    bookId: KomgaBookId,
+    userId: KomgaUserId,
+    pageCount: Int,
+    newProgression: R2Progression,
+): OfflineReadProgress {
+    val totalProgression = newProgression.locator.locations?.totalProgression
+    return OfflineReadProgress(
+        bookId = bookId,
+        userId = userId,
+        page = totalProgression?.let { (pageCount * it).roundToInt() } ?: 0,
+        completed = totalProgression?.let { it >= 0.99F } ?: false,
+        readDate = newProgression.modified,
+        deviceId = newProgression.device.id,
+        deviceName = newProgression.device.name,
+        locator = newProgression.locator,
+    )
 }

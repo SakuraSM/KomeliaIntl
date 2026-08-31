@@ -184,7 +184,8 @@ abstract class OfflineModule(
         val downloadManager: PlatformDownloadManager = createPlatformDownloadManager(
             downloadService = downloadService,
             logJournalRepository = repositories.logJournalRepository,
-            events = bookDownloadEvents
+            events = bookDownloadEvents,
+            tasksRepository = repositories.tasksRepository,
         )
         val fileService = BookContentExtractors(
             divinaExtractors = createDivinaExtractors(),
@@ -196,6 +197,7 @@ abstract class OfflineModule(
                 repositories = repositories,
                 platform = platform,
                 scope = moduleScope,
+                komgaEvents = komgaEvents,
             ).also { it.startScheduledScanning() }
         }
 
@@ -501,5 +503,6 @@ abstract class OfflineModule(
         downloadService: BookDownloadService,
         logJournalRepository: LogJournalRepository,
         events: MutableSharedFlow<DownloadEvent>,
+        tasksRepository: OfflineTasksRepository,
     ): PlatformDownloadManager
 }

@@ -28,6 +28,7 @@ import snd.komelia.offline.sync.model.DownloadEvent.BookDownloadProgress
 import snd.komelia.offline.sync.model.OfflineLogEntry.Companion.logError
 import snd.komelia.offline.sync.model.OfflineLogEntry.Companion.logInfo
 import snd.komelia.offline.sync.repository.LogJournalRepository
+import snd.komelia.offline.tasks.DownloadTaskTracker
 import snd.komga.client.book.KomgaBookId
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -46,6 +47,7 @@ class DownloadWorker(
     private val downloadService: BookDownloadService,
     private val logsJournalRepository: LogJournalRepository,
     private val sharedEvents: MutableSharedFlow<DownloadEvent>,
+    private val downloadTaskTracker: DownloadTaskTracker,
 ) : CoroutineWorker(context, workerParams) {
     private val notificationId = notificationIdCounter.incrementAndGet()
 
@@ -81,7 +83,10 @@ class DownloadWorker(
 
         try {
             downloadService.downloadBook(bookId)
-                .onEach { sharedEvents.emit(it) }
+                .onEach {
+                    downloadTaskTracker.onEvent(it)
+                    sharedEvents.emit(it)
+                }
                 .conflate()
                 .collect {
                     when (it) {
@@ -104,7 +109,9 @@ class DownloadWorker(
                 }
         } catch (e: Throwable) {
             logger.catching(e)
-            sharedEvents.emit(BookDownloadError(bookId = bookId, error = e))
+            val event = BookDownloadError(bookId = bookId, error = e)
+            downloadTaskTracker.onEvent(event)
+            sharedEvents.emit(event)
             currentCoroutineContext().ensureActive()
         } finally {
             if (isSuccess.get()) {

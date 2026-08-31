@@ -4,18 +4,27 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.http.decodeURLPart
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipFile
+import java.util.LinkedHashMap
 import kotlin.sequences.asSequence
 
 class ZipExtractor {
-    fun getEntryBytes(file: PlatformFile, entryName: String): ByteArray {
-        val zipFile = ZipFile
-            .builder()
-            .setFile(file.file)
-            .setUseUnicodeExtraFields(true)
-            .setIgnoreLocalFileHeader(true)
-            .get()
+    private val archiveLock = Any()
+    private val openArchives = LinkedHashMap<String, ZipFile>(MAX_OPEN_ARCHIVES, 0.75f, true)
 
-        val bytes = zipFile.use { zip ->
+    fun prepare(file: PlatformFile) = synchronized(archiveLock) {
+        val key = file.toString()
+        openArchives.remove(key)?.close()
+        openArchives[key] = openArchive(file)
+        trimOpenArchives()
+    }
+
+    fun getEntryBytes(file: PlatformFile, entryName: String): ByteArray {
+        val bytes = synchronized(archiveLock) {
+            val key = file.toString()
+            val zip = openArchives[key] ?: openArchive(file).also {
+                openArchives[key] = it
+                trimOpenArchives()
+            }
             val entry = zip.getEntry(entryName)
                 ?: findBestMatch(zip.entries.asSequence().filterNot { it.isDirectory }.toList(), entryName)
 
@@ -25,6 +34,22 @@ class ZipExtractor {
 
         if (bytes == null) throw IllegalStateException("zip entry does not exist: $entryName")
         return bytes
+    }
+
+    private fun openArchive(file: PlatformFile): ZipFile = ZipFile
+        .builder()
+        .setFile(file.file)
+        .setUseUnicodeExtraFields(true)
+        .setIgnoreLocalFileHeader(true)
+        .get()
+
+    private fun trimOpenArchives() {
+        while (openArchives.size > MAX_OPEN_ARCHIVES) {
+            val eldest = openArchives.entries.iterator().next()
+            val archive = eldest.value
+            openArchives.remove(eldest.key)
+            archive.close()
+        }
     }
 
     private fun findBestMatch(entries: List<ZipArchiveEntry>, entryName: String): ZipArchiveEntry? {
@@ -49,4 +74,8 @@ class ZipExtractor {
     }
 
     private fun String.safeDecodeURLPart(): String = runCatching { decodeURLPart() }.getOrDefault(this)
+
+    private companion object {
+        const val MAX_OPEN_ARCHIVES = 2
+    }
 }

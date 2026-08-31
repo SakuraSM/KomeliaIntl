@@ -16,6 +16,7 @@ import snd.komelia.offline.sync.BookDownloadService
 import snd.komelia.offline.sync.PlatformDownloadManager
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.offline.sync.repository.LogJournalRepository
+import snd.komelia.offline.tasks.repository.OfflineTasksRepository
 import snd.komga.client.KomgaClientFactory
 import snd.komga.client.user.KomgaUser
 
@@ -51,6 +52,7 @@ class AndroidOfflineModule(
         downloadService: BookDownloadService,
         logJournalRepository: LogJournalRepository,
         events: MutableSharedFlow<DownloadEvent>,
+        tasksRepository: OfflineTasksRepository,
     ): PlatformDownloadManager {
         return AndroidDownloadManager(
             context = context,

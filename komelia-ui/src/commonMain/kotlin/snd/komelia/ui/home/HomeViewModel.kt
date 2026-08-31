@@ -71,6 +71,7 @@ class HomeViewModel(
     val localBooks = MutableStateFlow(emptyList<KomeliaBook>())
     val remoteDownloadedBooks = MutableStateFlow(emptyList<KomeliaBook>())
     internal val localBookSort = MutableStateFlow(LocalHomeBookSort.RECENTLY_ADDED)
+    internal val remoteDownloadedBookSort = MutableStateFlow(LocalHomeBookSort.RECENTLY_ADDED)
 
     suspend fun initialize() {
         if (state.value !is Uninitialized) return
@@ -110,7 +111,7 @@ class HomeViewModel(
 
             remoteDownloadedBooks.value = runCatching {
                 localLibraryManager
-                    ?.getRemoteDownloadedBooks(remoteDownloadedBooksPageRequest())
+                    ?.getRemoteDownloadedBooks(remoteDownloadedBooksPageRequest(remoteDownloadedBookSort.value))
                     ?.content
                     .orEmpty()
             }.onFailure { logger.catching(it) }.getOrDefault(emptyList())
@@ -118,6 +119,8 @@ class HomeViewModel(
             activeFilterNumber.value = reconcileActiveHomeFilter(
                 activeFilterNumber = activeFilterNumber.value,
                 filterCount = currentFilters.value.size,
+                hasLocalBooks = localBooks.value.isNotEmpty(),
+                hasRemoteDownloadedBooks = remoteDownloadedBooks.value.isNotEmpty(),
             )
 
             mutableState.value = LoadState.Success(Unit)
@@ -182,6 +185,7 @@ class HomeViewModel(
         notifications = appNotifications,
         scope = screenModelScope,
         taskEmitter = taskEmitter,
+        localLibraryManager = localLibraryManager,
         onReadProgressChanged = { reload() },
     )
 
@@ -196,6 +200,12 @@ class HomeViewModel(
     internal fun onLocalBookSortChange(sort: LocalHomeBookSort) {
         if (localBookSort.value == sort) return
         localBookSort.value = sort
+        reload()
+    }
+
+    internal fun onRemoteDownloadedBookSortChange(sort: LocalHomeBookSort) {
+        if (remoteDownloadedBookSort.value == sort) return
+        remoteDownloadedBookSort.value = sort
         reload()
     }
 
@@ -248,7 +258,13 @@ internal fun <T> homeConfigurationRefreshFlow(
 internal fun reconcileActiveHomeFilter(
     activeFilterNumber: Int,
     filterCount: Int,
-): Int = activeFilterNumber.takeIf { it in 0..filterCount } ?: 0
+    hasLocalBooks: Boolean = false,
+    hasRemoteDownloadedBooks: Boolean = false,
+): Int = when (activeFilterNumber) {
+    HOME_LOCAL_BOOKS_TAB_ID -> activeFilterNumber.takeIf { hasLocalBooks } ?: 0
+    HOME_SERVER_DOWNLOADS_TAB_ID -> activeFilterNumber.takeIf { hasRemoteDownloadedBooks } ?: 0
+    else -> activeFilterNumber.takeIf { it in 0..filterCount } ?: 0
+}
 
 internal fun orderedHomeScreenFilters(filters: List<HomeScreenFilter>): List<HomeScreenFilter> =
     filters.sortedBy { it.order }

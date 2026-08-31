@@ -14,46 +14,38 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import snd.komelia.offline.settings.OfflineSettingsRepository
 import snd.komelia.offline.sync.model.DownloadEvent
-import snd.komelia.offline.sync.model.DownloadEvent.BookDownloadCompleted
-import snd.komelia.offline.sync.model.DownloadEvent.BookDownloadError
-import snd.komelia.offline.sync.model.DownloadEvent.BookDownloadProgress
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.tasks.model.TaskData.DownloadBook
+import snd.komelia.offline.tasks.model.TaskEntry
+import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.COMPLETED
+import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.CANCELED
+import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.FAILED
+import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.PAUSED
+import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.RUNNING
+import snd.komelia.offline.tasks.repository.OfflineTasksRepository
 import snd.komga.client.book.KomgaBookId
 
 class OfflineDownloadsState(
     downloadEvents: SharedFlow<DownloadEvent>,
     platformContext: PlatformContext,
     private val taskEmitter: OfflineTaskEmitter,
+    private val tasksRepository: OfflineTasksRepository,
     private val settingsRepository: OfflineSettingsRepository,
     private val coroutineScope: CoroutineScope,
 ) {
     private val internalDownloadDir = getDefaultInternalDownloadsDir(platformContext)
-    private val downloadsMap = MutableStateFlow<Map<KomgaBookId, DownloadEvent>>(emptyMap())
-    val downloads = downloadsMap.map { it.values }
+    private val tasksMap = MutableStateFlow<Map<KomgaBookId, TaskEntry>>(emptyMap())
+    val downloads = tasksMap.map { tasks -> tasks.values.toList() }
         .stateIn(coroutineScope, SharingStarted.Eagerly, emptyList())
 
     val storageLocation = settingsRepository.getDownloadDirectory()
-        .stateIn(coroutineScope, SharingStarted.Eagerly,null)
+        .stateIn(coroutineScope, SharingStarted.Eagerly, null)
 
     init {
+        coroutineScope.launch { reload() }
         downloadEvents.onEach { event ->
-            when (event) {
-                is BookDownloadProgress, is BookDownloadCompleted -> updateDownloads(event)
-                is BookDownloadError -> handleErrorEvent(event)
-            }
+            updateFromEvent(event)
         }.launchIn(coroutineScope)
-    }
-
-    private fun handleErrorEvent(event: BookDownloadError) {
-        if (event.book == null) {
-            val previousEvent = downloadsMap.value[event.bookId]
-            val newEvent =
-                if (previousEvent is BookDownloadProgress) event.copy(book = previousEvent.book)
-                else event
-            updateDownloads(newEvent)
-        } else {
-            updateDownloads(event)
-        }
     }
 
     fun onStorageLocationChange(directory: PlatformFile) {
@@ -64,16 +56,55 @@ class OfflineDownloadsState(
         coroutineScope.launch { settingsRepository.putDownloadDirectory(internalDownloadDir.platformFile) }
     }
 
-    private fun updateDownloads(event: DownloadEvent) {
-        downloadsMap.update {
-            val mutable = it.toMutableMap()
-            mutable[event.bookId] = event
-            mutable
+    fun onDownloadPause(bookId: KomgaBookId) = launchAndReload { taskEmitter.pauseBookDownload(bookId) }
+    fun onDownloadCancel(bookId: KomgaBookId) = launchAndReload { taskEmitter.cancelBookDownload(bookId) }
+    fun onDownloadRetry(bookId: KomgaBookId) = launchAndReload { taskEmitter.retryBookDownload(bookId) }
+    fun onTaskRemove(bookId: KomgaBookId) = launchAndReload { taskEmitter.removeDownloadTask(bookId) }
+    fun onTaskRemoveWithFiles(bookId: KomgaBookId) = launchAndReload {
+        taskEmitter.removeDownloadTaskAndFiles(bookId)
+    }
+
+    private fun launchAndReload(action: suspend () -> Unit) {
+        coroutineScope.launch {
+            action()
+            reload()
         }
     }
 
-    fun onDownloadCancel(bookId: KomgaBookId) {
-        coroutineScope.launch { taskEmitter.cancelBookDownload(bookId) }
+    private suspend fun reload() {
+        tasksMap.value = tasksRepository.findDownloads()
+            .associateBy { (it.task as DownloadBook).bookId }
+    }
+
+    private fun updateFromEvent(event: DownloadEvent) {
+        tasksMap.update { current ->
+            val previous = current[event.bookId] ?: TaskEntry(task = DownloadBook(event.bookId))
+            if (previous.status == PAUSED || previous.status == CANCELED) return@update current
+            val updated = when (event) {
+                is DownloadEvent.BookDownloadProgress -> previous.copy(
+                    status = RUNNING,
+                    completedBytes = maxOf(previous.completedBytes, event.completed),
+                    totalBytes = event.total,
+                    speedBytesPerSecond = event.speedBytesPerSecond,
+                    displayTitle = event.book.metadata.title,
+                    errorMessage = null,
+                )
+                is DownloadEvent.BookDownloadCompleted -> previous.copy(
+                    status = COMPLETED,
+                    completedBytes = previous.totalBytes,
+                    speedBytesPerSecond = 0,
+                    displayTitle = event.book.metadata.title,
+                    errorMessage = null,
+                )
+                is DownloadEvent.BookDownloadError -> previous.copy(
+                    status = FAILED,
+                    speedBytesPerSecond = 0,
+                    displayTitle = event.book?.metadata?.title ?: previous.displayTitle,
+                    errorMessage = event.error.message ?: event.error::class.simpleName,
+                )
+            }
+            current + (event.bookId to updated)
+        }
     }
 }
 

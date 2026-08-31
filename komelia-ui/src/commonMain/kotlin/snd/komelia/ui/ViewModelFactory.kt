@@ -8,10 +8,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.komga.api.KomgaApi
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.book.BookViewModel
 import snd.komelia.ui.collection.CollectionViewModel
 import snd.komelia.ui.color.ColorCorrectionViewModel
@@ -133,16 +135,21 @@ class ViewModelFactory(
     fun getLibraryViewModel(
         libraryId: KomgaLibraryId?,
     ): LibraryViewModel {
+        val selectedApi = if (libraryId?.isLocalLibrary() == true) {
+            dependencies.offlineDependencies?.komgaApi ?: komgaApi
+        } else {
+            komgaApi
+        }
         return LibraryViewModel(
-            libraryApi = komgaApi.libraryApi,
-            collectionApi = komgaApi.collectionsApi,
-            readListsApi = komgaApi.readListApi,
-            seriesApi = komgaApi.seriesApi,
-            referentialApi = komgaApi.referentialApi,
+            libraryApi = selectedApi.libraryApi,
+            collectionApi = selectedApi.collectionsApi,
+            readListsApi = selectedApi.readListApi,
+            seriesApi = selectedApi.seriesApi,
+            referentialApi = selectedApi.referentialApi,
 
             appNotifications = dependencies.appNotifications,
             komgaEvents = dependencies.komgaEvents.events,
-            libraryFlow = getLibraryFlow(libraryId),
+            libraryFlow = getLibraryFlow(libraryId, selectedApi),
             settingsRepository = appRepositories.settingsRepository,
             taskEmitter = dependencies.offlineDependencies?.taskEmitter,
         )
@@ -207,6 +214,7 @@ class ViewModelFactory(
             libraryApi = selectedApi.libraryApi,
             seriesApi = selectedApi.seriesApi,
             taskEmitter = dependencies.offlineDependencies?.taskEmitter,
+            localLibraryManager = dependencies.offlineDependencies?.localLibraryManager,
             bookApi = selectedApi.bookApi,
             collectionApi = selectedApi.collectionsApi,
             notifications = dependencies.appNotifications,
@@ -230,6 +238,7 @@ class ViewModelFactory(
             settingsRepository = appRepositories.settingsRepository,
             readListApi = selectedApi.readListApi,
             taskEmitter = dependencies.offlineDependencies?.taskEmitter,
+            localLibraryManager = dependencies.offlineDependencies?.localLibraryManager,
         )
     }
 
@@ -250,6 +259,7 @@ class ViewModelFactory(
             notifications = dependencies.appNotifications,
             libraries = dependencies.komgaSharedState.libraries,
             taskEmitter = dependencies.offlineDependencies?.taskEmitter,
+            localLibraryManager = dependencies.offlineDependencies?.localLibraryManager,
             settingsRepository = appRepositories.settingsRepository,
             readListApi = selectedApi.readListApi,
             collectionApi = selectedApi.collectionsApi,
@@ -734,6 +744,7 @@ class ViewModelFactory(
             seriesDeleteAction = offlineDependencies.actions.get(),
 
             taskEmitter = offlineDependencies.taskEmitter,
+            tasksRepository = offlineDependencies.repositories.tasksRepository,
             downloadEvents = offlineDependencies.bookDownloadEvents
         )
     }
@@ -760,8 +771,9 @@ class ViewModelFactory(
 
     fun getLibraries(): StateFlow<List<KomgaLibrary>> = dependencies.komgaSharedState.libraries
 
-    private fun getLibraryFlow(id: KomgaLibraryId?): Flow<KomgaLibrary?> {
+    private fun getLibraryFlow(id: KomgaLibraryId?, api: KomgaApi = komgaApi): Flow<KomgaLibrary?> {
         if (id == null) return flowOf(null)
+        if (id.isLocalLibrary()) return flow { emit(api.libraryApi.getLibrary(id)) }
         return dependencies.komgaSharedState.libraries.map { libraries -> libraries.firstOrNull { it.id == id } }
     }
 

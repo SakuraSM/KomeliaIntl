@@ -103,6 +103,7 @@ class EpubReaderViewModel(
 interface EpubReaderState {
     val state: StateFlow<LoadState<Unit>>
     val book: StateFlow<KomeliaBook?>
+    val contentReady: StateFlow<Boolean>
     suspend fun initialize(navigator: Navigator)
     fun onWebviewCreated(webview: KomeliaWebview)
     fun onBackButtonPress()

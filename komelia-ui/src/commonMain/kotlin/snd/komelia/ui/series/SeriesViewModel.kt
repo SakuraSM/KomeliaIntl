@@ -27,6 +27,7 @@ import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.komga.api.KomgaReferentialApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LoadState.Error
@@ -50,6 +51,7 @@ class SeriesViewModel(
     private val libraryApi: KomgaLibraryApi,
     private val seriesApi: KomgaSeriesApi,
     private val taskEmitter: OfflineTaskEmitter?,
+    localLibraryManager: LocalLibraryManager?,
     bookApi: KomgaBookApi,
     collectionApi: KomgaCollectionsApi,
     referentialApi: KomgaReferentialApi,
@@ -75,7 +77,8 @@ class SeriesViewModel(
         screenModelScope = screenModelScope,
         cardWidth = cardWidth,
         referentialApi = referentialApi,
-        taskEmitter = taskEmitter
+        taskEmitter = taskEmitter,
+        localLibraryManager = localLibraryManager,
     )
     val collectionsState = SeriesCollectionsState(
         series = this.series,

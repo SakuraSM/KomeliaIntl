@@ -25,6 +25,7 @@ import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LoadState.Error
@@ -58,6 +59,7 @@ class OneshotViewModel(
     private val notifications: AppNotifications,
     private val libraries: StateFlow<List<KomgaLibrary>>,
     private val taskEmitter: OfflineTaskEmitter?,
+    localLibraryManager: LocalLibraryManager?,
     settingsRepository: CommonSettingsRepository,
     readListApi: KomgaReadListApi,
     collectionApi: KomgaCollectionsApi,
@@ -74,6 +76,7 @@ class OneshotViewModel(
         notifications = notifications,
         scope = screenModelScope,
         taskEmitter = taskEmitter,
+        localLibraryManager = localLibraryManager,
         onReadProgressChanged = { reload() },
     )
 

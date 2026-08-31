@@ -732,6 +732,7 @@
   },
   "epubreader": {
     "current_chapter": "Current chapter",
+    "loading_book": "Preparing your book…",
     "page_of": "Page {page} of {count}",
     "settings": {
       "column_count": "Column count",

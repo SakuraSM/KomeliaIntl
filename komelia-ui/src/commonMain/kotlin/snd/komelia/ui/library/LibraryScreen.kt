@@ -61,6 +61,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_collections
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_readlists
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_series
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_source
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries_unavailable
 import org.jetbrains.compose.resources.stringResource
@@ -102,6 +103,7 @@ import snd.komga.client.common.KomgaAuthor
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.series.KomgaSeriesStatus
+import snd.komelia.offline.local.isLocalLibrary
 import kotlin.jvm.Transient
 
 class LibraryScreen(
@@ -120,7 +122,17 @@ class LibraryScreen(
         val viewModelFactory = LocalViewModelFactory.current
         val vm = rememberScreenModel(libraryId?.value) { viewModelFactory.getLibraryViewModel(libraryId) }
         val reloadEvents = LocalReloadEvents.current
-        val libraries = LocalLibraries.current.collectAsState().value
+        val remoteLibraries = LocalLibraries.current.collectAsState().value
+        val localLibrariesVm = rememberScreenModel("local-library-scopes") {
+            viewModelFactory.getLocalLibraryViewModel()
+        }
+        LaunchedEffect(Unit) { localLibrariesVm.initialize() }
+        val libraryScopes = remember(remoteLibraries, localLibrariesVm.libraries) {
+            mergeLibraryScopes(
+                remote = remoteLibraries.map { LibraryScopeItem(it.id, it.name, it.unavailable, false) },
+                local = localLibrariesVm.libraries.map { LibraryScopeItem(it.id, it.name, it.unavailable, true) },
+            )
+        }
         val width = LocalWindowWidth.current
         val libraryActions = remember(vm) { vm.libraryActions() }
 
@@ -130,8 +142,8 @@ class LibraryScreen(
             reloadEvents.collect { vm.reload() }
         }
 
-        LaunchedEffect(libraryId, libraries) {
-            if (libraryId != null && libraries.isNotEmpty() && libraries.none { it.id == libraryId }) {
+        LaunchedEffect(libraryId, libraryScopes) {
+            if (libraryId != null && libraryScopes.isNotEmpty() && libraryScopes.none { it.id == libraryId }) {
                 navigator.replaceAll(LibraryScreen(initialTab = vm.currentTab))
             }
         }
@@ -158,7 +170,7 @@ class LibraryScreen(
                     Row {
                         if (width == FULL) {
                             LibrarySupportingPane(
-                                libraries = libraries,
+                                libraries = libraryScopes,
                                 selectedLibraryId = libraryId,
                                 onSelect = onScopeSelected,
                             )
@@ -176,7 +188,7 @@ class LibraryScreen(
                                 ) {
                                     LibraryToolBar(
                                         library = vm.library.collectAsState().value,
-                                        libraries = libraries,
+                                        libraries = libraryScopes,
                                         showScopeSelector = width != FULL,
                                         selectedLibraryId = libraryId,
                                         onLibrarySelect = onScopeSelected,
@@ -321,9 +333,9 @@ class LibraryScreen(
 }
 
 @Composable
-fun LibraryToolBar(
+private fun LibraryToolBar(
     library: KomgaLibrary?,
-    libraries: List<KomgaLibrary>,
+    libraries: List<LibraryScopeItem>,
     showScopeSelector: Boolean,
     selectedLibraryId: KomgaLibraryId?,
     onLibrarySelect: (KomgaLibraryId?) -> Unit,
@@ -371,7 +383,7 @@ fun LibraryToolBar(
                     Text(library?.name ?: stringResource(Res.string.library_all_libraries))
                 }
 
-                if (library != null && (isAdmin || isOffline)) {
+                if (library != null && !library.id.isLocalLibrary() && (isAdmin || isOffline)) {
                     Box {
                         IconButton(
                             onClick = { showOptionsMenu = true }
@@ -433,7 +445,7 @@ fun LibraryToolBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MobileLibraryScopeBar(
-    libraries: List<KomgaLibrary>,
+    libraries: List<LibraryScopeItem>,
     selectedLibraryId: KomgaLibraryId?,
     onSelect: (KomgaLibraryId?) -> Unit,
 ) {
@@ -448,6 +460,8 @@ private fun MobileLibraryScopeBar(
             addAll(libraries.filterNot { it.id == selectedLibraryId })
         }
     }
+    val visibleLibraries = remember(orderedLibraries) { orderedLibraries.take(2) }
+    val overflowLibraries = remember(orderedLibraries) { orderedLibraries.drop(2) }
 
     if (showLibraryAddDialog) {
         LibraryEditDialogs(library = null, onDismissRequest = { showLibraryAddDialog = false })
@@ -467,7 +481,7 @@ private fun MobileLibraryScopeBar(
                 border = null,
             )
         }
-        if (libraries.size > 3) {
+        if (overflowLibraries.isNotEmpty()) {
             item("more-libraries") {
                 FilterChip(
                     selected = false,
@@ -479,7 +493,7 @@ private fun MobileLibraryScopeBar(
                 )
             }
         }
-        items(orderedLibraries, key = { it.id.value }) { item ->
+        items(visibleLibraries, key = { it.id.value }) { item ->
             FilterChip(
                 selected = item.id == selectedLibraryId,
                 onClick = { onSelect(item.id) },
@@ -504,7 +518,7 @@ private fun MobileLibraryScopeBar(
                 modifier = Modifier.padding(horizontal = layout.dialogContentPadding),
             )
             LibraryScopeItems(
-                libraries = libraries,
+                libraries = overflowLibraries,
                 selectedLibraryId = selectedLibraryId,
                 onSelect = {
                     expanded = false
@@ -528,7 +542,7 @@ private fun MobileLibraryScopeBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LibraryScopeSelector(
-    libraries: List<KomgaLibrary>,
+    libraries: List<LibraryScopeItem>,
     selectedLibraryId: KomgaLibraryId?,
     onSelect: (KomgaLibraryId?) -> Unit,
 ) {
@@ -605,7 +619,7 @@ private fun LibraryScopeSelector(
 
 @Composable
 private fun LibrarySupportingPane(
-    libraries: List<KomgaLibrary>,
+    libraries: List<LibraryScopeItem>,
     selectedLibraryId: KomgaLibraryId?,
     onSelect: (KomgaLibraryId?) -> Unit,
 ) {
@@ -644,7 +658,7 @@ private fun LibrarySupportingPane(
 
 @Composable
 private fun LibraryScopeItems(
-    libraries: List<KomgaLibrary>,
+    libraries: List<LibraryScopeItem>,
     selectedLibraryId: KomgaLibraryId?,
     onSelect: (KomgaLibraryId?) -> Unit,
     onAddLibrary: () -> Unit,
@@ -662,10 +676,10 @@ private fun LibraryScopeItems(
         libraries.forEach { library ->
             LibraryScopeRow(
                 label = library.name,
-                supportingText = if (library.unavailable) {
-                    stringResource(Res.string.navbar_libraries_unavailable)
-                } else {
-                    null
+                supportingText = when {
+                    library.unavailable -> stringResource(Res.string.navbar_libraries_unavailable)
+                    library.isLocal -> stringResource(Res.string.local_source)
+                    else -> null
                 },
                 selected = selectedLibraryId == library.id,
                 onClick = { onSelect(library.id) },
@@ -681,7 +695,7 @@ private fun LibraryScopeItems(
 
 @Composable
 private fun LibraryScopeMenuItems(
-    libraries: List<KomgaLibrary>,
+    libraries: List<LibraryScopeItem>,
     selectedLibraryId: KomgaLibraryId?,
     onSelect: (KomgaLibraryId?) -> Unit,
     onAddLibrary: () -> Unit,
@@ -706,6 +720,12 @@ private fun LibraryScopeMenuItems(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error,
                         )
+                    } else if (library.isLocal) {
+                        Text(
+                            stringResource(Res.string.local_source),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             },
@@ -722,6 +742,23 @@ private fun LibraryScopeMenuItems(
         onClick = onAddLibrary,
         leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
     )
+}
+
+internal data class LibraryScopeItem(
+    val id: KomgaLibraryId,
+    val name: String,
+    val unavailable: Boolean,
+    val isLocal: Boolean,
+)
+
+internal fun mergeLibraryScopes(
+    remote: List<LibraryScopeItem>,
+    local: List<LibraryScopeItem>,
+): List<LibraryScopeItem> {
+    val localIds = local.mapTo(mutableSetOf()) { it.id }
+    return remote
+        .filterNot { it.id in localIds }
+        .distinctBy { it.id } + local.distinctBy { it.id }
 }
 
 @Composable

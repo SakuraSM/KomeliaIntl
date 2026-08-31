@@ -7,6 +7,29 @@ import kotlin.test.assertTrue
 
 class OfflineCacheCatalogTest {
     @Test
+    fun localSourceBooksNeverAppearInTheRemoteDownloadCache() {
+        val catalog = buildOfflineCacheCatalog(
+            series = listOf(
+                OfflineCacheSeriesRecord("remote-series", "Remote", "remote-library"),
+                OfflineCacheSeriesRecord("local-series", "Local", "local-library-device"),
+            ),
+            books = listOf(
+                book("remote-book", "remote-series", OfflineCacheMediaKind.COMIC, 10),
+                book(
+                    "local-book",
+                    "local-series",
+                    OfflineCacheMediaKind.EPUB,
+                    20,
+                    libraryId = "local-library-device",
+                ),
+            ),
+        )
+
+        assertEquals(listOf("remote-book"), catalog.books.map { it.id })
+        assertEquals(listOf("remote-series"), catalog.series.map { it.id })
+    }
+
+    @Test
     fun catalogGroupsBooksAndKeepsOrphansVisible() {
         val catalog = buildOfflineCacheCatalog(
             series = listOf(OfflineCacheSeriesRecord("series-1", "Series one")),
@@ -60,6 +83,7 @@ class OfflineCacheCatalogTest {
         kind: OfflineCacheMediaKind,
         size: Long,
         available: Boolean = true,
+        libraryId: String = "remote-library",
     ) = OfflineCacheBookRecord(
         id = id,
         seriesId = seriesId,
@@ -68,5 +92,6 @@ class OfflineCacheCatalogTest {
         sizeBytes = size,
         updatedEpochSeconds = 1,
         isAvailable = available,
+        libraryId = libraryId,
     )
 }

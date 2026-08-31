@@ -55,6 +55,7 @@ class KomgaEpubReaderState(
 ) : EpubReaderState {
     override val state = MutableStateFlow<LoadState<Unit>>(Uninitialized)
     override val book = MutableStateFlow(book)
+    override val contentReady = MutableStateFlow(false)
 
     val bookId = MutableStateFlow(bookId)
     private val webview = MutableStateFlow<KomeliaWebview?>(null)
@@ -76,6 +77,7 @@ class KomgaEpubReaderState(
     }
 
     override fun onWebviewCreated(webview: KomeliaWebview) {
+        contentReady.value = false
         this.webview.value = webview
         coroutineScope.launch { loadEpub(webview) }
     }
@@ -172,6 +174,9 @@ class KomgaEpubReaderState(
         webview.bind<Unit, Unit>("toggleFullscreen") {
             val fullscreen = windowState.isFullscreen.first()
             windowState.setFullscreen(!fullscreen)
+        }
+        webview.bind<Unit, Unit>("readerContentReady") {
+            contentReady.value = true
         }
 
         webview.registerRequestInterceptor { request ->

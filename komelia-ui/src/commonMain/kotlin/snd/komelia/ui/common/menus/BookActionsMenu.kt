@@ -25,6 +25,9 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_dow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download_confirm
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_edit
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_exclude_local
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_exclude_local_confirm_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_exclude_local_confirm_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_mark_read
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_mark_unread
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_refresh_metadata
@@ -37,6 +40,7 @@ import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.local.isLocalLibrary
+import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineAvailable
@@ -60,6 +64,7 @@ fun BookActionsMenu(
     val isOffline = LocalOfflineMode.current.collectAsState().value
     val isLocalBook = book.libraryId.isLocalLibrary()
     var showDeleteDownloadedDialog by remember { mutableStateOf(false) }
+    var showExcludeLocalDialog by remember { mutableStateOf(false) }
 
     if (showDeleteDownloadedDialog) {
         ConfirmationDialog(
@@ -74,6 +79,21 @@ fun BookActionsMenu(
                 onDismissRequest()
             },
             buttonConfirmColor = MaterialTheme.colorScheme.errorContainer
+        )
+    }
+
+    if (showExcludeLocalDialog) {
+        ConfirmationDialog(
+            title = stringResource(Res.string.book_exclude_local_confirm_title),
+            body = stringResource(Res.string.book_exclude_local_confirm_body, book.metadata.title),
+            onDialogConfirm = {
+                actions.delete(book)
+                onDismissRequest()
+            },
+            onDialogDismiss = {
+                showExcludeLocalDialog = false
+                onDismissRequest()
+            },
         )
     }
 
@@ -108,7 +128,9 @@ fun BookActionsMenu(
         }
     }
 
-    val showDropdown = derivedStateOf { expanded && !showEditDialog }
+    val showDropdown = derivedStateOf {
+        expanded && !showEditDialog && !showExcludeLocalDialog && !showDeleteDownloadedDialog
+    }
     DropdownMenu(
         expanded = showDropdown.value,
         onDismissRequest = onDismissRequest
@@ -188,6 +210,12 @@ fun BookActionsMenu(
             )
 
         }
+        if (isLocalBook) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.book_exclude_local)) },
+                onClick = { showExcludeLocalDialog = true },
+            )
+        }
     }
 }
 
@@ -205,6 +233,7 @@ data class BookMenuActions(
         notifications: AppNotifications,
         scope: CoroutineScope,
         taskEmitter: OfflineTaskEmitter?,
+        localLibraryManager: LocalLibraryManager? = null,
         onReadProgressChanged: (KomeliaBook) -> Unit = {},
     ) : this(
         analyze = {
@@ -246,8 +275,14 @@ data class BookMenuActions(
                 )
             }
         },
-        delete = {
-            notifications.runCatchingToNotifications(scope) { bookApi.deleteBook(it.id) }
+        delete = { book ->
+            notifications.runCatchingToNotifications(scope) {
+                if (book.libraryId.isLocalLibrary()) {
+                    checkNotNull(localLibraryManager).excludeBook(book.id)
+                } else {
+                    bookApi.deleteBook(book.id)
+                }
+            }
         },
         download = { scope.launch { checkNotNull(taskEmitter).downloadBook(it.id) } },
         deleteDownloaded = { scope.launch { checkNotNull(taskEmitter).deleteBook(it.id) } }

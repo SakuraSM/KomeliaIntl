@@ -10,11 +10,10 @@ import io.github.vinceglb.filekit.name
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.library.model.OfflineLibrary
 import snd.komelia.offline.local.LocalLibraryManager
+import snd.komelia.offline.local.LocalBookExclusion
 import snd.komelia.offline.local.LocalLibraryScanState
-import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.library.ScanInterval
 
@@ -23,13 +22,7 @@ class LocalLibraryViewModel(
 ) : ScreenModel {
     var libraries by mutableStateOf<List<OfflineLibrary>>(emptyList())
         private set
-    var books by mutableStateOf<List<KomeliaBook>>(emptyList())
-        private set
-    var currentPage by mutableStateOf(1)
-        private set
-    var totalPages by mutableStateOf(0)
-        private set
-    var totalBooks by mutableStateOf(0)
+    var excludedBooks by mutableStateOf<List<LocalBookExclusion>>(emptyList())
         private set
     var loading by mutableStateOf(false)
         private set
@@ -53,15 +46,12 @@ class LocalLibraryViewModel(
 
     fun remove(libraryId: KomgaLibraryId) = launchAction { manager?.removeLibrary(libraryId) }
 
-    fun setScheduled(libraryId: KomgaLibraryId, enabled: Boolean) = launchAction {
-        manager?.updateScanInterval(libraryId, if (enabled) ScanInterval.HOURLY else ScanInterval.DISABLED)
+    fun restore(exclusion: LocalBookExclusion) = launchAction {
+        manager?.restoreExcludedBook(exclusion.libraryId, exclusion.relativePath)
     }
 
-    fun setPage(page: Int) {
-        val target = page.coerceIn(1, totalPages.coerceAtLeast(1))
-        if (target == currentPage) return
-        currentPage = target
-        reload()
+    fun setScheduled(libraryId: KomgaLibraryId, enabled: Boolean) = launchAction {
+        manager?.updateScanInterval(libraryId, if (enabled) ScanInterval.HOURLY else ScanInterval.DISABLED)
     }
 
     fun reload() = launchAction { }
@@ -73,19 +63,7 @@ class LocalLibraryViewModel(
             try {
                 action()
                 libraries = manager?.getLibraries().orEmpty()
-                var bookPage = manager?.getBooks(
-                    KomgaPageRequest(pageIndex = currentPage - 1, size = LOCAL_LIBRARY_PAGE_SIZE),
-                )
-                if (bookPage != null && bookPage.totalPages > 0 && currentPage > bookPage.totalPages) {
-                    currentPage = bookPage.totalPages
-                    bookPage = manager?.getBooks(
-                        KomgaPageRequest(pageIndex = currentPage - 1, size = LOCAL_LIBRARY_PAGE_SIZE),
-                    )
-                }
-                books = bookPage?.content.orEmpty()
-                totalPages = bookPage?.totalPages ?: 0
-                totalBooks = bookPage?.totalElements ?: 0
-                if (totalPages == 0) currentPage = 1
+                excludedBooks = manager?.getExcludedBooks().orEmpty()
             } catch (throwable: Throwable) {
                 error = throwable.message ?: throwable::class.simpleName
             } finally {
@@ -94,7 +72,4 @@ class LocalLibraryViewModel(
         }
     }
 
-    private companion object {
-        const val LOCAL_LIBRARY_PAGE_SIZE = 24
-    }
 }

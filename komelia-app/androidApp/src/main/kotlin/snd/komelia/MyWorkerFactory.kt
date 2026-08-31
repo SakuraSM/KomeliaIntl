@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import snd.komelia.offline.OfflineDependencies
 import snd.komelia.offline.local.LocalLibraryScanWorker
 import snd.komelia.offline.sync.DownloadWorker
+import snd.komelia.offline.tasks.DownloadTaskTracker
 
 class MyWorkerFactory(
     private val dependenciesProvider: suspend (Context) -> OfflineDependencies?,
@@ -28,6 +29,7 @@ class MyWorkerFactory(
                     downloadService = currentDependencies.downloadService,
                     logsJournalRepository = currentDependencies.repositories.logJournalRepository,
                     sharedEvents = currentDependencies.bookDownloadEvents,
+                    downloadTaskTracker = DownloadTaskTracker(currentDependencies.repositories.tasksRepository),
                 )
                 LocalLibraryScanWorker::class.qualifiedName -> currentDependencies.localLibraryManager?.let { manager ->
                     LocalLibraryScanWorker(appContext, workerParameters, manager)

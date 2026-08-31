@@ -9,6 +9,7 @@ import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.offline.book.actions.BookDeleteAction
 import snd.komelia.offline.book.repository.OfflineBookRepository
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.offline.media.repository.OfflineMediaRepository
 import snd.komelia.offline.series.actions.SeriesDeleteAction
 import snd.komelia.offline.series.repository.OfflineSeriesRepository
@@ -40,6 +41,7 @@ internal class OfflineCacheState(
 
     fun deleteBook(bookId: String) = runMutation {
         val book = bookRepository.get(snd.komga.client.book.KomgaBookId(bookId))
+        check(!book.libraryId.isLocalLibrary()) { "Local source files are not cache entries" }
         bookDeleteAction.execute(book.id)
         if (bookRepository.findAll(book.seriesId).isEmpty() && seriesRepository.find(book.seriesId) != null) {
             seriesDeleteAction.execute(book.seriesId)
@@ -47,12 +49,18 @@ internal class OfflineCacheState(
     }
 
     fun deleteSeries(seriesId: String) = runMutation {
-        seriesDeleteAction.execute(snd.komga.client.series.KomgaSeriesId(seriesId))
+        val series = seriesRepository.get(snd.komga.client.series.KomgaSeriesId(seriesId))
+        check(!series.libraryId.isLocalLibrary()) { "Local source files are not cache entries" }
+        seriesDeleteAction.execute(series.id)
     }
 
     fun deleteAll() = runMutation {
-        seriesRepository.findAll().forEach { seriesDeleteAction.execute(it.id) }
-        bookRepository.findAll().forEach { bookDeleteAction.execute(it.id) }
+        seriesRepository.findAll()
+            .filterNot { it.libraryId.isLocalLibrary() }
+            .forEach { seriesDeleteAction.execute(it.id) }
+        bookRepository.findAll()
+            .filterNot { it.libraryId.isLocalLibrary() }
+            .forEach { bookDeleteAction.execute(it.id) }
     }
 
     fun retry() {
@@ -80,7 +88,7 @@ internal class OfflineCacheState(
             val books = bookRepository.findAll()
             val mediaByBook = mediaRepository.findAll(books.map { it.id }).associateBy { it.bookId }
             _catalog.value = buildOfflineCacheCatalog(
-                series = series.map { OfflineCacheSeriesRecord(it.id.value, it.name) },
+                series = series.map { OfflineCacheSeriesRecord(it.id.value, it.name, it.libraryId.value) },
                 books = books.map { book ->
                     val profile = mediaByBook[book.id]?.mediaProfile
                     OfflineCacheBookRecord(
@@ -96,6 +104,7 @@ internal class OfflineCacheState(
                         sizeBytes = book.sizeBytes,
                         updatedEpochSeconds = book.localFileLastModified.epochSeconds,
                         isAvailable = isOfflineCacheFileAvailable(book.fileDownloadPath),
+                        libraryId = book.libraryId.value,
                     )
                 },
             )

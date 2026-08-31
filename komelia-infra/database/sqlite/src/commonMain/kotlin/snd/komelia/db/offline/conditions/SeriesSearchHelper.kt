@@ -69,7 +69,7 @@ class SeriesSearchHelper(
     }
 
     private fun KomgaSearchCondition.AnyOfSeries.toSeriesCondition(): Pair<Op<Boolean>, Set<RequiredJoin>> {
-        return this.conditions.fold(Op.TRUE to emptySet()) { (accOp, accJoins), cond ->
+        return this.conditions.fold(Op.FALSE to emptySet()) { (accOp, accJoins), cond ->
             val (op, joins) = toConditionInternal(cond)
             accOp.or(op) to (accJoins + joins)
         }

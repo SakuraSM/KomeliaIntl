@@ -30,7 +30,7 @@ class LocalContentScreen : ReloadableScreen {
             reloadEvents.collect { vm.reload() }
         }
 
-        ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
+        ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::refreshFromSources) {
             when (val state = vm.state.collectAsState().value) {
                 is LoadState.Error -> ErrorContent(state.exception, vm::reload)
                 LoadState.Uninitialized -> LoadingMaxSizeIndicator()

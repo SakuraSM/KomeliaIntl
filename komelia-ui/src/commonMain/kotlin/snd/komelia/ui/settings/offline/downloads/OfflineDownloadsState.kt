@@ -10,18 +10,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import snd.komelia.offline.settings.OfflineSettingsRepository
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.offline.tasks.model.TaskData.DownloadBook
 import snd.komelia.offline.tasks.model.TaskEntry
-import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.COMPLETED
-import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.CANCELED
-import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.FAILED
-import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.PAUSED
-import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.RUNNING
 import snd.komelia.offline.tasks.repository.OfflineTasksRepository
 import snd.komga.client.book.KomgaBookId
 
@@ -43,9 +37,9 @@ class OfflineDownloadsState(
 
     init {
         coroutineScope.launch { reload() }
-        downloadEvents.onEach { event ->
-            updateFromEvent(event)
-        }.launchIn(coroutineScope)
+        // The tracker persists each event before publishing it. Reloading the repository here keeps
+        // the UI aligned with restart recovery, pause/cancel guards, and background workers.
+        downloadEvents.onEach { reload() }.launchIn(coroutineScope)
     }
 
     fun onStorageLocationChange(directory: PlatformFile) {
@@ -76,36 +70,6 @@ class OfflineDownloadsState(
             .associateBy { (it.task as DownloadBook).bookId }
     }
 
-    private fun updateFromEvent(event: DownloadEvent) {
-        tasksMap.update { current ->
-            val previous = current[event.bookId] ?: TaskEntry(task = DownloadBook(event.bookId))
-            if (previous.status == PAUSED || previous.status == CANCELED) return@update current
-            val updated = when (event) {
-                is DownloadEvent.BookDownloadProgress -> previous.copy(
-                    status = RUNNING,
-                    completedBytes = maxOf(previous.completedBytes, event.completed),
-                    totalBytes = event.total,
-                    speedBytesPerSecond = event.speedBytesPerSecond,
-                    displayTitle = event.book.metadata.title,
-                    errorMessage = null,
-                )
-                is DownloadEvent.BookDownloadCompleted -> previous.copy(
-                    status = COMPLETED,
-                    completedBytes = previous.totalBytes,
-                    speedBytesPerSecond = 0,
-                    displayTitle = event.book.metadata.title,
-                    errorMessage = null,
-                )
-                is DownloadEvent.BookDownloadError -> previous.copy(
-                    status = FAILED,
-                    speedBytesPerSecond = 0,
-                    displayTitle = event.book?.metadata?.title ?: previous.displayTitle,
-                    errorMessage = event.error.message ?: event.error::class.simpleName,
-                )
-            }
-            current + (event.bookId to updated)
-        }
-    }
 }
 
 internal data class DefaultDownloadStorageLocation(

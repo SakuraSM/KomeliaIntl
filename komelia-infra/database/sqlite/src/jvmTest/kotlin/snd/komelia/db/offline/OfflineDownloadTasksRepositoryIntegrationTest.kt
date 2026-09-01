@@ -91,4 +91,26 @@ class OfflineDownloadTasksRepositoryIntegrationTest {
         assertEquals(100, repository.findDownloads().size)
         assertEquals("Updated", repository.find(tasks.first().uniqueName)?.displayTitle)
     }
+
+    @Test
+    fun restartOnlyRequeuesTasksThatWereRunning() = runBlocking {
+        val database = KomeliaDatabase(createTempDirectory("komelia-download-recovery-test").toString())
+        val repository = ExposedOfflineTasksRepository(database.offline)
+        val running = DownloadBook(KomgaBookId("running"))
+        val paused = DownloadBook(KomgaBookId("paused"))
+        val canceled = DownloadBook(KomgaBookId("canceled"))
+        repository.save(
+            listOf(
+                TaskEntry(task = running, status = RUNNING, completedBytes = 30),
+                TaskEntry(task = paused, status = PAUSED, completedBytes = 40),
+                TaskEntry(task = canceled, status = CANCELED, completedBytes = 50),
+            )
+        )
+
+        assertEquals(1, repository.resetAllRunning())
+        assertEquals(NEW, repository.find(running.uniqueName)?.status)
+        assertEquals(30L, repository.find(running.uniqueName)?.completedBytes)
+        assertEquals(PAUSED, repository.find(paused.uniqueName)?.status)
+        assertEquals(CANCELED, repository.find(canceled.uniqueName)?.status)
+    }
 }

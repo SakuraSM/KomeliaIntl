@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.model.KomeliaBook
@@ -45,6 +46,10 @@ class LocalContentViewModel(
     val sort = MutableStateFlow(LocalHomeBookSort.RECENTLY_ADDED)
     val currentPage = MutableStateFlow(1)
     val totalPages = MutableStateFlow(1)
+    private val sourceRefresh = LocalContentRefreshCoordinator(
+        scanSources = { localLibraryManager?.scanAll() },
+        reloadIndex = { loadPage(currentPage.value) },
+    )
 
     suspend fun initialize() {
         if (state.value !is LoadState.Uninitialized) return
@@ -62,7 +67,11 @@ class LocalContentViewModel(
                 manager.scanState
                     .drop(1)
                     .collect { scanState ->
-                        if (scanState.scanningLibraryId == null && scanState.error == null) {
+                        if (
+                            !sourceRefresh.isRefreshing &&
+                            scanState.scanningLibraryId == null &&
+                            scanState.error == null
+                        ) {
                             loadPage(1)
                         }
                     }
@@ -72,6 +81,16 @@ class LocalContentViewModel(
 
     fun reload() {
         screenModelScope.launch { loadPage(currentPage.value) }
+    }
+
+    fun refreshFromSources() {
+        screenModelScope.launch {
+            appNotifications.runCatchingToNotifications {
+                sourceRefresh.refresh {
+                    mutableState.value = LoadState.Loading
+                }
+            }.onFailure { mutableState.value = LoadState.Error(it) }
+        }
     }
 
     fun onPageChange(page: Int) {
@@ -123,3 +142,23 @@ internal data class LocalContentQuery(
     val source: AvailableBookSource,
     val sort: LocalHomeBookSort,
 )
+
+internal class LocalContentRefreshCoordinator(
+    private val scanSources: suspend () -> Unit,
+    private val reloadIndex: suspend () -> Unit,
+) {
+    private val mutex = Mutex()
+    val isRefreshing: Boolean get() = mutex.isLocked
+
+    suspend fun refresh(onStart: () -> Unit = {}): Boolean {
+        if (!mutex.tryLock()) return false
+        return try {
+            onStart()
+            scanSources()
+            reloadIndex()
+            true
+        } finally {
+            mutex.unlock()
+        }
+    }
+}

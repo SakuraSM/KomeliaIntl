@@ -7,7 +7,7 @@ import snd.komga.client.common.KomgaSort
 internal const val LOCAL_HOME_BOOK_PAGE_SIZE = 20
 internal const val REMOTE_DOWNLOADED_HOME_BOOK_PAGE_SIZE = 20
 
-internal enum class LocalHomeBookSort {
+enum class LocalHomeBookSort {
     RECENTLY_ADDED,
     FILE_MODIFIED,
     TITLE,

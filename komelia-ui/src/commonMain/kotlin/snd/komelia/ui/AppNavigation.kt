@@ -9,6 +9,7 @@ import snd.komga.client.library.KomgaLibraryId
 enum class AppDestination {
     LIBRARY,
     HOME,
+    LOCAL,
     SEARCH,
     SETTINGS,
 }

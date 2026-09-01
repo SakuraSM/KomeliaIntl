@@ -46,44 +46,36 @@ class HomeConfigurationRefreshTest {
 
     @Test
     fun removedActiveGroupFallsBackToAll() {
-        assertEquals(0, reconcileActiveHomeFilter(activeFilterNumber = 4, filterCount = 3))
-        assertEquals(2, reconcileActiveHomeFilter(activeFilterNumber = 2, filterCount = 3))
-    }
-
-    @Test
-    fun builtInSourceTabsSurviveReloadsWhileTheirContentExists() {
         assertEquals(
-            HOME_LOCAL_BOOKS_TAB_ID,
+            0,
             reconcileActiveHomeFilter(
-                activeFilterNumber = HOME_LOCAL_BOOKS_TAB_ID,
-                filterCount = 3,
-                hasLocalBooks = true,
+                activeFilterNumber = 4,
+                availableFilterNumbers = listOf(1, 2, 3),
             ),
         )
         assertEquals(
-            HOME_SERVER_DOWNLOADS_TAB_ID,
+            2,
             reconcileActiveHomeFilter(
-                activeFilterNumber = HOME_SERVER_DOWNLOADS_TAB_ID,
-                filterCount = 3,
-                hasRemoteDownloadedBooks = true,
+                activeFilterNumber = 2,
+                availableFilterNumbers = listOf(1, 2, 3),
             ),
         )
     }
 
     @Test
-    fun emptyBuiltInSourceTabFallsBackToOverview() {
+    fun activeGroupUsesPersistedOrderInsteadOfListIndex() {
         assertEquals(
-            0,
+            7,
             reconcileActiveHomeFilter(
-                activeFilterNumber = HOME_LOCAL_BOOKS_TAB_ID,
-                filterCount = 3,
+                activeFilterNumber = 7,
+                availableFilterNumbers = listOf(2, 7, 11),
             ),
         )
         assertEquals(
             0,
             reconcileActiveHomeFilter(
-                activeFilterNumber = HOME_SERVER_DOWNLOADS_TAB_ID,
-                filterCount = 3,
+                activeFilterNumber = 3,
+                availableFilterNumbers = listOf(2, 7, 11),
             ),
         )
     }

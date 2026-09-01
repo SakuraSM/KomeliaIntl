@@ -230,7 +230,7 @@ private fun BookImageOverlay(
 }
 
 @Composable
-private fun DownloadedBookBadge(
+fun DownloadedBookBadge(
     needsUpdate: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -458,21 +458,14 @@ private fun BookDetailedListDetails(
     val width = LocalWindowWidth.current
     val layout = LocalKomeliaLayout.current
     Column(Modifier.padding(start = layout.itemSpacing)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
-        ) {
-            Text(
-                book.metadata.title,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f),
-                maxLines = when (width) {
-                    COMPACT, MEDIUM -> 2
-                    else -> 4
-                }
-            )
-            if (book.libraryId.isLocalLibrary()) LocalSourceBadge()
-        }
+        Text(
+            book.metadata.title,
+            fontWeight = FontWeight.Bold,
+            maxLines = when (width) {
+                COMPACT, MEDIUM -> 2
+                else -> 4
+            }
+        )
 
         Text(
             stringResource(Res.string.book_pages, book.media.pagesCount),

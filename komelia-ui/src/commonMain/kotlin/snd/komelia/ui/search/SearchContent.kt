@@ -17,6 +17,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,6 +32,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_books_tab
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_no_results_body
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_no_results_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_offline_only
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_remote_only
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_series_tab
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
@@ -45,6 +51,7 @@ import snd.komga.client.series.KomgaSeries
 fun SearchContent(
     query: String,
     searchType: SearchResultsTab,
+    coverage: SearchCoverage,
     onSearchTypeChange: (SearchResultsTab) -> Unit,
 
     bookResults: List<KomeliaBook>,
@@ -83,6 +90,10 @@ fun SearchContent(
                 hasBooks = bookResults.isNotEmpty(),
                 modifier = widthModifier
             )
+
+            if (coverage != SearchCoverage.COMPLETE) {
+                SearchCoverageBanner(coverage, widthModifier)
+            }
 
             LazyColumn(
                 state = scrollState,
@@ -131,6 +142,38 @@ fun SearchContent(
         }
 
         VerticalScrollbar(scrollState, Modifier.align(Alignment.TopEnd))
+    }
+}
+
+@Composable
+private fun SearchCoverageBanner(coverage: SearchCoverage, modifier: Modifier) {
+    val offlineOnly = coverage == SearchCoverage.OFFLINE_ONLY
+    Surface(
+        modifier = modifier.padding(bottom = LocalKomeliaLayout.current.controlSpacing),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(LocalKomeliaLayout.current.controlSpacing),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(
+                horizontal = LocalKomeliaLayout.current.cardContentPadding,
+                vertical = LocalKomeliaLayout.current.controlSpacing,
+            ),
+        ) {
+            Icon(
+                imageVector = if (offlineOnly) Icons.Rounded.CloudOff else Icons.Rounded.Storage,
+                contentDescription = null,
+            )
+            Text(
+                text = stringResource(
+                    if (offlineOnly) Res.string.search_offline_only else Res.string.search_remote_only,
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 

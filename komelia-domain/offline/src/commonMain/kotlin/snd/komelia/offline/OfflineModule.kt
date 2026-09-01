@@ -55,6 +55,7 @@ import snd.komelia.offline.library.actions.LibraryRefreshMetadataAction
 import snd.komelia.offline.library.actions.LibraryScanAction
 import snd.komelia.offline.library.repository.OfflineLibraryRepository
 import snd.komelia.offline.local.LocalLibraryManager
+import snd.komelia.offline.local.AvailableBooksRepository
 import snd.komelia.offline.local.createLocalLibraryPlatform
 import snd.komelia.offline.media.repository.OfflineMediaRepository
 import snd.komelia.offline.mediacontainer.BookContentExtractors
@@ -200,6 +201,7 @@ abstract class OfflineModule(
                 komgaEvents = komgaEvents,
             ).also { it.startScheduledScanning() }
         }
+        val availableBooksRepository = AvailableBooksRepository(repositories)
 
         val offlineServerFlow = offlineUserId
             .map { repositories.mediaServerRepository.findByUserId(it) }
@@ -294,6 +296,7 @@ abstract class OfflineModule(
             repositories = repositories,
             fileService = fileService,
             komgaApi = komgaApi,
+            availableBooksRepository = availableBooksRepository,
             localLibraryManager = localLibraryManager,
         )
     }

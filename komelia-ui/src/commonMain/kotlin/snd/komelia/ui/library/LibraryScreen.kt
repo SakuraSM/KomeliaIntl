@@ -110,7 +110,6 @@ class LibraryScreen(
     val libraryId: KomgaLibraryId? = null,
     @Transient
     private val seriesFilter: SeriesScreenFilter? = null,
-    @Transient
     private val initialTab: LibraryTab = SERIES,
 ) : ReloadableScreen {
 
@@ -137,7 +136,7 @@ class LibraryScreen(
         val libraryActions = remember(vm) { vm.libraryActions() }
 
         LaunchedEffect(libraryId) {
-            vm.selectTab(initialTab)
+            vm.selectTab(resolveRestoredLibraryTab(initialTab))
             vm.initialize(seriesFilter)
             reloadEvents.collect { vm.reload() }
         }
@@ -330,7 +329,12 @@ class LibraryScreen(
         }
     }
 
+    private companion object {
+        private const val serialVersionUID = 4825294352688731390L
+    }
 }
+
+internal fun resolveRestoredLibraryTab(tab: LibraryTab?): LibraryTab = tab ?: SERIES
 
 @Composable
 private fun LibraryToolBar(

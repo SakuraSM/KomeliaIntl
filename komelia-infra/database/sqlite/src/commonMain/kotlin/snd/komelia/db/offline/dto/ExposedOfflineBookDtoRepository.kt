@@ -19,6 +19,7 @@ import org.jetbrains.exposed.v1.core.intLiteral
 import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.max
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.Query
 import org.jetbrains.exposed.v1.jdbc.andWhere
@@ -203,7 +204,7 @@ class ExposedOfflineBookDtoRepository(
             .where { conditions }
             .apply {
                 if (searchTerm != null) andWhere {
-                    OfflineSeriesMetadataTable.title.like("%${searchTerm}%")
+                    bookTextSearch(searchTerm)
                 }
                 if (userId != OfflineUser.ROOT) {
                     andWhere { bookTable.libraryId.inSubQuery(librariesCondition) }
@@ -219,7 +220,7 @@ class ExposedOfflineBookDtoRepository(
             .where { conditions }
             .apply {
                 if (searchTerm != null) andWhere {
-                    OfflineSeriesMetadataTable.title.like("%${searchTerm}%")
+                    bookTextSearch(searchTerm)
                 }
                 if (userId != OfflineUser.ROOT) {
                     andWhere { bookTable.libraryId.inSubQuery(librariesCondition) }
@@ -230,6 +231,14 @@ class ExposedOfflineBookDtoRepository(
 
 
         return page(result, pageRequest, count, orderBy.isNotEmpty())
+    }
+
+    private fun bookTextSearch(searchTerm: String): Op<Boolean> {
+        val pattern = "%$searchTerm%"
+        return seriesMetaTable.title.like(pattern) or
+            seriesMetaTable.titleSort.like(pattern) or
+            bookMetaTable.title.like(pattern) or
+            bookTable.name.like(pattern)
     }
 
     override suspend fun get(

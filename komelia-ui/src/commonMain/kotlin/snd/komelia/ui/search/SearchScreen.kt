@@ -56,6 +56,7 @@ class SearchScreen(
                         SearchContent(
                             query = vm.query,
                             searchType = vm.currentTab,
+                            coverage = vm.currentCoverage,
                             onSearchTypeChange = vm::onSearchTypeChange,
 
                             seriesResults = vm.seriesResults,

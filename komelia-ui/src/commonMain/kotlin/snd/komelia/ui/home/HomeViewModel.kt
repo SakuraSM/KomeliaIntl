@@ -30,10 +30,8 @@ import snd.komelia.homefilters.HomeScreenFilterRepository
 import snd.komelia.homefilters.SeriesHomeScreenFilter
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaSeriesApi
-import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.offline.local.LocalLibraryManager
-import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LoadState.Uninitialized
 import snd.komelia.ui.common.cards.defaultCardWidth
@@ -54,6 +52,8 @@ private val logger = KotlinLogging.logger { }
 class HomeViewModel(
     private val seriesApi: KomgaSeriesApi,
     private val bookApi: KomgaBookApi,
+    private val offlineSeriesApi: KomgaSeriesApi?,
+    private val offlineBookApi: KomgaBookApi?,
     private val appNotifications: AppNotifications,
     private val komgaEvents: SharedFlow<KomgaEvent>,
     private val filterRepository: HomeScreenFilterRepository,
@@ -68,10 +68,6 @@ class HomeViewModel(
 
     val currentFilters = MutableStateFlow(emptyList<HomeFilterData>())
     val activeFilterNumber = MutableStateFlow(0)
-    val localBooks = MutableStateFlow(emptyList<KomeliaBook>())
-    val remoteDownloadedBooks = MutableStateFlow(emptyList<KomeliaBook>())
-    internal val localBookSort = MutableStateFlow(LocalHomeBookSort.RECENTLY_ADDED)
-    internal val remoteDownloadedBookSort = MutableStateFlow(LocalHomeBookSort.RECENTLY_ADDED)
 
     suspend fun initialize() {
         if (state.value !is Uninitialized) return
@@ -93,86 +89,151 @@ class HomeViewModel(
         appNotifications.runCatchingToNotifications {
             mutableState.value = LoadState.Loading
 
+            val localLibraryIds = runCatching {
+                localLibraryManager?.getLibraries()?.map { it.id }.orEmpty()
+            }.onFailure { logger.catching(it) }.getOrDefault(emptyList())
             val loadedFilters = coroutineScope {
                 orderedHomeScreenFilters(filters)
                     .map { it.withLocalizedDefaultLabel() }
-                    .map { async { fetchFilterData(it) } }
+                    .map { async { fetchFilterData(it, localLibraryIds) } }
                     .awaitAll()
                     .filterNotNull()
             }
             currentFilters.value = loadedFilters
-
-            localBooks.value = runCatching {
-                localLibraryManager
-                    ?.getBooks(localBookSort.value.pageRequest())
-                    ?.content
-                    .orEmpty()
-            }.onFailure { logger.catching(it) }.getOrDefault(emptyList())
-
-            remoteDownloadedBooks.value = runCatching {
-                localLibraryManager
-                    ?.getRemoteDownloadedBooks(remoteDownloadedBooksPageRequest(remoteDownloadedBookSort.value))
-                    ?.content
-                    .orEmpty()
-            }.onFailure { logger.catching(it) }.getOrDefault(emptyList())
-
             activeFilterNumber.value = reconcileActiveHomeFilter(
                 activeFilterNumber = activeFilterNumber.value,
-                filterCount = currentFilters.value.size,
-                hasLocalBooks = localBooks.value.isNotEmpty(),
-                hasRemoteDownloadedBooks = remoteDownloadedBooks.value.isNotEmpty(),
+                availableFilterNumbers = currentFilters.value.map { it.filter.order },
             )
 
             mutableState.value = LoadState.Success(Unit)
         }.onFailure { mutableState.value = LoadState.Error(it) }
     }
 
-    private suspend fun fetchFilterData(filter: HomeScreenFilter): HomeFilterData? {
+    private suspend fun fetchFilterData(
+        filter: HomeScreenFilter,
+        localLibraryIds: List<snd.komga.client.library.KomgaLibraryId>,
+    ): HomeFilterData? {
         return when (filter) {
             is BooksHomeScreenFilter.CustomFilter -> {
-                val books = bookApi.getBookList(
-                    search = KomgaBookSearch(filter.filter, filter.textSearch),
-                    pageRequest = filter.pageRequest
-                ).content.filterNot { it.libraryId.isLocalLibrary() }
-
-                BookFilterData(books = books, filter = filter)
+                val search = KomgaBookSearch(filter.filter, filter.textSearch)
+                val remote = bookApi.getBookList(search, filter.pageRequest).content
+                val local = localBookSearch(search, localLibraryIds)?.let { localSearch ->
+                    runCatching { offlineBookApi?.getBookList(localSearch, filter.pageRequest)?.content.orEmpty() }
+                        .onFailure { logger.catching(it) }
+                        .getOrDefault(emptyList())
+                }.orEmpty()
+                BookFilterData(
+                    books = mergeHomeItems(
+                        remote = remote,
+                        local = local,
+                        limit = filter.pageRequest?.size ?: maxOf(remote.size, local.size),
+                        idOf = { it.id },
+                        comparator = bookHomeComparator(filter.pageRequest?.sort),
+                    ),
+                    filter = filter,
+                )
             }
 
             is BooksHomeScreenFilter.OnDeck -> {
-                val books = bookApi.getBooksOnDeck(pageRequest = KomgaPageRequest(size = filter.pageSize))
-                    .content
-                    .filterNot { it.libraryId.isLocalLibrary() }
-                BookFilterData(books, filter)
+                val pageRequest = KomgaPageRequest(
+                    size = filter.pageSize,
+                    sort = snd.komga.client.common.KomgaSort.KomgaBooksSort.byReadDateDesc(),
+                )
+                val remote = bookApi.getBooksOnDeck(pageRequest = pageRequest).content
+                val local = if (localLibraryIds.isEmpty()) emptyList() else {
+                    runCatching {
+                        offlineBookApi?.getBooksOnDeck(localLibraryIds, pageRequest)?.content.orEmpty()
+                    }.onFailure { logger.catching(it) }.getOrDefault(emptyList())
+                }
+                BookFilterData(
+                    mergeHomeItems(
+                        remote,
+                        local,
+                        filter.pageSize,
+                        { it.id },
+                        bookHomeComparator(pageRequest.sort),
+                    ),
+                    filter,
+                )
             }
 
             is SeriesHomeScreenFilter.CustomFilter -> {
-                val series = seriesApi.getSeriesList(
-                    search = KomgaSeriesSearch(filter.filter, filter.textSearch),
-                    pageRequest = filter.pageRequest
-                ).content.filterNot { it.libraryId.isLocalLibrary() }
-
-                SeriesFilterData(series = series, filter = filter)
+                val search = KomgaSeriesSearch(filter.filter, filter.textSearch)
+                val remote = seriesApi.getSeriesList(search, filter.pageRequest).content
+                val local = localSeriesSearch(search, localLibraryIds)?.let { localSearch ->
+                    runCatching { offlineSeriesApi?.getSeriesList(localSearch, filter.pageRequest)?.content.orEmpty() }
+                        .onFailure { logger.catching(it) }
+                        .getOrDefault(emptyList())
+                }.orEmpty()
+                SeriesFilterData(
+                    series = mergeHomeItems(
+                        remote = remote,
+                        local = local,
+                        limit = filter.pageRequest?.size ?: maxOf(remote.size, local.size),
+                        idOf = { it.id },
+                        comparator = seriesHomeComparator(filter.pageRequest?.sort),
+                    ),
+                    filter = filter,
+                )
             }
 
             is SeriesHomeScreenFilter.RecentlyAdded -> {
-                val series = seriesApi.getNewSeries(
+                val pageRequest = KomgaPageRequest(
+                    size = filter.pageSize,
+                    sort = snd.komga.client.common.KomgaSort.KomgaSeriesSort.byCreatedDateDesc(),
+                )
+                val remote = seriesApi.getNewSeries(
                     oneshot = false,
-                    pageRequest = KomgaPageRequest(size = filter.pageSize)
-                ).content.filterNot { it.libraryId.isLocalLibrary() }
+                    pageRequest = pageRequest,
+                ).content
+                val local = if (localLibraryIds.isEmpty()) emptyList() else {
+                    runCatching {
+                        offlineSeriesApi?.getNewSeries(
+                            libraryIds = localLibraryIds,
+                            oneshot = false,
+                            pageRequest = pageRequest,
+                        )?.content.orEmpty()
+                    }.onFailure { logger.catching(it) }.getOrDefault(emptyList())
+                }
                 SeriesFilterData(
-                    series = series,
-                    filter = filter
+                    series = mergeHomeItems(
+                        remote,
+                        local,
+                        filter.pageSize,
+                        { it.id },
+                        seriesHomeComparator(pageRequest.sort),
+                    ),
+                    filter = filter,
                 )
             }
 
             is SeriesHomeScreenFilter.RecentlyUpdated -> {
-                val series = seriesApi.getUpdatedSeries(
+                val pageRequest = KomgaPageRequest(
+                    size = filter.pageSize,
+                    sort = snd.komga.client.common.KomgaSort.KomgaSeriesSort.byLastModifiedDateDesc(),
+                )
+                val remote = seriesApi.getUpdatedSeries(
                     oneshot = false,
-                    pageRequest = KomgaPageRequest(size = filter.pageSize)
-                ).content.filterNot { it.libraryId.isLocalLibrary() }
+                    pageRequest = pageRequest,
+                ).content
+                val local = if (localLibraryIds.isEmpty()) emptyList() else {
+                    runCatching {
+                        offlineSeriesApi?.getUpdatedSeries(
+                            libraryIds = localLibraryIds,
+                            oneshot = false,
+                            pageRequest = pageRequest,
+                        )?.content.orEmpty()
+                    }.onFailure { logger.catching(it) }.getOrDefault(emptyList())
+                }
                 SeriesFilterData(
-                    series = series,
-                    filter = filter
+                    series = mergeHomeItems(
+                        remote,
+                        local,
+                        filter.pageSize,
+                        { it.id },
+                        seriesHomeComparator(pageRequest.sort),
+                    ),
+                    filter = filter,
                 )
             }
         }
@@ -195,18 +256,6 @@ class HomeViewModel(
 
     fun startKomgaEventsHandler() {
         reloadEventsEnabled.value = true
-    }
-
-    internal fun onLocalBookSortChange(sort: LocalHomeBookSort) {
-        if (localBookSort.value == sort) return
-        localBookSort.value = sort
-        reload()
-    }
-
-    internal fun onRemoteDownloadedBookSortChange(sort: LocalHomeBookSort) {
-        if (remoteDownloadedBookSort.value == sort) return
-        remoteDownloadedBookSort.value = sort
-        reload()
     }
 
     private fun startLocalLibraryScanListener() {
@@ -257,14 +306,10 @@ internal fun <T> homeConfigurationRefreshFlow(
 
 internal fun reconcileActiveHomeFilter(
     activeFilterNumber: Int,
-    filterCount: Int,
-    hasLocalBooks: Boolean = false,
-    hasRemoteDownloadedBooks: Boolean = false,
-): Int = when (activeFilterNumber) {
-    HOME_LOCAL_BOOKS_TAB_ID -> activeFilterNumber.takeIf { hasLocalBooks } ?: 0
-    HOME_SERVER_DOWNLOADS_TAB_ID -> activeFilterNumber.takeIf { hasRemoteDownloadedBooks } ?: 0
-    else -> activeFilterNumber.takeIf { it in 0..filterCount } ?: 0
-}
+    availableFilterNumbers: Collection<Int>,
+): Int = activeFilterNumber.takeIf {
+    it == HOME_ALL_TAB_ID || it in availableFilterNumbers
+} ?: HOME_ALL_TAB_ID
 
 internal fun orderedHomeScreenFilters(filters: List<HomeScreenFilter>): List<HomeScreenFilter> =
     filters.sortedBy { it.order }

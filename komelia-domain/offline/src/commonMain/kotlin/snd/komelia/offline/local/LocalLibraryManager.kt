@@ -28,7 +28,6 @@ import snd.komelia.offline.sync.model.OfflineLogEntry.Companion.logError
 import snd.komelia.offline.sync.model.OfflineLogEntry.Companion.logInfo
 import snd.komelia.offline.user.model.OfflineUser
 import snd.komga.client.book.KomgaBookId
-import snd.komga.client.book.KomgaBookSearch
 import snd.komga.client.book.KomgaMediaStatus
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.common.KomgaThumbnailId
@@ -40,7 +39,6 @@ import snd.komga.client.series.KomgaSeriesId
 import snd.komga.client.series.KomgaSeriesStatus
 import snd.komga.client.sse.KomgaEvent
 import snd.komga.client.sse.KomgaEvent.BookDeleted
-import snd.komga.client.search.anyOfBooks
 import kotlin.math.absoluteValue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
@@ -62,6 +60,7 @@ class LocalLibraryManager(
     private val scope: CoroutineScope,
     private val komgaEvents: MutableSharedFlow<KomgaEvent>? = null,
 ) {
+    private val availableBooksRepository = AvailableBooksRepository(repositories)
     private val scanMutex = Mutex()
     private val mutableScanState = MutableStateFlow(LocalLibraryScanState())
     val scanState: StateFlow<LocalLibraryScanState> = mutableScanState.asStateFlow()
@@ -80,38 +79,21 @@ class LocalLibraryManager(
     }
 
     suspend fun getBooks(pageRequest: KomgaPageRequest = KomgaPageRequest(unpaged = true)): Page<KomeliaBook> {
-        val localLibraryIds = getLibraries().map { it.id }.toSet()
-        if (localLibraryIds.isEmpty()) return Page.empty()
-        return repositories.bookDtoRepository
-            .findAll(
-                userId = OfflineUser.ROOT,
-                search = KomgaBookSearch(
-                    condition = anyOfBooks {
-                        localLibraryIds.forEach { libraryId -> library { isEqualTo(libraryId) } }
-                    }.toBookCondition(),
-                ),
-                pageRequest = pageRequest,
-            )
+        return getAvailableBooks(AvailableBookSource.LOCAL, pageRequest = pageRequest)
     }
 
     suspend fun getRemoteDownloadedBooks(
         pageRequest: KomgaPageRequest = KomgaPageRequest(unpaged = true),
     ): Page<KomeliaBook> {
-        val remoteLibraryIds = repositories.libraryRepository.findAll()
-            .filterNot { it.isLocalSourceLibrary() }
-            .map { it.id }
-            .toSet()
-        if (remoteLibraryIds.isEmpty()) return Page.empty()
+        return getAvailableBooks(AvailableBookSource.DOWNLOADED, pageRequest = pageRequest)
+    }
 
-        return repositories.bookDtoRepository.findAll(
-            userId = OfflineUser.ROOT,
-            search = KomgaBookSearch(
-                condition = anyOfBooks {
-                    remoteLibraryIds.forEach { libraryId -> library { isEqualTo(libraryId) } }
-                }.toBookCondition(),
-            ),
-            pageRequest = pageRequest,
-        )
+    suspend fun getAvailableBooks(
+        source: AvailableBookSource = AvailableBookSource.ALL,
+        query: String = "",
+        pageRequest: KomgaPageRequest = KomgaPageRequest(unpaged = true),
+    ): Page<KomeliaBook> {
+        return availableBooksRepository.getBooks(source, query, pageRequest)
     }
 
     suspend fun addLibrary(

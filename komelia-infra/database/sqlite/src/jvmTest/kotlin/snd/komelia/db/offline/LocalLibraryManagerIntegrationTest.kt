@@ -15,6 +15,8 @@ import snd.komelia.db.offline.dto.ExposedSeriesDtoRepository
 import snd.komelia.db.repository.OfflineSettingsRepositoryWrapper
 import snd.komelia.offline.OfflineRepositories
 import snd.komelia.offline.local.LocalBookInspection
+import snd.komelia.offline.local.AvailableBookSource
+import snd.komelia.offline.local.AvailableBooksRepository
 import snd.komelia.offline.local.LocalLibraryFile
 import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.offline.local.LocalLibraryPlatform
@@ -96,6 +98,23 @@ class LocalLibraryManagerIntegrationTest {
 
         assertEquals(listOf("Local Book.epub"), manager.getBooks().content.map { it.name })
         assertEquals(listOf("Remote Download.epub"), manager.getRemoteDownloadedBooks().content.map { it.name })
+        val availableBooks = AvailableBooksRepository(repositories)
+        assertEquals(
+            listOf("Local Book.epub", "Remote Download.epub"),
+            availableBooks.getBooks(AvailableBookSource.ALL).content.map { it.name }.sorted(),
+        )
+        assertEquals(
+            listOf("Remote Download.epub"),
+            availableBooks.getBooks(AvailableBookSource.DOWNLOADED, query = "Download").content.map { it.name },
+        )
+        assertEquals(
+            emptyList(),
+            availableBooks.getBooks(AvailableBookSource.LOCAL, query = "Download").content.map { it.name },
+        )
+        assertEquals(
+            listOf("Local Book.epub"),
+            availableBooks.getBooks(AvailableBookSource.LOCAL, query = "Book").content.map { it.name },
+        )
     }
 
     @Test

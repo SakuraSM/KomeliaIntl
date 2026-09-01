@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
@@ -21,7 +20,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Search
@@ -36,7 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -58,13 +55,6 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_gro
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_groups
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_search_groups
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_books
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_remote_downloaded_books
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_sort_file_modified
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_sort_recently_added
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_sort_title
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_remote_sort_recently_downloaded
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_view_all
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
@@ -82,12 +72,6 @@ import snd.komga.client.series.KomgaSeries
 @Composable
 internal fun HomeContent(
     filters: List<HomeFilterData>,
-    localBooks: List<KomeliaBook>,
-    remoteDownloadedBooks: List<KomeliaBook>,
-    localBookSort: LocalHomeBookSort,
-    onLocalBookSortChange: (LocalHomeBookSort) -> Unit,
-    remoteDownloadedBookSort: LocalHomeBookSort,
-    onRemoteDownloadedBookSortChange: (LocalHomeBookSort) -> Unit,
     activeFilterNumber: Int,
     onFilterChange: (Int) -> Unit,
 
@@ -108,8 +92,6 @@ internal fun HomeContent(
     Column {
         Toolbar(
             filters = filters,
-            localBookCount = localBooks.size,
-            remoteDownloadedBookCount = remoteDownloadedBooks.size,
             currentFilterNumber = activeFilterNumber,
             isContentScrolled = isContentScrolled,
             onFilterChange = {
@@ -119,14 +101,7 @@ internal fun HomeContent(
         )
         DisplayContent(
             filters = filters,
-            localBooks = localBooks,
-            remoteDownloadedBooks = remoteDownloadedBooks,
-            localBookSort = localBookSort,
-            onLocalBookSortChange = onLocalBookSortChange,
-            remoteDownloadedBookSort = remoteDownloadedBookSort,
-            onRemoteDownloadedBookSortChange = onRemoteDownloadedBookSortChange,
             activeFilterNumber = activeFilterNumber,
-            onFilterChange = onFilterChange,
 
             gridState = gridState,
             cardWidth = cardWidth,
@@ -142,8 +117,6 @@ internal fun HomeContent(
 @Composable
 private fun Toolbar(
     filters: List<HomeFilterData>,
-    localBookCount: Int,
-    remoteDownloadedBookCount: Int,
     currentFilterNumber: Int,
     isContentScrolled: Boolean,
     onFilterChange: (Int) -> Unit,
@@ -155,23 +128,7 @@ private fun Toolbar(
         selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
-    val localBooksLabel = stringResource(Res.string.home_local_books)
-    val remoteDownloadedBooksLabel = stringResource(Res.string.home_remote_downloaded_books)
-    val toolbarFilters = remember(
-        filters,
-        localBooksLabel,
-        localBookCount,
-        remoteDownloadedBooksLabel,
-        remoteDownloadedBookCount,
-    ) {
-        homeToolbarEntries(
-            filters = filters,
-            localBooksLabel = localBooksLabel,
-            localBookCount = localBookCount,
-            remoteDownloadedBooksLabel = remoteDownloadedBooksLabel,
-            remoteDownloadedBookCount = remoteDownloadedBookCount,
-        )
-    }
+    val toolbarFilters = remember(filters) { homeToolbarEntries(filters) }
     if (toolbarFilters.isEmpty()) return
 
     val windowWidth = LocalWindowWidth.current
@@ -491,9 +448,6 @@ internal fun homeGroupToolbarFilters(filters: List<HomeFilterData>): List<HomeFi
     filters.sortedBy { it.filter.order }
 
 internal const val HOME_ALL_TAB_ID = 0
-internal const val HOME_LOCAL_BOOKS_TAB_ID = -1
-internal const val HOME_SERVER_DOWNLOADS_TAB_ID = -2
-private const val HOME_OVERVIEW_PREVIEW_SIZE = 6
 
 internal data class HomeToolbarEntry(
     val id: Int,
@@ -503,33 +457,14 @@ internal data class HomeToolbarEntry(
 
 internal fun homeToolbarEntries(
     filters: List<HomeFilterData>,
-    localBooksLabel: String,
-    localBookCount: Int,
-    remoteDownloadedBooksLabel: String,
-    remoteDownloadedBookCount: Int,
-): List<HomeToolbarEntry> = buildList {
-    if (localBookCount > 0) add(HomeToolbarEntry(HOME_LOCAL_BOOKS_TAB_ID, localBooksLabel, localBookCount))
-    if (remoteDownloadedBookCount > 0) {
-        add(HomeToolbarEntry(HOME_SERVER_DOWNLOADS_TAB_ID, remoteDownloadedBooksLabel, remoteDownloadedBookCount))
-    }
-    addAll(
-        homeGroupToolbarFilters(filters).map {
-            HomeToolbarEntry(it.filter.order, it.filter.label, it.itemCount())
-        },
-    )
+): List<HomeToolbarEntry> = homeGroupToolbarFilters(filters).map {
+    HomeToolbarEntry(it.filter.order, it.filter.label, it.itemCount())
 }
 
 @Composable
 private fun DisplayContent(
     filters: List<HomeFilterData>,
-    localBooks: List<KomeliaBook>,
-    remoteDownloadedBooks: List<KomeliaBook>,
-    localBookSort: LocalHomeBookSort,
-    onLocalBookSortChange: (LocalHomeBookSort) -> Unit,
-    remoteDownloadedBookSort: LocalHomeBookSort,
-    onRemoteDownloadedBookSortChange: (LocalHomeBookSort) -> Unit,
     activeFilterNumber: Int,
-    onFilterChange: (Int) -> Unit,
     gridState: LazyGridState,
     cardWidth: Dp,
     onSeriesClick: (KomgaSeries) -> Unit,
@@ -539,8 +474,6 @@ private fun DisplayContent(
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
 ) {
     val layout = LocalKomeliaLayout.current
-    val localBooksLabel = stringResource(Res.string.home_local_books)
-    val remoteDownloadedBooksLabel = stringResource(Res.string.home_remote_downloaded_books)
     val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyVerticalGrid(
@@ -557,60 +490,6 @@ private fun DisplayContent(
                 bottom = layout.gridBottomPadding + layout.sectionSpacing,
             )
         ) {
-            when (activeFilterNumber) {
-                HOME_ALL_TAB_ID -> {
-                    BookFilterEntry(
-                        label = localBooksLabel,
-                        books = localBooks.take(HOME_OVERVIEW_PREVIEW_SIZE),
-                        bookMenuActions = bookMenuActions,
-                        onBookClick = onBookClick,
-                        onBookReadClick = onBookReadClick,
-                        headerAction = if (localBooks.size > HOME_OVERVIEW_PREVIEW_SIZE) {
-                            { HomeViewAllAction { onFilterChange(HOME_LOCAL_BOOKS_TAB_ID) } }
-                        } else null,
-                    )
-                    BookFilterEntry(
-                        label = remoteDownloadedBooksLabel,
-                        books = remoteDownloadedBooks.take(HOME_OVERVIEW_PREVIEW_SIZE),
-                        bookMenuActions = bookMenuActions,
-                        onBookClick = onBookClick,
-                        onBookReadClick = onBookReadClick,
-                        headerAction = if (remoteDownloadedBooks.size > HOME_OVERVIEW_PREVIEW_SIZE) {
-                            { HomeViewAllAction { onFilterChange(HOME_SERVER_DOWNLOADS_TAB_ID) } }
-                        } else null,
-                    )
-                }
-
-                HOME_LOCAL_BOOKS_TAB_ID -> BookFilterEntry(
-                    label = localBooksLabel,
-                    books = localBooks,
-                    bookMenuActions = bookMenuActions,
-                    onBookClick = onBookClick,
-                    onBookReadClick = onBookReadClick,
-                    headerAction = {
-                        HomeBookSortMenu(
-                            selected = localBookSort,
-                            source = HomeBookSource.LOCAL,
-                            onSelect = onLocalBookSortChange,
-                        )
-                    },
-                )
-
-                HOME_SERVER_DOWNLOADS_TAB_ID -> BookFilterEntry(
-                    label = remoteDownloadedBooksLabel,
-                    books = remoteDownloadedBooks,
-                    bookMenuActions = bookMenuActions,
-                    onBookClick = onBookClick,
-                    onBookReadClick = onBookReadClick,
-                    headerAction = {
-                        HomeBookSortMenu(
-                            selected = remoteDownloadedBookSort,
-                            source = HomeBookSource.SERVER_DOWNLOAD,
-                            onSelect = onRemoteDownloadedBookSortChange,
-                        )
-                    },
-                )
-            }
             for (data in filters) {
                 if (activeFilterNumber == HOME_ALL_TAB_ID || data.filter.order == activeFilterNumber) {
                     when (data) {
@@ -671,72 +550,6 @@ private fun LazyGridScope.BookFilterEntry(
             showSeriesTitle = true,
             modifier = Modifier.fillMaxSize()
         )
-    }
-}
-
-private enum class HomeBookSource { LOCAL, SERVER_DOWNLOAD }
-
-@Composable
-private fun HomeViewAllAction(onClick: () -> Unit) {
-    TextButton(onClick = onClick) {
-        Text(stringResource(Res.string.home_view_all))
-    }
-}
-
-@Composable
-private fun HomeBookSortMenu(
-    selected: LocalHomeBookSort,
-    source: HomeBookSource,
-    onSelect: (LocalHomeBookSort) -> Unit,
-) {
-    val layout = LocalKomeliaLayout.current
-    var expanded by remember { mutableStateOf(false) }
-    val labels = mapOf(
-        LocalHomeBookSort.RECENTLY_ADDED to if (source == HomeBookSource.LOCAL) {
-            stringResource(Res.string.home_local_sort_recently_added)
-        } else {
-            stringResource(Res.string.home_remote_sort_recently_downloaded)
-        },
-        LocalHomeBookSort.FILE_MODIFIED to stringResource(Res.string.home_local_sort_file_modified),
-        LocalHomeBookSort.TITLE to stringResource(Res.string.home_local_sort_title),
-    )
-
-    Box {
-        FilterChip(
-            selected = false,
-            onClick = { expanded = true },
-            leadingIcon = { Icon(Icons.AutoMirrored.Rounded.Sort, contentDescription = null) },
-            label = {
-                Text(
-                    text = labels.getValue(selected),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            },
-            border = null,
-            colors = FilterChipDefaults.filterChipColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
-            modifier = Modifier.heightIn(min = layout.minimumTouchTarget),
-        )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            LocalHomeBookSort.entries.forEach { sort ->
-                DropdownMenuItem(
-                    text = { Text(labels.getValue(sort)) },
-                    leadingIcon = if (sort == selected) {
-                        { Icon(Icons.Rounded.Check, contentDescription = null) }
-                    } else null,
-                    onClick = {
-                        expanded = false
-                        onSelect(sort)
-                    },
-                )
-            }
-        }
     }
 }
 

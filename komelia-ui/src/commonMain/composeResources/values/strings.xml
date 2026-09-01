@@ -849,6 +849,16 @@
     <string name="local_library_excluded_books">Excluded books</string>
     <string name="local_library_excluded_books_description">Excluded source files stay on the device and are ignored during scans.</string>
     <string name="local_library_restore_book">Restore to local library</string>
+    <string name="local_content_title">Local</string>
+    <string name="local_content_all">All</string>
+    <string name="local_content_downloaded">Downloaded</string>
+    <string name="local_content_search">Search local and downloaded books</string>
+    <string name="local_content_empty_title">No available books</string>
+    <string name="local_content_empty_body">Add a local folder or download a book from your server.</string>
+    <string name="local_content_empty_local_title">No local books</string>
+    <string name="local_content_empty_local_body">Add a local folder and scan it to see books here.</string>
+    <string name="local_content_empty_downloaded_title">No downloaded books</string>
+    <string name="local_content_empty_downloaded_body">Download a book from your server to read it offline.</string>
     <string name="book_exclude_local">Exclude from local library</string>
     <string name="book_exclude_local_confirm_title">Exclude this book?</string>
     <string name="book_exclude_local_confirm_body">“%1$s” will disappear from Komelia, but its source file will not be deleted. You can restore it under Settings → Local folders.</string>
@@ -1309,6 +1319,8 @@
     <string name="search_result_in_library">in %1$s</string>
     <string name="search_no_results_title">The search returned no results</string>
     <string name="search_no_results_body">Try searching for something else</string>
+    <string name="search_offline_only">The server is unavailable. Showing local and downloaded results.</string>
+    <string name="search_remote_only">The local index is unavailable. Showing server results only.</string>
 
     <string name="topbar_offline">Offline</string>
     <string name="topbar_go_online">Go Online?</string>
@@ -1317,6 +1329,7 @@
     <string name="navbar_libraries">Libraries</string>
     <string name="navbar_libraries_unavailable">Unavailable</string>
     <string name="navbar_home">Home</string>
+    <string name="navbar_local">Local</string>
     <string name="navbar_settings">Settings</string>
     <string name="navbar_search">Search</string>
     <plurals name="sidebar_task_count">

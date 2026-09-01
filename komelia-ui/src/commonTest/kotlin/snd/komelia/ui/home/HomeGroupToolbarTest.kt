@@ -34,44 +34,21 @@ class HomeGroupToolbarTest {
     }
 
     @Test
-    fun builtInSourceTabsStayDistinctAndPrecedeConfiguredGroups() {
+    fun toolbarContainsOnlyConfiguredGroups() {
         val groups = listOf(
             emptySeriesGroup(order = 2, label = "Recently added"),
             emptyBookGroup(order = 1, label = "Continue reading"),
         )
 
-        val entries = homeToolbarEntries(
-            filters = groups,
-            localBooksLabel = "Local books",
-            localBookCount = 12,
-            remoteDownloadedBooksLabel = "Server downloads",
-            remoteDownloadedBookCount = 4,
-        )
+        val entries = homeToolbarEntries(groups)
 
-        assertEquals(
-            listOf(
-                HOME_LOCAL_BOOKS_TAB_ID,
-                HOME_SERVER_DOWNLOADS_TAB_ID,
-                1,
-                2,
-            ),
-            entries.map { it.id },
-        )
-        assertEquals(listOf(12, 4, 0, 0), entries.map { it.itemCount })
+        assertEquals(listOf(1, 2), entries.map { it.id })
+        assertEquals(listOf(0, 0), entries.map { it.itemCount })
     }
 
     @Test
-    fun emptySourceTabsAreNotShown() {
-        assertEquals(
-            emptyList(),
-            homeToolbarEntries(
-                filters = emptyList(),
-                localBooksLabel = "Local books",
-                localBookCount = 0,
-                remoteDownloadedBooksLabel = "Server downloads",
-                remoteDownloadedBookCount = 0,
-            ),
-        )
+    fun emptyConfigurationHasNoToolbarEntries() {
+        assertEquals(emptyList(), homeToolbarEntries(emptyList()))
     }
 }
 

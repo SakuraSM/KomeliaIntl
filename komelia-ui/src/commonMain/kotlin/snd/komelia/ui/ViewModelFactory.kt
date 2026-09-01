@@ -42,6 +42,7 @@ import snd.komelia.ui.home.HomeFilterData
 import snd.komelia.ui.home.HomeViewModel
 import snd.komelia.ui.home.edit.FilterEditViewModel
 import snd.komelia.ui.library.LibraryViewModel
+import snd.komelia.ui.local.LocalContentViewModel
 import snd.komelia.ui.login.LoginViewModel
 import snd.komelia.ui.login.offline.OfflineLoginViewModel
 import snd.komelia.ui.oneshot.OneshotViewModel
@@ -159,6 +160,8 @@ class ViewModelFactory(
         return HomeViewModel(
             seriesApi = komgaApi.seriesApi,
             bookApi = komgaApi.bookApi,
+            offlineSeriesApi = dependencies.offlineDependencies?.komgaApi?.seriesApi,
+            offlineBookApi = dependencies.offlineDependencies?.komgaApi?.bookApi,
             appNotifications = dependencies.appNotifications,
             komgaEvents = dependencies.komgaEvents.events,
             filterRepository = appRepositories.homeScreenFilterRepository,
@@ -167,6 +170,15 @@ class ViewModelFactory(
             cardWidthFlow = getGridCardWidth(),
         )
     }
+
+    fun getLocalContentViewModel(): LocalContentViewModel = LocalContentViewModel(
+        localLibraryManager = dependencies.offlineDependencies?.localLibraryManager,
+        availableBooksRepository = dependencies.offlineDependencies?.availableBooksRepository,
+        bookApi = komgaApi.bookApi,
+        appNotifications = dependencies.appNotifications,
+        taskEmitter = dependencies.offlineDependencies?.taskEmitter,
+        cardWidthFlow = getGridCardWidth(),
+    )
 
     fun getFilterEditViewModel(homeFilters: List<HomeFilterData>?): FilterEditViewModel {
         return FilterEditViewModel(
@@ -418,8 +430,10 @@ class ViewModelFactory(
     fun getSearchViewModel() = SearchViewModel(
         seriesApi = komgaApi.seriesApi,
         bookApi = komgaApi.bookApi,
+        offlineSeriesApi = dependencies.offlineDependencies?.komgaApi?.seriesApi,
+        offlineBookApi = dependencies.offlineDependencies?.komgaApi?.bookApi,
+        localLibraryManager = dependencies.offlineDependencies?.localLibraryManager,
         appNotifications = dependencies.appNotifications,
-        libraries = dependencies.komgaSharedState.libraries,
     )
 
 

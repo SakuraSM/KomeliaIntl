@@ -60,12 +60,6 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
                 else ->
                     HomeContent(
                         filters = vm.currentFilters.collectAsState().value,
-                        localBooks = vm.localBooks.collectAsState().value,
-                        remoteDownloadedBooks = vm.remoteDownloadedBooks.collectAsState().value,
-                        localBookSort = vm.localBookSort.collectAsState().value,
-                        onLocalBookSortChange = vm::onLocalBookSortChange,
-                        remoteDownloadedBookSort = vm.remoteDownloadedBookSort.collectAsState().value,
-                        onRemoteDownloadedBookSortChange = vm::onRemoteDownloadedBookSortChange,
                         activeFilterNumber = vm.activeFilterNumber.collectAsState().value,
                         onFilterChange = vm::onFilterChange,
                         cardWidth = vm.cardWidth.collectAsState().value,

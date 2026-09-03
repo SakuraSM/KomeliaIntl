@@ -85,11 +85,14 @@ class LocalContentViewModel(
 
     fun refreshFromSources() {
         screenModelScope.launch {
+            val previousState = state.value
             appNotifications.runCatchingToNotifications {
                 sourceRefresh.refresh {
                     mutableState.value = LoadState.Loading
                 }
-            }.onFailure { mutableState.value = LoadState.Error(it) }
+            }.onFailure {
+                mutableState.value = localRefreshFailureState(previousState, it)
+            }
         }
     }
 
@@ -142,6 +145,14 @@ internal data class LocalContentQuery(
     val source: AvailableBookSource,
     val sort: LocalHomeBookSort,
 )
+
+internal fun localRefreshFailureState(
+    previousState: LoadState<Unit>,
+    error: Throwable,
+): LoadState<Unit> = when (previousState) {
+    is LoadState.Success -> previousState
+    else -> LoadState.Error(error)
+}
 
 internal class LocalContentRefreshCoordinator(
     private val scanSources: suspend () -> Unit,

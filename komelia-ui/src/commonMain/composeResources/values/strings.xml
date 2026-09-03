@@ -865,6 +865,11 @@
     <string name="book_downloaded_status">Downloaded</string>
     <string name="book_downloaded_outdated_status">Downloaded copy needs updating</string>
     <string name="download_tasks_empty">No download tasks</string>
+    <string name="download_tasks_filtered_empty">No tasks in this status</string>
+    <string name="download_task_filter_all">All (%1$d)</string>
+    <string name="download_task_filter_active">Active (%1$d)</string>
+    <string name="download_task_filter_failed">Failed (%1$d)</string>
+    <string name="download_task_filter_history">History (%1$d)</string>
     <string name="download_task_queued">Queued</string>
     <string name="download_task_running">Downloading</string>
     <string name="download_task_paused">Paused</string>

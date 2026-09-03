@@ -3,6 +3,7 @@ package snd.komelia.ui.settings.offline.downloads
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -34,6 +36,10 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_c
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_canceled
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_completed
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_failed
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_filter_active
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_filter_all
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_filter_failed
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_filter_history
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_pause
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_paused
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_queued
@@ -48,6 +54,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_s
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_tasks_overall_progress
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_tasks_summary
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_tasks_empty
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_tasks_filtered_empty
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_view_logs
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_storage_location
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_storage_location_change
@@ -59,6 +66,8 @@ import snd.komelia.offline.tasks.model.TaskData.DownloadBook
 import snd.komelia.offline.tasks.model.TaskEntry
 import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.common.components.AppFilterChipDefaults
+import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.dialogs.permissions.StoragePermissionRequestDialog
 import snd.komga.client.book.KomgaBookId
@@ -77,6 +86,15 @@ fun OfflineDownloadsContent(
     onOpenLogs: () -> Unit,
 ) {
     val layout = LocalKomeliaLayout.current
+    val downloadList = downloads.toList()
+    var selectedFilter by remember { mutableStateOf(DownloadTaskFilter.ALL) }
+    var requestedPage by remember { mutableStateOf(1) }
+    val filteredDownloads = remember(downloadList, selectedFilter) {
+        filterDownloadTasks(downloadList, selectedFilter)
+    }
+    val page = remember(filteredDownloads, requestedPage) {
+        paginateDownloadTasks(filteredDownloads, requestedPage)
+    }
     Column(verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing)) {
         storageLocation?.let {
             Column(verticalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
@@ -111,7 +129,21 @@ fun OfflineDownloadsContent(
             )
         } else {
             DownloadTasksSummary(downloads)
-            downloads.forEach { entry ->
+            DownloadTaskFilters(
+                downloads = downloadList,
+                selected = selectedFilter,
+                onSelect = {
+                    selectedFilter = it
+                    requestedPage = 1
+                },
+            )
+            if (page.items.isEmpty()) {
+                Text(
+                    stringResource(Res.string.download_tasks_filtered_empty),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            page.items.forEach { entry ->
                 DownloadTaskCard(
                     entry = entry,
                     onPause = onDownloadPause,
@@ -122,6 +154,36 @@ fun OfflineDownloadsContent(
                     onOpenLogs = onOpenLogs,
                 )
             }
+            Pagination(
+                totalPages = page.totalPages,
+                currentPage = page.currentPage,
+                onPageChange = { requestedPage = it },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DownloadTaskFilters(
+    downloads: List<TaskEntry>,
+    selected: DownloadTaskFilter,
+    onSelect: (DownloadTaskFilter) -> Unit,
+) {
+    val layout = LocalKomeliaLayout.current
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+        verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+    ) {
+        DownloadTaskFilter.entries.forEach { filter ->
+            val count = remember(downloads, filter) { filterDownloadTasks(downloads, filter).size }
+            FilterChip(
+                selected = selected == filter,
+                onClick = { onSelect(filter) },
+                label = { Text(stringResource(filter.label, count)) },
+                colors = AppFilterChipDefaults.filterChipColors(),
+                border = null,
+            )
         }
     }
 }
@@ -291,6 +353,53 @@ internal data class DownloadTaskSummary(
     val remaining: Int,
     val failed: Int,
 )
+
+internal enum class DownloadTaskFilter(
+    val label: org.jetbrains.compose.resources.StringResource,
+) {
+    ALL(Res.string.download_task_filter_all),
+    ACTIVE(Res.string.download_task_filter_active),
+    FAILED(Res.string.download_task_filter_failed),
+    HISTORY(Res.string.download_task_filter_history),
+}
+
+internal data class DownloadTaskPage(
+    val items: List<TaskEntry>,
+    val currentPage: Int,
+    val totalPages: Int,
+)
+
+internal const val DOWNLOAD_TASK_PAGE_SIZE = 20
+
+internal fun filterDownloadTasks(
+    downloads: List<TaskEntry>,
+    filter: DownloadTaskFilter,
+): List<TaskEntry> = when (filter) {
+    DownloadTaskFilter.ALL -> downloads
+    DownloadTaskFilter.ACTIVE -> downloads.filter {
+        it.status in setOf(TaskStatus.NEW, TaskStatus.RUNNING, TaskStatus.PAUSED)
+    }
+    DownloadTaskFilter.FAILED -> downloads.filter { it.status == TaskStatus.FAILED }
+    DownloadTaskFilter.HISTORY -> downloads.filter {
+        it.status in setOf(TaskStatus.COMPLETED, TaskStatus.CANCELED)
+    }
+}
+
+internal fun paginateDownloadTasks(
+    downloads: List<TaskEntry>,
+    requestedPage: Int,
+    pageSize: Int = DOWNLOAD_TASK_PAGE_SIZE,
+): DownloadTaskPage {
+    require(pageSize > 0) { "pageSize must be greater than zero" }
+    val totalPages = ((downloads.size + pageSize - 1) / pageSize).coerceAtLeast(1)
+    val currentPage = requestedPage.coerceIn(1, totalPages)
+    val startIndex = (currentPage - 1) * pageSize
+    return DownloadTaskPage(
+        items = downloads.drop(startIndex).take(pageSize),
+        currentPage = currentPage,
+        totalPages = totalPages,
+    )
+}
 
 internal fun summarizeDownloadTasks(downloads: Collection<TaskEntry>): DownloadTaskSummary = DownloadTaskSummary(
     total = downloads.size,

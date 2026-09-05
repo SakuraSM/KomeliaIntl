@@ -5,6 +5,7 @@
 | Surface | Entry area | Main dependencies | Build alias |
 |---|---|---|---|
 | Android app | `komelia-app/androidApp` | shared app, UI, domain, offline, SQLite, WebView, ONNX | `androidDebug`, `androidRelease` |
+| HarmonyOS app | `komelia-app/harmonyApp` | independent ArkTS/ArkUI, native RDB, Core File Kit, Image/PDF/Reader Kits | `harmonyDebug`, `harmonyTest` |
 | Desktop app | `komelia-app/desktopApp` | shared app, UI, domain, offline, SQLite, VIPS, WebView, ONNX | `desktopRun`, `desktopJar`, installer aliases |
 | Wasm app | `komelia-app/webApp` | shared app, UI, domain, offline, Wasm database/decoder, WebView | `komfWebUI` |
 | Shared composition root | `komelia-app/shared` | UI, domain, offline, database transaction, WebView | consumed by applications |
@@ -33,6 +34,8 @@ Applications assemble platform implementations and depend on shared app/UI/domai
 Some Gradle project dependencies are not a textbook layered graph because shared interfaces and implementations are split across modules. Before moving a type, inspect every `build.gradle.kts` consumer and source-set actual implementation rather than relying only on directory names.
 
 Local-folder libraries enter through `komelia-ui/.../settings/local`, are orchestrated by `komelia-domain/offline/.../local/LocalLibraryManager`, and reuse the offline SQLite repositories and reader APIs. Android storage access and hourly background work live in the offline Android source set; JVM folder/archive implementations live in the JVM source set; Wasm exposes the unsupported boundary explicitly.
+
+HarmonyOS does not consume the Compose implementation. Its `entry/src/main/ets/pages/LocalContentPage.ets` and `LocalLibraries.ets` use `LocalLibraryService` and `LocalLibraryIndexer`. `LocalFilePlatform` owns picker permissions and read-only source access; `LocalArchiveReader` performs bounded ZIP reads. `LocalLibraryRepository` owns independent local metadata and progress tables. `AvailableContentRepository` merges these with completed downloads from the active server/account. `AppState` owns local-only startup, remembered navigation, and merged Home state. See [HarmonyOS feature port](../../komelia-app/harmonyApp/feature-port-status.md) for verification and native platform differences.
 
 ## Build and dependency surfaces
 

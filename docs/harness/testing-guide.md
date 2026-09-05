@@ -29,6 +29,7 @@ Run shared UI tests for every application code change:
 | Remote/LAN switching | Selection and connectivity state tests | Android connectivity-change flow and at least one non-Android client |
 | EPUB package | Package-local checks | Both package builds, then `./gradlew buildEpubReaders` and an EPUB smoke test |
 | Android-only | Targeted Android test | `./gradlew androidDebug`, install, launch, and reported flow |
+| HarmonyOS-only ArkTS/UI/RDB | `bash komelia-app/harmonyApp/scripts/harmony-test.sh`, including SQL migration/cleanup fixtures and Hypium logic | HarmonyOS HAP build; separate device upgrade, picker grants, local readers, cancellation/recovery and system-bar checks |
 | Desktop-only | Targeted JVM test | `./gradlew desktopJar` and the affected installer task |
 | Wasm-only | Targeted Wasm test | `./gradlew komfWebUI` and browser smoke test |
 | Native decoder, JNI, WebView, or ONNX | Module tests where available | Platform-native dependency build and consuming package |
@@ -70,6 +71,8 @@ Use real Komga content only when authorized. Redact credentials, addresses, file
 When the user will validate on a physical device, follow [Android device validation](android-device-validation.md). Deliver an identifiable debug APK that coexists with production, verify its packaged labels and signature, and keep physical-device acceptance pending until the user reports results.
 
 ## Evidence record
+
+HarmonyOS SQL fixtures run the production additive schema and cleanup statements on host SQLite. They are not device RDB integration tests. Hypium Previewer results do not establish picker, PDF/Reader Kit, native ZIP inflation, filesystem grants, or physical-device behavior. For a code-alignment-only handoff, leave these runtime scenarios explicitly pending. An unchanged Gradle task reported `UP-TO-DATE` is reuse of existing test outputs, not a fresh execution.
 
 In the pull request or handoff, list each executed command and manual scenario with its result. If a required check is blocked, include the reason and the closest substitute; do not silently omit it. Installed and launched packages are stronger evidence than artifact presence alone.
 

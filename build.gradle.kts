@@ -452,6 +452,13 @@ tasks.register<Exec>("harmonyRelease") {
     )
 }
 
+tasks.register<Exec>("harmonyTest") {
+    description = "run native HarmonyOS unit tests and fail on Hypium test failures"
+    group = "verification"
+    workingDir("$projectDir/komelia-app/harmonyApp")
+    commandLine("bash", "scripts/harmony-test.sh")
+}
+
 tasks.register<Exec>("harmonyDeviceRun") {
     description = "build, install and launch native HarmonyOS app on a connected device"
     group = "komelia-run"
@@ -464,6 +471,20 @@ tasks.register<Exec>("harmonyDeviceRun") {
         "--build-mode", "debug",
         "--ability", "EntryAbility",
     )
+}
+
+tasks.register<Exec>("harmonyRealDeviceValidation") {
+    description = "verify a signed HAP and prepare strict HarmonyOS 6 real-device validation"
+    group = "verification"
+    workingDir("$projectDir/komelia-app/harmonyApp")
+    commandLine("bash", "scripts/harmony-real-device-validation.sh")
+}
+
+tasks.register<Exec>("harmonyDeviceTest") {
+    description = "build, install and run native HarmonyOS Hypium tests on a connected target"
+    group = "verification"
+    workingDir("$projectDir/komelia-app/harmonyApp")
+    commandLine("bash", "scripts/harmony-device-test.sh")
 }
 
 tasks.register("komfExtensionChrome") {

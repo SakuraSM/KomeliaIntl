@@ -25,6 +25,9 @@ komelia-app/harmonyApp/oh_modules/
 komelia-app/harmonyApp/build/
 komelia-app/harmonyApp/entry/build/
 komelia-app/harmonyApp/entry/oh_modules/
+komelia-app/harmonyApp/entry/.test/
+komelia-app/harmonyApp/.appanalyzer/
+komelia-app/harmonyApp/scripts/__pycache__/
 komelia-app/harmonyApp/signing-configs/
 *.p12
 *.cer

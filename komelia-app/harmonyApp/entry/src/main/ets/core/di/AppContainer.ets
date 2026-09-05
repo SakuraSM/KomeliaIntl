@@ -16,13 +16,13 @@ export class AppContainer {
   }
 
   static requireContext(): common.UIAbilityContext {
-    if (AppContainer.context === undefined) throw new Error('AppContainer 尚未初始化');
+    if (AppContainer.context === undefined) throw new Error('APP_CONTAINER_NOT_INITIALIZED');
     return AppContainer.context;
   }
 
   static async ready(): Promise<void> {
     if (AppContainer.initialization === undefined) {
-      throw new Error('AppContainer 尚未初始化');
+      throw new Error('APP_CONTAINER_NOT_INITIALIZED');
     }
     await AppContainer.initialization;
   }

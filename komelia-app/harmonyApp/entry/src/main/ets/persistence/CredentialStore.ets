@@ -48,7 +48,7 @@ export class CredentialStore {
       if (businessError.code === 24000002) {
         return undefined;
       }
-      throw error;
+      throw new Error((error as Error).message);
     }
   }
 
@@ -60,7 +60,7 @@ export class CredentialStore {
     } catch (error) {
       const businessError = error as BusinessError;
       if (businessError.code !== 24000002) {
-        throw error;
+        throw new Error((error as Error).message);
       }
     }
   }

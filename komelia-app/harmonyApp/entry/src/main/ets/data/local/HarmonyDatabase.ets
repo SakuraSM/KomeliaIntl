@@ -1,7 +1,9 @@
 import { common } from '@kit.AbilityKit';
 import { relationalStore } from '@kit.ArkData';
+import { LOCAL_LIBRARY_SCHEMA } from './LocalLibrarySchema';
+import { DOWNLOAD_PROGRESS_SCHEMA } from '../../model/DownloadProgressModels';
 
-const DATABASE_VERSION = 3;
+const DATABASE_VERSION = 10;
 const STORE_CONFIG: relationalStore.StoreConfig = {
   name: 'komelia_harmony.db',
   securityLevel: relationalStore.SecurityLevel.S3
@@ -42,15 +44,74 @@ export class HarmonyDatabase {
       await store.execute('ALTER TABLE PROGRESS_OUTBOX ADD COLUMN LOCATOR TEXT NOT NULL DEFAULT ""');
       store.version = 3;
     }
+    if (store.version === 3) {
+      await store.execute('CREATE TABLE IF NOT EXISTS OFFLINE_LOG (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAMESPACE TEXT NOT NULL, LEVEL TEXT NOT NULL, MESSAGE TEXT NOT NULL, TIMESTAMP INTEGER NOT NULL)');
+      await store.execute('CREATE INDEX IF NOT EXISTS IDX_OFFLINE_LOG_LEVEL ON OFFLINE_LOG (NAMESPACE, LEVEL, TIMESTAMP DESC)');
+      store.version = 4;
+    }
+    if (store.version === 4) {
+      // Page-stream endpoints are zero-based, while Komga read progress is one-based.
+      await store.execute("UPDATE PROGRESS_OUTBOX SET PAGE = PAGE + 1 WHERE LOCATOR = ''");
+      store.version = 5;
+    }
+    if (store.version === 5) {
+      await store.execute('DELETE FROM DOWNLOAD_PART WHERE JOB_ID IN (' +
+        'SELECT JOB_ID FROM DOWNLOAD_JOB AS candidate WHERE JOB_ID <> (' +
+        'SELECT JOB_ID FROM DOWNLOAD_JOB AS latest WHERE latest.NAMESPACE = candidate.NAMESPACE ' +
+        'AND latest.BOOK_ID = candidate.BOOK_ID ORDER BY latest.UPDATED_AT DESC LIMIT 1))');
+      await store.execute('DELETE FROM DOWNLOAD_JOB WHERE JOB_ID <> (' +
+        'SELECT JOB_ID FROM DOWNLOAD_JOB AS latest WHERE latest.NAMESPACE = DOWNLOAD_JOB.NAMESPACE ' +
+        'AND latest.BOOK_ID = DOWNLOAD_JOB.BOOK_ID ORDER BY latest.UPDATED_AT DESC LIMIT 1)');
+      await store.execute('CREATE UNIQUE INDEX IF NOT EXISTS IDX_DOWNLOAD_BOOK ON DOWNLOAD_JOB (NAMESPACE, BOOK_ID)');
+      store.version = 6;
+    }
+    if (store.version === 6) {
+      await store.execute('CREATE TABLE IF NOT EXISTS BOOK_COLOR_CORRECTION (' +
+        'NAMESPACE TEXT NOT NULL, BOOK_ID TEXT NOT NULL, PAYLOAD TEXT NOT NULL, UPDATED_AT INTEGER NOT NULL, ' +
+        'PRIMARY KEY (NAMESPACE, BOOK_ID))');
+      await store.execute('CREATE INDEX IF NOT EXISTS IDX_BOOK_COLOR_CORRECTION ON ' +
+        'BOOK_COLOR_CORRECTION (NAMESPACE, BOOK_ID)');
+      store.version = 7;
+    }
+    if (store.version === 7) {
+      await store.execute("ALTER TABLE PROGRESS_OUTBOX ADD COLUMN OPERATION TEXT NOT NULL DEFAULT 'UPDATE'");
+      store.version = 8;
+    }
+    if (store.version === 8) {
+      store.beginTransaction();
+      try {
+        for (let index = 0; index < LOCAL_LIBRARY_SCHEMA.length; index++) {
+          await store.execute(LOCAL_LIBRARY_SCHEMA[index]);
+        }
+        store.version = 9;
+        store.commit();
+      } catch (error) {
+        store.rollBack();
+        throw error as Error;
+      }
+    }
+    if (store.version === 9) {
+      store.beginTransaction();
+      try {
+        for (let index = 0; index < DOWNLOAD_PROGRESS_SCHEMA.length; index++) {
+          await store.execute(DOWNLOAD_PROGRESS_SCHEMA[index]);
+        }
+        store.version = 10;
+        store.commit();
+      } catch (error) {
+        store.rollBack();
+        throw error as Error;
+      }
+    }
     if (store.version !== DATABASE_VERSION) {
-      throw new Error(`不支持的 HarmonyOS 数据库版本：${store.version}`);
+      throw new Error(`UNSUPPORTED_HARMONY_DATABASE_VERSION:${store.version}`);
     }
     HarmonyDatabase.store = store;
   }
 
   static requireStore(): relationalStore.RdbStore {
     if (HarmonyDatabase.store === undefined) {
-      throw new Error('HarmonyDatabase 尚未初始化');
+      throw new Error('HARMONY_DATABASE_NOT_INITIALIZED');
     }
     return HarmonyDatabase.store;
   }

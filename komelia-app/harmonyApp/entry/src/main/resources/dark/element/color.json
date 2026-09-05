@@ -1,14 +1,19 @@
 {
   "color": [
-    { "name": "surface", "value": "#121217" },
+    { "name": "surface", "value": "#15151A" },
     { "name": "surface_container", "value": "#1D1C24" },
-    { "name": "surface_high", "value": "#26252E" },
-    { "name": "primary", "value": "#C8C1FF" },
-    { "name": "primary_container", "value": "#45406F" },
-    { "name": "on_surface", "value": "#E6E1E9" },
-    { "name": "on_surface_variant", "value": "#C8C4D0" },
-    { "name": "outline", "value": "#494751" },
+    { "name": "surface_container_high", "value": "#25242E" },
+    { "name": "surface_high", "value": "#0B0C0E" },
+    { "name": "primary", "value": "#C5C2F0" },
+    { "name": "primary_container", "value": "#454269" },
+    { "name": "tertiary_container", "value": "#5F4100" },
+    { "name": "on_tertiary", "value": "#FFDFA0" },
+    { "name": "on_surface", "value": "#F0F0F3" },
+    { "name": "on_surface_variant", "value": "#C5C6CD" },
+    { "name": "outline", "value": "#34363E" },
     { "name": "error", "value": "#FFB4AB" },
+    { "name": "error_container", "value": "#93000A" },
+    { "name": "on_error_container", "value": "#FFDAD6" },
     { "name": "scrim", "value": "#99000000" }
   ]
 }

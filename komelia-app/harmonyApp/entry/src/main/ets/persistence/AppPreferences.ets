@@ -20,6 +20,11 @@ export class AppPreferences {
     return await store.get(key, fallback) as boolean;
   }
 
+  static async getNumber(key: string, fallback: number = 0): Promise<number> {
+    const store = await preferences.getPreferences(AppPreferences.requireContext(), STORE_NAME);
+    return await store.get(key, fallback) as number;
+  }
+
   static async putString(key: string, value: string): Promise<void> {
     const store = await preferences.getPreferences(AppPreferences.requireContext(), STORE_NAME);
     await store.put(key, value);
@@ -27,6 +32,12 @@ export class AppPreferences {
   }
 
   static async putBoolean(key: string, value: boolean): Promise<void> {
+    const store = await preferences.getPreferences(AppPreferences.requireContext(), STORE_NAME);
+    await store.put(key, value);
+    await store.flush();
+  }
+
+  static async putNumber(key: string, value: number): Promise<void> {
     const store = await preferences.getPreferences(AppPreferences.requireContext(), STORE_NAME);
     await store.put(key, value);
     await store.flush();
@@ -40,7 +51,7 @@ export class AppPreferences {
 
   private static requireContext(): common.UIAbilityContext {
     if (AppPreferences.context === undefined) {
-      throw new Error('AppPreferences 尚未初始化');
+      throw new Error('APP_PREFERENCES_NOT_INITIALIZED');
     }
     return AppPreferences.context;
   }

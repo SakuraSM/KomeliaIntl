@@ -37,6 +37,10 @@ export interface OfflinePageRecord {
 }
 
 export interface DownloadJobRecord {
+  title?: string;
+  completedBytes?: number;
+  totalBytes?: number;
+  bytesPerSecond?: number;
   namespace: string;
   jobId: string;
   bookId: string;
@@ -51,9 +55,39 @@ export interface DownloadJobRecord {
 export interface ProgressOutboxRecord {
   namespace: string;
   bookId: string;
+  operation: ProgressOutboxOperation;
   page: number;
   completed: boolean;
   readDate: string;
   attempts: number;
   locatorJson?: string;
+}
+
+export enum ProgressOutboxOperation {
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE'
+}
+
+export function progressOutboxOperation(value: string): ProgressOutboxOperation {
+  return value === ProgressOutboxOperation.DELETE ? ProgressOutboxOperation.DELETE : ProgressOutboxOperation.UPDATE;
+}
+
+export enum OfflineLogLevel {
+  INFO = 'INFO',
+  ERROR = 'ERROR'
+}
+
+export interface OfflineLogRecord {
+  id: number;
+  namespace: string;
+  level: OfflineLogLevel;
+  message: string;
+  timestamp: number;
+}
+
+export interface OfflineLogPage {
+  content: OfflineLogRecord[];
+  page: number;
+  totalPages: number;
+  totalElements: number;
 }

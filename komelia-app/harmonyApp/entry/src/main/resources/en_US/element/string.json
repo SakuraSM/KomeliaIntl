@@ -1,5 +1,38 @@
 {
   "string": [
+    {"name":"local_content","value":"Local"},
+    {"name":"local_libraries","value":"Local libraries"},
+    {"name":"local_mode_enter","value":"Continue without a server"},
+    {"name":"local_source_all","value":"All available"},
+    {"name":"local_source_files","value":"Local files"},
+    {"name":"local_source_downloaded","value":"Downloaded"},
+    {"name":"local_sort_added","value":"Recently added"},
+    {"name":"local_sort_modified","value":"File modified"},
+    {"name":"local_sort_title","value":"Title"},
+    {"name":"local_add_folder","value":"Add folder"},
+    {"name":"local_import_files","value":"Import files"},
+    {"name":"local_folder_unavailable","value":"Folder access is unavailable on this device. Import files to keep a private copy."},
+    {"name":"local_manage","value":"Manage libraries"},
+    {"name":"local_empty","value":"No local books yet. Add a folder or import files."},
+    {"name":"local_operation_failed","value":"Unable to read local content. Check the file, storage space and access permission, then retry."},
+    {"name":"local_scan_partial","value":"Some sources could not be read. Their existing index and progress were retained."},
+    {"name":"local_remove_library","value":"Remove library"},
+    {"name":"local_remove_warning","value":"Remove the index and its reading progress? Granted source files will not be deleted. App-imported private copies will be removed."},
+    {"name":"local_exclude_book","value":"Exclude from library"},
+    {"name":"local_exclude_warning","value":"Remove this book from the index and clear its progress? The source file will not be deleted. Restore it in library settings."},
+    {"name":"local_scan_startup","value":"Scan on startup"},
+    {"name":"local_scan_hourly","value":"Refresh hourly while active"},
+    {"name":"local_restore_excluded","value":"Restore excluded book"},
+    {"name":"local_sources_notice","value":"Only selected folders and files are accessed. Removing an index never deletes granted source files."},
+    {"name":"local_search_offline","value":"Showing local and downloaded results only; server search is unavailable."},
+    {"name":"local_search_remote","value":"Showing server results only; local content could not be read."},
+    {"name":"local_library_missing","value":"This local book or library is no longer indexed."},
+    {"name":"local_scan","value":"Refresh source files"},
+    {"name":"local_read","value":"Read locally"},
+    {"name":"local_mark_read","value":"Mark as read"},
+    {"name":"local_mark_unread","value":"Mark as unread"},
+    { "name": "module_desc", "value": "Komelia for HarmonyOS" },
+    { "name": "entry_ability_desc", "value": "Komelia native reader" },
     { "name": "login", "value": "Sign in" },
     { "name": "server", "value": "Server URL" },
     { "name": "email", "value": "Email" },
@@ -11,6 +44,867 @@
     { "name": "retry", "value": "Retry" },
     { "name": "empty", "value": "Nothing here" },
     { "name": "loading", "value": "Loading" },
-    { "name": "logout", "value": "Sign out" }
+    { "name": "logout", "value": "Sign out" },
+    { "name": "logout_confirmation", "value": "Sign out of the current account? Offline downloads will not be removed." },
+    { "name": "back", "value": "Back" },
+    { "name": "cancel", "value": "Cancel" },
+    { "name": "confirm", "value": "Confirm" },
+    { "name": "application_settings", "value": "App settings" },
+    { "name": "appearance", "value": "Appearance" },
+    { "name": "home_groups", "value": "Home groups" },
+    { "name": "network_connection", "value": "Network connection" },
+    { "name": "image_reader", "value": "Image reader" },
+    { "name": "epub_reader", "value": "EPUB reader" },
+    { "name": "offline_mode", "value": "Offline mode" },
+    { "name": "about", "value": "About" },
+    { "name": "user_settings", "value": "User settings" },
+    { "name": "my_account", "value": "My account" },
+    { "name": "my_authentication_activity", "value": "My sign-in activity" },
+    { "name": "server_settings", "value": "Server settings" },
+    { "name": "server_general_settings", "value": "General server settings" },
+    { "name": "user_management", "value": "User management" },
+    { "name": "authentication_activity", "value": "Sign-in activity" },
+    { "name": "media_management", "value": "Media management" },
+    { "name": "komf_settings", "value": "Komf settings" },
+    { "name": "komf_connection_processing", "value": "Komf connection and processing" },
+    { "name": "media_and_tasks", "value": "Media and tasks" },
+    { "name": "add_library", "value": "Add library" },
+    { "name": "unavailable", "value": "Unavailable" },
+    { "name": "scan", "value": "Scan" },
+    { "name": "deep_scan", "value": "Deep scan" },
+    { "name": "analyze", "value": "Analyze" },
+    { "name": "edit", "value": "Edit" },
+    { "name": "empty_trash", "value": "Empty trash" },
+    { "name": "empty_library_trash_confirmation", "value": "Permanently remove unavailable items from \"%s\"." },
+    { "name": "all_libraries", "value": "All libraries" },
+    { "name": "all_libraries_task_description", "value": "Batch actions are submitted to the Komga server queue one library at a time" },
+    { "name": "scan_all", "value": "Scan all" },
+    { "name": "deep_scan_all", "value": "Deep scan all" },
+    { "name": "analyze_all", "value": "Analyze all" },
+    { "name": "empty_all_trash", "value": "Empty all trash" },
+    { "name": "empty_all_trash_confirmation", "value": "Permanently remove unavailable items from every library." },
+    { "name": "task_queue", "value": "Task queue" },
+    { "name": "task_queue_description", "value": "Clear queued tasks without interrupting tasks already running" },
+    { "name": "clear_pending_tasks", "value": "Clear pending tasks" },
+    { "name": "clear_task_queue", "value": "Clear task queue" },
+    { "name": "clear_task_queue_confirmation", "value": "Clear every pending server task?" },
+    { "name": "task_submitting", "value": "Submitting task…" },
+    { "name": "task_submitted", "value": "Task submitted" },
+    { "name": "task_submit_failed", "value": "Could not submit task" },
+    { "name": "all_library_tasks_submitting", "value": "Submitting tasks for all libraries…" },
+    { "name": "all_library_tasks_submitted", "value": "Submitted tasks for %d libraries" },
+    { "name": "batch_task_submit_failed", "value": "Could not submit batch tasks" },
+    { "name": "no_pending_tasks", "value": "No pending tasks" },
+    { "name": "pending_tasks_cleared", "value": "Cleared %d pending tasks" },
+    { "name": "task_queue_clear_failed", "value": "Could not clear task queue" }
+    ,{ "name": "appearance_and_language", "value": "Appearance and language" }
+    ,{ "name": "theme", "value": "Theme" }
+    ,{ "name": "light_theme", "value": "Light" }
+    ,{ "name": "dark_theme", "value": "Dark" }
+    ,{ "name": "app_language", "value": "App language" }
+    ,{ "name": "follow_system", "value": "Follow system" }
+    ,{ "name": "english_language", "value": "English" }
+    ,{ "name": "simplified_chinese", "value": "Simplified Chinese" }
+    ,{ "name": "language_theme_persistence_hint", "value": "Language changes rebuild the resource environment immediately. OLED keeps the persisted DARKER theme value." }
+    ,{ "name": "using_local_cache", "value": "Using local cache" }
+    ,{ "name": "load_failed_retry", "value": "Could not load. Try again shortly." }
+    ,{ "name": "role_admin", "value": "Administrator" }
+    ,{ "name": "role_user", "value": "User" }
+    ,{ "name": "role_file_download", "value": "File download" }
+    ,{ "name": "role_page_streaming", "value": "Page streaming" }
+    ,{ "name": "role_kobo_sync", "value": "Kobo sync" }
+    ,{ "name": "role_koreader_sync", "value": "KOReader sync" }
+    ,{ "name": "current_account_unavailable", "value": "The current account is unavailable. Sign in again." }
+    ,{ "name": "password_minimum", "value": "The new password must contain at least 8 characters" }
+    ,{ "name": "password_mismatch", "value": "The passwords do not match" }
+    ,{ "name": "password_updated", "value": "Password updated" }
+    ,{ "name": "password_update_failed", "value": "Could not update password" }
+    ,{ "name": "account_information", "value": "Account information" }
+    ,{ "name": "roles", "value": "Roles" }
+    ,{ "name": "change_password", "value": "Change password" }
+    ,{ "name": "change_password_description", "value": "Update the current Komga account password. Passwords are never written to logs or regular settings." }
+    ,{ "name": "new_password_placeholder", "value": "New password (at least 8 characters)" }
+    ,{ "name": "repeat_new_password", "value": "Enter the new password again" }
+    ,{ "name": "updating", "value": "Updating…" }
+    ,{ "name": "update_password", "value": "Update password" }
+    ,{ "name": "authentication_activity_load_failed", "value": "Could not load sign-in activity" }
+    ,{ "name": "success", "value": "Success" }
+    ,{ "name": "failed", "value": "Failed" }
+    ,{ "name": "no_authentication_activity", "value": "No sign-in activity" }
+    ,{ "name": "previous_page", "value": "Previous" }
+    ,{ "name": "next_page", "value": "Next" }
+    ,{ "name": "user_data_load_failed", "value": "Could not load user data" }
+    ,{ "name": "no_sign_in_record", "value": "No sign-in history" }
+    ,{ "name": "latest_sign_in", "value": "Last sign-in: %s" }
+    ,{ "name": "user_email_password_validation", "value": "Enter an email and a password of at least 8 characters" }
+    ,{ "name": "user_created", "value": "User created" }
+    ,{ "name": "user_create_failed", "value": "Could not create user" }
+    ,{ "name": "delete_user", "value": "Delete user" }
+    ,{ "name": "delete_user_confirmation", "value": "Delete %s? This cannot be undone." }
+    ,{ "name": "delete", "value": "Delete" }
+    ,{ "name": "user_deleted", "value": "User deleted" }
+    ,{ "name": "expand_user_actions", "value": "%s, expand user actions" }
+    ,{ "name": "edit_and_password", "value": "Edit and password" }
+    ,{ "name": "initial_password_placeholder", "value": "Initial password (at least 8 characters)" }
+    ,{ "name": "administrator_role", "value": "Administrator access" }
+    ,{ "name": "administrator_role_description", "value": "Allow management of users, libraries, and server tasks" }
+    ,{ "name": "creating", "value": "Creating…" }
+    ,{ "name": "create_user", "value": "Create user" }
+    ,{ "name": "user_management_count", "value": "User management (%d)" }
+    ,{ "name": "collapse", "value": "Collapse" }
+    ,{ "name": "add", "value": "Add" }
+    ,{ "name": "server_settings_load_failed", "value": "Could not load server settings" }
+    ,{ "name": "remember_me_days_validation", "value": "Remember-me days must be a positive integer" }
+    ,{ "name": "task_threads_validation", "value": "Task threads must be a positive integer" }
+    ,{ "name": "server_port_validation", "value": "Server port must be between 1 and 65535" }
+    ,{ "name": "context_path_validation", "value": "Base URL must start with / or be empty" }
+    ,{ "name": "server_settings_updated", "value": "Server settings updated" }
+    ,{ "name": "server_settings_update_failed", "value": "Could not update server settings" }
+    ,{ "name": "media_and_cleanup", "value": "Media and cleanup" }
+    ,{ "name": "media_and_cleanup_description", "value": "Thumbnail and post-scan cleanup settings matching the Android app" }
+    ,{ "name": "thumbnail_size", "value": "Thumbnail size" }
+    ,{ "name": "thumbnail_default", "value": "Default (300px)" }
+    ,{ "name": "thumbnail_medium", "value": "Medium (600px)" }
+    ,{ "name": "thumbnail_large", "value": "Large (900px)" }
+    ,{ "name": "thumbnail_xlarge", "value": "Extra large (1200px)" }
+    ,{ "name": "delete_empty_collections", "value": "Delete empty collections after scan" }
+    ,{ "name": "delete_empty_collections_description", "value": "Automatically remove collections that no longer contain series" }
+    ,{ "name": "delete_empty_read_lists", "value": "Delete empty read lists after scan" }
+    ,{ "name": "delete_empty_read_lists_description", "value": "Automatically remove read lists that no longer contain books" }
+    ,{ "name": "tasks_and_sessions", "value": "Tasks and sessions" }
+    ,{ "name": "tasks_and_sessions_description", "value": "Adjust background tasks and manage remember-me sessions" }
+    ,{ "name": "task_threads", "value": "Task threads" }
+    ,{ "name": "remember_me_days_restart", "value": "Remember-me days · takes effect after restart" }
+    ,{ "name": "regenerate_remember_me_key", "value": "Regenerate remember-me key" }
+    ,{ "name": "regenerate_remember_me_key_description", "value": "Saving invalidates existing remember-me tokens" }
+    ,{ "name": "network_listener", "value": "Network listener" }
+    ,{ "name": "network_listener_description", "value": "Restart the Komga server after changing these values" }
+    ,{ "name": "server_port", "value": "Server port" }
+    ,{ "name": "context_path_hint", "value": "Base URL · leave empty for the root path" }
+    ,{ "name": "discard", "value": "Discard" }
+    ,{ "name": "saving", "value": "Saving…" }
+    ,{ "name": "save_changes", "value": "Save changes" }
+    ,{ "name": "harmony_native_reader", "value": "Native reader for HarmonyOS" }
+    ,{ "name": "insecure_http_acknowledgement", "value": "I understand that this local HTTP connection is not encrypted" }
+    ,{ "name": "signing_in", "value": "Signing in…" }
+    ,{ "name": "credential_security_hint", "value": "Credentials are encrypted in HarmonyOS Asset Store. Invalid TLS certificates are rejected." }
+    ,{ "name": "done", "value": "Done" }
+    ,{ "name": "item_count", "value": "%d items" }
+    ,{ "name": "overview", "value": "Overview" }
+    ,{ "name": "more", "value": "More" }
+    ,{ "name": "no_on_deck_books", "value": "No books on deck" }
+    ,{ "name": "no_latest_books", "value": "No recently added books" }
+    ,{ "name": "no_series", "value": "No series" }
+    ,{ "name": "home_group_keep_reading", "value": "Keep reading" }
+    ,{ "name": "home_group_on_deck", "value": "On deck" }
+    ,{ "name": "home_group_recently_released", "value": "Recently released books" }
+    ,{ "name": "home_group_latest", "value": "Recently added books" }
+    ,{ "name": "home_group_recently_added_series", "value": "Recently added series" }
+    ,{ "name": "home_group_recently_updated_series", "value": "Recently updated series" }
+    ,{ "name": "home_group_recently_read", "value": "Recently read books" }
+    ,{ "name": "series", "value": "Series" }
+    ,{ "name": "books", "value": "Books" }
+    ,{ "name": "library_scope_fallback", "value": "The previous library is unavailable. Showing all libraries." }
+    ,{ "name": "library_load_failed", "value": "Could not load the library" }
+    ,{ "name": "processing_series", "value": "Processing %d series…" }
+    ,{ "name": "batch_completed", "value": "Batch action completed" }
+    ,{ "name": "preparing_batch_download", "value": "Preparing the batch download…" }
+    ,{ "name": "downloads_queued", "value": "%d books added to the download queue" }
+    ,{ "name": "batch_download_completed", "value": "%d books downloaded" }
+    ,{ "name": "batch_download_failed", "value": "Batch download failed: %s" }
+    ,{ "name": "currently_unavailable", "value": "Currently unavailable" }
+    ,{ "name": "library_scope", "value": "Library scope" }
+    ,{ "name": "manage_libraries", "value": "Manage libraries" }
+    ,{ "name": "choose_library", "value": "Choose library" }
+    ,{ "name": "collections", "value": "Collections" }
+    ,{ "name": "read_lists", "value": "Read lists" }
+    ,{ "name": "batch", "value": "Batch" }
+    ,{ "name": "selected_count", "value": "%d selected" }
+    ,{ "name": "mark_as_read", "value": "Mark as read" }
+    ,{ "name": "mark_as_unread", "value": "Mark as unread" }
+    ,{ "name": "refresh_metadata", "value": "Refresh metadata" }
+    ,{ "name": "search_current_category", "value": "Search this category" }
+    ,{ "name": "filters", "value": "Filters" }
+    ,{ "name": "apply_filters", "value": "Apply" }
+    ,{ "name": "reset_filters", "value": "Reset" }
+    ,{ "name": "page_size", "value": "Items per page" }
+    ,{ "name": "sort_order", "value": "Sort order" }
+    ,{ "name": "sort_title_ascending", "value": "Title ascending" }
+    ,{ "name": "sort_title_descending", "value": "Title descending" }
+    ,{ "name": "sort_updated_descending", "value": "Recently updated" }
+    ,{ "name": "sort_updated_ascending", "value": "Least recently updated" }
+    ,{ "name": "sort_added_descending", "value": "Recently added" }
+    ,{ "name": "sort_added_ascending", "value": "Least recently added" }
+    ,{ "name": "no_filter_results", "value": "Nothing matches the current filters" }
+    ,{ "name": "series_count", "value": "%d series" }
+    ,{ "name": "books_count", "value": "%d books" }
+    ,{ "name": "search_failed", "value": "Search failed. Check the network connection." }
+    ,{ "name": "search_hint", "value": "Search" }
+    ,{ "name": "search_result_pages", "value": "%d pages" }
+    ,{ "name": "start_search", "value": "Enter a keyword to search" }
+    ,{ "name": "no_match_results", "value": "No matching results" }
+    ,{ "name": "reset", "value": "Reset" }
+    ,{ "name": "display_in_top_order", "value": "Shown in this order at the top" }
+    ,{ "name": "move_up", "value": "Move up" }
+    ,{ "name": "move_down", "value": "Move down" }
+    ,{ "name": "auto_login_failed", "value": "Automatic sign-in failed: %s" }
+    ,{ "name": "epub_font_size", "value": "Font size %d" }
+    ,{ "name": "epub_line_height", "value": "Line height %s" }
+    ,{ "name": "epub_page_margin", "value": "Page margin %d" }
+    ,{ "name": "paginated_reading", "value": "Paginated reading" }
+    ,{ "name": "reading_mode", "value": "Reading mode" }
+    ,{ "name": "paginated", "value": "Paginated" }
+    ,{ "name": "continuous", "value": "Continuous" }
+    ,{ "name": "double_page", "value": "Double page" }
+    ,{ "name": "panel_mode", "value": "Panel" }
+    ,{ "name": "reading_direction", "value": "Reading direction" }
+    ,{ "name": "left_to_right", "value": "Left to right" }
+    ,{ "name": "right_to_left", "value": "Right to left" }
+    ,{ "name": "top_to_bottom", "value": "Top to bottom" }
+    ,{ "name": "color_correction", "value": "Color correction" }
+    ,{ "name": "mindspore_enhancement", "value": "MindSpore image enhancement" }
+    ,{ "name": "reduce_motion", "value": "Reduce motion" }
+    ,{ "name": "reader_type", "value": "Reader type" }
+    ,{ "name": "image_settings", "value": "Image settings" }
+    ,{ "name": "page_scale", "value": "Page scale" }
+    ,{ "name": "fit_screen", "value": "Fit screen" }
+    ,{ "name": "fit_width", "value": "Fit width" }
+    ,{ "name": "fit_height", "value": "Fit height" }
+    ,{ "name": "original_size", "value": "Original size" }
+    ,{ "name": "page_layout", "value": "Page layout" }
+    ,{ "name": "single_page", "value": "Single page" }
+    ,{ "name": "double_pages_no_cover", "value": "Double pages (no separate cover)" }
+    ,{ "name": "offset_pages", "value": "Offset double pages" }
+    ,{ "name": "continuous_side_padding", "value": "Side padding" }
+    ,{ "name": "continuous_page_spacing", "value": "Page spacing" }
+    ,{ "name": "stretch_small_images", "value": "Stretch small images" }
+    ,{ "name": "crop_borders", "value": "Crop blank borders" }
+    ,{ "name": "flash_on_page_change", "value": "Flash on page change" }
+    ,{ "name": "flash_duration", "value": "Flash duration %d ms" }
+    ,{ "name": "flash_every_n_pages", "value": "Flash every %d pages" }
+    ,{ "name": "flash_color", "value": "Flash color" }
+    ,{ "name": "flash_black", "value": "Black" }
+    ,{ "name": "flash_white", "value": "White" }
+    ,{ "name": "flash_alternate", "value": "Alternate black and white" }
+    ,{ "name": "panel_model_required", "value": "Available after installing a compatible panel detection model" }
+    ,{ "name": "panel_detection_loading", "value": "Detecting panels…" }
+    ,{ "name": "panel_detection_failed", "value": "Panel detection failed" }
+    ,{ "name": "panel_full_page", "value": "Full page" }
+    ,{ "name": "harmony_native_version", "value": "Native HarmonyOS version" }
+    ,{ "name": "version", "value": "Version" }
+    ,{ "name": "implementation", "value": "Implementation" }
+    ,{ "name": "arkui_native_rewrite", "value": "Native ArkTS / ArkUI rewrite" }
+    ,{ "name": "license", "value": "License" }
+    ,{ "name": "project_repository", "value": "Project repository" }
+    ,{ "name": "upstream_attribution", "value": "Maintained by SakuraSM/KomeliaIntl and based on Snd-R/Komelia." }
+    ,{ "name": "upstream_repository", "value": "Upstream: Snd-R/Komelia" }
+    ,{ "name": "source_code", "value": "Source code" }
+    ,{ "name": "about_version", "value": "Version %s" }
+    ,{ "name": "about_description", "value": "Komelia Intl is based on Snd-R/Komelia and adds Simplified Chinese localization and cross-platform experience improvements." }
+    ,{ "name": "original_repository", "value": "Original repository" }
+    ,{ "name": "server_url_scheme_validation", "value": "The address must start with https:// or http://" }
+    ,{ "name": "http_confirmation_required", "value": "Confirm the local-network risk before using HTTP" }
+    ,{ "name": "server_saved_relogin", "value": "Address saved. Sign in again to protect your credentials." }
+    ,{ "name": "network_and_server", "value": "Network and server" }
+    ,{ "name": "allow_local_http", "value": "Allow local HTTP" }
+    ,{ "name": "local_http_description", "value": "The connection is unencrypted. Use only on a trusted local network." }
+    ,{ "name": "save_and_clear_credentials", "value": "Save and clear old credentials" }
+    ,{ "name": "not_connected", "value": "Not connected" }
+    ,{ "name": "connecting", "value": "Connecting…" }
+    ,{ "name": "komf_unresponsive", "value": "Komf did not respond" }
+    ,{ "name": "connected", "value": "Connected" }
+    ,{ "name": "configuration_saved", "value": "Configuration saved" }
+    ,{ "name": "invalid_configuration", "value": "Invalid configuration: %s" }
+    ,{ "name": "job_history_cleared", "value": "Job history cleared" }
+    ,{ "name": "notification_templates_saved", "value": "Notification templates saved" }
+    ,{ "name": "invalid_notification_templates", "value": "Invalid notification templates: %s" }
+    ,{ "name": "komf_http_description", "value": "The connection is unencrypted. Enable only on a trusted local network." }
+    ,{ "name": "connect", "value": "Connect" }
+    ,{ "name": "save_configuration", "value": "Save configuration" }
+    ,{ "name": "providers", "value": "Providers" }
+    ,{ "name": "komga_libraries_count", "value": "Komga libraries (%d)" }
+    ,{ "name": "jobs_count", "value": "Jobs (%d)" }
+    ,{ "name": "clear_history", "value": "Clear history" }
+    ,{ "name": "advanced_configuration_json", "value": "Advanced configuration JSON" }
+    ,{ "name": "notification_templates", "value": "Notification templates" }
+    ,{ "name": "save_templates", "value": "Save templates" }
+    ,{ "name": "book_detail", "value": "Book details" }
+    ,{ "name": "series_detail", "value": "Series details" }
+    ,{ "name": "book_detail_load_failed", "value": "Could not load the book details" }
+    ,{ "name": "series_detail_load_failed", "value": "Could not load the series details" }
+    ,{ "name": "collection_load_failed", "value": "Could not load the collection" }
+    ,{ "name": "read_list_load_failed", "value": "Could not load the read list" }
+    ,{ "name": "no_collection_series", "value": "No series in this collection" }
+    ,{ "name": "no_read_list_books", "value": "No books in this read list" }
+    ,{ "name": "download", "value": "Download" }
+    ,{ "name": "downloaded", "value": "Available offline" }
+    ,{ "name": "downloading", "value": "Downloading…" }
+    ,{ "name": "download_failed_retry", "value": "Retry: %s" }
+    ,{ "name": "emulator_epub_unavailable", "value": "EPUB is unavailable in the emulator" }
+    ,{ "name": "emulator_epub_message", "value": "The HarmonyOS emulator does not provide Reader Kit. Images, comics, and PDF remain available; connect a HarmonyOS 6 device to read EPUB." }
+    ,{ "name": "offline_epub_message", "value": "Downloaded EPUB files can be read offline on a HarmonyOS 6 device." }
+    ,{ "name": "got_it", "value": "Got it" }
+    ,{ "name": "read", "value": "Read" }
+    ,{ "name": "volume_page_summary", "value": "Volume %s · %d pages" }
+    ,{ "name": "content_summary", "value": "Summary" }
+    ,{ "name": "file_information", "value": "File information" }
+    ,{ "name": "writer", "value": "Writer" }
+    ,{ "name": "size", "value": "Size" }
+    ,{ "name": "format", "value": "Format" }
+    ,{ "name": "file_name", "value": "File" }
+    ,{ "name": "book_count_unread", "value": "%d books · %d unread" }
+    ,{ "name": "series_release_year", "value": "Release year %s" }
+    ,{ "name": "series_publisher", "value": "Publisher" }
+    ,{ "name": "series_summary_from_book", "value": "Summary from book %s: %s" }
+    ,{ "name": "series_actions", "value": "Series actions" }
+    ,{ "name": "download_series", "value": "Download series" }
+    ,{ "name": "expand", "value": "Expand" }
+    ,{ "name": "processing_books", "value": "Processing %d books…" }
+    ,{ "name": "selected_books_count", "value": "%d books selected" }
+    ,{ "name": "clear_progress", "value": "Clear progress" }
+    ,{ "name": "downloads_and_offline", "value": "Downloads and offline" }
+    ,{ "name": "offline_content_count", "value": "%d offline items" }
+    ,{ "name": "refresh", "value": "Refresh" }
+    ,{ "name": "no_offline_content", "value": "No offline content yet" }
+    ,{ "name": "download_task", "value": "Task %s" }
+    ,{ "name": "queued", "value": "Queued" }
+    ,{ "name": "paused", "value": "Paused" }
+    ,{ "name": "retrying", "value": "Retrying" }
+    ,{ "name": "cancelled", "value": "Cancelled" }
+    ,{ "name": "completed", "value": "Completed" }
+    ,{ "name": "pausing", "value": "Pausing…" }
+    ,{ "name": "cancelling", "value": "Cancelling…" }
+    ,{ "name": "resuming", "value": "Resuming…" }
+    ,{ "name": "download_paused", "value": "Download paused" }
+    ,{ "name": "download_removed", "value": "Download and temporary files removed" }
+    ,{ "name": "download_resumed", "value": "Download resumed" }
+    ,{ "name": "page_progress", "value": "%d / %s pages" }
+    ,{ "name": "pause", "value": "Pause" }
+    ,{ "name": "resume", "value": "Resume" }
+    ,{ "name": "cleanup", "value": "Clean up" }
+    ,{ "name": "reader_page_load_failed", "value": "Could not load this page" }
+    ,{ "name": "panel_model_fallback", "value": "Panel detection model is unavailable. Using paginated mode." }
+    ,{ "name": "open_epub_failed", "value": "Could not open EPUB: %s" }
+    ,{ "name": "reading_settings", "value": "Reading settings" }
+    ,{ "name": "horizontal_page_turning", "value": "Horizontal page turning" }
+    ,{ "name": "keep_screen_on_while_reading", "value": "Keep screen on while reading" }
+    ,{ "name": "dark_reading_background", "value": "Dark reading background" }
+    ,{ "name": "preparing_epub", "value": "Preparing EPUB…" }
+    ,{ "name": "catalog", "value": "Contents" }
+    ,{ "name": "unnamed_chapter", "value": "Untitled chapter" }
+    ,{ "name": "book_information_saved", "value": "Book information saved" }
+    ,{ "name": "edit_book", "value": "Edit book" }
+    ,{ "name": "title", "value": "Title" }
+    ,{ "name": "summary", "value": "Summary" }
+    ,{ "name": "volume_number", "value": "Volume number" }
+    ,{ "name": "release_date_hint", "value": "Release date (YYYY-MM-DD)" }
+    ,{ "name": "authors_separator_hint", "value": "Authors (comma separated)" }
+    ,{ "name": "tags_separator_hint", "value": "Tags (comma separated)" }
+    ,{ "name": "series_information_saved", "value": "Series information saved" }
+    ,{ "name": "komf_identify_submitted", "value": "Komf identification submitted" }
+    ,{ "name": "komf_reset_submitted", "value": "Komf metadata reset submitted" }
+    ,{ "name": "edit_series", "value": "Edit series" }
+    ,{ "name": "sort_title", "value": "Sort title" }
+    ,{ "name": "publisher", "value": "Publisher" }
+    ,{ "name": "language", "value": "Language" }
+    ,{ "name": "publication_status", "value": "Publication status" }
+    ,{ "name": "series_status_ended", "value": "Ended" }
+    ,{ "name": "series_status_ongoing", "value": "Ongoing" }
+    ,{ "name": "series_status_abandoned", "value": "Abandoned" }
+    ,{ "name": "series_status_hiatus", "value": "Hiatus" }
+    ,{ "name": "genres_separator_hint", "value": "Genres (comma separated)" }
+    ,{ "name": "maintenance_actions", "value": "Maintenance actions" }
+    ,{ "name": "komf_identify", "value": "Komf identify" }
+    ,{ "name": "komf_reset", "value": "Komf reset" }
+    ,{ "name": "library_name_root_required", "value": "Name and root directory are required" }
+    ,{ "name": "library_saved", "value": "Library saved" }
+    ,{ "name": "delete_library", "value": "Delete library" }
+    ,{ "name": "delete_library_confirmation", "value": "This removes the library configuration from Komga. Review the impact on server files before continuing." }
+    ,{ "name": "edit_library", "value": "Edit library" }
+    ,{ "name": "library_name", "value": "Library name" }
+    ,{ "name": "server_root", "value": "Server root directory" }
+    ,{ "name": "library_scan_hint", "value": "New libraries scan CBX, PDF, and EPUB by default. Editing does not overwrite other scan options." }
+    ,{ "name": "permissions_saved", "value": "Permissions saved" }
+    ,{ "name": "edit_user", "value": "Edit user" }
+    ,{ "name": "save_permissions", "value": "Save permissions" }
+    ,{ "name": "reset_password", "value": "Reset password" }
+    ,{ "name": "unsupported_library_action", "value": "Unsupported library action" }
+    ,{ "name": "unsupported_series_action", "value": "Unsupported series action" }
+    ,{ "name": "unsupported_book_action", "value": "Unsupported book action" }
+    ,{ "name": "komga_not_signed_in", "value": "Not signed in to Komga" }
+    ,{ "name": "komga_request_failed", "value": "Komga request failed (%d)" }
+    ,{ "name": "komf_url_scheme_validation", "value": "The Komf address must start with https:// or http://" }
+    ,{ "name": "komf_http_confirmation_required", "value": "The Komf HTTP connection is unencrypted. Confirm the local-network risk and retry." }
+    ,{ "name": "komf_not_configured", "value": "Komf is not configured" }
+    ,{ "name": "komf_request_failed", "value": "Komf request failed (%d)" }
+    ,{ "name": "reader_request_cancelled", "value": "Reader page loading was cancelled" }
+    ,{ "name": "pdf_parse_failed", "value": "Could not parse PDF (%d)" }
+    ,{ "name": "page_request_failed", "value": "Page request failed (%d: %s)" }
+    ,{ "name": "unknown_error", "value": "Unknown error" }
+    ,{ "name": "pdf_render_failed", "value": "Could not render the PDF page (%s)" }
+    ,{ "name": "reader_page_decode_failed", "value": "Could not decode the reader page" }
+    ,{ "name": "page_info_failed", "value": "Could not read page information (%d bytes; %s)" }
+    ,{ "name": "page_decode_failed", "value": "Page decode failed (%d×%d, %d: %s)" }
+    ,{ "name": "mindspore_model_unavailable", "value": "The MindSpore model is not installed" }
+    ,{ "name": "single_input_model_only", "value": "Only single-input image models are supported" }
+    ,{ "name": "four_dimensional_model_required", "value": "A single-input four-dimensional image model is required" }
+    ,{ "name": "model_input_size_mismatch", "value": "The model requires %d×%d input; this page is %d×%d" }
+    ,{ "name": "model_output_invalid", "value": "The model did not return a valid image output" }
+    ,{ "name": "model_input_count_mismatch", "value": "Model input count mismatch: expected %d, received %d" }
+    ,{ "name": "download_cancelled", "value": "Download cancelled" }
+    ,{ "name": "offline_series_missing", "value": "This series is not available in the offline cache" }
+    ,{ "name": "offline_series_filter_requires_network", "value": "Author, release year, and completion filters require a connection" }
+    ,{ "name": "offline_book_missing", "value": "This book is not available in the offline cache" }
+    ,{ "name": "primary_server", "value": "Primary server" }
+    ,{ "name": "lan_connection", "value": "Local-network connection" }
+    ,{ "name": "lan_auto_switch", "value": "Use the local-network address automatically" }
+    ,{ "name": "lan_auto_switch_description", "value": "Try the LAN address first at startup and fall back to the primary address when unavailable" }
+    ,{ "name": "allow_lan_http", "value": "Allow LAN HTTP" }
+    ,{ "name": "check_lan_connection", "value": "Check and apply connection" }
+    ,{ "name": "checking_lan", "value": "Checking the local network…" }
+    ,{ "name": "using_lan_server", "value": "Using local-network address: %s" }
+    ,{ "name": "using_primary_server", "value": "Using the primary server address" }
+    ,{ "name": "lan_unreachable", "value": "Currently offline. Check both the primary and LAN addresses." }
+    ,{ "name": "lan_address_required", "value": "Enter a LAN address before enabling automatic switching" }
+    ,{ "name": "offline_profile_missing", "value": "The offline account no longer exists" }
+    ,{ "name": "show_offline_accounts", "value": "Offline mode" }
+    ,{ "name": "hide_offline_accounts", "value": "Hide offline accounts" }
+    ,{ "name": "offline_login_description", "value": "Use cached accounts and content without sending network requests." }
+    ,{ "name": "use_offline_account", "value": "Open" }
+    ,{ "name": "media_analysis", "value": "Media analysis" }
+    ,{ "name": "media_analysis_description", "value": "Media with errors or unsupported formats that needs attention" }
+    ,{ "name": "media_analysis_empty", "value": "No media needs attention" }
+    ,{ "name": "media_analysis_load_failed", "value": "Could not load media analysis results" }
+    ,{ "name": "media_status_error", "value": "Error" }
+    ,{ "name": "media_status_unsupported", "value": "Unsupported" }
+    ,{ "name": "media_error_1000", "value": "The file could not be accessed during analysis" }
+    ,{ "name": "media_error_1001", "value": "The media type is not supported" }
+    ,{ "name": "media_error_1002", "value": "Encrypted RAR archives are not supported" }
+    ,{ "name": "media_error_1003", "value": "Solid RAR archives are not supported" }
+    ,{ "name": "media_error_1004", "value": "Multi-volume RAR archives are not supported" }
+    ,{ "name": "media_error_1005", "value": "An unknown error occurred while analyzing the book" }
+    ,{ "name": "media_error_1006", "value": "The book does not contain any pages" }
+    ,{ "name": "media_error_1007", "value": "Some entries could not be analyzed" }
+    ,{ "name": "media_error_1008", "value": "An unknown error occurred while reading the book entries" }
+    ,{ "name": "announcements", "value": "Announcements" }
+    ,{ "name": "announcements_description", "value": "Komga project updates and important notices" }
+    ,{ "name": "announcements_empty", "value": "No announcements" }
+    ,{ "name": "announcements_load_failed", "value": "Could not load announcements" }
+    ,{ "name": "announcement_untitled", "value": "Untitled announcement" }
+    ,{ "name": "unread", "value": "Unread" }
+    ,{ "name": "offline_log_download_complete", "value": "Download completed: %s" }
+    ,{ "name": "offline_log_download_failed", "value": "Download failed: %s" }
+    ,{ "name": "offline_log_progress_queued", "value": "Reading progress queued for synchronization" }
+    ,{ "name": "offline_log_progress_synced", "value": "Reading progress synchronized" }
+    ,{ "name": "offline_log_progress_sync_failed", "value": "Reading progress synchronization failed: %s" }
+    ,{ "name": "offline_settings_description", "value": "Manage offline accounts, downloads, and synchronization logs" }
+    ,{ "name": "accounts", "value": "Accounts" }
+    ,{ "name": "downloads", "value": "Downloads" }
+    ,{ "name": "logs", "value": "Logs" }
+    ,{ "name": "current_account", "value": "Current account" }
+    ,{ "name": "offline_account_status", "value": "Status: %s" }
+    ,{ "name": "online", "value": "Online" }
+    ,{ "name": "offline", "value": "Offline" }
+    ,{ "name": "offline_available", "value": "%d accounts available offline" }
+    ,{ "name": "enter_offline", "value": "Go offline" }
+    ,{ "name": "entering_offline", "value": "Going offline…" }
+    ,{ "name": "go_online", "value": "Go online" }
+    ,{ "name": "reconnecting", "value": "Reconnecting…" }
+    ,{ "name": "connection_failed", "value": "Connection failed" }
+    ,{ "name": "delete_server_data", "value": "Delete server data" }
+    ,{ "name": "no_offline_accounts", "value": "No offline accounts" }
+    ,{ "name": "offline_delete_user_title", "value": "Delete offline account data" }
+    ,{ "name": "offline_delete_user_message", "value": "Delete offline content, download tasks, synchronization queue, and local credentials for “%s”? This cannot be undone." }
+    ,{ "name": "offline_user_deleted", "value": "Offline account data deleted" }
+    ,{ "name": "offline_delete_server_title", "value": "Delete offline server data" }
+    ,{ "name": "offline_delete_server_message", "value": "Delete offline data for every account on “%s”? This cannot be undone." }
+    ,{ "name": "offline_server_deleted", "value": "Offline server data deleted" }
+    ,{ "name": "errors", "value": "Errors" }
+    ,{ "name": "information", "value": "Information" }
+    ,{ "name": "clear", "value": "Clear" }
+    ,{ "name": "no_offline_logs", "value": "No offline logs" }
+    ,{ "name": "offline_clear_logs", "value": "Clear offline logs" }
+    ,{ "name": "offline_clear_logs_message", "value": "Clear every offline log for the current account? This cannot be undone." }
+    ,{ "name": "previous", "value": "Previous" }
+    ,{ "name": "next", "value": "Next" }
+    ,{ "name": "page_of", "value": "Page %d of %d" }
+    ,{ "name": "download_file_missing", "value": "The temporary download file is missing" }
+    ,{ "name": "download_file_empty", "value": "The downloaded file is empty" }
+    ,{ "name": "color_correction_curves", "value": "Curves" }
+    ,{ "name": "color_correction_levels", "value": "Levels" }
+    ,{ "name": "color_correction_preview", "value": "Current page preview" }
+    ,{ "name": "color_correction_channel", "value": "Channel" }
+    ,{ "name": "color_channel_value", "value": "Value" }
+    ,{ "name": "color_channel_red", "value": "Red" }
+    ,{ "name": "color_channel_green", "value": "Green" }
+    ,{ "name": "color_channel_blue", "value": "Blue" }
+    ,{ "name": "color_reset_channel", "value": "Reset channel" }
+    ,{ "name": "color_reset_all", "value": "Reset all" }
+    ,{ "name": "color_curve_input", "value": "Input" }
+    ,{ "name": "color_curve_output", "value": "Output" }
+    ,{ "name": "color_curve_point", "value": "Control point" }
+    ,{ "name": "color_curve_add_point", "value": "Add control point" }
+    ,{ "name": "color_curve_delete_point", "value": "Delete control point" }
+    ,{ "name": "color_curve_smooth", "value": "Smooth" }
+    ,{ "name": "color_curve_corner", "value": "Corner" }
+    ,{ "name": "color_levels_black", "value": "Black" }
+    ,{ "name": "color_levels_white", "value": "White" }
+    ,{ "name": "color_levels_gamma", "value": "Gamma" }
+    ,{ "name": "color_levels_output", "value": "Output levels" }
+    ,{ "name": "color_correction_saved", "value": "Color correction saved" }
+    ,{ "name": "color_correction_inactive", "value": "Color correction is not enabled for this book" }
+    ,{ "name": "color_correction_active", "value": "Active" }
+    ,{ "name": "name", "value": "Name" }
+    ,{ "name": "create", "value": "Create" }
+    ,{ "name": "name_required", "value": "Name is required" }
+    ,{ "name": "edit_collection", "value": "Edit collection" }
+    ,{ "name": "create_collection", "value": "Create collection" }
+    ,{ "name": "collection_name", "value": "Collection name" }
+    ,{ "name": "ordered_collection", "value": "Manual order" }
+    ,{ "name": "ordered_collection_description", "value": "Keep the series in a manually arranged order" }
+    ,{ "name": "collection_preserves_series", "value": "The current %d series will be preserved when saving" }
+    ,{ "name": "delete_collection", "value": "Delete collection" }
+    ,{ "name": "delete_collection_confirmation", "value": "Delete this collection? Its series will not be deleted." }
+    ,{ "name": "edit_read_list", "value": "Edit read list" }
+    ,{ "name": "create_read_list", "value": "Create read list" }
+    ,{ "name": "read_list_name", "value": "Read list name" }
+    ,{ "name": "read_list_summary", "value": "Read list description" }
+    ,{ "name": "ordered_read_list", "value": "Manual order" }
+    ,{ "name": "ordered_read_list_description", "value": "Keep the books in a manually arranged order" }
+    ,{ "name": "read_list_preserves_books", "value": "The current %d books will be preserved when saving" }
+    ,{ "name": "delete_read_list", "value": "Delete read list" }
+    ,{ "name": "delete_read_list_confirmation", "value": "Delete this read list? Its books will not be deleted." }
+    ,{ "name": "add_to_collection", "value": "Add to collection" }
+    ,{ "name": "add_to_read_list", "value": "Add to read list" }
+    ,{ "name": "search_or_create_collection", "value": "Search or enter a new collection name" }
+    ,{ "name": "search_or_create_read_list", "value": "Search or enter a new read list name" }
+    ,{ "name": "target_item_missing", "value": "The item to add was not found" }
+    ,{ "name": "komf_connection", "value": "Connection" }
+    ,{ "name": "komf_media_server_disconnected", "value": "Komf is connected, but the media server is unavailable" }
+    ,{ "name": "no_libraries_available", "value": "No media libraries are available" }
+    ,{ "name": "komf_processing", "value": "Processing rules" }
+    ,{ "name": "komf_processing_description", "value": "Configure metadata matching, covers, titles, and aggregation rules" }
+    ,{ "name": "komf_providers_description", "value": "View metadata providers available on this Komf instance" }
+    ,{ "name": "komf_notifications", "value": "Notifications" }
+    ,{ "name": "komf_notifications_description", "value": "Manage Discord and Apprise notification templates" }
+    ,{ "name": "komf_job_history", "value": "Job history" }
+    ,{ "name": "komf_jobs_description", "value": "Review identification, matching, and metadata processing jobs" }
+    ,{ "name": "advanced_configuration_warning", "value": "Advanced JSON configuration is applied directly to Komf. Verify every field before saving." }
+    ,{ "name": "no_providers", "value": "Komf returned no available providers" }
+    ,{ "name": "provider_enabled", "value": "%s enabled" }
+    ,{ "name": "provider_disabled", "value": "%s disabled" }
+    ,{ "name": "provider_order_saved", "value": "Provider order saved" }
+    ,{ "name": "provider_settings_saved", "value": "Provider settings saved" }
+    ,{ "name": "provider_priority", "value": "Priority %d" }
+    ,{ "name": "provider_not_enabled", "value": "Not enabled" }
+    ,{ "name": "provider_common_settings", "value": "Common settings" }
+    ,{ "name": "provider_common_settings_description", "value": "Configure matching and metadata source credentials" }
+    ,{ "name": "name_matching_mode", "value": "Name matching mode" }
+    ,{ "name": "closest_match", "value": "Closest match" }
+    ,{ "name": "exact_match", "value": "Exact match" }
+    ,{ "name": "hide_provider_credentials", "value": "Hide provider credentials" }
+    ,{ "name": "edit_provider_credentials", "value": "Edit provider credentials" }
+    ,{ "name": "mal_client_id", "value": "MyAnimeList client ID" }
+    ,{ "name": "comic_vine_client_id", "value": "Comic Vine client ID" }
+    ,{ "name": "enabled_providers", "value": "Enabled providers" }
+    ,{ "name": "enabled_providers_description", "value": "Reorder or disable active metadata sources" }
+    ,{ "name": "available_providers", "value": "Available providers" }
+    ,{ "name": "available_providers_description", "value": "Enable other metadata sources supported by this Komf instance" }
+    ,{ "name": "available", "value": "Available" }
+    ,{ "name": "running", "value": "Running" }
+    ,{ "name": "all", "value": "All" }
+    ,{ "name": "save", "value": "Save" }
+    ,{ "name": "no_jobs", "value": "No jobs match this filter" }
+    ,{ "name": "clear_komf_jobs_confirmation", "value": "Clear all Komf job history? This cannot be undone." }
+    ,{ "name": "discord_template_description", "value": "Edit the Discord notification template JSON. Sensitive webhooks are never written to app logs." }
+    ,{ "name": "apprise_template_description", "value": "Edit the Apprise notification template JSON. Verify URLs and template fields before saving." }
+    ,{ "name": "komf_job_detail", "value": "Job details" }
+    ,{ "name": "open_job_detail", "value": "Open job details" }
+    ,{ "name": "job_not_found", "value": "Komf job not found" }
+    ,{ "name": "job_status", "value": "Status" }
+    ,{ "name": "job_started_at", "value": "Started" }
+    ,{ "name": "job_finished_at", "value": "Finished" }
+    ,{ "name": "job_message", "value": "Job message" }
+    ,{ "name": "open_series", "value": "Open series" }
+    ,{ "name": "job_event_stream", "value": "Live processing events" }
+    ,{ "name": "waiting_for_job_events", "value": "Waiting for Komf processing progress…" }
+    ,{ "name": "job_event_stream_finished", "value": "The live event stream has ended" }
+    ,{ "name": "job_event_stream_not_found", "value": "No live events are available; the final status was refreshed" }
+    ,{ "name": "job_events_received", "value": "%d processing events received" }
+    ,{ "name": "no_job_events", "value": "No processing events were retained for this job" }
+    ,{ "name": "komf_retrieving_series", "value": "Retrieving series metadata" }
+    ,{ "name": "komf_retrieving_books", "value": "Retrieving book metadata" }
+    ,{ "name": "komf_provider_completed", "value": "Provider completed" }
+    ,{ "name": "komf_provider_failed", "value": "Provider failed" }
+    ,{ "name": "komf_post_processing", "value": "Running post-processing" }
+    ,{ "name": "komf_processing_failed", "value": "Metadata processing failed" }
+    ,{ "name": "komf_unknown_event", "value": "Other processing event" }
+    ,{ "name": "komf_book_progress", "value": "%d / %d books processed" }
+    ,{ "name": "notification_preview_updated", "value": "Notification preview updated" }
+    ,{ "name": "notification_preview_failed", "value": "Could not render the notification preview: %s" }
+    ,{ "name": "send_test_notification", "value": "Send test notification" }
+    ,{ "name": "send_test_notification_confirmation", "value": "Send a real test notification to %d configured targets?" }
+    ,{ "name": "discord_targets_missing", "value": "Configure a Discord webhook in Komf first" }
+    ,{ "name": "apprise_targets_missing", "value": "Configure an Apprise URL in Komf first" }
+    ,{ "name": "test_notification_sent", "value": "Test notification sent" }
+    ,{ "name": "test_notification_failed", "value": "Could not send the test notification: %s" }
+    ,{ "name": "notification_preview", "value": "Notification preview" }
+    ,{ "name": "notification_preview_description", "value": "Komf renders this preview from the current template and test context" }
+    ,{ "name": "notification_preview_empty", "value": "Select Preview to view the server-rendered result" }
+    ,{ "name": "notification_targets_configured", "value": "%d delivery targets configured" }
+    ,{ "name": "notification_templates_json_description", "value": "Template fields use the same Komf data structure as the Android version" }
+    ,{ "name": "preview", "value": "Preview" }
+    ,{ "name": "send_test", "value": "Send test" }
+    ,{ "name": "send", "value": "Send" }
+    ,{ "name": "edit_test_context", "value": "Edit test context" }
+    ,{ "name": "hide_test_context", "value": "Hide test context" }
+    ,{ "name": "reset_test_context", "value": "Restore sample context" }
+    ,{ "name": "notification_context", "value": "Notification test context" }
+    ,{ "name": "notification_context_description", "value": "Used only for previews and test sends. It never changes library data; do not enter account credentials." }
+    ,{ "name": "discord_webhooks", "value": "Discord webhooks" }
+    ,{ "name": "apprise_urls", "value": "Apprise URLs" }
+    ,{ "name": "notification_targets_description", "value": "Komf stores delivery addresses. The app shows masked labels only and never writes them to logs." }
+    ,{ "name": "discord_webhook_number", "value": "Discord webhook %d" }
+    ,{ "name": "apprise_target_number", "value": "%s target %d" }
+    ,{ "name": "discord_webhook_placeholder", "value": "https://discord.com/api/webhooks/…" }
+    ,{ "name": "apprise_url_placeholder", "value": "apprise://…" }
+    ,{ "name": "add_notification_target", "value": "Add delivery target" }
+    ,{ "name": "upload_series_cover", "value": "Upload series cover" }
+    ,{ "name": "upload_series_cover_description", "value": "Attach the current series cover to test and production notifications" }
+    ,{ "name": "invalid_discord_webhook", "value": "Enter a valid Discord HTTPS webhook" }
+    ,{ "name": "invalid_apprise_url", "value": "Enter a valid Apprise URL including its scheme" }
+    ,{ "name": "notification_target_added", "value": "Delivery target added" }
+    ,{ "name": "notification_target_removed", "value": "Delivery target removed" }
+    ,{ "name": "remove_notification_target", "value": "Remove delivery target" }
+    ,{ "name": "remove_notification_target_confirmation", "value": "Remove this target from the Komf notification configuration?" }
+    ,{ "name": "notification_settings_saved", "value": "Notification settings saved" }
+    ,{ "name": "structured_settings", "value": "Structured settings" }
+    ,{ "name": "advanced_json", "value": "Advanced JSON" }
+    ,{ "name": "default_processing_scope_description", "value": "These settings match Android's default Komga processing rules and apply to libraries without overrides." }
+    ,{ "name": "processing_general", "value": "General processing" }
+    ,{ "name": "processing_general_description", "value": "Configure library type, update sources, and book ordering" }
+    ,{ "name": "processing_library_type", "value": "Library type" }
+    ,{ "name": "library_type_manga", "value": "Manga" }
+    ,{ "name": "library_type_novel", "value": "Novel" }
+    ,{ "name": "library_type_comic", "value": "Comic" }
+    ,{ "name": "library_type_webtoon", "value": "Webtoon" }
+    ,{ "name": "processing_update_modes", "value": "Update modes" }
+    ,{ "name": "update_mode_api", "value": "Komga API" }
+    ,{ "name": "update_mode_comic_info", "value": "ComicInfo.xml" }
+    ,{ "name": "processing_order_books", "value": "Order books" }
+    ,{ "name": "processing_order_books_description", "value": "Attempt to order books using naming rules for the selected library type" }
+    ,{ "name": "processing_aggregation", "value": "Metadata aggregation" }
+    ,{ "name": "processing_aggregation_description", "value": "Control how results from multiple providers are combined" }
+    ,{ "name": "processing_aggregate", "value": "Enable aggregation" }
+    ,{ "name": "processing_aggregate_description", "value": "Combine multiple matches instead of using only the first result" }
+    ,{ "name": "processing_merge_genres", "value": "Merge genres" }
+    ,{ "name": "processing_merge_genres_description", "value": "Merge genres from every matched result when aggregating" }
+    ,{ "name": "processing_merge_tags", "value": "Merge tags" }
+    ,{ "name": "processing_merge_tags_description", "value": "Merge tags from every matched result when aggregating" }
+    ,{ "name": "processing_covers", "value": "Cover settings" }
+    ,{ "name": "processing_covers_description", "value": "Control series and book cover updates and locking" }
+    ,{ "name": "processing_series_covers", "value": "Update series covers" }
+    ,{ "name": "processing_series_covers_description", "value": "Use series covers returned by matched metadata" }
+    ,{ "name": "processing_book_covers", "value": "Update book covers" }
+    ,{ "name": "processing_book_covers_description", "value": "Use individual book covers returned by matched metadata" }
+    ,{ "name": "processing_override_covers", "value": "Override existing covers" }
+    ,{ "name": "processing_override_covers_description", "value": "Apply new covers even when a cover already exists" }
+    ,{ "name": "processing_lock_covers", "value": "Lock updated covers" }
+    ,{ "name": "processing_lock_covers_description", "value": "Prevent later scans from replacing covers after an update" }
+    ,{ "name": "processing_titles", "value": "Title settings" }
+    ,{ "name": "processing_titles_description", "value": "Configure series titles, alternatives, and language preferences" }
+    ,{ "name": "processing_series_title", "value": "Update series title" }
+    ,{ "name": "processing_series_title_description", "value": "Update the series title when matched metadata contains one" }
+    ,{ "name": "processing_alternative_titles", "value": "Write alternative titles" }
+    ,{ "name": "processing_alternative_titles_description", "value": "Keep titles in other languages returned by providers" }
+    ,{ "name": "processing_fallback_title", "value": "Fall back to an alternative title" }
+    ,{ "name": "processing_fallback_title_description", "value": "Use an available alternative when the preferred-language title is missing" }
+    ,{ "name": "iso_language_placeholder", "value": "Language code, such as zh, en, or ja" }
+    ,{ "name": "alternative_languages_placeholder", "value": "Alternative title languages, separated by commas" }
+    ,{ "name": "processing_defaults", "value": "Default values" }
+    ,{ "name": "processing_defaults_description", "value": "Set reading direction and language when metadata is missing" }
+    ,{ "name": "processing_reading_direction", "value": "Default reading direction" }
+    ,{ "name": "none", "value": "Not set" }
+    ,{ "name": "vertical", "value": "Vertical" }
+    ,{ "name": "webtoon", "value": "Webtoon" }
+    ,{ "name": "library_general", "value": "General" }
+    ,{ "name": "library_general_description", "value": "Set the name, server directory, and one-shot directory" }
+    ,{ "name": "library_scanner", "value": "Scanner" }
+    ,{ "name": "library_scanner_description", "value": "Control scan scheduling, file types, and excluded directories" }
+    ,{ "name": "library_processing", "value": "File processing" }
+    ,{ "name": "library_processing_description", "value": "Configure hashing, analysis, repair, and series cover behavior" }
+    ,{ "name": "library_metadata_import", "value": "Metadata import" }
+    ,{ "name": "library_metadata_import_description", "value": "Choose local metadata sources used during scans" }
+    ,{ "name": "oneshots_directory", "value": "One-shot directory" }
+    ,{ "name": "scan_interval", "value": "Scan interval" }
+    ,{ "name": "scan_disabled", "value": "Disabled" }
+    ,{ "name": "scan_hourly", "value": "Hourly" }
+    ,{ "name": "scan_every_6h", "value": "Every 6 hours" }
+    ,{ "name": "scan_every_12h", "value": "Every 12 hours" }
+    ,{ "name": "scan_daily", "value": "Daily" }
+    ,{ "name": "scan_weekly", "value": "Weekly" }
+    ,{ "name": "scan_directory_exclusions", "value": "Excluded directories" }
+    ,{ "name": "scan_directory_exclusions_hint", "value": "Comma-separated, such as #recycle and @eaDir" }
+    ,{ "name": "scan_on_startup", "value": "Scan on startup" }
+    ,{ "name": "scan_on_startup_description", "value": "Scan this library automatically after Komga starts" }
+    ,{ "name": "scan_force_modified_time", "value": "Force modified-time check" }
+    ,{ "name": "scan_force_modified_time_description", "value": "Recheck file modification times during scans" }
+    ,{ "name": "scan_cbx", "value": "Scan CBZ/CBR" }
+    ,{ "name": "scan_pdf", "value": "Scan PDF" }
+    ,{ "name": "scan_epub", "value": "Scan EPUB" }
+    ,{ "name": "empty_trash_after_scan", "value": "Empty trash after scan" }
+    ,{ "name": "empty_trash_after_scan_description", "value": "Permanently clear the library trash after each scan" }
+    ,{ "name": "hash_files", "value": "Hash files" }
+    ,{ "name": "hash_files_description", "value": "Reliably detect changes to file contents" }
+    ,{ "name": "hash_pages", "value": "Hash pages" }
+    ,{ "name": "hash_pages_description", "value": "Generate hashes for page deduplication and analysis" }
+    ,{ "name": "analyze_dimensions", "value": "Analyze page dimensions" }
+    ,{ "name": "analyze_dimensions_description", "value": "Record page sizes to optimize reading layouts" }
+    ,{ "name": "repair_extensions", "value": "Repair file extensions" }
+    ,{ "name": "repair_extensions_description", "value": "Correct invalid extensions using the detected file format" }
+    ,{ "name": "convert_to_cbz", "value": "Convert to CBZ" }
+    ,{ "name": "convert_to_cbz_description", "value": "Convert compatible archives to CBZ during scans" }
+    ,{ "name": "series_cover_policy", "value": "Series cover" }
+    ,{ "name": "series_cover_first", "value": "First book" }
+    ,{ "name": "series_cover_first_unread_first", "value": "First unread, otherwise first" }
+    ,{ "name": "series_cover_first_unread_last", "value": "First unread, otherwise last" }
+    ,{ "name": "series_cover_last", "value": "Last book" }
+    ,{ "name": "import_comicinfo_book", "value": "Import ComicInfo book metadata" }
+    ,{ "name": "import_comicinfo_series", "value": "Import ComicInfo series metadata" }
+    ,{ "name": "append_comicinfo_volume", "value": "Append volume to series title" }
+    ,{ "name": "import_comicinfo_collection", "value": "Import ComicInfo collections" }
+    ,{ "name": "import_comicinfo_readlist", "value": "Import ComicInfo read lists" }
+    ,{ "name": "import_epub_book", "value": "Import EPUB book metadata" }
+    ,{ "name": "import_epub_series", "value": "Import EPUB series metadata" }
+    ,{ "name": "download_storage_insufficient", "value": "Not enough storage: %d MiB required, %d MiB available" }
+    ,{ "name": "import_mylar_series", "value": "Import Mylar series metadata" }
+    ,{ "name": "import_local_artwork", "value": "Import local artwork" }
+    ,{ "name": "import_barcode_isbn", "value": "Import ISBN from barcodes" }
+    ,{ "name": "metadata_lock", "value": "Lock field" }
+    ,{ "name": "age_rating", "value": "Age rating" }
+    ,{ "name": "total_book_count", "value": "Expected book count" }
+    ,{ "name": "sharing_labels", "value": "Sharing labels (comma-separated)" }
+    ,{ "name": "web_links", "value": "Web links" }
+    ,{ "name": "web_links_hint", "value": "One label|URL pair per line" }
+    ,{ "name": "alternative_titles", "value": "Alternative titles" }
+    ,{ "name": "alternative_titles_hint", "value": "One language label|title pair per line" }
+    ,{ "name": "number_sort", "value": "Sort number" }
+    ,{ "name": "author_roles", "value": "Authors and roles" }
+    ,{ "name": "penciller", "value": "Penciller" }
+    ,{ "name": "inker", "value": "Inker" }
+    ,{ "name": "colorist", "value": "Colorist" }
+    ,{ "name": "letterer", "value": "Letterer" }
+    ,{ "name": "cover_artist", "value": "Cover artist" }
+    ,{ "name": "editor", "value": "Editor" }
+    ,{ "name": "translator", "value": "Translator" }
+    ,{ "name": "status_ended", "value": "Ended" }
+    ,{ "name": "status_ongoing", "value": "Ongoing" }
+    ,{ "name": "status_abandoned", "value": "Abandoned" }
+    ,{ "name": "status_hiatus", "value": "Hiatus" }
+    ,{ "name": "bulk_edit_metadata", "value": "Bulk edit metadata" }
+    ,{ "name": "apply_this_field", "value": "Apply this field" }
+    ,{ "name": "bulk_metadata_saved", "value": "Updated metadata for %d items" }
+    ,{ "name": "grid_cover_minimum_size", "value": "Minimum grid cover size" }
+    ,{ "name": "application_theme", "value": "App theme" }
+    ,{ "name": "read_incognito", "value": "Read incognito" }
+    ,{ "name": "read_options", "value": "Reading options" }
+    ,{ "name": "read_aloud", "value": "Read aloud" }
+    ,{ "name": "read_aloud_description", "value": "Uses on-device speech with screen-off and lock-screen controls" }
+    ,{ "name": "start_read_aloud", "value": "Start reading" }
+    ,{ "name": "preparing_read_aloud", "value": "Preparing…" }
+    ,{ "name": "read_aloud_unavailable", "value": "System speech is unavailable on this device" }
+    ,{ "name": "read_aloud_failed", "value": "Unable to start reading: %s" }
+    ,{ "name": "filter_options_load_failed", "value": "Could not load filter options: %s" }
+    ,{ "name": "filter_read_status", "value": "Read status" }
+    ,{ "name": "filter_read", "value": "Read" }
+    ,{ "name": "filter_in_progress", "value": "In progress" }
+    ,{ "name": "filter_publication_status", "value": "Publication status" }
+    ,{ "name": "filter_inclusion_mode", "value": "Include matching" }
+    ,{ "name": "filter_exclusion_mode", "value": "Exclude matching" }
+    ,{ "name": "filter_match_all", "value": "Match all" }
+    ,{ "name": "filter_match_any", "value": "Match any" }
+    ,{ "name": "filter_include_genres", "value": "Include genres" }
+    ,{ "name": "filter_include_tags", "value": "Include tags" }
+    ,{ "name": "filter_exclude_genres", "value": "Exclude genres" }
+    ,{ "name": "filter_exclude_tags", "value": "Exclude tags" }
+    ,{ "name": "filter_authors", "value": "Authors" }
+    ,{ "name": "filter_author_search", "value": "Search authors" }
+    ,{ "name": "filter_publisher", "value": "Publisher" }
+    ,{ "name": "filter_language", "value": "Language" }
+    ,{ "name": "filter_release_year", "value": "Release year" }
+    ,{ "name": "filter_age_rating", "value": "Age rating" }
+    ,{ "name": "filter_complete", "value": "Complete series" }
+    ,{ "name": "filter_oneshot", "value": "One-shot" }
+    ,{ "name": "any", "value": "Any" }
+    ,{ "name": "yes", "value": "Yes" }
+    ,{ "name": "no", "value": "No" }
+    ,{ "name": "no_options", "value": "No options" }
+    ,{ "name": "filter_none", "value": "Not set" }
+    ,{ "name": "reason_keep_background_running", "value": "Used for screen-off reading and background downloads" }
+    ,{ "name": "release_date", "value": "Release date" }
+    ,{ "name": "genres", "value": "Genres" }
+    ,{ "name": "tags", "value": "Tags" }
+    ,{ "name": "komf_processing_komga", "value": "Komga processing" }
+    ,{ "name": "komf_processing_kavita", "value": "Kavita processing" }
+    ,{ "name": "kavita_libraries_count", "value": "Kavita libraries (%d)" }
+    ,{ "name": "default_processing_scope", "value": "Default rules" }
+    ,{ "name": "processing_scope", "value": "Processing scope" }
+    ,{ "name": "processing_scope_description", "value": "Default rules apply to libraries without overrides. Select a library to edit its own rules." }
+    ,{ "name": "library_override_remove", "value": "Remove library override" }
+    ,{ "name": "library_override_removed", "value": "Library override removed" }
+    ,{ "name": "komf_identify_page_title", "value": "Komf identification" }
+    ,{ "name": "komf_identify_description", "value": "Search metadata candidates and confirm one manually, or let Komf identify the series using configured providers." }
+    ,{ "name": "komf_identify_search_hint", "value": "Enter a series title" }
+    ,{ "name": "komf_auto_identify", "value": "Auto-identify" }
+    ,{ "name": "komf_search_results_count", "value": "Candidates (%d)" }
+    ,{ "name": "komf_no_results", "value": "No matching results" }
+    ,{ "name": "komf_confirm_identify", "value": "Use selected result" }
+    ,{ "name": "komf_reset_series_title", "value": "Reset series metadata" }
+    ,{ "name": "komf_reset_library_title", "value": "Reset library metadata" }
+    ,{ "name": "komf_reset_series_warning", "value": "This resets all series metadata, field locks, and thumbnails uploaded by Komf. Files are unchanged by default." }
+    ,{ "name": "komf_reset_library_warning", "value": "This resets metadata, field locks, and thumbnails uploaded by Komf for every series in this library. Files are unchanged by default." }
+    ,{ "name": "komf_remove_comic_info", "value": "Also remove ComicInfo.xml" }
+    ,{ "name": "komf_remove_comic_info_description", "value": "Requires server write access and modifies files in the library." }
+    ,{ "name": "komf_confirm_reset", "value": "Confirm reset" }
+    ,{ "name": "komf_library_maintenance", "value": "Komf metadata" }
+    ,{ "name": "komf_library_maintenance_description", "value": "Auto-identify or reset series metadata in this library" }
+    ,{ "name": "komf_library_auto_identify", "value": "Auto-identify entire library" }
+    ,{ "name": "komf_library_auto_identify_confirmation", "value": "Submit Komf auto-identification jobs for every series in this library?" }
+    ,{ "name": "komf_library_reset", "value": "Reset library metadata" }
+    ,{ "name": "komf_bulk_auto_identify", "value": "Komf bulk auto-identify" }
+    ,{ "name": "komf_bulk_auto_identify_description", "value": "Submit a Komf auto-identification job for each selected series" }
+    ,{ "name": "komf_bulk_auto_identify_confirmation", "value": "Submit Komf auto-identification jobs for %d selected series?" }
+    ,{ "name": "komf_jobs_submitted", "value": "Submitted %d Komf identification jobs" }
+    ,{ "name": "komf_bulk_partial_failure", "value": "Submitted %d/%d jobs: %s" }
+    ,{ "name": "book_actions", "value": "Book actions" }
+    ,{ "name": "book_read_progress", "value": "Read progress" }
+    ,{ "name": "book_read_progress_value", "value": "%d%% read, %d pages left" }
+    ,{ "name": "book_last_read", "value": "Last read" }
+    ,{ "name": "book_unavailable", "value": "Unavailable" }
+    ,{ "name": "book_remote_unavailable", "value": "Remote file unavailable" }
+    ,{ "name": "book_local_download_outdated", "value": "Local download outdated" }
+    ,{ "name": "book_isbn", "value": "ISBN" }
+    ,{ "name": "book_delete_downloaded", "value": "Delete downloaded content" }
+    ,{ "name": "book_delete_download_title", "value": "Delete downloaded content?" }
+    ,{ "name": "book_delete_download_message", "value": "Remove the offline copy of %s from this device? The server file will not be changed." }
+    ,{ "name": "book_marked_read", "value": "Marked as read" }
+    ,{ "name": "book_marked_unread", "value": "Marked as unread" }
+    ,{ "name": "book_analysis_started", "value": "Book analysis started" }
+    ,{ "name": "book_metadata_refresh_started", "value": "Book metadata refresh started" }
+    ,{ "name": "book_action_failed", "value": "Book action failed: %s" }
+    ,{ "name": "series_marked_read", "value": "Series marked as read" }
+    ,{ "name": "series_marked_unread", "value": "Series marked as unread" }
+    ,{ "name": "series_analysis_started", "value": "Series analysis started" }
+    ,{ "name": "series_metadata_refresh_started", "value": "Series metadata refresh started" }
+    ,{ "name": "series_action_failed", "value": "Series action failed: %s" }
+    ,{ "name": "link_open_failed", "value": "Could not open the link" }
+    ,{ "name": "edit_oneshot", "value": "Edit one-shot" }
+    ,{ "name": "download_remove_title", "value": "Remove download task?" }
+    ,{ "name": "download_remove_message", "value": "Removing only the task keeps its files. Removing the task and files deletes completed and partial downloads on this device, without changing the server." }
+    ,{ "name": "download_remove_task", "value": "Remove task only" }
+    ,{ "name": "download_remove_files", "value": "Remove task and files" }
+    ,{ "name": "epub_immersive", "value": "Immersive reading" }
+    ,{ "name": "epub_safe_area_description", "value": "System bars are avoided by default. Immersive mode hides them and lets reading content fill the screen." }
+    ,{ "name": "epub_top_spacing", "value": "Top spacing: %d vp" }
   ]
 }

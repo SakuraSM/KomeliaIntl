@@ -6,6 +6,7 @@
 | Library/catalog | Libraries, series, books, collections, read lists, filters, Home groups | Komga API identity and ordering semantics | stale selection, filter persistence, duplicate state owners |
 | Reader | Image/PDF/EPUB navigation, progress, chrome, retries | progress protocol and Back behavior | gesture overlap, double navigation, content loss |
 | Offline | download lifecycle, cache index, local browsing, deletion, logs | cache/database compatibility and privacy | orphaned files, silent errors, destructive cleanup |
+| HarmonyOS local content | independent local library/index/progress and active-account downloaded content | local IDs never reach Komga; granted files remain read-only; private imports are separately owned | revoked grants, archive limits, stale scans, late reader writes |
 | Presentation | adaptive navigation, layout tokens, themes, locale, accessibility | persisted theme/language values and shared design tokens | platform divergence, inaccessible overlays, overflow |
 | Persistence | transactions, schema, settings, SQLite/Wasm implementations | previous schema and serialized values | migration failure, partial writes, target mismatch |
 | Native media | decoders, color/inference, JNI, WebView resources | architecture-specific packaging | missing libraries, license drift, host/target confusion |

@@ -43,6 +43,19 @@ Risk points: revoked folder permissions, unstable IDs after moving files, archiv
 
 ## Reader navigation
 
+### HarmonyOS local-content route
+
+1. Login offers local-only mode without a Komga account. The selected destination is restored from Preferences without changing existing enum values or deleting saved server credentials.
+2. The picker grants a directory where supported. Devices without durable folder grants import selected files into app-owned storage instead.
+3. `LocalLibraryIndexer` completes the listing before replacing the index. Permission/listing failures retain the previous index; removal/exclusion deletes progress before book rows inside one transaction.
+4. `AvailableContentRepository` exposes local books and the current account's completed downloads to Local, Home, and unified search. Search requests use the same modified-date order as their merge comparator and report partial coverage.
+5. Local reader routes use native image/PDF/EPUB adapters and `LOCAL_PROGRESS`, never Komga progress or the server outbox. Index revisions invalidate retained local reader images on reopening.
+6. Startup, return-to-foreground, and a foreground timer scan according to preferences. This is not an OS background job and does not promise scans while the process is stopped.
+
+Download task cancellation retains the record and reusable files. Explicit task removal distinguishes retaining files from deleting both completed and partial downloads. Additive schema v10 stores task titles, byte progress, and speed; guarded writes cannot restart paused/cancelled tasks.
+
+### Shared reader route
+
 1. Detail or library navigation opens an image, PDF, or EPUB reader with a stable content/progress identity.
 2. The reader distinguishes tap zones, drag/swipe gestures, controls, and system navigation.
 3. Progress updates through the existing protocol without a gesture triggering multiple page or stack changes.

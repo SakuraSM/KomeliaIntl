@@ -112,6 +112,10 @@ kotlin {
             implementation(projects.komeliaInfra.onnxruntime.jvm)
         }
 
+        jvmTest.dependencies {
+            implementation(compose.desktop.uiTestJUnit4)
+        }
+
         jvmMain.dependencies {
             api(compose.desktop.currentOs)
             api(libs.compose.desktop)

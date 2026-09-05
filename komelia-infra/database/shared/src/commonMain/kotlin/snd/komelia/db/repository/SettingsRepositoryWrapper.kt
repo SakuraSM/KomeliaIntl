@@ -100,7 +100,7 @@ class SettingsRepositoryWrapper(
         return wrapper.state.map { it.updateLastCheckedReleaseVersion }.distinctUntilChanged()
     }
 
-    override suspend fun putLastCheckedReleaseVersion(version: AppVersion) {
+    override suspend fun putLastCheckedReleaseVersion(version: AppVersion?) {
         wrapper.transform { it.copy(updateLastCheckedReleaseVersion = version) }
     }
 

@@ -1381,4 +1381,13 @@
     <string name="window_logs_title">Komelia 日志</string>
     <string name="window_error_title">Komelia 错误</string>
 
+    <string name="search_clear_query">清空搜索</string>
+    <string name="settings_epub_immersive">全屏沉浸式</string>
+    <string name="settings_epub_immersive_desc">默认关闭，自动避让挖孔和系统导航区域。开启后使用整个屏幕，内容可能延伸到摄像头下方。</string>
+    <string name="settings_epub_top_spacing">顶部额外留白</string>
+    <string name="settings_epub_spacing_value">%1$d dp</string>
+    <string name="settings_updates_external_hint">更新将打开下载页面，测试版与正式版保持独立安装。</string>
+    <string name="settings_updates_current">已是最新版本</string>
+    <string name="settings_updates_empty">暂无可用版本</string>
+    <string name="settings_updates_check_failed">检查更新失败，请重试。</string>
 </resources>

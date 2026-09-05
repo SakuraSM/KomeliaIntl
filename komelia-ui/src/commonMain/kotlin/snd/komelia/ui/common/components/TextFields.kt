@@ -61,6 +61,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -173,7 +174,7 @@ fun NoPaddingTextField(
         OutlinedTextFieldDefaults.DecorationBox(
             value = text,
             innerTextField = innerTextField,
-            placeholder = { Text(placeholder, style = textStyle) },
+            placeholder = { Text(placeholder, style = textStyle, maxLines = 1, overflow = TextOverflow.Ellipsis) },
             enabled = true,
             singleLine = true,
             visualTransformation = VisualTransformation.None,

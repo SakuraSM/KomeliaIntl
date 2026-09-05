@@ -12,7 +12,7 @@ class BrowserWindowState : AppWindowState {
     }
     private fun checkIfFullscreen() = document.fullscreenElement != null
 
-    override fun setFullscreen(enabled: Boolean) {
+    override fun setFullscreen(enabled: Boolean, hideNavigationBar: Boolean) {
         if (enabled) {
             document.documentElement?.requestFullscreen()
         } else {

@@ -89,6 +89,8 @@ class EpubScreen(
                     onWebviewCreated = { state.value.onWebviewCreated(it) },
                     onBackButtonPress = state.value::onBackButtonPress,
                     contentReady = state.value.contentReady.collectAsState().value,
+                    displaySettings = vm.displaySettings.collectAsState().value,
+                    backgroundColor = state.value.backgroundColor.collectAsState().value,
                 )
             }
         }

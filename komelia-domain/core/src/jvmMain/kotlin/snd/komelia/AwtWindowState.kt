@@ -58,7 +58,7 @@ class AwtWindowState(private val composeWindow: Flow<ComposeWindow>) : AppWindow
         }.launchIn(coroutineScope)
     }
 
-    override fun setFullscreen(enabled: Boolean) {
+    override fun setFullscreen(enabled: Boolean, hideNavigationBar: Boolean) {
         fullscreenStrategy.value.setFullscreen(enabled)
     }
 }

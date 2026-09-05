@@ -1,5 +1,7 @@
 package snd.komelia.ui.reader.epub
 
+import androidx.compose.ui.graphics.Color
+import snd.komelia.settings.model.EpubDisplaySettings
 import cafe.adriel.voyager.navigator.Navigator
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
@@ -69,6 +71,7 @@ class TtsuReaderState(
     private val markReadProgress: Boolean,
     private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
+    private val displaySettings: StateFlow<EpubDisplaySettings>,
     private val localeTag: String?,
     private val fontsRepository: UserFontsRepository,
     private val windowState: AppWindowState,
@@ -78,6 +81,7 @@ class TtsuReaderState(
 ) : EpubReaderState {
     override val state = MutableStateFlow<LoadState<Unit>>(LoadState.Uninitialized)
     override val book = MutableStateFlow(book)
+    override val backgroundColor = MutableStateFlow(Color.White)
     override val contentReady = MutableStateFlow(true)
 
     val bookId = MutableStateFlow(bookId)
@@ -90,7 +94,7 @@ class TtsuReaderState(
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun initialize(navigator: Navigator) {
         this.navigator.value = navigator
-        if (platformType == PlatformType.MOBILE) windowState.setFullscreen(true)
+        if (platformType == PlatformType.MOBILE) windowState.setFullscreen(true, hideNavigationBar = displaySettings.value.immersiveMode)
         if (state.value !is LoadState.Uninitialized) return
 
         state.value = LoadState.Loading
@@ -159,10 +163,12 @@ class TtsuReaderState(
 
         webview.bind<Unit, TtsuReaderSettings>("getSettings") {
             val settings = epubSettingsRepository.getTtsuReaderSettings()
+            backgroundColor.value = ttsuReaderBackground(settings)
             if (!markReadProgress) settings.copy(autoBookmark = false)
             else settings
         }
         webview.bind<TtsuReaderSettings, Unit>("putSettings") {
+            backgroundColor.value = ttsuReaderBackground(it)
             epubSettingsRepository.putTtsuReaderSettings(it)
         }
         webview.bind<Unit, TtuBookmarkData>("getBookmark") { getBookmark() }
@@ -220,7 +226,7 @@ class TtsuReaderState(
             windowState.isFullscreen.first()
         }
         webview.bind<Boolean, Unit>("setFullscreen") {
-            windowState.setFullscreen(it)
+            windowState.setFullscreen(it, hideNavigationBar = displaySettings.value.immersiveMode)
         }
 
         webview.bind<Unit, Unit>("completeBook") {

@@ -65,6 +65,10 @@ When rendering or interaction changes, cover the relevant subset:
 
 Use real Komga content only when authorized. Redact credentials, addresses, filenames, account data, and private book content before committing evidence.
 
+## Android test-package handoff
+
+When the user will validate on a physical device, follow [Android device validation](android-device-validation.md). Deliver an identifiable debug APK that coexists with production, verify its packaged labels and signature, and keep physical-device acceptance pending until the user reports results.
+
 ## Evidence record
 
 In the pull request or handoff, list each executed command and manual scenario with its result. If a required check is blocked, include the reason and the closest substitute; do not silently omit it. Installed and launched packages are stronger evidence than artifact presence alone.

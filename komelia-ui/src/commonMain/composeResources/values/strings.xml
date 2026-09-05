@@ -1381,4 +1381,13 @@
     <string name="window_logs_title">Komelia Logs</string>
     <string name="window_error_title">Komelia Error</string>
 
+    <string name="search_clear_query">Clear search</string>
+    <string name="settings_epub_immersive">Immersive full screen</string>
+    <string name="settings_epub_immersive_desc">Off by default: automatically avoid camera cutouts and system bars. Turn on to use the entire screen; content may extend beneath the camera.</string>
+    <string name="settings_epub_top_spacing">Extra top spacing</string>
+    <string name="settings_epub_spacing_value">%1$d dp</string>
+    <string name="settings_updates_external_hint">Updates open the download page. Test and production apps remain separate.</string>
+    <string name="settings_updates_current">You are up to date</string>
+    <string name="settings_updates_empty">No releases are available yet</string>
+    <string name="settings_updates_check_failed">Could not check for updates. Please try again.</string>
 </resources>

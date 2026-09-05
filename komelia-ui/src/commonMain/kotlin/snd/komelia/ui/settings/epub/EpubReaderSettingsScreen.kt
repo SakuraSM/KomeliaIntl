@@ -29,7 +29,9 @@ class EpubReaderSettingsScreen : Screen {
                 LoadState.Uninitialized, LoadState.Loading -> LoadingMaxSizeIndicator()
                 is LoadState.Success<Unit> -> EpubReaderSettingsContent(
                     vm.selectedEpubReader.collectAsState().value,
-                    vm::onSelectedTypeChange
+                    vm::onSelectedTypeChange,
+                    vm.displaySettings.collectAsState().value,
+                    vm::onDisplaySettingsChange
                 )
             }
 

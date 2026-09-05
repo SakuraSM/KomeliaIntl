@@ -147,35 +147,9 @@
         <div id="reader-loading"></div>
         <div id="reader-error"></div>
       </main>
-      <a id="previous-chapter" rel="prev" role="button" aria-labelledby="previous-label"
-         style="left: 50%;position: fixed;color: #000;height: 24px;background: #d3d3d33b; width: 150px;transform: translate(-50%, 0); display: block"
-         :style="`top: ${showToolbars ? 48 : 0}px`"
-         :class="settings.navigationButtons ? '' : 'hidden'"
-      >
-        <v-icon :icon="mdiChevronUp" style="left: calc(50% - 12px); position: relative;"/>
-      </a>
-      <a id="next-chapter" rel="next" role="button" aria-labelledby="next-label"
-         :class="settings.navigationButtons ? '' : 'hidden'"
-         style="bottom: 0;left: 50%;position: fixed;color: #000;height: 24px;background: #d3d3d33b; width: 150px;transform: translate(-50%, 0); display: block">
-        <v-icon :icon="mdiChevronDown" style="left: calc(50% - 12px);position: relative;"/>
-      </a>
     </div>
 
-    <footer id="footerMenu">
-      <a rel="prev" class="disabled" role="button" aria-labelledby="previous-label"
-         style="top: 50%;left:0;position: fixed;height: 100px;background: #d3d3d33b;"
-         :class="settings.navigationButtons ? '' : 'hidden'"
-      >
-        <v-icon :icon="mdiChevronLeft" style="top: calc(50% - 12px);
-                        position: relative;"/>
-      </a>
-      <a rel="next" class="disabled" role="button" aria-labelledby="next-label"
-         style="top: 50%;right:0;position: fixed;height: 100px;background: #d3d3d33b;"
-         :class="settings.navigationButtons ? '' : 'hidden'"
-      >
-        <v-icon :icon="mdiChevronRight" style="top: calc(50% - 12px);position: relative;"/>
-      </a>
-    </footer>
+    <footer id="footerMenu"/>
 
     <v-container fluid class="full-width" style="position: fixed; bottom: 0; font-size: .85rem"
                  :class="appearanceClass()"
@@ -222,10 +196,11 @@
             </v-list-item>
 
             <v-list-item>
-              <settings-select
-                  :items="navigationOptions"
-                  v-model="navigationMode"
-                  :label="t('epubreader.settings.navigation_mode')"
+              <v-switch
+                  v-model="navigationClick"
+                  :label="t('epubreader.settings.tap_to_turn')"
+                  color="primary"
+                  hide-details
               />
             </v-list-item>
 
@@ -361,10 +336,8 @@ import IconFormatLineSpacingDown from "@/components/IconFormatLineSpacingDown.vu
 import {
   mdiArrowLeft,
   mdiCheck,
-  mdiChevronDown,
   mdiChevronLeft,
   mdiChevronRight,
-  mdiChevronUp,
   mdiClose,
   mdiCog,
   mdiEiffelTower,
@@ -460,17 +433,9 @@ const settings = reactive(
       // Epub Reader
       alwaysFullscreen: false,
       navigationClick: true,
-      navigationButtons: true,
+      navigationButtons: false, // Retained for compatibility with stored reader settings.
     } as EpubReaderSettings
 )
-const navigationOptions = ref(
-    [
-      {title: t('epubreader.settings.navigation_options.buttons'), value: 'button'},
-      {title: t('epubreader.settings.navigation_options.click'), value: 'click'},
-      {title: t('epubreader.settings.navigation_options.both'), value: 'buttonclick'},
-    ]
-)
-
 const tocs = reactive({
   toc: undefined as unknown as TocEntry[],
   landmarks: undefined as unknown as TocEntry[],
@@ -744,15 +709,12 @@ const fontSize = computed({
     externalFunctions.saveReaderSettings(settings)
   },
 })
-const navigationMode = computed({
-  get(): string {
-    let r = settings.navigationButtons ? 'button' : ''
-    if (settings.navigationClick) r += 'click'
-    return r
+const navigationClick = computed({
+  get(): boolean {
+    return settings.navigationClick
   },
-  set(value: string): void {
-    settings.navigationButtons = value.includes('button')
-    settings.navigationClick = value.includes('click')
+  set(value: boolean): void {
+    settings.navigationClick = value
     externalFunctions.saveReaderSettings(settings)
   },
 })

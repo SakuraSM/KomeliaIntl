@@ -2,9 +2,10 @@ package snd.komelia.ui.settings.updates
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -28,6 +29,10 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_update
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_release_date
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_release_notes
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_update
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_external_hint
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_current
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_check_failed
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_empty
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
@@ -57,6 +62,8 @@ fun AppUpdatesContent(
     onUpdate: () -> Unit,
     onUpdateCancel: () -> Unit,
     downloadProgress: UpdateProgress?,
+    installsInApp: Boolean,
+    checkFailed: Boolean,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -77,6 +84,7 @@ fun AppUpdatesContent(
 
             FilledTonalButton(
                 onClick = { onCheckForUpdates() },
+                enabled = !versionCheckInProgress,
             ) { Text(stringResource(Res.string.settings_updates_check)) }
 
             if (LocalPlatform.current != PlatformType.WEB_KOMF &&
@@ -85,6 +93,19 @@ fun AppUpdatesContent(
                 FilledTonalButton(
                     onClick = { onUpdate() },
                 ) { Text(stringResource(Res.string.settings_updates_update)) }
+            }
+        }
+
+        if (LocalPlatform.current == PlatformType.MOBILE && !installsInApp) {
+            Text(stringResource(Res.string.settings_updates_external_hint), style = MaterialTheme.typography.bodySmall)
+        }
+        if (checkFailed) {
+            Text(stringResource(Res.string.settings_updates_check_failed), color = MaterialTheme.colorScheme.error)
+        }
+        if (!versionCheckInProgress && !checkFailed && lastChecked != null) {
+            when {
+                latestVersion == null -> Text(stringResource(Res.string.settings_updates_empty))
+                latestVersion <= currentVersion -> Text(stringResource(Res.string.settings_updates_current))
             }
         }
 
@@ -147,48 +168,19 @@ private fun VersionDetails(
     lastChecked: Instant?,
     versionCheckInProgress: Boolean,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(5.dp),
-    ) {
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                stringResource(Res.string.settings_updates_current_version),
-                modifier = Modifier.widthIn(min = 200.dp)
-            )
-            Text("$currentVersion")
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        Text(stringResource(Res.string.settings_updates_current_version), style = MaterialTheme.typography.labelLarge)
+        Text("$currentVersion", style = MaterialTheme.typography.titleLarge)
+        if (latestVersion != null) {
+            Text(stringResource(Res.string.settings_updates_last_checked_version), style = MaterialTheme.typography.labelLarge)
+            Text("$latestVersion", style = MaterialTheme.typography.titleLarge)
         }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (latestVersion != null) {
-                Text(
-                    stringResource(Res.string.settings_updates_last_checked_version),
-                    modifier = Modifier.widthIn(200.dp)
-                )
-                Text("$latestVersion")
-
-                if (lastChecked != null) {
-                    lastChecked.toString()
-                    val localDate = remember(lastChecked) {
-                        lastChecked.toLocalDateTime(TimeZone.currentSystemDefault()).format(localDateFormat)
-                    }
-                    Text(
-                        stringResource(Res.string.settings_updates_last_checked_date, localDate),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                }
-
-                if (versionCheckInProgress) {
-                    CircularProgressIndicator()
-                }
+        if (lastChecked != null) {
+            val localDate = remember(lastChecked) {
+                lastChecked.toLocalDateTime(TimeZone.currentSystemDefault()).format(localDateFormat)
             }
+            Text(stringResource(Res.string.settings_updates_last_checked_date, localDate), style = MaterialTheme.typography.bodySmall)
         }
-
+        if (versionCheckInProgress) CircularProgressIndicator(Modifier.size(24.dp))
     }
 }

@@ -108,7 +108,15 @@ fun ReaderContent(
     val volumeKeysNavigation = commonReaderState.volumeKeysNavigation.collectAsState().value
     var hasFocus by remember { mutableStateOf(false) }
 
-    BackPressHandler { if (showSettingsMenu) showSettingsMenu = false else onExit() }
+    val isMobile = LocalPlatform.current == MOBILE
+    BackPressHandler {
+        val isPdf = commonReaderState.booksState.value?.currentBook?.media?.mediaProfile == snd.komga.client.book.MediaProfile.PDF
+        when (readerBackAction(isMobile && isPdf, showSettingsMenu)) {
+            ReaderBackAction.ShowControls -> showSettingsMenu = true
+            ReaderBackAction.HideControls -> showSettingsMenu = false
+            ReaderBackAction.Exit -> onExit()
+        }
+    }
     Box(
         Modifier
             .fillMaxSize()

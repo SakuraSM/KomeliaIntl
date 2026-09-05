@@ -39,7 +39,7 @@ interface CommonSettingsRepository {
     suspend fun putLastUpdateCheckTimestamp(timestamp: Instant)
 
     fun getLastCheckedReleaseVersion(): Flow<AppVersion?>
-    suspend fun putLastCheckedReleaseVersion(version: AppVersion)
+    suspend fun putLastCheckedReleaseVersion(version: AppVersion?)
 
     fun getDismissedVersion(): Flow<AppVersion?>
     suspend fun putDismissedVersion(version: AppVersion)

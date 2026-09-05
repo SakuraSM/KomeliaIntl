@@ -69,6 +69,8 @@ Do not use file existence, compilation alone, or a local unit test as proof of r
 5. Use the repository pull request template and list only checks that actually ran.
 6. Merge, publish, or close issues only when explicitly requested and when their acceptance gates are met.
 
+For Android test-package handoff, follow [Android device validation](android-device-validation.md) and preserve the worktree until user validation is resolved.
+
 Release work additionally follows [versioning](../maintainers/versioning.md) and [Release and issue replies](../maintainers/release-and-issue-replies.md).
 
 ## 8. Improve the feedback loop

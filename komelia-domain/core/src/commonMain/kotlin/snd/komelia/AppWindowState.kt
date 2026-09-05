@@ -4,5 +4,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface AppWindowState {
     val isFullscreen: Flow<Boolean>
-    fun setFullscreen(enabled: Boolean)
+    fun setFullscreen(enabled: Boolean, hideNavigationBar: Boolean = false)
 }

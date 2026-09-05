@@ -3,6 +3,9 @@ package snd.komelia.ui.reader.epub
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
+import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.compose.ui.graphics.Color
+import snd.komelia.settings.model.EpubDisplaySettings
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import snd.komelia.AppNotifications
@@ -40,7 +43,10 @@ class EpubReaderViewModel(
     private val bookSiblingsContext: BookSiblingsContext,
 ) : StateScreenModel<LoadState<EpubReaderState>>(LoadState.Uninitialized) {
 
+    val displaySettings = MutableStateFlow(EpubDisplaySettings())
+
     suspend fun initialize(navigator: Navigator) {
+        displaySettings.value = epubSettingsRepository.getDisplaySettings().first()
         when (val state = state.value) {
             LoadState.Loading, is LoadState.Error -> {}
             is LoadState.Success<EpubReaderState> -> state.value.initialize(navigator)
@@ -58,6 +64,7 @@ class EpubReaderViewModel(
                             notifications = notifications,
                             markReadProgress = markReadProgress,
                             epubSettingsRepository = epubSettingsRepository,
+                            displaySettings = displaySettings,
                             windowState = windowState,
                             platformType = platformType,
                             coroutineScope = screenModelScope,
@@ -80,6 +87,7 @@ class EpubReaderViewModel(
                             markReadProgress = markReadProgress,
                             serverUrl = serverUrl,
                             epubSettingsRepository = epubSettingsRepository,
+                            displaySettings = displaySettings,
                             localeTag = settingsRepository.getAppLanguage().first().explicitLocaleTag(),
                             fontsRepository = fontsRepository,
                             windowState = windowState,
@@ -104,6 +112,7 @@ interface EpubReaderState {
     val state: StateFlow<LoadState<Unit>>
     val book: StateFlow<KomeliaBook?>
     val contentReady: StateFlow<Boolean>
+    val backgroundColor: StateFlow<Color>
     suspend fun initialize(navigator: Navigator)
     fun onWebviewCreated(webview: KomeliaWebview)
     fun onBackButtonPress()

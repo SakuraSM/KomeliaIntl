@@ -14,12 +14,17 @@ class AndroidWindowState(
 ) : AppWindowState {
     override val isFullscreen = MutableStateFlow(false)
 
-    override fun setFullscreen(enabled: Boolean) {
+    override fun setFullscreen(enabled: Boolean, hideNavigationBar: Boolean) {
         val activity = this.activity.value ?: return
         val insetsController = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
         if (enabled) {
-            insetsController.hide(statusBars() or navigationBars())
-            insetsController.systemBarsBehavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            // Transient bars can consume edge Back gestures while navigation is hidden.
+            insetsController.systemBarsBehavior = if (hideNavigationBar) BEHAVIOR_DEFAULT
+            else BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            // Default readers retain system Back; EPUB can explicitly opt into immersion.
+            if (hideNavigationBar) insetsController.hide(navigationBars())
+            else insetsController.show(navigationBars())
+            insetsController.hide(statusBars())
             isFullscreen.value = true
         } else {
             insetsController.show(statusBars() or navigationBars())

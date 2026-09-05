@@ -9,7 +9,7 @@ import snd.komelia.updates.AppVersion
 class AppVersionTest {
     @Test
     fun aboutVersionMatchesCurrentRelease() {
-        assertEquals("0.20.0-beta.1", AppVersion.current.toString())
+        assertEquals("0.25.0", AppVersion.current.toString())
     }
 
     @Test

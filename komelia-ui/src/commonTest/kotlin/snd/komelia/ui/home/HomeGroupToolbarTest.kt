@@ -32,6 +32,24 @@ class HomeGroupToolbarTest {
             homeGroupToolbarFilters(groups).map { it.filter.label },
         )
     }
+
+    @Test
+    fun toolbarContainsOnlyConfiguredGroups() {
+        val groups = listOf(
+            emptySeriesGroup(order = 2, label = "Recently added"),
+            emptyBookGroup(order = 1, label = "Continue reading"),
+        )
+
+        val entries = homeToolbarEntries(groups)
+
+        assertEquals(listOf(1, 2), entries.map { it.id })
+        assertEquals(listOf(0, 0), entries.map { it.itemCount })
+    }
+
+    @Test
+    fun emptyConfigurationHasNoToolbarEntries() {
+        assertEquals(emptyList(), homeToolbarEntries(emptyList()))
+    }
 }
 
 private fun emptyBookGroup(order: Int, label: String) = BookFilterData(

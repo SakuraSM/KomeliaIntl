@@ -10,50 +10,36 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import snd.komelia.offline.settings.OfflineSettingsRepository
 import snd.komelia.offline.sync.model.DownloadEvent
-import snd.komelia.offline.sync.model.DownloadEvent.BookDownloadCompleted
-import snd.komelia.offline.sync.model.DownloadEvent.BookDownloadError
-import snd.komelia.offline.sync.model.DownloadEvent.BookDownloadProgress
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.tasks.model.TaskData.DownloadBook
+import snd.komelia.offline.tasks.model.TaskEntry
+import snd.komelia.offline.tasks.repository.OfflineTasksRepository
 import snd.komga.client.book.KomgaBookId
 
 class OfflineDownloadsState(
     downloadEvents: SharedFlow<DownloadEvent>,
     platformContext: PlatformContext,
     private val taskEmitter: OfflineTaskEmitter,
+    private val tasksRepository: OfflineTasksRepository,
     private val settingsRepository: OfflineSettingsRepository,
     private val coroutineScope: CoroutineScope,
 ) {
     private val internalDownloadDir = getDefaultInternalDownloadsDir(platformContext)
-    private val downloadsMap = MutableStateFlow<Map<KomgaBookId, DownloadEvent>>(emptyMap())
-    val downloads = downloadsMap.map { it.values }
+    private val tasksMap = MutableStateFlow<Map<KomgaBookId, TaskEntry>>(emptyMap())
+    val downloads = tasksMap.map { tasks -> tasks.values.toList() }
         .stateIn(coroutineScope, SharingStarted.Eagerly, emptyList())
 
     val storageLocation = settingsRepository.getDownloadDirectory()
-        .stateIn(coroutineScope, SharingStarted.Eagerly,null)
+        .stateIn(coroutineScope, SharingStarted.Eagerly, null)
 
     init {
-        downloadEvents.onEach { event ->
-            when (event) {
-                is BookDownloadProgress, is BookDownloadCompleted -> updateDownloads(event)
-                is BookDownloadError -> handleErrorEvent(event)
-            }
-        }.launchIn(coroutineScope)
-    }
-
-    private fun handleErrorEvent(event: BookDownloadError) {
-        if (event.book == null) {
-            val previousEvent = downloadsMap.value[event.bookId]
-            val newEvent =
-                if (previousEvent is BookDownloadProgress) event.copy(book = previousEvent.book)
-                else event
-            updateDownloads(newEvent)
-        } else {
-            updateDownloads(event)
-        }
+        coroutineScope.launch { reload() }
+        // The tracker persists each event before publishing it. Reloading the repository here keeps
+        // the UI aligned with restart recovery, pause/cancel guards, and background workers.
+        downloadEvents.onEach { reload() }.launchIn(coroutineScope)
     }
 
     fun onStorageLocationChange(directory: PlatformFile) {
@@ -64,17 +50,26 @@ class OfflineDownloadsState(
         coroutineScope.launch { settingsRepository.putDownloadDirectory(internalDownloadDir.platformFile) }
     }
 
-    private fun updateDownloads(event: DownloadEvent) {
-        downloadsMap.update {
-            val mutable = it.toMutableMap()
-            mutable[event.bookId] = event
-            mutable
+    fun onDownloadPause(bookId: KomgaBookId) = launchAndReload { taskEmitter.pauseBookDownload(bookId) }
+    fun onDownloadCancel(bookId: KomgaBookId) = launchAndReload { taskEmitter.cancelBookDownload(bookId) }
+    fun onDownloadRetry(bookId: KomgaBookId) = launchAndReload { taskEmitter.retryBookDownload(bookId) }
+    fun onTaskRemove(bookId: KomgaBookId) = launchAndReload { taskEmitter.removeDownloadTask(bookId) }
+    fun onTaskRemoveWithFiles(bookId: KomgaBookId) = launchAndReload {
+        taskEmitter.removeDownloadTaskAndFiles(bookId)
+    }
+
+    private fun launchAndReload(action: suspend () -> Unit) {
+        coroutineScope.launch {
+            action()
+            reload()
         }
     }
 
-    fun onDownloadCancel(bookId: KomgaBookId) {
-        coroutineScope.launch { taskEmitter.cancelBookDownload(bookId) }
+    private suspend fun reload() {
+        tasksMap.value = tasksRepository.findDownloads()
+            .associateBy { (it.task as DownloadBook).bookId }
     }
+
 }
 
 internal data class DefaultDownloadStorageLocation(

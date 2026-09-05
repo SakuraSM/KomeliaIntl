@@ -2,6 +2,8 @@ package snd.komelia.ui.search
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -12,6 +14,7 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import snd.komelia.ui.LoadState
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.ReloadableScreen
@@ -56,6 +59,7 @@ class SearchScreen(
                         SearchContent(
                             query = vm.query,
                             searchType = vm.currentTab,
+                            coverage = vm.currentCoverage,
                             onSearchTypeChange = vm::onSearchTypeChange,
 
                             seriesResults = vm.seriesResults,
@@ -80,6 +84,7 @@ class SearchScreen(
     @Composable
     private fun SearchField(vm: SearchViewModel) {
         val focusManager = LocalFocusManager.current
+        val layout = LocalKomeliaLayout.current
 
         SearchTextField(
             query = vm.query,
@@ -87,6 +92,8 @@ class SearchScreen(
             onDone = { focusManager.clearFocus() },
             onDismiss = { vm.query = "" },
             modifier = Modifier
+                .widthIn(max = layout.contentMaxWidth)
+                .padding(horizontal = layout.pageHorizontalPadding, vertical = layout.controlSpacing)
         )
     }
 }

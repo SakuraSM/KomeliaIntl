@@ -23,9 +23,11 @@ import kotlinx.coroutines.launch
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaCollectionsApi
+import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.komga.api.KomgaReferentialApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LoadState.Error
@@ -46,8 +48,10 @@ class SeriesViewModel(
     private val seriesId: KomgaSeriesId,
     private val notifications: AppNotifications,
     private val events: SharedFlow<KomgaEvent>,
+    private val libraryApi: KomgaLibraryApi,
     private val seriesApi: KomgaSeriesApi,
     private val taskEmitter: OfflineTaskEmitter?,
+    localLibraryManager: LocalLibraryManager?,
     bookApi: KomgaBookApi,
     collectionApi: KomgaCollectionsApi,
     referentialApi: KomgaReferentialApi,
@@ -73,7 +77,8 @@ class SeriesViewModel(
         screenModelScope = screenModelScope,
         cardWidth = cardWidth,
         referentialApi = referentialApi,
-        taskEmitter = taskEmitter
+        taskEmitter = taskEmitter,
+        localLibraryManager = localLibraryManager,
     )
     val collectionsState = SeriesCollectionsState(
         series = this.series,
@@ -99,8 +104,8 @@ class SeriesViewModel(
 
         series.filterNotNull()
             .combine(libraries) { series, libraries ->
-                val newLibrary = libraries.firstOrNull { it.id == series.libraryId }
-                library.value = newLibrary
+                library.value = libraries.firstOrNull { it.id == series.libraryId }
+                    ?: runCatching { libraryApi.getLibrary(series.libraryId) }.getOrNull()
             }.launchIn(screenModelScope)
 
         booksState.initialize()
@@ -145,14 +150,14 @@ class SeriesViewModel(
         }.onFailure { mutableState.value = Error(it) }
     }
 
-    private fun getLibraryOrThrow(series: KomgaSeries): KomgaLibrary {
-        val library = this.libraries.value.firstOrNull { it.id == series.libraryId }
-        if (library == null) {
-            throw IllegalStateException("Failed to find library for series ${series.metadata.title}")
-        }
-        return library
-
-    }
+    private suspend fun getLibraryOrThrow(series: KomgaSeries): KomgaLibrary =
+        this.libraries.value.firstOrNull { it.id == series.libraryId }
+            ?: runCatching { libraryApi.getLibrary(series.libraryId) }.getOrElse {
+                throw IllegalStateException(
+                    "Failed to find library for series ${series.metadata.title}",
+                    it,
+                )
+            }
 
     fun stopKomgaEventHandler() {
         reloadEventsEnabled.value = false

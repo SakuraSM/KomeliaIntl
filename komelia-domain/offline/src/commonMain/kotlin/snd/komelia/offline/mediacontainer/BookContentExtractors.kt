@@ -73,6 +73,12 @@ class BookContentExtractors(
         }
     }
 
+    fun prepareEpub(book: OfflineBook, media: OfflineMedia) {
+        if (media.mediaProfile != MediaProfile.EPUB) return
+        checkNotNull(epubExtractor) { "Extractor does not support extraction of files" }
+            .prepare(book.fileDownloadPath)
+    }
+
     private fun getDivinaExtractorOrThrow(media: OfflineMedia): DivinaExtractor {
         val type = checkNotNull(media.mediaType) { "Book media type is null" }
         return checkNotNull(divinaExtractors[type]) { "Unsupported book file format $type" }

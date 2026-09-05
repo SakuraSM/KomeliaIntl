@@ -8,6 +8,13 @@
     <string name="home_filter_groups">首页分组</string>
     <string name="home_filter_search_groups">搜索分组</string>
     <string name="home_filter_group_items">%1$d 项</string>
+    <string name="home_local_books">本地书籍</string>
+    <string name="home_remote_downloaded_books">服务器下载</string>
+    <string name="home_local_sort_recently_added">最近添加</string>
+    <string name="home_remote_sort_recently_downloaded">最近下载</string>
+    <string name="home_local_sort_file_modified">文件修改时间</string>
+    <string name="home_local_sort_title">标题</string>
+    <string name="home_view_all">查看全部</string>
     <string name="home_filter_default_keep_reading">继续阅读</string>
     <string name="home_filter_default_on_deck">待读</string>
     <string name="home_filter_default_recently_realeased_books">最近发布的书籍</string>
@@ -569,6 +576,7 @@
     <string name="reader_image_upsampling_mode_bilinear">双线性</string>
     <string name="reader_image_upsampling_mode_bicubic_mitchell">Mitchell 双三次</string>
     <string name="reader_image_upsampling_mode_bicubic_catmull_rom">Catmull-Rom 双三次</string>
+    <string name="reader_image_upsampling_mode_lanczos3">Lanczos3</string>
 
     <string name="reader_image_downsampling_kernel">缩小算法</string>
     <string name="reader_image_downsampling_kernel_mitchell">Mitchell</string>
@@ -666,7 +674,7 @@
     <string name="settings_navigation_epub_reader">EPUB 阅读器</string>
     <string name="settings_navigation_updates">应用更新</string>
     <string name="settings_navigation_offline_mode">离线模式</string>
-    <string name="settings_navigation_local_library">本地书库</string>
+    <string name="settings_navigation_local_library">本地目录</string>
     <string name="settings_navigation_about">关于</string>
     <string name="settings_about_version">版本 %1$s</string>
     <string name="settings_about_description">Komelia Intl 基于 Snd-R/Komelia 修改，增加简体中文本地化与多平台体验优化。</string>
@@ -835,10 +843,52 @@
     <string name="local_library_auto_scan">每小时扫描新增文件</string>
     <string name="local_library_empty">未发现支持的书籍。Android 支持 CBZ、CBR、EPUB 和 PDF。</string>
     <string name="local_library_not_available">浏览器版本暂不支持持久访问本地目录。</string>
-    <string name="local_library_book_count">共 %1$s 本本地书籍</string>
+    <string name="local_library_book_count">共 %1$s 本地书籍</string>
     <string name="local_library_refresh">立即扫描此目录</string>
     <string name="local_library_remove">移除此目录</string>
     <string name="local_source">本地</string>
+    <string name="local_library_excluded_books">已排除书籍</string>
+    <string name="local_library_excluded_books_description">源文件仍保留在设备中，扫描时会忽略这些书籍。</string>
+    <string name="local_library_restore_book">恢复到本地书库</string>
+    <string name="local_content_title">本地</string>
+    <string name="local_content_all">全部</string>
+    <string name="local_content_downloaded">已下载</string>
+    <string name="local_content_search">搜索本地书籍和已下载内容</string>
+    <string name="local_content_empty_title">暂无可用书籍</string>
+    <string name="local_content_empty_body">请添加本地目录，或从服务器下载书籍。</string>
+    <string name="local_content_empty_local_title">暂无本地书籍</string>
+    <string name="local_content_empty_local_body">添加并扫描本地目录后，书籍会显示在这里。</string>
+    <string name="local_content_empty_downloaded_title">暂无已下载书籍</string>
+    <string name="local_content_empty_downloaded_body">从服务器下载书籍后，即可在这里离线阅读。</string>
+    <string name="book_exclude_local">从本地书库排除</string>
+    <string name="book_exclude_local_confirm_title">排除此书籍？</string>
+    <string name="book_exclude_local_confirm_body">“%1$s”将从 Komelia 中隐藏，但不会删除源文件。可前往“设置 → 本地目录”恢复。</string>
+    <string name="book_downloaded_status">已下载</string>
+    <string name="book_downloaded_outdated_status">下载内容需要更新</string>
+    <string name="download_tasks_empty">暂无下载任务</string>
+    <string name="download_tasks_filtered_empty">当前状态下暂无任务</string>
+    <string name="download_task_filter_all">全部（%1$d）</string>
+    <string name="download_task_filter_active">进行中（%1$d）</string>
+    <string name="download_task_filter_failed">失败（%1$d）</string>
+    <string name="download_task_filter_history">历史（%1$d）</string>
+    <string name="download_task_queued">等待中</string>
+    <string name="download_task_running">下载中</string>
+    <string name="download_task_paused">已暂停</string>
+    <string name="download_task_completed">已完成</string>
+    <string name="download_task_failed">失败</string>
+    <string name="download_task_canceled">已取消</string>
+    <string name="download_task_pause">暂停</string>
+    <string name="download_task_resume">继续</string>
+    <string name="download_task_retry">重试</string>
+    <string name="download_task_cancel">取消</string>
+    <string name="download_task_remove">从任务记录中移除</string>
+    <string name="download_task_remove_files">删除已下载副本</string>
+    <string name="download_task_remove_files_confirm_title">删除已下载副本？</string>
+    <string name="download_task_remove_files_confirm_body">删除“%1$s”的已下载副本并移除任务记录？服务器数据和阅读进度不会改变。</string>
+    <string name="download_task_view_logs">查看错误日志</string>
+    <string name="download_task_speed">%1$s MiB/秒</string>
+    <string name="download_tasks_summary">共 %1$d 项 · 剩余 %2$d 项 · 失败 %3$d 项</string>
+    <string name="download_tasks_overall_progress">已完成 %1$d / %2$d</string>
     <string name="pagination_first_page">第一页</string>
     <string name="pagination_previous_page">上一页</string>
     <string name="pagination_next_page">下一页</string>
@@ -1275,6 +1325,8 @@
     <string name="search_result_in_library">位于 %1$s</string>
     <string name="search_no_results_title">没有找到搜索结果</string>
     <string name="search_no_results_body">换个关键词试试</string>
+    <string name="search_offline_only">服务器暂不可用，当前仅显示本地书籍和已下载内容。</string>
+    <string name="search_remote_only">本地索引暂不可用，当前仅显示服务器结果。</string>
 
     <string name="topbar_offline">离线</string>
     <string name="topbar_go_online">切回在线？</string>
@@ -1283,6 +1335,7 @@
     <string name="navbar_libraries">书库</string>
     <string name="navbar_libraries_unavailable">不可用</string>
     <string name="navbar_home">首页</string>
+    <string name="navbar_local">本地</string>
     <string name="navbar_settings">设置</string>
     <string name="navbar_search">搜索</string>
     <plurals name="sidebar_task_count">
@@ -1329,4 +1382,13 @@
     <string name="window_logs_title">Komelia 日志</string>
     <string name="window_error_title">Komelia 错误</string>
 
+    <string name="search_clear_query">清空搜索</string>
+    <string name="settings_epub_immersive">全屏沉浸式</string>
+    <string name="settings_epub_immersive_desc">默认关闭，自动避让挖孔和系统导航区域。开启后使用整个屏幕，内容可能延伸到摄像头下方。</string>
+    <string name="settings_epub_top_spacing">顶部额外留白</string>
+    <string name="settings_epub_spacing_value">%1$d dp</string>
+    <string name="settings_updates_external_hint">更新将打开下载页面，测试版与正式版保持独立安装。</string>
+    <string name="settings_updates_current">已是最新版本</string>
+    <string name="settings_updates_empty">暂无可用版本</string>
+    <string name="settings_updates_check_failed">检查更新失败，请重试。</string>
 </resources>

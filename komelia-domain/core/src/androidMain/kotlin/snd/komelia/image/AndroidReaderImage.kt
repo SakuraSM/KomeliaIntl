@@ -42,6 +42,24 @@ class AndroidReaderImage(
         tiles.forEach { it.renderImage?.recycle() }
     }
 
+    override suspend fun onUpsamplingModeChanged(mode: UpsamplingMode) {
+        super.onUpsamplingModeChanged(mode)
+        // High-quality modes change the raster pixels, including already visible/animated frames.
+        reloadLastRequest()
+    }
+
+    override fun sourceTileSize(tileSize: Int, scaleFactor: Double): Int {
+        if (upsamplingKernel() == null || scaleFactor <= 1.0) return tileSize
+        // Keep enlarged tile bitmaps within the existing output-pixel budget while zooming.
+        return (tileSize / scaleFactor).toInt().coerceIn(1, tileSize)
+    }
+
+    private fun upsamplingKernel(): ReduceKernel? = when (upsamplingMode.value) {
+        UpsamplingMode.MITCHELL -> ReduceKernel.MITCHELL
+        UpsamplingMode.LANCZOS3 -> ReduceKernel.LANCZOS3
+        else -> null
+    }
+
     override fun createTilePainter(
         tiles: List<ReaderImageTile>,
         displaySize: IntSize,
@@ -56,12 +74,27 @@ class AndroidReaderImage(
     }
 
     override suspend fun resizeImage(image: KomeliaImage, scaleWidth: Int, scaleHeight: Int): ReaderImageData {
+        val kernel = upsamplingKernel()
+        if (kernel != null && (scaleWidth > image.width || scaleHeight > image.pageHeight)) {
+            val frames = mutableListOf<Bitmap>()
+            try {
+                for (index in 0 until image.pagesLoaded) {
+                    image.extractArea(ImageRect(0, index * image.pageHeight, image.width, (index + 1) * image.pageHeight)).use { frame ->
+                        frames.add(frame.upscaleBitmap(scaleWidth, scaleHeight, kernel))
+                    }
+                }
+                return ReaderImageData(scaleWidth, scaleHeight, frames, image.pageDelays?.map { it.toLong() })
+            } catch (error: Throwable) {
+                frames.forEach { it.recycle() }
+                throw error
+            }
+        }
         return image.resize(
             scaleWidth = scaleWidth,
             scaleHeight = scaleHeight,
             linear = linearLightDownSampling.value,
             kernel = downSamplingKernel.value
-        ).toReaderImageData()
+        ).use { it.toReaderImageData() }
     }
 
     override suspend fun getImageRegion(
@@ -70,6 +103,26 @@ class AndroidReaderImage(
         scaleWidth: Int,
         scaleHeight: Int
     ): ReaderImageData {
+        val kernel = upsamplingKernel()
+        if (kernel != null && (scaleWidth > imageRegion.width || scaleHeight > imageRegion.height)) {
+            // Include neighboring source pixels so reconstruction does not clamp at tile seams.
+            val padding = if (kernel == ReduceKernel.LANCZOS3) 3 else 2
+            val padded = ImageRect(
+                (imageRegion.left - padding).coerceAtLeast(0),
+                (imageRegion.top - padding).coerceAtLeast(0),
+                (imageRegion.right + padding).coerceAtMost(image.width),
+                (imageRegion.bottom + padding).coerceAtMost(image.height),
+            )
+            return image.extractArea(padded).use { region ->
+                val sourceRegion = ImageRect(
+                    imageRegion.left - padded.left,
+                    imageRegion.top - padded.top,
+                    imageRegion.right - padded.left,
+                    imageRegion.bottom - padded.top,
+                )
+                ReaderImageData(scaleWidth, scaleHeight, listOf(region.upscaleBitmap(scaleWidth, scaleHeight, kernel, sourceRegion)), null)
+            }
+        }
         var region: KomeliaImage? = null
         var resized: KomeliaImage? = null
         try {
@@ -89,6 +142,17 @@ class AndroidReaderImage(
             region?.close()
             resized?.close()
         }
+    }
+
+    private suspend fun KomeliaImage.upscaleBitmap(
+        targetWidth: Int,
+        targetHeight: Int,
+        kernel: ReduceKernel,
+        sourceRegion: ImageRect = ImageRect(0, 0, width, height),
+    ): Bitmap {
+        check(type != ImageFormat.HISTOGRAM)
+        val pixels = upscalePixels(getBytes(), width, height, bands, targetWidth, targetHeight, kernel, sourceRegion)
+        return Bitmap.createBitmap(pixels, targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
     }
 
     private suspend fun KomeliaImage.toReaderImageData(): ReaderImageData {

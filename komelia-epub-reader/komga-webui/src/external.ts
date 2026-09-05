@@ -26,7 +26,7 @@ declare global {
         // readListGetBookSiblingPrevious: (readListId: string, bookId: string) => Promise<BookDto>
 
         d2ReaderGetContent: (href: string) => Promise<CallbackResponse<string | null>>;
-        d2ReaderGetContentBytesLength: (href: string, requestConfig?: RequestConfig) => Promise<CallbackResponse<number>>;
+        d2ReaderGetContentBytesLength: (href: string) => Promise<CallbackResponse<number>>;
 
         getReaderSettings: () => Promise<CallbackResponse<EpubReaderSettings>>;
         setReaderSettings: (settings: EpubReaderSettings) => Promise<CallbackResponse<undefined>>;
@@ -43,6 +43,7 @@ declare global {
 
         isFullscreenAvailable: () => Promise<CallbackResponse<boolean>>
         toggleFullscreen: () => Promise<CallbackResponse<undefined>>
+        readerContentReady: () => Promise<CallbackResponse<undefined>>
     }
 }
 
@@ -92,8 +93,8 @@ export default class ExternalFunctions {
             .then((value) => value.result ?? (undefined as unknown as string))
     }
 
-    async d2ReaderGetContentBytesLength(href: string, requestConfig?: RequestConfig): Promise<number> {
-        return window.d2ReaderGetContentBytesLength(href, requestConfig).then((value) => value.result)
+    async d2ReaderGetContentBytesLength(href: string, _requestConfig?: RequestConfig): Promise<number> {
+        return window.d2ReaderGetContentBytesLength(href).then((value) => value.result)
     }
 
     async closeBook(): Promise<undefined> {
@@ -108,8 +109,8 @@ export default class ExternalFunctions {
         return window.saveSettings(settings).then((value) => value.result)
     }
 
-    async externalFetch(href: string, requestConfig?: RequestConfig): Promise<number> {
-        return this.callbackResult(window.d2ReaderGetContentBytesLength(href, requestConfig))
+    async externalFetch(href: string, _requestConfig?: RequestConfig): Promise<number> {
+        return this.callbackResult(window.d2ReaderGetContentBytesLength(href))
     }
 
     async getPublication(bookId: string): Promise<any> {
@@ -126,6 +127,10 @@ export default class ExternalFunctions {
 
     async toggleFullscreen(): Promise<undefined> {
         return window.toggleFullscreen().then((value) => value.result)
+    }
+
+    async readerContentReady(): Promise<undefined> {
+        return window.readerContentReady().then((value) => value.result)
     }
 
     async callbackResult<T>(promise: Promise<CallbackResponse<T>>): Promise<T> {

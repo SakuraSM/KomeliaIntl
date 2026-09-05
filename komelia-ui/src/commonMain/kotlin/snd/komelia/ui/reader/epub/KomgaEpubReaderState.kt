@@ -1,5 +1,7 @@
 package snd.komelia.ui.reader.epub
 
+import androidx.compose.ui.graphics.Color
+import snd.komelia.settings.model.EpubDisplaySettings
 import cafe.adriel.voyager.navigator.Navigator
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
@@ -20,6 +22,7 @@ import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.settings.EpubReaderSettingsRepository
 import snd.komelia.ui.BookSiblingsContext
 import snd.komelia.ui.LoadState
@@ -37,8 +40,6 @@ import snd.webview.KomeliaWebview
 import snd.webview.ResourceLoadResult
 
 private val logger = KotlinLogging.logger {}
-private val resourceBaseUriRegex = "^http(s)?://.*/resource/".toRegex()
-
 class KomgaEpubReaderState(
     bookId: KomgaBookId,
     book: KomeliaBook?,
@@ -47,6 +48,7 @@ class KomgaEpubReaderState(
     private val readListApi: KomgaReadListApi,
     private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
+    private val displaySettings: StateFlow<EpubDisplaySettings>,
     private val notifications: AppNotifications,
     private val markReadProgress: Boolean,
     private val windowState: AppWindowState,
@@ -56,6 +58,8 @@ class KomgaEpubReaderState(
 ) : EpubReaderState {
     override val state = MutableStateFlow<LoadState<Unit>>(Uninitialized)
     override val book = MutableStateFlow(book)
+    override val backgroundColor = MutableStateFlow(Color.White)
+    override val contentReady = MutableStateFlow(false)
 
     val bookId = MutableStateFlow(bookId)
     private val webview = MutableStateFlow<KomeliaWebview?>(null)
@@ -63,7 +67,7 @@ class KomgaEpubReaderState(
 
     override suspend fun initialize(navigator: Navigator) {
         this.navigator.value = navigator
-        if (platformType == PlatformType.MOBILE) windowState.setFullscreen(true)
+        if (platformType == PlatformType.MOBILE) windowState.setFullscreen(true, hideNavigationBar = displaySettings.value.immersiveMode)
         if (state.value !is Uninitialized) return
 
         state.value = LoadState.Loading
@@ -77,6 +81,7 @@ class KomgaEpubReaderState(
     }
 
     override fun onWebviewCreated(webview: KomeliaWebview) {
+        contentReady.value = false
         this.webview.value = webview
         coroutineScope.launch { loadEpub(webview) }
     }
@@ -161,10 +166,11 @@ class KomgaEpubReaderState(
         }
 
         webview.bind<Unit, JsonObject>("getSettings") {
-            epubSettingsRepository.getKomgaReaderSettings()
+            epubSettingsRepository.getKomgaReaderSettings().also { backgroundColor.value = komgaReaderBackground(it) }
         }
 
         webview.bind<JsonObject, Unit>("saveSettings") { newSettings ->
+            backgroundColor.value = komgaReaderBackground(newSettings)
             epubSettingsRepository.putKomgaReaderSettings(newSettings)
         }
         webview.bind<Unit, Boolean>("isFullscreenAvailable") {
@@ -172,7 +178,10 @@ class KomgaEpubReaderState(
         }
         webview.bind<Unit, Unit>("toggleFullscreen") {
             val fullscreen = windowState.isFullscreen.first()
-            windowState.setFullscreen(!fullscreen)
+            windowState.setFullscreen(!fullscreen, hideNavigationBar = displaySettings.value.immersiveMode)
+        }
+        webview.bind<Unit, Unit>("readerContentReady") {
+            contentReady.value = true
         }
 
         webview.registerRequestInterceptor { request ->
@@ -195,9 +204,15 @@ class KomgaEpubReaderState(
 
     private suspend fun progressionToWebview(progress: R2Progression): R2Progression {
         val baseUrl = serverUrl.first()
+        val resourceName = epubResourceName(progress.locator.href)
+        val href = if (book.value?.libraryId?.isLocalLibrary() == true) {
+            bookResourceUrl(bookId.value, resourceName)
+        } else {
+            "$baseUrl/api/v1/books/${bookId.value}/resource/$resourceName"
+        }
         return progress.copy(
             locator = progress.locator.copy(
-                href = "$baseUrl/api/v1/books/${bookId.value}/resource/${progress.locator.href}"
+                href = href,
             )
         )
     }
@@ -205,7 +220,7 @@ class KomgaEpubReaderState(
     private fun progressionFromWebview(progress: R2Progression): R2Progression {
         return progress.copy(
             locator = progress.locator.copy(
-                href = progress.locator.href.replace(resourceBaseUriRegex, "")
+                href = epubResourceName(progress.locator.href),
             )
         )
     }

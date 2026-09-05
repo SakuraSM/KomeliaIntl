@@ -9,6 +9,7 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.STATUS_PENDING_USER_ACTION
 import android.content.pm.PackageInstaller.SessionParams.MODE_FULL_INSTALL
 import android.os.Build
+import androidx.core.net.toUri
 import androidx.core.content.IntentCompat
 import io.ktor.client.statement.*
 import io.ktor.utils.io.*
@@ -21,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class AndroidAppUpdater(
     private val githubClient: UpdateClient,
     private val context: Context,
+    override val installsInApp: Boolean = true,
 ) : AppUpdater {
     private var inProgress = AtomicBoolean(false)
 
@@ -34,8 +36,12 @@ class AndroidAppUpdater(
     }
 
     override fun updateTo(release: AppRelease): Flow<UpdateProgress>? {
-        if (!inProgress.compareAndSet(false, true)) return null
+        if (!installsInApp) {
+            context.startActivity(Intent(Intent.ACTION_VIEW, release.htmlUrl.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            return null
+        }
         if (release.assetUrl == null) return null
+        if (!inProgress.compareAndSet(false, true)) return null
 
         return flow {
             emit(UpdateProgress(0, 0))

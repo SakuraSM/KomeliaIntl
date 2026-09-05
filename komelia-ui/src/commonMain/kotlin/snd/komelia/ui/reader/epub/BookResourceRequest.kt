@@ -13,6 +13,20 @@ private val bookResourceRegex = ".*/api/v1/books/(?<bookId>[^/]+)/resource/(?<re
 private val bookManifestRegex = ".*/api/v1/books/(?<bookId>[^/]+)/manifest.*".toRegex()
 private val bookPositionsRegex = ".*/api/v1/books/(?<bookId>[^/]+)/positions.*".toRegex()
 
+internal fun bookResourceUrl(bookId: KomgaBookId, resourceName: String): String =
+    "http://komelia/api/v1/books/${bookId.value}/resource/${resourceName.trimStart('/')}"
+
+internal fun isBookResourceRequest(urlString: String): Boolean =
+    bookResourceRegex.containsMatchIn(urlString)
+
+internal fun epubResourceName(href: String): String =
+    bookResourceRegex.find(href)
+        ?.groups
+        ?.get("resourceName")
+        ?.value
+        ?.normalizeResourceName()
+        ?: href.normalizeResourceName()
+
 suspend fun proxyResourceRequest(
     bookApi: KomgaBookApi,
     urlString: String,

@@ -33,13 +33,13 @@ class StartupUpdateChecker(
             if (lastChecked != null && lastChecked > Clock.System.now().minus(24.hours)) return null
 
             val releases = updater.getReleases()
-            val latest = releases.first()
+            val latest = releases.firstOrNull() ?: return null
             releaseFlow.value = releases
             settings.putLastUpdateCheckTimestamp(Clock.System.now())
             settings.putLastCheckedReleaseVersion(latest.version)
 
             if (AppVersion.current >= latest.version) return null
-            if (settings.getDismissedVersion().first() == AppVersion.current) return null
+            if (settings.getDismissedVersion().first() == latest.version) return null
 
             return latest
         } catch (e: Exception) {

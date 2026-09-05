@@ -19,6 +19,7 @@ class ExposedEpubReaderSettingsRepository(database: Database) : ExposedRepositor
                 .firstOrNull()
                 ?.let {
                     EpubReaderSettings(
+                        displaySettings = it[EpubReaderSettingsTable.displaySettingsJson],
                         readerType = EpubReaderType.valueOf(it[EpubReaderSettingsTable.readerType]),
                         komgaReaderSettings = it[EpubReaderSettingsTable.komgaSettingsJson],
                         ttsuReaderSettings = it[EpubReaderSettingsTable.ttsuSettingsJson]
@@ -30,6 +31,7 @@ class ExposedEpubReaderSettingsRepository(database: Database) : ExposedRepositor
     suspend fun save(settings: EpubReaderSettings) {
         transaction {
             EpubReaderSettingsTable.upsert {
+                it[displaySettingsJson] = settings.displaySettings
                 it[bookId] = defaultBookId
                 it[readerType] = settings.readerType.name
                 it[komgaSettingsJson] = settings.komgaReaderSettings

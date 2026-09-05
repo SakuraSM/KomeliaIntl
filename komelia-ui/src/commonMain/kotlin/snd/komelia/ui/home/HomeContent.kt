@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
@@ -71,7 +70,7 @@ import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komga.client.series.KomgaSeries
 
 @Composable
-fun HomeContent(
+internal fun HomeContent(
     filters: List<HomeFilterData>,
     activeFilterNumber: Int,
     onFilterChange: (Int) -> Unit,
@@ -129,13 +128,13 @@ private fun Toolbar(
         selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
-    val toolbarFilters = remember(filters) { homeGroupToolbarFilters(filters) }
-    if (toolbarFilters.size <= 1) return
+    val toolbarFilters = remember(filters) { homeToolbarEntries(filters) }
+    if (toolbarFilters.isEmpty()) return
 
     val windowWidth = LocalWindowWidth.current
     val useBottomSheet = windowWidth == snd.komelia.ui.platform.WindowSizeClass.COMPACT ||
             windowWidth == snd.komelia.ui.platform.WindowSizeClass.MEDIUM
-    val currentFilter = toolbarFilters.firstOrNull { it.filter.order == currentFilterNumber }
+    val currentFilter = toolbarFilters.firstOrNull { it.id == currentFilterNumber }
     var pickerOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(currentFilterNumber, toolbarFilters) {
@@ -170,7 +169,7 @@ private data class HomeGroupConstrainedSlot(val index: Int)
 
 @Composable
 private fun AdaptiveHomeGroupBar(
-    filters: List<HomeFilterData>,
+    filters: List<HomeToolbarEntry>,
     currentFilterNumber: Int,
     chipColors: androidx.compose.material3.SelectableChipColors,
     useBottomSheet: Boolean,
@@ -206,15 +205,15 @@ private fun AdaptiveHomeGroupBar(
         val groupPlaceables = filters.mapIndexed { index, data ->
             subcompose(HomeGroupProbeSlot(index)) {
                 HomeGroupChip(
-                    label = data.filter.label,
-                    selected = data.filter.order == currentFilterNumber,
+                    label = data.label,
+                    selected = data.id == currentFilterNumber,
                     colors = chipColors,
                     minimumHeight = layout.minimumTouchTarget,
-                    onClick = { onFilterChange(data.filter.order) },
+                    onClick = { onFilterChange(data.id) },
                 )
             }.single().measure(chipConstraints)
         }
-        val activeIndex = filters.indexOfFirst { it.filter.order == currentFilterNumber }.takeIf { it >= 0 }
+        val activeIndex = filters.indexOfFirst { it.id == currentFilterNumber }.takeIf { it >= 0 }
         val spacingPx = spacing.roundToPx()
         val result = calculateHomeGroupOverflowLayout(
             availableWidth = constraints.maxWidth,
@@ -232,11 +231,11 @@ private fun AdaptiveHomeGroupBar(
             if (index == activeIndex && groupPlaceables[index].width > promotedCapacity) {
                 subcompose(HomeGroupConstrainedSlot(index)) {
                     HomeGroupChip(
-                        label = filters[index].filter.label,
+                        label = filters[index].label,
                         selected = true,
                         colors = chipColors,
                         minimumHeight = layout.minimumTouchTarget,
-                        onClick = { onFilterChange(filters[index].filter.order) },
+                        onClick = { onFilterChange(filters[index].id) },
                     )
                 }.single().measure(
                     chipConstraints.copy(maxWidth = promotedCapacity.coerceAtLeast(1)),
@@ -324,7 +323,7 @@ private fun HomeMoreChip(
 @Composable
 private fun HomeMorePicker(
     label: String,
-    filters: List<HomeFilterData>,
+    filters: List<HomeToolbarEntry>,
     currentFilterNumber: Int,
     colors: androidx.compose.material3.SelectableChipColors,
     minimumHeight: Dp,
@@ -368,7 +367,7 @@ private fun HomeMorePicker(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeGroupPickerSheet(
-    filters: List<HomeFilterData>,
+    filters: List<HomeToolbarEntry>,
     currentFilterNumber: Int,
     onDismiss: () -> Unit,
     onFilterChange: (Int) -> Unit,
@@ -395,7 +394,7 @@ private fun HomeGroupPickerSheet(
 
 @Composable
 private fun HomeGroupPickerItems(
-    filters: List<HomeFilterData>,
+    filters: List<HomeToolbarEntry>,
     currentFilterNumber: Int,
     modifier: Modifier = Modifier,
     onFilterChange: (Int) -> Unit,
@@ -403,7 +402,7 @@ private fun HomeGroupPickerItems(
     val layout = LocalKomeliaLayout.current
     var query by remember { mutableStateOf("") }
     val visibleFilters = remember(filters, query) {
-        if (query.isBlank()) filters else filters.filter { it.filter.label.contains(query, ignoreCase = true) }
+        if (query.isBlank()) filters else filters.filter { it.label.contains(query, ignoreCase = true) }
     }
     Column(modifier.heightIn(max = 480.dp)) {
         if (filters.size > 6) {
@@ -422,18 +421,18 @@ private fun HomeGroupPickerItems(
                 DropdownMenuItem(
                     text = {
                         Column {
-                            Text(data.filter.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(data.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Text(
-                                stringResource(Res.string.home_filter_group_items, data.itemCount()),
+                                stringResource(Res.string.home_filter_group_items, data.itemCount),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     },
-                    leadingIcon = if (data.filter.order == currentFilterNumber) {
+                    leadingIcon = if (data.id == currentFilterNumber) {
                         { Icon(Icons.Rounded.Check, null) }
                     } else null,
-                    onClick = { onFilterChange(data.filter.order) },
+                    onClick = { onFilterChange(data.id) },
                 )
             }
         }
@@ -447,6 +446,20 @@ private fun HomeFilterData.itemCount(): Int = when (this) {
 
 internal fun homeGroupToolbarFilters(filters: List<HomeFilterData>): List<HomeFilterData> =
     filters.sortedBy { it.filter.order }
+
+internal const val HOME_ALL_TAB_ID = 0
+
+internal data class HomeToolbarEntry(
+    val id: Int,
+    val label: String,
+    val itemCount: Int,
+)
+
+internal fun homeToolbarEntries(
+    filters: List<HomeFilterData>,
+): List<HomeToolbarEntry> = homeGroupToolbarFilters(filters).map {
+    HomeToolbarEntry(it.filter.order, it.filter.label, it.itemCount())
+}
 
 @Composable
 private fun DisplayContent(
@@ -478,7 +491,7 @@ private fun DisplayContent(
             )
         ) {
             for (data in filters) {
-                if (activeFilterNumber == 0 || data.filter.order == activeFilterNumber) {
+                if (activeFilterNumber == HOME_ALL_TAB_ID || data.filter.order == activeFilterNumber) {
                     when (data) {
                         is BookFilterData -> BookFilterEntry(
                             label = data.filter.label,
@@ -508,17 +521,24 @@ private fun LazyGridScope.BookFilterEntry(
     bookMenuActions: BookMenuActions,
     onBookClick: (KomeliaBook) -> Unit,
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
+    headerAction: (@Composable () -> Unit)? = null,
 ) {
     if (books.isEmpty()) return
 
     item(span = { GridItemSpan(maxLineSpan) }) {
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(LocalKomeliaLayout.current.controlSpacing),
+        ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
             )
+            headerAction?.invoke()
         }
     }
     items(books) { book ->

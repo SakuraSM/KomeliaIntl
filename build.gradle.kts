@@ -383,6 +383,7 @@ tasks.register("desktopJar") {
     description = "create release jar for current OS"
     group = "komelia-package"
     dependsOn(releaseVersionCheck)
+    dependsOn("buildEpubReaders")
     dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseUberJarForCurrentOS")
 }
 
@@ -390,6 +391,7 @@ tasks.register("desktopDeb") {
     description = "create linux deb package"
     group = "komelia-package"
     dependsOn(releaseVersionCheck)
+    dependsOn("buildEpubReaders")
     dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseDeb")
 }
 
@@ -397,6 +399,7 @@ tasks.register("desktopMsi") {
     description = "create windows msi installer"
     group = "komelia-package"
     dependsOn(releaseVersionCheck)
+    dependsOn("buildEpubReaders")
     dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseMsi")
 }
 
@@ -404,12 +407,14 @@ tasks.register("desktopDmg") {
     description = "create macOS dmg installer"
     group = "komelia-package"
     dependsOn(releaseVersionCheck)
+    dependsOn("buildEpubReaders")
     dependsOn(projects.komeliaApp.desktopApp.path + ":packageReleaseDmg")
 }
 
 tasks.register("androidDebug") {
     description = "build debug apk"
     group = "komelia-package"
+    dependsOn("buildEpubReaders")
     dependsOn(projects.komeliaApp.androidApp.path + ":assembleDebug")
 }
 
@@ -417,6 +422,7 @@ tasks.register("androidRelease") {
     description = "build release apk"
     group = "komelia-package"
     dependsOn(releaseVersionCheck)
+    dependsOn("buildEpubReaders")
     dependsOn(projects.komeliaApp.androidApp.path + ":assembleRelease")
 }
 
@@ -476,6 +482,7 @@ tasks.register<DefaultTask>("komfWebUI") {
     description = "build and package webapp"
     group = "komelia-package"
     dependsOn(releaseVersionCheck)
+    dependsOn("buildEpubReaders")
     dependsOn(projects.komeliaApp.webApp.path + ":wasmJsBrowserDistribution")
     dependsOn(projects.komeliaInfra.imageDecoder.wasmImageWorker.path + ":wasmJsBrowserDistribution")
 
@@ -544,5 +551,33 @@ tasks.register<DefaultTask>("komfWebUI") {
                     "$output/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/${valuesDirectory.name}"
                 )
             }
+    }
+}
+
+val buildEpubReadersTask = tasks.named("buildEpubReaders")
+gradle.projectsEvaluated {
+    project(projects.komeliaUi.path).tasks.named("copyNonXmlValueResourcesForCommonMain") {
+        mustRunAfter(buildEpubReadersTask)
+    }
+    project(projects.komeliaApp.desktopApp.path).tasks.named("packageReleaseUberJarForCurrentOS") {
+        mustRunAfter(buildEpubReadersTask)
+    }
+    project(projects.komeliaApp.desktopApp.path).tasks.named("packageReleaseDeb") {
+        mustRunAfter(buildEpubReadersTask)
+    }
+    project(projects.komeliaApp.desktopApp.path).tasks.named("packageReleaseMsi") {
+        mustRunAfter(buildEpubReadersTask)
+    }
+    project(projects.komeliaApp.desktopApp.path).tasks.named("packageReleaseDmg") {
+        mustRunAfter(buildEpubReadersTask)
+    }
+    project(projects.komeliaApp.androidApp.path).tasks.named("assembleDebug") {
+        mustRunAfter(buildEpubReadersTask)
+    }
+    project(projects.komeliaApp.androidApp.path).tasks.named("assembleRelease") {
+        mustRunAfter(buildEpubReadersTask)
+    }
+    project(projects.komeliaApp.webApp.path).tasks.named("wasmJsBrowserDistribution") {
+        mustRunAfter(buildEpubReadersTask)
     }
 }

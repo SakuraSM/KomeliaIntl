@@ -38,6 +38,7 @@ import snd.komga.client.library.KomgaLibraryClient
 import snd.komga.client.series.KomgaSeries
 import snd.komga.client.series.KomgaSeriesClient
 import snd.komga.client.user.KomgaUserClient
+import kotlin.time.TimeSource
 
 
 private val logger = KotlinLogging.logger { }
@@ -119,6 +120,9 @@ class BookDownloadService(
         try {
             val expectedSize = book.sizeBytes.takeIf { it > 0L }
             emit(BookDownloadProgress(book, expectedSize ?: 0L, 0))
+            var speedSampleBytes = 0L
+            var speedSampleMark = TimeSource.Monotonic.markNow()
+            var speedBytesPerSecond = 0L
             ResumableDownloadWriter(
                 sourceFactory = KtorDownloadSourceFactory(downloadClient),
                 onRetry = { attempt, offset, error ->
@@ -131,7 +135,19 @@ class BookDownloadService(
                 expectedSize = expectedSize,
                 output = output,
             ) { completed, total ->
-                emit(BookDownloadProgress(book, total ?: 0L, completed))
+                val elapsedMillis = speedSampleMark.elapsedNow().inWholeMilliseconds
+                val sampleReady = elapsedMillis >= DOWNLOAD_SPEED_SAMPLE_MILLIS
+                if (sampleReady) {
+                    speedBytesPerSecond = calculateDownloadSpeed(
+                        bytesDelta = completed - speedSampleBytes,
+                        elapsedMillis = elapsedMillis,
+                    )
+                    speedSampleBytes = completed
+                    speedSampleMark = TimeSource.Monotonic.markNow()
+                }
+                if (sampleReady || total != null && completed >= total) {
+                    emit(BookDownloadProgress(book, total ?: 0L, completed, speedBytesPerSecond))
+                }
             }
         } catch (e: Exception) {
             deleteFile(file)
@@ -145,6 +161,13 @@ class BookDownloadService(
 
         return file
     }
+}
+
+private const val DOWNLOAD_SPEED_SAMPLE_MILLIS = 500L
+
+internal fun calculateDownloadSpeed(bytesDelta: Long, elapsedMillis: Long): Long {
+    if (bytesDelta <= 0L || elapsedMillis <= 0L) return 0L
+    return bytesDelta * 1_000L / elapsedMillis
 }
 
 internal expect suspend fun prepareOutput(

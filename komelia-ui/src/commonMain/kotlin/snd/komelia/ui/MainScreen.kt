@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
@@ -64,6 +65,7 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_home
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_local
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_search
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_settings
 import kotlinx.coroutines.coroutineScope
@@ -78,6 +80,7 @@ import snd.komelia.ui.common.components.komeliaTopBarScroll
 import snd.komelia.ui.common.components.rememberKomeliaTopBarScrollState
 import snd.komelia.ui.home.HomeScreen
 import snd.komelia.ui.library.LibraryScreen
+import snd.komelia.ui.local.LocalContentScreen
 import snd.komelia.ui.oneshot.OneshotScreen
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType.MOBILE
@@ -311,6 +314,7 @@ private fun createTabs(defaultScreen: Screen, isMobile: Boolean): List<AppTab> {
     return listOf(
         tab(AppDestination.LIBRARY, LibraryScreen()),
         tab(AppDestination.HOME, HomeScreen()),
+        tab(AppDestination.LOCAL, LocalContentScreen()),
         tab(AppDestination.SEARCH, SearchScreen(null)),
         tab(
             AppDestination.SETTINGS,
@@ -323,6 +327,7 @@ private fun destinationFor(screen: Screen): AppDestination = when (screen) {
     is LibraryScreen, is BookScreen, is SeriesScreen, is OneshotScreen, is CollectionScreen, is ReadListScreen ->
         AppDestination.LIBRARY
 
+    is LocalContentScreen -> AppDestination.LOCAL
     is SearchScreen -> AppDestination.SEARCH
     is MobileSettingsScreen, is SettingsScreen -> AppDestination.SETTINGS
     else -> AppDestination.HOME
@@ -418,6 +423,7 @@ private data class DestinationItem(
 private val destinationItems = listOf(
     DestinationItem(AppDestination.LIBRARY, Res.string.navbar_libraries, Icons.Default.LocalLibrary),
     DestinationItem(AppDestination.HOME, Res.string.navbar_home, Icons.Default.Home),
+    DestinationItem(AppDestination.LOCAL, Res.string.navbar_local, Icons.Rounded.CloudDownload),
     DestinationItem(AppDestination.SEARCH, Res.string.navbar_search, Icons.Default.Search),
     DestinationItem(AppDestination.SETTINGS, Res.string.navbar_settings, Icons.Default.Settings),
 )

@@ -20,10 +20,12 @@ import kotlinx.coroutines.launch
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaCollectionsApi
+import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LoadState.Error
@@ -52,10 +54,12 @@ class OneshotViewModel(
     private val seriesId: KomgaSeriesId,
     private val seriesApi: KomgaSeriesApi,
     private val bookApi: KomgaBookApi,
+    private val libraryApi: KomgaLibraryApi,
     private val events: SharedFlow<KomgaEvent>,
     private val notifications: AppNotifications,
     private val libraries: StateFlow<List<KomgaLibrary>>,
     private val taskEmitter: OfflineTaskEmitter?,
+    localLibraryManager: LocalLibraryManager?,
     settingsRepository: CommonSettingsRepository,
     readListApi: KomgaReadListApi,
     collectionApi: KomgaCollectionsApi,
@@ -72,6 +76,7 @@ class OneshotViewModel(
         notifications = notifications,
         scope = screenModelScope,
         taskEmitter = taskEmitter,
+        localLibraryManager = localLibraryManager,
         onReadProgressChanged = { reload() },
     )
 
@@ -100,12 +105,8 @@ class OneshotViewModel(
         if (state.value != Uninitialized) return
         initState()
         book.filterNotNull().combine(libraries) { book, libraries ->
-            val newLibrary = libraries.firstOrNull { it.id == book.libraryId }
-            if (newLibrary == null) {
-                mutableState.value =
-                    Error(IllegalStateException("Failed to find library for oneshot ${book.metadata.title}"))
-            }
-            library.value = newLibrary
+            library.value = libraries.firstOrNull { it.id == book.libraryId }
+                ?: runCatching { libraryApi.getLibrary(book.libraryId) }.getOrNull()
         }.launchIn(screenModelScope)
 
         startKomgaEventListener()
@@ -178,13 +179,14 @@ class OneshotViewModel(
         }.onFailure { mutableState.value = Error(it) }
     }
 
-    private fun getLibraryOrThrow(book: KomeliaBook): KomgaLibrary {
-        val library = this.libraries.value.firstOrNull { it.id == book.libraryId }
-        if (library == null) {
-            throw IllegalStateException("Failed to find library for oneshot ${book.metadata.title}")
-        }
-        return library
-    }
+    private suspend fun getLibraryOrThrow(book: KomeliaBook): KomgaLibrary =
+        this.libraries.value.firstOrNull { it.id == book.libraryId }
+            ?: runCatching { libraryApi.getLibrary(book.libraryId) }.getOrElse {
+                throw IllegalStateException(
+                    "Failed to find library for oneshot ${book.metadata.title}",
+                    it,
+                )
+            }
 
     fun stopKomgaEventHandler() {
         reloadEventsEnabled.value = false

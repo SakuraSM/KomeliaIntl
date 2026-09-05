@@ -46,8 +46,38 @@ class HomeConfigurationRefreshTest {
 
     @Test
     fun removedActiveGroupFallsBackToAll() {
-        assertEquals(0, reconcileActiveHomeFilter(activeFilterNumber = 4, filterCount = 3))
-        assertEquals(2, reconcileActiveHomeFilter(activeFilterNumber = 2, filterCount = 3))
+        assertEquals(
+            0,
+            reconcileActiveHomeFilter(
+                activeFilterNumber = 4,
+                availableFilterNumbers = listOf(1, 2, 3),
+            ),
+        )
+        assertEquals(
+            2,
+            reconcileActiveHomeFilter(
+                activeFilterNumber = 2,
+                availableFilterNumbers = listOf(1, 2, 3),
+            ),
+        )
+    }
+
+    @Test
+    fun activeGroupUsesPersistedOrderInsteadOfListIndex() {
+        assertEquals(
+            7,
+            reconcileActiveHomeFilter(
+                activeFilterNumber = 7,
+                availableFilterNumbers = listOf(2, 7, 11),
+            ),
+        )
+        assertEquals(
+            0,
+            reconcileActiveHomeFilter(
+                activeFilterNumber = 3,
+                availableFilterNumbers = listOf(2, 7, 11),
+            ),
+        )
     }
 
     @Test

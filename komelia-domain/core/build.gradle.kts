@@ -35,6 +35,8 @@ kotlin {
             languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
             languageSettings.optIn("kotlin.js.ExperimentalWasmJsInterop")
         }
+        commonTest.dependencies { implementation(kotlin("test")) }
+
         commonMain.dependencies {
             api(projects.komeliaDomain.komgaApi)
             api(projects.komeliaDomain.offline)

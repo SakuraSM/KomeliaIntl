@@ -1,7 +1,7 @@
 package snd.komelia.ui.common.cards
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,10 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
@@ -36,22 +33,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_unavailable
 import org.jetbrains.compose.resources.stringResource
-import snd.komelia.ui.LocalLibraries
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalLibraries
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.images.SeriesThumbnail
 import snd.komelia.ui.common.menus.SeriesActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.platform.cursorForHand
-import snd.komelia.ui.platform.WindowSizeClass.COMPACT
-import snd.komelia.ui.platform.WindowSizeClass.MEDIUM
 import snd.komga.client.series.KomgaSeries
-import snd.komelia.offline.local.isLocalLibrary
 
 @Composable
 fun SeriesImageCard(
@@ -260,8 +255,6 @@ fun SeriesDetailedListCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val layout = LocalKomeliaLayout.current
-    val width = LocalWindowWidth.current
     Card(
         modifier
             .cursorForHand()
@@ -270,48 +263,42 @@ fun SeriesDetailedListCard(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .heightIn(max = 200.dp)
-                .padding(layout.cardContentPadding)
-        ) {
-            SeriesSimpleImageCard(
-                series = series,
-                onSeriesClick = onClick,
-                modifier = Modifier.width(
-                    when (width) {
-                        COMPACT, MEDIUM -> 96.dp
-                        else -> 130.dp
-                    }
-                )
-            )
-            SeriesDetails(series)
-        }
+        DetailedListCardLayout(
+            cover = {
+                SeriesImageOverlay(series = series, libraryIsDeleted = false, showTitle = false) {
+                    SeriesThumbnail(series.id, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                }
+            },
+            content = { SeriesDetails(series) },
+        )
     }
 }
 
 @Composable
 private fun SeriesDetails(series: KomgaSeries) {
     val layout = LocalKomeliaLayout.current
-    Column(Modifier.padding(start = layout.itemSpacing)) {
+    Column {
         Row(
             horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 series.metadata.title,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            if (series.libraryId.isLocalLibrary()) LocalSourceBadge()
         }
-        MetadataTagFlow(
+        if (series.metadata.genres.isNotEmpty()) MetadataTagFlow(
             values = series.metadata.genres,
             width = LocalWindowWidth.current,
             modifier = Modifier.padding(vertical = 8.dp),
         )
-        Text(series.metadata.summary, maxLines = 4, style = MaterialTheme.typography.bodyMedium)
+        if (series.metadata.summary.isNotBlank()) Text(
+            series.metadata.summary, maxLines = 3, style = MaterialTheme.typography.bodyMedium,
+            overflow = TextOverflow.Ellipsis,
+        )
 
     }
 }

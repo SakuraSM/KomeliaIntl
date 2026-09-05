@@ -14,6 +14,7 @@ import snd.komelia.offline.settings.OfflineSettingsRepository
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.offline.sync.repository.LogJournalRepository
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.tasks.repository.OfflineTasksRepository
 import snd.komelia.offline.book.actions.BookDeleteAction
 import snd.komelia.offline.book.repository.OfflineBookRepository
 import snd.komelia.offline.media.repository.OfflineMediaRepository
@@ -44,6 +45,7 @@ class OfflineSettingsViewModel(
     seriesDeleteAction: SeriesDeleteAction,
 
     private val taskEmitter: OfflineTaskEmitter,
+    private val tasksRepository: OfflineTasksRepository,
     private val downloadEvents: SharedFlow<DownloadEvent>,
 ) : ScreenModel {
 
@@ -67,6 +69,7 @@ class OfflineSettingsViewModel(
     val downloadsSate = OfflineDownloadsState(
         downloadEvents = downloadEvents,
         taskEmitter = taskEmitter,
+        tasksRepository = tasksRepository,
         settingsRepository = offlineSettingsRepository,
         platformContext = platformContext,
         coroutineScope = screenModelScope,

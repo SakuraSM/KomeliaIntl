@@ -11,10 +11,6 @@ import android.webkit.WebSettings
 import android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.fleeksoft.ksoup.Ksoup
-import com.fleeksoft.ksoup.nodes.DataNode
-import com.fleeksoft.ksoup.nodes.Element
-import com.fleeksoft.ksoup.parseInputStream
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
@@ -166,20 +162,10 @@ actual class KomeliaWebview(private val webview: WebView) : WebViewClient(), Aut
         val response = runBlocking { interceptor?.run(request = request.toResourceRequest()) } ?: return null
 
         if (currentUrl == request.url) {
-            val htmlDocument = Ksoup.parseInputStream(response.data.inputStream(), "")
-
-            val bindScriptElement = Element("script")
-            bindScriptElement.appendChild(DataNode(createBindScript()))
-            htmlDocument.head().prependChild(bindScriptElement)
-
-            val initScriptElement = Element("script")
-            initScriptElement.appendChild(DataNode(initScript))
-            htmlDocument.head().prependChild(initScriptElement)
-
             return WebResourceResponse(
                 "text/html",
                 "utf-8",
-                htmlDocument.outerHtml().byteInputStream(Charsets.UTF_8)
+                injectBridgeScripts(response.data).inputStream()
             )
         }
 
@@ -224,6 +210,19 @@ actual class KomeliaWebview(private val webview: WebView) : WebViewClient(), Aut
                   window.__webview__.onBind(name);
                 })
             """
+    }
+
+    private fun injectBridgeScripts(htmlBytes: ByteArray): ByteArray {
+        val html = htmlBytes.decodeToString()
+        val headEnd = html.indexOf("</head>", ignoreCase = true)
+        val scripts = "<script>$initScript</script><script>${createBindScript()}</script>"
+        if (headEnd < 0) return (scripts + html).encodeToByteArray()
+
+        return buildString(html.length + scripts.length) {
+            append(html, 0, headEnd)
+            append(scripts)
+            append(html, headEnd, html.length)
+        }.encodeToByteArray()
     }
 }
 

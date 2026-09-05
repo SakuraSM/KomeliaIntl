@@ -732,12 +732,14 @@
   },
   "epubreader": {
     "current_chapter": "当前章节",
+    "loading_book": "正在准备书籍…",
     "page_of": "第 {page} 页，共 {count} 页",
     "settings": {
       "column_count": "栏数",
       "layout": "布局",
       "layout_paginated": "分页",
       "layout_scroll": "滚动",
+      "tap_to_turn": "点按翻页",
       "navigation_mode": "导航模式",
       "navigation_options": {
         "both": "全部",

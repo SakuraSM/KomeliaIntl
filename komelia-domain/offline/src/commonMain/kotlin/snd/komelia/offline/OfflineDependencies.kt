@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import snd.komelia.offline.action.OfflineActions
 import snd.komelia.offline.api.OfflineKomgaApi
 import snd.komelia.offline.local.LocalLibraryManager
+import snd.komelia.offline.local.AvailableBooksRepository
 import snd.komelia.offline.mediacontainer.BookContentExtractors
 import snd.komelia.offline.sync.BookDownloadService
 import snd.komelia.offline.sync.model.DownloadEvent
@@ -21,5 +22,6 @@ data class OfflineDependencies(
     val repositories: OfflineRepositories,
     val fileService: BookContentExtractors,
     val komgaApi: OfflineKomgaApi,
+    val availableBooksRepository: AvailableBooksRepository,
     val localLibraryManager: LocalLibraryManager?,
 )

@@ -122,6 +122,19 @@
 
     <header id="headerMenu"/>
 
+    <v-fade-transition>
+      <div
+          v-if="readerLoading"
+          class="reader-loading-overlay"
+          :class="appearanceClass('bg')"
+          role="status"
+          aria-live="polite"
+      >
+        <v-progress-circular indeterminate color="primary" size="40" width="3"/>
+        <span>{{ t('epubreader.loading_book') }}</span>
+      </div>
+    </v-fade-transition>
+
     <div id="D2Reader-Container" style="height: 100vh" :class="appearanceClass('bg')">
       <main
           tabindex=-1
@@ -134,35 +147,9 @@
         <div id="reader-loading"></div>
         <div id="reader-error"></div>
       </main>
-      <a id="previous-chapter" rel="prev" role="button" aria-labelledby="previous-label"
-         style="left: 50%;position: fixed;color: #000;height: 24px;background: #d3d3d33b; width: 150px;transform: translate(-50%, 0); display: block"
-         :style="`top: ${showToolbars ? 48 : 0}px`"
-         :class="settings.navigationButtons ? '' : 'hidden'"
-      >
-        <v-icon :icon="mdiChevronUp" style="left: calc(50% - 12px); position: relative;"/>
-      </a>
-      <a id="next-chapter" rel="next" role="button" aria-labelledby="next-label"
-         :class="settings.navigationButtons ? '' : 'hidden'"
-         style="bottom: 0;left: 50%;position: fixed;color: #000;height: 24px;background: #d3d3d33b; width: 150px;transform: translate(-50%, 0); display: block">
-        <v-icon :icon="mdiChevronDown" style="left: calc(50% - 12px);position: relative;"/>
-      </a>
     </div>
 
-    <footer id="footerMenu">
-      <a rel="prev" class="disabled" role="button" aria-labelledby="previous-label"
-         style="top: 50%;left:0;position: fixed;height: 100px;background: #d3d3d33b;"
-         :class="settings.navigationButtons ? '' : 'hidden'"
-      >
-        <v-icon :icon="mdiChevronLeft" style="top: calc(50% - 12px);
-                        position: relative;"/>
-      </a>
-      <a rel="next" class="disabled" role="button" aria-labelledby="next-label"
-         style="top: 50%;right:0;position: fixed;height: 100px;background: #d3d3d33b;"
-         :class="settings.navigationButtons ? '' : 'hidden'"
-      >
-        <v-icon :icon="mdiChevronRight" style="top: calc(50% - 12px);position: relative;"/>
-      </a>
-    </footer>
+    <footer id="footerMenu"/>
 
     <v-container fluid class="full-width" style="position: fixed; bottom: 0; font-size: .85rem"
                  :class="appearanceClass()"
@@ -209,10 +196,11 @@
             </v-list-item>
 
             <v-list-item>
-              <settings-select
-                  :items="navigationOptions"
-                  v-model="navigationMode"
-                  :label="t('epubreader.settings.navigation_mode')"
+              <v-switch
+                  v-model="navigationClick"
+                  :label="t('epubreader.settings.tap_to_turn')"
+                  color="primary"
+                  hide-details
               />
             </v-list-item>
 
@@ -329,7 +317,7 @@
 
 <script setup lang="ts">
 import {useI18n} from 'vue-i18n'
-import {computed, ComputedRef, onBeforeUnmount, onMounted, reactive, Ref, ref} from 'vue'
+import {computed, ComputedRef, nextTick, onBeforeUnmount, onMounted, reactive, Ref, ref} from 'vue'
 import D2Reader, {Locator, ReadingPosition} from '@d-i-t-a/reader'
 import {Locations} from "@d-i-t-a/reader/dist/types/model/Locator";
 import {BookDto} from '@/types/komga-books'
@@ -348,10 +336,8 @@ import IconFormatLineSpacingDown from "@/components/IconFormatLineSpacingDown.vu
 import {
   mdiArrowLeft,
   mdiCheck,
-  mdiChevronDown,
   mdiChevronLeft,
   mdiChevronRight,
-  mdiChevronUp,
   mdiClose,
   mdiCog,
   mdiEiffelTower,
@@ -382,6 +368,8 @@ const showSettings = ref(false)
 const showToolbars = ref(false)
 const showToc = ref(false)
 const showHelp = ref(false)
+const readerLoading = ref(true)
+let readerLoadGeneration = 0
 const tab: Ref<string> = ref("hasToc")
 const readingDirs = ref(
     [
@@ -445,17 +433,9 @@ const settings = reactive(
       // Epub Reader
       alwaysFullscreen: false,
       navigationClick: true,
-      navigationButtons: true,
+      navigationButtons: false, // Retained for compatibility with stored reader settings.
     } as EpubReaderSettings
 )
-const navigationOptions = ref(
-    [
-      {title: t('epubreader.settings.navigation_options.buttons'), value: 'button'},
-      {title: t('epubreader.settings.navigation_options.click'), value: 'click'},
-      {title: t('epubreader.settings.navigation_options.both'), value: 'buttonclick'},
-    ]
-)
-
 const tocs = reactive({
   toc: undefined as unknown as TocEntry[],
   landmarks: undefined as unknown as TocEntry[],
@@ -729,15 +709,12 @@ const fontSize = computed({
     externalFunctions.saveReaderSettings(settings)
   },
 })
-const navigationMode = computed({
-  get(): string {
-    let r = settings.navigationButtons ? 'button' : ''
-    if (settings.navigationClick) r += 'click'
-    return r
+const navigationClick = computed({
+  get(): boolean {
+    return settings.navigationClick
   },
-  set(value: string): void {
-    settings.navigationButtons = value.includes('button')
-    settings.navigationClick = value.includes('click')
+  set(value: boolean): void {
+    settings.navigationClick = value
     externalFunctions.saveReaderSettings(settings)
   },
 })
@@ -995,9 +972,12 @@ function navigateResourceAfterUnchangedBoundary(
 }
 
 async function setupState(currentBookId: string) {
+  const loadGeneration = ++readerLoadGeneration
+  readerLoading.value = true
   bookId.value = currentBookId
   book.value = await externalFunctions.bookGet(currentBookId)
   series.value = await externalFunctions.getOneSeries(book.value.seriesId)
+  const isLocalPublication = book.value.libraryId.startsWith('local-library-')
 
   const progression = await externalFunctions.bookGetProgression(currentBookId)
   const serverUrl = await externalFunctions.getServerUrl()
@@ -1068,6 +1048,8 @@ async function setupState(currentBookId: string) {
       enableContentProtection: false,
       enableMediaOverlays: false,
       enablePageBreaks: false,
+      // Generating positions walks the complete publication before the first resource is shown.
+      // Local books persist their exact locator instead, keeping first paint independent of book size.
       autoGeneratePositions: false,
       enableLineFocus: false,
       customKeyboardEvents: false,
@@ -1075,7 +1057,7 @@ async function setupState(currentBookId: string) {
       enableCitations: false,
       enableConsumption: false,
     },
-    services: {
+    services: isLocalPublication ? {} : {
       positions: new URL(`${serverUrl}/api/v1/books/${currentBookId}/positions`),
     },
     api: {
@@ -1084,7 +1066,7 @@ async function setupState(currentBookId: string) {
       updateCurrentLocation: updateCurrentLocation,
       keydownFallthrough: keyPressed,
       clickThrough: clickThrough,
-      resourceReady: scheduleReaderContentSwipeNavigationSetup,
+      resourceReady: handleResourceReady,
       positionInfo: updatePositionInfo,
       chapterInfo: updateChapterInfo,
       direction: updateDirection,
@@ -1092,6 +1074,8 @@ async function setupState(currentBookId: string) {
   })
 
   fixedLayout.value = d2Reader.value.publicationLayout === 'fixed'
+
+  if (loadGeneration !== readerLoadGeneration) return
 
   tocs.toc = d2Reader.value.tableOfContents
   tocs.landmarks = d2Reader.value.landmarks
@@ -1113,6 +1097,71 @@ async function setupState(currentBookId: string) {
     // }
   } catch (e) {
   }
+}
+
+function handleResourceReady(): void {
+  scheduleReaderContentSwipeNavigationSetup()
+  const loadGeneration = readerLoadGeneration
+  void hideReaderLoadingAfterFirstPaint(loadGeneration)
+}
+
+async function hideReaderLoadingAfterFirstPaint(loadGeneration: number): Promise<void> {
+  await nextTick()
+  const deadline = performance.now() + 15_000
+
+  while (loadGeneration === readerLoadGeneration && performance.now() < deadline) {
+    const readerFrame = await readyReaderFrame()
+    if (readerFrame) {
+      // Image.complete can become true before Android WebView has decoded and
+      // composited the resource. Wait for both the publication frame and the
+      // host frame so the loading overlay never reveals an intermediate white
+      // canvas.
+      await nextAnimationFrame(readerFrame)
+      await nextAnimationFrame(readerFrame)
+      await nextAnimationFrame()
+      await nextAnimationFrame()
+      if (loadGeneration === readerLoadGeneration) {
+        await externalFunctions.readerContentReady()
+        readerLoading.value = false
+      }
+      return
+    }
+    await new Promise(resolve => window.setTimeout(resolve, 80))
+  }
+
+  if (loadGeneration === readerLoadGeneration) {
+    await externalFunctions.readerContentReady()
+    readerLoading.value = false
+  }
+}
+
+async function readyReaderFrame(): Promise<Window | null> {
+  const iframes = Array.from(document.querySelectorAll<HTMLIFrameElement>('#iframe-wrapper iframe'))
+  for (const iframe of iframes) {
+    try {
+      const document = iframe.contentDocument
+      if (!document || document.readyState !== 'complete') continue
+      const images = Array.from(document.images)
+      if (images.some(image => !image.complete)) continue
+
+      const renderedImages = images.filter(image => image.naturalWidth > 0 && image.naturalHeight > 0)
+      if (renderedImages.length > 0) {
+        await Promise.all(renderedImages.map(image => image.decode().catch(() => undefined)))
+      }
+
+      const hasImage = renderedImages.some(image => image.complete && image.naturalWidth > 0)
+      const hasText = (document.body?.innerText.trim().length ?? 0) > 0
+      const hasRenderedMedia = document.querySelector('svg, canvas, video') !== null
+      if (hasImage || hasText || hasRenderedMedia) return document.defaultView
+    } catch {
+      continue
+    }
+  }
+  return null
+}
+
+function nextAnimationFrame(frameWindow: Window = window): Promise<void> {
+  return new Promise(resolve => frameWindow.requestAnimationFrame(() => resolve()))
 }
 
 function historyBack() {
@@ -1243,8 +1292,15 @@ function sendNotification(message: string, timeout: number = 4000) {
   notification.enabled = true
 }
 
-function markProgress(location: Locator) {
-  externalFunctions.bookUpdateProgression(bookId.value, createR2Progression(location))
+async function markProgress(location: Locator) {
+  if (incognito.value) return
+  try {
+    await externalFunctions.bookUpdateProgression(bookId.value, createR2Progression(location))
+  } catch (error) {
+    // A provisional first locator can be emitted before the reader has stable location data.
+    // The next location update will retry without breaking the reader's Promise chain.
+    console.warn('Unable to persist the current EPUB location', error)
+  }
   // debounce(() => {
   //   if (!incognito.value) {
   //     externalFunctions.bookUpdateProgression(bookId.value, createR2Progression(location))
@@ -1293,5 +1349,23 @@ function markProgress(location: Locator) {
 
 .hidden {
   display: none !important;
+}
+
+.reader-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 13;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 0.95rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reader-loading-overlay {
+    transition: none !important;
+  }
 }
 </style>

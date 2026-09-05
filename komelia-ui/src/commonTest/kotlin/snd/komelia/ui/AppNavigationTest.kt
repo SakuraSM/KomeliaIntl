@@ -31,6 +31,20 @@ class AppNavigationTest {
     }
 
     @Test
+    fun primaryNavigationContainsFiveStableDestinations() {
+        assertEquals(
+            listOf(
+                AppDestination.LIBRARY,
+                AppDestination.HOME,
+                AppDestination.LOCAL,
+                AppDestination.SEARCH,
+                AppDestination.SETTINGS,
+            ),
+            AppDestination.entries,
+        )
+    }
+
+    @Test
     fun destinationSelectionDistinguishesSwitchesFromReselection() {
         assertEquals(
             DestinationSelection.SwitchDestination,
@@ -46,6 +60,7 @@ class AppNavigationTest {
     fun backActionPopsDetailsReturnsOtherRootsHomeAndLetsHomeExit() {
         assertEquals(AppBackAction.PopDetail, appBackAction(canPop = true, AppDestination.SEARCH))
         assertEquals(AppBackAction.ReturnHome, appBackAction(canPop = false, AppDestination.LIBRARY))
+        assertEquals(AppBackAction.ReturnHome, appBackAction(canPop = false, AppDestination.LOCAL))
         assertEquals(AppBackAction.ReturnHome, appBackAction(canPop = false, AppDestination.SEARCH))
         assertEquals(AppBackAction.ReturnHome, appBackAction(canPop = false, AppDestination.SETTINGS))
         assertEquals(AppBackAction.ExitApp, appBackAction(canPop = false, AppDestination.HOME))

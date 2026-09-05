@@ -40,7 +40,9 @@ class AppUpdatesScreen : Screen {
                     versionCheckInProgress = state == LoadState.Loading,
                     onUpdate = vm::onUpdate,
                     onUpdateCancel = vm::onUpdateCancel,
-                    downloadProgress = vm.downloadProgress.collectAsState().value
+                    downloadProgress = vm.downloadProgress.collectAsState().value,
+                    installsInApp = vm.updater?.installsInApp == true,
+                    checkFailed = vm.checkFailed.collectAsState().value
                 )
             }
 

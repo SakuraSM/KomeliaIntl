@@ -115,7 +115,12 @@ class OfflineSettingsScreen : Screen {
                         onStorageLocationChange = downloadsState::onStorageLocationChange,
                         onStorageLocationReset = downloadsState::onStorageLocationReset,
                         downloads = downloadsState.downloads.collectAsState().value,
-                        onDownloadCancel = downloadsState::onDownloadCancel
+                        onDownloadPause = downloadsState::onDownloadPause,
+                        onDownloadCancel = downloadsState::onDownloadCancel,
+                        onDownloadRetry = downloadsState::onDownloadRetry,
+                        onTaskRemove = downloadsState::onTaskRemove,
+                        onTaskRemoveWithFiles = downloadsState::onTaskRemoveWithFiles,
+                        onOpenLogs = { selectedTab = 3 },
                     )
                 }
 

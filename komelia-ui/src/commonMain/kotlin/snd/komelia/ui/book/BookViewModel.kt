@@ -20,9 +20,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
+import snd.komelia.komga.api.KomgaLibraryApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.tasks.OfflineTaskEmitter
+import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LoadState.Error
@@ -44,10 +46,12 @@ class BookViewModel(
     book: KomeliaBook?,
     private val bookId: KomgaBookId,
     private val bookApi: KomgaBookApi,
+    private val libraryApi: KomgaLibraryApi,
     private val notifications: AppNotifications,
     private val komgaEvents: SharedFlow<KomgaEvent>,
     private val libraries: StateFlow<List<KomgaLibrary>>,
     private val taskEmitter: OfflineTaskEmitter?,
+    localLibraryManager: LocalLibraryManager?,
     settingsRepository: CommonSettingsRepository,
     readListApi: KomgaReadListApi,
 ) : StateScreenModel<LoadState<Unit>>(Uninitialized) {
@@ -75,6 +79,7 @@ class BookViewModel(
         notifications = notifications,
         scope = screenModelScope,
         taskEmitter = taskEmitter,
+        localLibraryManager = localLibraryManager,
         onReadProgressChanged = { reload() },
     )
 
@@ -111,9 +116,10 @@ class BookViewModel(
             .onFailure { mutableState.value = Error(it) }
     }
 
-    private fun loadLibrary() {
+    private suspend fun loadLibrary() {
         val book = requireNotNull(book.value)
         library = libraries.value.firstOrNull { library -> library.id == book.libraryId }
+            ?: runCatching { libraryApi.getLibrary(book.libraryId) }.getOrNull()
     }
 
     fun stopKomgaEventHandler() {

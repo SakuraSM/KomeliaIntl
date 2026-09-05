@@ -1,21 +1,27 @@
 package snd.komelia.ui.settings.offline.downloads
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,38 +30,78 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_download_canceled
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_download_complete
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_cancel
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_canceled
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_completed
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_failed
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_filter_active
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_filter_all
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_filter_failed
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_filter_history
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_pause
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_paused
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_queued
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_remove
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_remove_files
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_remove_files_confirm_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_remove_files_confirm_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_resume
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_retry
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_running
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_speed
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_tasks_overall_progress
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_tasks_summary
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_tasks_empty
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_tasks_filtered_empty
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.download_task_view_logs
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_storage_location
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_storage_location_change
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_offline_mode_storage_location_reset
 import io.github.vinceglb.filekit.PlatformFile
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.formatDecimal
-import snd.komelia.offline.sync.model.DownloadEvent
+import snd.komelia.offline.tasks.model.TaskData.DownloadBook
+import snd.komelia.offline.tasks.model.TaskEntry
+import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus
+import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.common.components.AppFilterChipDefaults
+import snd.komelia.ui.common.components.Pagination
+import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.dialogs.permissions.StoragePermissionRequestDialog
 import snd.komga.client.book.KomgaBookId
-import kotlin.coroutines.cancellation.CancellationException
 
 @Composable
 fun OfflineDownloadsContent(
     storageLocation: PlatformFile?,
-
     onStorageLocationChange: (PlatformFile) -> Unit,
     onStorageLocationReset: () -> Unit,
-    downloads: Collection<DownloadEvent>,
+    downloads: Collection<TaskEntry>,
+    onDownloadPause: (KomgaBookId) -> Unit,
     onDownloadCancel: (KomgaBookId) -> Unit,
+    onDownloadRetry: (KomgaBookId) -> Unit,
+    onTaskRemove: (KomgaBookId) -> Unit,
+    onTaskRemoveWithFiles: (KomgaBookId) -> Unit,
+    onOpenLogs: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        if (storageLocation != null) {
-            Column {
+    val layout = LocalKomeliaLayout.current
+    val downloadList = downloads.toList()
+    var selectedFilter by remember { mutableStateOf(DownloadTaskFilter.ALL) }
+    var requestedPage by remember { mutableStateOf(1) }
+    val filteredDownloads = remember(downloadList, selectedFilter) {
+        filterDownloadTasks(downloadList, selectedFilter)
+    }
+    val page = remember(filteredDownloads, requestedPage) {
+        paginateDownloadTasks(filteredDownloads, requestedPage)
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing)) {
+        storageLocation?.let {
+            Column(verticalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
                 Text(stringResource(Res.string.settings_offline_mode_storage_location))
                 Text(
-                    rememberStorageLabel(storageLocation),
-                    modifier = Modifier.padding(start = 10.dp),
+                    rememberStorageLabel(it),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -63,95 +109,336 @@ fun OfflineDownloadsContent(
         var showDirectoryPickerDialog by remember { mutableStateOf(false) }
         if (showDirectoryPickerDialog) {
             StoragePermissionRequestDialog { directory ->
-                if (directory != null) {
-                    onStorageLocationChange(directory)
-                }
+                directory?.let(onStorageLocationChange)
                 showDirectoryPickerDialog = false
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
             Button(onClick = { showDirectoryPickerDialog = true }) {
+                Text(stringResource(Res.string.settings_offline_mode_storage_location_change))
+            }
+            Button(onClick = onStorageLocationReset) {
+                Text(stringResource(Res.string.settings_offline_mode_storage_location_reset))
+            }
+        }
+
+        if (downloads.isEmpty()) {
+            Text(
+                stringResource(Res.string.download_tasks_empty),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            DownloadTasksSummary(downloads)
+            DownloadTaskFilters(
+                downloads = downloadList,
+                selected = selectedFilter,
+                onSelect = {
+                    selectedFilter = it
+                    requestedPage = 1
+                },
+            )
+            if (page.items.isEmpty()) {
                 Text(
-                    stringResource(Res.string.settings_offline_mode_storage_location_change)
+                    stringResource(Res.string.download_tasks_filtered_empty),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Button(onClick = onStorageLocationReset) { Text(stringResource(Res.string.settings_offline_mode_storage_location_reset)) }
+            page.items.forEach { entry ->
+                DownloadTaskCard(
+                    entry = entry,
+                    onPause = onDownloadPause,
+                    onCancel = onDownloadCancel,
+                    onRetry = onDownloadRetry,
+                    onRemove = onTaskRemove,
+                    onRemoveWithFiles = onTaskRemoveWithFiles,
+                    onOpenLogs = onOpenLogs,
+                )
+            }
+            Pagination(
+                totalPages = page.totalPages,
+                currentPage = page.currentPage,
+                onPageChange = { requestedPage = it },
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
+    }
+}
 
-        HorizontalDivider()
-        for (event in downloads) {
-            Column(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(5.dp)
-                    .fillMaxWidth()
-            ) {
-                when (event) {
-                    is DownloadEvent.BookDownloadProgress -> DownloadProgress(event, onDownloadCancel)
-                    is DownloadEvent.BookDownloadCompleted -> DownloadCompleted(event)
-                    is DownloadEvent.BookDownloadError -> DownloadError(event)
+@Composable
+private fun DownloadTaskFilters(
+    downloads: List<TaskEntry>,
+    selected: DownloadTaskFilter,
+    onSelect: (DownloadTaskFilter) -> Unit,
+) {
+    val layout = LocalKomeliaLayout.current
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+        verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+    ) {
+        DownloadTaskFilter.entries.forEach { filter ->
+            val count = remember(downloads, filter) { filterDownloadTasks(downloads, filter).size }
+            FilterChip(
+                selected = selected == filter,
+                onClick = { onSelect(filter) },
+                label = { Text(stringResource(filter.label, count)) },
+                colors = AppFilterChipDefaults.filterChipColors(),
+                border = null,
+            )
+        }
+    }
+}
+
+@Composable
+private fun DownloadTaskCard(
+    entry: TaskEntry,
+    onPause: (KomgaBookId) -> Unit,
+    onCancel: (KomgaBookId) -> Unit,
+    onRetry: (KomgaBookId) -> Unit,
+    onRemove: (KomgaBookId) -> Unit,
+    onRemoveWithFiles: (KomgaBookId) -> Unit,
+    onOpenLogs: () -> Unit,
+) {
+    val layout = LocalKomeliaLayout.current
+    val bookId = (entry.task as DownloadBook).bookId
+    var showRemoveFilesConfirm by remember(entry.uniqueName) { mutableStateOf(false) }
+    if (showRemoveFilesConfirm) {
+        ConfirmationDialog(
+            title = stringResource(Res.string.download_task_remove_files_confirm_title),
+            body = stringResource(
+                Res.string.download_task_remove_files_confirm_body,
+                entry.displayTitle ?: bookId.value,
+            ),
+            onDialogConfirm = {
+                showRemoveFilesConfirm = false
+                onRemoveWithFiles(bookId)
+            },
+            onDialogDismiss = { showRemoveFilesConfirm = false },
+            buttonConfirmColor = MaterialTheme.colorScheme.errorContainer,
+        )
+    }
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(
+            modifier = Modifier.padding(layout.cardContentPadding),
+            verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(entry.displayTitle ?: bookId.value, style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        statusLabel(entry.status),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = statusColor(entry.status),
+                    )
+                }
+                TaskActions(
+                    status = entry.status,
+                    bookId = bookId,
+                    onPause = onPause,
+                    onCancel = onCancel,
+                    onRetry = onRetry,
+                    onRemove = onRemove,
+                    onRemoveWithFiles = { showRemoveFilesConfirm = true },
+                    onOpenLogs = onOpenLogs,
+                )
+            }
+            if (entry.status == TaskStatus.RUNNING || entry.status == TaskStatus.PAUSED) {
+                if (entry.totalBytes > 0) {
+                    LinearProgressIndicator(
+                        progress = { entry.completedBytes.toFloat() / entry.totalBytes },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(
+                        buildString {
+                            append("${toMiB(entry.completedBytes)} MiB / ${toMiB(entry.totalBytes)} MiB")
+                            if (entry.speedBytesPerSecond > 0) {
+                                append(" · ")
+                                append(stringResource(Res.string.download_task_speed, toMiB(entry.speedBytesPerSecond)))
+                            }
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
             }
+            entry.errorMessage?.takeIf { entry.status == TaskStatus.FAILED }?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
         }
     }
 }
 
 @Composable
-private fun DownloadProgress(
-    event: DownloadEvent.BookDownloadProgress,
-    onCancel: (KomgaBookId) -> Unit
+private fun TaskActions(
+    status: TaskStatus,
+    bookId: KomgaBookId,
+    onPause: (KomgaBookId) -> Unit,
+    onCancel: (KomgaBookId) -> Unit,
+    onRetry: (KomgaBookId) -> Unit,
+    onRemove: (KomgaBookId) -> Unit,
+    onRemoveWithFiles: () -> Unit,
+    onOpenLogs: () -> Unit,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        DownloadProgressIndicator(event)
-        IconButton(onClick = { onCancel(event.book.id) }) { Icon(Icons.Default.Cancel, null) }
+    when (status) {
+        TaskStatus.NEW -> ActionIcon(Icons.Rounded.Close, Res.string.download_task_cancel) { onCancel(bookId) }
+        TaskStatus.RUNNING -> {
+            ActionIcon(Icons.Rounded.Pause, Res.string.download_task_pause) { onPause(bookId) }
+            ActionIcon(Icons.Rounded.Close, Res.string.download_task_cancel) { onCancel(bookId) }
+        }
+        TaskStatus.PAUSED -> {
+            ActionIcon(Icons.Rounded.PlayArrow, Res.string.download_task_resume) { onRetry(bookId) }
+            ActionIcon(Icons.Rounded.Close, Res.string.download_task_cancel) { onCancel(bookId) }
+        }
+        TaskStatus.FAILED, TaskStatus.CANCELED -> {
+            ActionIcon(Icons.Rounded.Refresh, Res.string.download_task_retry) { onRetry(bookId) }
+            if (status == TaskStatus.FAILED) {
+                ActionIcon(Icons.AutoMirrored.Rounded.ReceiptLong, Res.string.download_task_view_logs, onOpenLogs)
+            }
+            ActionIcon(Icons.Rounded.DeleteOutline, Res.string.download_task_remove) { onRemove(bookId) }
+        }
+        TaskStatus.COMPLETED -> {
+            ActionIcon(Icons.Rounded.DeleteOutline, Res.string.download_task_remove) { onRemove(bookId) }
+            ActionIcon(Icons.Rounded.DeleteForever, Res.string.download_task_remove_files, onRemoveWithFiles)
+        }
     }
 }
 
 @Composable
-private fun RowScope.DownloadProgressIndicator(
-    event: DownloadEvent.BookDownloadProgress,
-) {
-    Column(modifier = Modifier.weight(1f)) {
-        Text(event.book.metadata.title)
-        if (event.total == 0L) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        } else {
-            LinearProgressIndicator(
-                progress = { event.completed / event.total.toFloat() },
-                modifier = Modifier.fillMaxWidth()
+private fun DownloadTasksSummary(downloads: Collection<TaskEntry>) {
+    val summary = remember(downloads) { summarizeDownloadTasks(downloads) }
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+    ) {
+        Column(
+            modifier = Modifier.padding(LocalKomeliaLayout.current.cardContentPadding),
+            verticalArrangement = Arrangement.spacedBy(LocalKomeliaLayout.current.controlSpacing),
+        ) {
+            Text(
+                stringResource(
+                    Res.string.download_tasks_summary,
+                    summary.total,
+                    summary.remaining,
+                    summary.failed,
+                ),
+                style = MaterialTheme.typography.titleSmall,
             )
-
-            val totalMiB = remember(event.total) {
-                (event.total.toFloat() / 1024 / 1024).formatDecimal(2)
-            }
-            val completedMiB = remember(event.completed) {
-                (event.completed.toFloat() / 1024 / 1024).formatDecimal(2)
-            }
-            Text("${completedMiB}MiB / ${totalMiB}MiB")
+            LinearProgressIndicator(
+                progress = { summary.completed.toFloat() / summary.total.coerceAtLeast(1) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Text(
+                stringResource(
+                    Res.string.download_tasks_overall_progress,
+                    summary.completed,
+                    summary.total,
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
 
+internal data class DownloadTaskSummary(
+    val total: Int,
+    val completed: Int,
+    val remaining: Int,
+    val failed: Int,
+)
+
+internal enum class DownloadTaskFilter(
+    val label: org.jetbrains.compose.resources.StringResource,
+) {
+    ALL(Res.string.download_task_filter_all),
+    ACTIVE(Res.string.download_task_filter_active),
+    FAILED(Res.string.download_task_filter_failed),
+    HISTORY(Res.string.download_task_filter_history),
+}
+
+internal data class DownloadTaskPage(
+    val items: List<TaskEntry>,
+    val currentPage: Int,
+    val totalPages: Int,
+)
+
+internal const val DOWNLOAD_TASK_PAGE_SIZE = 20
+
+internal fun filterDownloadTasks(
+    downloads: List<TaskEntry>,
+    filter: DownloadTaskFilter,
+): List<TaskEntry> = when (filter) {
+    DownloadTaskFilter.ALL -> downloads
+    DownloadTaskFilter.ACTIVE -> downloads.filter {
+        it.status in setOf(TaskStatus.NEW, TaskStatus.RUNNING, TaskStatus.PAUSED)
+    }
+    DownloadTaskFilter.FAILED -> downloads.filter { it.status == TaskStatus.FAILED }
+    DownloadTaskFilter.HISTORY -> downloads.filter {
+        it.status in setOf(TaskStatus.COMPLETED, TaskStatus.CANCELED)
+    }
+}
+
+internal fun paginateDownloadTasks(
+    downloads: List<TaskEntry>,
+    requestedPage: Int,
+    pageSize: Int = DOWNLOAD_TASK_PAGE_SIZE,
+): DownloadTaskPage {
+    require(pageSize > 0) { "pageSize must be greater than zero" }
+    val totalPages = ((downloads.size + pageSize - 1) / pageSize).coerceAtLeast(1)
+    val currentPage = requestedPage.coerceIn(1, totalPages)
+    val startIndex = (currentPage - 1) * pageSize
+    return DownloadTaskPage(
+        items = downloads.drop(startIndex).take(pageSize),
+        currentPage = currentPage,
+        totalPages = totalPages,
+    )
+}
+
+internal fun summarizeDownloadTasks(downloads: Collection<TaskEntry>): DownloadTaskSummary = DownloadTaskSummary(
+    total = downloads.size,
+    completed = downloads.count { it.status == TaskStatus.COMPLETED },
+    remaining = downloads.count { it.status !in setOf(TaskStatus.COMPLETED, TaskStatus.CANCELED) },
+    failed = downloads.count { it.status == TaskStatus.FAILED },
+)
+
 @Composable
-private fun DownloadCompleted(event: DownloadEvent.BookDownloadCompleted) {
-    Column {
-        Text(event.book.metadata.title)
-        Text(stringResource(Res.string.settings_offline_mode_download_complete))
+private fun ActionIcon(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: org.jetbrains.compose.resources.StringResource,
+    onClick: () -> Unit,
+) {
+    IconButton(onClick = onClick) {
+        Icon(icon, contentDescription = stringResource(label))
     }
 }
 
 @Composable
-private fun DownloadError(event: DownloadEvent.BookDownloadError) {
-    Column {
-        Text(event.book?.metadata?.title ?: event.bookId.value)
-        val errorMessage =
-            if (event.error is CancellationException) stringResource(Res.string.settings_offline_mode_download_canceled)
-            else "${event.error::class.simpleName}: ${event.error.message}"
-
-        Text(errorMessage, color = MaterialTheme.colorScheme.error)
+private fun statusLabel(status: TaskStatus): String = stringResource(
+    when (status) {
+        TaskStatus.NEW -> Res.string.download_task_queued
+        TaskStatus.RUNNING -> Res.string.download_task_running
+        TaskStatus.PAUSED -> Res.string.download_task_paused
+        TaskStatus.COMPLETED -> Res.string.download_task_completed
+        TaskStatus.FAILED -> Res.string.download_task_failed
+        TaskStatus.CANCELED -> Res.string.download_task_canceled
     }
+)
+
+@Composable
+private fun statusColor(status: TaskStatus) = when (status) {
+    TaskStatus.FAILED -> MaterialTheme.colorScheme.error
+    TaskStatus.COMPLETED -> MaterialTheme.colorScheme.primary
+    else -> MaterialTheme.colorScheme.onSurfaceVariant
 }
+
+private fun toMiB(bytes: Long): String = (bytes.toFloat() / 1024 / 1024).formatDecimal(2)
 
 @Composable
 internal expect fun rememberStorageLabel(file: PlatformFile): String

@@ -19,6 +19,6 @@ actual fun Webview(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-        } },
-        update = { onCreated(KomeliaWebview(it)) })
+        }.also { webView -> onCreated(KomeliaWebview(webView)) } },
+    )
 }

@@ -43,3 +43,22 @@ Local-folder libraries enter through `komelia-ui/.../settings/local`, are orches
 - `.gitmodules` lists native and UI submodules. Initialize recursively for native/package builds.
 - `cmake/` builds native dependencies for supported host/target combinations.
 - `.github/workflows/release-desktop.yml` validates and uploads Linux/Windows desktop packages to an existing draft Release.
+
+## Detailed catalog lists
+
+`komelia-ui/.../common/cards/DetailedListCardLayout.kt` owns the shared book/series list geometry. The text column determines row height above a minimum portrait-cover height; the cover fills the measured row without imposing an image intrinsic size. Search results and series book lists reuse this layout. `DetailedListCardLayoutTest` runs Compose measurement regressions on JVM through `:komelia-ui:jvmTest`.
+
+### Android reader and search validation
+
+- `komelia-domain/core/src/androidMain/kotlin/snd/komelia/AndroidWindowState.kt` controls reader system bars; preserve system navigation by default and hide it only for explicitly selected EPUB immersion.
+- `komelia-ui/src/commonMain/kotlin/snd/komelia/ui/reader/image/common/ReaderBackAction.kt` defines mobile PDF's controls-then-exit Back behavior.
+- `komelia-ui/src/commonMain/kotlin/snd/komelia/ui/reader/epub/EpubContent.kt` owns the EPUB host safe drawing insets, including landscape cutouts.
+- Local and global search share `SearchTextField`; long placeholders remain one line. Runtime checks are in [Android device validation](../harness/android-device-validation.md).
+
+- `EpubDisplaySettings` stores native EPUB immersion and extra top spacing separately from web reader preferences; database migration V15 preserves existing reader settings and defaults to automatic safe-area handling plus 8dp spacing.
+- `EpubBackground.kt` maps Komga/TTU reading themes to the native margin background; Android WebView initialization happens once per created view so theme recomposition does not reload the book.
+- Standalone Android update discovery is enabled independently of self-installation. `AppUpdatesViewModel` exposes manual checks and retry states; `StartupUpdateChecker` preserves the opt-out and daily throttle. Debug update actions open the download page.
+
+Android Lanczos3 and Mitchell upsampling use the cancellable, premultiplied-alpha `PixelUpsampler` in `komelia-infra/image-decoder/shared`. `AndroidReaderImage` applies it to frames and padded source tiles on the background image pipeline; output tile sizes stay bounded while zooming. Desktop/Wasm sampling choices remain platform-specific.
+
+Local-library index removal deletes reading progress before books and series inside a database transaction. Refresh, exclusion, and library removal share that cleanup; source files are never deleted by index cleanup. SQLite integration tests cover external file/folder deletion, preserved progress, and rollback.

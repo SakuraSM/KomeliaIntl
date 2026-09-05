@@ -13,6 +13,7 @@ import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.offline.sync.model.OfflineLogEntry.Companion.logError
 import snd.komelia.offline.sync.model.OfflineLogEntry.Companion.logInfo
 import snd.komelia.offline.sync.repository.LogJournalRepository
+import snd.komelia.offline.tasks.DownloadTaskTracker
 import snd.komga.client.book.KomgaBookId
 
 private val downloadsSemaphore = Semaphore(4)
@@ -26,6 +27,7 @@ class DesktopDownloadManager(
     private val bookDownloadService: BookDownloadService,
     private val logsJournalRepository: LogJournalRepository,
     private val sharedEvents: MutableSharedFlow<DownloadEvent>,
+    private val downloadTaskTracker: DownloadTaskTracker,
 ) : PlatformDownloadManager {
     private val bookJobs = mutableMapOf<KomgaBookId, Job>()
     private val mutex = Mutex()
@@ -40,6 +42,7 @@ class DesktopDownloadManager(
 
             downloadsSemaphore.withPermit {
                 bookDownloadService.downloadBook(bookId).collect {
+                    downloadTaskTracker.onEvent(it)
                     sharedEvents.emit(it)
                     when (it) {
                         is DownloadEvent.BookDownloadProgress -> {}
@@ -50,9 +53,9 @@ class DesktopDownloadManager(
             }
 
         } catch (e: Exception) {
-            sharedEvents.emit(
-                DownloadEvent.BookDownloadError(bookId = bookId, error = e)
-            )
+            val event = DownloadEvent.BookDownloadError(bookId = bookId, error = e)
+            downloadTaskTracker.onEvent(event)
+            sharedEvents.emit(event)
             currentCoroutineContext().ensureActive()
         } finally {
             mutex.withLock { bookJobs.remove(bookId) }

@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
@@ -27,7 +28,6 @@ import snd.komelia.offline.sync.model.OfflineLogEntry.Companion.logError
 import snd.komelia.offline.sync.model.OfflineLogEntry.Companion.logInfo
 import snd.komelia.offline.user.model.OfflineUser
 import snd.komga.client.book.KomgaBookId
-import snd.komga.client.book.KomgaBookSearch
 import snd.komga.client.book.KomgaMediaStatus
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.common.KomgaThumbnailId
@@ -37,14 +37,15 @@ import snd.komga.client.library.ScanInterval
 import snd.komga.client.library.SeriesCover
 import snd.komga.client.series.KomgaSeriesId
 import snd.komga.client.series.KomgaSeriesStatus
-import snd.komga.client.search.anyOfBooks
+import snd.komga.client.sse.KomgaEvent
+import snd.komga.client.sse.KomgaEvent.BookDeleted
 import kotlin.math.absoluteValue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 
 private const val LOCAL_SERVER_URL = "local://device"
-private val LOCAL_SERVER_ID = OfflineMediaServerId("local-device")
+internal val LOCAL_SERVER_ID = OfflineMediaServerId("local-device")
 
 data class LocalLibraryScanState(
     val scanningLibraryId: KomgaLibraryId? = null,
@@ -57,7 +58,9 @@ class LocalLibraryManager(
     private val repositories: OfflineRepositories,
     private val platform: LocalLibraryPlatform,
     private val scope: CoroutineScope,
+    private val komgaEvents: MutableSharedFlow<KomgaEvent>? = null,
 ) {
+    private val availableBooksRepository = AvailableBooksRepository(repositories)
     private val scanMutex = Mutex()
     private val mutableScanState = MutableStateFlow(LocalLibraryScanState())
     val scanState: StateFlow<LocalLibraryScanState> = mutableScanState.asStateFlow()
@@ -65,6 +68,7 @@ class LocalLibraryManager(
 
     suspend fun getLibraries(): List<OfflineLibrary> {
         return repositories.libraryRepository.findAllByMediaServer(LOCAL_SERVER_ID)
+            .filter { it.isLocalSourceLibrary() }
     }
 
     suspend fun prepareLocalMode() {
@@ -75,18 +79,21 @@ class LocalLibraryManager(
     }
 
     suspend fun getBooks(pageRequest: KomgaPageRequest = KomgaPageRequest(unpaged = true)): Page<KomeliaBook> {
-        val localLibraryIds = getLibraries().map { it.id }.toSet()
-        if (localLibraryIds.isEmpty()) return Page.empty()
-        return repositories.bookDtoRepository
-            .findAll(
-                userId = OfflineUser.ROOT,
-                search = KomgaBookSearch(
-                    condition = anyOfBooks {
-                        localLibraryIds.forEach { libraryId -> library { isEqualTo(libraryId) } }
-                    }.toBookCondition(),
-                ),
-                pageRequest = pageRequest,
-            )
+        return getAvailableBooks(AvailableBookSource.LOCAL, pageRequest = pageRequest)
+    }
+
+    suspend fun getRemoteDownloadedBooks(
+        pageRequest: KomgaPageRequest = KomgaPageRequest(unpaged = true),
+    ): Page<KomeliaBook> {
+        return getAvailableBooks(AvailableBookSource.DOWNLOADED, pageRequest = pageRequest)
+    }
+
+    suspend fun getAvailableBooks(
+        source: AvailableBookSource = AvailableBookSource.ALL,
+        query: String = "",
+        pageRequest: KomgaPageRequest = KomgaPageRequest(unpaged = true),
+    ): Page<KomeliaBook> {
+        return availableBooksRepository.getBooks(source, query, pageRequest)
     }
 
     suspend fun addLibrary(
@@ -142,21 +149,55 @@ class LocalLibraryManager(
         repositories.libraryRepository.save(library.copy(scanInterval = interval))
     }
 
-    suspend fun removeLibrary(libraryId: KomgaLibraryId) {
+    suspend fun removeLibrary(libraryId: KomgaLibraryId) = scanMutex.withLock {
         val library = repositories.libraryRepository.get(libraryId)
         check(library.mediaServerId == LOCAL_SERVER_ID) { "Not a local library" }
-        val series = repositories.seriesRepository.findAllByLibraryId(libraryId)
-        series.forEach { localSeries ->
-            val bookIds = repositories.bookRepository.findAllIdsBySeriesId(localSeries.id)
-            repositories.thumbnailBookRepository.deleteByBookIds(bookIds)
-            repositories.mediaRepository.delete(bookIds)
-            repositories.bookMetadataRepository.delete(bookIds)
-            repositories.bookRepository.delete(bookIds)
-            repositories.bookMetadataAggregationRepository.delete(localSeries.id)
-            repositories.seriesMetadataRepository.delete(localSeries.id)
-            repositories.seriesRepository.delete(localSeries.id)
+        repositories.transactionTemplate.execute {
+            repositories.seriesRepository.findAllByLibraryId(libraryId).forEach { series ->
+                removeIndexedBooks(repositories.bookRepository.findAllIdsBySeriesId(series.id))
+            }
+            cleanupEmptySeries(libraryId)
+            repositories.libraryRepository.delete(libraryId)
         }
-        repositories.libraryRepository.delete(libraryId)
+    }
+
+    suspend fun getExcludedBooks(): List<LocalBookExclusion> = getLibraries().flatMap { library ->
+        library.scanDirectoryExclusions.mapNotNull { encoded ->
+            encoded.removePrefixOrNull(LOCAL_BOOK_EXCLUSION_PREFIX)?.let { relativePath ->
+                LocalBookExclusion(
+                    libraryId = library.id,
+                    libraryName = library.name,
+                    relativePath = relativePath,
+                    displayName = relativePath.substringAfterLast('/'),
+                )
+            }
+        }
+    }
+
+    suspend fun excludeBook(bookId: KomgaBookId) = scanMutex.withLock {
+        val book = repositories.bookRepository.get(bookId)
+        check(book.libraryId.isLocalLibrary()) { "Only source files from a local library can be excluded" }
+        val relativePath = book.url.removePrefix("local://")
+        val library = repositories.libraryRepository.get(book.libraryId)
+        val encoded = "$LOCAL_BOOK_EXCLUSION_PREFIX$relativePath"
+        if (encoded !in library.scanDirectoryExclusions) {
+            repositories.libraryRepository.save(
+                library.copy(scanDirectoryExclusions = library.scanDirectoryExclusions + encoded),
+            )
+        }
+        removeIndexedBooks(listOf(book.id))
+        cleanupEmptySeries(book.libraryId)
+        komgaEvents?.emit(BookDeleted(book.id, book.seriesId, book.libraryId))
+    }
+
+    suspend fun restoreExcludedBook(libraryId: KomgaLibraryId, relativePath: String) {
+        val library = repositories.libraryRepository.get(libraryId)
+        check(library.id.isLocalLibrary()) { "Not a local library" }
+        val encoded = "$LOCAL_BOOK_EXCLUSION_PREFIX$relativePath"
+        repositories.libraryRepository.save(
+            library.copy(scanDirectoryExclusions = library.scanDirectoryExclusions - encoded),
+        )
+        scan(libraryId)
     }
 
     suspend fun scanAll() {
@@ -175,7 +216,11 @@ class LocalLibraryManager(
         mutableScanState.value = LocalLibraryScanState(scanningLibraryId = libraryId)
 
         try {
+            val excludedFiles = library.scanDirectoryExclusions.mapNotNull {
+                it.removePrefixOrNull(LOCAL_BOOK_EXCLUSION_PREFIX)
+            }.toSet()
             val files = platform.listSupportedFiles(library.root)
+                .filterNot { it.relativePath in excludedFiles }
             val existingBooks = repositories.bookRepository.findAll()
                 .filter { it.libraryId == libraryId }
                 .associateBy { it.id }
@@ -187,24 +232,46 @@ class LocalLibraryManager(
                 .toList()
                 .sortedBy { it.first }
             for ((seriesPath, seriesFiles) in seriesGroups) {
-                val seriesId = KomgaSeriesId("local-series-${stableId("${library.id.value}/$seriesPath")}")
+                val seriesId = KomgaSeriesId("$LOCAL_SERIES_ID_PREFIX${stableId("${library.id.value}/$seriesPath")}")
                 val seriesName = seriesPath.substringAfterLast('/').ifBlank { library.name }
                 // Books reference their parent series, so create the stable parent first.
                 // The final save below replaces the placeholder counts and timestamps.
                 saveSeries(seriesId, libraryId, seriesName, emptyList())
                 val inspectedBooks = seriesFiles.sortedByNaturalName().mapIndexedNotNull { index, localFile ->
-                    val bookId = KomgaBookId("local-book-${stableId("${library.id.value}/${localFile.relativePath}")}")
+                    val bookId = KomgaBookId("$LOCAL_BOOK_ID_PREFIX${stableId("${library.id.value}/${localFile.relativePath}")}")
                     scannedBookIds += bookId
                     val existing = existingBooks[bookId]
                     val modified = Instant.fromEpochMilliseconds(localFile.lastModifiedEpochMillis.coerceAtLeast(0))
+                    val number = extractBookNumber(localFile.displayName, index + 1)
                     if (existing != null && existing.sizeBytes == localFile.sizeBytes &&
                         existing.localFileLastModified == modified
-                    ) return@mapIndexedNotNull existing
+                    ) {
+                        val metadata = repositories.bookMetadataRepository.find(bookId)
+                        var repaired = false
+                        val repairedBook = if (existing.number != number) {
+                            repositories.bookRepository.save(existing.copy(number = number))
+                            repaired = true
+                            existing.copy(number = number)
+                        } else {
+                            existing
+                        }
+                        if (metadata != null) {
+                            val repairedMetadata = metadata.copy(
+                                number = if (metadata.numberLock) metadata.number else number.toString(),
+                                numberSort = if (metadata.numberSortLock) metadata.numberSort else number.toFloat(),
+                            )
+                            if (repairedMetadata != metadata) {
+                                repositories.bookMetadataRepository.save(repairedMetadata)
+                                repaired = true
+                            }
+                        }
+                        if (repaired) imported++
+                        return@mapIndexedNotNull repairedBook
+                    }
 
                     runCatching {
                         val inspection = platform.inspect(localFile)
                         val now = Clock.System.now()
-                        val number = extractBookNumber(localFile.displayName, index + 1)
                         val book = OfflineBook(
                             id = bookId,
                             seriesId = seriesId,
@@ -295,10 +362,7 @@ class LocalLibraryManager(
 
             val removedIds = existingBooks.keys - scannedBookIds
             if (removedIds.isNotEmpty()) {
-                repositories.thumbnailBookRepository.deleteByBookIds(removedIds)
-                repositories.mediaRepository.delete(removedIds.toList())
-                repositories.bookMetadataRepository.delete(removedIds.toList())
-                repositories.bookRepository.delete(removedIds)
+                removeIndexedBooks(removedIds)
             }
             cleanupEmptySeries(libraryId)
             repositories.logJournalRepository.logInfo {
@@ -312,6 +376,18 @@ class LocalLibraryManager(
             repositories.logJournalRepository.logError(error) { "Local library scan failed '${library.name}'" }
             mutableScanState.value = LocalLibraryScanState(error = error.message ?: error::class.simpleName)
             throw error
+        }
+    }
+
+    private suspend fun removeIndexedBooks(bookIds: Collection<KomgaBookId>) {
+        if (bookIds.isEmpty()) return
+        repositories.transactionTemplate.execute {
+            // Progress references BOOK and must be removed before its parent row.
+            repositories.readProgressRepository.deleteByBookIds(bookIds.toList())
+            repositories.thumbnailBookRepository.deleteByBookIds(bookIds)
+            repositories.mediaRepository.delete(bookIds.toList())
+            repositories.bookMetadataRepository.delete(bookIds.toList())
+            repositories.bookRepository.delete(bookIds)
         }
     }
 
@@ -395,9 +471,11 @@ class LocalLibraryManager(
         )
     }
 
-    private suspend fun cleanupEmptySeries(libraryId: KomgaLibraryId) {
+    private suspend fun cleanupEmptySeries(libraryId: KomgaLibraryId) = repositories.transactionTemplate.execute {
         repositories.seriesRepository.findAllByLibraryId(libraryId).forEach { series ->
             if (repositories.bookRepository.findAllIdsBySeriesId(series.id).isEmpty()) {
+                repositories.readProgressRepository.deleteBySeriesIds(listOf(series.id))
+                repositories.thumbnailSeriesRepository.deleteBySeriesId(series.id)
                 repositories.bookMetadataAggregationRepository.delete(series.id)
                 repositories.seriesMetadataRepository.delete(series.id)
                 repositories.seriesRepository.delete(series.id)
@@ -405,6 +483,9 @@ class LocalLibraryManager(
         }
     }
 }
+
+internal fun OfflineLibrary.isLocalSourceLibrary(): Boolean =
+    mediaServerId == LOCAL_SERVER_ID || id.isLocalLibrary()
 
 internal fun stableId(value: String): String {
     var hash = -0x340d631b7bdddcdbL
@@ -425,8 +506,33 @@ private fun naturalSortKey(value: String): String = buildString {
     }
 }
 
-private fun extractBookNumber(name: String, fallback: Int): Int =
-    Regex("\\d+").findAll(name.substringBeforeLast('.')).lastOrNull()?.value?.toIntOrNull() ?: fallback
+private val labeledBookNumber = Regex(
+    pattern = "(?i)(?:chapter|chap|ch|episode|ep|issue|book|volume|vol|v|#)\\s*[._ -]*([0-9]+)",
+)
+
+private const val LOCAL_BOOK_EXCLUSION_PREFIX = "local-file:"
+
+data class LocalBookExclusion(
+    val libraryId: KomgaLibraryId,
+    val libraryName: String,
+    val relativePath: String,
+    val displayName: String,
+)
+
+private fun String.removePrefixOrNull(prefix: String): String? =
+    if (startsWith(prefix)) removePrefix(prefix) else null
+
+private fun extractBookNumber(name: String, fallback: Int): Int {
+    val stem = name.substringBeforeLast('.')
+    val labeledNumber = labeledBookNumber.findAll(stem)
+        .lastOrNull()
+        ?.groupValues
+        ?.getOrNull(1)
+        ?.toIntOrNull()
+    if (labeledNumber != null) return labeledNumber
+
+    return Regex("\\d+").findAll(stem).lastOrNull()?.value?.toIntOrNull() ?: fallback
+}
 
 private fun formatBytes(bytes: Long): String = when {
     bytes < 1024 -> "$bytes B"

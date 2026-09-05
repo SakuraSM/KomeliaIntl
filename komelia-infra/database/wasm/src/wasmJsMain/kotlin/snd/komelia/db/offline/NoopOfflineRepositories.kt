@@ -812,6 +812,10 @@ class NoopOfflineTasksRepository : OfflineTasksRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun find(taskId: String): TaskEntry? = null
+
+    override suspend fun findDownloads(): List<TaskEntry> = emptyList()
+
     override suspend fun resetAllRunning(): Int {
         TODO("Not yet implemented")
     }

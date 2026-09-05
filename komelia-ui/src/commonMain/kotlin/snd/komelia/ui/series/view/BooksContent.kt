@@ -611,7 +611,6 @@ fun LazyGridScope.BooksList(
                     isSelected = selectedBooks.any { it.id == book.id },
                     onSelect = onBookSelect?.let { { onBookSelect(book) } },
                 )
-                Spacer(Modifier.height(15.dp))
             }
         }
     }

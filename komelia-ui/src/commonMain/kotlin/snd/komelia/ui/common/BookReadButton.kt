@@ -55,7 +55,7 @@ fun BookReadButton(
     onDropdownOpenChange: (Boolean) -> Unit = {}
 ) {
     val containerColor = MaterialTheme.colorScheme.tertiaryContainer
-    val contentColor = MaterialTheme.colorScheme.onTertiary
+    val contentColor = MaterialTheme.colorScheme.onTertiaryContainer
     Surface(
         shape = CircleShape,
         modifier = modifier.semantics { role = Role.Button }.pointerHoverIcon(PointerIcon.Hand),

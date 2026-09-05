@@ -9,6 +9,7 @@ This directory is the canonical engineering contract for turning a request into 
 | Understand the repository | [Development map](../project-knowledge/dev-map.md) and [bounded contexts](../project-knowledge/contexts.md) |
 | Plan or implement a change | [Change protocol](change-protocol.md) |
 | Select checks | [Testing guide](testing-guide.md) |
+| Deliver an Android test APK for user validation | [Android device validation](android-device-validation.md) |
 | Find task-specific paths | [Task routes](task-routes.md) |
 | Review quality and security constraints | [Quality rules](quality-rules.md) |
 | Prepare a pull request, Release, or issue reply | [Templates](templates.md) |

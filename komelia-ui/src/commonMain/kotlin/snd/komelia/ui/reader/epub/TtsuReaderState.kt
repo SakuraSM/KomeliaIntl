@@ -1,5 +1,7 @@
 package snd.komelia.ui.reader.epub
 
+import androidx.compose.ui.graphics.Color
+import snd.komelia.settings.model.EpubDisplaySettings
 import cafe.adriel.voyager.navigator.Navigator
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
@@ -61,8 +63,6 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 private val logger = KotlinLogging.logger {}
-private val resourceBaseUriRegex = "^http(s)?://.*/resource/".toRegex()
-
 class TtsuReaderState(
     bookId: KomgaBookId,
     book: KomeliaBook?,
@@ -71,6 +71,7 @@ class TtsuReaderState(
     private val markReadProgress: Boolean,
     private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
+    private val displaySettings: StateFlow<EpubDisplaySettings>,
     private val localeTag: String?,
     private val fontsRepository: UserFontsRepository,
     private val windowState: AppWindowState,
@@ -80,6 +81,8 @@ class TtsuReaderState(
 ) : EpubReaderState {
     override val state = MutableStateFlow<LoadState<Unit>>(LoadState.Uninitialized)
     override val book = MutableStateFlow(book)
+    override val backgroundColor = MutableStateFlow(Color.White)
+    override val contentReady = MutableStateFlow(true)
 
     val bookId = MutableStateFlow(bookId)
     private val webview = MutableStateFlow<KomeliaWebview?>(null)
@@ -91,7 +94,7 @@ class TtsuReaderState(
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun initialize(navigator: Navigator) {
         this.navigator.value = navigator
-        if (platformType == PlatformType.MOBILE) windowState.setFullscreen(true)
+        if (platformType == PlatformType.MOBILE) windowState.setFullscreen(true, hideNavigationBar = displaySettings.value.immersiveMode)
         if (state.value !is LoadState.Uninitialized) return
 
         state.value = LoadState.Loading
@@ -160,10 +163,12 @@ class TtsuReaderState(
 
         webview.bind<Unit, TtsuReaderSettings>("getSettings") {
             val settings = epubSettingsRepository.getTtsuReaderSettings()
+            backgroundColor.value = ttsuReaderBackground(settings)
             if (!markReadProgress) settings.copy(autoBookmark = false)
             else settings
         }
         webview.bind<TtsuReaderSettings, Unit>("putSettings") {
+            backgroundColor.value = ttsuReaderBackground(it)
             epubSettingsRepository.putTtsuReaderSettings(it)
         }
         webview.bind<Unit, TtuBookmarkData>("getBookmark") { getBookmark() }
@@ -221,7 +226,7 @@ class TtsuReaderState(
             windowState.isFullscreen.first()
         }
         webview.bind<Boolean, Unit>("setFullscreen") {
-            windowState.setFullscreen(it)
+            windowState.setFullscreen(it, hideNavigationBar = displaySettings.value.immersiveMode)
         }
 
         webview.bind<Unit, Unit>("completeBook") {
@@ -251,6 +256,7 @@ class TtsuReaderState(
                         font
                     }
 
+                    isBookResourceRequest(urlString) -> proxyResourceRequest(bookApi, urlString, serverUrl)
                     urlString.startsWith("http://komelia") -> error("invalid request uri $urlString")
                     else -> proxyResourceRequest(bookApi, urlString, serverUrl)
                 }
@@ -276,7 +282,7 @@ class TtsuReaderState(
             )
 
         val chapterIndex = data.manifest.readingOrder
-            .indexOfFirst { it.href?.replace(resourceBaseUriRegex, "") == progress.locator.href }
+            .indexOfFirst { it.href?.let(::epubResourceName) == epubResourceName(progress.locator.href) }
             .takeIf { it >= 0 }
             ?: 0
         val section = data.sections[chapterIndex]
@@ -301,7 +307,7 @@ class TtsuReaderState(
             progress = totalProgress,
             lastBookmarkModified = Clock.System.now().toEpochMilliseconds(),
             chapterIndex = chapterIndex,
-            chapterReference = requireNotNull(data.manifest.readingOrder.first().href),
+            chapterReference = requireNotNull(data.manifest.readingOrder[chapterIndex].href),
         )
     }
 
@@ -323,7 +329,7 @@ class TtsuReaderState(
                 else ((it - epubSection.startCharacter).toDouble() / epubSection.characters).toFloat()
             } ?: 0f
 
-        val chapterHref = bookmark.chapterReference.replace(resourceBaseUriRegex, "")
+        val chapterHref = epubResourceName(bookmark.chapterReference)
         val matchingPositions = epubData.positions.positions.filter { it.href == chapterHref }
         val before = matchingPositions
             .filter { it.locations?.progression != null && it.locations?.position != null }
@@ -340,7 +346,7 @@ class TtsuReaderState(
             modified = Instant.fromEpochMilliseconds(bookmark.lastBookmarkModified),
             device = R2Device("unused", "Komelia"),
             locator = R2Locator(
-                href = bookmark.chapterReference.replace(resourceBaseUriRegex, ""),
+                href = epubResourceName(bookmark.chapterReference),
                 type = type,
                 title = manifestLink.title,
                 locations = R2Location(

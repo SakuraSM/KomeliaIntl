@@ -89,7 +89,7 @@ android {
         applicationId = "io.github.zhengningning.komelia"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 37
+        versionCode = 43
         versionName = libs.versions.app.version.get()
 
         val enableSelfUpdates = when (androidVariant) {
@@ -98,6 +98,7 @@ android {
             AndroidVariant.PLAY -> "false"
         }
         buildConfigField("boolean", "ENABLE_SELF_UPDATES", enableSelfUpdates)
+        buildConfigField("boolean", "ENABLE_UPDATE_CHECKS", (androidVariant == AndroidVariant.STANDALONE).toString())
     }
     packaging {
         resources {

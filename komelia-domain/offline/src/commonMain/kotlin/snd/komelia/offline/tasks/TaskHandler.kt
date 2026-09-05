@@ -88,6 +88,7 @@ class TaskHandler(
             }
 
             is TaskData.DownloadBookCancel -> downloadManager.cancelBookDownload(task.bookId)
+            is TaskData.DownloadBookPause -> downloadManager.cancelBookDownload(task.bookId)
             is TaskData.DeleteBookFiles -> actions.get<BookDeleteFilesAction>().execute(task.file)
         }
     }

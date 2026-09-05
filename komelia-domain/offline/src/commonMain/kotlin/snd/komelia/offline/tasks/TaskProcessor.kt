@@ -17,6 +17,8 @@ import snd.komelia.offline.sync.model.OfflineLogEntry.Companion.logError
 import snd.komelia.offline.sync.repository.LogJournalRepository
 import snd.komelia.offline.tasks.model.TaskAddedEvent
 import snd.komelia.offline.tasks.model.TaskEntry
+import snd.komelia.offline.tasks.model.TaskData.DownloadBook
+import snd.komelia.offline.tasks.model.TaskEntry.TaskStatus.FAILED
 import snd.komelia.offline.tasks.repository.OfflineTasksRepository
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -26,6 +28,8 @@ import kotlin.coroutines.cancellation.CancellationException
 private val logger = KotlinLogging.logger { }
 
 private typealias JobId = Int
+private const val MAX_CONCURRENT_DOWNLOADS = 4
+private const val MAX_CONCURRENT_TASKS = MAX_CONCURRENT_DOWNLOADS + 1
 
 @OptIn(ExperimentalAtomicApi::class)
 class TaskProcessor(
@@ -49,6 +53,7 @@ class TaskProcessor(
 
     private val jobCounter = AtomicInt(0)
     private val jobs = mutableMapOf<JobId, Job>()
+    private val downloadJobs = mutableSetOf<JobId>()
     private val mutex = Mutex()
 
     fun initialize() {
@@ -67,34 +72,46 @@ class TaskProcessor(
     private suspend fun processTask(jobId: Int, task: TaskEntry) {
         try {
             taskHandler.handleTask(task)
-            tasksRepository.delete(task.uniqueName)
+            if (task.task !is DownloadBook) tasksRepository.delete(task.uniqueName)
         } catch (e: CancellationException) {
-            logger.catching(e)
-            logJournalRepository.logError(e) { "Task processing error" }
-            tasksRepository.delete(task.uniqueName)
+            logger.debug { "Task canceled: ${task.uniqueName}" }
+            if (task.task !is DownloadBook) tasksRepository.delete(task.uniqueName)
             throw e
         } catch (e: Exception) {
             logger.catching(e)
             logJournalRepository.logError(e) { "Task processing error" }
-            tasksRepository.delete(task.uniqueName)
+            if (task.task is DownloadBook) {
+                tasksRepository.save(task.copy(status = FAILED, errorMessage = e.message ?: e::class.simpleName))
+            } else {
+                tasksRepository.delete(task.uniqueName)
+            }
         } finally {
             taskFinishedEvents.emit(jobId)
         }
     }
 
     private suspend fun onTaskFinish(jobId: JobId) {
-        mutex.withLock { jobs.remove(jobId) }
+        mutex.withLock {
+            jobs.remove(jobId)
+            downloadJobs.remove(jobId)
+        }
         processAvailableTasks()
     }
 
     private suspend fun processAvailableTasks() {
         mutex.withLock {
             do {
+                if (jobs.size >= MAX_CONCURRENT_TASKS) return@withLock
                 val task = tasksRepository.takeNew()
                 if (task != null) {
+                    if (task.task is DownloadBook && downloadJobs.size >= MAX_CONCURRENT_DOWNLOADS) {
+                        tasksRepository.save(task.copy(status = TaskEntry.TaskStatus.NEW))
+                        return@withLock
+                    }
                     val jobId = jobCounter.incrementAndFetch()
                     val job = processorScope.launch { processTask(jobId, task) }
                     jobs[jobId] = job
+                    if (task.task is DownloadBook) downloadJobs += jobId
                 }
             } while (task != null)
         }

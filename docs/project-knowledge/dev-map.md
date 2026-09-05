@@ -58,3 +58,7 @@ Local-folder libraries enter through `komelia-ui/.../settings/local`, are orches
 - `EpubDisplaySettings` stores native EPUB immersion and extra top spacing separately from web reader preferences; database migration V15 preserves existing reader settings and defaults to automatic safe-area handling plus 8dp spacing.
 - `EpubBackground.kt` maps Komga/TTU reading themes to the native margin background; Android WebView initialization happens once per created view so theme recomposition does not reload the book.
 - Standalone Android update discovery is enabled independently of self-installation. `AppUpdatesViewModel` exposes manual checks and retry states; `StartupUpdateChecker` preserves the opt-out and daily throttle. Debug update actions open the download page.
+
+Android Lanczos3 and Mitchell upsampling use the cancellable, premultiplied-alpha `PixelUpsampler` in `komelia-infra/image-decoder/shared`. `AndroidReaderImage` applies it to frames and padded source tiles on the background image pipeline; output tile sizes stay bounded while zooming. Desktop/Wasm sampling choices remain platform-specific.
+
+Local-library index removal deletes reading progress before books and series inside a database transaction. Refresh, exclusion, and library removal share that cleanup; source files are never deleted by index cleanup. SQLite integration tests cover external file/folder deletion, preserved progress, and rollback.

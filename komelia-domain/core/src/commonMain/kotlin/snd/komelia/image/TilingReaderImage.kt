@@ -116,7 +116,7 @@ abstract class TilingReaderImage(
         }.launchIn(processingScope)
 
         stretchImages.drop(1).onEach { reloadLastRequest() }.launchIn(processingScope)
-        upsamplingMode.onEach { mode -> painter.update { it?.withSamplingMode(mode) } }
+        upsamplingMode.onEach { mode -> onUpsamplingModeChanged(mode) }
             .launchIn(processingScope)
         downSamplingKernel.drop(1).onEach { reloadLastRequest() }
             .launchIn(processingScope)
@@ -169,6 +169,12 @@ abstract class TilingReaderImage(
             jobFlow.emit(lastRequest)
         }
     }
+
+    protected open suspend fun onUpsamplingModeChanged(mode: UpsamplingMode) {
+        painter.update { it?.withSamplingMode(mode) }
+    }
+
+    protected open fun sourceTileSize(tileSize: Int, scaleFactor: Double): Int = tileSize
 
     override suspend fun getOriginalImageSize(): Result<IntSize> {
         return coroutineScope {
@@ -280,7 +286,7 @@ abstract class TilingReaderImage(
                 displayScaleFactor = displayScaleFactor,
                 scaleFactor = actualScaleFactor,
                 displayArea = displaySize,
-                tileSize = tileSize
+                tileSize = sourceTileSize(tileSize, actualScaleFactor)
             )
         }
     }
@@ -348,82 +354,79 @@ abstract class TilingReaderImage(
         val timeSource = TimeSource.Monotonic
         val start = timeSource.markNow()
 
-        val visibilityWindow = Rect(
-            left = displayRegion.left / 1.5f,
-            top = displayRegion.top / 1.5f,
-            right = displayRegion.right * 1.5f,
-            bottom = displayRegion.bottom * 1.5f
-        )
+        val visibilityWindow = tileVisibilityWindow(displayRegion)
 
         val oldTiles = frameData.value?.frames?.first()?.tiles ?: emptyList()
         val newTiles = mutableListOf<ReaderImageTile>()
-        val unusedTiles = mutableListOf<ReaderImageTile>()
         var addedNewTiles = false
 
-        var yTaken = 0
-        while (yTaken != image.height) {
-            var xTaken = 0
-            while (xTaken != image.width) {
-                val tileRegion = IntRect(
-                    top = yTaken.coerceAtMost(image.height),
-                    bottom = (yTaken + tileSize).coerceAtMost(image.height),
-                    left = (xTaken).coerceAtMost(image.width),
-                    right = (xTaken + tileSize).coerceAtMost(image.width),
-                )
-                val tileDisplayRegion = Rect(
-                    (tileRegion.left * displayScaleFactor).toFloat(),
-                    (tileRegion.top * displayScaleFactor).toFloat(),
-                    (tileRegion.right * displayScaleFactor).toFloat(),
-                    (tileRegion.bottom * displayScaleFactor).toFloat()
-                )
+        try {
+            var yTaken = 0
+            while (yTaken != image.height) {
+                var xTaken = 0
+                while (xTaken != image.width) {
+                    val tileRegion = IntRect(
+                        top = yTaken.coerceAtMost(image.height),
+                        bottom = (yTaken + tileSize).coerceAtMost(image.height),
+                        left = (xTaken).coerceAtMost(image.width),
+                        right = (xTaken + tileSize).coerceAtMost(image.width),
+                    )
+                    val tileDisplayRegion = Rect(
+                        (tileRegion.left * displayScaleFactor).toFloat(),
+                        (tileRegion.top * displayScaleFactor).toFloat(),
+                        (tileRegion.right * displayScaleFactor).toFloat(),
+                        (tileRegion.bottom * displayScaleFactor).toFloat()
+                    )
 
-                val existingTile = oldTiles.find { it.displayRegion == tileDisplayRegion }
-                if (!visibilityWindow.overlaps(tileDisplayRegion)) {
-                    xTaken = (xTaken + tileSize).coerceAtMost(image.width)
-                    existingTile?.let { unusedTiles.add(it) }
-                    continue
-                }
-
-                if (existingTile != null) {
-                    if (scaleFactor == lastUsedScaleFactor && existingTile.renderImage != null) {
-                        newTiles.add(existingTile)
+                    val existingTile = oldTiles.find { it.displayRegion == tileDisplayRegion }
+                    if (!visibilityWindow.overlaps(tileDisplayRegion)) {
                         xTaken = (xTaken + tileSize).coerceAtMost(image.width)
                         continue
-                    } else {
-                        unusedTiles.add(existingTile)
                     }
+
+                    if (existingTile != null) {
+                        if (scaleFactor == lastUsedScaleFactor && existingTile.renderImage != null) {
+                            newTiles.add(existingTile)
+                            xTaken = (xTaken + tileSize).coerceAtMost(image.width)
+                            continue
+                        }
+                    }
+
+                    val tileWidth = tileRegion.right - tileRegion.left
+                    val tileHeight = tileRegion.bottom - tileRegion.top
+                    val scaledTile = getImageRegion(
+                        image,
+                        tileRegion,
+                        ((tileWidth) * scaleFactor).roundToInt(),
+                        ((tileHeight) * scaleFactor).roundToInt()
+                    )
+
+                    val tile = ReaderImageTile(
+                        size = IntSize(scaledTile.width, scaledTile.height),
+                        displayRegion = tileDisplayRegion,
+                        isVisible = true,
+                        renderImage = scaledTile.frames.first()
+                    )
+
+                    newTiles.add(tile)
+                    addedNewTiles = true
+                    xTaken = (xTaken + tileSize).coerceAtMost(image.width)
                 }
-
-                val tileWidth = tileRegion.right - tileRegion.left
-                val tileHeight = tileRegion.bottom - tileRegion.top
-                val scaledTile = getImageRegion(
-                    image,
-                    tileRegion,
-                    ((tileWidth) * scaleFactor).roundToInt(),
-                    ((tileHeight) * scaleFactor).roundToInt()
-                )
-
-                val tile = ReaderImageTile(
-                    size = IntSize(scaledTile.width, scaledTile.height),
-                    displayRegion = tileDisplayRegion,
-                    isVisible = true,
-                    renderImage = scaledTile.frames.first()
-                )
-
-                newTiles.add(tile)
-                addedNewTiles = true
-                xTaken = (xTaken + tileSize).coerceAtMost(image.width)
+                yTaken = (yTaken + tileSize).coerceAtMost(image.height)
             }
-            yTaken = (yTaken + tileSize).coerceAtMost(image.height)
+        } catch (error: Throwable) {
+            closeTileBitmaps(newTiles.filter { tile -> oldTiles.none { it === tile } })
+            throw error
         }
 
-        if (addedNewTiles) {
+        if (addedNewTiles || newTiles.size != oldTiles.size) {
             frameData.value = FrameData(
                 frames = listOf(ImageFrame(newTiles, 0)),
                 displaySize = displayArea,
                 scaleFactor = scaleFactor
             )
-            closeTileBitmaps(unusedTiles)
+            // A raster upsampling mode can change the source tile grid at the same zoom level.
+            closeTileBitmaps(oldTiles.filter { old -> newTiles.none { it === old } })
 
             val end = timeSource.markNow()
             logger.info { "page ${pageId.pageNumber} completed tiled resize in ${end - start};  ${newTiles.size} tiles" }
@@ -493,3 +496,10 @@ abstract class TilingReaderImage(
         val delay: Long
     )
 }
+
+internal fun tileVisibilityWindow(viewport: Rect): Rect = Rect(
+    left = viewport.left - viewport.width / 4,
+    top = viewport.top - viewport.height / 4,
+    right = viewport.right + viewport.width / 4,
+    bottom = viewport.bottom + viewport.height / 4,
+)

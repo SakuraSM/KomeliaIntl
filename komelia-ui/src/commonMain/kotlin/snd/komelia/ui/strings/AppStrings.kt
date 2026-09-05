@@ -82,6 +82,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_up
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_upsampling_mode_bicubic_mitchell
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_upsampling_mode_bilinear
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_upsampling_mode_nearest
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_upsampling_mode_lanczos3
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_layout_double_pages
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_layout_double_pages_no_cover
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_layout_single_page
@@ -359,6 +360,7 @@ data object AppStrings {
             UpsamplingMode.BILINEAR -> Res.string.reader_image_upsampling_mode_bilinear
             UpsamplingMode.MITCHELL -> Res.string.reader_image_upsampling_mode_bicubic_mitchell
             UpsamplingMode.CATMULL_ROM -> Res.string.reader_image_upsampling_mode_bicubic_catmull_rom
+            UpsamplingMode.LANCZOS3 -> Res.string.reader_image_upsampling_mode_lanczos3
         }
     }
 

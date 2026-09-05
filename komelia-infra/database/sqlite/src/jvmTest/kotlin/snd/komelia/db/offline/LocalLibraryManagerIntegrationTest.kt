@@ -5,6 +5,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import snd.komelia.db.ExposedTransactionTemplate
 import snd.komelia.db.KomeliaDatabase
 import snd.komelia.db.OfflineSettings
@@ -24,6 +26,7 @@ import snd.komelia.offline.media.model.OfflineBookPage
 import snd.komelia.offline.server.model.OfflineMediaServer
 import snd.komelia.offline.server.model.OfflineMediaServerId
 import snd.komelia.offline.series.model.OfflineBookMetadataAggregation
+import snd.komelia.offline.readprogress.OfflineReadProgress
 import snd.komelia.offline.user.model.OfflineUser
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.common.KomgaPageRequest
@@ -33,9 +36,15 @@ import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.library.ScanInterval
 import snd.komga.client.series.KomgaSeriesId
 import java.nio.file.Path
+import java.util.Base64
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
+import snd.komelia.offline.local.createLocalLibraryPlatform
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -138,7 +147,11 @@ class LocalLibraryManagerIntegrationTest {
         val excludedBook = manager.getBooks(KomgaPageRequest(unpaged = true)).content
             .first { it.name == "Chapter 01.cbz" }
 
+        repositories.readProgressRepository.save(
+            OfflineReadProgress(excludedBook.id, OfflineUser.ROOT, page = 1, completed = true),
+        )
         manager.excludeBook(excludedBook.id)
+        assertNull(repositories.readProgressRepository.find(excludedBook.id, OfflineUser.ROOT))
         assertEquals(listOf("Chapter 02.cbz"), manager.getBooks(KomgaPageRequest(unpaged = true)).content.map { it.name })
         assertEquals(listOf("Series/Chapter 01.cbz"), manager.getExcludedBooks().map { it.relativePath })
         assertTrue(platform.files.any { it.relativePath == "Series/Chapter 01.cbz" }, "source file must remain untouched")
@@ -303,6 +316,135 @@ class LocalLibraryManagerIntegrationTest {
 
         restarted.scanAll()
         assertEquals(listOf("Book 02.cbz", "Book 03.cbz"), repositories.bookRepository.findAll().map { it.name }.sorted())
+    }
+
+    @Test
+    fun refreshRemovesExternallyDeletedReadBookAndPreservesSurvivingProgress() = runBlocking {
+        val tempDirectory = createTempDirectory("komelia-external-delete-test")
+        val sourceDirectory = tempDirectory.resolve("source").createDirectories()
+        val database = KomeliaDatabase(tempDirectory.toString())
+        val repositories = createRepositories(database, tempDirectory)
+        val platform = FakeLocalLibraryPlatform(sourceDirectory).apply {
+            files = listOf(
+                file("Series/Chapter 01.cbz", size = 101, modified = 101_000),
+                file("Series/Chapter 02.cbz", size = 102, modified = 102_000),
+            )
+        }
+        val manager = LocalLibraryManager(
+            repositories = repositories,
+            platform = platform,
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        )
+        manager.prepareLocalMode()
+        val library = manager.addLibrary(PlatformFile(sourceDirectory.toFile()), "Local")
+        val books = repositories.bookRepository.findAll().sortedBy { it.name }
+        books.forEach { book ->
+            repositories.readProgressRepository.save(
+                OfflineReadProgress(book.id, OfflineUser.ROOT, page = 1, completed = true),
+            )
+        }
+        val survivingProgress = repositories.readProgressRepository.find(books.last().id, OfflineUser.ROOT)
+
+        // A file manager removes a book which already has persisted reading progress.
+        platform.files = platform.files.drop(1)
+        manager.scan(library.id)
+
+        assertEquals(listOf(books.last().id), repositories.bookRepository.findAll().map { it.id })
+        assertNull(repositories.readProgressRepository.find(books.first().id, OfflineUser.ROOT))
+        assertEquals(survivingProgress, repositories.readProgressRepository.find(books.last().id, OfflineUser.ROOT))
+        assertEquals(1, repositories.seriesRepository.findAllByLibraryId(library.id).single().bookCount)
+
+        // Removing the containing folder must also remove its now-empty series.
+        platform.files = emptyList()
+        manager.scan(library.id)
+        assertTrue(repositories.bookRepository.findAll().isEmpty())
+        assertTrue(repositories.seriesRepository.findAllByLibraryId(library.id).isEmpty())
+        assertNull(repositories.readProgressRepository.find(books.last().id, OfflineUser.ROOT))
+        manager.scanAll()
+    }
+
+    @Test
+    fun removingLocalLibraryCleansProgressWithoutTouchingSourceFiles() = runBlocking {
+        val tempDirectory = createTempDirectory("komelia-remove-local-library-test")
+        val sourceDirectory = tempDirectory.resolve("source").createDirectories()
+        val repositories = createRepositories(KomeliaDatabase(tempDirectory.toString()), tempDirectory)
+        val platform = FakeLocalLibraryPlatform(sourceDirectory).apply {
+            files = listOf(file("Series/Read book.cbz", size = 100, modified = 1_000))
+        }
+        val manager = LocalLibraryManager(repositories, platform, CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val library = manager.addLibrary(PlatformFile(sourceDirectory.toFile()), "Local")
+        val book = repositories.bookRepository.findAll().single()
+        repositories.readProgressRepository.save(
+            OfflineReadProgress(book.id, OfflineUser.ROOT, page = 1, completed = true),
+        )
+
+        manager.removeLibrary(library.id)
+
+        assertTrue(manager.getLibraries().isEmpty())
+        assertTrue(repositories.bookRepository.findAll().isEmpty())
+        assertTrue(repositories.seriesRepository.findAllByLibraryId(library.id).isEmpty())
+        assertNull(repositories.readProgressRepository.find(book.id, OfflineUser.ROOT))
+        assertEquals(1, platform.files.size, "removing an index must not delete source files")
+    }
+
+    @Test
+    fun failedBookRemovalRollsBackProgressAndMetadataCleanup() = runBlocking {
+        val tempDirectory = createTempDirectory("komelia-local-removal-rollback-test")
+        val sourceDirectory = tempDirectory.resolve("source").createDirectories()
+        val database = KomeliaDatabase(tempDirectory.toString())
+        val repositories = createRepositories(database, tempDirectory)
+        val platform = FakeLocalLibraryPlatform(sourceDirectory).apply {
+            files = listOf(file("Series/Read book.cbz", size = 100, modified = 1_000))
+        }
+        val manager = LocalLibraryManager(repositories, platform, CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val library = manager.addLibrary(PlatformFile(sourceDirectory.toFile()), "Local")
+        val book = repositories.bookRepository.findAll().single()
+        repositories.readProgressRepository.save(
+            OfflineReadProgress(book.id, OfflineUser.ROOT, page = 1, completed = true),
+        )
+        val progress = repositories.readProgressRepository.find(book.id, OfflineUser.ROOT)
+        val media = repositories.mediaRepository.get(book.id)
+        val metadata = repositories.bookMetadataRepository.get(book.id)
+        suspendTransaction(db = database.offline) {
+            exec("CREATE TRIGGER reject_book_delete BEFORE DELETE ON BOOK BEGIN SELECT RAISE(ABORT, 'injected delete failure'); END")
+        }
+        platform.files = emptyList()
+
+        assertFailsWith<ExposedSQLException> { manager.scan(library.id) }
+
+        assertEquals(book, repositories.bookRepository.get(book.id))
+        assertEquals(progress, repositories.readProgressRepository.find(book.id, OfflineUser.ROOT))
+        assertEquals(media, repositories.mediaRepository.get(book.id))
+        assertEquals(metadata, repositories.bookMetadataRepository.get(book.id))
+    }
+
+    @Test
+    fun desktopRefreshHandlesActualExternalFileAndFolderDeletion() = runBlocking {
+        val tempDirectory = createTempDirectory("komelia-desktop-external-delete-test")
+        val sourceDirectory = tempDirectory.resolve("source").createDirectories()
+        val seriesDirectory = sourceDirectory.resolve("Series").createDirectories()
+        val archive = seriesDirectory.resolve("Read book.cbz").toFile()
+        ZipOutputStream(archive.outputStream()).use { zip ->
+            zip.putNextEntry(ZipEntry("001.png"))
+            zip.write(Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR5sAAAAASUVORK5CYII="))
+            zip.closeEntry()
+        }
+        val repositories = createRepositories(KomeliaDatabase(tempDirectory.toString()), tempDirectory)
+        val manager = LocalLibraryManager(
+            repositories, checkNotNull(createLocalLibraryPlatform()), CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        )
+        val library = manager.addLibrary(PlatformFile(sourceDirectory.toFile()), "Local")
+        val book = repositories.bookRepository.findAll().single()
+        repositories.readProgressRepository.save(OfflineReadProgress(book.id, OfflineUser.ROOT, page = 1, completed = true))
+
+        assertTrue(archive.delete())
+        assertTrue(seriesDirectory.toFile().delete())
+        manager.scan(library.id)
+
+        assertTrue(repositories.bookRepository.findAll().isEmpty())
+        assertTrue(repositories.seriesRepository.findAllByLibraryId(library.id).isEmpty())
+        assertNull(repositories.readProgressRepository.find(book.id, OfflineUser.ROOT))
+        manager.scanAll()
     }
 
     private fun createRepositories(database: KomeliaDatabase, tempDirectory: Path): OfflineRepositories {

@@ -48,6 +48,7 @@ import kotlin.math.atan2
  */
 suspend fun PointerInputScope.detectTransformGestures(
     panZoomLock: Boolean = false,
+    coordinateScale: () -> Float = { 1f },
     onGesture: (changes: List<PointerInputChange>, centroid: Offset, pan: Offset, zoom: Float, rotation: Float) -> Unit
 ) {
     awaitEachGesture {
@@ -55,10 +56,11 @@ suspend fun PointerInputScope.detectTransformGestures(
         var zoom = 1f
         var pan = Offset.Zero
         var pastTouchSlop = false
-        val touchSlop = viewConfiguration.touchSlop
         var lockedToPanZoom = false
 
         awaitFirstDown(requireUnconsumed = false)
+        // Pointer positions are local to the scaled graphics layer; match the threshold to those units.
+        val touchSlop = viewConfiguration.touchSlop / coordinateScale().coerceAtLeast(0.001f)
         do {
             val event = awaitPointerEvent()
             val canceled = event.changes.fastAny { it.isConsumed }

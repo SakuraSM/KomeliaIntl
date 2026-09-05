@@ -239,6 +239,8 @@ class DesktopReaderImage(
             UpsamplingMode.BILINEAR -> SamplingMode.LINEAR
             UpsamplingMode.MITCHELL -> SamplingMode.MITCHELL
             UpsamplingMode.CATMULL_ROM -> SamplingMode.CATMULL_ROM
+            // Lanczos3 is an Android raster option, not exposed by this renderer.
+            UpsamplingMode.LANCZOS3 -> SamplingMode.LINEAR
         } else SamplingMode.DEFAULT
 
         override fun DrawScope.onDraw() {

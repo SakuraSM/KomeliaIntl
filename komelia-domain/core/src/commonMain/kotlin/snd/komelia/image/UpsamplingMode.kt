@@ -5,6 +5,7 @@ enum class UpsamplingMode {
     BILINEAR,
     MITCHELL,
     CATMULL_ROM,
+    LANCZOS3,
 }
 
 expect fun availableUpsamplingModes(): List<UpsamplingMode>

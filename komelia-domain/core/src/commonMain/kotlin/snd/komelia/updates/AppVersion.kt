@@ -19,7 +19,7 @@ data class AppVersion(
 
     companion object {
         // Keep in sync with gradle/libs.versions.toml app-version.
-        val current = AppVersion(0, 24, 0)
+        val current = AppVersion(0, 25, 0)
 
         fun fromString(value: String): AppVersion {
             val match = VERSION_PATTERN.matchEntire(value.trim())

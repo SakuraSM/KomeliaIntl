@@ -576,6 +576,7 @@
     <string name="reader_image_upsampling_mode_bilinear">双线性</string>
     <string name="reader_image_upsampling_mode_bicubic_mitchell">Mitchell 双三次</string>
     <string name="reader_image_upsampling_mode_bicubic_catmull_rom">Catmull-Rom 双三次</string>
+    <string name="reader_image_upsampling_mode_lanczos3">Lanczos3</string>
 
     <string name="reader_image_downsampling_kernel">缩小算法</string>
     <string name="reader_image_downsampling_kernel_mitchell">Mitchell</string>

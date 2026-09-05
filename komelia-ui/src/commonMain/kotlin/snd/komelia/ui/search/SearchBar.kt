@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -25,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_clear_query
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_books_tab
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_result_in_library
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_search_all
@@ -276,25 +277,25 @@ fun SearchTextField(
     onDismiss: () -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     modifier: Modifier = Modifier,
+    placeholder: String = stringResource(Res.string.search_search_input_placeholder),
 ) {
     val focusManager = LocalFocusManager.current
     val layout = LocalKomeliaLayout.current
     NoPaddingTextField(
         text = query,
-        placeholder = stringResource(Res.string.search_search_input_placeholder),
+        placeholder = placeholder,
         onTextChange = onQueryChange,
-        shape = CircleShape,
+        shape = MaterialTheme.shapes.large,
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
             unfocusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
             unfocusedPlaceholderColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         interactionSource = interactionSource,
         modifier = modifier
             .heightIn(min = layout.minimumTouchTarget)
             .fillMaxWidth()
-            .padding(top = layout.controlSpacing / 2)
             .onKeyEvent { keyEvent ->
                 when {
                     keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyUp -> {
@@ -313,19 +314,16 @@ fun SearchTextField(
             },
         trailingIcon = {
             if (query.isNotBlank()) {
-                Icon(
-                    Icons.Filled.Close, null,
-                    modifier = Modifier
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null,
-                            onClick = {
-                                focusManager.clearFocus()
-                                onDismiss()
-                            }
-                        ).cursorForHand(),
-                    tint = MaterialTheme.colorScheme.secondary
-                )
+                IconButton(onClick = {
+                    focusManager.clearFocus()
+                    onDismiss()
+                }) {
+                    Icon(
+                        Icons.Filled.Close,
+                        stringResource(Res.string.search_clear_query),
+                        tint = MaterialTheme.colorScheme.secondary,
+                    )
+                }
             } else {
                 Icon(
                     Icons.Filled.Search, null,

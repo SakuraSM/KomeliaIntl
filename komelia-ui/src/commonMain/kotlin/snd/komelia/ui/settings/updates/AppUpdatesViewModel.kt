@@ -29,6 +29,7 @@ class AppUpdatesViewModel(
     val settings: CommonSettingsRepository,
     val notifications: AppNotifications
 ) : StateScreenModel<LoadState<Unit>>(Uninitialized) {
+    val checkFailed = MutableStateFlow(false)
     val latestVersion = MutableStateFlow<AppVersion?>(null)
     val checkForUpdatesOnStartup = MutableStateFlow(false)
     val lastUpdateCheck = MutableStateFlow<Instant?>(null)
@@ -46,25 +47,32 @@ class AppUpdatesViewModel(
         latestVersion.value = settings.getLastCheckedReleaseVersion().first()
         checkForUpdatesOnStartup.value = settings.getCheckForUpdatesOnStartup().first()
         lastUpdateCheck.value = settings.getLastUpdateCheckTimestamp().first()
+        mutableState.value = LoadState.Success(Unit)
     }
 
     fun checkForUpdates() {
-        val updater = requireNotNull(updater)
-        notifications.runCatchingToNotifications(screenModelScope) {
-            mutableState.value = LoadState.Loading
+        if (state.value == LoadState.Loading) return
+        val updater = updater ?: return
+        mutableState.value = LoadState.Loading
+        checkFailed.value = false
+        notifications.runCatchingToNotifications(
+            screenModelScope,
+            onFailure = {
+                checkFailed.value = true
+                mutableState.value = LoadState.Success(Unit)
+            },
+        ) {
 
             val releases = updater.getReleases()
             this.releases.value = releases
-            if (releases.isEmpty()) return@runCatchingToNotifications
-
-            val latestRelease = releases.first()
-            latestVersion.value = latestRelease.version
+            val latestRelease = releases.firstOrNull()
+            latestVersion.value = latestRelease?.version
 
             val now = Clock.System.now()
             settings.putLastUpdateCheckTimestamp(now)
             lastUpdateCheck.value = now
 
-            settings.putLastCheckedReleaseVersion(latestRelease.version)
+            settings.putLastCheckedReleaseVersion(latestRelease?.version)
 
             mutableState.value = LoadState.Success(Unit)
         }

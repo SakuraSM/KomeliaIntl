@@ -19,10 +19,18 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_epub_r
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_epub_reader_type_komga_desc
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_epub_reader_type_ttsu_desc
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_epub_reader_type_ttsu_github
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_epub_immersive
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_epub_immersive_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_epub_top_spacing
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_epub_spacing_value
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.settings.model.EpubDisplaySettings
 import snd.komelia.settings.model.EpubReaderType
 import snd.komelia.settings.model.EpubReaderType.KOMGA_EPUB
 import snd.komelia.settings.model.EpubReaderType.TTSU_EPUB
+import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.platform.PlatformType
+import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.platform.cursorForHand
@@ -33,6 +41,8 @@ import snd.komelia.ui.strings.stringLabels
 fun EpubReaderSettingsContent(
     readerType: EpubReaderType,
     onReaderChange: (EpubReaderType) -> Unit,
+    displaySettings: EpubDisplaySettings,
+    onDisplaySettingsChange: (EpubDisplaySettings) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -61,6 +71,22 @@ fun EpubReaderSettingsContent(
             }
         }
 
+
+        if (LocalPlatform.current == PlatformType.MOBILE) {
+            SwitchWithLabel(
+                checked = displaySettings.immersiveMode,
+                onCheckedChange = { onDisplaySettingsChange(displaySettings.copy(immersiveMode = it)) },
+                label = { Text(stringResource(Res.string.settings_epub_immersive)) },
+                supportingText = { Text(stringResource(Res.string.settings_epub_immersive_desc)) },
+            )
+            DropdownChoiceMenu(
+                selectedOption = LabeledEntry(displaySettings.topSpacingDp, stringResource(Res.string.settings_epub_spacing_value, displaySettings.topSpacingDp)),
+                options = listOf(0, 8, 16, 24, 32, 48).map { LabeledEntry(it, stringResource(Res.string.settings_epub_spacing_value, it)) },
+                onOptionChange = { onDisplaySettingsChange(displaySettings.copy(extraTopSpacingDp = it.value)) },
+                label = { Text(stringResource(Res.string.settings_epub_top_spacing)) },
+                inputFieldModifier = Modifier.fillMaxWidth(),
+            )
+        }
 
         when (readerType) {
             TTSU_EPUB -> Text(stringResource(Res.string.settings_epub_reader_type_ttsu_desc))

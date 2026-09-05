@@ -5,12 +5,19 @@ import kotlinx.serialization.json.JsonObject
 import snd.komelia.db.EpubReaderSettings
 import snd.komelia.db.SettingsStateWrapper
 import snd.komelia.settings.EpubReaderSettingsRepository
+import snd.komelia.settings.model.EpubDisplaySettings
 import snd.komelia.settings.model.EpubReaderType
 import snd.komelia.settings.model.TtsuReaderSettings
 
 class EpubReaderSettingsRepositoryWrapper(
     private val wrapper: SettingsStateWrapper<EpubReaderSettings>
 ) : EpubReaderSettingsRepository {
+
+    override fun getDisplaySettings(): Flow<EpubDisplaySettings> = wrapper.mapState { it.displaySettings }
+
+    override suspend fun putDisplaySettings(settings: EpubDisplaySettings) {
+        wrapper.transform { it.copy(displaySettings = settings.copy(extraTopSpacingDp = settings.topSpacingDp)) }
+    }
 
     override fun getReaderType(): Flow<EpubReaderType> {
         return wrapper.mapState { it.readerType }

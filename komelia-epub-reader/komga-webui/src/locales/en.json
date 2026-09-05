@@ -739,6 +739,7 @@
       "layout": "Layout",
       "layout_paginated": "Paginated",
       "layout_scroll": "Scroll",
+      "tap_to_turn": "Tap to turn pages",
       "navigation_mode": "Navigation mode",
       "navigation_options": {
         "both": "Both",

@@ -1,7 +1,7 @@
 package snd.komelia.ui.common.cards
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -48,22 +48,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_downloaded_outdated_status
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_downloaded_status
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_pages
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_unavailable
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_downloaded_status
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_downloaded_outdated_status
 import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
-import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.offline.local.isLocalLibrary
+import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
-import snd.komelia.ui.LocalLibraries
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalLibraries
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.BookReadButton
 import snd.komelia.ui.common.images.BookThumbnail
@@ -393,10 +392,8 @@ fun BookDetailedListCard(
     onSelect: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    val layout = LocalKomeliaLayout.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
-    val width = LocalWindowWidth.current
     Card(
         modifier
             .cursorForHand()
@@ -407,44 +404,27 @@ fun BookDetailedListCard(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .heightIn(max = 220.dp)
-                .fillMaxWidth()
-                .then(
-                    if (isSelected) Modifier.background(
-                        MaterialTheme.colorScheme.secondary.copy(
-                            alpha = .3f
-                        )
-                    )
-                    else Modifier
-                )
-                .padding(layout.cardContentPadding),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box {
-                BookSimpleImageCard(
-                    book = book,
-                    modifier = Modifier.width(
-                        when (width) {
-                            COMPACT, MEDIUM -> 96.dp
-                            else -> 130.dp
-                        }
-                    )
-                )
-                if (onSelect != null && (isSelected || isHovered.value)) {
-                    SelectionRadioButton(
-                        isSelected,
-                        onSelect
-                    )
+        DetailedListCardLayout(
+            modifier = if (isSelected) Modifier.background(
+                MaterialTheme.colorScheme.secondary.copy(alpha = .3f)
+            ) else Modifier,
+            cover = {
+                BookImageOverlay(book = book, libraryIsDeleted = false, showTitle = false) {
+                    BookThumbnail(book.id, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 }
-            }
-            BookDetailedListDetails(
-                book = book,
-                bookMenuActions = bookMenuActions,
-                onBookReadClick = onBookReadClick,
-            )
-        }
+                if (onSelect != null && (isSelected || isHovered.value)) {
+                    SelectionRadioButton(isSelected, onSelect)
+                }
+            },
+            content = {
+                BookDetailedListDetails(
+                    book = book,
+                    bookMenuActions = bookMenuActions,
+                    onBookReadClick = onBookReadClick,
+                    modifier = Modifier.fillMaxHeight(),
+                )
+            },
+        )
     }
 
 }
@@ -454,13 +434,15 @@ private fun BookDetailedListDetails(
     book: KomeliaBook,
     bookMenuActions: BookMenuActions?,
     onBookReadClick: ((Boolean) -> Unit)? = null,
+    modifier: Modifier = Modifier,
 ) {
     val width = LocalWindowWidth.current
     val layout = LocalKomeliaLayout.current
-    Column(Modifier.padding(start = layout.itemSpacing)) {
+    Column(modifier) {
         Text(
             book.metadata.title,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleSmall,
+            overflow = TextOverflow.Ellipsis,
             maxLines = when (width) {
                 COMPACT, MEDIUM -> 2
                 else -> 4
@@ -473,16 +455,16 @@ private fun BookDetailedListDetails(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = layout.controlSpacing / 2),
         )
-        MetadataTagFlow(
+        if (book.metadata.tags.isNotEmpty()) MetadataTagFlow(
             values = book.metadata.tags,
             width = width,
             modifier = Modifier.padding(vertical = 6.dp),
         )
 
-        Text(
+        if (book.metadata.summary.isNotBlank()) Text(
             book.metadata.summary,
             maxLines = when (width) {
-                COMPACT, MEDIUM -> 3
+                COMPACT, MEDIUM -> 2
                 else -> 4
             },
             style = MaterialTheme.typography.bodyMedium,
@@ -491,10 +473,10 @@ private fun BookDetailedListDetails(
         )
 
         Spacer(Modifier.weight(1f))
-        Row(horizontalArrangement = Arrangement.Start) {
+        Row(horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing / 2), verticalAlignment = Alignment.CenterVertically) {
             if (onBookReadClick != null && !book.deleted && readIsSupported(book)) {
                 BookReadButton(
-                    modifier = Modifier.padding(start = 5.dp, bottom = 5.dp),
+                    modifier = Modifier.padding(top = layout.controlSpacing),
                     onRead = { onBookReadClick(true) },
                     onIncognitoRead = { onBookReadClick(false) }
                 )

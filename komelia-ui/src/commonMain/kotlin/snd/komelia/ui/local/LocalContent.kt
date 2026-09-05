@@ -1,5 +1,7 @@
 package snd.komelia.ui.local
 
+import snd.komelia.ui.search.SearchTextField
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,9 +19,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.CloudDownload
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -29,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -174,21 +173,12 @@ private fun LocalToolbar(
             stringResource(Res.string.local_content_title),
             style = MaterialTheme.typography.headlineSmall,
         )
-        OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChange,
-            singleLine = true,
-            leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
-            trailingIcon = if (query.isNotEmpty()) {
-                {
-                    IconButton(onClick = { onQueryChange("") }) {
-                        Icon(Icons.Rounded.Clear, contentDescription = null)
-                    }
-                }
-            } else null,
-            placeholder = { Text(stringResource(Res.string.local_content_search)) },
-            shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth(),
+        SearchTextField(
+            query = query,
+            onQueryChange = onQueryChange,
+            onDone = onQueryChange,
+            onDismiss = { onQueryChange("") },
+            placeholder = stringResource(Res.string.local_content_search),
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),

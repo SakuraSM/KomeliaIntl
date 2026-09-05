@@ -100,7 +100,7 @@ fun ScalableContainer(
 
             }
             .pointerInput(areaSize) {
-                detectTransformGestures { event, centroid, pan, zoom, _ ->
+                detectTransformGestures(coordinateScale = { scaleState.transformation.value.scale }) { event, centroid, pan, zoom, _ ->
                     if (zoom != 1.0f) {
                         scaleState.multiplyZoom(zoom, centroid - areaCenter)
                     } else {

@@ -149,21 +149,16 @@ class LocalLibraryManager(
         repositories.libraryRepository.save(library.copy(scanInterval = interval))
     }
 
-    suspend fun removeLibrary(libraryId: KomgaLibraryId) {
+    suspend fun removeLibrary(libraryId: KomgaLibraryId) = scanMutex.withLock {
         val library = repositories.libraryRepository.get(libraryId)
         check(library.mediaServerId == LOCAL_SERVER_ID) { "Not a local library" }
-        val series = repositories.seriesRepository.findAllByLibraryId(libraryId)
-        series.forEach { localSeries ->
-            val bookIds = repositories.bookRepository.findAllIdsBySeriesId(localSeries.id)
-            repositories.thumbnailBookRepository.deleteByBookIds(bookIds)
-            repositories.mediaRepository.delete(bookIds)
-            repositories.bookMetadataRepository.delete(bookIds)
-            repositories.bookRepository.delete(bookIds)
-            repositories.bookMetadataAggregationRepository.delete(localSeries.id)
-            repositories.seriesMetadataRepository.delete(localSeries.id)
-            repositories.seriesRepository.delete(localSeries.id)
+        repositories.transactionTemplate.execute {
+            repositories.seriesRepository.findAllByLibraryId(libraryId).forEach { series ->
+                removeIndexedBooks(repositories.bookRepository.findAllIdsBySeriesId(series.id))
+            }
+            cleanupEmptySeries(libraryId)
+            repositories.libraryRepository.delete(libraryId)
         }
-        repositories.libraryRepository.delete(libraryId)
     }
 
     suspend fun getExcludedBooks(): List<LocalBookExclusion> = getLibraries().flatMap { library ->
@@ -386,10 +381,14 @@ class LocalLibraryManager(
 
     private suspend fun removeIndexedBooks(bookIds: Collection<KomgaBookId>) {
         if (bookIds.isEmpty()) return
-        repositories.thumbnailBookRepository.deleteByBookIds(bookIds)
-        repositories.mediaRepository.delete(bookIds.toList())
-        repositories.bookMetadataRepository.delete(bookIds.toList())
-        repositories.bookRepository.delete(bookIds)
+        repositories.transactionTemplate.execute {
+            // Progress references BOOK and must be removed before its parent row.
+            repositories.readProgressRepository.deleteByBookIds(bookIds.toList())
+            repositories.thumbnailBookRepository.deleteByBookIds(bookIds)
+            repositories.mediaRepository.delete(bookIds.toList())
+            repositories.bookMetadataRepository.delete(bookIds.toList())
+            repositories.bookRepository.delete(bookIds)
+        }
     }
 
     fun startScheduledScanning() {
@@ -472,9 +471,11 @@ class LocalLibraryManager(
         )
     }
 
-    private suspend fun cleanupEmptySeries(libraryId: KomgaLibraryId) {
+    private suspend fun cleanupEmptySeries(libraryId: KomgaLibraryId) = repositories.transactionTemplate.execute {
         repositories.seriesRepository.findAllByLibraryId(libraryId).forEach { series ->
             if (repositories.bookRepository.findAllIdsBySeriesId(series.id).isEmpty()) {
+                repositories.readProgressRepository.deleteBySeriesIds(listOf(series.id))
+                repositories.thumbnailSeriesRepository.deleteBySeriesId(series.id)
                 repositories.bookMetadataAggregationRepository.delete(series.id)
                 repositories.seriesMetadataRepository.delete(series.id)
                 repositories.seriesRepository.delete(series.id)

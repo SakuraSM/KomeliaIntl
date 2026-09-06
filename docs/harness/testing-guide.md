@@ -78,3 +78,17 @@ In the pull request or handoff, list each executed command and manual scenario w
 Run `:komelia-domain:core:jvmTest` for stable tile prefetch bounds while panning. Run `:komelia-infra:image-decoder:shared:allTests` for kernel weights, alpha handling, tile halos, and pixel formats. Run `:komelia-infra:database:sqlite:allTests` for persisted sampling values and local index cleanup, including rollback and actual external file/folder deletion. On Android, compare Lanczos3, Mitchell, and bilinear using synthetic small images; exercise pinch zoom, panning, mode changes, and restart. Record physical-device and panel-detection checks separately from image-renderer checks.
 
 For reader gesture changes, run the JVM Compose `ScalableContainerGestureTest` and repeat maximum zoom followed by both short and wide pinch-in gestures on Android, including while enlarged tiles are rendering. Touch thresholds must use the same coordinate units as pointer positions.
+
+## Reader image lifetime, preloading, and OLED
+
+`RetainedPageLoadTest` in shared UI tests covers navigation cancellation, bounded spread windows, eviction, shutdown, and retry without discarding successful neighboring pages. `ThemeTest` checks OLED background, base surface, and dim surface independently.
+
+`TilingReaderImageLifetimeTest` in shared UI common tests suspends a real domain reader resize while requesting crop reload or shutdown. It checks that native images stay open until the operation finishes and that a shared original/processed image is released only once. These integration tests use the UI module's existing Compose/Skiko test runtime through `:komelia-ui:allTests`.
+
+Run `./gradlew :komelia-app:androidApp:connectedDebugAndroidTest` with only the dedicated test emulator connected for `AndroidReaderImageLifetimeTest`. It verifies that an outgoing frame can still draw a retired Android bitmap. This is separate from the common/JVM tests and does not require a real server or private media.
+
+On Android, use a synthetic multipage CBZ with white borders. Verify crop on/off, fast forward/backward navigation, single/double-page layout, pinch zoom and panning, sampling changes, reader mode changes, and exit/re-entry. Check both process/crash logs and actual page rendering. For OLED, sample unobstructed reader-background pixels; elevated settings panels intentionally retain distinct surface colors. Do not infer physical-panel power behavior from emulator RGB values.
+
+## Server announcements
+
+`AnnouncementsViewModelTest` covers server-content order and fields, empty feeds, request errors, and coroutine cancellation without an update-client dependency. JVM Compose `AnnouncementsContentTest` checks the server notice and empty state without application release sections. For device validation, use an authorized server-admin session to open Server settings / Announcements, then verify App settings / App updates independently. Non-admin accounts cannot open server settings; do not change permissions merely to pass a test.

@@ -28,6 +28,8 @@ class ThemeTest {
     @Test
     fun oledThemeKeepsTrueBlackBackground() {
         assertEquals(Color.Black, Theme.DARKER.colorScheme.background)
+        assertEquals(Color.Black, Theme.DARKER.colorScheme.surface)
+        assertEquals(Color.Black, Theme.DARKER.colorScheme.surfaceDim)
     }
 
     @Test

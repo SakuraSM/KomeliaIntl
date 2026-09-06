@@ -34,6 +34,9 @@ dependencies{
     implementation(libs.filekit.core)
     implementation(libs.filekit.dialogs)
 
+    androidTestImplementation("androidx.test:runner:1.7.0")
+    androidTestImplementation("junit:junit:4.13.2")
+
 }
 
 kotlin {
@@ -89,8 +92,9 @@ android {
         applicationId = "io.github.zhengningning.komelia"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 43
+        versionCode = 44
         versionName = libs.versions.app.version.get()
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         val enableSelfUpdates = when (androidVariant) {
             AndroidVariant.STANDALONE -> (project.findProperty("snd.enable.self.updates") == "true").toString()

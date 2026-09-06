@@ -5,10 +5,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toSize
-import io.github.reactivecircus.cache4k.Cache
-import io.github.reactivecircus.cache4k.CacheEvent.Evicted
-import io.github.reactivecircus.cache4k.CacheEvent.Expired
-import io.github.reactivecircus.cache4k.CacheEvent.Removed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -62,21 +58,13 @@ class PagedReaderState(
     val screenScaleState: ScreenScaleState,
 ) {
     private val stateScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val pageLoadScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val pageLoadScope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
+    private val imageLoadScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var imageCache = newImageCache()
 
-    private val imageCache = Cache.Builder<PageId, Deferred<Page>>()
-        .maximumCacheSize(10)
-        .eventListener {
-            val value = when (it) {
-                is Evicted -> it.value
-                is Expired -> it.value
-                is Removed -> it.value
-                else -> null
-            } ?: return@eventListener
-
-            cleanupScope.launch { value.await().imageResult?.image?.close() }
-        }
-        .build()
+    private fun newImageCache() = RetainedPageCache<PageId, Page>(imageLoadScope) { page ->
+        cleanupScope.launch { page.imageResult?.image?.close() }
+    }
 
     val pageSpreads = MutableStateFlow<List<List<PageMetadata>>>(emptyList())
     val currentSpreadIndex = MutableStateFlow(0)
@@ -129,7 +117,11 @@ class PagedReaderState(
 
     fun stop() {
         stateScope.coroutineContext.cancelChildren()
-        imageCache.invalidateAll()
+        pageLoadScope.coroutineContext.cancelChildren()
+        imageLoadScope.coroutineContext.cancelChildren()
+        imageCache.close()
+        imageCache = newImageCache()
+        currentSpread.value = PageSpread(emptyList())
     }
 
     private suspend fun updateSpreadImageState(
@@ -304,16 +296,19 @@ class PagedReaderState(
         }
 
         pageLoadScope.coroutineContext.cancelChildren()
-        pageLoadScope.launch { loadSpread(spreadIndex) }
+        val cache = imageCache
+        pageLoadScope.launch { loadSpread(spreadIndex, cache) }
     }
 
-    private suspend fun loadSpread(loadSpreadIndex: Int) {
+    private suspend fun loadSpread(loadSpreadIndex: Int, cache: RetainedPageCache<PageId, Page>) {
         val loadRange = getSpreadLoadRange(loadSpreadIndex)
+        val pageIds = loadRange.flatMap { pageSpreads.value[it] }.map { it.toPageId() }.toSet()
+        cache.retain(pageIds)
         val currentSpreadMetadata = pageSpreads.value[loadSpreadIndex]
-        val currentSpreadJob = launchSpreadLoadJob(currentSpreadMetadata)
+        val currentSpreadJob = launchSpreadLoadJob(currentSpreadMetadata, cache)
 
         loadRange.filter { it != loadSpreadIndex }.forEach { spreadIndex ->
-            enqueueSpreadLoadJob(pageSpreads.value[spreadIndex])
+            enqueueSpreadLoadJob(pageSpreads.value[spreadIndex], cache)
         }
 
         if (currentSpreadJob.isActive) {
@@ -339,17 +334,11 @@ class PagedReaderState(
         val scale: ScreenScaleState
     )
 
-    private fun launchSpreadLoadJob(pagesMeta: List<PageMetadata>): Deferred<PagesLoadJob> {
+    private fun launchSpreadLoadJob(pagesMeta: List<PageMetadata>, cache: RetainedPageCache<PageId, Page>): Deferred<PagesLoadJob> {
         val pages = pagesMeta.map { meta ->
-            val pageId = meta.toPageId()
-            val cached = imageCache.get(pageId)
-
-            if (cached != null && !cached.isCancelled) cached
-            else pageLoadScope.async {
-                val imageResult = imageLoader.loadReaderImage(meta.bookId, meta.pageNumber)
-                if (imageResult is ReaderImageResult.Error) imageCache.invalidate(pageId)
-                Page(meta, imageResult)
-            }.also { imageCache.put(pageId, it) }
+            cache.getOrLoad(meta.toPageId(), acceptCached = { it.imageResult !is ReaderImageResult.Error }) {
+                Page(meta, imageLoader.loadReaderImage(meta.bookId, meta.pageNumber))
+            }
         }
 
         return pageLoadScope.async {
@@ -392,8 +381,8 @@ class PagedReaderState(
     }
 
     @Suppress("DeferredResultUnused")
-    private fun enqueueSpreadLoadJob(pagesMeta: List<PageMetadata>) {
-        launchSpreadLoadJob(pagesMeta)
+    private fun enqueueSpreadLoadJob(pagesMeta: List<PageMetadata>, cache: RetainedPageCache<PageId, Page>) {
+        launchSpreadLoadJob(pagesMeta, cache)
     }
 
     private fun getMaxPageSize(pages: List<PageMetadata>, containerSize: IntSize): IntSize {
@@ -480,8 +469,7 @@ class PagedReaderState(
     }
 
     private fun getSpreadLoadRange(spreadIndex: Int): IntRange {
-        val spreads = pageSpreads.value
-        return (spreadIndex - 1).coerceAtLeast(0)..(spreadIndex + 1).coerceAtMost(spreads.size - 1)
+        return spreadPreloadRange(spreadIndex, pageSpreads.value.size)
     }
 
     fun onLayoutChange(layout: PageDisplayLayout) {

@@ -39,7 +39,10 @@ class AndroidReaderImage(
 ) {
 
     override fun closeTileBitmaps(tiles: List<ReaderImageTile>) {
-        tiles.forEach { it.renderImage?.recycle() }
+        // Published tiles can still be held by an outgoing painter, Crossfade or RenderThread.
+        // Let Android release their pixels when those references are gone. isRecycled checks
+        // cannot make a concurrent recycle/draw safe. Unpublished error-path frames below
+        // remain exclusively owned and can still be recycled immediately.
     }
 
     override suspend fun onUpsamplingModeChanged(mode: UpsamplingMode) {

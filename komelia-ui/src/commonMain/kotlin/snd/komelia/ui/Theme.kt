@@ -96,7 +96,7 @@ private val DarkColors = darkColorScheme(
 
 private val OledColors = DarkColors.copy(
     background = Color.Black,
-    surface = Color(0xFF08080C),
+    surface = Color.Black,
     surfaceVariant = Color(0xFF12111A),
     surfaceContainerLowest = Color.Black,
     surfaceContainerLow = Color(0xFF08080C),

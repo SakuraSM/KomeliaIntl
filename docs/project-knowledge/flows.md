@@ -48,6 +48,10 @@ Risk points: revoked folder permissions, unstable IDs after moving files, archiv
 3. Progress updates through the existing protocol without a gesture triggering multiple page or stack changes.
 4. Back first closes the top reader overlay, then exits the reader once, then follows the application stack.
 
+Paged image loads belong to an explicit window of up to five spreads and ten pages. Changing the visible spread cancels its presentation wait, while image loading and crop processing remain reusable inside that window. Eviction or reader shutdown closes the owned load; a stopped window cannot accept late loads. Android published tile bitmaps remain owned by any outgoing painters/render frames until those references are released, rather than being manually recycled on replacement.
+
+Native decode, crop replacement, and resize operations share an image mutex across suspensions. Coroutine cancellation requests shutdown, but native images and source handles are released only after processing jobs complete. A single-parallelism dispatcher is not a substitute for that ownership boundary.
+
 Risk points: duplicate Back handlers, click-through overlays, drag-end taps, stale progress, system-edge conflicts, and unsafe-area overlap.
 
 ## Localization

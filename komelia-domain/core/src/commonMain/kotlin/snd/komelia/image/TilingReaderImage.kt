@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toRect
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
@@ -28,8 +29,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import snd.komelia.image.processing.ImageProcessingPipeline
 import kotlin.concurrent.Volatile
 import kotlin.math.round
@@ -54,7 +58,8 @@ abstract class TilingReaderImage(
     protected val upsamplingMode: StateFlow<UpsamplingMode>,
     protected val downSamplingKernel: StateFlow<ReduceKernel>,
     protected val linearLightDownSampling: StateFlow<Boolean>,
-    final override val pageId: ReaderImage.PageId
+    final override val pageId: ReaderImage.PageId,
+    processingDispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(1),
 ) : ReaderImage {
     final override val painter = MutableStateFlow<TiledPainter?>(null)
     final override val error = MutableStateFlow<Throwable?>(null)
@@ -65,7 +70,9 @@ abstract class TilingReaderImage(
 
     private val imageAwaitScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val animationScope = CoroutineScope(Dispatchers.Default.limitedParallelism(1) + SupervisorJob())
-    protected val processingScope = CoroutineScope(Dispatchers.Default.limitedParallelism(1) + SupervisorJob())
+    protected val processingScope = CoroutineScope(processingDispatcher + SupervisorJob())
+    private val imageMutex = Mutex()
+    private val closed = MutableStateFlow(false)
 
     private val jobFlow = MutableSharedFlow<UpdateRequest>(1, 0, BufferOverflow.DROP_OLDEST)
     private val frameData = MutableStateFlow<FrameData?>(null)
@@ -103,15 +110,14 @@ abstract class TilingReaderImage(
             }.launchIn(processingScope)
 
         processingPipeline.changeFlow.onEach {
-            val currentImage = image.value
-            if (currentImage !== originalImage) {
-                currentImage?.close()
+            // Native calls can switch dispatchers and suspend. limitedParallelism(1) alone
+            // does not keep a crop reload from closing an image that a resize still uses.
+            imageMutex.withLock {
+                releaseImages()
+                originalSize.value = null
+                currentSize.value = null
+                loadImage()
             }
-
-            image.value = null
-            originalSize.value = originalImage?.let { IntSize(it.width, it.pageHeight) }
-            currentSize.value = null
-            loadImage()
             reloadLastRequest()
         }.launchIn(processingScope)
 
@@ -123,7 +129,7 @@ abstract class TilingReaderImage(
         linearLightDownSampling.drop(1).onEach { reloadLastRequest() }
             .launchIn(processingScope)
 
-        processingScope.launch { loadImage() }
+        processingScope.launch { imageMutex.withLock { loadImage() } }
 
         frameData.onEach { data ->
             when {
@@ -164,9 +170,12 @@ abstract class TilingReaderImage(
     }
 
     protected suspend fun reloadLastRequest() {
-        lastUpdateRequest?.let { lastRequest ->
-            lastUsedScaleFactor = null
-            jobFlow.emit(lastRequest)
+        imageMutex.withLock {
+            if (closed.value) return@withLock
+            lastUpdateRequest?.let { lastRequest ->
+                lastUsedScaleFactor = null
+                jobFlow.emit(lastRequest)
+            }
         }
     }
 
@@ -247,7 +256,16 @@ abstract class TilingReaderImage(
     private suspend fun doUpdate(request: UpdateRequest) {
         lastUpdateRequest = request
 
-        val image = getCurrentImage()
+        // Wait outside the lock so the initial decoder can publish the first image.
+        getCurrentImage()
+        imageMutex.withLock {
+            // A reload may have replaced the image while we were waiting for the lock.
+            val currentImage = image.value ?: return@withLock
+            doUpdate(request, currentImage)
+        }
+    }
+
+    private suspend fun doUpdate(request: UpdateRequest, image: KomeliaImage) {
         val displaySize = calculateSizeForArea(request.maxDisplaySize, stretchImages.value) ?: return
         val widthRatio = displaySize.width.toDouble() / image.width
         val heightRatio = displaySize.height.toDouble() / image.pageHeight
@@ -436,15 +454,38 @@ abstract class TilingReaderImage(
     }
 
     override fun close() {
-        originalImage?.close()
-        frameData.value?.frames
-            ?.flatMap { it.tiles }
-            ?.let { closeTileBitmaps(it) }
-        image.value?.close()
-        imageSource.close()
-        processingScope.cancel()
+        if (!closed.compareAndSet(false, true)) return
         imageAwaitScope.cancel()
         animationScope.cancel()
+        // Cancellation cannot interrupt an already executing JNI call. Release only after
+        // all processing children finish, including their cancellation/finally blocks.
+        processingScope.coroutineContext.job.invokeOnCompletion {
+            runCatching {
+                try {
+                    releaseImages()
+                    frameData.value?.frames
+                        ?.flatMap { it.tiles }
+                        ?.let { closeTileBitmaps(it) }
+                } finally {
+                    frameData.value = null
+                    painter.value = null
+                    imageSource.close()
+                }
+            }.onFailure { logger.catching(it) }
+        }
+        processingScope.cancel()
+    }
+
+    private fun releaseImages() {
+        val processed = image.value
+        val original = originalImage
+        image.value = null
+        originalImage = null
+        try {
+            processed?.close()
+        } finally {
+            if (original !== processed) original?.close()
+        }
     }
 
     protected abstract fun closeTileBitmaps(tiles: List<ReaderImageTile>)

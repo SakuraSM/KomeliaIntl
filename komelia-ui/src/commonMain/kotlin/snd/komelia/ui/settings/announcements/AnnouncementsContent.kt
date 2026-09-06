@@ -23,11 +23,7 @@ import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_announcements_empty
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_announcements_project_releases
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_announcements_server
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_announcements_source_unavailable
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_announcements_upstream_releases
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_release_date
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
@@ -37,58 +33,15 @@ import snd.komelia.DefaultDateTimeFormats.localDateFormat
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.components.SettingsSection
 import snd.komelia.ui.platform.cursorForHand
-import snd.komelia.updates.GithubRelease
 import snd.komga.client.announcements.KomgaJsonFeed.KomgaAnnouncement
 
 @Composable
 fun AnnouncementsContent(state: AnnouncementsState) {
-    val layout = LocalKomeliaLayout.current
-    Column(verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing)) {
-        ReleaseSection(
-            title = Res.string.settings_announcements_project_releases,
-            releases = state.projectReleases,
-            unavailable = AnnouncementSource.Project in state.unavailableSources,
-        )
-        ReleaseSection(
-            title = Res.string.settings_announcements_upstream_releases,
-            releases = state.upstreamReleases,
-            unavailable = AnnouncementSource.Upstream in state.unavailableSources,
-        )
-        ServerAnnouncementSection(
-            announcements = state.serverAnnouncements,
-            unavailable = AnnouncementSource.Server in state.unavailableSources,
-        )
-    }
-}
-
-@Composable
-private fun ReleaseSection(
-    title: StringResource,
-    releases: List<GithubRelease>,
-    unavailable: Boolean,
-) {
-    SettingsSection(title = stringResource(title)) {
-        when {
-            unavailable -> SourceStatusText(Res.string.settings_announcements_source_unavailable)
-            releases.isEmpty() -> SourceStatusText(Res.string.settings_announcements_empty)
-            else -> releases.forEachIndexed { index, release ->
-                if (index > 0) HorizontalDivider()
-                ReleaseAnnouncement(release)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ServerAnnouncementSection(
-    announcements: List<KomgaAnnouncement>,
-    unavailable: Boolean,
-) {
     SettingsSection(title = stringResource(Res.string.settings_announcements_server)) {
-        when {
-            unavailable -> SourceStatusText(Res.string.settings_announcements_source_unavailable)
-            announcements.isEmpty() -> SourceStatusText(Res.string.settings_announcements_empty)
-            else -> announcements.forEachIndexed { index, announcement ->
+        if (state.serverAnnouncements.isEmpty()) {
+            SourceStatusText(Res.string.settings_announcements_empty)
+        } else {
+            state.serverAnnouncements.forEachIndexed { index, announcement ->
                 if (index > 0) HorizontalDivider()
                 ServerAnnouncement(announcement)
             }
@@ -103,31 +56,6 @@ private fun SourceStatusText(resource: StringResource) {
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-}
-
-@OptIn(ExperimentalRichTextApi::class)
-@Composable
-private fun ReleaseAnnouncement(release: GithubRelease) {
-    val layout = LocalKomeliaLayout.current
-    Column(verticalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
-        AnnouncementTitle(release.tagName, release.htmlUrl)
-        val publishDate = remember(release.publishedAt) {
-            release.publishedAt.toLocalDateTime(TimeZone.currentSystemDefault()).format(localDateFormat)
-        }
-        Text(
-            text = stringResource(Res.string.settings_updates_release_date, publishDate),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        if (release.body.isNotBlank()) {
-            SelectionContainer {
-                val richTextState = rememberRichTextState()
-                ConfigureRichText(richTextState)
-                LaunchedEffect(release.body) { richTextState.setMarkdown(release.body) }
-                RichText(richTextState)
-            }
-        }
-    }
 }
 
 @OptIn(ExperimentalRichTextApi::class)

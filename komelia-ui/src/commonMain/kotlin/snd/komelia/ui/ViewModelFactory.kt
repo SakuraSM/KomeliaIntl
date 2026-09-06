@@ -494,7 +494,6 @@ class ViewModelFactory(
         return AnnouncementsViewModel(
             appNotifications = dependencies.appNotifications,
             announcementsApi = komgaApi.announcementsApi,
-            updateClient = dependencies.updateClient,
         )
     }
 

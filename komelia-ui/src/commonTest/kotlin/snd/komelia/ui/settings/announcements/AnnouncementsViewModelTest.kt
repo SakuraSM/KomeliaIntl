@@ -1,65 +1,64 @@
 package snd.komelia.ui.settings.announcements
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import snd.komelia.komga.api.KomgaAnnouncementsApi
+import snd.komelia.ui.LoadState
+import snd.komga.client.announcements.KomgaJsonFeed
+import snd.komga.client.announcements.KomgaJsonFeed.KomgaAnnouncementId
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
-import kotlin.time.Instant
-import snd.komelia.ui.LoadState
-import snd.komelia.updates.GithubRelease
-import snd.komga.client.announcements.KomgaJsonFeed.KomgaAnnouncement
 
 class AnnouncementsViewModelTest {
     @Test
-    fun keepsProjectAndUpstreamReleaseNotesAsSeparateSources() {
-        val projectRelease = release(1, "v0.18.15")
-        val upstreamRelease = release(2, "v0.18.14")
-
-        val result = announcementsLoadState(
-            projectResult = Result.success(listOf(projectRelease)),
-            upstreamResult = Result.success(listOf(upstreamRelease)),
-            serverResult = Result.success(emptyList()),
-        )
-
-        val state = assertIs<LoadState.Success<AnnouncementsState>>(result).value
-        assertEquals(listOf(projectRelease), state.projectReleases)
-        assertEquals(listOf(upstreamRelease), state.upstreamReleases)
-        assertTrue(state.unavailableSources.isEmpty())
+    fun preservesServerContentAndOrderWithoutAnUpdateClient() = runTest {
+        val feed = Json.decodeFromString<KomgaJsonFeed>("""{
+            "version":"https://jsonfeed.org/version/1", "title":"Komga notifications", "home_page_url":null, "description":null,
+            "items":[
+                {"id":"server-2", "title":"Server maintenance", "content_html":"<p>Server notice</p>", "url":"https://example.invalid/notice", "summary":null, "date_modified":null, "author":null, "_komga":{"read":false}},
+                {"id":"server-1", "title":"Komga update", "content_html":null, "url":null, "summary":null, "date_modified":null, "author":null, "_komga":{"read":true}}
+            ]
+        }""")
+        val api = FakeApi { feed }
+        val state = assertIs<LoadState.Success<AnnouncementsState>>(loadServerAnnouncements(api)).value
+        assertEquals(feed.items, state.serverAnnouncements)
+        assertEquals(1, api.calls)
     }
 
     @Test
-    fun oneFailedSourceDoesNotHideTheOtherReleaseNotes() {
-        val upstreamRelease = release(2, "v0.18.14")
-
-        val result = announcementsLoadState(
-            projectResult = Result.failure(IllegalStateException("project unavailable")),
-            upstreamResult = Result.success(listOf(upstreamRelease)),
-            serverResult = Result.success(emptyList()),
-        )
-
-        val state = assertIs<LoadState.Success<AnnouncementsState>>(result).value
-        assertTrue(state.projectReleases.isEmpty())
-        assertEquals(listOf(upstreamRelease), state.upstreamReleases)
-        assertEquals(setOf(AnnouncementSource.Project), state.unavailableSources)
+    fun emptyServerFeedStaysEmpty() = runTest {
+        val api = FakeApi {
+            Json.decodeFromString<KomgaJsonFeed>("""{"version":"https://jsonfeed.org/version/1","title":"Komga","home_page_url":null,"description":null,"items":[]}""")
+        }
+        val state = assertIs<LoadState.Success<AnnouncementsState>>(loadServerAnnouncements(api)).value
+        assertTrue(state.serverAnnouncements.isEmpty())
     }
 
     @Test
-    fun allFailedSourcesProduceAnErrorState() {
-        val result = announcementsLoadState(
-            projectResult = Result.failure(IllegalStateException("project unavailable")),
-            upstreamResult = Result.failure(IllegalStateException("upstream unavailable")),
-            serverResult = Result.failure<List<KomgaAnnouncement>>(IllegalStateException("server unavailable")),
-        )
-
-        assertIs<LoadState.Error>(result)
+    fun serverFailureMustNotBeMaskedByAppReleaseNotes() = runTest {
+        val failure = IllegalStateException("server unavailable")
+        val result = loadServerAnnouncements(FakeApi { throw failure })
+        assertSame(failure, assertIs<LoadState.Error>(result).exception)
     }
 
-    private fun release(id: Int, tag: String) = GithubRelease(
-        id = id,
-        publishedAt = Instant.parse("2026-08-23T00:00:00Z"),
-        tagName = tag,
-        htmlUrl = "https://example.com/$id",
-        body = "Release notes",
-        assets = emptyList(),
-    )
+    @Test
+    fun cancellationIsNotReportedAsServerFailure() = runTest {
+        assertFailsWith<CancellationException> {
+            loadServerAnnouncements(FakeApi { throw CancellationException("screen closed") })
+        }
+    }
+
+    private class FakeApi(val response: suspend () -> KomgaJsonFeed) : KomgaAnnouncementsApi {
+        var calls = 0
+        override suspend fun getAnnouncements(): KomgaJsonFeed {
+            calls++
+            return response()
+        }
+        override suspend fun markAnnouncementsRead(announcements: List<KomgaAnnouncementId>) = Unit
+    }
 }

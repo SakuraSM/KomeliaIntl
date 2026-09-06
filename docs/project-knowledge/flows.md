@@ -54,6 +54,10 @@ Native decode, crop replacement, and resize operations share an image mutex acro
 
 Risk points: duplicate Back handlers, click-through overlays, drag-end taps, stale progress, system-edge conflicts, and unsafe-area overlap.
 
+## Server announcements and application updates
+
+Server settings announcements use only the active Komga session's `KomgaAnnouncementsApi`. A failed server request is an error, not an empty feed or a fallback to GitHub release notes. Application version checks and Komelia release notes remain under App settings / App updates. Keep the existing server-admin navigation gate and read-status API unchanged.
+
 ## Localization
 
 1. Persist `SYSTEM`, `EN`, or `ZH_CN` using the stable setting values.

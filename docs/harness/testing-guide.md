@@ -84,6 +84,8 @@ For reader gesture changes, run the JVM Compose `ScalableContainerGestureTest` a
 
 ## Reader image lifetime, preloading, and OLED
 
+`ReaderSystemBarsEffectTest` exercises the Compose reader lifecycle: hide both system bars during reading, restore them while controls are shown, hide again when controls close, and restore on disposal. Repeat with Android gesture navigation, three-button navigation and tablet-sized layouts; the mocked window contract does not prove OEM taskbar behavior.
+
 `RetainedPageLoadTest` in shared UI tests covers navigation cancellation, bounded spread windows, eviction, shutdown, and retry without discarding successful neighboring pages. `ThemeTest` checks OLED background, base surface, and dim surface independently.
 
 `TilingReaderImageLifetimeTest` in shared UI common tests suspends a real domain reader resize while requesting crop reload or shutdown. It checks that native images stay open until the operation finishes and that a shared original/processed image is released only once. These integration tests use the UI module's existing Compose/Skiko test runtime through `:komelia-ui:allTests`.

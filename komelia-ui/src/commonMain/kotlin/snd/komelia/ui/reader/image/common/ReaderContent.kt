@@ -5,7 +5,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -82,17 +81,7 @@ fun ReaderContent(
         }
     }
     if (LocalPlatform.current == MOBILE) {
-        val windowState = LocalWindowState.current
-        DisposableEffect(showSettingsMenu) {
-            if (showSettingsMenu) {
-                windowState.setFullscreen(false)
-            } else {
-                windowState.setFullscreen(true)
-            }
-            onDispose {
-                windowState.setFullscreen(false)
-            }
-        }
+        ReaderSystemBarsEffect(LocalWindowState.current, showSettingsMenu)
     }
     val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {

@@ -50,6 +50,62 @@ import kotlin.test.assertTrue
 
 class LocalLibraryManagerIntegrationTest {
     @Test
+    fun reindexesLegacyEpubOnceWithoutChangingIdentityMetadataOrProgress() = runBlocking {
+        val tempDirectory = createTempDirectory("komelia-epub-reindex-test")
+        val sourceDirectory = tempDirectory.resolve("source").createDirectories()
+        val repositories = createRepositories(KomeliaDatabase(tempDirectory.toString()), tempDirectory)
+        val currentExtension = snd.komelia.offline.media.model.MediaExtensionEpub(
+            manifest = snd.komga.client.book.WPPublication(links = emptyList(), metadata = snd.komga.client.book.WPMetadata(title = "Novel")),
+            localInspectionVersion = 1,
+            positions = listOf(0f, 1f).map { progress ->
+                snd.komga.client.book.R2Locator("chapter.xhtml", "application/xhtml+xml",
+                    locations = snd.komga.client.book.R2Location(progression = progress, totalProgression = progress))
+            },
+        )
+        val platform = FakeLocalLibraryPlatform(sourceDirectory).apply {
+            files = listOf(file("Novel.epub", size = 100, modified = 1_000))
+            inspection = LocalBookInspection("application/epub+zip", MediaProfile.EPUB, emptyList(), currentExtension)
+        }
+        val manager = LocalLibraryManager(repositories, platform, CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val library = manager.addLibrary(PlatformFile(sourceDirectory.toFile()), "Local")
+        val book = repositories.bookRepository.findAll().single()
+        val media = repositories.mediaRepository.get(book.id)
+        repositories.mediaRepository.save(media.copy(extension = currentExtension.copy(localInspectionVersion = 0, positions = emptyList())))
+        val metadata = repositories.bookMetadataRepository.get(book.id).copy(
+            title = "My title", titleLock = true, number = "Special", numberLock = true,
+        )
+        repositories.bookMetadataRepository.save(metadata)
+        val progress = OfflineReadProgress(book.id, OfflineUser.ROOT, page = 0, completed = false,
+            locator = snd.komga.client.book.R2Locator("chapter.xhtml", "application/xhtml+xml"))
+        repositories.readProgressRepository.save(progress)
+        val storedProgress = repositories.readProgressRepository.find(book.id, OfflineUser.ROOT)
+
+        manager.scan(library.id)
+
+        assertEquals(2, platform.inspectionCount)
+        assertEquals(book.id, repositories.bookRepository.findAll().single().id)
+        assertEquals(metadata, repositories.bookMetadataRepository.get(book.id))
+        assertEquals(storedProgress, repositories.readProgressRepository.find(book.id, OfflineUser.ROOT))
+        assertEquals(currentExtension, repositories.mediaRepository.get(book.id).extension)
+        assertEquals(0, repositories.mediaRepository.get(book.id).pageCount)
+        manager.scan(library.id)
+        assertEquals(2, platform.inspectionCount, "the migrated unchanged EPUB must not be reopened")
+
+        // The first browser callback after migration must still save through the real transaction/repository path.
+        val action = snd.komelia.offline.readprogress.actions.ProgressMarkProgressionAction(
+            repositories.mediaRepository, repositories.readProgressRepository,
+            repositories.transactionTemplate, kotlinx.coroutines.flow.MutableSharedFlow(),
+        )
+        action.run(book.id, OfflineUser.ROOT, snd.komga.client.book.R2Progression(
+            modified = kotlin.time.Instant.fromEpochMilliseconds(1_000),
+            device = snd.komga.client.book.R2Device("test", "Test"),
+            locator = snd.komga.client.book.R2Locator("http://komelia/api/v1/books/${book.id.value}/resource/chapter.xhtml", "application/xhtml+xml",
+                locations = snd.komga.client.book.R2Location(progression = 0.5f)),
+        ))
+        assertEquals(0.5f, repositories.readProgressRepository.find(book.id, OfflineUser.ROOT)?.locator?.locations?.totalProgression)
+    }
+
+    @Test
     fun separatesLocalSourceBooksFromRemoteDownloads() = runBlocking {
         val tempDirectory = createTempDirectory("komelia-local-source-isolation-test")
         val sourceDirectory = tempDirectory.resolve("source").createDirectories()
@@ -481,6 +537,7 @@ class LocalLibraryManagerIntegrationTest {
     private class FakeLocalLibraryPlatform(private val sourceDirectory: Path) : LocalLibraryPlatform {
         var files: List<LocalLibraryFile> = emptyList()
         var inspectionCount: Int = 0
+        var inspection: LocalBookInspection? = null
 
         fun file(relativePath: String, size: Long, modified: Long) = LocalLibraryFile(
             file = PlatformFile(sourceDirectory.resolve(relativePath).toFile()),
@@ -494,6 +551,7 @@ class LocalLibraryManagerIntegrationTest {
 
         override suspend fun inspect(file: LocalLibraryFile): LocalBookInspection {
             inspectionCount++
+            inspection?.let { return it }
             return LocalBookInspection(
                 mediaType = "application/zip",
                 mediaProfile = MediaProfile.DIVINA,

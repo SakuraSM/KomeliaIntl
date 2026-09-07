@@ -19,6 +19,7 @@ import snd.komelia.offline.book.model.OfflineBookMetadata
 import snd.komelia.offline.book.model.OfflineThumbnailBook
 import snd.komelia.offline.library.model.OfflineLibrary
 import snd.komelia.offline.media.model.OfflineMedia
+import snd.komelia.offline.media.model.MediaExtensionEpub
 import snd.komelia.offline.series.model.OfflineBookMetadataAggregation
 import snd.komelia.offline.series.model.OfflineSeries
 import snd.komelia.offline.series.model.OfflineSeriesMetadata
@@ -243,10 +244,15 @@ class LocalLibraryManager(
                     val existing = existingBooks[bookId]
                     val modified = Instant.fromEpochMilliseconds(localFile.lastModifiedEpochMillis.coerceAtLeast(0))
                     val number = extractBookNumber(localFile.displayName, index + 1)
+                    val existingMetadata = existing?.let { repositories.bookMetadataRepository.find(bookId) }
+                    val needsEpubReinspection = existing != null &&
+                        localFile.displayName.endsWith(".epub", ignoreCase = true) &&
+                        (repositories.mediaRepository.find(bookId)?.extension as? MediaExtensionEpub)
+                            ?.localInspectionVersion != LOCAL_EPUB_INSPECTION_VERSION
                     if (existing != null && existing.sizeBytes == localFile.sizeBytes &&
-                        existing.localFileLastModified == modified
+                        existing.localFileLastModified == modified && !needsEpubReinspection
                     ) {
-                        val metadata = repositories.bookMetadataRepository.find(bookId)
+                        val metadata = existingMetadata
                         var repaired = false
                         val repairedBook = if (existing.number != number) {
                             repositories.bookRepository.save(existing.copy(number = number))
@@ -256,10 +262,7 @@ class LocalLibraryManager(
                             existing
                         }
                         if (metadata != null) {
-                            val repairedMetadata = metadata.copy(
-                                number = if (metadata.numberLock) metadata.number else number.toString(),
-                                numberSort = if (metadata.numberSortLock) metadata.numberSort else number.toFloat(),
-                            )
+                            val repairedMetadata = metadata.withLocalNumber(number)
                             if (repairedMetadata != metadata) {
                                 repositories.bookMetadataRepository.save(repairedMetadata)
                                 repaired = true
@@ -293,7 +296,7 @@ class LocalLibraryManager(
                         )
                         repositories.bookRepository.save(book)
                         repositories.bookMetadataRepository.save(
-                            OfflineBookMetadata(
+                            existingMetadata?.withLocalNumber(number) ?: OfflineBookMetadata(
                                 bookId = bookId,
                                 title = localFile.displayName.substringBeforeLast('.'),
                                 summary = "",
@@ -533,6 +536,11 @@ private fun extractBookNumber(name: String, fallback: Int): Int {
 
     return Regex("\\d+").findAll(stem).lastOrNull()?.value?.toIntOrNull() ?: fallback
 }
+
+private fun OfflineBookMetadata.withLocalNumber(number: Int): OfflineBookMetadata = copy(
+    number = if (numberLock) this.number else number.toString(),
+    numberSort = if (numberSortLock) this.numberSort else number.toFloat(),
+)
 
 private fun formatBytes(bytes: Long): String = when {
     bytes < 1024 -> "$bytes B"

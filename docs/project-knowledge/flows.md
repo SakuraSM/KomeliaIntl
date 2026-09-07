@@ -35,7 +35,7 @@ Risk points: partial files, cancellation, record/file divergence, missing error 
 1. A native app can prepare a local-only root user and media server, allowing startup without Komga credentials.
 2. The user grants a folder; Android persists the Storage Access Framework tree permission and desktop keeps the selected platform path.
 3. `LocalLibraryManager` recursively lists supported files, creates stable library/series/book identities from relative paths, and stores metadata in the existing offline database.
-4. Unchanged size and modified-time pairs are skipped; changed and new files are inspected; missing records are removed without deleting source files.
+4. Unchanged size and modified-time pairs are skipped unless a local EPUB has an older inspection version. EPUB inspection imports EPUB 3 navigation or EPUB 2 NCX, falls back to the spine when no TOC exists, and persists a byte-weighted position index. Reinspection keeps book IDs, metadata locks and reading progress; missing records are removed without deleting source files.
 5. Image/PDF pages and EPUB resources are served through the existing offline reader APIs. Local EPUB manifest links are resolved to the internal book-resource route before reaching either EPUB reader.
 6. Startup scanning and Android WorkManager discover later changes according to the stored scan interval.
 
@@ -53,6 +53,8 @@ Paged image loads belong to an explicit window of up to five spreads and ten pag
 Native decode, crop replacement, and resize operations share an image mutex across suspensions. Coroutine cancellation requests shutdown, but native images and source handles are released only after processing jobs complete. A single-parallelism dispatcher is not a substitute for that ownership boundary.
 
 Risk points: duplicate Back handlers, click-through overlays, drag-end taps, stale progress, system-edge conflicts, and unsafe-area overlap.
+
+Local EPUB positions describe approximate reading progress, not physical pages. Komga reads the cached positions service without scanning the publication before first paint; local progress matching accepts internal absolute resource URLs and archive-relative locators. Chapter scroll handoff is armed only by a single-finger vertical gesture and may finish after momentum settles. Touches originate inside the iframe, but the SDK scrolls the outer `main#iframe-wrapper`; use screen coordinates for gesture distance and the wrapper for scroll events and boundaries. It is disarmed after one navigation, cancellation, expiry or resource replacement, so initial short chapters cannot auto-skip.
 
 ## Server announcements and application updates
 

@@ -34,6 +34,8 @@ data class MediaExtensionEpub(
     val pageList: List<EpubTocEntry> = emptyList(),
     val isFixedLayout: Boolean = false,
     val positions: List<R2Locator> = emptyList(),
+    // Zero identifies legacy local imports. Remote caches keep their existing behavior.
+    val localInspectionVersion: Int = 0,
 
     // cached from komga response
     val manifest: WPPublication

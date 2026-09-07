@@ -84,6 +84,8 @@ For reader gesture changes, run the JVM Compose `ScalableContainerGestureTest` a
 
 ## Reader image lifetime, preloading, and OLED
 
+`ReaderTileFallbackTest` exercises the real tile pipeline with delayed full-frame generation: whole-page coverage survives zoom-out, previews are reused across zoom/pan, crop reload replaces preview pixels, and page close retires owned pixels once. `TileFallbackSizeTest` checks the 768-pixel longest-edge limit without upscaling small images. Android `AndroidReaderImageLifetimeTest` also checks real bitmap gap filling and translucent tile alpha; a preview must not be composited beneath already loaded transparent pixels. Use a synthetic high-resolution image for native decoding, rapid zoom/pan, and exit/re-entry checks. ONNX panel detection and reporter-device acceptance remain separate from renderer validation.
+
 `ReaderSystemBarsEffectTest` exercises the Compose reader lifecycle: hide both system bars during reading, restore them while controls are shown, hide again when controls close, and restore on disposal. Repeat with Android gesture navigation, three-button navigation and tablet-sized layouts; the mocked window contract does not prove OEM taskbar behavior.
 
 `RetainedPageLoadTest` in shared UI tests covers navigation cancellation, bounded spread windows, eviction, shutdown, and retry without discarding successful neighboring pages. `ThemeTest` checks OLED background, base surface, and dim surface independently.

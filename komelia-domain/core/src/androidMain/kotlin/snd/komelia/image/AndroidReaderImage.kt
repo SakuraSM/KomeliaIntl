@@ -201,12 +201,14 @@ class AndroidReaderImage(
             tiles.forEach { tile ->
                 if (tile.renderImage != null && !tile.renderImage.isRecycled && tile.isVisible) {
                     val bitmap: Bitmap = tile.renderImage
-                    drawContext.canvas.nativeCanvas.drawBitmap(
-                        bitmap,
-                        null,
-                        tile.displayRegion.toAndroidRectF(),
-                        Paint().apply { flags = paintFlags },
-                    )
+                    withTileFallbackClip(tile, tiles) {
+                        drawContext.canvas.nativeCanvas.drawBitmap(
+                            bitmap,
+                            null,
+                            tile.displayRegion.toAndroidRectF(),
+                            Paint().apply { flags = if (tile.isFallback) FILTER_BITMAP_FLAG else paintFlags },
+                        )
+                    }
 
 //                    drawContext.canvas.drawRect(
 //                        tile.displayRegion,

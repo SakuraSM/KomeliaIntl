@@ -247,17 +247,19 @@ class DesktopReaderImage(
             tiles.forEach { tile ->
                 if (tile.renderImage != null && !tile.renderImage.isClosed && tile.isVisible) {
                     val bitmap = tile.renderImage
-                    drawContext.canvas.skiaCanvas.drawImageRect(
-                        image = bitmap,
-                        src = Rect.makeWH(
-                            tile.size.width.toFloat(),
-                            tile.size.height.toFloat()
-                        ),
-                        dst = tile.displayRegion.toSkiaRect(),
-                        samplingMode = samplingMode,
-                        paint = null,
-                        strict = true
-                    )
+                    withTileFallbackClip(tile, tiles) {
+                        drawContext.canvas.skiaCanvas.drawImageRect(
+                            image = bitmap,
+                            src = Rect.makeWH(
+                                tile.size.width.toFloat(),
+                                tile.size.height.toFloat()
+                            ),
+                            dst = tile.displayRegion.toSkiaRect(),
+                            samplingMode = if (tile.isFallback) SamplingMode.LINEAR else samplingMode,
+                            paint = null,
+                            strict = true
+                        )
+                    }
 
                     if (showDebugGrid) {
                         drawContext.canvas.drawRect(

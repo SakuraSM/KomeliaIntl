@@ -46,10 +46,13 @@ npm run build
 
 ```shell
 cd komelia-epub-reader/komga-webui
+npm test
 npm run build
 ```
 
 `komga-webui` has no declared `check` script; its `build` script performs `vue-tsc --noEmit` before Vite.
+
+For local EPUB navigation, run offline `LocalEpubNavigationTest`, `ProgressMarkProgressionActionTest` and SQLite `LocalLibraryManagerIntegrationTest`. Cover EPUB 2/3 nested TOCs, position endpoints, absolute resource URL progress and reindexing an unchanged legacy book without losing locked metadata or saved progress. The package `npm test` covers slow swipes, post-touch momentum, short-chapter non-skipping, pinch/cancel, expiry and cleanup. Repeat the actual touch flow on Android; event-model tests are not device input proof.
 
 ## UI and interaction matrix
 

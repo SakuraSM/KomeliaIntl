@@ -2,6 +2,7 @@
   "name": "komga-vuetify3",
   "version": "0.0.0",
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "build_watch": "vue-tsc --noEmit && vite build --watch",

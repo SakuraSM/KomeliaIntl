@@ -328,6 +328,7 @@ import TocList from '@/components/TocList.vue'
 import {flattenToc} from '@/functions/toc'
 import ShortcutHelpDialog from '@/components/ShortcutHelpDialog.vue'
 import SettingsSelect from '@/components/SettingsSelect.vue'
+import {setupChapterScrollNavigation} from '@/functions/chapterScrollNavigation'
 import {createR2Progression, r2ProgressionToReadingPosition} from '@/functions/readium'
 import {useDisplay, useRtl} from "vuetify";
 import {EpubReaderSettings} from "@/types/epub-reader-settings";
@@ -601,7 +602,7 @@ const shortcutsHelp = computed(() => {
 
 const progressionTotalPercentage = computed(() => {
   const p = currentLocation.value?.locations?.totalProgression
-  if (p) return `${Math.round(p * 100)}%`
+  if (p !== undefined && Number.isFinite(p)) return `${Math.round(p * 100)}%`
   return ''
 })
 
@@ -811,7 +812,6 @@ function touchStart(e: TouchEvent) {
 
 function touchEnd(e: TouchEvent) {
   if (e.changedTouches.length !== 1) return
-  if (e.timeStamp - swipeStart.time > SWIPE_DURATION_MS) return
 
   const touch = e.changedTouches[0]
   const deltaX = touch.clientX - swipeStart.x
@@ -825,6 +825,7 @@ function touchEnd(e: TouchEvent) {
     return
   }
 
+  if (e.timeStamp - swipeStart.time > SWIPE_DURATION_MS) return
   if (absoluteX < SWIPE_DISTANCE_THRESHOLD || absoluteX < absoluteY * SWIPE_AXIS_RATIO) return
   const isNext = effectiveRtl.value ? deltaX > 0 : deltaX < 0
   isNext ? navigateForward() : navigateBackward()
@@ -844,12 +845,12 @@ function setupReaderContentSwipeNavigation(): void {
   const readerDocument = getReaderContentDocument()
   if (!readerDocument || !getReaderScrollElement()) return
 
-  readerDocument.addEventListener('touchstart', touchStart, {passive: true})
-  readerDocument.addEventListener('touchend', touchEndAtReaderContentBoundary, {passive: false})
-  readerContentSwipeCleanup = () => {
-    readerDocument.removeEventListener('touchstart', touchStart)
-    readerDocument.removeEventListener('touchend', touchEndAtReaderContentBoundary)
-  }
+  readerContentSwipeCleanup = setupChapterScrollNavigation({
+    document: readerDocument,
+    scrollTarget: getReaderScrollElement(),
+    isEnabled: () => verticalScroll.value,
+    navigateAtBoundary: (deltaY) => navigateAtVerticalScrollBoundary(deltaY, getReaderScrollElement()),
+  })
 }
 
 function cleanupReaderContentSwipeNavigation(): void {
@@ -867,37 +868,16 @@ function getReaderContentDocument(): Document | undefined {
 }
 
 function getReaderScrollElement(): Element | undefined {
-  const readerDocument = getReaderContentDocument()
-  return readerDocument?.scrollingElement
-      ?? readerDocument?.documentElement
-      ?? readerDocument?.body
-      ?? undefined
-}
-
-function touchEndAtReaderContentBoundary(e: TouchEvent): void {
-  if (!verticalScroll.value) return
-  if (e.changedTouches.length !== 1) return
-  if (e.timeStamp - swipeStart.time > SWIPE_DURATION_MS) return
-
-  const touch = e.changedTouches[0]
-  const deltaX = touch.clientX - swipeStart.x
-  const deltaY = touch.clientY - swipeStart.y
-  const absoluteX = Math.abs(deltaX)
-  const absoluteY = Math.abs(deltaY)
-  if (absoluteY < SWIPE_DISTANCE_THRESHOLD || absoluteY < absoluteX * SWIPE_AXIS_RATIO) return
-
-  if (navigateAtVerticalScrollBoundary(deltaY, getReaderScrollElement())) {
-    e.preventDefault()
-  }
+  return document.querySelector('main#iframe-wrapper') ?? undefined
 }
 
 function navigateAtVerticalScrollBoundary(deltaY: number, scrollElement?: Element): boolean {
-  if (deltaY < 0 && (d2Reader.value.atEnd || (scrollElement !== undefined && isScrollAtEnd(scrollElement)))) {
+  if (deltaY < 0 && (scrollElement !== undefined ? isScrollAtEnd(scrollElement) : d2Reader.value.atEnd)) {
     navigateForward()
     return true
   }
 
-  if (deltaY > 0 && (d2Reader.value.atStart || (scrollElement !== undefined && isScrollAtStart(scrollElement)))) {
+  if (deltaY > 0 && (scrollElement !== undefined ? isScrollAtStart(scrollElement) : d2Reader.value.atStart)) {
     navigateBackward()
     return true
   }
@@ -977,10 +957,13 @@ async function setupState(currentBookId: string) {
   bookId.value = currentBookId
   book.value = await externalFunctions.bookGet(currentBookId)
   series.value = await externalFunctions.getOneSeries(book.value.seriesId)
-  const isLocalPublication = book.value.libraryId.startsWith('local-library-')
 
   const progression = await externalFunctions.bookGetProgression(currentBookId)
   const serverUrl = await externalFunctions.getServerUrl()
+  const positionsUrl = new URL(`${serverUrl}/api/v1/books/${currentBookId}/positions`)
+  const canUsePositions = await hasUsablePositionsService({
+    isLocal: book.value.libraryId.startsWith('local-library-'), url: positionsUrl,
+  })
   let initialLocation: ReadingPosition | undefined = undefined
   if (progression != undefined) {
     initialLocation = r2ProgressionToReadingPosition(currentBookId, progression)
@@ -1048,8 +1031,7 @@ async function setupState(currentBookId: string) {
       enableContentProtection: false,
       enableMediaOverlays: false,
       enablePageBreaks: false,
-      // Generating positions walks the complete publication before the first resource is shown.
-      // Local books persist their exact locator instead, keeping first paint independent of book size.
+      // Local positions are cached by background library inspection; never scan the book before first paint.
       autoGeneratePositions: false,
       enableLineFocus: false,
       customKeyboardEvents: false,
@@ -1057,9 +1039,7 @@ async function setupState(currentBookId: string) {
       enableCitations: false,
       enableConsumption: false,
     },
-    services: isLocalPublication ? {} : {
-      positions: new URL(`${serverUrl}/api/v1/books/${currentBookId}/positions`),
-    },
+    services: canUsePositions ? {positions: positionsUrl} : {},
     api: {
       getContent: externalFunctions.d2ReaderGetContent,
       getContentBytesLength: externalFunctions.d2ReaderGetContentBytesLength,
@@ -1103,6 +1083,19 @@ function handleResourceReady(): void {
   scheduleReaderContentSwipeNavigationSetup()
   const loadGeneration = readerLoadGeneration
   void hideReaderLoadingAfterFirstPaint(loadGeneration)
+}
+
+async function hasUsablePositionsService(source: {isLocal: boolean; url: URL}): Promise<boolean> {
+  if (!source.isLocal) return true
+  // An old book may be opened before its background rescan completes. An empty positions
+  // array breaks the reader's locator path; retain positionless reading until it is indexed.
+  const response = await fetch(source.url.href)
+  if (!response.ok) throw new Error(`Unable to load local EPUB positions: ${response.status}`)
+  const result: unknown = await response.json()
+  if (typeof result !== 'object' || result === null || !('positions' in result) || !Array.isArray(result.positions)) {
+    throw new Error('Invalid local EPUB positions response')
+  }
+  return result.positions.length > 0
 }
 
 async function hideReaderLoadingAfterFirstPaint(loadGeneration: number): Promise<void> {

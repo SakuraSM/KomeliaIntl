@@ -13,6 +13,18 @@ import kotlin.time.Instant
 
 class ProgressMarkProgressionActionTest {
     @Test
+    fun indexedLocalEpubMatchesAbsoluteResourceUrlAndInterpolatesProgress() {
+        val positions = listOf(
+            R2Locator("OPS/chapter one.xhtml", "application/xhtml+xml", locations = R2Location(progression = 0f, totalProgression = 0.2f)),
+            R2Locator("OPS/chapter one.xhtml", "application/xhtml+xml", locations = R2Location(progression = 1f, totalProgression = 0.6f)),
+        )
+        val locator = R2Locator("http://komelia/api/v1/books/local-book/resource/OPS/chapter%20one.xhtml#start", "application/xhtml+xml",
+            locations = R2Location(progression = 0.5f))
+        assertEquals(0.4f, localEpubTotalProgression(positions, locator), absoluteTolerance = 0.000001f)
+        assertEquals(0.6f, localEpubTotalProgression(positions, locator.copy(locations = R2Location(progression = 1f))), absoluteTolerance = 0.000001f)
+    }
+
+    @Test
     fun positionlessLocalEpubPersistsTheReaderLocator() {
         val locator = R2Locator(
             href = "chapter-01.xhtml",

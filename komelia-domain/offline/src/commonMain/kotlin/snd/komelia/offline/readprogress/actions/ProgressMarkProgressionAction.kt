@@ -11,6 +11,7 @@ import snd.komelia.offline.readprogress.OfflineReadProgressRepository
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.MediaProfile
 import snd.komga.client.book.R2Progression
+import snd.komga.client.book.R2Locator
 import snd.komga.client.sse.KomgaEvent
 import snd.komga.client.user.KomgaUserId
 import kotlin.math.roundToInt
@@ -61,7 +62,15 @@ class ProgressMarkProgressionAction(
 
                     val extension = media.extension
                     check(extension is MediaExtensionEpub) { "Epub extension not found" }
-                    if (extension.positions.isEmpty()) {
+                    if (extension.localInspectionVersion > 0 && extension.positions.isNotEmpty()) {
+                        val total = localEpubTotalProgression(extension.positions, newProgression.locator)
+                        positionlessEpubProgress(
+                            bookId, userId, media.pageCount,
+                            newProgression.copy(locator = newProgression.locator.copy(
+                                locations = newProgression.locator.locations?.copy(totalProgression = total),
+                            )),
+                        )
+                    } else if (extension.positions.isEmpty()) {
                         positionlessEpubProgress(
                             bookId = bookId,
                             userId = userId,
@@ -116,6 +125,18 @@ class ProgressMarkProgressionAction(
 
         komgaEvents.emit(KomgaEvent.ReadProgressChanged(bookId, userId))
     }
+}
+
+internal fun localEpubTotalProgression(positions: List<R2Locator>, locator: R2Locator): Float {
+    val resourceHref = if ("://" in locator.href) locator.href.substringAfter("/resource/") else locator.href
+    val href = resourceHref.substringBefore('#').decodeURLPart()
+    val resourcePositions = positions.filter { it.href.decodeURLPart() == href }
+    require(resourcePositions.isNotEmpty()) { "EPUB resource is absent from the local position index" }
+    val progression = requireNotNull(locator.locations?.progression)
+    require(progression.isFinite() && progression in 0f..1f) { "Invalid EPUB resource progression" }
+    val start = requireNotNull(resourcePositions.first().locations?.totalProgression)
+    val end = requireNotNull(resourcePositions.last().locations?.totalProgression)
+    return start + (end - start) * progression
 }
 
 internal fun positionlessEpubProgress(

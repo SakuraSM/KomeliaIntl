@@ -394,6 +394,7 @@
     <string name="book_remote_unavailable">Remote Unavailable</string>
     <string name="book_local_download_outdated">Local download outdated</string>
     <string name="book_number_and_page_count">Book %1$s · %2$s pages</string>
+    <string name="book_number_epub">Book %1$s · EPUB</string>
     <string name="book_pages">%1$s pages</string>
     <string name="book_release_date">Release date:</string>
     <string name="book_read_progress">Read progress:</string>

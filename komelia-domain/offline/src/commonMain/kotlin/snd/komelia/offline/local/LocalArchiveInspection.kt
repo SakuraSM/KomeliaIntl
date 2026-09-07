@@ -1,5 +1,6 @@
 package snd.komelia.offline.local
 
+import io.ktor.http.decodeURLPart
 import snd.komelia.offline.media.model.EpubTocEntry
 import snd.komelia.offline.media.model.MediaExtensionEpub
 import snd.komelia.offline.media.model.OfflineBookPage
@@ -112,6 +113,17 @@ internal fun inspectEpubArchive(
             .find(opf)?.groupValues?.get(1)]
         ?: manifest.values.firstOrNull { it.id.equals("cover", ignoreCase = true) }
     val cover = coverItem?.href?.takeIf(entries::contains)?.let(readEntry)
+    val readResource: (String) -> ByteArray = { href ->
+        readEntry(if (href in entries) href else href.decodeURLPart())
+    }
+    val navigationItem = manifest.values.firstOrNull { "nav" in it.properties.split(Regex("\\s+")) }
+    val navigation = navigationItem?.let { parseEpubNavigation(readResource(it.href).decodeToString(), it.href) } ?: EpubNavigation()
+    val ncxItem = manifest.values.firstOrNull { it.mediaType == "application/x-dtbncx+xml" }
+    val toc = navigation.toc.ifEmpty {
+        ncxItem?.let { parseEpubNavigation(readResource(it.href).decodeToString(), it.href).toc }.orEmpty()
+    }.ifEmpty {
+        readingOrder.map { EpubTocEntry(title = it.href.orEmpty().substringAfterLast('/').substringBeforeLast('.'), href = it.href) }
+    }
 
     val publication = WPPublication(
         links = emptyList(),
@@ -123,13 +135,20 @@ internal fun inspectEpubArchive(
         ),
         readingOrder = readingOrder,
         resources = resources,
+        toc = toc.map { it.toPublicationLink() },
+        landmarks = navigation.landmarks.map { it.toPublicationLink() },
+        pageList = navigation.pageList.map { it.toPublicationLink() },
     )
     return LocalBookInspection(
         mediaType = "application/epub+zip",
         mediaProfile = MediaProfile.EPUB,
         pages = emptyList(),
         extension = MediaExtensionEpub(
-            toc = emptyList<EpubTocEntry>(),
+            toc = toc,
+            landmarks = navigation.landmarks,
+            pageList = navigation.pageList,
+            positions = buildLocalEpubPositions(readingOrder, readResource),
+            localInspectionVersion = LOCAL_EPUB_INSPECTION_VERSION,
             isFixedLayout = false,
             manifest = publication,
         ),
@@ -146,7 +165,7 @@ private fun xmlText(xml: String, tag: String): String? =
     Regex("<${Regex.escape(tag)}(?:\\s[^>]*)?>(.*?)</${Regex.escape(tag)}>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
         .find(xml)?.groupValues?.get(1)?.replace(Regex("<[^>]+>"), "")?.decodeXmlEntities()?.trim()
 
-private fun String.decodeXmlEntities(): String =
+internal fun String.decodeXmlEntities(): String =
     replace(Regex("&#x([0-9a-fA-F]+);")) { match ->
         match.groupValues[1].toIntOrNull(16)?.toChar()?.toString() ?: match.value
     }
@@ -159,7 +178,7 @@ private fun String.decodeXmlEntities(): String =
         .replace("&gt;", ">")
         .replace("&amp;", "&")
 
-private fun resolveArchivePath(parent: String, child: String): String {
+internal fun resolveArchivePath(parent: String, child: String): String {
     val parts = (if (parent.isBlank()) child else "$parent/$child").replace('\\', '/').split('/')
     val resolved = mutableListOf<String>()
     parts.forEach { part ->

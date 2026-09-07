@@ -35,6 +35,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_last_read
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_links
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_local_download_outdated
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_number_and_page_count
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_number_epub
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_percentage_read_pages_left
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_publisher
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_read_progress
@@ -239,9 +240,11 @@ fun BookInfoRow(
 
         SelectionContainer {
             Text(
-                text = stringResource(
-                    Res.string.book_number_and_page_count, book.metadata.number, book.media.pagesCount
-                )
+                text = if (book.media.mediaType == "application/epub+zip" && book.media.pagesCount == 0) {
+                    stringResource(Res.string.book_number_epub, book.metadata.number)
+                } else {
+                    stringResource(Res.string.book_number_and_page_count, book.metadata.number, book.media.pagesCount)
+                }
             )
         }
 
@@ -260,7 +263,7 @@ fun BookInfoRow(
                 val readProgress = book.readProgress
                 val pagesCount = book.media.pagesCount
                 if (readProgress != null) {
-                    if (!readProgress.completed) {
+                    if (!readProgress.completed && pagesCount > 0) {
                         val (percentage, pagesLeft) = remember(pagesCount, readProgress) {
                             val safePageCount = pagesCount.coerceAtLeast(1)
                             val currentPage = readProgress.page.coerceIn(0, safePageCount)

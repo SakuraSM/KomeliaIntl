@@ -136,7 +136,7 @@ abstract class TilingReaderImage(
                 data == null -> this.painter.value = null
                 data.frames.size == 1 -> {
                     this.painter.value = createTilePainter(
-                        tiles = data.frames.first().tiles,
+                        tiles = listOfNotNull(data.fallback) + data.frames.first().tiles,
                         displaySize = data.displaySize,
                         scaleFactor = data.scaleFactor
                     )
@@ -330,7 +330,6 @@ abstract class TilingReaderImage(
                 dstWidth,
                 dstHeight,
             )
-            val previousTiles = frameData.value?.frames?.flatMap { it.tiles } ?: emptyList()
             val frames = resizedImage.frames.mapIndexed { i, renderImage ->
                 ImageFrame(
                     tiles = listOf(
@@ -349,12 +348,15 @@ abstract class TilingReaderImage(
                     delay = resizedImage.delays?.getOrNull(i) ?: defaultFrameDelay
                 )
             }
-            frameData.value = FrameData(
+            publishFrame(FrameData(
                 frames = frames,
                 displaySize = displayArea,
-                scaleFactor = scaleFactor
-            )
-            closeTileBitmaps(previousTiles)
+                scaleFactor = scaleFactor,
+                sourceImage = image,
+                fallback = frameData.value?.takeIf { it.sourceImage === image }?.fallback?.copy(
+                    displayRegion = Rect(0f, 0f, displayArea.width.toFloat(), displayArea.height.toFloat())
+                ),
+            ))
         }.also { logger.info { "page ${pageId.pageNumber} completed full resize to $dstWidth x $dstHeight in $it" } }
 
     }
@@ -372,6 +374,7 @@ abstract class TilingReaderImage(
         val timeSource = TimeSource.Monotonic
         val start = timeSource.markNow()
 
+        ensureTileFallback(image, displayArea, scaleFactor)
         val visibilityWindow = tileVisibilityWindow(displayRegion)
 
         val oldTiles = frameData.value?.frames?.first()?.tiles ?: emptyList()
@@ -438,19 +441,54 @@ abstract class TilingReaderImage(
         }
 
         if (addedNewTiles || newTiles.size != oldTiles.size) {
-            frameData.value = FrameData(
+            publishFrame(FrameData(
                 frames = listOf(ImageFrame(newTiles, 0)),
                 displaySize = displayArea,
-                scaleFactor = scaleFactor
-            )
-            // A raster upsampling mode can change the source tile grid at the same zoom level.
-            closeTileBitmaps(oldTiles.filter { old -> newTiles.none { it === old } })
+                scaleFactor = scaleFactor,
+                sourceImage = image,
+                fallback = frameData.value?.fallback,
+            ))
 
             val end = timeSource.markNow()
             logger.info { "page ${pageId.pageNumber} completed tiled resize in ${end - start};  ${newTiles.size} tiles" }
         }
         lastUsedScaleFactor = scaleFactor
 
+    }
+
+    // Generate once per processed static image, only when high-resolution tiling is needed.
+    // Publish before waiting for tiles so every outgoing painter already covers the page.
+    private suspend fun ensureTileFallback(image: KomeliaImage, displayArea: IntSize, scaleFactor: Double) {
+        val previous = frameData.value
+        val sameImage = previous?.sourceImage === image
+        if (sameImage && previous?.fallback != null && previous.displaySize == displayArea) return
+        val region = Rect(0f, 0f, displayArea.width.toFloat(), displayArea.height.toFloat())
+        val existing = previous?.takeIf { sameImage }?.fallback
+        val fallback = if (existing != null) existing.copy(displayRegion = region) else {
+            val size = tileFallbackSize(IntSize(image.width, image.pageHeight))
+            val resized = resizeImage(image, size.width, size.height)
+            ReaderImageTile(
+                size = IntSize(resized.width, resized.height),
+                displayRegion = region,
+                isVisible = true,
+                renderImage = resized.frames.single(),
+                isFallback = true,
+            )
+        }
+        val frames = if (sameImage && previous?.displaySize == displayArea) previous.frames
+        else listOf(ImageFrame(emptyList(), 0))
+        publishFrame(FrameData(frames, displayArea, scaleFactor, image, fallback))
+    }
+
+    private fun publishFrame(next: FrameData) {
+        val previousTiles = frameData.value?.allTiles().orEmpty()
+        val retainedTiles = next.allTiles()
+        frameData.value = next
+        // Fallback geometry can change without replacing its pixels. Compare pixel ownership,
+        // not tile wrappers, and never retire a preview reused by the next full/tiled frame.
+        closeTileBitmaps(previousTiles.filter { old ->
+            retainedTiles.none { it.renderImage === old.renderImage }
+        })
     }
 
     override fun close() {
@@ -463,8 +501,7 @@ abstract class TilingReaderImage(
             runCatching {
                 try {
                     releaseImages()
-                    frameData.value?.frames
-                        ?.flatMap { it.tiles }
+                    frameData.value?.allTiles()
                         ?.let { closeTileBitmaps(it) }
                 } finally {
                     frameData.value = null
@@ -513,6 +550,7 @@ abstract class TilingReaderImage(
         val displayRegion: Rect,
         val isVisible: Boolean,
         val renderImage: RenderImage?,
+        val isFallback: Boolean = false,
     )
 
     data class ReaderImageData(
@@ -530,11 +568,24 @@ abstract class TilingReaderImage(
         val frames: List<ImageFrame>,
         val displaySize: IntSize,
         val scaleFactor: Double,
-    )
+        val sourceImage: KomeliaImage,
+        val fallback: ReaderImageTile? = null,
+    ) {
+        fun allTiles(): List<ReaderImageTile> = listOfNotNull(fallback) + frames.flatMap { it.tiles }
+    }
 
     data class ImageFrame(
         val tiles: List<ReaderImageTile>,
         val delay: Long
+    )
+}
+
+internal fun tileFallbackSize(imageSize: IntSize): IntSize {
+    require(imageSize.width > 0 && imageSize.height > 0)
+    val scale = minOf(1.0, 768.0 / maxOf(imageSize.width, imageSize.height))
+    return IntSize(
+        (imageSize.width * scale).roundToInt().coerceAtLeast(1),
+        (imageSize.height * scale).roundToInt().coerceAtLeast(1),
     )
 }
 

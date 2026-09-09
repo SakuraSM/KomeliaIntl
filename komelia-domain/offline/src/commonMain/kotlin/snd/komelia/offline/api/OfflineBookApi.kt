@@ -1,6 +1,8 @@
 package snd.komelia.offline.api
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import snd.komelia.komga.api.KomgaBookApi
@@ -266,7 +268,7 @@ class OfflineBookApi(
         val book = bookRepository.get(bookId)
         val media = mediaRepository.get(bookId)
 
-        return fileContentExtractors.getBookPage(book, media, page)
+        return fileContentExtractors.getBookPage(book, media, page, currentCoroutineContext()::ensureActive)
     }
 
     // avoid double decode/encode and get raw image, resize is handled in client
@@ -277,7 +279,7 @@ class OfflineBookApi(
         val book = bookRepository.get(bookId)
         val media = mediaRepository.get(bookId)
 
-        return fileContentExtractors.getBookPage(book, media, page)
+        return fileContentExtractors.getBookPage(book, media, page, currentCoroutineContext()::ensureActive)
     }
 
     override suspend fun getReadiumProgression(bookId: KomgaBookId): R2Progression? {
@@ -311,7 +313,7 @@ class OfflineBookApi(
         val book = bookRepository.get(bookId)
         val media = mediaRepository.get(bookId)
         withContext(Dispatchers.Default) {
-            fileContentExtractors.prepareEpub(book, media)
+            fileContentExtractors.prepareEpub(book, media, currentCoroutineContext()::ensureActive)
         }
         return when (val extension = media.extension) {
             is MediaExtensionEpub -> if (book.url.startsWith("local://")) {
@@ -331,7 +333,7 @@ class OfflineBookApi(
         val media = mediaRepository.get(bookId)
         return withContext(Dispatchers.Default) {
             when (media.mediaProfile) {
-                MediaProfile.EPUB -> fileContentExtractors.getFileContent(book, media, resourceName)
+                MediaProfile.EPUB -> fileContentExtractors.getFileContent(book, media, resourceName, currentCoroutineContext()::ensureActive)
                 else -> throw IllegalStateException("Unsupported media profile ${media.mediaProfile}")
             }
         }

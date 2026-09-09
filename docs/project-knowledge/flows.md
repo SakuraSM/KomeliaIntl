@@ -41,7 +41,13 @@ Risk points: partial files, cancellation, record/file divergence, missing error 
 
 Risk points: revoked folder permissions, unstable IDs after moving files, archive path encoding, relative EPUB resources, duplicate scans, unsupported desktop PDF extraction, and accidentally treating local source files as app-owned cache.
 
+Android import and archive reading share `AndroidZipArchiveOpener`. Seekable files are read directly. Providers that cannot seek or expose a usable length use an app-private temporary copy. `ArchiveScratchSpace` shares reservations across import and reading, with 1 GiB per file, 2 GiB total, and a 128 MiB free-space reserve. Cancellation, parse failure, and reader-cache eviction release owned copies; initialization removes only this feature's orphan files. Permission and corrupt-ZIP failures are not copy-retry triggers. Per-book import failures remain visible in the local-folder screen and offline logs.
+
+Local chapter labels and `metadata.numberSort` preserve decimal values such as `1.5`. The integer book position stays separate. Rescanning unchanged books repairs unlocked metadata without reopening archives or changing book identity and progress.
+
 ## Reader navigation
+
+Online Komga sibling navigation uses the remote chapter directory even when the current book has cached content. Local-source books and explicit offline mode use the offline directory. Online read lists keep their own order; the existing offline series fallback remains unchanged. A sibling lookup or page-list failure is a retryable state, not the end of a series. Retrying updates neighbouring books without resetting the current book, page, or zoom.
 
 1. Detail or library navigation opens an image, PDF, or EPUB reader with a stable content/progress identity.
 2. The reader distinguishes tap zones, drag/swipe gestures, controls, and system navigation.
@@ -63,6 +69,10 @@ Local EPUB positions describe approximate reading progress, not physical pages. 
 Server settings announcements use only the active Komga session's `KomgaAnnouncementsApi`. A failed server request is an error, not an empty feed or a fallback to GitHub release notes. Application version checks and Komelia release notes remain under App settings / App updates. Keep the existing server-admin navigation gate and read-status API unchanged.
 
 ## Localization
+
+Poster grids share `posterGridCells`, including loading placeholders and the settings preview. Compact and medium mobile layouts use the existing card-width preference as density: the default 240 gives three columns, bounded by actual width and touch-target size. Larger mobile layouts, desktop, and Web retain adaptive minimum widths. No additional preference or migration is needed.
+
+Settings updates serialize the read-transform-save-publish sequence. Card-size drag events coalesce to the latest value and finish an in-flight save when leaving the settings screen. An earlier database write must not overwrite the final slider position or another preference.
 
 1. Persist `SYSTEM`, `EN`, or `ZH_CN` using the stable setting values.
 2. Apply locale before the root resource environment is composed; Wasm may reload after persistence.

@@ -89,7 +89,7 @@ fun BoxScope.PanelsReaderContent(
         ScalableContainer(scaleState = screenScaleState) {
             val transitionPage = panelsReaderState.transitionPage.collectAsState().value
             if (transitionPage != null) {
-                TransitionPage(transitionPage)
+                TransitionPage(transitionPage, panelsReaderState.readerState)
             } else {
                 page?.let {
                     Box(contentAlignment = Alignment.Center) {
@@ -107,7 +107,7 @@ fun BoxScope.PanelsReaderContent(
 
 
 @Composable
-private fun TransitionPage(page: TransitionPage) {
+private fun TransitionPage(page: TransitionPage, readerState: snd.komelia.ui.reader.image.ReaderState) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -124,33 +124,12 @@ private fun TransitionPage(page: TransitionPage) {
                 }
                 Spacer(Modifier.size(50.dp))
 
-                if (page.nextBook != null) {
-                    Column {
-                        Text(stringResource(Res.string.reader_next_book), style = MaterialTheme.typography.bodyMedium)
-                        Text(
-                            page.nextBook.metadata.title,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
-                } else {
-                    Text(stringResource(Res.string.reader_no_next_book))
-                }
+                snd.komelia.ui.reader.image.common.ReaderSiblingContent(readerState, next = true)
 
             }
 
             is BookStart -> {
-                if (page.previousBook != null) {
-                    Column {
-                        Text(stringResource(Res.string.reader_previous_book), style = MaterialTheme.typography.bodyMedium)
-                        Text(
-                            page.previousBook.metadata.title,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
-                } else {
-                    Text(stringResource(Res.string.reader_no_previous_book))
-
-                }
+                snd.komelia.ui.reader.image.common.ReaderSiblingContent(readerState, next = false)
                 Spacer(Modifier.size(50.dp))
                 Column {
                     Text(stringResource(Res.string.reader_current_book), style = MaterialTheme.typography.bodyMedium)

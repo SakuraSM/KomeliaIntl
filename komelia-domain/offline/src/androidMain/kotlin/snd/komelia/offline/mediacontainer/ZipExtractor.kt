@@ -1,60 +1,62 @@
 package snd.komelia.offline.mediacontainer
 
-import io.github.vinceglb.filekit.AndroidFile
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.context
 import io.ktor.http.decodeURLPart
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
-import org.apache.commons.compress.archivers.zip.ZipFile
 import java.util.LinkedHashMap
 import kotlin.sequences.asSequence
 
-class ZipExtractor {
+class ZipExtractor(
+    private val opener: AndroidZipArchiveOpener = AndroidZipArchiveOpener(FileKit.context),
+) : java.io.Closeable {
     private val archiveLock = Any()
-    private val openArchives = LinkedHashMap<String, ZipFile>(MAX_OPEN_ARCHIVES, 0.75f, true)
+    private val openArchives = LinkedHashMap<String, OpenedZipArchive>(MAX_OPEN_ARCHIVES, 0.75f, true)
 
-    fun prepare(file: PlatformFile) = synchronized(archiveLock) {
+    fun prepare(file: PlatformFile, checkCancelled: () -> Unit = ::checkArchiveThread) = synchronized(archiveLock) {
+        checkCancelled()
         val key = file.toString()
         openArchives.remove(key)?.close()
-        openArchives[key] = openArchive(file)
+        trimOpenArchives(MAX_OPEN_ARCHIVES - 1)
+        openArchives[key] = openArchive(file, checkCancelled)
         trimOpenArchives()
     }
 
-    fun getEntryBytes(file: PlatformFile, entryName: String): ByteArray {
+    fun getEntryBytes(file: PlatformFile, entryName: String, checkCancelled: () -> Unit = ::checkArchiveThread): ByteArray {
         val bytes = synchronized(archiveLock) {
             val key = file.toString()
-            val zip = openArchives[key] ?: openArchive(file).also {
-                openArchives[key] = it
-                trimOpenArchives()
+            try {
+                checkCancelled()
+                val zip = (openArchives[key] ?: run {
+                    // Release the eldest copy before reserving space for the next one.
+                    trimOpenArchives(MAX_OPEN_ARCHIVES - 1)
+                    openArchive(file, checkCancelled).also { openArchives[key] = it }
+                }).zip
+                val entry = zip.getEntry(entryName)
+                    ?: findBestMatch(zip.entries.asSequence().filterNot { it.isDirectory }.toList(), entryName)
+                entry?.let { zip.getInputStream(it).use { stream -> stream.readBytes() } }.also { checkCancelled() }
+            } catch (error: Throwable) {
+                runCatching { openArchives.remove(key)?.close() }.exceptionOrNull()?.let(error::addSuppressed)
+                throw error
             }
-            val entry = zip.getEntry(entryName)
-                ?: findBestMatch(zip.entries.asSequence().filterNot { it.isDirectory }.toList(), entryName)
-
-            entry
-                ?.let { entry -> zip.getInputStream(entry).use { it.readBytes() } }
         }
 
         if (bytes == null) error("zip entry does not exist: $entryName")
         return bytes
     }
 
-    private fun openArchive(file: PlatformFile): ZipFile {
-        val builder = ZipFile.builder()
-            .setUseUnicodeExtraFields(true)
-            .setIgnoreLocalFileHeader(true)
+    private fun openArchive(file: PlatformFile, checkCancelled: () -> Unit): OpenedZipArchive =
+        opener.open(file, checkCancelled = checkCancelled)
 
-        when (val androidFile = file.androidFile) {
-            is AndroidFile.FileWrapper -> builder.file = androidFile.file
-            is AndroidFile.UriWrapper -> builder.setSeekableByteChannel(
-                SafSeekableReadByteChannel(androidFile.uri, FileKit.context),
-            )
-        }
-        return builder.get()
+    override fun close() = synchronized(archiveLock) {
+        val archives = openArchives.values.toList()
+        openArchives.clear()
+        archives.forEach { it.close() }
     }
 
-    private fun trimOpenArchives() {
-        while (openArchives.size > MAX_OPEN_ARCHIVES) {
+    private fun trimOpenArchives(maximumSize: Int = MAX_OPEN_ARCHIVES) {
+        while (openArchives.size > maximumSize) {
             val eldest = openArchives.entries.iterator().next()
             val archive = eldest.value
             openArchives.remove(eldest.key)

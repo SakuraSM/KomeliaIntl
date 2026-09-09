@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.parcelize)
 }
 
@@ -24,6 +26,9 @@ kotlin {
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
+        // Common tests reference Compose geometry through the reader. Package the Skiko
+        // runtime just as the shared UI test target does.
+        binaries.executable()
     }
     compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
 
@@ -35,7 +40,11 @@ kotlin {
             languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
             languageSettings.optIn("kotlin.js.ExperimentalWasmJsInterop")
         }
-        commonTest.dependencies { implementation(kotlin("test")) }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            // Match the Compose/Skiko version used by the consuming UI in browser tests.
+            implementation(libs.compose.foundation)
+        }
 
         commonMain.dependencies {
             api(projects.komeliaDomain.komgaApi)

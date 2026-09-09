@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -66,9 +65,7 @@ import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
-import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
-import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.collection.SeriesCollectionsContent
 import snd.komelia.ui.collection.SeriesCollectionsState
 import snd.komelia.ui.common.TagList
@@ -124,7 +121,6 @@ fun SeriesContent(
     val layout = LocalKomeliaLayout.current
     val gridMinWidth = booksState.cardWidth.collectAsState().value
     val width = LocalWindowWidth.current
-    val fixedColumnCount = posterColumnCount(LocalPlatform.current, width)
     val booksLoadState = booksState.state.collectAsState().value
     val bookMenuActions = remember { booksState.bookMenuActions() }
 
@@ -178,7 +174,7 @@ fun SeriesContent(
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyVerticalGrid(
                 state = scrollState,
-                columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(gridMinWidth),
+                columns = snd.komelia.ui.common.itemlist.posterGridCells(gridMinWidth),
                 horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
                 verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
                 contentPadding = PaddingValues(

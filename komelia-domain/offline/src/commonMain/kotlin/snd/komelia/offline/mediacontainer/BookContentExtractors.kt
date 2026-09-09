@@ -21,7 +21,8 @@ class BookContentExtractors(
     fun getBookPage(
         book: OfflineBook,
         media: OfflineMedia,
-        page: Int
+        page: Int,
+        checkCancelled: () -> Unit = {},
     ): ByteArray {
 
         if (media.status != KomgaMediaStatus.READY) {
@@ -36,12 +37,12 @@ class BookContentExtractors(
 
         return when (media.mediaProfile) {
             MediaProfile.DIVINA -> getDivinaExtractorOrThrow(media)
-                .getEntryBytes(book.fileDownloadPath, media.pages[page - 1].fileName)
+                .getEntryBytes(book.fileDownloadPath, media.pages[page - 1].fileName, checkCancelled)
 
             MediaProfile.EPUB -> {
                 if (media.epubDivinaCompatible) {
                     if (epubExtractor == null) throw IllegalStateException("Epub content is not supported")
-                    epubExtractor.getEntryBytes(book.fileDownloadPath, media.pages[page - 1].fileName)
+                    epubExtractor.getEntryBytes(book.fileDownloadPath, media.pages[page - 1].fileName, checkCancelled)
                 } else throw IllegalStateException("Epub profile does not support getting page content")
             }
 
@@ -59,24 +60,24 @@ class BookContentExtractors(
         }
     }
 
-    fun getFileContent(book: OfflineBook, media: OfflineMedia, filename: String): ByteArray {
+    fun getFileContent(book: OfflineBook, media: OfflineMedia, filename: String, checkCancelled: () -> Unit = {}): ByteArray {
         return when (media.mediaProfile) {
             MediaProfile.DIVINA -> getDivinaExtractorOrThrow(media)
-                .getEntryBytes(book.fileDownloadPath, filename)
+                .getEntryBytes(book.fileDownloadPath, filename, checkCancelled)
 
             MediaProfile.EPUB -> {
                 if (epubExtractor == null) throw IllegalStateException("Extractor does not support extraction of files")
-                epubExtractor.getEntryBytes(book.fileDownloadPath, filename)
+                epubExtractor.getEntryBytes(book.fileDownloadPath, filename, checkCancelled)
             }
 
             MediaProfile.PDF, null -> throw IllegalStateException("Extractor does not support extraction of files")
         }
     }
 
-    fun prepareEpub(book: OfflineBook, media: OfflineMedia) {
+    fun prepareEpub(book: OfflineBook, media: OfflineMedia, checkCancelled: () -> Unit = {}) {
         if (media.mediaProfile != MediaProfile.EPUB) return
         checkNotNull(epubExtractor) { "Extractor does not support extraction of files" }
-            .prepare(book.fileDownloadPath)
+            .prepare(book.fileDownloadPath, checkCancelled)
     }
 
     private fun getDivinaExtractorOrThrow(media: OfflineMedia): DivinaExtractor {

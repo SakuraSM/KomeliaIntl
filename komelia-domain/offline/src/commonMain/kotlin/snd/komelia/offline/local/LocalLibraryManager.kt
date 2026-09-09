@@ -2,6 +2,9 @@ package snd.komelia.offline.local
 
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +23,8 @@ import snd.komelia.offline.book.model.OfflineThumbnailBook
 import snd.komelia.offline.library.model.OfflineLibrary
 import snd.komelia.offline.media.model.OfflineMedia
 import snd.komelia.offline.media.model.MediaExtensionEpub
+import snd.komelia.offline.mediacontainer.LocalArchiveAccessException
+import snd.komelia.offline.mediacontainer.LocalArchiveFailure
 import snd.komelia.offline.series.model.OfflineBookMetadataAggregation
 import snd.komelia.offline.series.model.OfflineSeries
 import snd.komelia.offline.series.model.OfflineSeriesMetadata
@@ -53,6 +58,8 @@ data class LocalLibraryScanState(
     val importedBooks: Int = 0,
     val removedBooks: Int = 0,
     val error: String? = null,
+    val failedImports: Int = 0,
+    val archiveFailure: LocalArchiveFailure? = null,
 )
 
 class LocalLibraryManager(
@@ -227,6 +234,8 @@ class LocalLibraryManager(
                 .associateBy { it.id }
             val scannedBookIds = mutableSetOf<KomgaBookId>()
             var imported = 0
+            var failedImports = 0
+            var archiveFailure: LocalArchiveFailure? = null
 
             val seriesGroups = files
                 .groupBy { it.relativePath.substringBeforeLast('/', missingDelimiterValue = "") }
@@ -235,15 +244,21 @@ class LocalLibraryManager(
             for ((seriesPath, seriesFiles) in seriesGroups) {
                 val seriesId = KomgaSeriesId("$LOCAL_SERIES_ID_PREFIX${stableId("${library.id.value}/$seriesPath")}")
                 val seriesName = seriesPath.substringAfterLast('/').ifBlank { library.name }
-                // Books reference their parent series, so create the stable parent first.
-                // The final save below replaces the placeholder counts and timestamps.
-                saveSeries(seriesId, libraryId, seriesName, emptyList())
+                // New books need their parent first. Do not reset an existing series before
+                // inspection: cancellation must leave its counts and metadata intact.
+                if (repositories.seriesRepository.find(seriesId) == null) {
+                    saveSeries(seriesId, libraryId, seriesName, emptyList())
+                }
                 val inspectedBooks = seriesFiles.sortedByNaturalName().mapIndexedNotNull { index, localFile ->
+                    currentCoroutineContext().ensureActive()
                     val bookId = KomgaBookId("$LOCAL_BOOK_ID_PREFIX${stableId("${library.id.value}/${localFile.relativePath}")}")
                     scannedBookIds += bookId
                     val existing = existingBooks[bookId]
                     val modified = Instant.fromEpochMilliseconds(localFile.lastModifiedEpochMillis.coerceAtLeast(0))
-                    val number = extractBookNumber(localFile.displayName, index + 1)
+                    // BOOK.number is an integer position. Metadata keeps the actual chapter label,
+                    // including decimals, and is the source of truth for sibling ordering.
+                    val number = index + 1
+                    val chapterNumber = extractBookNumber(localFile.displayName, number)
                     val existingMetadata = existing?.let { repositories.bookMetadataRepository.find(bookId) }
                     val needsEpubReinspection = existing != null &&
                         localFile.displayName.endsWith(".epub", ignoreCase = true) &&
@@ -262,7 +277,7 @@ class LocalLibraryManager(
                             existing
                         }
                         if (metadata != null) {
-                            val repairedMetadata = metadata.withLocalNumber(number)
+                            val repairedMetadata = metadata.withLocalNumber(chapterNumber)
                             if (repairedMetadata != metadata) {
                                 repositories.bookMetadataRepository.save(repairedMetadata)
                                 repaired = true
@@ -296,12 +311,12 @@ class LocalLibraryManager(
                         )
                         repositories.bookRepository.save(book)
                         repositories.bookMetadataRepository.save(
-                            existingMetadata?.withLocalNumber(number) ?: OfflineBookMetadata(
+                            existingMetadata?.withLocalNumber(chapterNumber) ?: OfflineBookMetadata(
                                 bookId = bookId,
                                 title = localFile.displayName.substringBeforeLast('.'),
                                 summary = "",
-                                number = number.toString(),
-                                numberSort = number.toFloat(),
+                                number = chapterNumber.display,
+                                numberSort = chapterNumber.sort,
                                 releaseDate = null,
                                 authors = emptyList(),
                                 tags = emptyList(),
@@ -352,10 +367,13 @@ class LocalLibraryManager(
                         imported++
                         book
                     }.onFailure { error ->
+                        if (error is CancellationException) throw error
+                        failedImports++
+                        if (error is LocalArchiveAccessException) archiveFailure = error.reason
                         repositories.logJournalRepository.logError(error) {
                             "Local book import failed '${localFile.displayName}'"
                         }
-                    }.getOrNull()
+                    }.getOrNull() ?: existing
                 }
 
                 if (inspectedBooks.isNotEmpty()) {
@@ -374,7 +392,12 @@ class LocalLibraryManager(
             mutableScanState.value = LocalLibraryScanState(
                 importedBooks = imported,
                 removedBooks = removedIds.size,
+                failedImports = failedImports,
+                archiveFailure = archiveFailure,
             )
+        } catch (cancelled: CancellationException) {
+            mutableScanState.value = LocalLibraryScanState()
+            throw cancelled
         } catch (error: Throwable) {
             repositories.logJournalRepository.logError(error) { "Local library scan failed '${library.name}'" }
             mutableScanState.value = LocalLibraryScanState(error = error.message ?: error::class.simpleName)
@@ -402,7 +425,7 @@ class LocalLibraryManager(
             while (isActive) {
                 delay(1.hours)
                 getLibraries().filter { it.scanInterval != ScanInterval.DISABLED }.forEach { library ->
-                    runCatching { scan(library.id) }
+                    runCatching { scan(library.id) }.onFailure { if (it is CancellationException) throw it }
                 }
             }
         }
@@ -500,7 +523,8 @@ internal fun stableId(value: String): String {
 }
 
 private fun List<LocalLibraryFile>.sortedByNaturalName(): List<LocalLibraryFile> =
-    sortedWith(compareBy({ naturalSortKey(it.displayName) }, { it.relativePath }))
+    sortedWith(compareBy<LocalLibraryFile> { extractBookNumber(it.displayName, Int.MAX_VALUE).sort }
+        .thenBy { naturalSortKey(it.displayName) }.thenBy { it.relativePath })
 
 private fun naturalSortKey(value: String): String = buildString {
     Regex("\\d+|\\D+").findAll(value.lowercase()).forEach { part ->
@@ -510,7 +534,7 @@ private fun naturalSortKey(value: String): String = buildString {
 }
 
 private val labeledBookNumber = Regex(
-    pattern = "(?i)(?:chapter|chap|ch|episode|ep|issue|book|volume|vol|v|#)\\s*[._ -]*([0-9]+)",
+    pattern = "(?i)(?:chapter|chap|ch|episode|ep|issue|book|volume|vol|v|#)\\s*[._ -]*([0-9]+(?:\\.[0-9]+)?)",
 )
 
 private const val LOCAL_BOOK_EXCLUSION_PREFIX = "local-file:"
@@ -525,21 +549,25 @@ data class LocalBookExclusion(
 private fun String.removePrefixOrNull(prefix: String): String? =
     if (startsWith(prefix)) removePrefix(prefix) else null
 
-private fun extractBookNumber(name: String, fallback: Int): Int {
+private data class LocalChapterNumber(val display: String, val sort: Float)
+
+private fun extractBookNumber(name: String, fallback: Int): LocalChapterNumber {
     val stem = name.substringBeforeLast('.')
     val labeledNumber = labeledBookNumber.findAll(stem)
         .lastOrNull()
         ?.groupValues
         ?.getOrNull(1)
-        ?.toIntOrNull()
-    if (labeledNumber != null) return labeledNumber
-
-    return Regex("\\d+").findAll(stem).lastOrNull()?.value?.toIntOrNull() ?: fallback
+    val token = labeledNumber ?: Regex("\\d+(?:\\.\\d+)?").findAll(stem).lastOrNull()?.value
+    val numeric = token?.toFloatOrNull()?.takeIf { it.isFinite() }
+        ?: return LocalChapterNumber(fallback.toString(), fallback.toFloat())
+    val normalized = token.trimStart('0').let { if (it.startsWith('.')) "0$it" else it.ifEmpty { "0" } }
+        .let { if ('.' in it) it.trimEnd('0').trimEnd('.') else it }
+    return LocalChapterNumber(normalized, numeric)
 }
 
-private fun OfflineBookMetadata.withLocalNumber(number: Int): OfflineBookMetadata = copy(
-    number = if (numberLock) this.number else number.toString(),
-    numberSort = if (numberSortLock) this.numberSort else number.toFloat(),
+private fun OfflineBookMetadata.withLocalNumber(number: LocalChapterNumber): OfflineBookMetadata = copy(
+    number = if (numberLock) this.number else number.display,
+    numberSort = if (numberSortLock) this.numberSort else number.sort,
 )
 
 private fun formatBytes(bytes: Long): String = when {

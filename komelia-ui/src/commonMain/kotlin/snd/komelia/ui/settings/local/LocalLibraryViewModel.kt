@@ -65,6 +65,7 @@ class LocalLibraryViewModel(
                 libraries = manager?.getLibraries().orEmpty()
                 excludedBooks = manager?.getExcludedBooks().orEmpty()
             } catch (throwable: Throwable) {
+                if (throwable is kotlinx.coroutines.CancellationException) throw throwable
                 error = throwable.message ?: throwable::class.simpleName
             } finally {
                 loading = false

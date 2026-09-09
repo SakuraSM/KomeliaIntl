@@ -33,6 +33,9 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_archive_copy_limit
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_archive_low_space
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_archive_import_failures
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_add
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_auto_scan
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_not_available
@@ -79,7 +82,11 @@ class LocalLibrarySettingsScreen : Screen {
 
             SettingsSection(
                 title = stringResource(Res.string.local_library_sources),
-                supportingText = scanState.error ?: vm.error,
+                supportingText = scanState.error ?: vm.error ?: when (scanState.archiveFailure) {
+                    snd.komelia.offline.mediacontainer.LocalArchiveFailure.COPY_LIMIT -> stringResource(Res.string.local_archive_copy_limit)
+                    snd.komelia.offline.mediacontainer.LocalArchiveFailure.LOW_SPACE -> stringResource(Res.string.local_archive_low_space)
+                    null -> if (scanState.failedImports > 0) stringResource(Res.string.local_archive_import_failures, scanState.failedImports) else null
+                },
             ) {
                 Button(onClick = { selectingDirectory = true }, enabled = !vm.loading) {
                     Icon(Icons.Rounded.Add, contentDescription = null)

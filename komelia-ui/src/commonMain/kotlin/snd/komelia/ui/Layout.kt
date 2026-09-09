@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import snd.komelia.ui.common.cards.defaultCardWidth
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.WindowSizeClass
 
@@ -119,15 +120,16 @@ internal fun detailCoverWidth(
         (availableWidth * 0.25f).coerceIn(220.dp, 260.dp)
 }
 
-/** Returns null when the home grid should continue using the configured adaptive card width. */
+/** Returns null when poster grids should use the configured adaptive card width. */
 internal fun posterColumnCount(
     platform: PlatformType,
     windowWidth: WindowSizeClass,
+    cardWidth: Dp = defaultCardWidth.dp,
 ): Int? {
     if (platform != PlatformType.MOBILE) return null
     return when (windowWidth) {
-        WindowSizeClass.COMPACT -> 3
-        WindowSizeClass.MEDIUM -> 3
+        WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM ->
+            kotlin.math.round(3f * defaultCardWidth / cardWidth.value.coerceIn(150f, 350f)).toInt().coerceIn(2, 5)
         WindowSizeClass.EXPANDED, WindowSizeClass.FULL -> null
     }
 }

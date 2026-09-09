@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -30,9 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import snd.komelia.ui.LocalKomeliaLayout
-import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.LocalWindowWidth
-import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.common.cards.ItemCard
 import snd.komelia.ui.platform.HorizontalScrollbar
 import snd.komelia.ui.platform.VerticalScrollbar
@@ -45,10 +41,9 @@ fun PlaceHolderLazyCardGrid(
     scrollState: LazyGridState = rememberLazyGridState(),
 ) {
     val layout = LocalKomeliaLayout.current
-    val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyVerticalGrid(
-            columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(minSize),
+            columns = posterGridCells(minSize),
             state = scrollState,
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),

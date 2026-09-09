@@ -10,10 +10,13 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.runInterruptible
 import org.apache.commons.compress.archivers.zip.ZipFile
 import snd.komelia.offline.media.model.OfflineBookPage
 import snd.komelia.offline.mediacontainer.AndroidPdfExtractor
-import snd.komelia.offline.mediacontainer.SafSeekableReadByteChannel
+import snd.komelia.offline.mediacontainer.AndroidZipArchiveOpener
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.MediaProfile
 import java.io.FileInputStream
@@ -22,6 +25,7 @@ import kotlin.sequences.asSequence
 actual fun createLocalLibraryPlatform(): LocalLibraryPlatform? = AndroidLocalLibraryPlatform()
 
 private class AndroidLocalLibraryPlatform : LocalLibraryPlatform {
+    private val zipOpener by lazy { AndroidZipArchiveOpener(FileKit.context) }
     override val scheduledScanningIsManagedByPlatform: Boolean = true
 
     override suspend fun listSupportedFiles(root: String): List<LocalLibraryFile> = withContext(Dispatchers.IO) {
@@ -36,7 +40,7 @@ private class AndroidLocalLibraryPlatform : LocalLibraryPlatform {
 
     override suspend fun inspect(file: LocalLibraryFile): LocalBookInspection = withContext(Dispatchers.IO) {
         when (file.displayName.substringAfterLast('.', "").lowercase()) {
-            "cbz", "zip" -> withZip(file.file) { zip ->
+            "cbz", "zip" -> withZip(file) { zip ->
                 val entries = zip.entries.asSequence().filterNot { it.isDirectory }.toList()
                 inspectComicArchive(
                     entries = entries.map { it.name to it.size.takeIf { size -> size >= 0 } },
@@ -44,7 +48,7 @@ private class AndroidLocalLibraryPlatform : LocalLibraryPlatform {
                     mediaType = "application/zip",
                 )
             }
-            "epub" -> withZip(file.file) { zip ->
+            "epub" -> withZip(file) { zip ->
                 val entries = zip.entries.asSequence().filterNot { it.isDirectory }.toList()
                 inspectEpubArchive(
                     entries = entries.map { it.name },
@@ -116,15 +120,13 @@ private class AndroidLocalLibraryPlatform : LocalLibraryPlatform {
         }
     }
 
-    private fun <T> withZip(file: PlatformFile, block: (ZipFile) -> T): T {
-        val builder = ZipFile.builder().setUseUnicodeExtraFields(true).setIgnoreLocalFileHeader(true)
-        when (val androidFile = file.androidFile) {
-            is AndroidFile.FileWrapper -> builder.file = androidFile.file
-            is AndroidFile.UriWrapper -> builder.setSeekableByteChannel(
-                SafSeekableReadByteChannel(androidFile.uri, FileKit.context)
-            )
+    private suspend fun <T> withZip(file: LocalLibraryFile, block: (ZipFile) -> T): T {
+        val caller = currentCoroutineContext()
+        return runInterruptible(Dispatchers.IO) {
+            zipOpener.open(file.file, file.sizeBytes.takeIf { it > 0 }, caller::ensureActive).use {
+                block(it.zip)
+            }
         }
-        return builder.get().use(block)
     }
 
     private fun <T> withRar(file: PlatformFile, block: (Archive) -> T): T = when (val androidFile = file.androidFile) {

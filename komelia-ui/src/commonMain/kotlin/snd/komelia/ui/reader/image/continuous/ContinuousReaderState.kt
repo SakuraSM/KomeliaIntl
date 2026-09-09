@@ -66,7 +66,7 @@ private val logger = KotlinLogging.logger("ContinuousReaderState")
 
 class ContinuousReaderState(
     private val cleanupScope: CoroutineScope,
-    private val readerState: ReaderState,
+    internal val readerState: ReaderState,
     private val imageLoader: BookImageLoader,
     private val settingsRepository: ImageReaderSettingsRepository,
     private val notifications: AppNotifications,
@@ -153,6 +153,18 @@ class ContinuousReaderState(
                             val readProgress = currentBookPageIndex.first()
                             lazyListState.scrollToItem(bookStartIndex + readProgress + 2)
                         }
+                    }
+
+                    currentBook?.id == newState.currentBook.id -> {
+                        // A sibling retry updates only the neighbours, not the visible book/page.
+                        val prepend = newState.previousBook?.takeIf { book -> currentIntervals.none { it.book.id == book.id } }
+                        val append = newState.nextBook?.takeIf { book -> currentIntervals.none { it.book.id == book.id } }
+                        pageIntervals.value = listOfNotNull(prepend?.let {
+                            BookPagesInterval(it, newState.previousBookPages.takeLast(100))
+                        }) + currentIntervals + listOfNotNull(append?.let {
+                            BookPagesInterval(it, newState.nextBookPages)
+                        })
+                        if (prepend != null) currentIntervalIndex.update { it + 1 }
                     }
 
                     wasPreviousBookLoaded -> {

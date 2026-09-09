@@ -52,12 +52,13 @@ class PagedReaderState(
     private val cleanupScope: CoroutineScope,
     private val settingsRepository: ImageReaderSettingsRepository,
     private val appNotifications: AppNotifications,
-    private val readerState: ReaderState,
+    internal val readerState: ReaderState,
     private val imageLoader: BookImageLoader,
     private val pageChangeFlow: MutableSharedFlow<Unit>,
     val screenScaleState: ScreenScaleState,
 ) {
     private val stateScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var displayedBookId: snd.komga.client.book.KomgaBookId? = null
     private val pageLoadScope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
     private val imageLoadScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var imageCache = newImageCache()
@@ -116,6 +117,7 @@ class PagedReaderState(
     }
 
     fun stop() {
+        displayedBookId = null
         stateScope.coroutineContext.cancelChildren()
         pageLoadScope.coroutineContext.cancelChildren()
         imageLoadScope.coroutineContext.cancelChildren()
@@ -199,6 +201,15 @@ class PagedReaderState(
     }
 
     private fun onNewBookLoaded(bookState: BookState) {
+        if (displayedBookId == bookState.currentBook.id) {
+            transitionPage.value = when (val page = transitionPage.value) {
+                is BookEnd -> page.copy(nextBook = bookState.nextBook)
+                is BookStart -> page.copy(previousBook = bookState.previousBook)
+                null -> null
+            }
+            return
+        }
+        displayedBookId = bookState.currentBook.id
         val pageSpreads = buildSpreadMap(bookState.currentBookPages, layout.value)
         this.pageSpreads.value = pageSpreads
 

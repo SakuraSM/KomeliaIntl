@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class SettingsStateWrapper<T>(
     settings: T,
@@ -12,12 +14,13 @@ class SettingsStateWrapper<T>(
 ) {
     private val _state: MutableStateFlow<T> = MutableStateFlow(settings)
     val state = _state.asStateFlow()
+    private val updateMutex = Mutex()
 
     inline fun <R> mapState(crossinline transform: suspend (value: T) -> R): Flow<R> {
         return state.map(transform).distinctUntilChanged()
     }
 
-    suspend fun transform(transform: suspend (settings: T) -> T) {
+    suspend fun transform(transform: suspend (settings: T) -> T) = updateMutex.withLock {
         val transformed = transform(_state.value)
         saveSettings(transformed)
         _state.value = transformed

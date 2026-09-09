@@ -3,8 +3,6 @@ package snd.komelia.ui.reader.image
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import cafe.adriel.voyager.navigator.Navigator
-import io.ktor.client.plugins.*
-import io.ktor.http.HttpStatusCode.Companion.NotFound
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -13,6 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import snd.komelia.AppNotification
 import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
@@ -41,7 +41,6 @@ import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.KomgaBookReadProgressUpdateRequest
 import snd.komga.client.common.KomgaReadingDirection
 import snd.komga.client.series.KomgaSeries
-import kotlin.coroutines.cancellation.CancellationException
 
 typealias SpreadIndex = Int
 
@@ -65,6 +64,8 @@ class ReaderState(
     val expandImageSettings = MutableStateFlow(false)
 
     val booksState = MutableStateFlow<BookState?>(null)
+    val retryingSibling = MutableStateFlow<Boolean?>(null)
+    private val navigationMutex = Mutex()
     val series = MutableStateFlow<KomgaSeries?>(null)
 
     val readerType = MutableStateFlow(ReaderType.PAGED)
@@ -108,18 +109,14 @@ class ReaderState(
 
             val bookPages = loadBookPages(newBook.id)
 
-            val prevBook = getPreviousBook(newBook)
-            val prevBookPages = if (prevBook != null) loadBookPages(prevBook.id) else emptyList()
-            val nextBook = getNextBook(newBook)
-            val nextBookPages = if (nextBook != null) loadBookPages(nextBook.id) else emptyList()
+            val previous = getSibling(newBook, next = false)
+            val next = getSibling(newBook, next = true)
 
             booksState.value = BookState(
                 currentBook = newBook,
                 currentBookPages = bookPages,
-                previousBook = prevBook,
-                previousBookPages = prevBookPages,
-                nextBook = nextBook,
-                nextBookPages = nextBookPages
+                previous = previous,
+                next = next,
             )
 
             val bookProgress = newBook.readProgress
@@ -157,63 +154,44 @@ class ReaderState(
         }
     }
 
-    private suspend fun getNextBook(currentBook: KomeliaBook): KomeliaBook? {
-        val currentBookId = currentBook.id
-        return try {
-            when (bookSiblingsContext) {
-                is BookSiblingsContext.ReadList ->
-                    if (currentBook.downloaded) bookApi.getBookSiblingNext(currentBookId)
-                    else readListApi.getBookSiblingNext(bookSiblingsContext.id, currentBookId)
+    private suspend fun getSibling(book: KomeliaBook, next: Boolean): SiblingLoad<ReaderSibling> = loadSibling(
+        query = { queryReaderSibling(book.id, bookSiblingsContext, next, bookApi, readListApi) },
+        prepare = {
+            val pages = loadBookPages(it.id)
+            check(pages.isNotEmpty()) { "Adjacent book has no readable image pages" }
+            ReaderSibling(it, pages)
+        },
+    )
 
-                BookSiblingsContext.Series -> bookApi.getBookSiblingNext(currentBookId)
+    suspend fun retrySibling(next: Boolean) = navigationMutex.withLock {
+        val snapshot = booksState.value ?: return@withLock
+        if ((if (next) snapshot.next else snapshot.previous) !is SiblingLoad.Failed) return@withLock
+        retryingSibling.value = next
+        try {
+            val result = getSibling(snapshot.currentBook, next)
+            if (booksState.value?.currentBook?.id == snapshot.currentBook.id) {
+                booksState.value = if (next) snapshot.copy(next = result) else snapshot.copy(previous = result)
             }
-        } catch (e: ClientRequestException) {
-            if (e.response.status != NotFound) throw e
-            else null
-        } catch (e: Throwable) {
-            if (e is CancellationException) throw e
-            null
+        } finally {
+            retryingSibling.value = null
         }
-
     }
 
-    private suspend fun getPreviousBook(currentBook: KomeliaBook): KomeliaBook? {
-        val currentBookId = currentBook.id
-        return try {
-            when (bookSiblingsContext) {
-                is BookSiblingsContext.ReadList ->
-                    if (currentBook.downloaded) bookApi.getBookSiblingPrevious(currentBookId)
-                    else readListApi.getBookSiblingPrevious(bookSiblingsContext.id, currentBookId)
-
-                BookSiblingsContext.Series -> bookApi.getBookSiblingPrevious(currentBookId)
-            }
-        } catch (e: ClientRequestException) {
-            if (e.response.status != NotFound) throw e
-            else null
-        } catch (e: Throwable) {
-            if (e is CancellationException) throw e
-            null
-        }
-
-    }
-
-    suspend fun loadNextBook() {
+    suspend fun loadNextBook() = navigationMutex.withLock {
         val booksState = requireNotNull(booksState.value)
         if (booksState.nextBook != null) {
-            val nextBook = getNextBook(booksState.nextBook)
-            val nextBookPages = if (nextBook != null) loadBookPages(nextBook.id) else emptyList()
+            val newBook = requireNotNull(booksState.nextBook)
+            val next = getSibling(newBook, next = true)
 
+            readProgressPage.value = 1
             this.booksState.value = BookState(
-                currentBook = booksState.nextBook,
+                currentBook = newBook,
                 currentBookPages = booksState.nextBookPages,
-                previousBook = booksState.currentBook,
-                previousBookPages = booksState.currentBookPages,
-
-                nextBook = nextBook,
-                nextBookPages = nextBookPages
+                previous = SiblingLoad.Available(ReaderSibling(booksState.currentBook, booksState.currentBookPages)),
+                next = next,
             )
             onProgressChange(1)
-        } else {
+        } else if (booksState.next is SiblingLoad.End) {
             navigator replace MainScreen(
                 if (booksState.currentBook.oneshot) OneshotScreen(booksState.currentBook, bookSiblingsContext)
                 else SeriesScreen(booksState.currentBook.seriesId)
@@ -221,26 +199,21 @@ class ReaderState(
         }
     }
 
-    suspend fun loadPreviousBook() {
+    suspend fun loadPreviousBook() = navigationMutex.withLock {
         val booksState = requireNotNull(booksState.value)
         if (booksState.previousBook != null) {
-            val previousBook = getPreviousBook(booksState.previousBook)
-            val previousBookPages =
-                if (previousBook != null) loadBookPages(previousBook.id) else emptyList()
+            val newBook = requireNotNull(booksState.previousBook)
+            val previous = getSibling(newBook, next = false)
 
             readProgressPage.value = booksState.previousBookPages.size
             this.booksState.value = BookState(
-                currentBook = booksState.previousBook,
+                currentBook = newBook,
                 currentBookPages = booksState.previousBookPages,
-                nextBook = booksState.currentBook,
-                nextBookPages = booksState.currentBookPages,
-
-                previousBook = previousBook,
-                previousBookPages = previousBookPages,
+                next = SiblingLoad.Available(ReaderSibling(booksState.currentBook, booksState.currentBookPages)),
+                previous = previous,
             )
-        } else
+        } else if (booksState.previous is SiblingLoad.End)
             appNotifications.add(AppNotification.Normal(AppNotificationMessageKey.READER_AT_BEGINNING))
-        return
     }
 
     suspend fun onProgressChange(page: Int) {
@@ -342,8 +315,11 @@ data class PageMetadata(
 data class BookState(
     val currentBook: KomeliaBook,
     val currentBookPages: List<PageMetadata>,
-    val previousBook: KomeliaBook?,
-    val previousBookPages: List<PageMetadata>,
-    val nextBook: KomeliaBook?,
-    val nextBookPages: List<PageMetadata>,
-)
+    val previous: SiblingLoad<ReaderSibling>,
+    val next: SiblingLoad<ReaderSibling>,
+) {
+    val previousBook: KomeliaBook? = (previous as? SiblingLoad.Available)?.value?.book
+    val previousBookPages: List<PageMetadata> = (previous as? SiblingLoad.Available)?.value?.pages.orEmpty()
+    val nextBook: KomeliaBook? = (next as? SiblingLoad.Available)?.value?.book
+    val nextBookPages: List<PageMetadata> = (next as? SiblingLoad.Available)?.value?.pages.orEmpty()
+}

@@ -50,6 +50,81 @@ import kotlin.test.assertTrue
 
 class LocalLibraryManagerIntegrationTest {
     @Test
+    fun cancelledReinspectionPreservesTheExistingSeriesAndBooks() = runBlocking {
+        val root = createTempDirectory("komelia-cancelled-scan-test")
+        val source = root.resolve("source").createDirectories()
+        val repositories = createRepositories(KomeliaDatabase(root.toString()), root)
+        val delegate = FakeLocalLibraryPlatform(source).apply {
+            files = listOf(file("Series/Chapter 1.cbz", 100, 1_000))
+        }
+        var cancel = false
+        val platform = object : LocalLibraryPlatform by delegate {
+            override suspend fun inspect(file: LocalLibraryFile): LocalBookInspection {
+                if (cancel) throw kotlinx.coroutines.CancellationException("synthetic cancelled scan")
+                return delegate.inspect(file)
+            }
+        }
+        val manager = LocalLibraryManager(repositories, platform, CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val library = manager.addLibrary(PlatformFile(source.toFile()), "Synthetic books")
+        val originalSeries = repositories.seriesRepository.findAllByLibraryId(library.id).single()
+        val originalBook = repositories.bookRepository.findAll().single()
+        delegate.files = listOf(delegate.file("Series/Chapter 1.cbz", 101, 2_000))
+        cancel = true
+        assertFailsWith<kotlinx.coroutines.CancellationException> { manager.scan(library.id) }
+        assertEquals(originalSeries, repositories.seriesRepository.get(originalSeries.id))
+        assertEquals(originalBook, repositories.bookRepository.get(originalBook.id))
+    }
+
+    @Test
+    fun localImportAndRescanKeepDecimalChapterNumbers() = runBlocking {
+        val root = createTempDirectory("komelia-decimal-import-test")
+        val source = root.resolve("source").createDirectories()
+        val repositories = createRepositories(KomeliaDatabase(root.toString()), root)
+        val platform = FakeLocalLibraryPlatform(source).apply {
+            files = listOf("Chapter 1.cbz", "Chapter 1.5.cbz", "Chapter 2.cbz").map {
+                file("Series/$it", 100, 1_000)
+            }
+        }
+        val manager = LocalLibraryManager(repositories, platform, CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val library = manager.addLibrary(PlatformFile(source.toFile()), "Synthetic chapters")
+        repeat(2) {
+            val books = manager.getBooks(KomgaPageRequest(unpaged = true, sort = KomgaBooksSort.byNumberAsc())).content
+            assertEquals(listOf(1f, 1.5f, 2f), books.map { it.metadata.numberSort })
+            assertEquals(listOf("1", "1.5", "2"), books.map { it.metadata.number })
+            assertEquals(books[1].id, repositories.bookDtoRepository.findNextInSeriesOrNull(books[0].id, OfflineUser.ROOT)?.id)
+            assertEquals(books[2].id, repositories.bookDtoRepository.findNextInSeriesOrNull(books[1].id, OfflineUser.ROOT)?.id)
+            manager.scan(library.id)
+        }
+        assertEquals(3, platform.inspectionCount)
+    }
+
+    @Test
+    fun siblingNavigationPreservesDecimalsAndBothSeriesBoundaries() = runBlocking {
+        val root = createTempDirectory("komelia-sibling-test")
+        val source = root.resolve("source").createDirectories()
+        val repositories = createRepositories(KomeliaDatabase(root.toString()), root)
+        val numbers = listOf(1f, 1.5f, 2f, 3f, 4f)
+        val platform = FakeLocalLibraryPlatform(source).apply {
+            files = numbers.indices.map { file("Series/chapter-$it.cbz", 100, 1_000) }
+        }
+        val manager = LocalLibraryManager(repositories, platform, CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        manager.addLibrary(PlatformFile(source.toFile()), "Synthetic chapters")
+        val books = repositories.bookRepository.findAll().sortedBy { it.name }
+        books.zip(numbers).forEach { (book, number) ->
+            val metadata = repositories.bookMetadataRepository.get(book.id)
+            repositories.bookMetadataRepository.save(metadata.copy(number = number.toString(), numberSort = number))
+        }
+        books.forEachIndexed { index, book ->
+            assertEquals(books.getOrNull(index + 1)?.id,
+                repositories.bookDtoRepository.findNextInSeriesOrNull(book.id, OfflineUser.ROOT)?.id,
+                "next chapter at index $index")
+            assertEquals(books.getOrNull(index - 1)?.id,
+                repositories.bookDtoRepository.findPreviousInSeriesOrNull(book.id, OfflineUser.ROOT)?.id,
+                "previous chapter at index $index")
+        }
+    }
+
+    @Test
     fun reindexesLegacyEpubOnceWithoutChangingIdentityMetadataOrProgress() = runBlocking {
         val tempDirectory = createTempDirectory("komelia-epub-reindex-test")
         val sourceDirectory = tempDirectory.resolve("source").createDirectories()

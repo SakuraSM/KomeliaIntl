@@ -17,6 +17,28 @@ import snd.komelia.updates.AppProjectMetadata
 
 class LayoutTest {
     @Test
+    fun mobileDensityRespondsToTheExistingPersistedWidthSetting() {
+        for (size in listOf(WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM)) {
+            assertEquals(5, posterColumnCount(PlatformType.MOBILE, size, 150.dp))
+            assertEquals(3, posterColumnCount(PlatformType.MOBILE, size, 240.dp))
+            assertEquals(2, posterColumnCount(PlatformType.MOBILE, size, 350.dp))
+        }
+    }
+
+    @Test
+    fun actualAvailableWidthBoundsTouchTargetsAndDistributesAllPixels() {
+        val policy = snd.komelia.ui.common.itemlist.TouchBoundedPosterCells(5, 48.dp)
+        with(policy) {
+            with(androidx.compose.ui.unit.Density(1f)) {
+                val cells = calculateCrossAxisCellSizes(200, 12)
+                assertEquals(3, cells.size)
+                kotlin.test.assertTrue(cells.all { it >= 48 })
+                assertEquals(200, cells.sum() + 12 * (cells.size - 1))
+            }
+        }
+    }
+
+    @Test
     fun compactMobileWidthsUseThreeHomeColumns() {
         listOf(360.dp, 375.dp, 412.dp).forEach { width ->
             assertEquals(

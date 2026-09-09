@@ -8,4 +8,7 @@ class DivinaZipExtractor(private val zipExtractor: ZipExtractor) : DivinaExtract
     override fun getEntryBytes(file: PlatformFile, entryName: String): ByteArray {
         return zipExtractor.getEntryBytes(file, entryName)
     }
+
+    override fun getEntryBytes(file: PlatformFile, entryName: String, checkCancelled: () -> Unit): ByteArray =
+        zipExtractor.getEntryBytes(file, entryName, checkCancelled)
 }

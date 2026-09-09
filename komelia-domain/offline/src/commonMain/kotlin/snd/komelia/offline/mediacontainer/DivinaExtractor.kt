@@ -7,6 +7,11 @@ interface DivinaExtractor {
 
     fun getEntryBytes(file: PlatformFile, entryName: String): ByteArray
 
+    fun getEntryBytes(file: PlatformFile, entryName: String, checkCancelled: () -> Unit): ByteArray {
+        checkCancelled()
+        return getEntryBytes(file, entryName).also { checkCancelled() }
+    }
+
     fun getEntryBytes(file: PlatformFile, entryName: String, pageNumber: Int): ByteArray {
         return getEntryBytes(file, entryName)
     }

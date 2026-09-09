@@ -2,6 +2,8 @@ package snd.komelia.ui.settings.appearance
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -19,6 +21,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_image_card_size
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_card_density_hint
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_card_width_value
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_language
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_language_chinese_simplified
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_language_english
@@ -27,6 +31,10 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_th
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppTheme
+import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.posterColumnCount
+import snd.komelia.ui.common.itemlist.PlaceHolderLazyCardGrid
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
@@ -70,13 +78,14 @@ fun AppearanceSettingsContent(
 
         Text(stringResource(Res.string.settings_app_image_card_size), modifier = Modifier.padding(10.dp))
         Slider(
-            value = cardWidth.value,
+            value = cardWidth.value.coerceIn(150f, 350f),
             onValueChange = { onCardWidthChange(it.roundToInt().dp) },
             steps = 19,
             valueRange = 150f..350f,
             colors = AppSliderDefaults.colors(),
             modifier = Modifier.cursorForHand().padding(end = 20.dp),
         )
+        val densityGrid = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current, cardWidth) != null
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -84,14 +93,14 @@ fun AppearanceSettingsContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Text("${cardWidth.value}")
-
-            Card(
-                Modifier
-                    .width(cardWidth)
-                    .aspectRatio(0.703f)
-            ) {
-
+            if (densityGrid) {
+                Text(stringResource(Res.string.settings_app_card_density_hint), Modifier.padding(horizontal = 12.dp))
+                Box(Modifier.fillMaxWidth().height(360.dp)) {
+                    PlaceHolderLazyCardGrid(elements = 10, minSize = cardWidth)
+                }
+            } else {
+                Text(stringResource(Res.string.settings_app_card_width_value, cardWidth.value.toInt()))
+                Card(Modifier.width(cardWidth).aspectRatio(0.703f)) {}
             }
         }
     }

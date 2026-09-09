@@ -3,6 +3,7 @@ package snd.komelia.api
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.book.repository.OfflineBookRepository
+import snd.komelia.offline.local.isLocalBook
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.KomgaBookMetadataUpdateRequest
 import snd.komga.client.book.KomgaBookPage
@@ -60,19 +61,15 @@ class LocalFirstBookApi(
     }
 
     override suspend fun getBookSiblingPrevious(bookId: KomgaBookId): KomeliaBook? {
-        return localFirst(
-            bookId = bookId,
-            local = { offlineBookApi.getBookSiblingPrevious(bookId) },
-            remote = { remoteBookApi.getBookSiblingPrevious(bookId) }
-        )
+        // Cached content does not make the offline catalogue a complete chapter directory.
+        // Explicit offline mode selects OfflineBookApi at application composition time.
+        return if (bookId.isLocalBook()) offlineBookApi.getBookSiblingPrevious(bookId)
+        else remoteBookApi.getBookSiblingPrevious(bookId)
     }
 
     override suspend fun getBookSiblingNext(bookId: KomgaBookId): KomeliaBook? {
-        return localFirst(
-            bookId = bookId,
-            local = { offlineBookApi.getBookSiblingNext(bookId) },
-            remote = { remoteBookApi.getBookSiblingNext(bookId) }
-        )
+        return if (bookId.isLocalBook()) offlineBookApi.getBookSiblingNext(bookId)
+        else remoteBookApi.getBookSiblingNext(bookId)
     }
 
     override suspend fun updateMetadata(bookId: KomgaBookId, request: KomgaBookMetadataUpdateRequest) {

@@ -59,13 +59,14 @@ class PanelsReaderState(
     private val cleanupScope: CoroutineScope,
     private val settingsRepository: ImageReaderSettingsRepository,
     private val appNotifications: AppNotifications,
-    private val readerState: ReaderState,
+    internal val readerState: ReaderState,
     private val imageLoader: BookImageLoader,
     private val pageChangeFlow: MutableSharedFlow<Unit>,
     private val onnxRuntimeRfDetr: KomeliaPanelDetector,
     val screenScaleState: ScreenScaleState,
 ) {
     private val stateScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var displayedBookId: snd.komga.client.book.KomgaBookId? = null
     private val pageLoadScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val imageCache = Cache.Builder<PageId, Deferred<PanelsPage>>()
         .maximumCacheSize(10)
@@ -146,6 +147,7 @@ class PanelsReaderState(
     }
 
     fun stop() {
+        displayedBookId = null
         stateScope.coroutineContext.cancelChildren()
         screenScaleState.enableOverscrollArea(false)
         imageCache.invalidateAll()
@@ -195,6 +197,15 @@ class PanelsReaderState(
     }
 
     private fun onNewBookLoaded(bookState: BookState) {
+        if (displayedBookId == bookState.currentBook.id) {
+            transitionPage.value = when (val page = transitionPage.value) {
+                is BookEnd -> page.copy(nextBook = bookState.nextBook)
+                is BookStart -> page.copy(previousBook = bookState.previousBook)
+                null -> null
+            }
+            return
+        }
+        displayedBookId = bookState.currentBook.id
         val newPages = bookState.currentBookPages
         val newPageIndex = readerState.readProgressPage.value - 1
 

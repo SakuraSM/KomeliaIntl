@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -36,8 +35,6 @@ import sh.calvin.reorderable.ReorderableLazyGridState
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalKomeliaLayout
-import snd.komelia.ui.LocalWindowWidth
-import snd.komelia.ui.posterColumnCount
 import snd.komelia.ui.common.cards.DraggableImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.components.Pagination
@@ -70,7 +67,6 @@ fun SeriesLazyCardGrid(
     beforeContent: @Composable () -> Unit = {},
 ) {
     val layout = LocalKomeliaLayout.current
-    val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
     val coroutineScope = rememberCoroutineScope()
     val reorderableLazyGridState = rememberReorderableLazyGridState(
         lazyGridState = gridState,
@@ -84,7 +80,7 @@ fun SeriesLazyCardGrid(
     Box(modifier, contentAlignment = Alignment.TopCenter) {
         LazyVerticalGrid(
             state = gridState,
-            columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(minSize),
+            columns = posterGridCells(minSize),
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             contentPadding = PaddingValues(bottom = layout.gridBottomPadding),

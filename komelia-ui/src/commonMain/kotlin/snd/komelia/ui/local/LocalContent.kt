@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -64,14 +63,11 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.local.AvailableBookSource
 import snd.komelia.ui.LocalKomeliaLayout
-import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.home.LocalHomeBookSort
-import snd.komelia.ui.posterColumnCount
 
 @Composable
 internal fun LocalContent(
@@ -118,9 +114,8 @@ internal fun LocalContent(
             LocalEmptyContent(hasQuery = query.isNotBlank(), selectedSource = selectedSource)
             return@Column
         }
-        val fixedColumnCount = posterColumnCount(LocalPlatform.current, LocalWindowWidth.current)
         LazyVerticalGrid(
-            columns = fixedColumnCount?.let(GridCells::Fixed) ?: GridCells.Adaptive(cardWidth),
+            columns = snd.komelia.ui.common.itemlist.posterGridCells(cardWidth),
             state = gridState,
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),

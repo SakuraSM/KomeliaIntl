@@ -620,6 +620,8 @@
     <string name="reader_current_book">Current:</string>
     <string name="reader_next_book">Next:</string>
     <string name="reader_no_next_book">There is no next book</string>
+    <string name="settings_app_card_density_hint">Smaller cards show more items per row. The default size keeps three columns on phones.</string>
+    <string name="settings_app_card_width_value">Minimum card width: %1$d dp</string>
     <string name="reader_no_previous_book">There is no previous book</string>
     <string name="reader_epub_preface">Preface</string>
 
@@ -719,7 +721,7 @@
     <string name="settings_app_language_system">System default</string>
     <string name="settings_app_language_english">English</string>
     <string name="settings_app_language_chinese_simplified">Simplified Chinese</string>
-    <string name="settings_app_image_card_size">Image card size in grid view (minimum display size)</string>
+    <string name="settings_app_image_card_size">Image card size in grid view</string>
     <string name="settings_network_title">Network connection</string>
     <string name="settings_network_auto_lan">Automatically use LAN address</string>
     <string name="settings_network_lan_address">LAN server address</string>
@@ -1390,4 +1392,11 @@
     <string name="settings_updates_current">You are up to date</string>
     <string name="settings_updates_empty">No releases are available yet</string>
     <string name="settings_updates_check_failed">Could not check for updates. Please try again.</string>
+    <string name="reader_next_book_failed">Could not load the next book. Retry to continue.</string>
+    <string name="reader_previous_book_failed">Could not load the previous book. Retry to continue.</string>
+    <string name="reader_sibling_retry">Retry</string>
+    <string name="reader_sibling_retrying">Retrying…</string>
+    <string name="local_archive_copy_limit">The temporary archive copy exceeds the limit. Move the book to a device folder that supports direct file access, then scan again.</string>
+    <string name="local_archive_low_space">Not enough space for a temporary archive copy. Free storage or move the book to a device folder, then scan again.</string>
+    <string name="local_archive_import_failures">Failed imports: %1$d. Check the offline logs, then scan again.</string>
 </resources>

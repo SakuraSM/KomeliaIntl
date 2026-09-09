@@ -198,7 +198,7 @@ private fun VerticalLayout(
         contentPadding = PaddingValues(start = sidePadding, end = sidePadding),
         userScrollEnabled = false,
     ) {
-        continuousPagesLayout(pageIntervals) { page ->
+        continuousPagesLayout(pageIntervals, state.readerState) { page ->
             var displaySize by remember { mutableStateOf(state.guessPageDisplaySize(page)) }
             LaunchedEffect(Unit) {
                 state.getPageDisplaySize(page).collect { displaySize = it }
@@ -237,7 +237,7 @@ private fun HorizontalLayout(
         userScrollEnabled = false,
         reverseLayout = reversed
     ) {
-        continuousPagesLayout(pageIntervals) { page ->
+        continuousPagesLayout(pageIntervals, state.readerState) { page ->
             var displaySize by remember { mutableStateOf(state.guessPageDisplaySize(page)) }
             LaunchedEffect(Unit) {
                 state.getPageDisplaySize(page).collect { displaySize = it }
@@ -265,6 +265,7 @@ private fun HorizontalLayout(
 
 private fun LazyListScope.continuousPagesLayout(
     pageIntervals: List<BookPagesInterval>,
+    readerState: snd.komelia.ui.reader.image.ReaderState,
     pageContent: @Composable (PageMetadata) -> Unit,
 ) {
     item {
@@ -272,7 +273,9 @@ private fun LazyListScope.continuousPagesLayout(
             modifier = Modifier.sizeIn(minHeight = 300.dp, minWidth = 300.dp).fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(
+            if (readerState.booksState.collectAsState().value?.previous is snd.komelia.ui.reader.image.SiblingLoad.Failed) {
+                snd.komelia.ui.reader.image.common.ReaderSiblingContent(readerState, next = false)
+            } else Text(
                 stringResource(Res.string.reader_reached_series_start),
                 style = MaterialTheme.typography.titleLarge,
             )
@@ -320,7 +323,9 @@ private fun LazyListScope.continuousPagesLayout(
             modifier = Modifier.sizeIn(minHeight = 300.dp, minWidth = 300.dp).fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(
+            if (readerState.booksState.collectAsState().value?.next is snd.komelia.ui.reader.image.SiblingLoad.Failed) {
+                snd.komelia.ui.reader.image.common.ReaderSiblingContent(readerState, next = true)
+            } else Text(
                 stringResource(Res.string.reader_reached_series_end),
                 style = MaterialTheme.typography.titleLarge,
             )

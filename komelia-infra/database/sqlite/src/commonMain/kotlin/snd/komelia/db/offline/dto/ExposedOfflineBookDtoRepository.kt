@@ -12,6 +12,7 @@ import org.jetbrains.exposed.v1.core.case
 import org.jetbrains.exposed.v1.core.countDistinct
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greater
+import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.greaterEq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.inSubQuery
@@ -445,7 +446,10 @@ class ExposedOfflineBookDtoRepository(
         return selectBase(userId)
             .where {
                 bookTable.seriesId.eq(seriesId)
-                    .and { bookMetaTable.numberSort.greater(numberSort) }
+                    .and {
+                        if (next) bookMetaTable.numberSort.greater(numberSort)
+                        else bookMetaTable.numberSort.less(numberSort)
+                    }
             }
             .orderBy(bookMetaTable.numberSort, if (next) SortOrder.ASC else SortOrder.DESC)
             .limit(1)

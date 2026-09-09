@@ -84,6 +84,14 @@ For reader gesture changes, run the JVM Compose `ScalableContainerGestureTest` a
 
 ## Reader image lifetime, preloading, and OLED
 
+For chapter navigation, run `LocalFirstBookApiTest`, `ReaderSiblingTest`, `ReaderSiblingStateTest`, and `SiblingStatusContentTest` in UI JVM tests. SQLite `LocalLibraryManagerIntegrationTest` covers imported decimal chapter labels, rescans, and both sibling boundaries. Check partial downloads, online read-list order, query failure/retry, and unchanged current-page progress. Use original reporter data separately from synthetic fixtures.
+
+For Android provider compatibility, run `SafChannelTest` and `AndroidArchiveAccessTest` on a dedicated emulator. These cover seekable and pipe-backed providers, bounded temporary copies, cache eviction, corrupt archives, permissions, free-space limits, and cancellation cleanup. Also import and open a CBZ and EPUB through the real folder picker. Preserve existing app data during package installation.
+
+`PosterGridDensityTest` changes the setting against an actual Compose grid. `LayoutTest` checks density defaults and touch-bound sizing. Repeat slider changes, rotation, and restart on Android; cover local, home, series, book, collection, and read-list grids.
+
+`CardWidthPersistenceTest` delays an earlier save and covers leaving settings during a write. `SettingsStateWrapperTest` verifies serialized updates of different preferences and failed-save state. Domain browser tests use the same Compose foundation runtime version as the consuming UI, with Skiko packaged by the Compose Gradle plugin.
+
 `ReaderTileFallbackTest` exercises the real tile pipeline with delayed full-frame generation: whole-page coverage survives zoom-out, previews are reused across zoom/pan, crop reload replaces preview pixels, and page close retires owned pixels once. `TileFallbackSizeTest` checks the 768-pixel longest-edge limit without upscaling small images. Android `AndroidReaderImageLifetimeTest` also checks real bitmap gap filling and translucent tile alpha; a preview must not be composited beneath already loaded transparent pixels. Use a synthetic high-resolution image for native decoding, rapid zoom/pan, and exit/re-entry checks. ONNX panel detection and reporter-device acceptance remain separate from renderer validation.
 
 `ReaderSystemBarsEffectTest` exercises the Compose reader lifecycle: hide both system bars during reading, restore them while controls are shown, hide again when controls close, and restore on disposal. Repeat with Android gesture navigation, three-button navigation and tablet-sized layouts; the mocked window contract does not prove OEM taskbar behavior.

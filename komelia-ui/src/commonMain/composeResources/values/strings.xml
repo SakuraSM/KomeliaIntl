@@ -1396,7 +1396,18 @@
     <string name="reader_previous_book_failed">Could not load the previous book. Retry to continue.</string>
     <string name="reader_sibling_retry">Retry</string>
     <string name="reader_sibling_retrying">Retrying…</string>
-    <string name="local_archive_copy_limit">The temporary archive copy exceeds the limit. Move the book to a device folder that supports direct file access, then scan again.</string>
-    <string name="local_archive_low_space">Not enough space for a temporary archive copy. Free storage or move the book to a device folder, then scan again.</string>
+    <string name="local_archive_copy_limit">Archive cache limit reached: 1 GiB per file and 2 GiB total. Use a smaller archive or close other readers and retry.</string>
+    <string name="local_archive_low_space">Not enough space to prepare the archive cache. Free device storage and retry.</string>
     <string name="local_archive_import_failures">Failed imports: %1$d. Check the offline logs, then scan again.</string>
+    <string name="local_archive_unknown_format">The file is not a recognized ZIP, RAR or 7z archive. Changing its extension does not convert its format.</string>
+    <string name="local_archive_corrupt">The archive is incomplete or damaged. Check the original file or download it again.</string>
+    <string name="local_archive_unsupported_codec">This compression method or RAR version is not supported. Repack the archive as ZIP or a supported 7z file.</string>
+    <string name="local_archive_encrypted">Password-protected archives are not supported. Create an unencrypted copy.</string>
+    <string name="local_archive_multi_volume">Multi-volume archives are not supported. Combine and repack the complete archive first.</string>
+    <string name="local_archive_permission">Archive access was denied. Grant access to the source folder again.</string>
+    <string name="local_archive_source_io">The archive source could not be read. Check that the file is available and the folder permission is valid.</string>
+    <string name="local_archive_memory_limit">The 7z decoder needs more than 128 MiB of memory. Repack with a smaller dictionary or as ZIP.</string>
+    <string name="local_archive_decode_limit">The 7z archive exceeds the limits: 64 MiB per entry, 1 GiB total or 10,000 entries. Split or repack it.</string>
+    <string name="local_archive_unsafe_entry">The archive contains unsafe or duplicate paths. Repack with unique relative paths.</string>
+    <string name="local_archive_preparing">Preparing archive cache… You can cancel and try again later.</string>
 </resources>

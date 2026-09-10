@@ -156,6 +156,7 @@ fun BookInfoColumn(
                         "application/epub+zip" -> "EPUB"
                         "application/pdf" -> "PDF"
                         "application/zip", "application/x-cbz" -> "CBZ / ZIP"
+                        "application/x-7z-compressed" -> "CB7 / 7z"
                         "application/vnd.comicbook-rar", "application/x-rar-compressed" -> "CBR / RAR"
                         else -> mediaType
                     }

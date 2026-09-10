@@ -1396,7 +1396,18 @@
     <string name="reader_previous_book_failed">上一本加载失败，请重试后继续阅读。</string>
     <string name="reader_sibling_retry">重试</string>
     <string name="reader_sibling_retrying">正在重试…</string>
-    <string name="local_archive_copy_limit">归档临时副本超过限制。请将书籍移至支持直接读取的设备本地目录，再重新扫描。</string>
-    <string name="local_archive_low_space">空间不足，无法创建归档临时副本。请释放空间或将书籍移至设备本地目录，再重新扫描。</string>
+    <string name="local_archive_copy_limit">归档缓存已达限制：单文件 1 GiB，总量 2 GiB。请使用较小的归档，或关闭其他阅读器后重试。</string>
+    <string name="local_archive_low_space">空间不足，无法准备归档缓存。请释放设备存储空间后重试。</string>
     <string name="local_archive_import_failures">有 %1$d 本书籍导入失败。请查看离线日志，再重新扫描。</string>
+    <string name="local_archive_unknown_format">无法识别归档格式。仅修改扩展名不会转换格式，请使用真实的 ZIP、RAR 或 7z 文件。</string>
+    <string name="local_archive_corrupt">归档不完整或已损坏，请检查原文件或重新下载。</string>
+    <string name="local_archive_unsupported_codec">暂不支持此压缩算法或 RAR 版本，请重新打包为 ZIP 或受支持的 7z 文件。</string>
+    <string name="local_archive_encrypted">暂不支持加密归档，请创建未加密的副本。</string>
+    <string name="local_archive_multi_volume">暂不支持分卷归档，请先合并完整文件并重新打包。</string>
+    <string name="local_archive_permission">无法访问归档，请重新授予源文件夹的访问权限。</string>
+    <string name="local_archive_source_io">无法读取源归档，请检查文件是否可用以及文件夹授权是否有效。</string>
+    <string name="local_archive_memory_limit">7z 解码所需内存超过 128 MiB，请减小压缩字典或重新打包为 ZIP。</string>
+    <string name="local_archive_decode_limit">7z 归档超过限制：单条目 64 MiB、解码总量 1 GiB 或 10,000 个条目。请拆分或重新打包。</string>
+    <string name="local_archive_unsafe_entry">归档包含不安全或重复的路径，请使用唯一的相对路径重新打包。</string>
+    <string name="local_archive_preparing">正在准备归档缓存，可取消后稍后重试。</string>
 </resources>

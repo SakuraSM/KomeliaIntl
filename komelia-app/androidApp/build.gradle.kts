@@ -36,6 +36,8 @@ dependencies{
 
     androidTestImplementation("androidx.test:runner:1.7.0")
     androidTestImplementation("junit:junit:4.13.2")
+    androidTestImplementation(libs.commons.compress)
+    androidTestImplementation(libs.xz)
 
 }
 

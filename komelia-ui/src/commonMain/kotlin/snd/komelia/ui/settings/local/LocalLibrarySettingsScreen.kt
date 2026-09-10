@@ -33,8 +33,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_archive_copy_limit
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_archive_low_space
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_archive_import_failures
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_add
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_auto_scan
@@ -50,6 +48,10 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.common.components.SettingsSection
+import snd.komelia.ui.common.archiveFailureMessage
+import snd.komelia.offline.mediacontainer.ArchivePreparation
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_archive_preparing
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
 import snd.komelia.ui.dialogs.permissions.StoragePermissionRequestDialog
 import snd.komelia.ui.settings.SettingsScreenContainer
 import snd.komga.client.library.ScanInterval
@@ -61,6 +63,7 @@ class LocalLibrarySettingsScreen : Screen {
         val vm = rememberScreenModel { factory.getLocalLibraryViewModel() }
         var selectingDirectory by remember { mutableStateOf(false) }
         val scanState by vm.scanState.collectAsState()
+        val preparingArchives by ArchivePreparation.activeCount.collectAsState()
         val layout = LocalKomeliaLayout.current
 
         LaunchedEffect(Unit) { vm.initialize() }
@@ -82,11 +85,9 @@ class LocalLibrarySettingsScreen : Screen {
 
             SettingsSection(
                 title = stringResource(Res.string.local_library_sources),
-                supportingText = scanState.error ?: vm.error ?: when (scanState.archiveFailure) {
-                    snd.komelia.offline.mediacontainer.LocalArchiveFailure.COPY_LIMIT -> stringResource(Res.string.local_archive_copy_limit)
-                    snd.komelia.offline.mediacontainer.LocalArchiveFailure.LOW_SPACE -> stringResource(Res.string.local_archive_low_space)
-                    null -> if (scanState.failedImports > 0) stringResource(Res.string.local_archive_import_failures, scanState.failedImports) else null
-                },
+                supportingText = if (preparingArchives > 0) stringResource(Res.string.local_archive_preparing)
+                else scanState.error ?: vm.error ?: scanState.archiveFailure?.let { archiveFailureMessage(it) }
+                    ?: if (scanState.failedImports > 0) stringResource(Res.string.local_archive_import_failures, scanState.failedImports) else null,
             ) {
                 Button(onClick = { selectingDirectory = true }, enabled = !vm.loading) {
                     Icon(Icons.Rounded.Add, contentDescription = null)
@@ -94,6 +95,9 @@ class LocalLibrarySettingsScreen : Screen {
                 }
                 if (vm.loading || scanState.scanningLibraryId != null) {
                     CircularProgressIndicator()
+                }
+                if (vm.loading) {
+                    Button(onClick = vm::cancel) { Text(stringResource(Res.string.dialog_cancel)) }
                 }
                 vm.libraries.forEach { library ->
                     Column(

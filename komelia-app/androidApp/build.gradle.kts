@@ -94,7 +94,7 @@ android {
         applicationId = "io.github.zhengningning.komelia"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 49
+        versionCode = 50
         versionName = libs.versions.app.version.get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

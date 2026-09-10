@@ -1,9 +1,14 @@
 package snd.komelia.offline.local
 
-import com.github.junrar.Archive
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.runInterruptible
+import snd.komelia.offline.mediacontainer.desktopComicArchives
+import snd.komelia.offline.mediacontainer.desktopComicArchiveCacheDirectory
+import snd.komelia.offline.mediacontainer.fileArchiveSource
 import org.apache.commons.compress.archivers.zip.ZipFile
 import java.io.File
 import kotlin.io.path.fileSize
@@ -18,10 +23,13 @@ actual fun createLocalLibraryPlatform(): LocalLibraryPlatform? = DesktopLocalLib
 
 private class DesktopLocalLibraryPlatform : LocalLibraryPlatform {
     override suspend fun listSupportedFiles(root: String): List<LocalLibraryFile> = withContext(Dispatchers.IO) {
-        val rootPath = File(root).toPath()
+        val rootPath = File(root).canonicalFile.toPath()
+        val cachePath = desktopComicArchiveCacheDirectory().toPath()
+        val caller = currentCoroutineContext()
         rootPath.walk()
             .filter {
-                it.isRegularFile() &&
+                caller.ensureActive()
+                !it.startsWith(cachePath) && it.isRegularFile() && !it.toRealPath().startsWith(cachePath) &&
                     isSupportedLocalBook(it.name) &&
                     !it.name.endsWith(".pdf", ignoreCase = true)
             }
@@ -39,14 +47,19 @@ private class DesktopLocalLibraryPlatform : LocalLibraryPlatform {
     }
 
     override suspend fun inspect(file: LocalLibraryFile): LocalBookInspection = withContext(Dispatchers.IO) {
+        if (isMultipartArchiveName(file.displayName)) throw snd.komelia.offline.mediacontainer.LocalArchiveAccessException(snd.komelia.offline.mediacontainer.LocalArchiveFailure.MULTI_VOLUME)
         when (file.displayName.substringAfterLast('.', "").lowercase()) {
-            "cbz", "zip" -> withZip(file.file) { zip ->
-                val entries = zip.entries.asSequence().filterNot { it.isDirectory }.toList()
-                inspectComicArchive(
-                    entries = entries.map { it.name to it.size.takeIf { size -> size >= 0 } },
-                    readEntry = { name -> zip.getInputStream(zip.getEntry(name)).use { it.readBytes() } },
-                    mediaType = "application/zip",
-                )
+            "cbz", "zip", "cbr", "rar", "7z", "cb7" -> {
+                val caller = currentCoroutineContext()
+                runInterruptible(Dispatchers.IO) {
+                    desktopComicArchives().withArchive(fileArchiveSource(file.file.file), caller::ensureActive) { archive ->
+                        inspectComicArchive(
+                            entries = archive.entries.map { it.name to it.size },
+                            readEntry = { archive.readEntryBytes(it, caller::ensureActive) },
+                            mediaType = archive.format.mediaType,
+                        )
+                    }
+                }
             }
             "epub" -> withZip(file.file) { zip ->
                 val entries = zip.entries.asSequence().filterNot { it.isDirectory }.toList()
@@ -56,17 +69,6 @@ private class DesktopLocalLibraryPlatform : LocalLibraryPlatform {
                         val entry = zip.getEntry(name) ?: error("EPUB entry does not exist: $name")
                         zip.getInputStream(entry).use { it.readBytes() }
                     },
-                )
-            }
-            "cbr", "rar" -> Archive(file.file.file).use { archive ->
-                val headers = archive.fileHeaders.filterNot { it.isDirectory }
-                inspectComicArchive(
-                    entries = headers.map { it.fileName to it.fullUnpackSize },
-                    readEntry = { name ->
-                        val header = headers.firstOrNull { it.fileName == name } ?: error("RAR entry does not exist: $name")
-                        archive.getInputStream(header).use { it.readBytes() }
-                    },
-                    mediaType = "application/x-rar-compressed",
                 )
             }
             "pdf" -> error("Local PDF import is not available on desktop yet")

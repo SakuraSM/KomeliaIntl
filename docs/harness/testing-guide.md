@@ -88,6 +88,10 @@ For chapter navigation, run `LocalFirstBookApiTest`, `ReaderSiblingTest`, `Reade
 
 For Android provider compatibility, run `SafChannelTest` and `AndroidArchiveAccessTest` on a dedicated emulator. These cover seekable and pipe-backed providers, bounded temporary copies, cache eviction, corrupt archives, permissions, free-space limits, and cancellation cleanup. Also import and open a CBZ and EPUB through the real folder picker. Preserve existing app data during package installation.
 
+For archive-format changes, run offline `ArchiveFormatRegressionTest`, `ComicArchiveServiceTest`, and `ArchiveCacheBoundaryTest`, plus Android `AndroidComicArchiveTest`. Cover ZIP/RAR/7z with mismatched suffixes, COPY/LZMA/LZMA2 and solid 7z, reverse reads, persistent-cache reuse, cache pressure, provider timeouts, encryption, invalid paths, CRC errors, and cancellation. UI `ArchiveMessagesTest` checks complete error-resource coverage and wrapped-error presentation.
+
+Optional real-file acceptance stays outside the repository. Set `KOMELIA_QA_ORIGINAL_ARCHIVE` and `KOMELIA_QA_REFERENCE_ARCHIVE` for desktop `OriginalArchiveAcceptanceTest`. On Android, grant the test folder through the app's picker, then supply `qa.originalArchiveUri` and `qa.referenceArchiveUri` as instrumentation arguments to compare all 59 entries in the #67 sample. Without fixtures these acceptance tests are skipped, not passed. Verify actual first/middle/last pages, backwards navigation, re-entry, restart progress and both UI languages separately from byte comparisons.
+
 `PosterGridDensityTest` changes the setting against an actual Compose grid. `LayoutTest` checks density defaults and touch-bound sizing. Repeat slider changes, rotation, and restart on Android; cover local, home, series, book, collection, and read-list grids.
 
 `CardWidthPersistenceTest` delays an earlier save and covers leaving settings during a write. `SettingsStateWrapperTest` verifies serialized updates of different preferences and failed-save state. Domain browser tests use the same Compose foundation runtime version as the consuming UI, with Skiko packaged by the Compose Gradle plugin.

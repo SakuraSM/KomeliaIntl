@@ -30,6 +30,9 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_processi
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.image.ReaderImage
 import snd.komelia.image.ReaderImageResult
+import snd.komelia.ui.common.archiveErrorMessage
+import snd.komelia.offline.mediacontainer.ArchivePreparation
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_archive_preparing
 
 @Composable
 fun ReaderImageContent(
@@ -46,7 +49,8 @@ fun ReaderImageContent(
             content = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(color = Color.Black)
-                    Text(stringResource(Res.string.reader_downloading), color = Color.Black)
+                    val preparing = ArchivePreparation.activeCount.collectAsState().value > 0
+                    Text(stringResource(if (preparing) Res.string.local_archive_preparing else Res.string.reader_downloading), color = Color.Black)
                 }
             }
         )
@@ -60,7 +64,7 @@ private fun ErrorContent(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            "${imageResult.throwable::class.simpleName}: ${imageResult.throwable.message}",
+            archiveErrorMessage(imageResult.throwable),
             color = MaterialTheme.colorScheme.error
         )
         if (onRetry != null) {
@@ -88,7 +92,7 @@ private fun ImageContent(image: ReaderImage) {
     val painter = painterState.value
     if (error != null) {
         Text(
-            "${error::class.simpleName}: ${error.message}",
+            archiveErrorMessage(error),
             color = MaterialTheme.colorScheme.error
         )
     } else if (painter == null) {

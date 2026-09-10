@@ -55,18 +55,25 @@ kotlin {
             implementation(kotlin("test"))
         }
 
+        // JVM archive engines are shared by Android and desktop, not the Wasm target.
+        val jvmSharedMain by creating {
+            dependsOn(commonMain.get())
+            dependencies {
+                implementation(libs.commons.compress)
+                implementation(libs.junrar)
+                implementation(libs.xz)
+            }
+        }
+        androidMain.get().dependsOn(jvmSharedMain)
+        jvmMain.get().dependsOn(jvmSharedMain)
+
         androidMain.dependencies {
-            implementation(libs.commons.compress)
-            implementation(libs.junrar)
             implementation(libs.androidx.documentfile)
             implementation(libs.androidx.workManager)
             implementation(libs.androidx.workManager.ktx)
-            implementation(libs.junrar)
         }
 
         jvmMain.dependencies {
-            implementation(libs.commons.compress)
-            implementation(libs.junrar)
             implementation(libs.ktor.client.okhttp)
             implementation(projects.komeliaInfra.jni)
         }

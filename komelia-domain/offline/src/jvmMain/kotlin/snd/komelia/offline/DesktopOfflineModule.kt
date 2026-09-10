@@ -5,10 +5,11 @@ import kotlinx.coroutines.flow.StateFlow
 import snd.komelia.offline.mediacontainer.DivinaExtractor
 import snd.komelia.offline.mediacontainer.EpubExtractor
 import snd.komelia.offline.mediacontainer.PdfExtractor
-import snd.komelia.offline.mediacontainer.divina.DivinaZipExtractor
 import snd.komelia.offline.mediacontainer.divina.EpubZipExtractor
-import snd.komelia.offline.mediacontainer.divina.RarExtractor
 import snd.komelia.offline.mediacontainer.divina.ZipExtractor
+import snd.komelia.offline.mediacontainer.ComicArchiveExtractor
+import snd.komelia.offline.mediacontainer.desktopComicArchives
+import snd.komelia.offline.mediacontainer.fileArchiveSource
 import snd.komelia.offline.sync.BookDownloadService
 import snd.komelia.offline.sync.DesktopDownloadManager
 import snd.komelia.offline.sync.PlatformDownloadManager
@@ -35,7 +36,7 @@ class DesktopOfflineModule(
     private val zipExtractor = ZipExtractor()
 
     override fun createDivinaExtractors(): List<DivinaExtractor> {
-        return listOf(DivinaZipExtractor(zipExtractor), RarExtractor())
+        return listOf(ComicArchiveExtractor(desktopComicArchives()) { fileArchiveSource(it.file) })
     }
 
     override fun createEpubExtractor(): EpubExtractor {

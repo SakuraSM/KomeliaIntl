@@ -10,6 +10,7 @@ import io.github.vinceglb.filekit.name
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
 import snd.komelia.offline.library.model.OfflineLibrary
 import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.offline.local.LocalBookExclusion
@@ -20,6 +21,7 @@ import snd.komga.client.library.ScanInterval
 class LocalLibraryViewModel(
     private val manager: LocalLibraryManager?,
 ) : ScreenModel {
+    private var actionJob: Job? = null
     var libraries by mutableStateOf<List<OfflineLibrary>>(emptyList())
         private set
     var excludedBooks by mutableStateOf<List<LocalBookExclusion>>(emptyList())
@@ -56,8 +58,15 @@ class LocalLibraryViewModel(
 
     fun reload() = launchAction { }
 
+    fun cancel() {
+        val running = actionJob ?: return
+        running.cancel()
+        screenModelScope.launch { running.join(); reload() }
+    }
+
     private fun launchAction(action: suspend () -> Unit) {
-        screenModelScope.launch {
+        if (actionJob?.isActive == true) return
+        actionJob = screenModelScope.launch {
             loading = true
             error = null
             try {

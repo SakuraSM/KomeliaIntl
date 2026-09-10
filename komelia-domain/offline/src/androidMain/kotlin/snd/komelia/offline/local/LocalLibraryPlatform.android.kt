@@ -3,7 +3,6 @@ package snd.komelia.offline.local
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.documentfile.provider.DocumentFile
-import com.github.junrar.Archive
 import io.github.vinceglb.filekit.AndroidFile
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
@@ -17,15 +16,19 @@ import org.apache.commons.compress.archivers.zip.ZipFile
 import snd.komelia.offline.media.model.OfflineBookPage
 import snd.komelia.offline.mediacontainer.AndroidPdfExtractor
 import snd.komelia.offline.mediacontainer.AndroidZipArchiveOpener
+import snd.komelia.offline.mediacontainer.AndroidArchiveSourceAccess
+import snd.komelia.offline.mediacontainer.ComicArchiveService
+import java.io.File
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.MediaProfile
-import java.io.FileInputStream
 import kotlin.sequences.asSequence
 
 actual fun createLocalLibraryPlatform(): LocalLibraryPlatform? = AndroidLocalLibraryPlatform()
 
 private class AndroidLocalLibraryPlatform : LocalLibraryPlatform {
     private val zipOpener by lazy { AndroidZipArchiveOpener(FileKit.context) }
+    private val archiveAccess by lazy { AndroidArchiveSourceAccess(FileKit.context) }
+    private val archives by lazy { ComicArchiveService.forDirectory(File(FileKit.context.cacheDir, "komelia-saf-archives")) }
     override val scheduledScanningIsManagedByPlatform: Boolean = true
 
     override suspend fun listSupportedFiles(root: String): List<LocalLibraryFile> = withContext(Dispatchers.IO) {
@@ -39,14 +42,19 @@ private class AndroidLocalLibraryPlatform : LocalLibraryPlatform {
     }
 
     override suspend fun inspect(file: LocalLibraryFile): LocalBookInspection = withContext(Dispatchers.IO) {
+        if (isMultipartArchiveName(file.displayName)) throw snd.komelia.offline.mediacontainer.LocalArchiveAccessException(snd.komelia.offline.mediacontainer.LocalArchiveFailure.MULTI_VOLUME)
         when (file.displayName.substringAfterLast('.', "").lowercase()) {
-            "cbz", "zip" -> withZip(file) { zip ->
-                val entries = zip.entries.asSequence().filterNot { it.isDirectory }.toList()
-                inspectComicArchive(
-                    entries = entries.map { it.name to it.size.takeIf { size -> size >= 0 } },
-                    readEntry = { name -> zip.getInputStream(zip.getEntry(name)).use { it.readBytes() } },
-                    mediaType = "application/zip",
-                )
+            "cbz", "zip", "cbr", "rar", "7z", "cb7" -> {
+                val caller = currentCoroutineContext()
+                runInterruptible(Dispatchers.IO) {
+                    archives.withArchive(archiveAccess.source(file.file, file.sizeBytes, file.lastModifiedEpochMillis), caller::ensureActive) { archive ->
+                        inspectComicArchive(
+                            entries = archive.entries.map { it.name to it.size },
+                            readEntry = { archive.readEntryBytes(it, caller::ensureActive) },
+                            mediaType = archive.format.mediaType,
+                        )
+                    }
+                }
             }
             "epub" -> withZip(file) { zip ->
                 val entries = zip.entries.asSequence().filterNot { it.isDirectory }.toList()
@@ -58,25 +66,20 @@ private class AndroidLocalLibraryPlatform : LocalLibraryPlatform {
                     },
                 )
             }
-            "cbr", "rar" -> withRar(file.file) { archive ->
-                val headers = archive.fileHeaders.filterNot { it.isDirectory }
-                inspectComicArchive(
-                    entries = headers.map { it.fileName to it.fullUnpackSize },
-                    readEntry = { name ->
-                        val header = headers.firstOrNull { it.fileName == name } ?: error("RAR entry does not exist: $name")
-                        archive.getInputStream(header).use { it.readBytes() }
-                    },
-                    mediaType = "application/x-rar-compressed",
-                )
-            }
             "pdf" -> inspectPdf(file.file)
             else -> error("Unsupported local book: ${file.displayName}")
         }
     }
 
-    private fun collectFiles(document: DocumentFile, prefix: String, output: MutableList<LocalLibraryFile>) {
-        document.listFiles().sortedBy { it.name?.lowercase().orEmpty() }.forEach { child ->
-            val name = child.name ?: return@forEach
+    private suspend fun collectFiles(document: DocumentFile, prefix: String, output: MutableList<LocalLibraryFile>) {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
+        val children = document.listFiles().mapNotNull { child ->
+            caller.ensureActive()
+            child.name?.let { child to it }
+        }.sortedBy { it.second.lowercase() }
+        children.forEach { (child, name) ->
+            caller.ensureActive()
             val relativePath = if (prefix.isBlank()) name else "$prefix/$name"
             when {
                 child.isDirectory -> collectFiles(child, relativePath, output)
@@ -126,15 +129,6 @@ private class AndroidLocalLibraryPlatform : LocalLibraryPlatform {
             zipOpener.open(file.file, file.sizeBytes.takeIf { it > 0 }, caller::ensureActive).use {
                 block(it.zip)
             }
-        }
-    }
-
-    private fun <T> withRar(file: PlatformFile, block: (Archive) -> T): T = when (val androidFile = file.androidFile) {
-        is AndroidFile.FileWrapper -> Archive(androidFile.file).use(block)
-        is AndroidFile.UriWrapper -> {
-            val descriptor = FileKit.context.contentResolver.openFileDescriptor(androidFile.uri, "r")
-                ?: error("Cannot open ${androidFile.uri}")
-            descriptor.use { FileInputStream(it.fileDescriptor).use { stream -> Archive(stream).use(block) } }
         }
     }
 

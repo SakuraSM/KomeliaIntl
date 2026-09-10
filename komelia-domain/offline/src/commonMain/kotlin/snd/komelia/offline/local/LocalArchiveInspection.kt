@@ -13,7 +13,11 @@ import snd.komga.client.book.WPPublication
 private val imageExtensions = setOf("jpg", "jpeg", "png", "webp", "gif", "avif", "bmp")
 
 internal fun isSupportedLocalBook(name: String): Boolean =
-    name.substringAfterLast('.', "").lowercase() in setOf("cbz", "zip", "cbr", "rar", "pdf", "epub")
+    name.substringAfterLast('.', "").lowercase() in setOf("cbz", "zip", "cbr", "rar", "7z", "cb7", "pdf", "epub")
+        || isMultipartArchiveName(name)
+
+internal fun isMultipartArchiveName(name: String): Boolean =
+    Regex("(?i).*(?:\\.(?:7z|zip|rar)\\.[0-9]{3}|\\.part[0-9]+\\.rar)$").matches(name)
 
 internal fun WPPublication.withLocalBookResourceUrls(bookId: KomgaBookId): WPPublication {
     // Keep publication resources on the reader's internal HTTP origin. WebViews and

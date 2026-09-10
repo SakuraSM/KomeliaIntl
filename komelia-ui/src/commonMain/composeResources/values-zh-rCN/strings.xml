@@ -1,4 +1,7 @@
 <resources>
+    <string name="reader_panel_prerender">提前渲染的后续画面数</string>
+    <string name="reader_panel_prerender_off">0 · 关闭</string>
+    <string name="reader_panel_prerender_description">仅分镜模式生效。默认 1，最多 2，包括翻页前的整页画面。额外预渲染像素共用 32 MiB 上限，过大的画面会跳过。此上限不包含原图和当前画面。</string>
     <string name="navigation_back">返回</string>
     <string name="navigation_close_settings">关闭设置</string>
     <string name="screen_error">错误：%1$s</string>

@@ -67,6 +67,12 @@ class ReaderSettingsRepositoryWrapper(
         wrapper.transform { it.copy(pagedPageLayout = layout) }
     }
 
+    override fun getPanelPrerenderCount(): Flow<Int> = wrapper.mapState { it.panelPrerenderCount.coerceIn(0, 2) }
+
+    override suspend fun putPanelPrerenderCount(count: Int) {
+        wrapper.transform { it.copy(panelPrerenderCount = count.coerceIn(0, 2)) }
+    }
+
     override fun getContinuousReaderReadingDirection(): Flow<ContinuousReadingDirection> {
         return wrapper.mapState { it.continuousReadingDirection }
     }

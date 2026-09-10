@@ -471,6 +471,7 @@ private fun PanelsModeSettings(
     state: PanelsReaderState,
 ) {
     Column {
+        PanelPrerenderSettings(state.prerenderCount.collectAsState().value, state::onPrerenderCountChange)
 
         val readingDirection = state.readingDirection.collectAsState().value
         Text(stringResource(Res.string.reader_paged_reading_direction))

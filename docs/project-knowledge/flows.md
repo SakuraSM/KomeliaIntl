@@ -53,6 +53,12 @@ Local chapter labels and `metadata.numberSort` preserve decimal values such as `
 
 ## Reader navigation
 
+PANELS mode separates page-load lifetime from the current page's presentation job. `RetainedPageCache` keeps in-flight neighboring loads when they become visible. Leaving the reader cancels both scopes and releases cached images, including images allocated before a cancelled decode or detection finishes.
+
+`PanelsReaderState` forecasts upcoming panels in the configured reading order, including the existing whole-page step before a page turn. The PANELS-only `panelPrerenderCount` setting accepts 0 through 2 and defaults to 1. Zero disables neighboring loads and speculative pixels. SQLite migration V16 preserves existing settings with that default; browser JSON uses the same default for missing fields.
+
+`ReaderImage.prefetch` prepares static-image pixels without changing the visible painter or reading progress. `TilingReaderImage` matches prepared frames by source generation, raster size, and tile geometry. All speculative frames share a 32 MiB pixel budget per panel reader. Over-budget views are skipped. This limit excludes decoded originals, inference memory, visible frames, and retired frames still held by a painter. Foreground requests interrupt speculative work after the current native operation. Crop, sampling changes, eviction, and shutdown invalidate prepared pixels.
+
 Online Komga sibling navigation uses the remote chapter directory even when the current book has cached content. Local-source books and explicit offline mode use the offline directory. Online read lists keep their own order; the existing offline series fallback remains unchanged. A sibling lookup or page-list failure is a retryable state, not the end of a series. Retrying updates neighbouring books without resetting the current book, page, or zoom.
 
 1. Detail or library navigation opens an image, PDF, or EPUB reader with a stable content/progress identity.

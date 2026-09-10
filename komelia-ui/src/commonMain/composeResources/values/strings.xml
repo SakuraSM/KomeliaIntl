@@ -1,4 +1,7 @@
 <resources>
+    <string name="reader_panel_prerender">Upcoming views to prerender</string>
+    <string name="reader_panel_prerender_off">0 · Off</string>
+    <string name="reader_panel_prerender_description">Panels mode only. Default: 1; maximum: 2, including the whole-page view between pages. Extra prerendered pixels share a 32 MiB limit, so large views may be skipped. Original images and the current view are not included.</string>
     <string name="navigation_back">Back</string>
     <string name="navigation_close_settings">Close settings</string>
     <string name="screen_error">Error %1$s</string>

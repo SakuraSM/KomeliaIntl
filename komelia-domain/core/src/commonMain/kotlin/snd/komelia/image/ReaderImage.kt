@@ -31,6 +31,12 @@ interface ReaderImage : AutoCloseable {
         visibleDisplaySize: IntRect,
     )
 
+    /** Best-effort background rendering. Must not replace the currently displayed painter. */
+    suspend fun prefetch(request: ReaderImagePrefetch): Int = 0
+
+    /** Retires only extra pre-rendered frames; visible image ownership is unchanged. */
+    fun clearPrefetch() = Unit
+
     suspend fun getOriginalImageSize(): Result<IntSize>
 
     suspend fun getOriginalImage(): Result<KomeliaImage>

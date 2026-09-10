@@ -198,6 +198,10 @@ fun SettingsSideMenuOverlay(
                                 readingDirection = panelsReaderState.readingDirection.collectAsState().value,
                                 onReadingDirectionChange = panelsReaderState::onReadingDirectionChange
                             )
+                            PanelPrerenderSettings(
+                                panelsReaderState.prerenderCount.collectAsState().value,
+                                panelsReaderState::onPrerenderCountChange,
+                            )
                         }
                     }
 

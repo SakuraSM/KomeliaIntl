@@ -35,6 +35,7 @@ class ExposedImageReaderSettingsRepository(database: Database) : ExposedReposito
                         pagedScaleType = LayoutScaleType.valueOf(it[ImageReaderSettingsTable.pagedScaleType]),
                         pagedReadingDirection = PagedReadingDirection.valueOf(it[ImageReaderSettingsTable.pagedReadingDirection]),
                         pagedPageLayout = PageDisplayLayout.valueOf(it[ImageReaderSettingsTable.pagedPageLayout]),
+                        panelPrerenderCount = it[ImageReaderSettingsTable.panelPrerenderCount].coerceIn(0, 2),
                         continuousReadingDirection = ContinuousReadingDirection.valueOf(it[ImageReaderSettingsTable.continuousReadingDirection]),
                         continuousPadding = it[ImageReaderSettingsTable.continuousPadding],
                         continuousPageSpacing = it[ImageReaderSettingsTable.continuousPageSpacing],
@@ -67,6 +68,7 @@ class ExposedImageReaderSettingsRepository(database: Database) : ExposedReposito
                 it[pagedScaleType] = settings.pagedScaleType.name
                 it[pagedReadingDirection] = settings.pagedReadingDirection.name
                 it[pagedPageLayout] = settings.pagedPageLayout.name
+                it[panelPrerenderCount] = settings.panelPrerenderCount.coerceIn(0, 2)
                 it[continuousReadingDirection] = settings.continuousReadingDirection.name
                 it[continuousPadding] = settings.continuousPadding
                 it[continuousPageSpacing] = settings.continuousPageSpacing

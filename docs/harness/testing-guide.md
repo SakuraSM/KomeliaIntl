@@ -110,6 +110,14 @@ Run `./gradlew :komelia-app:androidApp:connectedDebugAndroidTest` with only the 
 
 On Android, use a synthetic multipage CBZ with white borders. Verify crop on/off, fast forward/backward navigation, single/double-page layout, pinch zoom and panning, sampling changes, reader mode changes, and exit/re-entry. Check both process/crash logs and actual page rendering. For OLED, sample unobstructed reader-background pixels; elevated settings panels intentionally retain distinct surface colors. Do not infer physical-panel power behavior from emulator RGB values.
 
+## Login readiness and EPUB sibling state
+
+`OnlineLoginCoordinatorTest`, `LoginViewModelTest`, `LoginHttpRetryTest`, and `DefaultServerUrlResolverTest` cover route readiness, time budgets, retry classification, cancellation, and stale results. Run UI, domain-core, and shared-app `allTests`. The shared-app Wasm tests package Skiko through the Compose plugin, as UI and domain-core tests do.
+
+`komga-webui` tests cover sibling lookup failures, independent directions, retries, stale responses, disposal, and self-references. The eight chapter-scroll gesture tests remain separate. On a dedicated Android emulator, use a controlled local service for cold login, restore, timeout and cancellation, then cross-book EPUB failure and retry. Real accounts and daily application data are outside this fixture.
+
+`EpubReaderSessionTest` covers bridge requests after close, delayed results, and a fresh session on re-entry. Native acceptance must start a delayed sibling retry, confirm the request reached the service, press Back, reopen the same book before the response arrives, and verify that no late request loads another book. A standalone JavaScript disposal test cannot prove that native exit actually retires the document. Wait for the WebView's visual-state callback before injected touch tests and assert trusted touch delivery, including two simultaneous pointers for pinch cases.
+
 ## Server announcements
 
 `AnnouncementsViewModelTest` covers server-content order and fields, empty feeds, request errors, and coroutine cancellation without an update-client dependency. JVM Compose `AnnouncementsContentTest` checks the server notice and empty state without application release sections. For device validation, use an authorized server-admin session to open Server settings / Announcements, then verify App settings / App updates independently. Non-admin accounts cannot open server settings; do not change permissions merely to pass a test.

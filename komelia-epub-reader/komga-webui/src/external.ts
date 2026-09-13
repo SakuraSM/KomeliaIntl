@@ -17,8 +17,8 @@ declare global {
             bookId: string,
             progression: R2Progression
         }) => Promise<CallbackResponse<undefined>>
-        bookGetBookSiblingNext: (bookId: string) => Promise<CallbackResponse<BookDto>>
-        bookGetBookSiblingPrevious: (bookId: string) => Promise<CallbackResponse<BookDto>>
+        bookGetBookSiblingNext: (bookId: string) => Promise<CallbackResponse<BookDto | null>>
+        bookGetBookSiblingPrevious: (bookId: string) => Promise<CallbackResponse<BookDto | null>>
         getOneSeries: (seriesId: string) => Promise<CallbackResponse<SeriesDto>>
 
         readListGetOne: (readListId: string) => Promise<CallbackResponse<ReadListDto>>
@@ -72,11 +72,11 @@ export default class ExternalFunctions {
         return this.callbackResult(window.bookUpdateProgression({bookId: bookId, progression: progression}))
     }
 
-    async bookGetBookSiblingNext(bookId: string): Promise<BookDto> {
+    async bookGetBookSiblingNext(bookId: string): Promise<BookDto | null> {
         return this.callbackResult(window.bookGetBookSiblingNext(bookId))
     }
 
-    async bookGetBookSiblingPrevious(bookId: string): Promise<BookDto> {
+    async bookGetBookSiblingPrevious(bookId: string): Promise<BookDto | null> {
         return this.callbackResult(window.bookGetBookSiblingPrevious(bookId))
     }
 

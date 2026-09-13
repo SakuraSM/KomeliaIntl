@@ -731,6 +731,10 @@
     }
   },
   "epubreader": {
+    "previous_book": "Previous book",
+    "next_book": "Next book",
+    "sibling_error_previous": "Unable to load the previous book. Tap Previous book to retry.",
+    "sibling_error_next": "Unable to load the next book. Tap Next book to retry.",
     "current_chapter": "Current chapter",
     "loading_book": "Preparing your book…",
     "page_of": "Page {page} of {count}",

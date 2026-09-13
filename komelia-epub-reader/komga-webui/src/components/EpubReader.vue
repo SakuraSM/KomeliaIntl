@@ -56,7 +56,8 @@
           horizontal
           v-if="showToolbars"
       >
-        <v-btn icon @click="previousBook">
+        <v-btn icon :disabled="readerLoading || siblings?.previous.status === SiblingStatus.Loading"
+               :aria-label="t('epubreader.previous_book')" @click="previousBook">
           <v-icon :icon="mdiUndo"/>
         </v-btn>
 
@@ -84,7 +85,8 @@
 
         <v-spacer/>
 
-        <v-btn icon @click="nextBook">
+        <v-btn icon :disabled="readerLoading || siblings?.next.status === SiblingStatus.Loading"
+               :aria-label="t('epubreader.next_book')" @click="nextBook">
           <v-icon :icon="mdiRedo"/>
         </v-btn>
       </v-toolbar>
@@ -329,6 +331,7 @@ import {flattenToc} from '@/functions/toc'
 import ShortcutHelpDialog from '@/components/ShortcutHelpDialog.vue'
 import SettingsSelect from '@/components/SettingsSelect.vue'
 import {setupChapterScrollNavigation} from '@/functions/chapterScrollNavigation'
+import {BookSiblingState, BookSiblings, SiblingStatus} from '@/functions/bookSiblingState'
 import {createR2Progression, r2ProgressionToReadingPosition} from '@/functions/readium'
 import {useDisplay, useRtl} from "vuetify";
 import {EpubReaderSettings} from "@/types/epub-reader-settings";
@@ -362,8 +365,20 @@ const fullscreenIsAvailable = ref(true)
 const d2Reader = ref({} as D2Reader)
 const book = ref(undefined as unknown as BookDto)
 const series = ref(undefined as unknown as SeriesDto)
-const siblingPrevious: Ref<undefined | BookDto> = ref(undefined)
-const siblingNext: Ref<undefined | BookDto> = ref(undefined)
+const siblings = ref<BookSiblings<BookDto>>()
+const siblingState = new BookSiblingState<BookDto>({
+  load: (id, direction) => direction === 'next'
+    ? externalFunctions.bookGetBookSiblingNext(id)
+    : externalFunctions.bookGetBookSiblingPrevious(id),
+  changed: state => { siblings.value = state },
+  open: sibling => {
+    cleanupReaderContentSwipeNavigation()
+    d2Reader.value.stop()
+    void setupState(sibling.id)
+  },
+  close: closeBook,
+  failed: direction => sendNotification(t(`epubreader.sibling_error_${direction}`)),
+})
 const incognito = ref(false)
 const showSettings = ref(false)
 const showToolbars = ref(false)
@@ -722,11 +737,19 @@ const navigationClick = computed({
 
 
 onBeforeUnmount(() => {
-  cleanupReaderContentSwipeNavigation()
+  window.removeEventListener('pagehide', disposeReaderNavigation)
+  disposeReaderNavigation()
   d2Reader.value.stop()
 })
 
+function disposeReaderNavigation(): void {
+  siblingState.dispose()
+  readerLoadGeneration++
+  cleanupReaderContentSwipeNavigation()
+}
+
 onMounted(async () => {
+  window.addEventListener('pagehide', disposeReaderNavigation)
   let bookId = await externalFunctions.getInitialBookId()
   let externalSettings = await externalFunctions.getReaderSettings()
   fullscreenIsAvailable.value = await externalFunctions.isFullscreenAvailable()
@@ -734,24 +757,12 @@ onMounted(async () => {
   await setupState(bookId)
 })
 
-function previousBook() {
-  if (siblingPrevious.value == undefined) {
-    closeBook()
-  } else {
-    cleanupReaderContentSwipeNavigation()
-    d2Reader.value.stop()
-    setupState(siblingPrevious.value.id)
-  }
+function previousBook(): void {
+  if (!readerLoading.value) void siblingState.navigate('previous')
 }
 
-function nextBook() {
-  if (siblingNext.value == undefined) {
-    closeBook()
-  } else {
-    cleanupReaderContentSwipeNavigation()
-    d2Reader.value.stop()
-    setupState(siblingNext.value.id)
-  }
+function nextBook(): void {
+  if (!readerLoading.value) void siblingState.navigate('next')
 }
 
 async function switchFullscreen() {
@@ -953,6 +964,7 @@ function navigateResourceAfterUnchangedBoundary(
 
 async function setupState(currentBookId: string) {
   const loadGeneration = ++readerLoadGeneration
+  siblingState.reset(currentBookId)
   readerLoading.value = true
   bookId.value = currentBookId
   book.value = await externalFunctions.bookGet(currentBookId)
@@ -1061,22 +1073,6 @@ async function setupState(currentBookId: string) {
   tocs.landmarks = d2Reader.value.landmarks
   tocs.pageList = d2Reader.value.pageList
 
-  try {
-    // if (this?.context.origin === ContextOrigin.READLIST) {
-    //   this.siblingNext = await this.$komgaReadLists.getBookSiblingNext(this.context.id, bookId)
-    // } else {
-    siblingNext.value = await externalFunctions.bookGetBookSiblingNext(currentBookId)
-    // }
-  } catch (e) {
-  }
-  try {
-    // if (this?.context.origin === ContextOrigin.READLIST) {
-    //   this.siblingPrevious = await this.$komgaReadLists.getBookSiblingPrevious(this.context.id, bookId)
-    // } else {
-    siblingPrevious.value = await externalFunctions.bookGetBookSiblingPrevious(currentBookId)
-    // }
-  } catch (e) {
-  }
 }
 
 function handleResourceReady(): void {
@@ -1245,7 +1241,8 @@ function closeDialog() {
 }
 
 async function closeBook() {
-  await externalFunctions.closeBook()
+  disposeReaderNavigation()
+    await externalFunctions.closeBook()
 }
 
 function cycleViewingTheme() {

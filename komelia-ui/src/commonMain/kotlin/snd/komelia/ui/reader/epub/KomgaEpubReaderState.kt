@@ -9,6 +9,7 @@ import com.fleeksoft.ksoup.parser.Parser.Companion.xmlParser
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -64,8 +65,11 @@ class KomgaEpubReaderState(
     val bookId = MutableStateFlow(bookId)
     private val webview = MutableStateFlow<KomeliaWebview?>(null)
     private val navigator = MutableStateFlow<Navigator?>(null)
+    private val isClosed = MutableStateFlow(false)
+    private var activeSession: EpubReaderSession? = null
 
     override suspend fun initialize(navigator: Navigator) {
+        isClosed.value = false
         this.navigator.value = navigator
         if (platformType == PlatformType.MOBILE) windowState.setFullscreen(true, hideNavigationBar = displaySettings.value.immersiveMode)
         if (state.value !is Uninitialized) return
@@ -81,9 +85,13 @@ class KomgaEpubReaderState(
     }
 
     override fun onWebviewCreated(webview: KomeliaWebview) {
+        // A retained screen can create its native view before initialize() runs again.
+        isClosed.value = false
+        activeSession?.close()
+        val session = EpubReaderSession().also { activeSession = it }
         contentReady.value = false
         this.webview.value = webview
-        coroutineScope.launch { loadEpub(webview) }
+        coroutineScope.launch { loadEpub(webview, session) }
     }
 
     override fun onBackButtonPress() {
@@ -91,7 +99,8 @@ class KomgaEpubReaderState(
     }
 
     override fun closeWebview() {
-        webview.value?.close()
+        if (!isClosed.compareAndSet(false, true)) return
+        retireWebview()
         if (platformType == PlatformType.MOBILE) windowState.setFullscreen(false)
         navigator.value?.let { nav ->
             if (nav.canPop) nav.pop()
@@ -103,21 +112,40 @@ class KomgaEpubReaderState(
         }
     }
 
+    override fun dispose() {
+        if (!isClosed.compareAndSet(false, true)) return
+        retireWebview()
+        if (platformType == PlatformType.MOBILE) windowState.setFullscreen(false)
+    }
+
+    private fun retireWebview() {
+        activeSession?.close()
+        activeSession = null
+        val closing = webview.value
+        webview.value = null
+        contentReady.value = false
+        // Android close() does not destroy the document. Retire its JS realm explicitly.
+        closing?.navigate("about:blank")
+        closing?.close()
+    }
+
     @OptIn(ExperimentalResourceApi::class)
-    private suspend fun loadEpub(webview: KomeliaWebview) {
-        webview.bind<Unit, String>("bookId") {
+    private suspend fun loadEpub(webview: KomeliaWebview, session: EpubReaderSession) {
+        session.requireOpen()
+        bindActive<Unit, String>(webview, session, "bookId") {
             bookId.value.value
         }
-        webview.bind<Unit, Boolean>("incognito") {
+        bindActive<Unit, Boolean>(webview, session, "incognito") {
             !markReadProgress
         }
-        webview.bind<KomgaBookId, KomeliaBook>("bookGet") { bookId: KomgaBookId ->
+        bindActive<KomgaBookId, KomeliaBook>(webview, session, "bookGet") { bookId: KomgaBookId ->
             val book = bookApi.getOne(bookId)
+            session.requireOpen()
             this.book.value = book
             this.bookId.value = book.id
             book
         }
-        webview.bind("bookGetProgression") { bookId: KomgaBookId ->
+        bindActive(webview, session, "bookGetProgression") { bookId: KomgaBookId ->
             bookApi.getReadiumProgression(bookId)
                 ?.let { progressionToWebview(it) }
         }
@@ -125,81 +153,98 @@ class KomgaEpubReaderState(
         @Serializable
         data class BookUpdateProgression(val bookId: KomgaBookId, val progression: R2Progression)
         webview.bind("bookUpdateProgression") { request: BookUpdateProgression ->
+            // Preserve a queued final progress write for the book being closed.
             bookApi.updateReadiumProgression(request.bookId, progressionFromWebview(request.progression))
         }
 
-        webview.bind("bookGetBookSiblingNext") { bookId: KomgaBookId ->
+        bindActive(webview, session, "bookGetBookSiblingNext") { bookId: KomgaBookId ->
             bookApi.getBookSiblingNext(bookId)
         }
 
-        webview.bind("bookGetBookSiblingPrevious") { bookId: KomgaBookId ->
+        bindActive(webview, session, "bookGetBookSiblingPrevious") { bookId: KomgaBookId ->
             bookApi.getBookSiblingPrevious(bookId)
         }
 
-        webview.bind("getOneSeries") { seriesId: KomgaSeriesId ->
+        bindActive(webview, session, "getOneSeries") { seriesId: KomgaSeriesId ->
             seriesApi.getOneSeries(seriesId)
         }
 
-        webview.bind("readListGetOne") { readListId: KomgaReadListId ->
+        bindActive(webview, session, "readListGetOne") { readListId: KomgaReadListId ->
             readListApi.getOne(readListId)
         }
 
-        webview.bind("d2ReaderGetContent") { href: String ->
+        bindActive(webview, session, "d2ReaderGetContent") { href: String ->
             getD2Content(href)
         }
-        webview.bind("d2ReaderGetContentBytesLength") { href: String ->
+        bindActive(webview, session, "d2ReaderGetContentBytesLength") { href: String ->
             proxyResourceRequest(bookApi, href, serverUrl).data.size
         }
 
-        webview.bind("externalFetch") { href: String ->
+        bindActive(webview, session, "externalFetch") { href: String ->
             proxyResourceRequest(bookApi, href, serverUrl).data.decodeToString()
         }
 
-        webview.bind("getPublication") { bookId: KomgaBookId ->
+        bindActive(webview, session, "getPublication") { bookId: KomgaBookId ->
             bookApi.getWebPubManifest(bookId)
         }
 
-        webview.bind<Unit, Unit>("closeBook") { closeWebview() }
+        webview.bind<Unit, Unit>("closeBook") { session.requireOpen(); closeWebview() }
 
-        webview.bind<Unit, String>("getServerUrl") {
+        bindActive<Unit, String>(webview, session, "getServerUrl") {
             serverUrl.first()
         }
 
-        webview.bind<Unit, JsonObject>("getSettings") {
-            epubSettingsRepository.getKomgaReaderSettings().also { backgroundColor.value = komgaReaderBackground(it) }
+        bindActive<Unit, JsonObject>(webview, session, "getSettings") {
+            epubSettingsRepository.getKomgaReaderSettings().also {
+                session.requireOpen()
+                backgroundColor.value = komgaReaderBackground(it)
+            }
         }
 
-        webview.bind<JsonObject, Unit>("saveSettings") { newSettings ->
+        bindActive<JsonObject, Unit>(webview, session, "saveSettings") { newSettings ->
             backgroundColor.value = komgaReaderBackground(newSettings)
             epubSettingsRepository.putKomgaReaderSettings(newSettings)
         }
-        webview.bind<Unit, Boolean>("isFullscreenAvailable") {
+        bindActive<Unit, Boolean>(webview, session, "isFullscreenAvailable") {
             platformType != PlatformType.MOBILE
         }
-        webview.bind<Unit, Unit>("toggleFullscreen") {
+        bindActive<Unit, Unit>(webview, session, "toggleFullscreen") {
             val fullscreen = windowState.isFullscreen.first()
+            session.requireOpen()
             windowState.setFullscreen(!fullscreen, hideNavigationBar = displaySettings.value.immersiveMode)
         }
-        webview.bind<Unit, Unit>("readerContentReady") {
+        bindActive<Unit, Unit>(webview, session, "readerContentReady") {
             contentReady.value = true
         }
 
         webview.registerRequestInterceptor { request ->
             runCatching {
-                when (val urlString = request.url.toString()) {
-                    "http://komelia/komga.html" -> {
-                        val bytes = Res.readBytes("files/komga.html")
-                        ResourceLoadResult(data = bytes, contentType = "text/html")
-                    }
+                session.run {
+                    when (val urlString = request.url.toString()) {
+                        "http://komelia/komga.html" -> {
+                            val bytes = Res.readBytes("files/komga.html")
+                            ResourceLoadResult(data = bytes, contentType = "text/html")
+                        }
 
-                    "http://komelia/favicon.ico" -> null
-                    else -> proxyResourceRequest(bookApi, urlString, serverUrl)
+                        "http://komelia/favicon.ico" -> null
+                        else -> proxyResourceRequest(bookApi, urlString, serverUrl)
+                    }
                 }
-            }.onFailure { logger.catching(it) }.getOrNull()
+            }.onFailure { if (it !is CancellationException) logger.catching(it) }.getOrNull()
         }
 
+        session.requireOpen()
         webview.navigate("http://komelia/komga.html")
         webview.start()
+    }
+
+    private suspend inline fun <reified Args, reified Result> bindActive(
+        webview: KomeliaWebview,
+        session: EpubReaderSession,
+        name: String,
+        crossinline request: suspend (Args) -> Result,
+    ) {
+        webview.bind<Args, Result>(name) { arguments -> session.run { request(arguments) } }
     }
 
     private suspend fun progressionToWebview(progress: R2Progression): R2Progression {

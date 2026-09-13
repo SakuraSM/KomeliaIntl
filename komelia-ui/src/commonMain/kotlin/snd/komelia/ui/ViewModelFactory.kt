@@ -308,6 +308,7 @@ class ViewModelFactory(
 
     fun getLoginViewModel(): LoginViewModel {
         return LoginViewModel(
+            serverUrlResolver = dependencies.serverUrlResolver,
             settingsRepository = appRepositories.settingsRepository,
             secretsRepository = appRepositories.secretsRepository,
             komgaUserApi = dependencies.komgaApi.map { it.userApi },

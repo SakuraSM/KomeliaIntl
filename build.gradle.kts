@@ -138,6 +138,9 @@ val windowsLibs = setOf(
 interface Injected {
     @get:Inject
     val objectFactory: ObjectFactory
+
+    @get:Inject
+    val fs: FileSystemOperations
 }
 
 tasks.register<Sync>("linux-x86_64_copyJniLibs") {
@@ -482,11 +485,15 @@ tasks.register<DefaultTask>("komfWebUI") {
             injected.objectFactory.fileTree().from(appInput).matching {
                 include("*.wasm")
                 include("*.js")
-                include("*.html")
                 include("*.css")
             },
             output
         )
+        injected.fs.copy {
+            from(appInput)
+            into(output)
+            include("index.html")
+        }
         gzipFiles(
             injected.objectFactory.fileTree().from(webWorkerInput).matching {
                 include("*.wasm")

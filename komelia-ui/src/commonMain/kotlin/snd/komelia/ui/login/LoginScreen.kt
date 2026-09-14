@@ -14,6 +14,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import snd.komelia.ui.dialogs.permissions.AccessLocalNetworkRequestDialog
+import snd.komelia.ui.dialogs.ConfirmationDialog
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_android_lan_access_dialog
+import snd.komelia.ui.platform.hasLanPermission
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -79,11 +87,59 @@ class LoginScreen : Screen {
         rootNavigator: Navigator
     ) {
         val state = viewModel.state.collectAsState()
+        val platform = LocalPlatform.current
+        val granted = hasLanPermission()
+        var permissionAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+        var requestSystemPermission by remember { mutableStateOf(false) }
+        var autoPermissionOffered by remember { mutableStateOf(false) }
+        LaunchedEffect(state.value, viewModel.autoLoginError, granted) {
+            if (state.value is Error && viewModel.autoLoginError != null &&
+                !granted && !autoPermissionOffered) {
+                autoPermissionOffered = true
+                permissionAction = viewModel::retryAutoLogin
+            }
+        }
+        val withPermission: (() -> Unit) -> Unit = { action ->
+            if (granted) action() else permissionAction = action
+        }
+        if (permissionAction != null && !requestSystemPermission) {
+            ConfirmationDialog(
+                body = stringResource(Res.string.login_android_lan_access_dialog),
+                onDialogConfirm = { requestSystemPermission = true },
+                onDialogDismiss = {
+                    // ConfirmationDialog also dismisses after Confirm. Keep the pending
+                    // action until the system permission callback in that case.
+                    if (!requestSystemPermission) {
+                        val action = permissionAction
+                        permissionAction = null
+                        action?.invoke()
+                    }
+                },
+            )
+        }
+        if (permissionAction != null && requestSystemPermission) {
+            AccessLocalNetworkRequestDialog {
+                val action = permissionAction
+                permissionAction = null
+                requestSystemPermission = false
+                // A denied LAN grant must not prevent remote-server or offline use.
+                action?.invoke()
+            }
+        }
 
         when (state.value) {
             Loading, Uninitialized -> LoginLoadingContent(viewModel::cancel)
 
-            is Error -> LoginContent(
+            is Error -> if (platform == WEB_KOMF) KomfLoginContent(
+                url = viewModel.url,
+                onUrlChange = viewModel::onUrlChange,
+                apiKey = viewModel.apiKey,
+                onApiKeyChange = { viewModel.apiKey = it },
+                userLoginError = viewModel.userLoginError,
+                autoLoginError = viewModel.autoLoginError,
+                onAutoLoginRetry = viewModel::retryAutoLogin,
+                onLogin = viewModel::loginWithApiKey,
+            ) else LoginContent(
                 url = viewModel.url,
                 onUrlChange = viewModel::onUrlChange,
                 user = viewModel.user,
@@ -93,8 +149,8 @@ class LoginScreen : Screen {
                 userLoginError = viewModel.userLoginError,
                 serverUrlError = viewModel.serverUrlError,
                 autoLoginError = viewModel.autoLoginError,
-                onAutoLoginRetry = viewModel::retryAutoLogin,
-                onLogin = viewModel::loginWithCredentials,
+                onAutoLoginRetry = { withPermission(viewModel::retryAutoLogin) },
+                onLogin = { withPermission(viewModel::loginWithCredentials) },
                 offlineIsAvailable = viewModel.offlineIsAvailable.collectAsState().value,
                 onOfflineSelect = { rootNavigator.replaceAll(OfflineLoginScreen()) },
                 canGoOfflineAsCurrentUser = viewModel.canGoOfflineAsCurrentUser.collectAsState(false).value,

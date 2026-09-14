@@ -84,6 +84,12 @@ The Komga EPUB reader's `BookSiblingState` owns previous and next lookups by cur
 
 `KomgaEpubReaderState` gives each native document a fresh `EpubReaderSession`. Close and model disposal retire its bridge callbacks and navigate the document to `about:blank`; Android's WebView wrapper `close()` alone does not stop JavaScript. A retained screen creates a new session when its native view is recreated, even before its initialize effect runs. Book results check the session before changing native book identity. Queued final progress writes remain allowed. The JavaScript reader also clears navigation on `pagehide` and explicit close.
 
+## Android LAN permission and Web API keys
+
+Android 17 uses `ACCESS_LOCAL_NETWORK` for LAN connections. Native login and retry actions request permission through the system dialog. Automatic login failures offer the permission flow once per login screen. Dismissing or denying permission does not disable remote-server login or local-library access. Android variants retain `ACCESS_NETWORK_STATE` for the fork's route selection.
+
+Web Komf login accepts an API key through `ApiKeyStore` and the existing bounded login coordinator. Keys are selected by the current server URL in memory and stored by server URL in browser storage. Changing server must never attach the previous server's key. Logout removes the selected server's key. Android and desktop retain cookie login.
+
 ## Server announcements and application updates
 
 Server settings announcements use only the active Komga session's `KomgaAnnouncementsApi`. A failed server request is an error, not an empty feed or a fallback to GitHub release notes. Application version checks and Komelia release notes remain under App settings / App updates. Keep the existing server-admin navigation gate and read-status API unchanged.

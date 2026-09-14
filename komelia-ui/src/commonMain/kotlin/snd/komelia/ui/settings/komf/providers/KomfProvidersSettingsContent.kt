@@ -58,7 +58,11 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_book_release_date
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_book_summary
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_book_tags
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_bookwalker_database
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_bookwalker_database_download
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_bookwalker_database_update
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_comicvine_client_id
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_database_download_date
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_edit
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_edit_close
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mal_client_id
@@ -66,7 +70,6 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mangabaka_database_checksum
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mangabaka_database_download
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mangabaka_database_download_close
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mangabaka_database_download_date
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mangabaka_database_download_done
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mangabaka_database_update
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mangabaka_datasource_type
@@ -125,10 +128,11 @@ import snd.komf.api.KomfNameMatchingMode
 import snd.komf.api.KomfProviders
 import snd.komf.api.MangaBakaMode
 import snd.komf.api.MangaDexLink
+import snd.komf.api.config.DownloadProgress
 import snd.komf.api.config.MangaBakaDatabaseDto
-import snd.komf.api.config.MangaBakaDownloadProgress
 import snd.komf.api.mediaserver.KomfMediaServerLibrary
 import snd.komf.api.mediaserver.KomfMediaServerLibraryId
+import kotlin.time.Instant
 
 @Composable
 fun KomfProvidersSettingsContent(
@@ -149,7 +153,9 @@ fun KomfProvidersSettingsContent(
     onMalClientIdSave: (String) -> Unit,
 
     mangaBakaDbMetadata: MangaBakaDatabaseDto?,
-    onMangaBakaUpdate: () -> Flow<MangaBakaDownloadProgress>
+    onMangaBakaUpdate: () -> Flow<DownloadProgress>,
+    bookWalkerDownloadTimestamp: Instant?,
+    onBookWalkerUpdate: () -> Flow<DownloadProgress>,
 ) {
 
     LibraryTabs(
@@ -172,7 +178,9 @@ fun KomfProvidersSettingsContent(
                     malClientId = malClientId,
                     onMalClientIdSave = onMalClientIdSave,
                     mangaBakaDbMetadata = mangaBakaDbMetadata,
-                    onMangaBakaUpdate = onMangaBakaUpdate
+                    onMangaBakaUpdate = onMangaBakaUpdate,
+                    bookWalkerDownloadTimestamp = bookWalkerDownloadTimestamp,
+                    onBookWalkerUpdate = onBookWalkerUpdate,
                 )
 
             }
@@ -269,17 +277,28 @@ private fun AddNewProviderButton(
                 .widthIn(min = 200.dp)
                 .scrollbar(scrollState, Orientation.Vertical)
         ) {
-            KomfCoreProviders.entries.filter { it !in enabledProviders }.forEach {
-                DropdownMenuItem(
-                    text = { Text(AppStrings.forProvider(it)) },
-                    onClick = {
-                        addProviderExpanded = false
-                        onNewProviderAdd(it)
-                    },
-                    modifier = Modifier.cursorForHand()
-                )
+            KomfCoreProviders.entries
+                .filter {
+                    when (it) {
+                        KomfCoreProviders.BANGUMI, KomfCoreProviders.YEN_PRESS,
+                        KomfCoreProviders.VIZ, KomfCoreProviders.WEBTOONS,
+                        KomfCoreProviders.NAUTILJON, KomfCoreProviders.KODANSHA,
+                        KomfCoreProviders.HENTAG -> false
 
-            }
+                        else -> true
+                    }
+                }
+                .filter { it !in enabledProviders }.forEach {
+                    DropdownMenuItem(
+                        text = { Text(AppStrings.forProvider(it)) },
+                        onClick = {
+                            addProviderExpanded = false
+                            onNewProviderAdd(it)
+                        },
+                        modifier = Modifier.cursorForHand()
+                    )
+
+                }
         }
     }
 
@@ -296,9 +315,12 @@ private fun CommonSettingsContent(
     malClientId: String?,
     onMalClientIdSave: (String) -> Unit,
     mangaBakaDbMetadata: MangaBakaDatabaseDto?,
-    onMangaBakaUpdate: () -> Flow<MangaBakaDownloadProgress>
+    onMangaBakaUpdate: () -> Flow<DownloadProgress>,
+    bookWalkerDownloadTimestamp: Instant?,
+    onBookWalkerUpdate: () -> Flow<DownloadProgress>
 ) {
     var showMangaBakaDownloadProgress by remember { mutableStateOf(false) }
+    var showBookWalkerDownloadProgress by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         DropdownChoiceMenu(
@@ -338,7 +360,7 @@ private fun CommonSettingsContent(
                     mangaBakaDbMetadata.downloadTimestamp.toLocalDateTime(TimeZone.currentSystemDefault())
                         .format(localDateFormat)
                 }
-                Text(stringResource(Res.string.komf_providers_mangabaka_database_download_date, downloadDate))
+                Text(stringResource(Res.string.komf_providers_database_download_date, downloadDate))
                 Text(
                     stringResource(
                         Res.string.komf_providers_mangabaka_database_checksum, mangaBakaDbMetadata.checksum
@@ -351,21 +373,52 @@ private fun CommonSettingsContent(
             ) {
                 Text(
                     if (mangaBakaDbMetadata != null) stringResource(Res.string.komf_providers_mangabaka_database_update)
-                    else stringResource(Res.string.komf_providers_mangabaka_database_update)
+                    else stringResource(Res.string.komf_providers_mangabaka_database_download)
                 )
             }
         }
+
+        HorizontalDivider()
+        Text(
+            stringResource(Res.string.komf_providers_bookwalker_database),
+            style = MaterialTheme.typography.titleLarge
+        )
+        Column {
+            if (bookWalkerDownloadTimestamp != null) {
+                val downloadDate = remember(bookWalkerDownloadTimestamp) {
+                    bookWalkerDownloadTimestamp.toLocalDateTime(TimeZone.currentSystemDefault())
+                        .format(localDateFormat)
+                }
+                Text(stringResource(Res.string.komf_providers_database_download_date, downloadDate))
+            }
+            FilledTonalButton(
+                onClick = { showBookWalkerDownloadProgress = true },
+                modifier = Modifier.cursorForHand()
+            ) {
+                Text(
+                    if (bookWalkerDownloadTimestamp != null) stringResource(Res.string.komf_providers_bookwalker_database_update)
+                    else stringResource(Res.string.komf_providers_bookwalker_database_download)
+                )
+            }
+        }
+
         if (showMangaBakaDownloadProgress) {
-            MangaBakaDbDownloadContent(
+            DatabaseDownloadContent(
                 onMangaBakaUpdate,
                 { showMangaBakaDownloadProgress = false })
+        }
+
+        if (showBookWalkerDownloadProgress) {
+            DatabaseDownloadContent(
+                onBookWalkerUpdate,
+                { showBookWalkerDownloadProgress = false })
         }
     }
 }
 
 @Composable
-private fun MangaBakaDbDownloadContent(
-    onDownloadRequest: () -> Flow<MangaBakaDownloadProgress>,
+private fun DatabaseDownloadContent(
+    onDownloadRequest: () -> Flow<DownloadProgress>,
     onDismiss: () -> Unit,
 ) {
     var progress by remember { mutableStateOf(UpdateProgress(0, 0)) }
@@ -375,18 +428,18 @@ private fun MangaBakaDbDownloadContent(
     LaunchedEffect(Unit) {
         onDownloadRequest().collect { event ->
             when (event) {
-                is MangaBakaDownloadProgress.ProgressEvent -> progress = UpdateProgress(
+                is DownloadProgress.ProgressEvent -> progress = UpdateProgress(
                     event.total,
                     event.completed,
                     event.info
                 )
 
-                is MangaBakaDownloadProgress.ErrorEvent -> {
+                is DownloadProgress.ErrorEvent -> {
                     error = event.message
                     completed = true
                 }
 
-                MangaBakaDownloadProgress.FinishedEvent -> completed = true
+                DownloadProgress.FinishedEvent -> completed = true
             }
         }
     }

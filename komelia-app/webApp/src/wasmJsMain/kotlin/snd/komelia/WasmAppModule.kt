@@ -30,7 +30,7 @@ import snd.komelia.image.wasm.client.WorkerImageDecoder
 import snd.komelia.offline.OfflineModule
 import snd.komelia.offline.OfflineRepositories
 import snd.komelia.onnxruntime.OnnxRuntime
-import snd.komelia.settings.CookieStoreSecretsRepository
+import snd.komelia.settings.WasmJsSecretsRepository
 import snd.komelia.settings.ImageReaderSettingsRepository
 import snd.komelia.ui.DependencyContainer
 import snd.komelia.ui.home.edit.getDefaultFilters
@@ -77,7 +77,7 @@ class WasmAppModule(
             colorCurvesPresetsRepository = IDBColorCurvesPresetRepository(idb),
             colorLevelsPresetRepository = IDBColorLevelsPresetRepository(idb),
             bookColorCorrectionRepository = IDBBookColorCorrectionRepository(idb),
-            secretsRepository = CookieStoreSecretsRepository(),
+            secretsRepository = WasmJsSecretsRepository(),
             komfSettingsRepository = KomfSettingsRepositoryWrapper(
                 SettingsStateWrapper(
                     settingsRepository.getKomfSettings(),

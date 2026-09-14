@@ -47,7 +47,9 @@ class KomfProvidersSettingsScreen : Screen {
                     malClientId = vm.malClientId,
                     onMalClientIdSave = vm::onMalClientIdChange,
                     mangaBakaDbMetadata = vm.mangaBakaDbMetadata,
-                    onMangaBakaUpdate = vm::onMangaBakaDbUpdate
+                    onMangaBakaUpdate = vm::onMangaBakaDbUpdate,
+                    bookWalkerDownloadTimestamp = vm.bookWalkerDownloadTimestamp,
+                    onBookWalkerUpdate = vm::onBookWalkerDbUpdate
                 )
             }
 

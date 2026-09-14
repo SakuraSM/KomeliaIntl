@@ -33,7 +33,7 @@ fun ConfirmationDialog(
     body: String,
     title: String? = null,
     confirmText: String? = null,
-    buttonCancel: String = stringResource(Res.string.dialog_cancel),
+    buttonCancel: String? = stringResource(Res.string.dialog_cancel),
     buttonConfirm: String = stringResource(Res.string.dialog_confirm),
     buttonAlternate: String? = null,
     buttonConfirmColor: Color = MaterialTheme.colorScheme.secondaryContainer,
@@ -67,13 +67,15 @@ fun ConfirmationDialog(
         controlButtons = {
             FlowRow(Modifier.padding(layout.dialogContentPadding)) {
                 Spacer(Modifier.weight(1f))
-                TextButton(
-                    onClick = onDialogDismiss,
-                    modifier = Modifier.cursorForHand(),
-                ) {
-                    Text(buttonCancel)
+                if (buttonCancel != null) {
+                    TextButton(
+                        onClick = onDialogDismiss,
+                        modifier = Modifier.cursorForHand(),
+                    ) {
+                        Text(buttonCancel)
+                    }
+                    Spacer(Modifier.size(10.dp))
                 }
-                Spacer(Modifier.size(layout.controlSpacing))
 
                 if (buttonAlternate != null) {
                     TextButton(

@@ -12,7 +12,7 @@ group = "io.github.snd-r.komelia"
 version = libs.versions.app.version.get()
 
 
-dependencies{
+dependencies {
     implementation(projects.komeliaApp.shared)
     implementation(projects.komeliaUi)
     implementation(projects.komeliaDomain.core)
@@ -146,9 +146,20 @@ android {
             }
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "android.pro"
+
+            // required by playstore. helps to reduce apk/bundle size
+            // saves 185KB but mangles stacktraces
+            val obfuscationRule = when (androidVariant) {
+                AndroidVariant.STANDALONE, AndroidVariant.FDROID -> "dont_obfuscate.pro"
+                AndroidVariant.PLAY -> null
+            }
+
+            setProguardFiles(
+                listOfNotNull(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    obfuscationRule,
+                    "android.pro",
+                )
             )
         }
     }

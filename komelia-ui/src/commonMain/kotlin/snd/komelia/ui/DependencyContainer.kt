@@ -8,6 +8,7 @@ import snd.komelia.AppRepositories
 import snd.komelia.AppWindowState
 import snd.komelia.KomgaAuthenticationState
 import snd.komelia.ManagedKomgaEvents
+import snd.komelia.http.ApiKeyStore
 import snd.komelia.image.BookImageLoader
 import snd.komelia.image.KomeliaImageDecoder
 import snd.komelia.image.KomeliaPanelDetector
@@ -27,8 +28,8 @@ import snd.komf.client.KomfClientFactory
 data class DependencyContainer(
     val appRepositories: AppRepositories,
     val serverUrlResolver: ServerUrlResolver,
+    val apiKeyStore: ApiKeyStore,
     val komgaApi: StateFlow<KomgaApi>,
-
     val isOffline: StateFlow<Boolean>,
     val komfClientFactory: KomfClientFactory,
     val appNotifications: AppNotifications,

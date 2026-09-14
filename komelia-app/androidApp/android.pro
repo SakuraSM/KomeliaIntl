@@ -1,5 +1,3 @@
--dontobfuscate
-
 -dontwarn java.sql.JDBCType
 -dontwarn org.jboss.vfs.**
 -dontwarn org.osgi.framework.**

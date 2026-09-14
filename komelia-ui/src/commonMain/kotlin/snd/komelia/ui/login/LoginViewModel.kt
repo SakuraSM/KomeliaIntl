@@ -42,6 +42,7 @@ import snd.komelia.offline.user.repository.OfflineUserRepository
 import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.settings.SecretsRepository
 import snd.komelia.settings.ServerUrlResolver
+import snd.komelia.http.ApiKeyStore
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LoadState.Uninitialized
 import snd.komelia.ui.common.ServerUrlValidationError
@@ -66,6 +67,7 @@ class LoginViewModel(
     private val offlineLibraryApi: OfflineLibraryApi?,
     private val localLibraryManager: LocalLibraryManager?,
     logJournalRepository: LogJournalRepository?,
+    private val apiKeyStore: ApiKeyStore? = null,
 ) : StateScreenModel<LoadState<Unit>>(Uninitialized) {
 
     private val operationLogger = logJournalRepository?.let { OfflineOperationLogger(it, screenModelScope) }
@@ -83,6 +85,7 @@ class LoginViewModel(
     var url by mutableStateOf("")
     var user by mutableStateOf("")
     var password by mutableStateOf("")
+    var apiKey by mutableStateOf("")
     var userLoginError by mutableStateOf<String?>(null)
     var serverUrlError by mutableStateOf<LoginServerUrlError?>(null)
     var autoLoginError by mutableStateOf<String?>(null)
@@ -131,6 +134,19 @@ class LoginViewModel(
             settingsRepository.putCurrentUser(credentials.username)
             currentCoroutineContext().ensureActive()
             commitSession(loginCoordinator.login(primaryUrl, credentials))
+        }
+    }
+
+    fun loginWithApiKey() {
+        serverUrlError = validateServerUrl(url)?.toLoginServerUrlError()
+        if (serverUrlError != null) return
+        val primaryUrl = url
+        val key = apiKey
+        startLogin(isAutomatic = false) {
+            settingsRepository.putServerUrl(primaryUrl)
+            currentCoroutineContext().ensureActive()
+            checkNotNull(apiKeyStore).setApiKey(primaryUrl, key)
+            commitSession(loginCoordinator.login(primaryUrl))
         }
     }
 
@@ -190,7 +206,7 @@ class LoginViewModel(
         val offlineUsers = offlineUserRepository?.findAll() ?: emptyList()
         val offlineServer = offlineServerRepository?.findByUrl(primaryUrl)
         val isOffline = offlineSettingsRepository?.getOfflineMode()?.first() ?: false
-        val hasSession = isOffline || platform == WEB_KOMF ||
+        val hasSession = isOffline || (platform == WEB_KOMF && apiKeyStore?.apiKey != null) ||
             (primaryUrl.isNotBlank() && secretsRepository.getCookie(primaryUrl) != null)
         currentCoroutineContext().ensureActive()
         url = primaryUrl

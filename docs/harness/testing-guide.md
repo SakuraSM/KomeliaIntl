@@ -1,5 +1,7 @@
 # Testing guide
 
+The reusable [regression suite](../../tests/regression/README.md) defines profiles, case IDs, commands, and acceptance records. Start with `node scripts/regression.mjs plan core`. A green command result does not complete pending device cases. Use the detailed routes below to expand the selected profile when a change affects additional consumers.
+
 Select tests from impact, not from habit. A green narrow test does not replace an affected platform build or a runtime scenario.
 
 ## Baseline checks

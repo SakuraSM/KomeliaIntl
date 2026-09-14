@@ -21,6 +21,8 @@ This file is the entry map. The versioned engineering contract lives under [`doc
 - Harness check: `node scripts/check-harness.mjs`
 - Harness regression tests: `node --test scripts/check-harness.test.mjs`
 - Shared UI tests: `./gradlew :komelia-ui:allTests`
+- Regression plan: `node scripts/regression.mjs plan core`
+- Regression suite: [`tests/regression/README.md`](tests/regression/README.md).
 - Android debug: `./gradlew androidDebug`
 - Desktop JAR: `./gradlew desktopJar`
 - Wasm app: `./gradlew komfWebUI`
@@ -55,6 +57,7 @@ A listed command is not evidence that it ran. Report executed, failed, blocked, 
 - Keep changes inside the impact map and separate unrelated concerns.
 - Run focused checks while editing and the required platform matrix before delivery.
 - Record exact evidence and blockers; never report an unrun scenario as passed.
+- Select regression profiles by impact. Application changes require core smoke and affected-area acceptance; source changes invalidate previous acceptance records. Runtime cases remain pending until verified against the final artifact.
 - Review the complete diff and confirm only task-owned files changed.
 - Update the project map when entry points, responsibilities, contracts, or test strategy change.
 - For Releases, follow [`docs/maintainers/versioning.md`](docs/maintainers/versioning.md) and keep fixed issues open until the published assets are verified.

@@ -141,6 +141,32 @@
   },
   "cases": [
     {
+      "id": "READER-HINT-01",
+      "title": "阅读模式提示与旋转恢复",
+      "area": "reader",
+      "issues": [74],
+      "mode": "manual",
+      "preconditions": ["API35、API37；最终debug APK；书籍已停在非首页"],
+      "steps": ["首次打开阅读器，等待首次提示消失；横竖屏往返10轮；主动切换模式和方向；重复选择相同值；退出并重开"],
+      "expected": ["首次打开与实际模式/方向变化各提示一次；旋转、重组、重复选择不提示；重开新会话允许首次提示；页码保持；重复选择仍保存默认偏好"],
+      "profiles": ["core", "reader", "premerge", "release"],
+      "evidence": ["APK SHA256与设备/API", "旋转截图及实际方向", "提示出现/未出现证据", "前后页码"],
+      "automatedTests": ["ReaderModeHintEffectTest"]
+    },
+    {
+      "id": "CONTINUOUS-01",
+      "title": "连续长图的有界可见窗口",
+      "area": "reader",
+      "issues": [62],
+      "mode": "manual",
+      "preconditions": ["高长宽比合成长图及授权原始webtoon；Lanczos3放大、Mitchell缩小"],
+      "steps": ["慢滚、快滚、反向滚动与停留；横竖屏切换；测试垂直、水平LTR/RTL，以及章节头之后首次进入图片"],
+      "expected": ["请求沿滚动方向限制为可见窗口；RTL从图片右端计算；清晰图块覆盖可见区域；不生成整页尾部图块；预渲染预算仍为32MiB"],
+      "profiles": ["reader", "premerge", "release"],
+      "evidence": ["样本摘要、尺寸及设置", "相同条件下的渲染日志与截图", "前景完成和图块数量；原始分镜问题独立验收"],
+      "automatedTests": ["ContinuousViewportTest"]
+    },
+    {
       "id": "READ-01",
       "title": "核心阅读与进度冒烟",
       "area": "smoke",

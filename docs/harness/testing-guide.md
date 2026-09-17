@@ -86,6 +86,10 @@ For reader gesture changes, run the JVM Compose `ScalableContainerGestureTest` a
 
 ## Reader image lifetime, preloading, and OLED
 
+`ReaderModeHintEffectTest` covers initialized first-entry hints, composition restoration, explicit mode/direction requests, and a new reading session. Run `READER-HINT-01` on API35 and API37: ten portrait/landscape cycles must preserve the page without replaying the mode hint. Duplicate selections must still save preferences even though they do not show another hint.
+
+`ContinuousViewportTest` bounds the first visible long-page request to the scroll-axis viewport, including RTL right-edge coordinates and the first image after a header. `CONTINUOUS-01` requires actual scrolling, rotation, renderer logs and screenshots. Original-panel acceptance remains separate; a continuous-reader improvement does not close all of #62.
+
 For chapter navigation, run `LocalFirstBookApiTest`, `ReaderSiblingTest`, `ReaderSiblingStateTest`, and `SiblingStatusContentTest` in UI JVM tests. SQLite `LocalLibraryManagerIntegrationTest` covers imported decimal chapter labels, rescans, and both sibling boundaries. Check partial downloads, online read-list order, query failure/retry, and unchanged current-page progress. Use original reporter data separately from synthetic fixtures.
 
 For Android provider compatibility, run `SafChannelTest` and `AndroidArchiveAccessTest` on a dedicated emulator. These cover seekable and pipe-backed providers, bounded temporary copies, cache eviction, corrupt archives, permissions, free-space limits, and cancellation cleanup. Also import and open a CBZ and EPUB through the real folder picker. Preserve existing app data during package installation.

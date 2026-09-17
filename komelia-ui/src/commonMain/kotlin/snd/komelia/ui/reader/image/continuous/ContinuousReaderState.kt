@@ -444,6 +444,7 @@ class ContinuousReaderState(
         val firstItem = visibleItems.first()
 
         val visiblePages = visibleItems.filter { it.key is PageMetadata }.map { it.key as PageMetadata }
+        val firstPageItem = visibleItems.firstOrNull { it.key is PageMetadata } ?: return
         val visibleImages = visiblePages.associateWith { page -> imagesInUse[page.toPageId()] }
 
         val scale = screenScaleState.transformation.value.scale
@@ -451,30 +452,13 @@ class ContinuousReaderState(
 
         visibleImages.values.first()?.let { image ->
             val firstImageSize = getImageDisplaySize(image)
+            val trailingSpacing = (firstPageItem.size - firstImageSize.displaySize.width).coerceAtLeast(0)
 
             if (firstItem.key is PageMetadata) {
-                val visibleArea = when (readingDirection.value) {
-                    TOP_TO_BOTTOM -> IntRect(
-                        left = 0,
-                        top = firstItemOffset,
-                        right = firstImageSize.displaySize.width,
-                        bottom = firstImageSize.displaySize.height
-                    )
-
-                    LEFT_TO_RIGHT -> IntRect(
-                        left = firstItemOffset,
-                        top = 0,
-                        right = firstImageSize.displaySize.width,
-                        bottom = firstImageSize.displaySize.height
-                    )
-
-                    RIGHT_TO_LEFT -> IntRect(
-                        left = firstItemOffset,
-                        top = 0,
-                        right = firstImageSize.displaySize.width,
-                        bottom = firstImageSize.displaySize.height
-                    )
-                }
+                val visibleArea = continuousFirstPageViewport(
+                    firstImageSize.displaySize, screenScaleState.areaSize.value,
+                    firstItemOffset, readingDirection.value, trailingSpacing
+                )
                 image.requestUpdate(
                     visibleDisplaySize = visibleArea,
                     zoomFactor = scale,
@@ -482,7 +466,9 @@ class ContinuousReaderState(
                 )
             } else {
                 image.requestUpdate(
-                    visibleDisplaySize = firstImageSize.displaySize.toIntRect(),
+                    visibleDisplaySize = continuousFirstPageViewport(
+                        firstImageSize.displaySize, screenScaleState.areaSize.value, 0, readingDirection.value, trailingSpacing
+                    ),
                     zoomFactor = scale,
                     maxDisplaySize = firstImageSize.maxSize
                 )
@@ -521,11 +507,12 @@ class ContinuousReaderState(
                 bottom = containerSize.height
             )
 
-            RIGHT_TO_LEFT -> IntRect(
-                left = 0,
-                top = 0,
-                right = containerSize.width - lastItem.offset,
-                bottom = containerSize.height
+            RIGHT_TO_LEFT -> continuousFirstPageViewport(
+                lastImageSize.displaySize,
+                IntSize((containerSize.width - lastItem.offset).coerceAtLeast(0), containerSize.height),
+                0,
+                RIGHT_TO_LEFT,
+                (lastItem.size - lastImageSize.displaySize.width).coerceAtLeast(0)
             )
         }
         lastImage.requestUpdate(

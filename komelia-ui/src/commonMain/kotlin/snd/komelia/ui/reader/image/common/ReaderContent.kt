@@ -60,6 +60,7 @@ import snd.komelia.ui.strings.AppStrings
 
 @Composable
 fun ReaderContent(
+    lastModeHint: androidx.compose.runtime.MutableState<String?>,
     commonReaderState: ReaderState,
     pagedReaderState: PagedReaderState,
     continuousReaderState: ContinuousReaderState,
@@ -91,7 +92,7 @@ fun ReaderContent(
     LaunchedEffect(density) {
         commonReaderState.pixelDensity.value = density
     }
-    ReaderTypeNotification(commonReaderState, pagedReaderState, continuousReaderState, panelsReaderState)
+    ReaderTypeNotification(commonReaderState, pagedReaderState, continuousReaderState, panelsReaderState, lastModeHint)
 
     val topLevelFocus = remember { FocusRequester() }
     val volumeKeysNavigation = commonReaderState.volumeKeysNavigation.collectAsState().value
@@ -260,11 +261,15 @@ private fun ReaderTypeNotification(
     pagedReaderState: PagedReaderState,
     continuousReaderState: ContinuousReaderState,
     panelsReaderState: PanelsReaderState?,
+    lastModeHint: androidx.compose.runtime.MutableState<String?>,
 ) {
     val notifications = LocalNotifications.current
     val environment = rememberResourceEnvironment()
 
-    LaunchedEffect(Unit) {
+    val readerType = commonReaderState.readerType.collectAsState().value
+    val initializedType = commonReaderState.initializedReaderType.collectAsState().value
+    val requestId = commonReaderState.modeHintRequest.collectAsState().value
+    ReaderModeHintEffect(initializedType == readerType, requestId, lastModeHint) {
         val str = when (commonReaderState.readerType.value) {
             PAGED -> buildString {
                 append(getString(environment, Res.string.reader_type_paged))

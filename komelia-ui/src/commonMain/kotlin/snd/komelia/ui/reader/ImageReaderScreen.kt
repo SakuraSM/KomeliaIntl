@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -104,6 +105,7 @@ class ImageReaderScreen(
         //FIXME: do outside of composition? No proper multiplatform way to do it in viewmodel
         // restore current book when app process is killed in background on Android
         var currentBookId by rememberSaveable(bookId.value) { mutableStateOf(bookId.value) }
+        val lastModeHint = rememberSaveable(bookId.value) { mutableStateOf<String?>(null) }
         LaunchedEffect(bookId) {
             val bookId = KomgaBookId(currentBookId)
             vm.initialize(bookId)
@@ -131,7 +133,7 @@ class ImageReaderScreen(
                     if (currentBook != null && !isFullscreen.value) {
                         TitleBarContent(
                             title = currentBook.metadata.title,
-                            onExit = { onExit(navigator, currentBook, exitController) }
+                            onExit = { onExit(navigator, currentBook, exitController, lastModeHint) }
                         )
                     }
                 }
@@ -140,21 +142,22 @@ class ImageReaderScreen(
             when (val result = vmState.value) {
                 is LoadState.Error -> ErrorContent(
                     exception = result.exception,
-                    onExit = { onExit(navigator, currentBook, exitController) },
+                    onExit = { onExit(navigator, currentBook, exitController, lastModeHint) },
                     onReload = { coroutineScope.launch { vm.initialize(bookId) } }
                 )
 
                 LoadState.Loading, LoadState.Uninitialized -> LoadIndicator()
-                is Success -> ReaderScreenContent(vm, exitController)
+                is Success -> ReaderScreenContent(vm, exitController, lastModeHint)
             }
         }
     }
 
     @Composable
-    private fun ReaderScreenContent(vm: ReaderViewModel, exitController: ReaderExitController) {
+    private fun ReaderScreenContent(vm: ReaderViewModel, exitController: ReaderExitController, lastModeHint: MutableState<String?>) {
         val navigator = LocalNavigator.currentOrThrow
 
         ReaderContent(
+            lastModeHint = lastModeHint,
             commonReaderState = vm.readerState,
             pagedReaderState = vm.pagedReaderState,
             continuousReaderState = vm.continuousReaderState,
@@ -168,7 +171,7 @@ class ImageReaderScreen(
                     navigator push ColorCorrectionScreen(book.id, page)
                 }
             },
-            onExit = { onExit(navigator, vm.readerState.booksState.value?.currentBook, exitController) }
+            onExit = { onExit(navigator, vm.readerState.booksState.value?.currentBook, exitController, lastModeHint) }
         )
     }
 
@@ -198,8 +201,11 @@ class ImageReaderScreen(
         navigator: Navigator,
         book: KomeliaBook?,
         exitController: ReaderExitController,
+        lastModeHint: MutableState<String?>,
     ) {
-        when (exitController.requestExit(navigator.canPop, book != null)) {
+        val action = exitController.requestExit(navigator.canPop, book != null)
+        if (action != ReaderExitAction.Ignore) lastModeHint.value = null
+        when (action) {
             ReaderExitAction.Pop -> navigator.pop()
             ReaderExitAction.RestoreBookDetails -> navigator.replace(MainScreen(bookScreen(checkNotNull(book))))
             ReaderExitAction.Ignore -> Unit

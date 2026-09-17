@@ -69,6 +69,12 @@ class ReaderState(
     val series = MutableStateFlow<KomgaSeries?>(null)
 
     val readerType = MutableStateFlow(ReaderType.PAGED)
+    internal val initializedReaderType = MutableStateFlow<ReaderType?>(null)
+    internal val modeHintRequest = MutableStateFlow<String?>(null)
+
+    internal fun requestModeHint() {
+        modeHintRequest.value = kotlin.uuid.Uuid.random().toString()
+    }
     val imageStretchToFit = MutableStateFlow(true)
     val cropBorders = MutableStateFlow(false)
     val readProgressPage = MutableStateFlow(1)
@@ -230,8 +236,11 @@ class ReaderState(
         }
     }
 
-    fun onReaderTypeChange(type: ReaderType) {
+    fun onReaderTypeChange(type: ReaderType, notify: Boolean = true) {
+        val changed = readerType.value != type
+        if (changed) initializedReaderType.value = null
         this.readerType.value = type
+        if (notify && changed) requestModeHint()
         stateScope.launch { readerSettingsRepository.putReaderType(type) }
     }
 

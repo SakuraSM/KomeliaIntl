@@ -44,6 +44,7 @@ class ReaderSiblingStateTest {
         val second = book("chapter-1.5", 1.5f)
         var fail = true
         var emptyNextPages = true
+        val savedModes = mutableListOf<ReaderType>()
         val api = stub<KomgaBookApi> { name, args ->
             when (name) {
                 "getBookSiblingNext" -> if (args.first() == first.id.value) {
@@ -58,8 +59,11 @@ class ReaderSiblingStateTest {
         val reader = ReaderState(
             initialBook = first, bookApi = api, seriesApi = stub { _, _ -> throw IOException("no synthetic series metadata") },
             readListApi = stub { _, _ -> error("not a read list") }, navigator = navigator,
-            appNotifications = AppNotifications(), readerSettingsRepository = stub { name, _ ->
-                flowOf(when (name) {
+            appNotifications = AppNotifications(), readerSettingsRepository = stub { name, args ->
+                if (name == "putReaderType") {
+                    savedModes += args.first() as ReaderType
+                    Unit
+                } else flowOf(when (name) {
                     "getUpsamplingMode" -> UpsamplingMode.NEAREST
                     "getDownsamplingKernel" -> ReduceKernel.NEAREST
                     "getFlashDuration" -> 100L
@@ -77,6 +81,9 @@ class ReaderSiblingStateTest {
             runBlocking {
                 reader.initialize(first.id)
                 assertIs<LoadState.Success<Unit>>(reader.state.value)
+                reader.onReaderTypeChange(ReaderType.PAGED)
+                assertEquals(listOf(ReaderType.PAGED), savedModes)
+                assertNull(reader.modeHintRequest.value)
                 assertIs<SiblingLoad.Failed>(reader.booksState.value!!.next)
                 reader.onProgressChange(2)
                 val pages = reader.booksState.value!!.currentBookPages

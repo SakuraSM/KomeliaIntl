@@ -697,7 +697,9 @@ class ContinuousReaderState(
     }
 
     fun onReadingDirectionChange(direction: ContinuousReadingDirection) {
+        val changed = readingDirection.value != direction
         this.readingDirection.value = direction
+        if (changed) readerState.requestModeHint()
         when (direction) {
             TOP_TO_BOTTOM -> screenScaleState.setScrollOrientation(Orientation.Vertical, false)
             LEFT_TO_RIGHT -> screenScaleState.setScrollOrientation(Orientation.Horizontal, false)

@@ -288,7 +288,9 @@ class PanelsReaderState(
     }
 
     fun onReadingDirectionChange(readingDirection: PagedReadingDirection) {
+        val changed = this.readingDirection.value != readingDirection
         this.readingDirection.value = readingDirection
+        if (changed) readerState.requestModeHint()
         stateScope.launch { settingsRepository.putPagedReaderReadingDirection(readingDirection) }
     }
 

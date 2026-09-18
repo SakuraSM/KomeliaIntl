@@ -12,6 +12,8 @@ Risk points: duplicate state owners, platform-specific behavior leaking into com
 
 ## Remote and LAN selection
 
+Each `MainScreen` owns a serializable navigation identity. A new login gets a new identity; Activity recreation retains the current one. `SessionNavigators` retains destination navigators while a reader hides their composition and disposes their screen models when the owning main-screen session ends. Unconditionally disposing nested navigators on composition removal would also destroy the reader's return stack.
+
 1. Load the primary remote URL and optional LAN URL from settings.
 2. When automatic switching is enabled, probe the LAN endpoint without replacing the primary configuration.
 3. Use LAN while reachable; otherwise use the primary remote endpoint.
@@ -56,6 +58,8 @@ The service keeps at most two archives across live handles and inactive disk cac
 Local chapter labels and `metadata.numberSort` preserve decimal values such as `1.5`. The integer book position stays separate. Rescanning unchanged books repairs unlocked metadata without reopening archives or changing book identity and progress.
 
 ## Reader navigation
+
+Image readers reload the current book through the selected content API at entry. A book passed by navigation is a display snapshot and cannot supply the authoritative saved progress. TTU continuous mode keeps scrolling on the document used by its bookmark calculator and window scroll listeners; horizontal clipping must not introduce a second scroll container on `#app`.
 
 PANELS mode separates page-load lifetime from the current page's presentation job. `RetainedPageCache` keeps in-flight neighboring loads when they become visible. Leaving the reader cancels both scopes and releases cached images, including images allocated before a cancelled decode or detection finishes.
 

@@ -118,6 +118,12 @@ On Android, use a synthetic multipage CBZ with white borders. Verify crop on/off
 
 ## Login readiness and EPUB sibling state
 
+`MainScreenIdentityTest` checks that login sessions have different navigation keys while serialization retains the current key. `SessionNavigationLifetimeTest` mounts real nested Voyager navigators, logs out, and opens another server with the same library screen key. The old library model must be disposed. Repeat A/B/A/B on Android and verify both the selected library and the all-libraries contents.
+
+`ReaderSiblingStateTest.reopeningUsesSavedProgressInsteadOfTheDetailScreensSnapshot` passes an unread navigation snapshot while the content API contains page 2. Reopening must restore page 2. Use a non-final page for device acceptance; completed books intentionally reopen at their beginning.
+
+TTU's `npm run test:browser` compiles the production styles and checks document scroll ownership with real wheel input. It requires Playwright resolvable by Node and a compatible browser, supplied through the QA environment's `NODE_PATH` and `CHROME_BIN` when needed. Missing browser tooling is blocked, not passed. Follow this focused regression with actual EPUB scrolling, bookmark save, Back and reopen on the final APK.
+
 `OnlineLoginCoordinatorTest`, `LoginViewModelTest`, `LoginHttpRetryTest`, and `DefaultServerUrlResolverTest` cover route readiness, time budgets, retry classification, cancellation, and stale results. Run UI, domain-core, and shared-app `allTests`. The shared-app Wasm tests package Skiko through the Compose plugin, as UI and domain-core tests do.
 
 `komga-webui` tests cover sibling lookup failures, independent directions, retries, stale responses, disposal, and self-references. The eight chapter-scroll gesture tests remain separate. On a dedicated Android emulator, use a controlled local service for cold login, restore, timeout and cancellation, then cross-book EPUB failure and retry. Real accounts and daily application data are outside this fixture.

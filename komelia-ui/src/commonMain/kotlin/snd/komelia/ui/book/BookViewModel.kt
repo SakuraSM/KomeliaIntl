@@ -62,6 +62,7 @@ class BookViewModel(
 
     private val reloadEventsEnabled = MutableStateFlow(true)
     private val reloadJobsFlow = MutableSharedFlow<Unit>(1, 0, DROP_OLDEST)
+    private var listenersStarted = false
 
     val readListsState = BookReadListsState(
         book = this.book,
@@ -84,12 +85,13 @@ class BookViewModel(
     )
 
     suspend fun initialize() {
-        if (state.value != Uninitialized) return
-
-        if (book.value == null) loadBook()
-        else mutableState.value = Success(Unit)
+        // The retained detail model may miss progress events while the reader is visible.
+        loadBook()
         loadLibrary()
+        if (book.value == null) return
         readListsState.initialize()
+        if (listenersStarted) return
+        listenersStarted = true
         startKomgaEventListener()
 
         reloadJobsFlow.onEach {
@@ -117,7 +119,7 @@ class BookViewModel(
     }
 
     private suspend fun loadLibrary() {
-        val book = requireNotNull(book.value)
+        val book = book.value ?: return
         library = libraries.value.firstOrNull { library -> library.id == book.libraryId }
             ?: runCatching { libraryApi.getLibrary(book.libraryId) }.getOrNull()
     }

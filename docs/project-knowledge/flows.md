@@ -61,6 +61,8 @@ Local chapter labels and `metadata.numberSort` preserve decimal values such as `
 
 Image readers reload the current book through the selected content API at entry. A book passed by navigation is a display snapshot and cannot supply the authoritative saved progress. TTU continuous mode keeps scrolling on the document used by its bookmark calculator and window scroll listeners; horizontal clipping must not introduce a second scroll container on `#app`.
 
+Book details also refresh through the selected content API on every entry. A retained detail model cannot depend on receiving a progress event while the reader is open; its event listeners remain single-instance across entries.
+
 PANELS mode separates page-load lifetime from the current page's presentation job. `RetainedPageCache` keeps in-flight neighboring loads when they become visible. Leaving the reader cancels both scopes and releases cached images, including images allocated before a cancelled decode or detection finishes.
 
 `PanelsReaderState` forecasts upcoming panels in the configured reading order, including the existing whole-page step before a page turn. The PANELS-only `panelPrerenderCount` setting accepts 0 through 2 and defaults to 1. Zero disables neighboring loads and speculative pixels. SQLite migration V16 preserves existing settings with that default; browser JSON uses the same default for missing fields.

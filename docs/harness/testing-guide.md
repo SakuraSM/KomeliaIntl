@@ -122,6 +122,8 @@ On Android, use a synthetic multipage CBZ with white borders. Verify crop on/off
 
 `ReaderSiblingStateTest.reopeningUsesSavedProgressInsteadOfTheDetailScreensSnapshot` passes an unread navigation snapshot while the content API contains page 2. Reopening must restore page 2. Use a non-final page for device acceptance; completed books intentionally reopen at their beginning.
 
+`BookProgressRefreshTest` checks initial detail entry and return from a reader with no progress event. Both must refresh saved progress without adding duplicate event subscriptions. On-device acceptance must check both the restored reader page and the percentage displayed on the retained detail screen.
+
 TTU's `npm run test:browser` compiles the production styles and checks document scroll ownership with real wheel input. It requires Playwright resolvable by Node and a compatible browser, supplied through the QA environment's `NODE_PATH` and `CHROME_BIN` when needed. Missing browser tooling is blocked, not passed. Follow this focused regression with actual EPUB scrolling, bookmark save, Back and reopen on the final APK.
 
 `OnlineLoginCoordinatorTest`, `LoginViewModelTest`, `LoginHttpRetryTest`, and `DefaultServerUrlResolverTest` cover route readiness, time budgets, retry classification, cancellation, and stale results. Run UI, domain-core, and shared-app `allTests`. The shared-app Wasm tests package Skiko through the Compose plugin, as UI and domain-core tests do.

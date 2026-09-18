@@ -1,0 +1,693 @@
+{
+  "schemaVersion": 1,
+  "checks": {
+    "guard": {
+      "cwd": ".",
+      "argv": [
+        "node",
+        "scripts/check-harness.mjs"
+      ]
+    },
+    "harness": {
+      "cwd": ".",
+      "argv": [
+        "node",
+        "--test",
+        "scripts/check-harness.test.mjs"
+      ]
+    },
+    "runner": {
+      "cwd": ".",
+      "argv": [
+        "node",
+        "--test",
+        "scripts/regression.test.mjs",
+        "tests/regression/fixtures.test.mjs"
+      ]
+    },
+    "core": {
+      "cwd": ".",
+      "argv": [
+        "./gradlew",
+        ":komelia-ui:allTests",
+        ":komelia-domain:core:allTests",
+        ":komelia-app:shared:allTests",
+        "--no-configuration-cache"
+      ],
+      "reports": [
+        "komelia-ui/build/test-results",
+        "komelia-domain/core/build/test-results",
+        "komelia-app/shared/build/test-results"
+      ]
+    },
+    "offline": {
+      "cwd": ".",
+      "argv": [
+        "./gradlew",
+        ":komelia-domain:offline:allTests",
+        ":komelia-infra:database:sqlite:allTests",
+        "--no-configuration-cache"
+      ],
+      "reports": [
+        "komelia-domain/offline/build/test-results",
+        "komelia-infra/database/sqlite/build/test-results"
+      ]
+    },
+    "epub": {
+      "cwd": "komelia-epub-reader/komga-webui",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "requires": [
+        "komelia-epub-reader/komga-webui/node_modules/typescript/package.json"
+      ]
+    },
+    "ttu": {
+      "cwd": "komelia-epub-reader/ttu-ebook-reader",
+      "argv": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "requires": [
+        "komelia-epub-reader/ttu-ebook-reader/node_modules/svelte/package.json"
+      ]
+    },
+    "build": {
+      "cwd": ".",
+      "argv": [
+        "./gradlew",
+        "androidDebug",
+        "desktopJar",
+        "komfWebUI",
+        "--no-configuration-cache"
+      ]
+    },
+    "policy": {
+      "cwd": ".",
+      "argv": [
+        "bash",
+        "scripts/test-release-policy.sh"
+      ]
+    }
+  },
+  "profiles": {
+    "guard": [
+      "guard",
+      "harness",
+      "runner"
+    ],
+    "core": [
+      "guard",
+      "core"
+    ],
+    "login": [
+      "guard",
+      "core"
+    ],
+    "reader": [
+      "guard",
+      "core",
+      "epub",
+      "ttu"
+    ],
+    "offline": [
+      "guard",
+      "core",
+      "offline"
+    ],
+    "premerge": [
+      "guard",
+      "harness",
+      "runner",
+      "core",
+      "offline",
+      "epub",
+      "ttu",
+      "build"
+    ],
+    "release": [
+      "guard",
+      "harness",
+      "runner",
+      "core",
+      "offline",
+      "epub",
+      "ttu",
+      "build",
+      "policy"
+    ]
+  },
+  "cases": [
+    {
+      "id": "READER-HINT-01",
+      "title": "阅读模式提示与旋转恢复",
+      "area": "reader",
+      "issues": [74],
+      "mode": "manual",
+      "preconditions": ["API35、API37；最终debug APK；书籍已停在非首页"],
+      "steps": ["首次打开阅读器，等待首次提示消失；横竖屏往返10轮；主动切换模式和方向；重复选择相同值；退出并重开"],
+      "expected": ["首次打开与实际模式/方向变化各提示一次；旋转、重组、重复选择不提示；重开新会话允许首次提示；页码保持；重复选择仍保存默认偏好"],
+      "profiles": ["core", "reader", "premerge", "release"],
+      "evidence": ["APK SHA256与设备/API", "旋转截图及实际方向", "提示出现/未出现证据", "前后页码"],
+      "automatedTests": ["ReaderModeHintEffectTest"]
+    },
+    {
+      "id": "CONTINUOUS-01",
+      "title": "连续长图的有界可见窗口",
+      "area": "reader",
+      "issues": [62],
+      "mode": "manual",
+      "preconditions": ["高长宽比合成长图及授权原始webtoon；Lanczos3放大、Mitchell缩小"],
+      "steps": ["慢滚、快滚、反向滚动与停留；横竖屏切换；测试垂直、水平LTR/RTL，以及章节头之后首次进入图片"],
+      "expected": ["请求沿滚动方向限制为可见窗口；RTL从图片右端计算；清晰图块覆盖可见区域；不生成整页尾部图块；预渲染预算仍为32MiB"],
+      "profiles": ["reader", "premerge", "release"],
+      "evidence": ["样本摘要、尺寸及设置", "相同条件下的渲染日志与截图", "前景完成和图块数量；原始分镜问题独立验收"],
+      "automatedTests": ["ContinuousViewportTest"]
+    },
+    {
+      "id": "READ-01",
+      "title": "核心阅读与进度冒烟",
+      "area": "smoke",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": ["已导入合成漫画、PDF 和 EPUB；独立测试安装"],
+      "steps": ["分别打开三种格式，阅读到非首页，返回、重进，再重启应用"],
+      "expected": ["内容正常渲染；Back 返回正确位置；保存的阅读进度恢复；无崩溃"],
+      "profiles": ["core", "login", "reader", "offline", "premerge", "release"],
+      "evidence": ["最终 APK 哈希或 Web 构建标识", "三种格式的截图、保存与恢复进度", "设备/API 与执行时间"]
+    },
+    {
+      "id": "APP-01",
+      "title": "冷启动与返回",
+      "area": "smoke",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "API 35、API 37；独立测试安装"
+      ],
+      "steps": [
+        "冷启动，进入各主导航，再返回和重进"
+      ],
+      "expected": [
+        "无白屏、崩溃或重复页面栈；配置保持"
+      ],
+      "profiles": [
+        "core",
+        "login",
+        "reader",
+        "offline",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "AUTH-01",
+      "title": "登录及地址切换",
+      "area": "login",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "受控 Komga 服务；两套不同服务器数据"
+      ],
+      "steps": [
+        "登录 A，切换 B；模拟慢 LAN 探测和过期响应"
+      ],
+      "expected": [
+        "只呈现 B 的用户和书库；A 的迟到结果不能覆盖"
+      ],
+      "profiles": [
+        "login",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "AUTH-02",
+      "title": "超时、取消与离线",
+      "area": "login",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "服务可延迟、断开、返回 401/503"
+      ],
+      "steps": [
+        "分别触发错误，取消等待，进入离线模式，再尝试登录"
+      ],
+      "expected": [
+        "等待有界；401 不重试凭据；取消后不导航；离线仍可用"
+      ],
+      "profiles": [
+        "login",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "AUTH-03",
+      "title": "Web API Key 隔离",
+      "area": "web",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "浏览器；两个受控服务器；仅假密钥"
+      ],
+      "steps": [
+        "登录 A，切换 B，刷新，再退出"
+      ],
+      "expected": [
+        "B 请求不携带 A 密钥；退出删除当前服务器密钥"
+      ],
+      "profiles": [
+        "login",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "LAN-01",
+      "title": "系统权限授予与拒绝",
+      "area": "android",
+      "issues": [
+        73
+      ],
+      "mode": "manual",
+      "preconditions": [
+        "API 37；target 37 APK；权限未授予；受控 LAN 服务"
+      ],
+      "steps": [
+        "点击登录与说明确认；拒绝；再次登录并允许"
+      ],
+      "expected": [
+        "真实系统弹窗出现；拒绝时无 LAN 请求；允许后请求到达"
+      ],
+      "profiles": [
+        "login",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "LAN-02",
+      "title": "撤销权限与本地入口",
+      "area": "android",
+      "issues": [
+        73
+      ],
+      "mode": "manual",
+      "preconditions": [
+        "API 37；先授权；保留应用数据"
+      ],
+      "steps": [
+        "在系统设置撤销权限，重启，使用本地书库"
+      ],
+      "expected": [
+        "提示可理解；本地书库不被网络授权阻断；无循环弹窗"
+      ],
+      "profiles": [
+        "login",
+        "offline",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "LOCAL-01",
+      "title": "本地导入与格式识别",
+      "area": "local",
+      "issues": [
+        58,
+        67
+      ],
+      "mode": "manual",
+      "preconditions": [
+        "合成 CBZ、RAR、7z、改名归档、损坏归档；SAF 文件夹"
+      ],
+      "steps": [
+        "通过系统选目录导入；打开首、中、末页；触发解析失败"
+      ],
+      "expected": [
+        "页数与内容正确；错误明确；源文件不被修改；旧进度保留"
+      ],
+      "profiles": [
+        "offline",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "LOCAL-02",
+      "title": "外部删除与重新扫描",
+      "area": "local",
+      "issues": [
+        51
+      ],
+      "mode": "manual",
+      "preconditions": [
+        "至少两本有已保存进度的合成漫画"
+      ],
+      "steps": [
+        "在测试文件夹外部删除一本；扫描并重启"
+      ],
+      "expected": [
+        "无外键异常；缺失记录移除；另一书进度不变"
+      ],
+      "profiles": [
+        "offline",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "EPUB-01",
+      "title": "目录和旧数据迁移",
+      "area": "epub",
+      "issues": [
+        58
+      ],
+      "mode": "manual",
+      "preconditions": [
+        "EPUB2 NCX、EPUB3 nav、旧索引书籍与锁定元数据"
+      ],
+      "steps": [
+        "扫描旧书；打开目录；跳章；退出重进"
+      ],
+      "expected": [
+        "目录可用；近似进度正确；身份、锁定元数据和旧进度保留"
+      ],
+      "profiles": [
+        "reader",
+        "offline",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "EPUB-02",
+      "title": "滚动接续与短章",
+      "area": "epub",
+      "issues": [
+        60
+      ],
+      "mode": "manual",
+      "preconditions": [
+        "长章、连续短章、含图片 EPUB；滚动模式"
+      ],
+      "steps": [
+        "慢拖、快滑、惯性滚动、反向翻章、双指和取消"
+      ],
+      "expected": [
+        "有效手势接续一次；短章不自行跳过；双指不误翻章"
+      ],
+      "profiles": [
+        "reader",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "EPUB-03",
+      "title": "相邻书失败与重试",
+      "area": "epub",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "受控 A/B/C EPUB 服务；下一书返回 503/延迟"
+      ],
+      "steps": [
+        "重试多次；等待；检查进度；切书"
+      ],
+      "expected": [
+        "失败区别于末尾；请求去重；重试不重置进度；旧结果被丢弃"
+      ],
+      "profiles": [
+        "reader",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "EPUB-04",
+      "title": "退出后的迟到响应",
+      "area": "epub",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "受控延迟下一书响应，能记录请求"
+      ],
+      "steps": [
+        "确认重试请求已到服务端；Back；立即重开 B；等待延迟结束"
+      ],
+      "expected": [
+        "不会请求或打开 C；新页面可继续阅读；最后进度允许保存"
+      ],
+      "profiles": [
+        "reader",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "IMAGE-01",
+      "title": "缩放、裁边和旋转",
+      "area": "image",
+      "issues": [
+        49,
+        54,
+        56,
+        62
+      ],
+      "mode": "manual",
+      "preconditions": [
+        "高分辨率透明/不透明合成漫画"
+      ],
+      "steps": [
+        "裁边开关，快速翻页，放大到极限后捏合，旋转，退出重进"
+      ],
+      "expected": [
+        "位图不提前回收；预览补齐空隙；缩放/布局恢复；无崩溃"
+      ],
+      "profiles": [
+        "reader",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "PANEL-01",
+      "title": "分镜预渲染",
+      "area": "panel",
+      "issues": [
+        62
+      ],
+      "mode": "manual",
+      "preconditions": [
+        "合成多页漫画；真实检测模型；记录模型与采样设置"
+      ],
+      "steps": [
+        "比较预渲染 0/1/2；同页及跨页；改变采样；重启"
+      ],
+      "expected": [
+        "日志证明缓存复用；设置持久化；内存受限；当前阅读优先"
+      ],
+      "profiles": [
+        "reader",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "PANEL-02",
+      "title": "报告者原始样本",
+      "area": "reporter",
+      "issues": [
+        62
+      ],
+      "mode": "manual",
+      "preconditions": [
+        "经授权的原始漫画与报告者设备/模型；不得入库"
+      ],
+      "steps": [
+        "按 issue 最新反馈复现失败分镜，比较修复前后"
+      ],
+      "expected": [
+        "原始失败分镜达到验收要求；缺样本标 blocked，不能由合成用例代替"
+      ],
+      "profiles": [
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "UI-01",
+      "title": "语言、尺寸与系统栏",
+      "area": "ui",
+      "issues": [
+        61,
+        68
+      ],
+      "mode": "manual",
+      "preconditions": [
+        "中英文；Light/Dark/OLED；手机/平板"
+      ],
+      "steps": [
+        "调整海报大小；旋转；阅读器显示/隐藏控制栏；Back"
+      ],
+      "expected": [
+        "设置保存；布局无截断；系统栏正确恢复；触摸区域可用"
+      ],
+      "profiles": [
+        "core",
+        "reader",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "RC-01",
+      "title": "签名包覆盖升级",
+      "area": "release",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "前一正式签名包；最终候选签名包；仅合成数据"
+      ],
+      "steps": [
+        "保留本地书籍、进度、设置；覆盖安装；冷启动；阅读重进"
+      ],
+      "expected": [
+        "签名/身份正确；数据无损；记录最终 APK SHA256；不以 debug 代替"
+      ],
+      "profiles": [
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    },
+    {
+      "id": "RC-02",
+      "title": "原生与服务端兼容",
+      "area": "release",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "声明支持的设备/API；真实测试 Komga/Komf；桌面和 Web"
+      ],
+      "steps": [
+        "执行登录、图片/PDF/EPUB阅读和受影响的服务器设置"
+      ],
+      "expected": [
+        "按平台/服务端版本分别记录；构建通过不代替运行验收"
+      ],
+      "profiles": [
+        "release"
+      ],
+      "evidence": [
+        "最终 APK 哈希或 Web 构建标识",
+        "设备/API/语言/屏幕规格",
+        "脱敏截图或日志",
+        "执行人和时间"
+      ]
+    }
+  ]
+}

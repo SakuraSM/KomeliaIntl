@@ -25,7 +25,9 @@
   body.reader-horizontal-mode,
   body.reader-horizontal-mode #app {
     max-width: 100%;
-    overflow-x: hidden;
+    // Clipping must not create a nested vertical scroll container. Bookmarks,
+    // page controls and auto-scroll all use the document's scroll position.
+    overflow-x: clip;
   }
 
   body {

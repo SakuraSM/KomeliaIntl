@@ -9,4 +9,8 @@ interface SecretsRepository {
 
     suspend fun deleteCookie(url: String)
 
+    suspend fun getApiKey(url: String): String?
+    suspend fun setApiKey(url: String, apiKey: String)
+    suspend fun deleteApiKey(url: String)
+
 }

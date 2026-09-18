@@ -42,6 +42,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
             // Match the Compose/Skiko version used by the consuming UI in browser tests.
             implementation(libs.compose.foundation)
         }

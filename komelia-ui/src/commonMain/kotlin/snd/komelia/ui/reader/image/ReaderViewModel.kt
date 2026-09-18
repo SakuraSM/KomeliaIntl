@@ -138,6 +138,7 @@ class ReaderViewModel(
         screenScaleState.areaSize.takeWhile { it == IntSize.Zero }.collect()
 
         readerState.readerType.onEach {
+            readerState.initializedReaderType.value = null
             stopAllReaderModeStates()
             when (it) {
                 PAGED -> pagedReaderState.initialize()
@@ -145,12 +146,13 @@ class ReaderViewModel(
                 PANELS -> {
                     if (panelsReaderState == null) {
                         logger.warn { "onnx runtime was not provided. Falling back to paged reader" }
-                        readerState.onReaderTypeChange(PAGED)
+                        readerState.onReaderTypeChange(PAGED, notify = false)
                     } else {
                         panelsReaderState.initialize()
                     }
                 }
             }
+            if (readerState.readerType.value == it) readerState.initializedReaderType.value = it
         }.launchIn(screenModelScope)
     }
 

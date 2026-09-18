@@ -135,7 +135,7 @@ private fun GeneralTabContent(
                 options = KomgaSeriesStatus.entries.map {
                     LabeledEntry(
                         it,
-                        stringResource(AppStrings.forSeriesStatus(status.value))
+                        stringResource(AppStrings.forSeriesStatus(it))
                     )
                 },
                 onOptionChange = { status.onValueChange(it.value) },

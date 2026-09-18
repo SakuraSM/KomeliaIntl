@@ -308,8 +308,10 @@ class ViewModelFactory(
 
     fun getLoginViewModel(): LoginViewModel {
         return LoginViewModel(
+            serverUrlResolver = dependencies.serverUrlResolver,
             settingsRepository = appRepositories.settingsRepository,
             secretsRepository = appRepositories.secretsRepository,
+            apiKeyStore = dependencies.apiKeyStore,
             komgaUserApi = dependencies.komgaApi.map { it.userApi },
             komgaLibraryApi = dependencies.komgaApi.map { it.libraryApi },
             komgaAuthState = dependencies.komgaSharedState,
@@ -504,6 +506,7 @@ class ViewModelFactory(
             userApi = komgaApi.userApi,
             komgaSharedState = dependencies.komgaSharedState,
             secretsRepository = appRepositories.secretsRepository,
+            apiKeyStore = dependencies.apiKeyStore,
             offlineSettingsRepository = dependencies.offlineDependencies?.repositories?.offlineSettingsRepository,
             logJournalRepository = dependencies.offlineDependencies?.repositories?.logJournalRepository,
             isOffline = dependencies.isOffline,

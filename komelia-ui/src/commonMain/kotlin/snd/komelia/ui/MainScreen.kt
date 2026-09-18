@@ -92,9 +92,24 @@ import snd.komelia.ui.settings.MobileSettingsScreen
 import snd.komelia.ui.settings.SettingsScreen
 import snd.komelia.ui.topbar.AppBar
 
+internal const val DISPOSE_DESTINATIONS_WHEN_HIDDEN = false
+
 class MainScreen(
     private val defaultScreen: Screen = HomeScreen(),
 ) : Screen {
+
+    // Persist across Activity recreation, but never reuse the previous login's
+    // saveable navigation state when a new MainScreen is created.
+    private var navigationId: String? = newNavigationId()
+    override val key: String
+        get() = navigationId ?: newNavigationId().also { navigationId = it }
+
+    private companion object {
+        private const val serialVersionUID = 8985746227260504224L
+
+        @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+        fun newNavigationId(): String = "main-${kotlin.uuid.Uuid.random()}"
+    }
 
     @Composable
     override fun Content() {
@@ -103,14 +118,15 @@ class MainScreen(
         val width = LocalWindowWidth.current
         val motion = LocalKomeliaMotion.current
         val vm = rememberScreenModel { viewModelFactory.getNavigationViewModel() }
+        val sessionNavigators = rememberScreenModel("session-navigators") { SessionNavigators() }
         val tabs = remember(defaultScreen, platform) { createTabs(defaultScreen, platform == MOBILE) }
         val initialTab = tabs.first { it.destination == destinationFor(defaultScreen) }
 
         TabNavigator(
             tab = initialTab,
-            disposeNestedNavigators = false,
+            disposeNestedNavigators = DISPOSE_DESTINATIONS_WHEN_HIDDEN,
             tabDisposable = { TabDisposable(it, tabs) },
-            key = "main-destinations",
+            key = "$key-destinations",
         ) { tabNavigator ->
             val rootNavigator = LocalNavigator.currentOrThrow
             val rootScreen = rootNavigator.lastItem
@@ -237,9 +253,10 @@ class MainScreen(
                                         Navigator(
                                             screens = tab.initialScreens,
                                             onBackPressed = null,
-                                            key = "destination-${tab.destination.name.lowercase()}",
+                                            key = "$key-destination-${tab.destination.name.lowercase()}",
                                         ) { navigator ->
                                             SideEffect {
+                                                sessionNavigators.register(tab.destination, navigator)
                                                 if (tabNavigator.current == tab) {
                                                     activeNavigator = navigator
                                                     activeDestination = tab.destination

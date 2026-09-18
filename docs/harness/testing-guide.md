@@ -1,5 +1,7 @@
 # Testing guide
 
+The reusable [regression suite](../../tests/regression/README.md) defines profiles, case IDs, commands, and acceptance records. Start with `node scripts/regression.mjs plan core`. A green command result does not complete pending device cases. Use the detailed routes below to expand the selected profile when a change affects additional consumers.
+
 Select tests from impact, not from habit. A green narrow test does not replace an affected platform build or a runtime scenario.
 
 ## Baseline checks
@@ -84,6 +86,10 @@ For reader gesture changes, run the JVM Compose `ScalableContainerGestureTest` a
 
 ## Reader image lifetime, preloading, and OLED
 
+`ReaderModeHintEffectTest` covers initialized first-entry hints, composition restoration, explicit mode/direction requests, and a new reading session. Run `READER-HINT-01` on API35 and API37: ten portrait/landscape cycles must preserve the page without replaying the mode hint. Duplicate selections must still save preferences even though they do not show another hint.
+
+`ContinuousViewportTest` bounds the first visible long-page request to the scroll-axis viewport, including RTL right-edge coordinates and the first image after a header. `CONTINUOUS-01` requires actual scrolling, rotation, renderer logs and screenshots. Original-panel acceptance remains separate; a continuous-reader improvement does not close all of #62.
+
 For chapter navigation, run `LocalFirstBookApiTest`, `ReaderSiblingTest`, `ReaderSiblingStateTest`, and `SiblingStatusContentTest` in UI JVM tests. SQLite `LocalLibraryManagerIntegrationTest` covers imported decimal chapter labels, rescans, and both sibling boundaries. Check partial downloads, online read-list order, query failure/retry, and unchanged current-page progress. Use original reporter data separately from synthetic fixtures.
 
 For Android provider compatibility, run `SafChannelTest` and `AndroidArchiveAccessTest` on a dedicated emulator. These cover seekable and pipe-backed providers, bounded temporary copies, cache eviction, corrupt archives, permissions, free-space limits, and cancellation cleanup. Also import and open a CBZ and EPUB through the real folder picker. Preserve existing app data during package installation.
@@ -102,11 +108,29 @@ Optional real-file acceptance stays outside the repository. Set `KOMELIA_QA_ORIG
 
 `RetainedPageLoadTest` in shared UI tests covers navigation cancellation, bounded spread windows, eviction, shutdown, and retry without discarding successful neighboring pages. `ThemeTest` checks OLED background, base surface, and dim surface independently.
 
+For PANELS mode, run `PanelLoadLifetimeTest`, `PanelViewportTest`, `ReaderPanelPrefetchTest`, and `PanelPrerenderSettingsTest` through UI tests. These cover in-flight page reuse, shutdown cleanup, bounded lookahead, the whole-page transition, shared pixel budgets, foreground priority, raster-equivalent cache keys, and the actual setting controls. SQLite `PanelPrerenderSettingsIntegrationTest` covers migration from version 15, JSON defaults, and reopening all supported counts. On Android, use a synthetic multipage comic with the actual panel detector, test counts 0/1/2, cross-page navigation, sampling changes, exit/re-entry, and restart persistence. Confirm `reused pre-rendered viewport` in debug logs independently of model-detection completion. Original reporter files and physical-device acceptance remain separate checks.
+
 `TilingReaderImageLifetimeTest` in shared UI common tests suspends a real domain reader resize while requesting crop reload or shutdown. It checks that native images stay open until the operation finishes and that a shared original/processed image is released only once. These integration tests use the UI module's existing Compose/Skiko test runtime through `:komelia-ui:allTests`.
 
 Run `./gradlew :komelia-app:androidApp:connectedDebugAndroidTest` with only the dedicated test emulator connected for `AndroidReaderImageLifetimeTest`. It verifies that an outgoing frame can still draw a retired Android bitmap. This is separate from the common/JVM tests and does not require a real server or private media.
 
 On Android, use a synthetic multipage CBZ with white borders. Verify crop on/off, fast forward/backward navigation, single/double-page layout, pinch zoom and panning, sampling changes, reader mode changes, and exit/re-entry. Check both process/crash logs and actual page rendering. For OLED, sample unobstructed reader-background pixels; elevated settings panels intentionally retain distinct surface colors. Do not infer physical-panel power behavior from emulator RGB values.
+
+## Login readiness and EPUB sibling state
+
+`MainScreenIdentityTest` checks that login sessions have different navigation keys while serialization retains the current key. `SessionNavigationLifetimeTest` mounts real nested Voyager navigators, logs out, and opens another server with the same library screen key. The old library model must be disposed. Repeat A/B/A/B on Android and verify both the selected library and the all-libraries contents.
+
+`ReaderSiblingStateTest.reopeningUsesSavedProgressInsteadOfTheDetailScreensSnapshot` passes an unread navigation snapshot while the content API contains page 2. Reopening must restore page 2. Use a non-final page for device acceptance; completed books intentionally reopen at their beginning.
+
+`BookProgressRefreshTest` checks initial detail entry and return from a reader with no progress event. Both must refresh saved progress without adding duplicate event subscriptions. On-device acceptance must check both the restored reader page and the percentage displayed on the retained detail screen.
+
+TTU's `npm run test:browser` compiles the production styles and checks document scroll ownership with real wheel input. It requires Playwright resolvable by Node and a compatible browser, supplied through the QA environment's `NODE_PATH` and `CHROME_BIN` when needed. Missing browser tooling is blocked, not passed. Follow this focused regression with actual EPUB scrolling, bookmark save, Back and reopen on the final APK.
+
+`OnlineLoginCoordinatorTest`, `LoginViewModelTest`, `LoginHttpRetryTest`, and `DefaultServerUrlResolverTest` cover route readiness, time budgets, retry classification, cancellation, and stale results. Run UI, domain-core, and shared-app `allTests`. The shared-app Wasm tests package Skiko through the Compose plugin, as UI and domain-core tests do.
+
+`komga-webui` tests cover sibling lookup failures, independent directions, retries, stale responses, disposal, and self-references. The eight chapter-scroll gesture tests remain separate. On a dedicated Android emulator, use a controlled local service for cold login, restore, timeout and cancellation, then cross-book EPUB failure and retry. Real accounts and daily application data are outside this fixture.
+
+`EpubReaderSessionTest` covers bridge requests after close, delayed results, and a fresh session on re-entry. Native acceptance must start a delayed sibling retry, confirm the request reached the service, press Back, reopen the same book before the response arrives, and verify that no late request loads another book. A standalone JavaScript disposal test cannot prove that native exit actually retires the document. Wait for the WebView's visual-state callback before injected touch tests and assert trusted touch delivery, including two simultaneous pointers for pinch cases.
 
 ## Server announcements
 

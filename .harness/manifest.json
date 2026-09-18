@@ -39,6 +39,18 @@
     }
   ],
   "commands": {
+    "regressionPlan": {
+      "command": "node scripts/regression.mjs plan core",
+      "cwd": ".",
+      "source": "scripts/regression.mjs",
+      "status": "declared"
+    },
+    "regressionGuard": {
+      "command": "node scripts/regression.mjs run guard",
+      "cwd": ".",
+      "source": "scripts/regression.mjs",
+      "status": "observed"
+    },
     "bootstrapSubmodules": {
       "command": "git submodule update --init --recursive",
       "cwd": ".",

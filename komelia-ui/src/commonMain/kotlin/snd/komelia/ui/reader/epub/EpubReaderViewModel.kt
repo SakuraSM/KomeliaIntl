@@ -45,6 +45,11 @@ class EpubReaderViewModel(
 
     val displaySettings = MutableStateFlow(EpubDisplaySettings())
 
+    override fun onDispose() {
+        (state.value as? LoadState.Success)?.value?.dispose()
+        super.onDispose()
+    }
+
     suspend fun initialize(navigator: Navigator) {
         displaySettings.value = epubSettingsRepository.getDisplaySettings().first()
         when (val state = state.value) {
@@ -117,4 +122,5 @@ interface EpubReaderState {
     fun onWebviewCreated(webview: KomeliaWebview)
     fun onBackButtonPress()
     fun closeWebview()
+    fun dispose() {}
 }

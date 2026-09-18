@@ -52,7 +52,7 @@ class KomgaSettingsButtonNext(
             }
 
         val menus = drawerContent?.children?.item(0)
-        if (menus != null) {
+        if (menus != null && menus.classList.contains("v-list--one-line")) {
             menus.insertBefore(element, menus.children.asList().last())
             return true
         } else return false

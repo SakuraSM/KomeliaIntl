@@ -31,6 +31,9 @@ interface ImageReaderSettingsRepository {
     fun getPagedReaderDisplayLayout(): Flow<PageDisplayLayout>
     suspend fun putPagedReaderDisplayLayout(layout: PageDisplayLayout)
 
+    fun getPanelPrerenderCount(): Flow<Int>
+    suspend fun putPanelPrerenderCount(count: Int)
+
     fun getContinuousReaderReadingDirection(): Flow<ContinuousReadingDirection>
     suspend fun putContinuousReaderReadingDirection(direction: ContinuousReadingDirection)
 

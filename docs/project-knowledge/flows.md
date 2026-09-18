@@ -12,6 +12,8 @@ Risk points: duplicate state owners, platform-specific behavior leaking into com
 
 ## Remote and LAN selection
 
+Each `MainScreen` owns a serializable navigation identity. A new login gets a new identity; Activity recreation retains the current one. `SessionNavigators` retains destination navigators while a reader hides their composition and disposes their screen models when the owning main-screen session ends. Unconditionally disposing nested navigators on composition removal would also destroy the reader's return stack.
+
 1. Load the primary remote URL and optional LAN URL from settings.
 2. When automatic switching is enabled, probe the LAN endpoint without replacing the primary configuration.
 3. Use LAN while reachable; otherwise use the primary remote endpoint.
@@ -19,6 +21,10 @@ Risk points: duplicate state owners, platform-specific behavior leaking into com
 5. Preserve authentication and expose failures without logging secrets or private addresses.
 
 Risk points: probe races, stale active URL, destructive settings rewrites, and treating authentication failure as network unavailability.
+
+`ServerUrlResolver.resolution` distinguishes pending selection, a resolved route, and an unconfigured server. A configured initial address is not proof of readiness. Each selection has a generation; cancelled probes cannot publish over a newer configuration. `isCurrent` also checks the settings inputs before their collector runs.
+
+`LoginViewModel` owns one login task with a 15-second total deadline, including preparation and route selection. `OnlineLoginCoordinator` gives automatic network attempts six seconds each, with at most two attempts and a 300-millisecond retry delay. Connection failures, timeouts, and HTTP 502/503/504 can retry. Credentials are submitted once. Only a complete session from the current task and route can update authentication. Offline login bypasses route selection. The existing background authentication reload keeps its separate three-second policy.
 
 ## Offline download and reading
 
@@ -53,6 +59,16 @@ Local chapter labels and `metadata.numberSort` preserve decimal values such as `
 
 ## Reader navigation
 
+Image readers reload the current book through the selected content API at entry. A book passed by navigation is a display snapshot and cannot supply the authoritative saved progress. TTU continuous mode keeps scrolling on the document used by its bookmark calculator and window scroll listeners; horizontal clipping must not introduce a second scroll container on `#app`.
+
+Book details also refresh through the selected content API on every entry. A retained detail model cannot depend on receiving a progress event while the reader is open; its event listeners remain single-instance across entries.
+
+PANELS mode separates page-load lifetime from the current page's presentation job. `RetainedPageCache` keeps in-flight neighboring loads when they become visible. Leaving the reader cancels both scopes and releases cached images, including images allocated before a cancelled decode or detection finishes.
+
+`PanelsReaderState` forecasts upcoming panels in the configured reading order, including the existing whole-page step before a page turn. The PANELS-only `panelPrerenderCount` setting accepts 0 through 2 and defaults to 1. Zero disables neighboring loads and speculative pixels. SQLite migration V16 preserves existing settings with that default; browser JSON uses the same default for missing fields.
+
+`ReaderImage.prefetch` prepares static-image pixels without changing the visible painter or reading progress. `TilingReaderImage` matches prepared frames by source generation, raster size, and tile geometry. All speculative frames share a 32 MiB pixel budget per panel reader. Over-budget views are skipped. This limit excludes decoded originals, inference memory, visible frames, and retired frames still held by a painter. Foreground requests interrupt speculative work after the current native operation. Crop, sampling changes, eviction, and shutdown invalidate prepared pixels.
+
 Online Komga sibling navigation uses the remote chapter directory even when the current book has cached content. Local-source books and explicit offline mode use the offline directory. Online read lists keep their own order; the existing offline series fallback remains unchanged. A sibling lookup or page-list failure is a retryable state, not the end of a series. Retrying updates neighbouring books without resetting the current book, page, or zoom.
 
 1. Detail or library navigation opens an image, PDF, or EPUB reader with a stable content/progress identity.
@@ -69,6 +85,16 @@ Static tiled pages publish a bounded whole-page preview before waiting for high-
 Risk points: duplicate Back handlers, click-through overlays, drag-end taps, stale progress, system-edge conflicts, and unsafe-area overlap.
 
 Local EPUB positions describe approximate reading progress, not physical pages. Komga reads the cached positions service without scanning the publication before first paint; local progress matching accepts internal absolute resource URLs and archive-relative locators. Chapter scroll handoff is armed only by a single-finger vertical gesture and may finish after momentum settles. Touches originate inside the iframe, but the SDK scrolls the outer `main#iframe-wrapper`; use screen coordinates for gesture distance and the wrapper for scroll events and boundaries. It is disarmed after one navigation, cancellation, expiry or resource replacement, so initial short chapters cannot auto-skip.
+
+The Komga EPUB reader's `BookSiblingState` owns previous and next lookups by current book and generation. Switching books immediately invalidates both directions. A failed lookup stays distinct from an empty boundary. Clicking the failed direction retries only that request and preserves the current reader and progress until navigation succeeds. Loading clicks, stale completions, self-references, and disposed requests cannot navigate.
+
+`KomgaEpubReaderState` gives each native document a fresh `EpubReaderSession`. Close and model disposal retire its bridge callbacks and navigate the document to `about:blank`; Android's WebView wrapper `close()` alone does not stop JavaScript. A retained screen creates a new session when its native view is recreated, even before its initialize effect runs. Book results check the session before changing native book identity. Queued final progress writes remain allowed. The JavaScript reader also clears navigation on `pagehide` and explicit close.
+
+## Android LAN permission and Web API keys
+
+Android 17 uses `ACCESS_LOCAL_NETWORK` for LAN connections. Native login and retry actions request permission through the system dialog. Automatic login failures offer the permission flow once per login screen. Dismissing or denying permission does not disable remote-server login or local-library access. Android variants retain `ACCESS_NETWORK_STATE` for the fork's route selection.
+
+Web Komf login accepts an API key through `ApiKeyStore` and the existing bounded login coordinator. Keys are selected by the current server URL in memory and stored by server URL in browser storage. Changing server must never attach the previous server's key. Logout removes the selected server's key. Android and desktop retain cookie login.
 
 ## Server announcements and application updates
 

@@ -731,6 +731,10 @@
     }
   },
   "epubreader": {
+    "previous_book": "上一本",
+    "next_book": "下一本",
+    "sibling_error_previous": "上一本查询失败，请点击“上一本”重试。",
+    "sibling_error_next": "下一本查询失败，请点击“下一本”重试。",
     "current_chapter": "当前章节",
     "loading_book": "正在准备书籍…",
     "page_of": "第 {page} 页，共 {count} 页",

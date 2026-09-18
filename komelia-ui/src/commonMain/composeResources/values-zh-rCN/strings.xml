@@ -1,4 +1,7 @@
 <resources>
+    <string name="reader_panel_prerender">提前渲染的后续画面数</string>
+    <string name="reader_panel_prerender_off">0 · 关闭</string>
+    <string name="reader_panel_prerender_description">仅分镜模式生效。默认 1，最多 2，包括翻页前的整页画面。额外预渲染像素共用 32 MiB 上限，过大的画面会跳过。此上限不包含原图和当前画面。</string>
     <string name="navigation_back">返回</string>
     <string name="navigation_close_settings">关闭设置</string>
     <string name="screen_error">错误：%1$s</string>
@@ -1410,4 +1413,15 @@
     <string name="local_archive_decode_limit">7z 归档超过限制：单条目 64 MiB、解码总量 1 GiB 或 10,000 个条目。请拆分或重新打包。</string>
     <string name="local_archive_unsafe_entry">归档包含不安全或重复的路径，请使用唯一的相对路径重新打包。</string>
     <string name="local_archive_preparing">正在准备归档缓存，可取消后稍后重试。</string>
+    <string name="series_reading_direction_right_to_left">从右到左</string>
+    <string name="komf_providers_database_download_date">下载日期 %1$s</string>
+    <string name="komf_providers_bookwalker_database">BookWalker 离线数据库</string>
+    <string name="komf_providers_bookwalker_database_update">更新 BookWalker 数据库</string>
+    <string name="komf_providers_bookwalker_database_download">下载 BookWalker 数据库</string>
+    <string name="login_apikey">API 密钥</string>
+    <string name="login_android_lan_access_dialog">连接局域网服务器需要附近设备权限。请在系统弹窗中允许，或前往系统设置授权。</string>
+    <string name="login_unexpected_response">服务器 %1$s 返回了意外响应</string>
+    <string name="login_invalid_credentials">登录凭据无效</string>
+    <string name="login_cancel_error">已取消登录</string>
+    <string name="login_error">登录失败：%1$s</string>
 </resources>

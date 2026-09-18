@@ -36,14 +36,14 @@ fun KomfSettingsContent(
                 onClick = { selectedTab = 0 },
                 modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
             ) {
-                Text(stringResource(Res.string.komf_notification_apprise))
+                Text(stringResource(Res.string.komf_notification_discord))
             }
             Tab(
                 selected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
                 modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
             ) {
-                Text(stringResource(Res.string.komf_notification_discord))
+                Text(stringResource(Res.string.komf_notification_apprise))
             }
         }
         Spacer(Modifier.height(30.dp))

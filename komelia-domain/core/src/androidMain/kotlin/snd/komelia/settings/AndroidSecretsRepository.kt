@@ -19,4 +19,14 @@ class AndroidSecretsRepository(
     override suspend fun deleteCookie(url: String) {
         preferences.edit { remove(cookieKey) }
     }
+
+    override suspend fun getApiKey(url: String): String? {
+        return null
+    }
+
+    override suspend fun setApiKey(url: String, apiKey: String) {
+    }
+
+    override suspend fun deleteApiKey(url: String) {
+    }
 }

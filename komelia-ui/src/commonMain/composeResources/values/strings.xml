@@ -1,4 +1,7 @@
 <resources>
+    <string name="reader_panel_prerender">Upcoming views to prerender</string>
+    <string name="reader_panel_prerender_off">0 · Off</string>
+    <string name="reader_panel_prerender_description">Panels mode only. Default: 1; maximum: 2, including the whole-page view between pages. Extra prerendered pixels share a 32 MiB limit, so large views may be skipped. Original images and the current view are not included.</string>
     <string name="navigation_back">Back</string>
     <string name="navigation_close_settings">Close settings</string>
     <string name="screen_error">Error %1$s</string>
@@ -317,6 +320,7 @@
     <string name="series_status_abandoned">Abandoned</string>
     <string name="series_status_hiatus">Hiatus</string>
     <string name="series_reading_direction_left_to_right">Left to right</string>
+    <string name="series_reading_direction_right_to_left">Right to left</string>
     <string name="series_reading_direction_vertical">Vertical</string>
     <string name="series_reading_direction_webtoon">Webtoon</string>
     <string name="series_publisher">Publisher</string>
@@ -1118,7 +1122,7 @@
     <string name="komf_notification_discord_template_description">Description. 4096 characters max</string>
     <string name="komf_notification_discord_template_footer">Footer. 2048 characters max</string>
     <string name="komf_notification_discord_template_field_number">Field %1$s</string>
-    <string name="komf_notification_discord_template_field_add">Add field$s</string>
+    <string name="komf_notification_discord_template_field_add">Add fields</string>
     <string name="komf_notification_discord_template_field_name">Field name. 256 characters max$s</string>
     <string name="komf_notification_discord_template_field_inline">Inline</string>
     <string name="komf_notification_discord_template_field_value">Field value. 1024 characters max</string>
@@ -1172,20 +1176,23 @@
     <string name="komf_notification_context_list_value_and_number">%1$s %2$s</string>
     <string name="komf_notification_context_list_value_add">Add %1$s</string>
     <string name="komf_edit_tab_book_metadata">Book metadata</string>
-    <string name="komf_edit_tab_series_metadata">Book metadata</string>
+    <string name="komf_edit_tab_series_metadata">Series metadata</string>
     <string name="komf_edit_tab_provider_settings">Provider settings</string>
     <string name="komf_providers">Providers</string>
     <string name="komf_providers_add">Add provider</string>
     <string name="komf_providers_name_matching_mode">Name matching mode</string>
     <string name="komf_providers_comicvine_client_id">ComicVine client id</string>
     <string name="komf_providers_mal_client_id">MyAnimeList client id</string>
+    <string name="komf_providers_database_download_date">Download date %1$s</string>
     <string name="komf_providers_mangabaka_database">MangaBaka Offline Database</string>
-    <string name="komf_providers_mangabaka_database_download_date">Download date %1$s</string>
     <string name="komf_providers_mangabaka_database_checksum">Checksum %1$s</string>
-    <string name="komf_providers_mangabaka_database_update">Update ManghaBaka database</string>
-    <string name="komf_providers_mangabaka_database_download">Download ManghaBaka database</string>
+    <string name="komf_providers_mangabaka_database_update">Update MangaBaka database</string>
+    <string name="komf_providers_mangabaka_database_download">Download MangaBaka database</string>
     <string name="komf_providers_mangabaka_database_download_done">Done</string>
     <string name="komf_providers_mangabaka_database_download_close">Close</string>
+    <string name="komf_providers_bookwalker_database">BookWalker Offline Database</string>
+    <string name="komf_providers_bookwalker_database_update">Update BookWalker database</string>
+    <string name="komf_providers_bookwalker_database_download">Download BookWalker database</string>
     <string name="komf_providers_edit">Edit %1$s</string>
     <string name="komf_providers_edit_close">Close</string>
     <string name="komf_providers_series_age_rating">Age rating</string>
@@ -1305,6 +1312,7 @@
     <string name="login_invalid_port">Enter a port between 1 and 65535</string>
     <string name="login_username">Username</string>
     <string name="login_password">Password</string>
+    <string name="login_apikey">API Key</string>
     <string name="login_offline_mode">Offline mode</string>
     <string name="login_back_to_online">Back to online</string>
     <string name="login_login">Login</string>
@@ -1318,6 +1326,11 @@
     <string name="login_error_timeout">The server took too long to respond. Check your connection and try again.</string>
     <string name="login_error_connection">Could not connect to this server. Check the address and your network.</string>
     <string name="login_error_unexpected_response">The server returned an unexpected response.</string>
+    <string name="login_android_lan_access_dialog">In order to connect to local addresses "nearby devices" permission is required.\nPlease allow this via the following dialog box or change it via system setting</string>
+    <string name="login_unexpected_response">Unexpected response for url %1$s</string>
+    <string name="login_invalid_credentials">Invalid credentials</string>
+    <string name="login_cancel_error">Cancelled login attempt</string>
+    <string name="login_error">Login error: %1$s</string>
 
     <string name="search_search_all">Search all...</string>
     <string name="search_search_input_placeholder">Search</string>

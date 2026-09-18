@@ -39,6 +39,7 @@ import snd.komelia.api.RemoteSeriesApi
 import snd.komelia.api.RemoteSettingsApi
 import snd.komelia.api.RemoteTaskApi
 import snd.komelia.api.RemoteUserApi
+import snd.komelia.http.ApiKeyStore
 import snd.komelia.http.RememberMePersistingCookieStore
 import snd.komelia.homefilters.KomgaSearchRequestSerializersModule
 import snd.komelia.image.BookImageLoader
@@ -122,17 +123,24 @@ abstract class AppModule {
             appRepositories.secretsRepository
         )
         cookiesStorage.loadRememberMeCookie()
+        val apiKeyStore = ApiKeyStore(
+            baseUrl.map { Url(it) }.stateIn(initScope),
+            appRepositories.secretsRepository
+        )
+        apiKeyStore.loadStoredApiKey()
 
         val komgaClientFactory = KomgaClientFactory.Builder()
             .ktor(ktor)
             .baseUrl { baseUrl.value }
             .cookieStorage(cookiesStorage)
+            .apiKey { apiKeyStore.apiKey  }
             .build()
 
         val komgaClientFactoryNoCache = KomgaClientFactory.Builder()
             .ktor(ktorWithoutCache)
             .baseUrl { baseUrl.value }
             .cookieStorage(cookiesStorage)
+            .apiKey { apiKeyStore.apiKey  }
             .build()
 
         val komfClientFactory = KomfClientFactory.Builder()
@@ -171,7 +179,7 @@ abstract class AppModule {
         }.stateIn(initScope)
 
         val komgaNoRemoteCacheApi = isOffline.map { offline ->
-            if (offline && offlineModule!=null) offlineModule.komgaApi
+            if (offline && offlineModule != null) offlineModule.komgaApi
             else createRemoteApi(
                 komgaClientFactory = komgaClientFactoryNoCache,
                 offlineRepositories = offlineRepositories,
@@ -237,6 +245,7 @@ abstract class AppModule {
         val dependencies = DependencyContainer(
             appRepositories = appRepositories,
             serverUrlResolver = serverUrlResolver,
+            apiKeyStore = apiKeyStore,
 
             komgaApi = komgaApi,
             isOffline = isOffline,

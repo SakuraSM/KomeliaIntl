@@ -20,6 +20,7 @@ data class ImageReaderSettings(
     val pagedScaleType: LayoutScaleType = LayoutScaleType.SCREEN,
     val pagedReadingDirection: PagedReadingDirection = PagedReadingDirection.LEFT_TO_RIGHT,
     val pagedPageLayout: PageDisplayLayout = PageDisplayLayout.SINGLE_PAGE,
+    val panelPrerenderCount: Int = 1,
     val continuousReadingDirection: ContinuousReadingDirection = ContinuousReadingDirection.TOP_TO_BOTTOM,
     val continuousPadding: Float = 0f,
     val continuousPageSpacing: Int = 0,

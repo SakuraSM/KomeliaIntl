@@ -7,6 +7,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toRect
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -73,6 +76,23 @@ abstract class TilingReaderImage(
     protected val processingScope = CoroutineScope(processingDispatcher + SupervisorJob())
     private val imageMutex = Mutex()
     private val closed = MutableStateFlow(false)
+    private val visibleRequestSerial = MutableStateFlow(0L)
+    private val prefetchSerial = MutableStateFlow(0L)
+    private val renderRevision = MutableStateFlow(0L)
+    private var activeRenderSerial = 0L
+    private var activeRenderRevision = 0L
+    private val latestVisibleRequest = MutableStateFlow<UpdateRequest?>(null)
+    private var completedVisibleRequest: UpdateRequest? = null
+    // Float rounding in animation must not prevent reuse of identical rendered pixels.
+    private data class PrefetchKey(
+        val serial: Long,
+        val displaySize: IntSize,
+        val pixelSize: IntSize,
+        val regions: List<Pair<IntRect, IntSize>>,
+    )
+    private val preparedFrames = PreparedFrameCache<PrefetchKey, FrameData> { frame ->
+        closeTileBitmaps(frame.allTiles())
+    }
 
     private val jobFlow = MutableSharedFlow<UpdateRequest>(1, 0, BufferOverflow.DROP_OLDEST)
     private val frameData = MutableStateFlow<FrameData?>(null)
@@ -100,6 +120,8 @@ abstract class TilingReaderImage(
                 try {
                     doUpdate(request)
                     this.error.value = null
+                } catch (_: ForegroundSuperseded) {
+                    // A newer viewport is already queued; keep the current painter until it wins.
                 } catch (e: Throwable) {
                     currentCoroutineContext().ensureActive()
                     logger.catching(e)
@@ -110,9 +132,13 @@ abstract class TilingReaderImage(
             }.launchIn(processingScope)
 
         processingPipeline.changeFlow.onEach {
+            prefetchSerial.update { it + 1 }
+            renderRevision.update { it + 1 }
             // Native calls can switch dispatchers and suspend. limitedParallelism(1) alone
             // does not keep a crop reload from closing an image that a resize still uses.
             imageMutex.withLock {
+                preparedFrames.clear()
+                completedVisibleRequest = null
                 releaseImages()
                 originalSize.value = null
                 currentSize.value = null
@@ -170,16 +196,23 @@ abstract class TilingReaderImage(
     }
 
     protected suspend fun reloadLastRequest() {
+        prefetchSerial.update { it + 1 }
+        renderRevision.update { it + 1 }
         imageMutex.withLock {
             if (closed.value) return@withLock
-            lastUpdateRequest?.let { lastRequest ->
+            preparedFrames.clear()
+            completedVisibleRequest = null
+            (latestVisibleRequest.value ?: lastUpdateRequest)?.let { lastRequest ->
                 lastUsedScaleFactor = null
+                visibleRequestSerial.update { it + 1 }
+                latestVisibleRequest.value = lastRequest
                 jobFlow.emit(lastRequest)
             }
         }
     }
 
     protected open suspend fun onUpsamplingModeChanged(mode: UpsamplingMode) {
+        clearPrefetch()
         painter.update { it?.withSamplingMode(mode) }
     }
 
@@ -244,13 +277,10 @@ abstract class TilingReaderImage(
         zoomFactor: Float,
         visibleDisplaySize: IntRect,
     ) {
-        jobFlow.tryEmit(
-            UpdateRequest(
-                visibleDisplaySize = visibleDisplaySize,
-                zoomFactor = zoomFactor,
-                maxDisplaySize = maxDisplaySize
-            )
-        )
+        val request = UpdateRequest(visibleDisplaySize, zoomFactor, maxDisplaySize)
+        if (latestVisibleRequest.value != request) visibleRequestSerial.update { it + 1 }
+        latestVisibleRequest.value = request
+        jobFlow.tryEmit(request)
     }
 
     private suspend fun doUpdate(request: UpdateRequest) {
@@ -261,51 +291,168 @@ abstract class TilingReaderImage(
         imageMutex.withLock {
             // A reload may have replaced the image while we were waiting for the lock.
             val currentImage = image.value ?: return@withLock
+            if (latestVisibleRequest.value != request) return@withLock
+            activeRenderSerial = visibleRequestSerial.value
+            activeRenderRevision = renderRevision.value
             doUpdate(request, currentImage)
+            completedVisibleRequest = request
         }
     }
 
-    private suspend fun doUpdate(request: UpdateRequest, image: KomeliaImage) {
-        val displaySize = calculateSizeForArea(request.maxDisplaySize, stretchImages.value) ?: return
-        val widthRatio = displaySize.width.toDouble() / image.width
-        val heightRatio = displaySize.height.toDouble() / image.pageHeight
-        val displayScaleFactor = widthRatio.coerceAtMost(heightRatio)
+    private data class RenderPlan(
+        val displaySize: IntSize,
+        val displayScale: Double,
+        val scale: Double,
+        val pixelSize: IntSize,
+        val tileSize: Int?,
+    )
 
-        val zoomFactor = request.zoomFactor
-        val visibleDisplaySize = request.visibleDisplaySize
-
-        val actualScaleFactor = displayScaleFactor * zoomFactor
-
-        val dstWidth = displaySize.width * zoomFactor
-        val dstHeight = displaySize.height * zoomFactor
-
-        this.displaySize.value = displaySize
-        this.currentSize.value = IntSize(dstWidth.roundToInt(), dstHeight.roundToInt())
-
-        val displayPixCount = (dstWidth * dstHeight).roundToInt()
-        val tileSize = when (displayPixCount) {
-            in 0..tileThreshold1 -> null
-            in tileThreshold1..tileThreshold2 -> 1024
-            in tileThreshold2..tileThreshold3 -> 512
+    private suspend fun renderPlan(request: UpdateRequest, image: KomeliaImage): RenderPlan? {
+        if (request.maxDisplaySize.width <= 0 || request.maxDisplaySize.height <= 0 ||
+            !request.zoomFactor.isFinite() || request.zoomFactor <= 0f) return null
+        val display = calculateSizeForArea(request.maxDisplaySize, stretchImages.value) ?: return null
+        val displayScale = minOf(display.width.toDouble() / image.width, display.height.toDouble() / image.pageHeight)
+        val scale = displayScale * request.zoomFactor
+        val pixels = IntSize((display.width * request.zoomFactor).roundToInt(), (display.height * request.zoomFactor).roundToInt())
+        val count = pixels.width.toLong() * pixels.height
+        val tileSize = when {
+            count <= tileThreshold1 -> null
+            count <= tileThreshold2 -> 1024
+            count <= tileThreshold3 -> 512
             else -> 256
         }
+        return RenderPlan(display, displayScale, scale, pixels, tileSize?.let { sourceTileSize(it, scale) })
+    }
 
-        if (image.pagesLoaded > 1 || tileSize == null) {
-            doFullResize(
-                image = image,
-                scaleFactor = actualScaleFactor,
-                displayScaleFactor = displayScaleFactor,
-                displayArea = displaySize
-            )
+    private fun tilesFor(plan: RenderPlan, request: UpdateRequest, image: KomeliaImage): List<ViewportTile> =
+        viewportTiles(ViewportTilePlan(IntSize(image.width, image.height), checkNotNull(plan.tileSize),
+            plan.displayScale, plan.scale, request.visibleDisplaySize.toRect()))
+
+    private fun prefetchKey(generation: Long, plan: RenderPlan, request: UpdateRequest, image: KomeliaImage): PrefetchKey =
+        PrefetchKey(generation, plan.displaySize, plan.pixelSize,
+            if (plan.tileSize == null) emptyList() else tilesFor(plan, request, image).map { it.source to it.pixels })
+
+    private suspend fun doUpdate(request: UpdateRequest, image: KomeliaImage) {
+        val plan = renderPlan(request, image) ?: return
+        displaySize.value = plan.displaySize
+        currentSize.value = plan.pixelSize
+        val prepared = preparedFrames.take(prefetchKey(prefetchSerial.value, plan, request, image))
+        if (prepared != null) {
+            if (prepared.sourceImage === image) {
+                try {
+                    if (plan.tileSize != null) ensureTileFallback(image, plan.displaySize, plan.scale)
+                    ensureForegroundCurrent()
+                    publishFrame(FrameData(prepared.frames, prepared.displaySize, prepared.scaleFactor, image,
+                        frameData.value?.takeIf { it.sourceImage === image }?.fallback))
+                    lastUsedScaleFactor = plan.scale
+                    logger.debug { "page ${pageId.pageNumber} reused pre-rendered viewport" }
+                } catch (error: Throwable) {
+                    if (frameData.value?.frames !== prepared.frames) closeTileBitmaps(prepared.allTiles())
+                    throw error
+                }
+                return
+            }
+            closeTileBitmaps(prepared.allTiles())
+        }
+        if (image.pagesLoaded > 1 || plan.tileSize == null) {
+            doFullResize(image, plan.scale, plan.displayScale, plan.displaySize)
         } else {
-            doTile(
-                image = image,
-                displayRegion = visibleDisplaySize.toRect(),
-                displayScaleFactor = displayScaleFactor,
-                scaleFactor = actualScaleFactor,
-                displayArea = displaySize,
-                tileSize = sourceTileSize(tileSize, actualScaleFactor)
-            )
+            doTile(image, request.visibleDisplaySize.toRect(), plan.displayScale, plan.scale, plan.displaySize, plan.tileSize)
+        }
+    }
+
+    override fun clearPrefetch() {
+        prefetchSerial.update { it + 1 }
+        processingScope.launch { imageMutex.withLock { preparedFrames.clear() } }
+    }
+
+    override suspend fun prefetch(request: ReaderImagePrefetch): Int {
+        if (closed.value) return 0
+        val generation = prefetchSerial.value
+        val foreground = visibleRequestSerial.value
+        val targets = request.viewports.distinct().take(2).map {
+            UpdateRequest(it.visibleDisplaySize, it.zoomFactor, it.maxDisplaySize)
+        }
+        val task = processingScope.async {
+            if (targets.isEmpty()) {
+                imageMutex.withLock { preparedFrames.clear() }
+                return@async 0
+            }
+            getCurrentImage()
+            imageMutex.withLock {
+                val currentImage = image.value ?: return@withLock 0
+                if (closed.value || currentImage.pagesLoaded > 1 || currentImage.pagesTotal > 1) return@withLock 0
+                if (latestVisibleRequest.value != completedVisibleRequest) return@withLock 0
+                val keyedTargets = targets.mapNotNull { target ->
+                    renderPlan(target, currentImage)?.let { prefetchKey(generation, it, target, currentImage) to target }
+                }
+                preparedFrames.retain(keyedTargets.map { it.first }.toSet())
+                for ((key, target) in keyedTargets) {
+                    currentCoroutineContext().ensureActive()
+                    if (prefetchSerial.value != generation || visibleRequestSerial.value != foreground) break
+                    if (preparedFrames.contains(key) || completedVisibleRequest == target) continue
+                    prepareFrame(target, currentImage, request.budget, generation, foreground)?.let { (frame, reservation) ->
+                        preparedFrames.put(key, frame, reservation)
+                    }
+                }
+                keyedTargets.count { (key, target) -> preparedFrames.contains(key) || target == completedVisibleRequest }
+            }
+        }
+        try { return task.await() }
+        finally { if (!currentCoroutineContext().isActive) task.cancel() }
+    }
+
+    private suspend fun prepareFrame(
+        request: UpdateRequest,
+        image: KomeliaImage,
+        budget: ReaderPrefetchBudget,
+        generation: Long,
+        foreground: Long,
+    ): Pair<FrameData, ReaderPrefetchBudget.Reservation>? {
+        val plan = renderPlan(request, image) ?: return null
+        val specs = if (plan.tileSize != null) tilesFor(plan, request, image) else listOf(
+            ViewportTile(IntRect(0, 0, image.width, image.pageHeight),
+                Rect(0f, 0f, plan.displaySize.width.toFloat(), plan.displaySize.height.toFloat()), plan.pixelSize))
+        var bytes = 0L
+        for (spec in specs) {
+            val cost = rgbaPixelBytes(spec.pixels)
+            if (cost > budget.maximumBytes - bytes) return null
+            bytes += cost
+        }
+        if (specs.isEmpty()) return null
+        val reservation = budget.reserve(bytes) ?: return null
+        val tiles = mutableListOf<ReaderImageTile>()
+        try {
+            for (spec in specs) {
+                currentCoroutineContext().ensureActive()
+                if (prefetchSerial.value != generation || visibleRequestSerial.value != foreground) throw PrefetchSuperseded()
+                // A native resize cannot be interrupted safely after allocating pixels.
+                // Register ownership before observing cancellation and retiring this batch.
+                withContext(NonCancellable) {
+                    val pixels = if (plan.tileSize == null) resizeImage(image, spec.pixels.width, spec.pixels.height)
+                    else getImageRegion(image, spec.source, spec.pixels.width, spec.pixels.height)
+                    tiles.add(ReaderImageTile(IntSize(pixels.width, pixels.height), spec.display, true, pixels.frames.single()))
+                }
+                currentCoroutineContext().ensureActive()
+                if (prefetchSerial.value != generation || visibleRequestSerial.value != foreground) throw PrefetchSuperseded()
+            }
+            return FrameData(listOf(ImageFrame(tiles, 0)), plan.displaySize, plan.scale, image, null) to reservation
+        } catch (error: Throwable) {
+            closeTileBitmaps(tiles)
+            reservation.release()
+            if (error is PrefetchSuperseded) return null
+            throw error
+        }
+    }
+
+    private class PrefetchSuperseded : CancellationException("Foreground viewport superseded pre-rendering")
+
+    private class ForegroundSuperseded : CancellationException("Newer image viewport requested")
+
+    private suspend fun ensureForegroundCurrent() {
+        currentCoroutineContext().ensureActive()
+        if (activeRenderSerial != visibleRequestSerial.value || activeRenderRevision != renderRevision.value) {
+            throw ForegroundSuperseded()
         }
     }
 
@@ -320,7 +467,6 @@ abstract class TilingReaderImage(
             return
         }
 
-        lastUsedScaleFactor = scaleFactor
         val dstWidth = (image.width * scaleFactor).roundToInt()
         val dstHeight = (image.pageHeight * scaleFactor).roundToInt()
 
@@ -348,7 +494,9 @@ abstract class TilingReaderImage(
                     delay = resizedImage.delays?.getOrNull(i) ?: defaultFrameDelay
                 )
             }
-            publishFrame(FrameData(
+            try {
+                ensureForegroundCurrent()
+                publishFrame(FrameData(
                 frames = frames,
                 displaySize = displayArea,
                 scaleFactor = scaleFactor,
@@ -356,7 +504,12 @@ abstract class TilingReaderImage(
                 fallback = frameData.value?.takeIf { it.sourceImage === image }?.fallback?.copy(
                     displayRegion = Rect(0f, 0f, displayArea.width.toFloat(), displayArea.height.toFloat())
                 ),
-            ))
+                ))
+                lastUsedScaleFactor = scaleFactor
+            } catch (error: Throwable) {
+                closeTileBitmaps(frames.flatMap { it.tiles })
+                throw error
+            }
         }.also { logger.info { "page ${pageId.pageNumber} completed full resize to $dstWidth x $dstHeight in $it" } }
 
     }
@@ -375,65 +528,25 @@ abstract class TilingReaderImage(
         val start = timeSource.markNow()
 
         ensureTileFallback(image, displayArea, scaleFactor)
-        val visibilityWindow = tileVisibilityWindow(displayRegion)
 
         val oldTiles = frameData.value?.frames?.first()?.tiles ?: emptyList()
         val newTiles = mutableListOf<ReaderImageTile>()
         var addedNewTiles = false
 
         try {
-            var yTaken = 0
-            while (yTaken != image.height) {
-                var xTaken = 0
-                while (xTaken != image.width) {
-                    val tileRegion = IntRect(
-                        top = yTaken.coerceAtMost(image.height),
-                        bottom = (yTaken + tileSize).coerceAtMost(image.height),
-                        left = (xTaken).coerceAtMost(image.width),
-                        right = (xTaken + tileSize).coerceAtMost(image.width),
-                    )
-                    val tileDisplayRegion = Rect(
-                        (tileRegion.left * displayScaleFactor).toFloat(),
-                        (tileRegion.top * displayScaleFactor).toFloat(),
-                        (tileRegion.right * displayScaleFactor).toFloat(),
-                        (tileRegion.bottom * displayScaleFactor).toFloat()
-                    )
-
-                    val existingTile = oldTiles.find { it.displayRegion == tileDisplayRegion }
-                    if (!visibilityWindow.overlaps(tileDisplayRegion)) {
-                        xTaken = (xTaken + tileSize).coerceAtMost(image.width)
-                        continue
-                    }
-
-                    if (existingTile != null) {
-                        if (scaleFactor == lastUsedScaleFactor && existingTile.renderImage != null) {
-                            newTiles.add(existingTile)
-                            xTaken = (xTaken + tileSize).coerceAtMost(image.width)
-                            continue
-                        }
-                    }
-
-                    val tileWidth = tileRegion.right - tileRegion.left
-                    val tileHeight = tileRegion.bottom - tileRegion.top
-                    val scaledTile = getImageRegion(
-                        image,
-                        tileRegion,
-                        ((tileWidth) * scaleFactor).roundToInt(),
-                        ((tileHeight) * scaleFactor).roundToInt()
-                    )
-
-                    val tile = ReaderImageTile(
-                        size = IntSize(scaledTile.width, scaledTile.height),
-                        displayRegion = tileDisplayRegion,
-                        isVisible = true,
-                        renderImage = scaledTile.frames.first()
-                    )
-
-                    newTiles.add(tile)
-                    addedNewTiles = true
-                    xTaken = (xTaken + tileSize).coerceAtMost(image.width)
+            val specs = viewportTiles(ViewportTilePlan(IntSize(image.width, image.height), tileSize,
+                displayScaleFactor, scaleFactor, displayRegion))
+            for (spec in specs) {
+                ensureForegroundCurrent()
+                val existingTile = oldTiles.find { it.displayRegion == spec.display }
+                if (existingTile != null && scaleFactor == lastUsedScaleFactor && existingTile.renderImage != null) {
+                    newTiles.add(existingTile)
+                    continue
                 }
-                yTaken = (yTaken + tileSize).coerceAtMost(image.height)
+                val scaledTile = getImageRegion(image, spec.source, spec.pixels.width, spec.pixels.height)
+                newTiles.add(ReaderImageTile(IntSize(scaledTile.width, scaledTile.height), spec.display, true, scaledTile.frames.first()))
+                ensureForegroundCurrent()
+                addedNewTiles = true
             }
         } catch (error: Throwable) {
             closeTileBitmaps(newTiles.filter { tile -> oldTiles.none { it === tile } })
@@ -500,6 +613,7 @@ abstract class TilingReaderImage(
         processingScope.coroutineContext.job.invokeOnCompletion {
             runCatching {
                 try {
+                    preparedFrames.clear()
                     releaseImages()
                     frameData.value?.allTiles()
                         ?.let { closeTileBitmaps(it) }

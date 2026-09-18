@@ -35,7 +35,11 @@ import kotlin.time.Instant
 class ReaderSiblingStateTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun failedAdjacentLookupAndRetryKeepTheCurrentBookAndPage() {
+    @Test fun failedAdjacentLookupAndRetryKeepTheCurrentBookAndPage() = runScenario(false)
+
+    @Test fun reopeningUsesSavedProgressInsteadOfTheDetailScreensSnapshot() = runScenario(true)
+
+    private fun runScenario(hasNewerSavedProgress: Boolean) {
         lateinit var navigator: Navigator
         compose.setContent { Navigator(EmptyScreen) { nav -> SideEffect { navigator = nav } } }
         compose.waitForIdle()
@@ -44,8 +48,13 @@ class ReaderSiblingStateTest {
         val second = book("chapter-1.5", 1.5f)
         var fail = true
         var emptyNextPages = true
+        val savedModes = mutableListOf<ReaderType>()
         val api = stub<KomgaBookApi> { name, args ->
             when (name) {
+                "getOne" -> if (hasNewerSavedProgress) first.copy(readProgress = ReadProgress(
+                    page = 2, completed = false, readDate = first.created, created = first.created,
+                    lastModified = first.created, deviceId = "test", deviceName = "test",
+                )) else first
                 "getBookSiblingNext" -> if (args.first() == first.id.value) {
                     if (fail) throw IOException("synthetic timeout") else second
                 } else null
@@ -58,8 +67,11 @@ class ReaderSiblingStateTest {
         val reader = ReaderState(
             initialBook = first, bookApi = api, seriesApi = stub { _, _ -> throw IOException("no synthetic series metadata") },
             readListApi = stub { _, _ -> error("not a read list") }, navigator = navigator,
-            appNotifications = AppNotifications(), readerSettingsRepository = stub { name, _ ->
-                flowOf(when (name) {
+            appNotifications = AppNotifications(), readerSettingsRepository = stub { name, args ->
+                if (name == "putReaderType") {
+                    savedModes += args.first() as ReaderType
+                    Unit
+                } else flowOf(when (name) {
                     "getUpsamplingMode" -> UpsamplingMode.NEAREST
                     "getDownsamplingKernel" -> ReduceKernel.NEAREST
                     "getFlashDuration" -> 100L
@@ -77,6 +89,10 @@ class ReaderSiblingStateTest {
             runBlocking {
                 reader.initialize(first.id)
                 assertIs<LoadState.Success<Unit>>(reader.state.value)
+                assertEquals(if (hasNewerSavedProgress) 2 else 1, reader.readProgressPage.value)
+                reader.onReaderTypeChange(ReaderType.PAGED)
+                assertEquals(listOf(ReaderType.PAGED), savedModes)
+                assertNull(reader.modeHintRequest.value)
                 assertIs<SiblingLoad.Failed>(reader.booksState.value!!.next)
                 reader.onProgressChange(2)
                 val pages = reader.booksState.value!!.currentBookPages

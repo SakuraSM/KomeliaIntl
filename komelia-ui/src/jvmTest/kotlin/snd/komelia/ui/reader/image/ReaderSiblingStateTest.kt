@@ -35,7 +35,11 @@ import kotlin.time.Instant
 class ReaderSiblingStateTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun failedAdjacentLookupAndRetryKeepTheCurrentBookAndPage() {
+    @Test fun failedAdjacentLookupAndRetryKeepTheCurrentBookAndPage() = runScenario(false)
+
+    @Test fun reopeningUsesSavedProgressInsteadOfTheDetailScreensSnapshot() = runScenario(true)
+
+    private fun runScenario(hasNewerSavedProgress: Boolean) {
         lateinit var navigator: Navigator
         compose.setContent { Navigator(EmptyScreen) { nav -> SideEffect { navigator = nav } } }
         compose.waitForIdle()
@@ -47,6 +51,10 @@ class ReaderSiblingStateTest {
         val savedModes = mutableListOf<ReaderType>()
         val api = stub<KomgaBookApi> { name, args ->
             when (name) {
+                "getOne" -> if (hasNewerSavedProgress) first.copy(readProgress = ReadProgress(
+                    page = 2, completed = false, readDate = first.created, created = first.created,
+                    lastModified = first.created, deviceId = "test", deviceName = "test",
+                )) else first
                 "getBookSiblingNext" -> if (args.first() == first.id.value) {
                     if (fail) throw IOException("synthetic timeout") else second
                 } else null
@@ -81,6 +89,7 @@ class ReaderSiblingStateTest {
             runBlocking {
                 reader.initialize(first.id)
                 assertIs<LoadState.Success<Unit>>(reader.state.value)
+                assertEquals(if (hasNewerSavedProgress) 2 else 1, reader.readProgressPage.value)
                 reader.onReaderTypeChange(ReaderType.PAGED)
                 assertEquals(listOf(ReaderType.PAGED), savedModes)
                 assertNull(reader.modeHintRequest.value)

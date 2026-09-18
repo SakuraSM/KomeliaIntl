@@ -45,7 +45,8 @@ import snd.komga.client.series.KomgaSeries
 typealias SpreadIndex = Int
 
 class ReaderState(
-    private val initialBook: KomeliaBook?,
+    // Kept for constructor compatibility; progress must be loaded at entry.
+    @Suppress("UNUSED_PARAMETER") initialBook: KomeliaBook?,
     private val bookApi: KomgaBookApi,
     private val seriesApi: KomgaSeriesApi,
     private val readListApi: KomgaReadListApi,
@@ -110,8 +111,9 @@ class ReaderState(
             state.value = LoadState.Loading
             val currentBooksState = booksState.value
             if (currentBooksState == null) state.value = LoadState.Loading
-            val newBook = initialBook?.takeIf { it.id == bookId }
-                ?: bookApi.getOne(bookId)
+            // Navigation carries a display snapshot, not an authoritative progress
+            // checkpoint. It can predate the previous reader session's last save.
+            val newBook = bookApi.getOne(bookId)
 
             val bookPages = loadBookPages(newBook.id)
 

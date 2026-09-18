@@ -1,11 +1,11 @@
 package snd.komelia.ui.book
 
-import cafe.adriel.voyager.core.model.screenModelScope
+import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
+import cafe.adriel.voyager.core.model.ScreenModelStore
 import java.io.IOException
 import java.lang.reflect.Proxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -24,7 +24,7 @@ import snd.komga.client.sse.KomgaEvent
 import kotlin.test.assertEquals
 import kotlin.time.Instant
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, InternalVoyagerApi::class)
 class BookProgressRefreshTest {
     @Test fun returningFromReaderRefreshesProgressWithoutAnEvent() = verifyRefresh(false)
     @Test fun initialDetailSnapshotDoesNotOverrideSavedProgress() = verifyRefresh(true)
@@ -34,7 +34,8 @@ class BookProgressRefreshTest {
         val snapshot = book()
         var saved = snapshot
         val events = MutableSharedFlow<KomgaEvent>()
-        val vm = BookViewModel(
+        val holder = "book-progress-${java.util.UUID.randomUUID()}"
+        val vm = ScreenModelStore.getOrPut(holder, null) { BookViewModel(
             book = snapshot, bookId = snapshot.id,
             bookApi = stub { name -> when (name) {
                 "getOne" -> saved
@@ -46,7 +47,7 @@ class BookProgressRefreshTest {
             libraries = MutableStateFlow(emptyList()), taskEmitter = null, localLibraryManager = null,
             settingsRepository = stub { flowOf(240) },
             readListApi = stub { error("No synthetic read lists") },
-        )
+        ) }
         try {
             if (!staleInitially) {
                 vm.initialize()
@@ -64,7 +65,7 @@ class BookProgressRefreshTest {
             advanceUntilIdle()
             assertEquals(subscriptions, events.subscriptionCount.value)
         } finally {
-            vm.screenModelScope.cancel()
+            ScreenModelStore.onDisposeNavigator(holder)
             Dispatchers.resetMain()
         }
     }

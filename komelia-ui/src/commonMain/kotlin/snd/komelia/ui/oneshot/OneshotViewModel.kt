@@ -113,8 +113,7 @@ class OneshotViewModel(
 
         reloadFlow.onEach {
             reloadEventsEnabled.first { it }
-            loadSeries()
-            loadBook()
+            reloadState()
         }.launchIn(screenModelScope)
     }
 
@@ -125,34 +124,32 @@ class OneshotViewModel(
                 this.series.value = seriesApi.getOneSeries(seriesId)
             }
 
-            val currentBook = this.book.value
-                ?: bookApi.getBookList(allOfBooks { seriesId { isEqualTo(seriesId) } })
-                    .content.first()
-                    .also { this.book.value = it }
-
-
-            this.library.value = getLibraryOrThrow(currentBook)
+            val currentBook = findCurrentBook()
+            this.book.value = currentBook
+            this.library.value = currentBook?.let { getLibraryOrThrow(it) }
         }
             .onSuccess { mutableState.value = Success(Unit) }
             .onFailure { mutableState.value = Error(it) }
     }
 
     fun reload() {
-        screenModelScope.launch {
-            notifications.runCatchingToNotifications {
-                mutableState.value = Loading
-                val currentBook = book.value
-                    ?: bookApi.getBookList(allOfBooks { seriesId { isEqualTo(seriesId) } })
-                        .content.first()
-                        .also { book.value = it }
-                book.value = bookApi.getOne(currentBook.id)
-                series.value = seriesApi.getOneSeries(seriesId)
-                library.value = getLibraryOrThrow(currentBook)
-            }
-                .onSuccess { mutableState.value = Success(Unit) }
-                .onFailure { mutableState.value = Error(it) }
-        }
+        screenModelScope.launch { reloadState() }
     }
+
+    private suspend fun reloadState() {
+        notifications.runCatchingToNotifications {
+            mutableState.value = Loading
+            val currentBook = findCurrentBook()
+            book.value = currentBook?.let { bookApi.getOne(it.id) }
+            series.value = seriesApi.getOneSeries(seriesId)
+            library.value = book.value?.let { getLibraryOrThrow(it) }
+        }
+            .onSuccess { mutableState.value = Success(Unit) }
+            .onFailure { mutableState.value = Error(it) }
+    }
+
+    private suspend fun findCurrentBook(): KomeliaBook? = book.value
+        ?: bookApi.getBookList(allOfBooks { seriesId { isEqualTo(seriesId) } }).content.firstOrNull()
 
     fun onBookDownload() {
         screenModelScope.launch {
@@ -164,19 +161,6 @@ class OneshotViewModel(
         screenModelScope.launch {
             checkNotNull(taskEmitter).deleteSeries(seriesId)
         }
-    }
-
-    private suspend fun loadBook() {
-        notifications.runCatchingToNotifications {
-            val currentBook = requireNotNull(book.value)
-            this.book.value = bookApi.getOne(currentBook.id)
-        }.onFailure { mutableState.value = Error(it) }
-    }
-
-    private suspend fun loadSeries() {
-        notifications.runCatchingToNotifications {
-            series.value = seriesApi.getOneSeries(seriesId)
-        }.onFailure { mutableState.value = Error(it) }
     }
 
     private suspend fun getLibraryOrThrow(book: KomeliaBook): KomgaLibrary =

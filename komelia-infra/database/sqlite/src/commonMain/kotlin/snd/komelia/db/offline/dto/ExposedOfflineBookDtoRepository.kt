@@ -47,6 +47,7 @@ import snd.komelia.db.offline.toSortField
 import snd.komelia.formatDecimal
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.api.repository.OfflineBookDtoRepository
+import snd.komelia.offline.local.LOCAL_LIBRARY_ID_PREFIX
 import snd.komelia.offline.user.model.OfflineUser
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.KomgaBookMetadata
@@ -125,6 +126,11 @@ class ExposedOfflineBookDtoRepository(
 
     }
 
+    private fun visibleLibrariesCondition(userId: KomgaUserId): Op<Boolean> =
+        if (userId == OfflineUser.ROOT) Op.TRUE
+        else bookTable.libraryId.like("$LOCAL_LIBRARY_ID_PREFIX%") or
+            bookTable.libraryId.inSubQuery(serverLibrariesCondition(userId))
+
     override suspend fun findAll(
         userId: KomgaUserId,
         pageRequest: KomgaPageRequest
@@ -157,7 +163,7 @@ class ExposedOfflineBookDtoRepository(
         joins: Set<RequiredJoin>
     ): Page<KomeliaBook> {
 
-        val librariesCondition = serverLibrariesCondition(userId)
+        val librariesCondition = visibleLibrariesCondition(userId)
 
         val count = bookTable
             .join(
@@ -202,13 +208,10 @@ class ExposedOfflineBookDtoRepository(
                 }
             }
             .select(bookTable.id.countDistinct())
-            .where { conditions }
+            .where { conditions and librariesCondition }
             .apply {
                 if (searchTerm != null) andWhere {
                     bookTextSearch(searchTerm)
-                }
-                if (userId != OfflineUser.ROOT) {
-                    andWhere { bookTable.libraryId.inSubQuery(librariesCondition) }
                 }
             }
             .firstOrNull()
@@ -218,13 +221,10 @@ class ExposedOfflineBookDtoRepository(
             it.toSortField(sorts)
         }
         val result = selectBase(userId, joins)
-            .where { conditions }
+            .where { conditions and librariesCondition }
             .apply {
                 if (searchTerm != null) andWhere {
                     bookTextSearch(searchTerm)
-                }
-                if (userId != OfflineUser.ROOT) {
-                    andWhere { bookTable.libraryId.inSubQuery(librariesCondition) }
                 }
             }.orderBy(*orderBy.toTypedArray())
             .apply { if (pageRequest.unpaged == false) limit(pageRequest.size ?: 20).offset(pageRequest.offset()) }

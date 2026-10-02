@@ -50,6 +50,104 @@ import kotlin.test.assertTrue
 
 class LocalLibraryManagerIntegrationTest {
     @Test
+    fun localOneshotSeriesStillFindsItsBookWithARemoteUserSelected() = runBlocking {
+        val root = createTempDirectory("komelia-local-series-user-test")
+        val source = root.resolve("source").createDirectories()
+        val repositories = createRepositories(KomeliaDatabase(root.toString()), root)
+        val platform = FakeLocalLibraryPlatform(source).apply {
+            files = listOf(file("Standalone/Book.cbz", 100, 1_000))
+        }
+        val manager = LocalLibraryManager(repositories, platform, CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val library = manager.addLibrary(PlatformFile(source.toFile()), "Synthetic local library")
+        val series = repositories.seriesRepository.findAllByLibraryId(library.id).single()
+        val expectedBook = repositories.bookRepository.findAll().single()
+        val remoteServer = OfflineMediaServer(OfflineMediaServerId("synthetic-server"), "https://example.invalid")
+        val remoteUser = OfflineUser.ROOT_USER.copy(
+            id = snd.komga.client.user.KomgaUserId("synthetic-user"),
+            serverId = remoteServer.id,
+        )
+        repositories.mediaServerRepository.save(remoteServer)
+        repositories.userRepository.save(remoteUser)
+        val search = snd.komga.client.book.KomgaBookSearch(
+            snd.komga.client.search.allOfBooks { seriesId { isEqualTo(series.id) } }.toBookCondition(),
+        )
+        assertTrue(series.oneshot)
+        assertEquals(expectedBook.id, repositories.bookDtoRepository.findAll(
+            OfflineUser.ROOT, search, KomgaPageRequest(unpaged = true),
+        ).content.single().id)
+
+        // OneshotViewModel selects the first result when opened from a series, not a book.
+        val selectedBook = repositories.bookDtoRepository.findAll(
+            remoteUser.id, search, KomgaPageRequest(unpaged = true),
+        ).content.first()
+        assertEquals(expectedBook.id, selectedBook.id)
+    }
+
+    @Test
+    fun localSeriesQueriesKeepPaginationProgressAndOtherServerIsolation() = runBlocking {
+        val root = createTempDirectory("komelia-local-series-scope-test")
+        val source = root.resolve("source").createDirectories()
+        val repositories = createRepositories(KomeliaDatabase(root.toString()), root)
+        val platform = FakeLocalLibraryPlatform(source).apply {
+            files = listOf("Chapter 1.cbz", "Chapter 2.cbz").map { file("Series/$it", 100, 1_000) }
+        }
+        val manager = LocalLibraryManager(repositories, platform, CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val library = manager.addLibrary(PlatformFile(source.toFile()), "Local")
+        val series = repositories.seriesRepository.findAllByLibraryId(library.id).single()
+        val books = repositories.bookRepository.findAll().sortedBy { it.name }
+        val selectedUser = snd.komga.client.user.KomgaUserId("selected-user")
+        for (serverName in listOf("selected", "other")) {
+            val serverId = OfflineMediaServerId("$serverName-server")
+            val remoteLibraryId = KomgaLibraryId("$serverName-library")
+            val remoteSeriesId = KomgaSeriesId("$serverName-series")
+            val remoteBookId = KomgaBookId("$serverName-book")
+            repositories.mediaServerRepository.save(OfflineMediaServer(serverId, "https://$serverName.example.invalid"))
+            repositories.userRepository.save(OfflineUser.ROOT_USER.copy(
+                id = snd.komga.client.user.KomgaUserId("$serverName-user"), serverId = serverId,
+            ))
+            repositories.libraryRepository.save(library.copy(id = remoteLibraryId, mediaServerId = serverId))
+            repositories.seriesRepository.save(series.copy(id = remoteSeriesId, libraryId = remoteLibraryId))
+            repositories.seriesMetadataRepository.save(
+                checkNotNull(repositories.seriesMetadataRepository.find(series.id)).copy(seriesId = remoteSeriesId),
+            )
+            repositories.bookRepository.save(books.first().copy(
+                id = remoteBookId, seriesId = remoteSeriesId, libraryId = remoteLibraryId,
+            ))
+            repositories.bookMetadataRepository.save(repositories.bookMetadataRepository.get(books.first().id).copy(bookId = remoteBookId))
+            repositories.mediaRepository.save(repositories.mediaRepository.get(books.first().id).copy(bookId = remoteBookId))
+        }
+        repositories.readProgressRepository.save(OfflineReadProgress(books.first().id, selectedUser, page = 1, completed = true))
+        repositories.readProgressRepository.save(OfflineReadProgress(books.first().id, OfflineUser.ROOT, page = 0, completed = false))
+        val search = snd.komga.client.book.KomgaBookSearch(
+            snd.komga.client.search.allOfBooks { seriesId { isEqualTo(series.id) } }.toBookCondition(),
+        )
+        for (pageIndex in books.indices) {
+            val page = repositories.bookDtoRepository.findAll(selectedUser, search,
+                KomgaPageRequest(pageIndex = pageIndex, size = 1, unpaged = false, sort = KomgaBooksSort.byNumberAsc()))
+            assertEquals(2, page.totalElements)
+            assertEquals(2, page.totalPages)
+            assertEquals(books[pageIndex].id, page.content.single().id)
+            if (pageIndex == 0) assertEquals(true, page.content.single().readProgress?.completed)
+        }
+        val readBooks = repositories.bookDtoRepository.findAll(selectedUser,
+            snd.komga.client.book.KomgaBookSearch(snd.komga.client.search.allOfBooks {
+                seriesId { isEqualTo(series.id) }
+                readStatus { isEqualTo(snd.komga.client.book.KomgaReadStatus.READ) }
+            }.toBookCondition()), KomgaPageRequest(unpaged = true))
+        assertEquals(listOf(books.first().id), readBooks.content.map { it.id })
+        val visibleBooks = repositories.bookDtoRepository.findAll(selectedUser, KomgaPageRequest(unpaged = true))
+        assertEquals(books.map { it.id }.toSet() + KomgaBookId("selected-book"), visibleBooks.content.map { it.id }.toSet())
+        assertEquals(3, visibleBooks.totalElements)
+        val otherSeries = repositories.bookDtoRepository.findAll(selectedUser,
+            snd.komga.client.book.KomgaBookSearch(snd.komga.client.search.allOfBooks {
+                seriesId { isEqualTo(KomgaSeriesId("other-series")) }
+            }.toBookCondition()), KomgaPageRequest(unpaged = true))
+        assertTrue(otherSeries.content.isEmpty())
+        assertEquals(0, otherSeries.totalElements)
+        assertEquals(4, repositories.bookDtoRepository.findAll(OfflineUser.ROOT, KomgaPageRequest(unpaged = true)).totalElements)
+    }
+
+    @Test
     fun cancelledReinspectionPreservesTheExistingSeriesAndBooks() = runBlocking {
         val root = createTempDirectory("komelia-cancelled-scan-test")
         val source = root.resolve("source").createDirectories()

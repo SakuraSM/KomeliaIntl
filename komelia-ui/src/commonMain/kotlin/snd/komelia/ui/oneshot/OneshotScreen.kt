@@ -10,6 +10,9 @@ import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_no_books
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.BookSiblingsContext
 import snd.komelia.ui.LoadState
@@ -80,6 +83,12 @@ class OneshotScreen(
                 state is LoadState.Error -> ErrorContent(
                     exception = state.exception,
                     onReload = vm::reload
+                )
+
+                state is LoadState.Success && book == null -> ErrorContent(
+                    message = stringResource(Res.string.series_no_books),
+                    onReload = vm::reload,
+                    onExit = { onBackPress(navigator, series?.libraryId) },
                 )
 
                 book == null || series == null || library == null -> LoadingMaxSizeIndicator()

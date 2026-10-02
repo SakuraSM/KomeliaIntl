@@ -1,4 +1,16 @@
 <resources>
+    <string name="color_default_title">Default color correction</string>
+    <string name="color_default_description">Apply a saved preset to books that use the global default. Existing custom book settings take priority.</string>
+    <string name="color_default_off">Off</string>
+    <string name="color_default_loading">Loading color correction settings…</string>
+    <string name="color_default_saving">Saving…</string>
+    <string name="color_default_empty">No saved presets. Open a book, choose Color correction, switch to Custom for this book, and save a curve or levels preset first.</string>
+    <string name="color_default_snapshot">The selected preset is copied. Editing or deleting the preset will not change this default; select it again to update.</string>
+    <string name="color_book_mode">Color correction for this book</string>
+    <string name="color_book_inherit">Use global default</string>
+    <string name="color_book_custom">Custom for this book</string>
+    <string name="color_book_disabled">Off for this book</string>
+    <string name="color_book_mode_description">Custom and Off override the global default. Changes are saved when you leave this screen.</string>
     <string name="reader_panel_prerender">Upcoming views to prerender</string>
     <string name="reader_panel_prerender_off">0 · Off</string>
     <string name="reader_panel_prerender_description">Panels mode only. Default: 1; maximum: 2, including the whole-page view between pages. Extra prerendered pixels share a 32 MiB limit, so large views may be skipped. Original images and the current view are not included.</string>

@@ -17,7 +17,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import snd.komelia.color.ChannelsLookupTable
-import snd.komelia.color.ColorCorrectionType
+import snd.komelia.color.DefaultColorCorrection
+import snd.komelia.color.effectiveCorrection
 import snd.komelia.color.ColorCorrectionType.COLOR_CURVES
 import snd.komelia.color.ColorCorrectionType.COLOR_LEVELS
 import snd.komelia.color.ColorCurvePoints
@@ -35,36 +36,25 @@ import snd.komga.client.book.KomgaBookId
 @OptIn(ExperimentalUnsignedTypes::class)
 class ColorCorrectionStep(
     private val bookColorCorrectionRepository: BookColorCorrectionRepository,
+    private val defaultCorrection: Flow<DefaultColorCorrection?> = flowOf(null),
 ) : ProcessingStep {
     private val bookId = MutableStateFlow<KomgaBookId?>(null)
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val channelsLut = bookId.flatMapLatest { bookId ->
-        bookId?.let { id ->
-            bookColorCorrectionRepository.getCurrentType(id).map { type -> type?.let { bookId to it } }
-        } ?: flowOf(null)
-    }.flatMapLatest { bookAndType ->
-        val (bookId, type) = bookAndType ?: return@flatMapLatest flowOf(null)
-        mapChannelsLutFlow(bookId, type)
+        bookId?.let { id -> bookColorCorrectionRepository.effectiveCorrection(id, defaultCorrection) }
+            ?: flowOf(null)
+    }.map { config ->
+        when (config?.type) {
+            COLOR_CURVES -> mapCurvePoints(config.curves)
+            COLOR_LEVELS -> mapLevels(config.levels)
+            null -> null
+        }
     }.stateIn(coroutineScope, SharingStarted.Eagerly, null)
 
     fun setBookFlow(idFlow: StateFlow<KomgaBookId?>) {
         idFlow.onEach { bookId.value = it }.launchIn(coroutineScope)
-    }
-
-    private suspend fun mapChannelsLutFlow(bookId: KomgaBookId, type: ColorCorrectionType): Flow<ChannelsLookupTable?> {
-        return when (type) {
-            COLOR_CURVES -> bookColorCorrectionRepository
-                .getCurve(bookId)
-                .map { points ->
-                    points?.let { mapCurvePoints(it.channels) }
-                }
-
-            COLOR_LEVELS -> bookColorCorrectionRepository
-                .getLevels(bookId)
-                .map { levels -> levels?.let { mapLevels(it.channels) } }
-        }
     }
 
     private suspend fun mapCurvePoints(points: ColorCurvePoints): ChannelsLookupTable {
@@ -116,7 +106,8 @@ class ColorCorrectionStep(
             else -> colorMapped
         }
 
-        colorMapped?.close()
+        // RGB mapping is skipped for grayscale; in that case the caller still owns colorMapped.
+        if (rgbaMapped !== colorMapped) colorMapped?.close()
         return rgbaMapped
     }
 

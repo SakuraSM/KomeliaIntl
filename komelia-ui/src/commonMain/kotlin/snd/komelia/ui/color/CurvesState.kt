@@ -159,14 +159,17 @@ class CurvesState(
 
     suspend fun initialize() {
         bookCurvesRepository.getCurve(bookId).first()?.let { points ->
-            val channels = points.channels
-            colorCurve.setPoints(channels.colorCurvePoints)
-            redCurve.setPoints(channels.redCurvePoints)
-            greenCurve.setPoints(channels.greenCurvePoints)
-            blueCurve.setPoints(channels.blueCurvePoints)
+            setChannels(points.channels)
         }
 
         presetsState.initialize()
+    }
+
+    fun setChannels(channels: ColorCurvePoints) {
+        colorCurve.setPoints(channels.colorCurvePoints)
+        redCurve.setPoints(channels.redCurvePoints)
+        greenCurve.setPoints(channels.greenCurvePoints)
+        blueCurve.setPoints(channels.blueCurvePoints)
     }
 
     fun onKeyEvent(event: KeyEvent) {
@@ -341,5 +344,4 @@ data class SelectedPoint(
     val isMoving: Boolean,
     val isRemoved: Boolean,
 )
-
 

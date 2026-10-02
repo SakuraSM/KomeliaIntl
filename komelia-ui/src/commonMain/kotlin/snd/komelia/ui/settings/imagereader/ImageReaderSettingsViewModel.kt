@@ -33,7 +33,9 @@ class ImageReaderSettingsViewModel(
     private val coilMemoryCache: MemoryCache?,
     private val coilDiskCache: DiskCache?,
     private val readerDiskCache: DiskCache?,
+    colorCorrectionDependencies: DefaultColorCorrectionDependencies,
 ) : ScreenModel {
+    val defaultColorCorrection = DefaultColorCorrectionState(colorCorrectionDependencies, screenModelScope)
 
     val onnxRuntimeSettingsState = OnnxRuntimeSettingsState(
         onnxRuntimeInstaller = onnxRuntimeInstaller,
@@ -57,6 +59,7 @@ class ImageReaderSettingsViewModel(
 
 
     suspend fun initialize() {
+        defaultColorCorrection.initialize()
 
         upsamplingMode.value = settingsRepository.getUpsamplingMode().first()
         downsamplingKernel.value = settingsRepository.getDownsamplingKernel().first()

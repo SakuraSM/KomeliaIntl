@@ -2,6 +2,7 @@ package snd.komelia.db.repository
 
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.Flow
+import snd.komelia.color.DefaultColorCorrection
 import snd.komelia.db.ImageReaderSettings
 import snd.komelia.db.SettingsStateWrapper
 import snd.komelia.image.ReduceKernel
@@ -18,6 +19,11 @@ import snd.komelia.settings.model.ReaderType
 class ReaderSettingsRepositoryWrapper(
     private val wrapper: SettingsStateWrapper<ImageReaderSettings>,
 ) : ImageReaderSettingsRepository {
+    override fun getDefaultColorCorrection(): Flow<DefaultColorCorrection?> = wrapper.mapState { it.defaultColorCorrection }
+
+    override suspend fun putDefaultColorCorrection(correction: DefaultColorCorrection?) {
+        wrapper.transform { it.copy(defaultColorCorrection = correction) }
+    }
 
     override fun getReaderType(): Flow<ReaderType> {
         return wrapper.mapState { it.readerType }

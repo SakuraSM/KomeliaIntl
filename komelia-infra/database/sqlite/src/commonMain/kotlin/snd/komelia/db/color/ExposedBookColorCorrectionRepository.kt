@@ -2,6 +2,11 @@ package snd.komelia.db.color
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
+import snd.komelia.color.BookColorCorrectionMode
+import snd.komelia.color.ColorCorrectionConfig
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import org.jetbrains.exposed.v1.core.eq
@@ -25,9 +30,33 @@ import snd.komga.client.book.KomgaBookId
 class ExposedBookColorCorrectionRepository(
     database: Database
 ) : ExposedRepository(database), BookColorCorrectionRepository {
+    private val modeRevision = MutableStateFlow(0L)
     private val typeChangeFlow = MutableSharedFlow<Pair<KomgaBookId, ColorCorrectionType?>>()
     private val curveChangeFlow = MutableSharedFlow<Pair<KomgaBookId, ColorCurveBookPoints?>>()
     private val levelsChangeFlow = MutableSharedFlow<Pair<KomgaBookId, BookColorLevels?>>()
+
+    override fun getMode(bookId: KomgaBookId): Flow<BookColorCorrectionMode> = modeRevision.map {
+        transaction {
+            BookColorCorrectionTable.selectAll().where { BookColorCorrectionTable.bookId.eq(bookId.value) }
+                .firstOrNull()?.let { row -> BookColorCorrectionMode.valueOf(row[BookColorCorrectionTable.mode]) }
+                ?: BookColorCorrectionMode.INHERIT
+        }
+    }.distinctUntilChanged()
+
+    override suspend fun setMode(bookId: KomgaBookId, mode: BookColorCorrectionMode) {
+        transaction {
+            val record = BookColorCorrectionTable.selectAll()
+                .where { BookColorCorrectionTable.bookId.eq(bookId.value) }.firstOrNull()
+            if (record == null && mode == BookColorCorrectionMode.INHERIT) return@transaction
+            val currentType = record?.get(BookColorCorrectionTable.type) ?: ColorCorrectionType.COLOR_CURVES.name
+            BookColorCorrectionTable.upsert {
+                it[this.bookId] = bookId.value
+                it[this.type] = currentType
+                it[this.mode] = mode.name
+            }
+        }
+        modeRevision.update { it + 1 }
+    }
 
     override fun getCurrentType(bookId: KomgaBookId): Flow<ColorCorrectionType?> {
         return flow {
@@ -50,9 +79,11 @@ class ExposedBookColorCorrectionRepository(
             BookColorCorrectionTable.upsert {
                 it[this.bookId] = bookId.value
                 it[this.type] = type.name
+                it[this.mode] = BookColorCorrectionMode.CUSTOM.name
             }
         }
         typeChangeFlow.emit(bookId to type)
+        modeRevision.update { it + 1 }
     }
 
     override suspend fun deleteSettings(bookId: KomgaBookId) {
@@ -64,6 +95,7 @@ class ExposedBookColorCorrectionRepository(
         curveChangeFlow.emit(bookId to null)
         levelsChangeFlow.emit(bookId to null)
         typeChangeFlow.emit(bookId to null)
+        modeRevision.update { it + 1 }
     }
 
     override fun getCurve(bookId: KomgaBookId): Flow<ColorCurveBookPoints?> {
@@ -94,16 +126,18 @@ class ExposedBookColorCorrectionRepository(
     }
 
     override suspend fun saveCurve(points: ColorCurveBookPoints) {
-        transaction {
-            BookColorCurvesTable.upsert {
-                it[this.bookId] = points.bookId.value
-                it[colorCurvePoints] = points.channels.colorCurvePoints
-                it[redCurvePoints] = points.channels.redCurvePoints
-                it[greenCurvePoints] = points.channels.greenCurvePoints
-                it[blueCurvePoints] = points.channels.blueCurvePoints
-            }
-        }
+        transaction { storeCurve(points) }
         curveChangeFlow.emit(points.bookId to points)
+    }
+
+    private fun storeCurve(points: ColorCurveBookPoints) {
+        BookColorCurvesTable.upsert {
+            it[this.bookId] = points.bookId.value
+            it[colorCurvePoints] = points.channels.colorCurvePoints
+            it[redCurvePoints] = points.channels.redCurvePoints
+            it[greenCurvePoints] = points.channels.greenCurvePoints
+            it[blueCurvePoints] = points.channels.blueCurvePoints
+        }
     }
 
     override suspend fun deleteCurve(bookId: KomgaBookId) {
@@ -165,35 +199,55 @@ class ExposedBookColorCorrectionRepository(
     }
 
     override suspend fun saveLevels(levels: BookColorLevels) {
-        transaction {
-            BookColorLevelsTable.upsert {
-                it[this.bookId] = levels.bookId.value
-                it[colorLowInput] = levels.channels.color.lowInput
-                it[colorHighInput] = levels.channels.color.highInput
-                it[colorLowOutput] = levels.channels.color.lowOutput
-                it[colorHighOutput] = levels.channels.color.highOutput
-                it[colorGamma] = levels.channels.color.gamma
-
-                it[redLowInput] = levels.channels.red.lowInput
-                it[redHighInput] = levels.channels.red.highInput
-                it[redLowOutput] = levels.channels.red.lowOutput
-                it[redHighOutput] = levels.channels.red.highOutput
-                it[redGamma] = levels.channels.red.gamma
-
-                it[greenLowInput] = levels.channels.green.lowInput
-                it[greenHighInput] = levels.channels.green.highInput
-                it[greenLowOutput] = levels.channels.green.lowOutput
-                it[greenHighOutput] = levels.channels.green.highOutput
-                it[greenGamma] = levels.channels.green.gamma
-
-                it[blueLowInput] = levels.channels.blue.lowInput
-                it[blueHighInput] = levels.channels.blue.highInput
-                it[blueLowOutput] = levels.channels.blue.lowOutput
-                it[blueHighOutput] = levels.channels.blue.highOutput
-                it[blueGamma] = levels.channels.blue.gamma
-            }
-        }
+        transaction { storeLevels(levels) }
         levelsChangeFlow.emit(levels.bookId to levels)
+    }
+
+    private fun storeLevels(levels: BookColorLevels) {
+        BookColorLevelsTable.upsert {
+            it[this.bookId] = levels.bookId.value
+            it[colorLowInput] = levels.channels.color.lowInput
+            it[colorHighInput] = levels.channels.color.highInput
+            it[colorLowOutput] = levels.channels.color.lowOutput
+            it[colorHighOutput] = levels.channels.color.highOutput
+            it[colorGamma] = levels.channels.color.gamma
+
+            it[redLowInput] = levels.channels.red.lowInput
+            it[redHighInput] = levels.channels.red.highInput
+            it[redLowOutput] = levels.channels.red.lowOutput
+            it[redHighOutput] = levels.channels.red.highOutput
+            it[redGamma] = levels.channels.red.gamma
+
+            it[greenLowInput] = levels.channels.green.lowInput
+            it[greenHighInput] = levels.channels.green.highInput
+            it[greenLowOutput] = levels.channels.green.lowOutput
+            it[greenHighOutput] = levels.channels.green.highOutput
+            it[greenGamma] = levels.channels.green.gamma
+
+            it[blueLowInput] = levels.channels.blue.lowInput
+            it[blueHighInput] = levels.channels.blue.highInput
+            it[blueLowOutput] = levels.channels.blue.lowOutput
+            it[blueHighOutput] = levels.channels.blue.highOutput
+            it[blueGamma] = levels.channels.blue.gamma
+        }
+    }
+
+    override suspend fun saveConfiguration(bookId: KomgaBookId, configuration: ColorCorrectionConfig) {
+        val curves = ColorCurveBookPoints(bookId, configuration.curves)
+        val levels = BookColorLevels(bookId, configuration.levels)
+        transaction {
+            BookColorCorrectionTable.upsert {
+                it[this.bookId] = bookId.value
+                it[this.type] = configuration.type.name
+                it[this.mode] = BookColorCorrectionMode.CUSTOM.name
+            }
+            storeCurve(curves)
+            storeLevels(levels)
+        }
+        typeChangeFlow.emit(bookId to configuration.type)
+        curveChangeFlow.emit(bookId to curves)
+        levelsChangeFlow.emit(bookId to levels)
+        modeRevision.update { it + 1 }
     }
 
     override suspend fun deleteLevels(bookId: KomgaBookId) {

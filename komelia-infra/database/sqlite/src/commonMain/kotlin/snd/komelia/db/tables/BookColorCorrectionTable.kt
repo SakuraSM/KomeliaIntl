@@ -5,5 +5,6 @@ import org.jetbrains.exposed.v1.core.Table
 object BookColorCorrectionTable : Table("BookColorCorrection") {
     val bookId = text("book_id")
     val type = text("type")
+    val mode = text("mode").default("CUSTOM")
     override val primaryKey = PrimaryKey(bookId)
 }

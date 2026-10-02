@@ -17,6 +17,7 @@ import snd.komelia.AppNotification
 import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.color.repository.BookColorCorrectionRepository
+import snd.komelia.color.BookColorCorrectionMode
 import snd.komelia.image.ReaderImage.PageId
 import snd.komelia.image.ReduceKernel
 import snd.komelia.image.UpsamplingMode
@@ -299,7 +300,7 @@ class ReaderState(
 
     fun onColorCorrectionDisable() {
         stateScope.launch {
-            booksState.value?.currentBook?.let { colorCorrectionRepository.deleteSettings(it.id) }
+            booksState.value?.currentBook?.let { colorCorrectionRepository.setMode(it.id, BookColorCorrectionMode.DISABLED) }
         }
     }
 

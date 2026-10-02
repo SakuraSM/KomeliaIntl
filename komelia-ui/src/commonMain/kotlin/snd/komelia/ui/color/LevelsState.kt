@@ -200,14 +200,17 @@ class LevelsState(
 
     suspend fun initialize() {
         bookLevelsRepository.getLevels(bookId).first()?.let {
-            val channels = it.channels
-            colorLevels.setConfig(channels.color)
-            redLevels.setConfig(channels.red)
-            greenLevels.setConfig(channels.green)
-            blueLevels.setConfig(channels.blue)
+            setChannels(it.channels)
         }
 
         presetsState.initialize()
+    }
+
+    fun setChannels(channels: ColorLevelChannels) {
+        colorLevels.setConfig(channels.color)
+        redLevels.setConfig(channels.red)
+        greenLevels.setConfig(channels.green)
+        blueLevels.setConfig(channels.blue)
     }
 
     fun onPointerEvent(event: PointerEvent) {

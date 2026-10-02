@@ -141,6 +141,12 @@ kotlin {
             api(libs.ktor.client.js)
             implementation(projects.komeliaInfra.imageDecoder.wasmImageWorker)
         }
+        wasmJsTest.dependencies {
+            implementation(projects.komeliaInfra.database.wasm)
+            implementation(projects.komeliaInfra.database.shared)
+            implementation(libs.indexeddb)
+            implementation(libs.kotlinx.browser)
+        }
     }
 
     targets.configureEach {

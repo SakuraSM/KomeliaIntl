@@ -2,6 +2,7 @@ package snd.komelia.settings
 
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.Flow
+import snd.komelia.color.DefaultColorCorrection
 import snd.komelia.image.ReduceKernel
 import snd.komelia.image.UpsamplingMode
 import snd.komelia.image.UpscaleMode
@@ -13,6 +14,9 @@ import snd.komelia.settings.model.ReaderFlashColor
 import snd.komelia.settings.model.ReaderType
 
 interface ImageReaderSettingsRepository {
+    fun getDefaultColorCorrection(): Flow<DefaultColorCorrection?>
+    suspend fun putDefaultColorCorrection(correction: DefaultColorCorrection?)
+
     fun getReaderType(): Flow<ReaderType>
     suspend fun putReaderType(type: ReaderType)
 

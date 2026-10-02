@@ -11,7 +11,7 @@ function record() { return { sourceFingerprint: 'current', checks: [{ id: 'unit'
   cases: [{ id: 'LAN-01', status: 'passed', operator: 'tester', environment: 'API37', artifact: 'sha256:' + 'a'.repeat(64),
     completedAt: '2026-09-14T00:00:00Z', evidence: [{}] }] }; }
 test('catalog IDs and profile references validate', () => {
-  assert.equal(catalog().cases.length, 21);
+  assert.equal(catalog().cases.length, 22);
   assert.ok(plan('login').cases.some(c => c.id === 'LAN-01'));
 });
 test('unknown profiles fail closed', () => assert.throws(() => plan('typo')));

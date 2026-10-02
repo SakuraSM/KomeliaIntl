@@ -196,7 +196,10 @@ abstract class AppModule {
         )
 
 
-        val colorCorrectionStep = ColorCorrectionStep(appRepositories.bookColorCorrectionRepository)
+        val colorCorrectionStep = ColorCorrectionStep(
+            appRepositories.bookColorCorrectionRepository,
+            appRepositories.imageReaderSettingsRepository.getDefaultColorCorrection(),
+        )
         val imagePipeline = createImagePipeline(
             cropBorders = appRepositories.imageReaderSettingsRepository.getCropBorders().stateIn(initScope),
             colorCorrectionStep = colorCorrectionStep

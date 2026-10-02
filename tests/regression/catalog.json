@@ -640,6 +640,18 @@
       ]
     },
     {
+      "id": "COLOR-01",
+      "title": "全局默认颜色校正与单书覆盖",
+      "area": "reader",
+      "issues": [71],
+      "mode": "manual",
+      "preconditions": ["最终 debug APK；两本合成漫画；已保存的曲线或色阶预设"],
+      "steps": ["默认关闭；选择全局预设；检查无单书设置的书籍与已有自定义书籍", "本书关闭、恢复继承、修改全局设置；冷启动后重进；切换中英文"],
+      "expected": ["画面与有效设置一致；单书覆盖和关闭优先；预设副本独立持久化；进度不变"],
+      "profiles": ["reader", "premerge", "release"],
+      "evidence": ["最终 APK SHA256", "设备/API/语言/屏幕规格", "设置与实际图像截图", "执行人和时间"]
+    },
+    {
       "id": "RC-01",
       "title": "签名包覆盖升级",
       "area": "release",

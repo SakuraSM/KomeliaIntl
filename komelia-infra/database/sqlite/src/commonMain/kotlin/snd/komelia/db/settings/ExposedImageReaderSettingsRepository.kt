@@ -30,6 +30,7 @@ class ExposedImageReaderSettingsRepository(database: Database) : ExposedReposito
                 ?.let {
 
                     ImageReaderSettings(
+                        defaultColorCorrection = it[ImageReaderSettingsTable.defaultColorCorrection],
                         readerType = ReaderType.valueOf(it[ImageReaderSettingsTable.readerType]),
                         stretchToFit = it[ImageReaderSettingsTable.stretchToFit],
                         pagedScaleType = LayoutScaleType.valueOf(it[ImageReaderSettingsTable.pagedScaleType]),
@@ -63,6 +64,7 @@ class ExposedImageReaderSettingsRepository(database: Database) : ExposedReposito
         transaction {
             ImageReaderSettingsTable.upsert {
                 it[bookId] = defaultBookId
+                it[defaultColorCorrection] = settings.defaultColorCorrection
                 it[readerType] = settings.readerType.name
                 it[stretchToFit] = settings.stretchToFit
                 it[pagedScaleType] = settings.pagedScaleType.name

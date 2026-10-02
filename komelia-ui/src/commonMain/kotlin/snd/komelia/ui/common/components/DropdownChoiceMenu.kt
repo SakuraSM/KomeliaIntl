@@ -94,19 +94,20 @@ fun <T> DropdownChoiceMenu(
     modifier: Modifier = Modifier,
     label: @Composable (() -> Unit)? = null,
     inputFieldColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-    contentPadding: PaddingValues = PaddingValues(10.dp)
+    contentPadding: PaddingValues = PaddingValues(10.dp),
+    enabled: Boolean = true,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val selectedLabel = selectedOption?.let { localizedEnumLabel(it.value, it.label) }.orEmpty()
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = isExpanded,
-        onExpandedChange = { isExpanded = it },
+        onExpandedChange = { if (enabled) isExpanded = it },
     ) {
         InputField(
             value = selectedLabel,
             modifier = Modifier
-                .menuAnchor(PrimaryNotEditable)
+                .menuAnchor(PrimaryNotEditable, enabled = enabled)
                 .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
                 .then(inputFieldModifier),
             label = label,

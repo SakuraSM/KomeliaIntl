@@ -2,6 +2,7 @@ package snd.komelia.db
 
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.serialization.Serializable
+import snd.komelia.color.DefaultColorCorrection
 import snd.komelia.image.ReduceKernel
 import snd.komelia.image.UpsamplingMode
 import snd.komelia.image.UpscaleMode
@@ -15,6 +16,7 @@ import snd.komelia.settings.model.ReaderType.PAGED
 
 @Serializable
 data class ImageReaderSettings(
+    val defaultColorCorrection: DefaultColorCorrection? = null,
     val readerType: ReaderType = PAGED,
     val stretchToFit: Boolean = true,
     val pagedScaleType: LayoutScaleType = LayoutScaleType.SCREEN,

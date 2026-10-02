@@ -80,6 +80,12 @@ In the pull request or handoff, list each executed command and manual scenario w
 
 ## Image upsampling and local-library cleanup
 
+For global color correction, run core `EffectiveColorCorrectionTest`, SQLite `DefaultColorCorrectionIntegrationTest`, UI JVM `DefaultColorCorrectionContentTest`, `DefaultColorCorrectionStateTest`, `GlobalColorProcessingTest`, and the UI Wasm `ColorCorrectionBrowserStorageTest`. These cover default-off, legacy overrides, inheritance, explicit off, identity overrides, transaction rollback, save cancellation/failure, live lookup-table changes, grayscale ownership, IndexedDB reopen and old browser settings JSON.
+
+Run `COLOR-01` on the final debug APK. Create a preset through the book editor, select it as the global default, compare inherited and custom books, disable correction for one book, return to inheritance, restart and verify settings and reading position. Capture the actual rendered difference, not just the selected label. Repeat the new controls in English and Simplified Chinese. An unavailable device or system image stays pending.
+
+`ColorCorrectionScreenIdentityTest` covers isolation between books and repeated entries, Activity-state serialization and legacy identity restoration. Native acceptance must open A's editor, close it, then open B's editor in the same app session; cold-start-only testing misses retained-model bugs.
+
 Run `:komelia-domain:core:jvmTest` for stable tile prefetch bounds while panning. Run `:komelia-infra:image-decoder:shared:allTests` for kernel weights, alpha handling, tile halos, and pixel formats. Run `:komelia-infra:database:sqlite:allTests` for persisted sampling values and local index cleanup, including rollback and actual external file/folder deletion. On Android, compare Lanczos3, Mitchell, and bilinear using synthetic small images; exercise pinch zoom, panning, mode changes, and restart. Record physical-device and panel-detection checks separately from image-renderer checks.
 
 For reader gesture changes, run the JVM Compose `ScalableContainerGestureTest` and repeat maximum zoom followed by both short and wide pinch-in gestures on Android, including while enlarged tiles are rendering. Touch thresholds must use the same coordinate units as pointer positions.

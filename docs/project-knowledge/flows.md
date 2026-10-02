@@ -59,6 +59,14 @@ Local chapter labels and `metadata.numberSort` preserve decimal values such as `
 
 ## Reader navigation
 
+Image Reader settings can store a global color-correction snapshot copied from a saved curves or levels preset. The initial default is disabled. Selecting a preset copies its values; later preset edits or deletion do not change the snapshot. This applies through the existing image processing pipeline, not EPUB text styling.
+
+Books have three policies: inherit the global default, use custom book values, or disable correction for that book. SQLite V17 marks existing book corrections as custom and adds a nullable global setting. Missing IndexedDB policy fields also mean custom for existing records; missing records inherit. Switching policy preserves custom curve and level values. Saving custom values and their activation is one transaction. Returning to inherit restores live global updates. Identity-valued custom settings remain an override rather than silently re-enabling the global default.
+
+Global changes invalidate the active correction lookup table and notify the image pipeline to reload affected frames. A grayscale image skips RGB mapping and retains ownership of the value-mapped image returned to the caller. Reading progress, Komga API contracts and original image files are unchanged.
+
+Each color-editor entry owns a new serializable screen identity. Closing saves before popping and disposes the editor model explicitly, so another book or a reopened editor cannot reuse stale policy or preview state. Disposal cancels preview work before releasing its original native image.
+
 Image readers reload the current book through the selected content API at entry. A book passed by navigation is a display snapshot and cannot supply the authoritative saved progress. TTU continuous mode keeps scrolling on the document used by its bookmark calculator and window scroll listeners; horizontal clipping must not introduce a second scroll container on `#app`.
 
 Book details also refresh through the selected content API on every entry. A retained detail model cannot depend on receiving a progress event while the reader is open; its event listeners remain single-instance across entries.

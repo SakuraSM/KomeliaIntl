@@ -60,6 +60,7 @@ import snd.komelia.ui.settings.appearance.AppSettingsViewModel
 import snd.komelia.ui.settings.authactivity.AuthenticationActivityViewModel
 import snd.komelia.ui.settings.epub.EpubReaderSettingsViewModel
 import snd.komelia.ui.settings.imagereader.ImageReaderSettingsViewModel
+import snd.komelia.ui.settings.imagereader.DefaultColorCorrectionDependencies
 import snd.komelia.ui.settings.komf.KomfSharedState
 import snd.komelia.ui.settings.komf.general.KomfSettingsViewModel
 import snd.komelia.ui.settings.komf.jobs.KomfJobsViewModel
@@ -697,6 +698,7 @@ class ViewModelFactory(
             appNotifications = dependencies.appNotifications,
             bookId = bookId,
             pageNumber = pageNumber,
+            settingsRepository = appRepositories.imageReaderSettingsRepository,
         )
     }
 
@@ -737,6 +739,12 @@ class ViewModelFactory(
             coilMemoryCache = dependencies.coilImageLoader.memoryCache,
             coilDiskCache = dependencies.coilImageLoader.diskCache,
             readerDiskCache = dependencies.bookImageLoader.diskCache,
+            colorCorrectionDependencies = DefaultColorCorrectionDependencies(
+                appRepositories.imageReaderSettingsRepository,
+                appRepositories.colorCurvesPresetsRepository,
+                appRepositories.colorLevelsPresetRepository,
+                dependencies.appNotifications,
+            ),
         )
     }
 

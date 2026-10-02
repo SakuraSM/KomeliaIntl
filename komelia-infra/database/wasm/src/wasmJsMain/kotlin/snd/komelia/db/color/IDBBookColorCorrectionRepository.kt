@@ -3,6 +3,11 @@ package snd.komelia.db.color
 import com.juul.indexeddb.Database
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
+import snd.komelia.color.BookColorCorrectionMode
+import snd.komelia.color.ColorCorrectionConfig
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import snd.komelia.color.BookColorLevels
@@ -27,9 +32,29 @@ import snd.komga.client.book.KomgaBookId
 class IDBBookColorCorrectionRepository(
     private val database: Database
 ) : BookColorCorrectionRepository {
+    private val modeRevision = MutableStateFlow(0L)
     private val typeChangeFlow = MutableSharedFlow<Pair<KomgaBookId, ColorCorrectionType?>>()
     private val curveChangeFlow = MutableSharedFlow<Pair<KomgaBookId, ColorCurveBookPoints?>>()
     private val levelsChangeFlow = MutableSharedFlow<Pair<KomgaBookId, BookColorLevels?>>()
+
+    override fun getMode(bookId: KomgaBookId): Flow<BookColorCorrectionMode> = modeRevision.map {
+        database.transaction(colorCorrectionStore) {
+            val record = objectStore(colorCorrectionStore).get(Key(bookId.value)) as? JsBookColorCorrection
+            if (record == null) BookColorCorrectionMode.INHERIT
+            else record.mode?.let(BookColorCorrectionMode::valueOf) ?: BookColorCorrectionMode.CUSTOM
+        }
+    }.distinctUntilChanged()
+
+    override suspend fun setMode(bookId: KomgaBookId, mode: BookColorCorrectionMode) {
+        database.writeTransaction(colorCorrectionStore) {
+            val store = objectStore(colorCorrectionStore)
+            val record = store.get(Key(bookId.value)) as? JsBookColorCorrection
+            if (record == null && mode == BookColorCorrectionMode.INHERIT) return@writeTransaction
+            val type = record?.type?.let(ColorCorrectionType::valueOf) ?: ColorCorrectionType.COLOR_CURVES
+            store.put(jsBookColorCorrection(bookId, type, mode), Key(bookId.value))
+        }
+        modeRevision.update { it + 1 }
+    }
 
     override fun getCurrentType(bookId: KomgaBookId): Flow<ColorCorrectionType?> {
         return flow {
@@ -52,6 +77,7 @@ class IDBBookColorCorrectionRepository(
             store.put(jsBookColorCorrection(bookId, type), Key(bookId.value))
         }
         typeChangeFlow.emit(bookId to type)
+        modeRevision.update { it + 1 }
     }
 
     override suspend fun deleteSettings(bookId: KomgaBookId) {
@@ -71,6 +97,7 @@ class IDBBookColorCorrectionRepository(
         curveChangeFlow.emit(bookId to null)
         levelsChangeFlow.emit(bookId to null)
         typeChangeFlow.emit(bookId to null)
+        modeRevision.update { it + 1 }
     }
 
     override fun getCurve(bookId: KomgaBookId): Flow<ColorCurveBookPoints?> {
@@ -127,5 +154,19 @@ class IDBBookColorCorrectionRepository(
             objectStore(colorLevelsStore).delete(Key(bookId.value))
         }
         levelsChangeFlow.emit(bookId to null)
+    }
+
+    override suspend fun saveConfiguration(bookId: KomgaBookId, configuration: ColorCorrectionConfig) {
+        val curves = ColorCurveBookPoints(bookId, configuration.curves)
+        val levels = BookColorLevels(bookId, configuration.levels)
+        database.writeTransaction(colorCorrectionStore, colorCurvesStore, colorLevelsStore) {
+            objectStore(colorCorrectionStore).put(jsBookColorCorrection(bookId, configuration.type), Key(bookId.value))
+            objectStore(colorCurvesStore).put(curves.toJs(), Key(bookId.value))
+            objectStore(colorLevelsStore).put(levels.toJs(), Key(bookId.value))
+        }
+        typeChangeFlow.emit(bookId to configuration.type)
+        curveChangeFlow.emit(bookId to curves)
+        levelsChangeFlow.emit(bookId to levels)
+        modeRevision.update { it + 1 }
     }
 }

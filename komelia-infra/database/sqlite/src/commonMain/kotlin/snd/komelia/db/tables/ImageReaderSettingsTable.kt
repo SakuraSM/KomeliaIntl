@@ -1,9 +1,13 @@
 package snd.komelia.db.tables
 
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.json.json
+import snd.komelia.color.DefaultColorCorrection
+import snd.komelia.db.JsonDbDefault
 
 object ImageReaderSettingsTable : Table("ImageReaderSettings") {
     val bookId = text("book_id")
+    val defaultColorCorrection = json<DefaultColorCorrection>("default_color_correction", JsonDbDefault).nullable()
 
     val readerType = text("reader_type")
     val stretchToFit = bool("stretch_to_fit")

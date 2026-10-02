@@ -9,6 +9,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -17,14 +18,14 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import snd.komelia.AppNotifications
-import snd.komelia.color.BookColorLevels
+import snd.komelia.color.BookColorCorrectionMode
+import snd.komelia.color.ColorCorrectionConfig
+import snd.komelia.settings.ImageReaderSettingsRepository
 import snd.komelia.color.ChannelsLut
 import snd.komelia.color.ColorCorrectionType
 import snd.komelia.color.ColorCorrectionType.COLOR_CURVES
 import snd.komelia.color.ColorCorrectionType.COLOR_LEVELS
-import snd.komelia.color.ColorCurveBookPoints
 import snd.komelia.color.ColorCurvePoints
 import snd.komelia.color.ColorLevelChannels
 import snd.komelia.color.Histogram
@@ -49,6 +50,7 @@ class ColorCorrectionViewModel(
     private val appNotifications: AppNotifications,
     private val bookId: KomgaBookId,
     private val pageNumber: Int,
+    private val settingsRepository: ImageReaderSettingsRepository,
 ) : StateScreenModel<LoadState<Unit>>(LoadState.Uninitialized) {
     private val originalImage = MutableStateFlow<KomeliaImage?>(null)
     private val histogram = MutableStateFlow(Histogram(ByteArray(0)))
@@ -56,6 +58,10 @@ class ColorCorrectionViewModel(
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     val correctionType = MutableStateFlow(COLOR_CURVES)
+    val mode = MutableStateFlow(BookColorCorrectionMode.INHERIT)
+    val isSaving = MutableStateFlow(false)
+    private var defaultConfiguration: ColorCorrectionConfig? = null
+    private var customConfiguration = ColorCorrectionConfig(COLOR_CURVES)
 
     val curvesState = CurvesState(
         appNotifications = appNotifications,
@@ -101,8 +107,8 @@ class ColorCorrectionViewModel(
         .mapNotNull { (image, targetSize, channelsLut) ->
             val throttleDelay = coroutineScope { async { delay(100) } }
             val processed = processDisplayImage(image, targetSize, channelsLut)
-            val bitmap = processed.toImageBitmap()
-            if (image !== originalImage.value) processed.close()
+            val bitmap = try { processed.toImageBitmap() }
+            finally { if (processed !== image) processed.close() }
 
             throttleDelay.await()
             bitmap
@@ -185,7 +191,12 @@ class ColorCorrectionViewModel(
             curvesState.initialize()
             levelsState.initialize()
 
-            correctionType.value = bookColorCorrectionRepository.getCurrentType(bookId).first() ?: COLOR_CURVES
+            val storedType = bookColorCorrectionRepository.getCurrentType(bookId).first()
+            correctionType.value = storedType ?: COLOR_CURVES
+            defaultConfiguration = settingsRepository.getDefaultColorCorrection().first()?.configuration
+            customConfiguration = if (storedType == null) defaultConfiguration ?: currentConfiguration() else currentConfiguration()
+            mode.value = bookColorCorrectionRepository.getMode(bookId).first()
+            applyModePreview()
             mutableState.value = LoadState.Success(Unit)
         }.onFailure {
             mutableState.value = LoadState.Error(it)
@@ -198,58 +209,54 @@ class ColorCorrectionViewModel(
 
     fun onCurveTypeChange(type: ColorCorrectionType) {
         correctionType.value = type
-        coroutineScope.launch { bookColorCorrectionRepository.setCurrentType(bookId, type) }
     }
 
-    suspend fun onSave() {
-        val type = correctionType.value
-        bookColorCorrectionRepository.setCurrentType(bookId, type)
-        when (type) {
-            COLOR_CURVES -> {
-                val points = ColorCurvePoints(
-                    colorCurvePoints = curvesState.colorCurve.points.value,
-                    redCurvePoints = curvesState.redCurve.points.value,
-                    greenCurvePoints = curvesState.greenCurve.points.value,
-                    blueCurvePoints = curvesState.blueCurve.points.value,
-                )
-                val bookPoints = ColorCurveBookPoints(
-                    bookId = bookId,
-                    channels = points
-                )
+    fun onModeChange(next: BookColorCorrectionMode) {
+        if (isSaving.value || next == mode.value) return
+        if (mode.value == BookColorCorrectionMode.CUSTOM) customConfiguration = currentConfiguration()
+        mode.value = next
+        applyModePreview()
+    }
 
-                if (points == ColorCurvePoints.DEFAULT) {
-                    bookColorCorrectionRepository.deleteSettings(bookId)
-                } else {
-                    bookColorCorrectionRepository.saveCurve(bookPoints)
-                }
-
-            }
-
-            COLOR_LEVELS -> {
-                val channels = ColorLevelChannels(
-                    color = levelsState.colorLevels.levelsConfig.value,
-                    red = levelsState.redLevels.levelsConfig.value,
-                    green = levelsState.greenLevels.levelsConfig.value,
-                    blue = levelsState.blueLevels.levelsConfig.value,
-                )
-                val bookPoints = BookColorLevels(
-                    bookId = bookId,
-                    channels = channels
-                )
-
-                if (channels == ColorLevelChannels.DEFAULT) {
-                    bookColorCorrectionRepository.deleteSettings(bookId)
-                } else {
-                    bookColorCorrectionRepository.saveLevels(bookPoints)
-                }
-
-            }
+    private fun applyModePreview() {
+        val configuration = when (mode.value) {
+            BookColorCorrectionMode.INHERIT -> defaultConfiguration ?: ColorCorrectionConfig(COLOR_CURVES)
+            BookColorCorrectionMode.CUSTOM -> customConfiguration
+            BookColorCorrectionMode.DISABLED -> ColorCorrectionConfig(COLOR_CURVES)
         }
+        correctionType.value = configuration.type
+        curvesState.setChannels(configuration.curves)
+        levelsState.setChannels(configuration.levels)
+    }
+
+    private fun currentConfiguration(): ColorCorrectionConfig = ColorCorrectionConfig(
+        type = correctionType.value,
+        curves = ColorCurvePoints(curvesState.colorCurve.points.value, curvesState.redCurve.points.value,
+            curvesState.greenCurve.points.value, curvesState.blueCurve.points.value),
+        levels = ColorLevelChannels(levelsState.colorLevels.levelsConfig.value, levelsState.redLevels.levelsConfig.value,
+            levelsState.greenLevels.levelsConfig.value, levelsState.blueLevels.levelsConfig.value),
+    )
+
+    suspend fun onSave(): Boolean {
+        if (state.value !is LoadState.Success || !isSaving.compareAndSet(false, true)) return false
+        try {
+            return appNotifications.runCatchingToNotifications {
+                if (mode.value == BookColorCorrectionMode.CUSTOM) {
+                    bookColorCorrectionRepository.saveConfiguration(bookId, currentConfiguration())
+                } else {
+                    bookColorCorrectionRepository.setMode(bookId, mode.value)
+                }
+            }.isSuccess
+        } finally { isSaving.value = false }
     }
 
     override fun onDispose() {
-        originalImage.value?.close()
+        // Native preview work may suspend on another dispatcher; release only once it has stopped.
+        coroutineScope.coroutineContext.job.invokeOnCompletion {
+            val image = originalImage.value
+            originalImage.value = null
+            image?.close()
+        }
         coroutineScope.cancel()
     }
 }
-

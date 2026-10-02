@@ -64,7 +64,6 @@ Local raw evidence is retained under ignored `output/stable-release-0.28.0/`: th
 
 - API 35 acceptance was blocked by the missing emulator system image. No physical phone, Windows GUI, or desktop GUI acceptance was performed.
 - This targeted final-artifact verification does not mark all 22 regression-catalog cases as passed. The earlier ten-cycle rotation matrix and full original-panel matrix were not repeated.
-- #62 fast-scroll and tap blur remains unresolved. Synthetic color tests do not establish a fix on the reporter's device or original samples.
 - Remote server login, original archive comparison and native grayscale rendering with an RGB preset were not repeated on this signed APK. The grayscale ownership fix has an automated regression; it is not claimed as signed-device coverage.
 - EPUB source is unchanged. This run checks opening and bookmark retention, not a new complete EPUB browser test matrix.
 - Android is the published package. Desktop and Wasm compilation are not release-package or GUI acceptance.

@@ -69,6 +69,8 @@ Each color-editor entry owns a new serializable screen identity. Closing saves b
 
 Image readers reload the current book through the selected content API at entry. A book passed by navigation is a display snapshot and cannot supply the authoritative saved progress. TTU continuous mode keeps scrolling on the document used by its bookmark calculator and window scroll listeners; horizontal clipping must not introduce a second scroll container on `#app`.
 
+Android image readers expose current-page sharing through the optional domain `PageShareService`. The action captures the current book and one-based page before fetching original encoded bytes through the selected content API. It does not export the rendered viewport, crop, color correction or a double-page spread. Other platforms omit the action. Android validates the image header, stores one temporary image in the dedicated cache directory, and grants read-only access to that file through `PageShareFileProvider`. Failed launches remove their temporary file; completed launches retain it for receivers, with owned files older than 24 hours cleaned on later shares. Opening the system chooser does not send the image.
+
 Book details also refresh through the selected content API on every entry. A retained detail model cannot depend on receiving a progress event while the reader is open; its event listeners remain single-instance across entries.
 
 PANELS mode separates page-load lifetime from the current page's presentation job. `RetainedPageCache` keeps in-flight neighboring loads when they become visible. Leaving the reader cancels both scopes and releases cached images, including images allocated before a cancelled decode or detection finishes.
@@ -90,9 +92,13 @@ Native decode, crop replacement, and resize operations share an image mutex acro
 
 Static tiled pages publish a bounded whole-page preview before waiting for high-resolution tiles. The preview's longest edge is at most 768 pixels, it is reused across zoom and viewport changes, and crop/source replacement creates a new preview. Frame publication owns both preview and tile pixels; page shutdown releases that ownership through the platform retirement policy. Preview pixels fill only gaps in the loaded tile geometry so translucent content is not composited twice. Small full-frame images and animated images do not create this additional preview.
 
+Continuous readers observe the first visible item index and offset, viewport bounds, and visible-item geometry before requesting visible image regions. Observing only the offset loses page changes with equal offsets and remeasurement without scrolling. The existing conflated, delayed update path remains in place; unchanged geometry does not retrigger it.
+
 Risk points: duplicate Back handlers, click-through overlays, drag-end taps, stale progress, system-edge conflicts, and unsafe-area overlap.
 
 Local EPUB positions describe approximate reading progress, not physical pages. Komga reads the cached positions service without scanning the publication before first paint; local progress matching accepts internal absolute resource URLs and archive-relative locators. Chapter scroll handoff is armed only by a single-finger vertical gesture and may finish after momentum settles. Touches originate inside the iframe, but the SDK scrolls the outer `main#iframe-wrapper`; use screen coordinates for gesture distance and the wrapper for scroll events and boundaries. It is disarmed after one navigation, cancellation, expiry or resource replacement, so initial short chapters cannot auto-skip.
+
+When that wrapper has reached a boundary, the gesture calls `nextResource` or `previousResource` directly. SDK `atEnd` and `atStart` are fallbacks only when the wrapper is unavailable. Tap and keyboard page navigation keep their existing page-first behavior.
 
 The Komga EPUB reader's `BookSiblingState` owns previous and next lookups by current book and generation. Switching books immediately invalidates both directions. A failed lookup stays distinct from an empty boundary. Clicking the failed direction retries only that request and preserves the current reader and progress until navigation succeeds. Loading clicks, stale completions, self-references, and disposed requests cannot navigate.
 

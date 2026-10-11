@@ -94,6 +94,8 @@ Static tiled pages publish a bounded whole-page preview before waiting for high-
 
 Continuous readers observe the first visible item index and offset, viewport bounds, and visible-item geometry before requesting visible image regions. Observing only the offset loses page changes with equal offsets and remeasurement without scrolling. The existing conflated, delayed update path remains in place; unchanged geometry does not retrigger it.
 
+Tiled images keep the latest visible request and its serial in one atomic state, which also acts as the renderer's conflated queue. Foreground scrolling and background next-page loading must not write a separate queue that can diverge from that state. Reloads version the current viewport without restoring an older rendered position.
+
 Risk points: duplicate Back handlers, click-through overlays, drag-end taps, stale progress, system-edge conflicts, and unsafe-area overlap.
 
 Local EPUB positions describe approximate reading progress, not physical pages. Komga reads the cached positions service without scanning the publication before first paint; local progress matching accepts internal absolute resource URLs and archive-relative locators. Chapter scroll handoff is armed only by a single-finger vertical gesture and may finish after momentum settles. Touches originate inside the iframe, but the SDK scrolls the outer `main#iframe-wrapper`; use screen coordinates for gesture distance and the wrapper for scroll events and boundaries. It is disarmed after one navigation, cancellation, expiry or resource replacement, so initial short chapters cannot auto-skip.

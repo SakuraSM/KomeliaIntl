@@ -5,7 +5,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.IntRect
@@ -230,7 +229,7 @@ class ContinuousReaderState(
             }
             .launchIn(stateScope)
 
-        snapshotFlow { lazyListState.firstVisibleItemScrollOffset }
+        continuousViewportChanges(lazyListState)
             .combine(screenScaleState.areaSize) { _, _ -> }
             .combine(screenScaleState.targetSize) { _, _ -> }
             .combine(sidePaddingFraction) { _, _ -> }

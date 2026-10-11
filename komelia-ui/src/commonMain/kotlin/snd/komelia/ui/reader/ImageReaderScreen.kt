@@ -43,6 +43,7 @@ import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.canIntegrateWithSystemBar
 import snd.komelia.ui.reader.image.ReaderViewModel
+import snd.komelia.ui.reader.image.PageShareAction
 import snd.komelia.ui.reader.image.common.ReaderContent
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.MediaProfile.DIVINA
@@ -171,7 +172,10 @@ class ImageReaderScreen(
                     navigator push ColorCorrectionScreen(book.id, page)
                 }
             },
-            onExit = { onExit(navigator, vm.readerState.booksState.value?.currentBook, exitController, lastModeHint) }
+            onExit = { onExit(navigator, vm.readerState.booksState.value?.currentBook, exitController, lastModeHint) },
+            pageShareAction = vm.pageShareState?.let {
+                PageShareAction(it.isSharing.collectAsState().value, vm::shareCurrentPage)
+            },
         )
     }
 

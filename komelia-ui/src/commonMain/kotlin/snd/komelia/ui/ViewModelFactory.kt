@@ -299,6 +299,7 @@ class ViewModelFactory(
             currentBookId = imageReaderCurrentBook,
             colorCorrectionRepository = appRepositories.bookColorCorrectionRepository,
             colorCorrectionIsActive = dependencies.colorCorrectionStep.isActive,
+            pageShareService = dependencies.pageShareService,
             onnxRuntime = dependencies.onnxRuntime,
             panelDetector = dependencies.panelDetector,
             upscaler = dependencies.upscaler,

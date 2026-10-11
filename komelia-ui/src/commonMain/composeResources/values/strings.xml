@@ -1,4 +1,6 @@
 <resources>
+    <string name="reader_share_page">Share current page</string>
+    <string name="reader_share_page_failed">Could not share this page. Please try again.</string>
     <string name="color_default_title">Default color correction</string>
     <string name="color_default_description">Apply a saved preset to books that use the global default. Existing custom book settings take priority.</string>
     <string name="color_default_off">Off</string>

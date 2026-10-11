@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.toRect
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -25,6 +26,32 @@ import java.util.IdentityHashMap
 class ReaderTileFallbackTest {
     @Test fun zoomOutRetainsWholePageCoverageUntilNextFrameIsReady() = verify(3f, true)
     @Test fun fullFrameControlKeepsCoverageDuringTheSameDelay() = verify(1.5f, true)
+
+    @Test fun supersededNativeTileWorkStillPublishesTheFinalViewport() = runBlocking {
+        val reader = ProbeReader()
+        val finalViewport = IntRect(0, 1000, 333, 1500)
+        try {
+            reader.requestUpdate(IntSize(1000, 1500), 3f, IntRect(0, 0, 333, 500))
+            withTimeout(5000) { reader.painter.filterNotNull().first {
+                (it as ProbePainter).sharpRegions.isNotEmpty()
+            } }
+            reader.holdNextTile = true
+            reader.requestUpdate(IntSize(1000, 1500), 3f, IntRect(0, 600, 333, 1100))
+            withTimeout(5000) { reader.tileResizeStarted.await() }
+            reader.requestUpdate(IntSize(1000, 1500), 3f, IntRect(0, 800, 333, 1300))
+            reader.requestUpdate(IntSize(1000, 1500), 3f, finalViewport)
+            reader.releaseTileResize.complete(Unit)
+            withTimeout(5000) { reader.painter.filterNotNull().first {
+                val painter = it as ProbePainter
+                painter.covers(finalViewport.toRect(), painter.sharpRegions)
+            } }
+            assertNull(reader.error.value)
+        } finally {
+            reader.releaseTileResize.complete(Unit)
+            reader.close()
+            withTimeout(5000) { reader.painter.first { it == null } }
+        }
+    }
 
     @Test fun cropReloadReplacesThePreviewInsteadOfReusingOldPixels() = runBlocking {
         val pipeline = ImageProcessingPipeline()
@@ -91,11 +118,11 @@ class ReaderTileFallbackTest {
         }
     }
 
-    private class ProbePainter(val regions: List<Rect>, size: IntSize) : TilingReaderImage.TiledPainter() {
+    private class ProbePainter(val regions: List<Rect>, size: IntSize, val sharpRegions: List<Rect>) : TilingReaderImage.TiledPainter() {
         override val intrinsicSize = Size(size.width.toFloat(), size.height.toFloat())
         override fun DrawScope.onDraw() = Unit
         override fun withSamplingMode(upsamplingMode: UpsamplingMode) = this
-        fun covers(rect: Rect): Boolean {
+        fun covers(rect: Rect, regions: List<Rect> = this.regions): Boolean {
             val xs = (listOf(rect.left, rect.right) + regions.flatMap { listOf(it.left, it.right) })
                 .filter { it in rect.left..rect.right }.distinct().sorted()
             val ys = (listOf(rect.top, rect.bottom) + regions.flatMap { listOf(it.top, it.bottom) })
@@ -116,6 +143,9 @@ class ReaderTileFallbackTest {
         MutableStateFlow(ReduceKernel.NEAREST), MutableStateFlow(false), ReaderImage.PageId("diagnostic62", 1)
     ) {
         @Volatile var holdFullResize = false
+        @Volatile var holdNextTile = false
+        val tileResizeStarted = CompletableDeferred<Unit>()
+        val releaseTileResize = CompletableDeferred<Unit>()
         val fullResizeStarted = CompletableDeferred<Unit>()
         val releaseFullResize = CompletableDeferred<Unit>()
         val previewResizes = AtomicInteger()
@@ -126,7 +156,14 @@ class ReaderTileFallbackTest {
             if (holdFullResize) { fullResizeStarted.complete(Unit); releaseFullResize.await() }
             return pixels(scaleWidth, scaleHeight)
         }
-        override suspend fun getImageRegion(image: KomeliaImage, imageRegion: IntRect, scaleWidth: Int, scaleHeight: Int) = pixels(scaleWidth, scaleHeight)
+        override suspend fun getImageRegion(image: KomeliaImage, imageRegion: IntRect, scaleWidth: Int, scaleHeight: Int): ReaderImageData {
+            if (holdNextTile) {
+                holdNextTile = false
+                tileResizeStarted.complete(Unit)
+                releaseTileResize.await()
+            }
+            return pixels(scaleWidth, scaleHeight)
+        }
         private fun pixels(w: Int, h: Int): ReaderImageData {
             val surface = Surface.makeRasterN32Premul(1, 1)
             val bitmap = surface.makeImageSnapshot()
@@ -134,7 +171,9 @@ class ReaderTileFallbackTest {
             surface.close()
             return ReaderImageData(w, h, listOf(bitmap), null)
         }
-        override fun createTilePainter(tiles: List<ReaderImageTile>, displaySize: IntSize, scaleFactor: Double) = ProbePainter(tiles.map { it.displayRegion }, displaySize)
+        override fun createTilePainter(tiles: List<ReaderImageTile>, displaySize: IntSize, scaleFactor: Double) = ProbePainter(
+            tiles.map { it.displayRegion }, displaySize, tiles.filterNot { it.isFallback }.map { it.displayRegion }
+        )
         override fun closeTileBitmaps(tiles: List<ReaderImageTile>) {
             tiles.forEach { tile -> tile.renderImage?.let { retiredImages.add(it); it.close() } }
         }

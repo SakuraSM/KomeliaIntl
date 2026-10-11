@@ -5,7 +5,62 @@ import ts from 'typescript'
 
 const source = await readFile(new URL('../src/functions/chapterScrollNavigation.ts', import.meta.url), 'utf8')
 const compiled = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.ESNext}}).outputText
-const {setupChapterScrollNavigation} = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`)
+const {setupChapterScrollNavigation, navigateChapterAtScrollBoundary} = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`)
+
+test('DOM chapter end advances immediately even when SDK atEnd is stale', () => {
+  let next = 0
+  const sdk = {atEnd: false, atStart: false, nextResource: () => next++, previousResource: () => assert.fail('wrong direction')}
+  assert.equal(navigateChapterAtScrollBoundary(-100, sdk, {scrollTop: 900, clientHeight: 100, scrollHeight: 1000}), true)
+  assert.equal(next, 1)
+})
+
+test('DOM chapter start goes back immediately even when SDK atStart is stale', () => {
+  let previous = 0
+  const sdk = {atEnd: false, atStart: false, nextResource: () => assert.fail('wrong direction'), previousResource: () => previous++}
+  assert.equal(navigateChapterAtScrollBoundary(100, sdk, {scrollTop: 0, clientHeight: 100, scrollHeight: 1000}), true)
+  assert.equal(previous, 1)
+})
+
+test('DOM interior cannot skip a chapter even if SDK reports a boundary', () => {
+  const sdk = {atEnd: true, atStart: true, nextResource: () => assert.fail('skip'), previousResource: () => assert.fail('skip')}
+  const geometry = {scrollTop: 300, clientHeight: 100, scrollHeight: 1000}
+  assert.equal(navigateChapterAtScrollBoundary(-100, sdk, geometry), false)
+  assert.equal(navigateChapterAtScrollBoundary(100, sdk, geometry), false)
+  assert.equal(navigateChapterAtScrollBoundary(0, sdk, geometry), false)
+})
+
+test('missing DOM uses SDK boundary without reversing the gesture', () => {
+  let next = 0
+  const sdk = {atEnd: true, atStart: false, nextResource: () => next++, previousResource: () => assert.fail('wrong direction')}
+  assert.equal(navigateChapterAtScrollBoundary(100, sdk), false)
+  assert.equal(navigateChapterAtScrollBoundary(-100, sdk), true)
+  assert.equal(next, 1)
+})
+
+test('momentum to a short chapter with stale SDK flags advances once, then disarms', (t) => {
+  t.mock.timers.enable({apis: ['setTimeout']})
+  const document = new EventTarget()
+  const wrapper = new EventTarget()
+  const geometry = {scrollTop: 300, clientHeight: 100, scrollHeight: 1000}
+  let next = 0
+  const sdk = {atEnd: false, atStart: false, nextResource: () => { next++; geometry.scrollTop = 0; geometry.scrollHeight = 100 }, previousResource: () => assert.fail('wrong direction')}
+  const cleanup = setupChapterScrollNavigation({document, scrollTarget: wrapper, isEnabled: () => true,
+    navigateAtBoundary: delta => navigateChapterAtScrollBoundary(delta, sdk, geometry)})
+  t.after(cleanup)
+  for (const [type, y, touches] of [['touchstart', 500, true], ['touchend', 100, false]]) {
+    const event = new Event(type, {cancelable: true})
+    const touch = {screenX: 100, screenY: y}
+    Object.assign(event, {touches: touches ? [touch] : [], changedTouches: [touch]})
+    document.dispatchEvent(event)
+  }
+  assert.equal(next, 0)
+  geometry.scrollTop = 900
+  wrapper.dispatchEvent(new Event('scrollend'))
+  assert.equal(next, 1)
+  wrapper.dispatchEvent(new Event('scrollend'))
+  t.mock.timers.tick(2000)
+  assert.equal(next, 1)
+})
 
 function reader(t, scrollTarget) {
   t.mock.timers.enable({apis: ['setTimeout']})

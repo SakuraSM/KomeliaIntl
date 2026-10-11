@@ -2,6 +2,35 @@ const SCROLL_SETTLE_MS = 120
 const GESTURE_EXPIRY_MS = 1800
 const MIN_GESTURE_DISTANCE = 48
 const VERTICAL_AXIS_RATIO = 1.35
+const SCROLL_BOUNDARY_TOLERANCE = 2
+
+interface ChapterBoundaryReader {
+  atEnd: boolean
+  atStart: boolean
+  nextResource: () => void
+  previousResource: () => void
+}
+
+/** DOM scroll geometry is authoritative when the SDK's location update is delayed. */
+export function navigateChapterAtScrollBoundary(
+  deltaY: number,
+  reader: ChapterBoundaryReader,
+  scrollElement?: Pick<Element, 'scrollTop' | 'clientHeight' | 'scrollHeight'>,
+): boolean {
+  const atEnd = scrollElement === undefined ? reader.atEnd
+    : scrollElement.scrollTop + scrollElement.clientHeight >= scrollElement.scrollHeight - SCROLL_BOUNDARY_TOLERANCE
+  const atStart = scrollElement === undefined ? reader.atStart
+    : scrollElement.scrollTop <= SCROLL_BOUNDARY_TOLERANCE
+  if (deltaY < 0 && atEnd) {
+    reader.nextResource()
+    return true
+  }
+  if (deltaY > 0 && atStart) {
+    reader.previousResource()
+    return true
+  }
+  return false
+}
 
 interface ChapterScrollNavigation {
   document: Document

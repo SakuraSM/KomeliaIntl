@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = value => createHash('sha256').update(value).digest('hex');
 const git = (...args) => {
-  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8' });
+  // Rebuilt embedded EPUB HTML can exceed spawnSync's 1 MiB default.
+  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   if (result.status !== 0) throw Error('Cannot inspect Git state');
   return result.stdout;
 };

@@ -22,6 +22,7 @@ import snd.komelia.image.BookImageLoader
 import snd.komelia.image.KomeliaPanelDetector
 import snd.komelia.image.KomeliaUpscaler
 import snd.komelia.image.ReaderImageFactory
+import snd.komelia.image.PageShareService
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaReadListApi
 import snd.komelia.komga.api.KomgaSeriesApi
@@ -60,7 +61,12 @@ class ReaderViewModel(
     private val panelDetector: KomeliaPanelDetector?,
     private val upscaler: KomeliaUpscaler?,
     val colorCorrectionIsActive: Flow<Boolean>,
+    pageShareService: PageShareService? = null,
 ) : ScreenModel {
+    val pageShareState = pageShareService?.let {
+        ReaderPageShareState(bookApi, it, appNotifications, screenModelScope)
+    }
+
     val screenScaleState = ScreenScaleState()
     private val pageChangeFlow = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1,
@@ -161,6 +167,11 @@ class ReaderViewModel(
         continuousReaderState.stop()
         panelsReaderState?.stop()
 
+    }
+
+    fun shareCurrentPage() {
+        val currentBook = readerState.booksState.value?.currentBook ?: return
+        pageShareState?.share(currentBook.id, readerState.readProgressPage.value)
     }
 
     override fun onDispose() {

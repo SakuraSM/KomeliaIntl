@@ -16,12 +16,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
@@ -76,12 +74,11 @@ abstract class TilingReaderImage(
     protected val processingScope = CoroutineScope(processingDispatcher + SupervisorJob())
     private val imageMutex = Mutex()
     private val closed = MutableStateFlow(false)
-    private val visibleRequestSerial = MutableStateFlow(0L)
     private val prefetchSerial = MutableStateFlow(0L)
     private val renderRevision = MutableStateFlow(0L)
     private var activeRenderSerial = 0L
     private var activeRenderRevision = 0L
-    private val latestVisibleRequest = MutableStateFlow<UpdateRequest?>(null)
+    private val visibleRequests = VisibleImageRequests<UpdateRequest>()
     private var completedVisibleRequest: UpdateRequest? = null
     // Float rounding in animation must not prevent reuse of identical rendered pixels.
     private data class PrefetchKey(
@@ -94,7 +91,6 @@ abstract class TilingReaderImage(
         closeTileBitmaps(frame.allTiles())
     }
 
-    private val jobFlow = MutableSharedFlow<UpdateRequest>(1, 0, BufferOverflow.DROP_OLDEST)
     private val frameData = MutableStateFlow<FrameData?>(null)
     protected val image = MutableStateFlow<KomeliaImage?>(null)
     protected val defaultFrameDelay = 100L
@@ -115,7 +111,7 @@ abstract class TilingReaderImage(
     )
 
     init {
-        jobFlow.conflate()
+        visibleRequests.state.filterNotNull().conflate()
             .onEach { request ->
                 try {
                     doUpdate(request)
@@ -202,12 +198,8 @@ abstract class TilingReaderImage(
             if (closed.value) return@withLock
             preparedFrames.clear()
             completedVisibleRequest = null
-            (latestVisibleRequest.value ?: lastUpdateRequest)?.let { lastRequest ->
-                lastUsedScaleFactor = null
-                visibleRequestSerial.update { it + 1 }
-                latestVisibleRequest.value = lastRequest
-                jobFlow.emit(lastRequest)
-            }
+            lastUsedScaleFactor = null
+            visibleRequests.reload(lastUpdateRequest)
         }
     }
 
@@ -278,12 +270,11 @@ abstract class TilingReaderImage(
         visibleDisplaySize: IntRect,
     ) {
         val request = UpdateRequest(visibleDisplaySize, zoomFactor, maxDisplaySize)
-        if (latestVisibleRequest.value != request) visibleRequestSerial.update { it + 1 }
-        latestVisibleRequest.value = request
-        jobFlow.tryEmit(request)
+        visibleRequests.submit(request, force = error.value != null)
     }
 
-    private suspend fun doUpdate(request: UpdateRequest) {
+    private suspend fun doUpdate(visible: VisibleImageRequests.Versioned<UpdateRequest>) {
+        val request = visible.request
         lastUpdateRequest = request
 
         // Wait outside the lock so the initial decoder can publish the first image.
@@ -291,8 +282,8 @@ abstract class TilingReaderImage(
         imageMutex.withLock {
             // A reload may have replaced the image while we were waiting for the lock.
             val currentImage = image.value ?: return@withLock
-            if (latestVisibleRequest.value != request) return@withLock
-            activeRenderSerial = visibleRequestSerial.value
+            if (visibleRequests.value != visible) return@withLock
+            activeRenderSerial = visible.serial
             activeRenderRevision = renderRevision.value
             doUpdate(request, currentImage)
             completedVisibleRequest = request
@@ -369,7 +360,7 @@ abstract class TilingReaderImage(
     override suspend fun prefetch(request: ReaderImagePrefetch): Int {
         if (closed.value) return 0
         val generation = prefetchSerial.value
-        val foreground = visibleRequestSerial.value
+        val foreground = visibleRequests.serial
         val targets = request.viewports.distinct().take(2).map {
             UpdateRequest(it.visibleDisplaySize, it.zoomFactor, it.maxDisplaySize)
         }
@@ -382,14 +373,14 @@ abstract class TilingReaderImage(
             imageMutex.withLock {
                 val currentImage = image.value ?: return@withLock 0
                 if (closed.value || currentImage.pagesLoaded > 1 || currentImage.pagesTotal > 1) return@withLock 0
-                if (latestVisibleRequest.value != completedVisibleRequest) return@withLock 0
+                if (visibleRequests.value?.request != completedVisibleRequest) return@withLock 0
                 val keyedTargets = targets.mapNotNull { target ->
                     renderPlan(target, currentImage)?.let { prefetchKey(generation, it, target, currentImage) to target }
                 }
                 preparedFrames.retain(keyedTargets.map { it.first }.toSet())
                 for ((key, target) in keyedTargets) {
                     currentCoroutineContext().ensureActive()
-                    if (prefetchSerial.value != generation || visibleRequestSerial.value != foreground) break
+                    if (prefetchSerial.value != generation || visibleRequests.serial != foreground) break
                     if (preparedFrames.contains(key) || completedVisibleRequest == target) continue
                     prepareFrame(target, currentImage, request.budget, generation, foreground)?.let { (frame, reservation) ->
                         preparedFrames.put(key, frame, reservation)
@@ -425,7 +416,7 @@ abstract class TilingReaderImage(
         try {
             for (spec in specs) {
                 currentCoroutineContext().ensureActive()
-                if (prefetchSerial.value != generation || visibleRequestSerial.value != foreground) throw PrefetchSuperseded()
+                if (prefetchSerial.value != generation || visibleRequests.serial != foreground) throw PrefetchSuperseded()
                 // A native resize cannot be interrupted safely after allocating pixels.
                 // Register ownership before observing cancellation and retiring this batch.
                 withContext(NonCancellable) {
@@ -434,7 +425,7 @@ abstract class TilingReaderImage(
                     tiles.add(ReaderImageTile(IntSize(pixels.width, pixels.height), spec.display, true, pixels.frames.single()))
                 }
                 currentCoroutineContext().ensureActive()
-                if (prefetchSerial.value != generation || visibleRequestSerial.value != foreground) throw PrefetchSuperseded()
+                if (prefetchSerial.value != generation || visibleRequests.serial != foreground) throw PrefetchSuperseded()
             }
             return FrameData(listOf(ImageFrame(tiles, 0)), plan.displaySize, plan.scale, image, null) to reservation
         } catch (error: Throwable) {
@@ -451,7 +442,7 @@ abstract class TilingReaderImage(
 
     private suspend fun ensureForegroundCurrent() {
         currentCoroutineContext().ensureActive()
-        if (activeRenderSerial != visibleRequestSerial.value || activeRenderRevision != renderRevision.value) {
+        if (activeRenderSerial != visibleRequests.serial || activeRenderRevision != renderRevision.value) {
             throw ForegroundSuperseded()
         }
     }

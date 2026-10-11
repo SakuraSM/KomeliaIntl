@@ -276,6 +276,7 @@ abstract class AppModule {
             upscaler = upscaler,
             panelDetector = panelDetector,
             offlineDependencies = offlineModule,
+            pageShareService = createPageShareService(),
         )
         afterInit(dependencies)
         return dependencies
@@ -401,6 +402,7 @@ abstract class AppModule {
     ): ReaderImageFactory
 
     protected abstract fun createWindowState(): AppWindowState
+    protected open fun createPageShareService(): snd.komelia.image.PageShareService? = null
     protected abstract fun createCoilContext(): PlatformContext
     protected abstract fun createOnnxRuntimeInstaller(updateClient: UpdateClient): OnnxRuntimeInstaller?
     protected abstract fun createOnnxModelDownloader(updateClient: UpdateClient): OnnxModelDownloader?

@@ -14,6 +14,7 @@ import snd.komelia.image.KomeliaImageDecoder
 import snd.komelia.image.KomeliaPanelDetector
 import snd.komelia.image.KomeliaUpscaler
 import snd.komelia.image.ReaderImageFactory
+import snd.komelia.image.PageShareService
 import snd.komelia.image.processing.ColorCorrectionStep
 import snd.komelia.komga.api.KomgaApi
 import snd.komelia.offline.OfflineDependencies
@@ -55,4 +56,5 @@ data class DependencyContainer(
     val panelDetector: KomeliaPanelDetector?,
 
     val offlineDependencies: OfflineDependencies?,
+    val pageShareService: PageShareService? = null,
 )

@@ -40,6 +40,7 @@ import snd.komelia.ui.platform.WindowSizeClass.COMPACT
 import snd.komelia.ui.platform.WindowSizeClass.MEDIUM
 import snd.komelia.ui.reader.image.PageMetadata
 import snd.komelia.ui.reader.image.ReaderState
+import snd.komelia.ui.reader.image.PageShareAction
 import snd.komelia.ui.reader.image.ScreenScaleState
 import snd.komelia.ui.reader.image.common.PageSpreadProgressSlider
 import snd.komelia.ui.reader.image.common.ProgressSlider
@@ -62,6 +63,7 @@ fun BoxScope.SettingsOverlay(
     onBackPress: () -> Unit,
     ohShowHelpDialogChange: (Boolean) -> Unit,
     onSettingsDialogVisibilityChange: (Boolean) -> Unit,
+    pageShareAction: PageShareAction? = null,
 ) {
     if (!show) return
     val windowWidth = LocalWindowWidth.current
@@ -117,6 +119,7 @@ fun BoxScope.SettingsOverlay(
 
             onBackPress = onBackPress,
             onSettingsDialogVisibilityChange = onSettingsDialogVisibilityChange,
+            pageShareAction = pageShareAction,
         )
     } else {
         SettingsSideMenuOverlay(
@@ -125,6 +128,7 @@ fun BoxScope.SettingsOverlay(
             onReaderTypeChange = commonReaderState::onReaderTypeChange,
             isColorCorrectionsActive = isColorCorrectionsActive,
             onColorCorrectionClick = onColorCorrectionClick,
+            pageShareAction = pageShareAction,
             availableUpsamplingModes = availableUpsamplingModes,
             upsamplingMode = upsamplingMode,
             onUpsamplingModeChange = commonReaderState::onUpsamplingModeChange,

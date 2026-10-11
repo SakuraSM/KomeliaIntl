@@ -47,6 +47,7 @@ import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.reader.image.ReaderState
+import snd.komelia.ui.reader.image.PageShareAction
 import snd.komelia.ui.reader.image.ScreenScaleState
 import snd.komelia.ui.reader.image.continuous.ContinuousReaderContent
 import snd.komelia.ui.reader.image.continuous.ContinuousReaderState
@@ -71,12 +72,13 @@ fun ReaderContent(
     isColorCorrectionActive: Boolean,
     onColorCorrectionClick: () -> Unit,
     onExit: () -> Unit,
+    pageShareAction: PageShareAction? = null,
 ) {
     var showHelpDialog by remember { mutableStateOf(false) }
     var showSettingsMenu by remember { mutableStateOf(false) }
     var settingsDialogOpen by remember { mutableStateOf(false) }
-    LaunchedEffect(showSettingsMenu, settingsDialogOpen) {
-        if (showSettingsMenu && !settingsDialogOpen) {
+    LaunchedEffect(showSettingsMenu, settingsDialogOpen, pageShareAction?.isSharing) {
+        if (showSettingsMenu && !settingsDialogOpen && pageShareAction?.isSharing != true) {
             delay(4_000)
             showSettingsMenu = false
         }
@@ -191,6 +193,7 @@ fun ReaderContent(
             onBackPress = onExit,
             ohShowHelpDialogChange = { showHelpDialog = it },
             onSettingsDialogVisibilityChange = { settingsDialogOpen = it },
+            pageShareAction = pageShareAction,
         )
 
         EInkFlashOverlay(

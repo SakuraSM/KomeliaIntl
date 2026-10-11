@@ -301,6 +301,8 @@ class AndroidAppModule(
     }
 
     override fun createWindowState() = AndroidWindowState(mainActivity)
+    override fun createPageShareService(): snd.komelia.image.PageShareService =
+        snd.komelia.sharing.AndroidPageShareService(context, mainActivity)
 
     override fun createCoilContext() = context
 

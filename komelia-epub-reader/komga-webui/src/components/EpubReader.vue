@@ -330,7 +330,7 @@ import TocList from '@/components/TocList.vue'
 import {flattenToc} from '@/functions/toc'
 import ShortcutHelpDialog from '@/components/ShortcutHelpDialog.vue'
 import SettingsSelect from '@/components/SettingsSelect.vue'
-import {setupChapterScrollNavigation} from '@/functions/chapterScrollNavigation'
+import {navigateChapterAtScrollBoundary, setupChapterScrollNavigation} from '@/functions/chapterScrollNavigation'
 import {BookSiblingState, BookSiblings, SiblingStatus} from '@/functions/bookSiblingState'
 import {createR2Progression, r2ProgressionToReadingPosition} from '@/functions/readium'
 import {useDisplay, useRtl} from "vuetify";
@@ -482,7 +482,6 @@ const SWIPE_DISTANCE_THRESHOLD = 48
 const SWIPE_AXIS_RATIO = 1.35
 const SWIPE_DURATION_MS = 650
 const CHAPTER_NAVIGATION_SETTLE_MS = 80
-const SCROLL_BOUNDARY_TOLERANCE = 2
 
 
 const effectiveRtl = computed(() => {
@@ -883,25 +882,7 @@ function getReaderScrollElement(): Element | undefined {
 }
 
 function navigateAtVerticalScrollBoundary(deltaY: number, scrollElement?: Element): boolean {
-  if (deltaY < 0 && (scrollElement !== undefined ? isScrollAtEnd(scrollElement) : d2Reader.value.atEnd)) {
-    navigateForward()
-    return true
-  }
-
-  if (deltaY > 0 && (scrollElement !== undefined ? isScrollAtStart(scrollElement) : d2Reader.value.atStart)) {
-    navigateBackward()
-    return true
-  }
-
-  return false
-}
-
-function isScrollAtEnd(scrollElement: Element): boolean {
-  return scrollElement.scrollTop + scrollElement.clientHeight >= scrollElement.scrollHeight - SCROLL_BOUNDARY_TOLERANCE
-}
-
-function isScrollAtStart(scrollElement: Element): boolean {
-  return scrollElement.scrollTop <= SCROLL_BOUNDARY_TOLERANCE
+  return navigateChapterAtScrollBoundary(deltaY, d2Reader.value, scrollElement)
 }
 
 function singleClick(x: number, y: number) {

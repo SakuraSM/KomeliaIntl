@@ -96,6 +96,7 @@ import snd.komelia.ui.settings.imagereader.onnxruntime.TileSizeSelector
 import snd.komelia.ui.settings.imagereader.onnxruntime.UpscaleModeSelector
 import snd.komelia.ui.settings.imagereader.onnxruntime.isOnnxRuntimeInstalled
 import snd.komelia.ui.strings.AppStrings
+import snd.komelia.ui.reader.image.PageShareAction
 import snd.komelia.ui.strings.stringLabels
 import kotlin.math.roundToInt
 
@@ -139,6 +140,7 @@ fun SettingsSideMenuOverlay(
 
     onBackPress: () -> Unit,
     onShowHelpMenu: () -> Unit,
+    pageShareAction: PageShareAction? = null,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(
@@ -167,6 +169,7 @@ fun SettingsSideMenuOverlay(
                     Text(stringResource(Res.string.reader_close_book))
                 }
                 Spacer(Modifier.weight(1f))
+                pageShareAction?.let { PageShareButton(it) }
                 IconButton(onClick = { onShowHelpMenu() }) { Icon(Icons.AutoMirrored.Default.Help, null) }
             }
             if (book != null) {

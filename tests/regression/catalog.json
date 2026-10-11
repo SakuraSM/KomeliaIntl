@@ -160,11 +160,24 @@
       "issues": [62],
       "mode": "manual",
       "preconditions": ["高长宽比合成长图及授权原始webtoon；Lanczos3放大、Mitchell缩小"],
-      "steps": ["慢滚、快滚、反向滚动与停留；横竖屏切换；测试垂直、水平LTR/RTL，以及章节头之后首次进入图片"],
+      "steps": ["慢滚、快滚、反向滚动与停留；横竖屏切换；测试垂直、水平LTR/RTL，以及章节头之后首次进入图片；以相同偏移切页并改变可见页尺寸"],
       "expected": ["请求沿滚动方向限制为可见窗口；RTL从图片右端计算；清晰图块覆盖可见区域；不生成整页尾部图块；预渲染预算仍为32MiB"],
       "profiles": ["reader", "premerge", "release"],
       "evidence": ["样本摘要、尺寸及设置", "相同条件下的渲染日志与截图", "前景完成和图块数量；原始分镜问题独立验收"],
-      "automatedTests": ["ContinuousViewportTest"]
+      "automatedTests": ["ContinuousViewportTest", "ContinuousViewportChangesTest"]
+    },
+    {
+      "id": "SHARE-01",
+      "title": "Android 当前页原图分享",
+      "area": "reader",
+      "issues": [72],
+      "mode": "manual",
+      "preconditions": ["最终 debug APK；本地合成 CBZ；在线测试书可用时补充在线来源"],
+      "steps": ["停在非首页；打开阅读控制并分享当前页；等待系统分享面板后取消；继续翻页并再次分享；中英文与横竖屏检查；不实际发送"],
+      "expected": ["分享点击时的原始页字节和正确 MIME；准备时不重复请求；只授予单个 content URI 的读权限；取消后仍能阅读；错误后可重试；非 Android 不出现不可用入口"],
+      "profiles": ["reader", "premerge", "release"],
+      "evidence": ["APK 哈希、设备/API、语言和布局", "系统分享面板及取消后页码", "原图字节、MIME 和 URI 权限测试"],
+      "automatedTests": ["ReaderPageShareStateTest", "PageShareButtonTest", "AndroidPageShareTest"]
     },
     {
       "id": "READ-01",
@@ -454,7 +467,7 @@
         "慢拖、快滑、惯性滚动、反向翻章、双指和取消"
       ],
       "expected": [
-        "有效手势接续一次；短章不自行跳过；双指不误翻章"
+        "有效手势接续一次；实际滚动已到边界时不等待 SDK 状态或额外手势；短章不自行跳过；双指不误翻章"
       ],
       "profiles": [
         "reader",

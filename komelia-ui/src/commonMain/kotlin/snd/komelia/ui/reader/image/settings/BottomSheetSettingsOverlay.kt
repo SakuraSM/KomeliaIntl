@@ -104,6 +104,7 @@ import snd.komelia.ui.reader.image.continuous.ContinuousReaderState
 import snd.komelia.ui.reader.image.paged.PagedReaderState
 import snd.komelia.ui.reader.image.panels.PanelsReaderState
 import snd.komelia.ui.strings.AppStrings
+import snd.komelia.ui.reader.image.PageShareAction
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -142,6 +143,7 @@ fun BottomSheetSettingsOverlay(
     panelsReaderState: PanelsReaderState?,
     onBackPress: () -> Unit,
     onSettingsDialogVisibilityChange: (Boolean) -> Unit,
+    pageShareAction: PageShareAction? = null,
 ) {
 
     val windowWidth = LocalWindowWidth.current
@@ -196,6 +198,7 @@ fun BottomSheetSettingsOverlay(
                 )
             }
         }
+        pageShareAction?.let { PageShareButton(it) }
         FilledIconButton(
             onClick = {
                 showSettingsDialog = true

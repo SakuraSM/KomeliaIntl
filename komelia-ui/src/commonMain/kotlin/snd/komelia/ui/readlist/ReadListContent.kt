@@ -16,6 +16,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextOverflow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.readlist_edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,7 +44,7 @@ import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.itemlist.BookLazyCardGrid
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.common.menus.ReadListActionsMenu
-import snd.komelia.ui.common.menus.bulk.BottomPopupBulkActionsPanel
+import snd.komelia.ui.common.menus.bulk.BottomBulkActionsPanel
 import snd.komelia.ui.common.menus.bulk.BulkActionsContainer
 import snd.komelia.ui.common.menus.bulk.ReadListBulkActionsContent
 import snd.komelia.ui.platform.WindowSizeClass
@@ -106,29 +109,31 @@ fun ReadListContent(
                 HorizontalDivider()
             }
         }
-        BookLazyCardGrid(
-            books = books,
-            onBookClick = if (editMode) onBookSelect else onBookClick,
-            onBookReadClick = if (editMode) null else onBookReadClick,
-            bookMenuActions = if (editMode) null else bookMenuActions,
+        Box(Modifier.weight(1f)) {
+            BookLazyCardGrid(
+                books = books,
+                onBookClick = if (editMode) onBookSelect else onBookClick,
+                onBookReadClick = if (editMode) null else onBookReadClick,
+                bookMenuActions = if (editMode) null else bookMenuActions,
 
-            selectedBooks = selectedBooks,
-            onBookSelect = onBookSelect,
+                selectedBooks = selectedBooks,
+                onBookSelect = onBookSelect,
 
-            reorderable = readList.ordered && editMode,
-            onReorder = onReorder,
-            onReorderDragStateChange = onReorderDragStateChange,
+                reorderable = readList.ordered && editMode,
+                onReorder = onReorder,
+                onReorderDragStateChange = onReorderDragStateChange,
 
-            totalPages = totalPages,
-            currentPage = currentPage,
-            onPageChange = onPageChange,
+                totalPages = totalPages,
+                currentPage = currentPage,
+                onPageChange = onPageChange,
 
-            minSize = cardMinSize,
-        )
+                minSize = cardMinSize,
+            )
+        }
 
         val width = LocalWindowWidth.current
         if ((width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedBooks.isNotEmpty()) {
-            BottomPopupBulkActionsPanel {
+            BottomBulkActionsPanel {
                 ReadListBulkActionsContent(readList, selectedBooks, true)
             }
         }
@@ -150,6 +155,7 @@ private fun ReadListToolbar(
     ) {
 
         Row(
+            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing)
         ) {
@@ -159,6 +165,8 @@ private fun ReadListToolbar(
                     readList.name
                 ),
                 style = MaterialTheme.typography.labelMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
         }
 
@@ -182,7 +190,7 @@ private fun ReadListToolbar(
             Box {
                 var expandActions by remember { mutableStateOf(false) }
                 IconButton(onClick = { expandActions = true }) {
-                    Icon(Icons.Rounded.MoreVert, null)
+                    Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more))
                 }
 
                 ReadListActionsMenu(
@@ -192,10 +200,9 @@ private fun ReadListToolbar(
                     onDismissRequest = { expandActions = false }
                 )
             }
-            IconButton(onClick = onEditModeEnable) { Icon(Icons.Default.EditNote, null) }
+            IconButton(onClick = onEditModeEnable) { Icon(Icons.Default.EditNote, stringResource(Res.string.readlist_edit)) }
         }
 
-        Spacer(Modifier.weight(1f))
         PageSizeSelectionDropdown(pageSize, onPageSizeChange)
     }
 }

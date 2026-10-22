@@ -120,16 +120,18 @@ internal fun detailCoverWidth(
         (availableWidth * 0.25f).coerceIn(220.dp, 260.dp)
 }
 
-/** Returns null when poster grids should use the configured adaptive card width. */
+/** Mobile density scales with the breakpoint; other platforms keep adaptive card widths. */
 internal fun posterColumnCount(
     platform: PlatformType,
     windowWidth: WindowSizeClass,
     cardWidth: Dp = defaultCardWidth.dp,
 ): Int? {
     if (platform != PlatformType.MOBILE) return null
-    return when (windowWidth) {
-        WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM ->
-            kotlin.math.round(3f * defaultCardWidth / cardWidth.value.coerceIn(150f, 350f)).toInt().coerceIn(2, 5)
-        WindowSizeClass.EXPANDED, WindowSizeClass.FULL -> null
+    val defaultColumns = when (windowWidth) {
+        WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM -> 3
+        WindowSizeClass.EXPANDED -> 4
+        WindowSizeClass.FULL -> 6
     }
+    return kotlin.math.round(defaultColumns * defaultCardWidth / cardWidth.value.coerceIn(150f, 350f))
+        .toInt().coerceIn(2, 10)
 }

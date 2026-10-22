@@ -3,6 +3,7 @@ package snd.komelia.settings
 import kotlinx.coroutines.flow.Flow
 import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppTheme
+import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.updates.AppVersion
 import kotlin.time.Instant
@@ -46,6 +47,12 @@ interface CommonSettingsRepository {
 
     fun getAppTheme(): Flow<AppTheme>
     suspend fun putAppTheme(theme: AppTheme)
+
+    fun getSurfaceStyle(): Flow<AppSurfaceStyle>
+    suspend fun putSurfaceStyle(style: AppSurfaceStyle)
+
+    fun getReduceTransparency(): Flow<Boolean>
+    suspend fun putReduceTransparency(enabled: Boolean)
 
     fun getAppLanguage(): Flow<AppLanguage>
     suspend fun putAppLanguage(language: AppLanguage)

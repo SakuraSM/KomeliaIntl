@@ -3,6 +3,7 @@ package snd.komelia.db
 import kotlinx.serialization.Serializable
 import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppTheme
+import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.updates.AppVersion
 import kotlin.time.Instant
@@ -20,6 +21,8 @@ data class AppSettings(
     val bookListLayout: BooksLayout = BooksLayout.GRID,
     val appTheme: AppTheme = AppTheme.DARK,
     val appLanguage: AppLanguage = AppLanguage.SYSTEM,
+    val surfaceStyle: AppSurfaceStyle = AppSurfaceStyle.CLASSIC,
+    val reduceTransparency: Boolean = false,
 
     val checkForUpdatesOnStartup: Boolean = true,
     val updateLastCheckedTimestamp: Instant? = null,

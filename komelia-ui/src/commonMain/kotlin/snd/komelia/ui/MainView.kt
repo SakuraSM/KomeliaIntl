@@ -55,6 +55,9 @@ import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.settings.model.AppLanguage
+import snd.komelia.settings.model.AppSurfaceStyle
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.ui.common.components.SurfaceAppearance
 import snd.komelia.updates.AppRelease
 import snd.komelia.updates.StartupUpdateChecker
 
@@ -71,6 +74,14 @@ fun MainView(
 ) {
     var theme by rememberSaveable { mutableStateOf(Theme.DARK) }
     var appLanguage by rememberSaveable { mutableStateOf(AppLanguage.SYSTEM) }
+    var surfaceStyle by remember { mutableStateOf(AppSurfaceStyle.CLASSIC) }
+    var reduceTransparency by remember { mutableStateOf(false) }
+    LaunchedEffect(dependencies) {
+        dependencies?.appRepositories?.settingsRepository?.getSurfaceStyle()?.collect { surfaceStyle = it }
+    }
+    LaunchedEffect(dependencies) {
+        dependencies?.appRepositories?.settingsRepository?.getReduceTransparency()?.collect { reduceTransparency = it }
+    }
     LaunchedEffect(dependencies) {
         dependencies?.appRepositories?.settingsRepository?.getAppTheme()?.collect { theme = it.toTheme() }
     }
@@ -82,6 +93,7 @@ fun MainView(
     }
 
     val isReducedMotion = rememberSystemReducedMotion()
+    val glassSupported = rememberGlassRenderingSupported()
     key(appLanguage) {
         KomeliaTheme(appTheme = theme.toAppTheme(), isReducedMotion = isReducedMotion) {
         ConfigurePlatformTheme(theme)
@@ -109,6 +121,7 @@ fun MainView(
             if (viewModelFactory == null) return@Surface
 
             CompositionLocalProvider(
+                LocalSurfaceAppearance provides SurfaceAppearance(surfaceStyle, theme.toAppTheme(), reduceTransparency, glassSupported),
                 LocalViewModelFactory provides viewModelFactory,
                 LocalNotifications provides dependencies.appNotifications,
                 LocalKomgaEvents provides dependencies.komgaEvents.events,

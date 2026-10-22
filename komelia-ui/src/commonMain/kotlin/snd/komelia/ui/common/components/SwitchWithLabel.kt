@@ -1,6 +1,7 @@
 package snd.komelia.ui.common.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.Role
 
 @Composable
 fun SwitchWithLabel(
@@ -25,7 +27,7 @@ fun SwitchWithLabel(
     onCheckedChange: (Boolean) -> Unit,
     label: @Composable () -> Unit,
     supportingText: @Composable () -> Unit = {},
-    supportingTextColor: Color = LocalContentColor.current.copy(alpha = 0.6f),
+    supportingTextColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp)
@@ -39,9 +41,11 @@ fun SwitchWithLabel(
     CompositionLocalProvider(LocalContentColor provides contentColor) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier.clickable(
+            modifier = modifier.heightIn(min = 48.dp).toggleable(
+                value = checked,
+                role = Role.Switch,
                 enabled = enabled,
-                onClick = { onCheckedChange(!checked) }
+                onValueChange = onCheckedChange,
             )
                 .pointerHoverIcon(PointerIcon.Hand)
                 .padding(contentPadding),
@@ -54,7 +58,7 @@ fun SwitchWithLabel(
             }
             Switch(
                 checked = checked,
-                onCheckedChange = onCheckedChange,
+                onCheckedChange = null,
                 enabled = enabled,
                 colors = colors,
                 modifier = Modifier.scale(1f, .9f)

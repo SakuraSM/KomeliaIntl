@@ -111,7 +111,7 @@
 
   {#if showFooter && bookCharCount}
     <div class="mx-auto mb-3 flex max-w-[calc(100vw-1.5rem)] items-center justify-center gap-2 px-3 sm:mb-4">
-      <div class="pointer-events-auto flex max-w-full items-center gap-1 overflow-hidden rounded-full bg-slate-950/90 p-1 text-white shadow-xl shadow-black/30 backdrop-blur-md">
+      <div data-komelia-chrome class="pointer-events-auto flex max-w-full items-center gap-1 overflow-hidden rounded-full bg-slate-950/90 p-1 text-white shadow-xl shadow-black/30 backdrop-blur-md">
         <button
             type="button"
             class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 sm:flex"

@@ -1,3 +1,5 @@
+import '../../shared/chrome-appearance.css'
+import { refreshChromeAppearance } from '../../shared/chrome-appearance.mjs'
 import {registerPlugins} from '@/plugins'
 import App from './App.vue'
 import {createApp} from 'vue'
@@ -20,6 +22,8 @@ const i18n = createI18n({
     'zh-CN': zhCN
   },
 })
+void refreshChromeAppearance()
+
 const app = createApp(App)
 registerPlugins(app)
 app.use(i18n)

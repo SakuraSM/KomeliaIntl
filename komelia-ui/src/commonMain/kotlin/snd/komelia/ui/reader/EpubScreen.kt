@@ -2,7 +2,12 @@ package snd.komelia.ui.reader
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import snd.komelia.ui.LocalKomeliaMotion
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.ui.reader.epub.EpubChromeAppearance
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.collectAsState
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -48,6 +53,13 @@ class EpubScreen(
                 markReadProgress = markReadProgress
             )
         }
+        val appearance = LocalSurfaceAppearance.current
+        val reducedMotion = LocalKomeliaMotion.current.isReducedMotion
+        SideEffect {
+            vm.chromeAppearance.value = EpubChromeAppearance(
+                appearance.style, appearance.theme, appearance.reduceTransparency, reducedMotion, appearance.renderingSupported,
+            )
+        }
         LaunchedEffect(bookId) {
             vm.initialize(navigator)
             val state = vm.state.value
@@ -85,13 +97,13 @@ class EpubScreen(
                     }
                 )
 
-                is LoadState.Success -> EpubContent(
+                is LoadState.Success -> key(state.value) { EpubContent(
                     onWebviewCreated = { state.value.onWebviewCreated(it) },
                     onBackButtonPress = state.value::onBackButtonPress,
                     contentReady = state.value.contentReady.collectAsState().value,
                     displaySettings = vm.displaySettings.collectAsState().value,
                     backgroundColor = state.value.backgroundColor.collectAsState().value,
-                )
+                ) }
             }
         }
     }

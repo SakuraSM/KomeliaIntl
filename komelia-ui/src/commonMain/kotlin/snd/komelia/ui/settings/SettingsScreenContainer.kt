@@ -34,7 +34,12 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.common.components.LocalNavigationBarInset
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.common.components.GlassBackdropScope
+import snd.komelia.ui.common.components.glassBackdrop
+import snd.komelia.ui.common.components.KomeliaPageScaffold
+import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType.DESKTOP
@@ -59,8 +64,11 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
     val navigator = LocalNavigator.currentOrThrow
     val layout = LocalKomeliaLayout.current
     val scrollState = rememberScrollState()
+    PauseGlassWhileBusy(scrollState.isScrollInProgress)
     val isContentScrolled by remember(scrollState) { derivedStateOf { scrollState.value > 0 } }
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    KomeliaPageScaffold(
+        modifier = Modifier.background(MaterialTheme.colorScheme.background),
+        topBar = {
         KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
             Row(
                 modifier = Modifier
@@ -80,16 +88,16 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
                 Text(title, style = MaterialTheme.typography.titleLarge)
             }
         }
-
+    }) { topInset ->
         Column(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxSize()
                 .imePadding()
                 .verticalScroll(scrollState)
                 .padding(horizontal = layout.pageHorizontalPadding)
                 .padding(
-                    top = layout.topBarContentSpacing,
-                    bottom = layout.pageVerticalPadding,
+                    top = layout.topBarContentSpacing + topInset,
+                    bottom = layout.pageVerticalPadding + LocalNavigationBarInset.current,
                 ),
             verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing),
         ) {
@@ -102,6 +110,7 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
 @Composable
 private fun DesktopContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
     val scrollState = rememberScrollState()
+    PauseGlassWhileBusy(scrollState.isScrollInProgress)
     Box(Modifier.background(MaterialTheme.colorScheme.background)) {
         Box(Modifier.fillMaxSize().verticalScroll(scrollState)) {
             DesktopContent(title, content)

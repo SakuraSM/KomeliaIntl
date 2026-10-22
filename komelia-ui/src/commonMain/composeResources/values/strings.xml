@@ -1476,4 +1476,22 @@
     <string name="mangabaka_link_social">Social</string>
     <string name="mangabaka_link_info">Information</string>
     <string name="mangabaka_link_other">Other</string>
+    <string name="appearance_surface_style">Surface style</string>
+    <string name="appearance_classic">Classic</string>
+    <string name="appearance_liquid_glass">Liquid Glass</string>
+    <string name="appearance_surface_hint">Glass highlights navigation and controls. Reading pages and input fields keep their solid backgrounds.</string>
+    <string name="appearance_reduce_transparency">Reduce transparency</string>
+    <string name="appearance_reduce_transparency_hint">Use solid surfaces for clearer contrast and lower rendering cost.</string>
+    <string name="appearance_solid_fallback">Solid surfaces are active because this device cannot currently render glass reliably.</string>
+    <string name="appearance_save_failed">Could not save your change. The previous setting has been restored.</string>
+    <string name="appearance_retry">Retry saving</string>
+    <string name="appearance_reset_density">Reset cover density</string>
+    <string name="komf_connection_failed_hint">Unable to connect to Komf. Check the address and service, then select Connect to try again.</string>
+    <string name="error_show_details">Show error details</string>
+    <string name="error_hide_details">Hide error details</string>
+    <string name="komf_library_remove_override">Remove library override</string>
+    <string name="password_show">Show password</string>
+    <string name="password_hide">Hide password</string>
+    <string name="metadata_lock_field">Lock field</string>
+    <string name="metadata_unlock_field">Unlock field</string>
 </resources>

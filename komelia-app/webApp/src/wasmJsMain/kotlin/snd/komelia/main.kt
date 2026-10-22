@@ -35,6 +35,7 @@ fun main() {
     }
     window.addEventListener("resize") {
         windowWidth.value = WindowSizeClass.fromDp(window.innerWidth.dp)
+        windowHeight.value = WindowSizeClass.fromDp(window.innerHeight.dp)
     }
     document.addEventListener("keydown") { event ->
         initScope.launch { keyEvents.emit((event as KeyboardEvent).toComposeEvent()) }

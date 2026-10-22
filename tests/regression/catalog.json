@@ -715,6 +715,135 @@
         "脱敏截图或日志",
         "执行人和时间"
       ]
+    },
+    {
+      "id": "APPEARANCE-01",
+      "title": "经典与玻璃外观的升级、保存和会话保持",
+      "area": "settings",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "V17或V18应用数据；保留旧主题、账户、下载和非首页阅读进度；最终debug APK"
+      ],
+      "steps": [
+        "保留数据升级；切换经典/玻璃、浅色/深色/OLED和减少透明效果；连续快速切换并重启；模拟保存失败后重试；阅读中返回并重新进入"
+      ],
+      "expected": [
+        "旧数据默认经典；V19追加且V1–V18校验值不变；选择保存后生效；失败保留已保存值并提供重试；正文样式和阅读进度不变"
+      ],
+      "profiles": [
+        "core",
+        "reader",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "APK SHA256、数据版本与平台",
+        "外观前后截图",
+        "保存失败/重启/页码证据"
+      ],
+      "automatedTests": [
+        "SurfaceStyleIntegrationTest",
+        "SurfaceStyleBrowserStorageTest",
+        "SurfaceAppearanceTest",
+        "AppearancePreferenceTest"
+      ]
+    },
+    {
+      "id": "APPEARANCE-02",
+      "title": "响应布局、键盘、读屏与减少动态效果",
+      "area": "ui",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "360、412、600、840dp和桌面宽屏；中英文；大字体；TalkBack或桌面读屏"
+      ],
+      "steps": [
+        "走查页面和弹层；Tab/Enter/Space/Esc与Back；菜单关闭后继续读屏导航；切换系统减少动态效果；打开阅读控件后等待超过默认自动隐藏时间"
+      ],
+      "expected": [
+        "触控目标至少48dp，指针目标至少40dp；无截断遮挡；菜单恢复焦点；动态效果遵循系统设置；读屏用户有足够时间操作阅读控件；框架已知缺陷记录为失败而非通过"
+      ],
+      "profiles": [
+        "core",
+        "reader",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "页面/平台/状态清单",
+        "焦点、布局和读屏截图",
+        "已知框架阻塞及版本"
+      ],
+      "automatedTests": [
+        "DropdownChoiceFocusTest",
+        "ReducedMaterialMotionTest",
+        "SettingsScreenLayoutTest",
+        "KomeliaPageScaffoldTest",
+        "GlassContrastTest"
+      ]
+    },
+    {
+      "id": "APPEARANCE-03",
+      "title": "玻璃采样、滚动预算和资源释放",
+      "area": "ui",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "同设备、同APK、同内容；经典/玻璃分别预热；记录渲染器和刷新率"
+      ],
+      "steps": [
+        "重复首页滚动、搜索、菜单和快速阅读；分别保存原始帧统计；等待控件隐藏后测空闲帧；重复进出页面并记录内存；触发低内存回退"
+      ],
+      "expected": [
+        "P95增幅不超过20%，卡顿比例增加不超过2个百分点；超标时缩减采样或实色回退；滚动停止250ms后恢复采样，连续手势不反复重建；隐藏阅读控件时不持续绘制；退出释放所属资源"
+      ],
+      "profiles": [
+        "reader",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "双方原始数据、预热和样本数",
+        "P95、卡顿口径和内存趋势",
+        "模拟器与真机结论分开"
+      ],
+      "automatedTests": [
+        "GlassScrollBudgetTest",
+        "SearchGlassSamplingTest",
+        "SurfaceAppearanceTest",
+        "ReaderSystemBarsEffectTest"
+      ]
+    },
+    {
+      "id": "EPUB-IMPL-01",
+      "title": "同一本书切换EPUB实现并保留进度",
+      "area": "reader",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": [
+        "一份合成EPUB；Komga和TTU两套阅读器均可用"
+      ],
+      "steps": [
+        "打开EPUB并前进到非首页；返回设置切换阅读器；重新打开同一本书；反向切换；更换材质后再进入"
+      ],
+      "expected": [
+        "阅读器选择立即用于下次进入，同类型继续复用；旧实现资源释放；材质变化不重建正文会话；保存进度仍可恢复"
+      ],
+      "profiles": [
+        "reader",
+        "premerge",
+        "release"
+      ],
+      "evidence": [
+        "前后阅读器控件与页码/进度",
+        "退出、重进及重复切换记录"
+      ],
+      "automatedTests": [
+        "RetainedEpubReaderTest",
+        "EpubReaderSessionTest",
+        "chrome-appearance.test.mjs"
+      ]
     }
   ]
 }

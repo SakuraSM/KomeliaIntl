@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_collections_count
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_readlists_count
 import org.jetbrains.compose.resources.pluralStringResource
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
@@ -50,7 +50,7 @@ fun LibraryReadListsContent(
                 label = {
                     Text(
                         pluralStringResource(
-                            Res.plurals.library_tab_collections_count,
+                            Res.plurals.library_tab_readlists_count,
                             readListsTotalCount,
                             readListsTotalCount
                         )

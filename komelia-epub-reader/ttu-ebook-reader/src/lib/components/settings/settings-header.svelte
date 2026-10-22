@@ -14,7 +14,7 @@
 
 </script>
 
-<div class={baseHeaderClasses}>
+<div data-komelia-chrome class={baseHeaderClasses}>
   <div class="flex justify-end md:px-8">
     <div
         tabindex="0"

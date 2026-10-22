@@ -1,5 +1,7 @@
 package snd.komelia.ui.library
 
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement.spacedBy
@@ -394,7 +396,7 @@ private fun LibraryToolBar(
                         ) {
                             Icon(
                                 Icons.Rounded.MoreVert,
-                                contentDescription = null,
+                                contentDescription = stringResource(Res.string.actions_show_more),
                             )
                         }
 

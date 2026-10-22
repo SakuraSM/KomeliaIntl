@@ -17,6 +17,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.selection.SelectionContainer
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_connection_failed_hint
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_show_details
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_hide_details
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -175,7 +182,7 @@ private fun KomfConnectionDetails(
         isError = komfConnectionError != null,
         supportingText = {
             if (komfConnectionError != null) {
-                Text(komfConnectionError)
+                ConnectionErrorDetails(komfConnectionError)
             } else {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -225,13 +232,13 @@ private fun KomgaConnectionDetails(
         SavableTextField(
             currentValue = username,
             onValueSave = onUsernameChange,
-            label = { Text(stringResource(Res.string.komf_connection_komga_username)) },
+            label = stringResource(Res.string.komf_connection_komga_username),
         )
 
         SavableTextField(
             currentValue = "",
             onValueSave = onPasswordChange,
-            label = { Text(stringResource(Res.string.komf_connection_komga_password)) },
+            label = stringResource(Res.string.komf_connection_komga_password),
             useEditButton = true,
             isPassword = true
         )
@@ -278,7 +285,7 @@ private fun KavitaConnectionDetails(
         SavableTextField(
             currentValue = "",
             onValueSave = onPasswordChange,
-            label = { Text(stringResource(Res.string.komf_connection_kavita_api_key)) },
+            label = stringResource(Res.string.komf_connection_kavita_api_key),
             useEditButton = true,
             isPassword = true
         )
@@ -386,5 +393,20 @@ private fun EventListenerContent(
             inputFieldModifier = Modifier.fillMaxWidth(),
             inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
         )
+    }
+}
+@Composable
+private fun ConnectionErrorDetails(details: String) {
+    var expanded by remember(details) { mutableStateOf(false) }
+    Column {
+        Text(stringResource(Res.string.komf_connection_failed_hint))
+        TextButton(onClick = { expanded = !expanded }) {
+            Text(stringResource(if (expanded) Res.string.error_hide_details else Res.string.error_show_details))
+        }
+        if (expanded) {
+            SelectionContainer {
+                Text(details, Modifier.heightIn(max = 180.dp).verticalScroll(rememberScrollState()))
+            }
+        }
     }
 }

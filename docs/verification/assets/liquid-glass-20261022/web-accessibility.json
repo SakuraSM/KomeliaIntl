@@ -1,0 +1,26 @@
+{
+  "browser": "Chromium via ego-browser",
+  "composeWeb": "1.13.0-alpha02",
+  "skikoWeb": "0.153.0",
+  "popup": {
+    "mainRecovered": true,
+    "popupRemoved": true
+  },
+  "dialog": {
+    "owners": [
+      {
+        "inert": true,
+        "modal": false
+      },
+      {
+        "inert": false,
+        "modal": true
+      }
+    ],
+    "mainRestored": true
+  },
+  "drawer": {
+    "opened": true,
+    "escapeClosed": true
+  }
+}

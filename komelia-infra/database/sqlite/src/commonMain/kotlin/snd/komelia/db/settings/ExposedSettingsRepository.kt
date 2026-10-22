@@ -9,6 +9,7 @@ import snd.komelia.db.ExposedRepository
 import snd.komelia.db.tables.AppSettingsTable
 import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppTheme
+import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.updates.AppVersion
 import kotlin.time.Instant
@@ -38,6 +39,8 @@ class ExposedSettingsRepository(database: Database) : ExposedRepository(database
                 it[bookListLayout] = settings.bookListLayout.name
                 it[appTheme] = settings.appTheme.name
                 it[appLanguage] = settings.appLanguage.name
+                it[surfaceStyle] = settings.surfaceStyle.name
+                it[reduceTransparency] = settings.reduceTransparency
 
                 it[checkForUpdatesOnStartup] = settings.checkForUpdatesOnStartup
                 it[updateLastCheckedTimestamp] = settings.updateLastCheckedTimestamp?.toString()
@@ -61,6 +64,8 @@ class ExposedSettingsRepository(database: Database) : ExposedRepository(database
             appLanguage = get(AppSettingsTable.appLanguage)
                 ?.let { runCatching { AppLanguage.valueOf(it) }.getOrNull() }
                 ?: AppLanguage.SYSTEM,
+            surfaceStyle = AppSurfaceStyle.fromStoredValue(get(AppSettingsTable.surfaceStyle)),
+            reduceTransparency = get(AppSettingsTable.reduceTransparency),
             checkForUpdatesOnStartup = get(AppSettingsTable.checkForUpdatesOnStartup),
             updateLastCheckedTimestamp = get(AppSettingsTable.updateLastCheckedTimestamp)?.let {
                 runCatching { Instant.parse(it) }.getOrNull()

@@ -57,8 +57,11 @@ class LayoutTest {
     }
 
     @Test
-    fun largeMobileAndDesktopKeepAdaptiveCardWidth() {
-        assertNull(posterColumnCount(PlatformType.MOBILE, WindowSizeClass.fromDp(840.dp)))
+    fun tabletDefaultsKeepFourReadableColumnsWhileDesktopRemainsAdaptive() {
+        assertEquals(4, posterColumnCount(PlatformType.MOBILE, WindowSizeClass.fromDp(840.dp)))
+        assertEquals(6, posterColumnCount(PlatformType.MOBILE, WindowSizeClass.fromDp(1200.dp)))
+        assertEquals(6, posterColumnCount(PlatformType.MOBILE, WindowSizeClass.EXPANDED, 150.dp))
+        assertEquals(3, posterColumnCount(PlatformType.MOBILE, WindowSizeClass.EXPANDED, 350.dp))
         assertNull(posterColumnCount(PlatformType.DESKTOP, WindowSizeClass.COMPACT))
     }
 

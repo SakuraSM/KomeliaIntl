@@ -84,6 +84,8 @@ import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.LocalKomgaState
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalKomfIntegration
@@ -95,6 +97,8 @@ import snd.komelia.ui.collection.SeriesCollectionsState
 import snd.komelia.ui.common.TagList
 import snd.komelia.ui.common.components.AppFilterChipDefaults
 import snd.komelia.ui.common.components.DescriptionChips
+import snd.komelia.ui.common.components.KomeliaPageScaffold
+import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.LabeledEntry.Companion.stringEntry
@@ -102,7 +106,7 @@ import snd.komelia.ui.common.images.SeriesThumbnail
 import snd.komelia.ui.common.menus.SeriesActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.common.menus.bulk.BooksBulkActionsContent
-import snd.komelia.ui.common.menus.bulk.BottomPopupBulkActionsPanel
+import snd.komelia.ui.common.menus.bulk.BottomBulkActionsPanel
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialog
 import snd.komelia.ui.dialogs.komf.mangabaka.KomfMangaBakaLinkDialog
 import snd.komelia.ui.dialogs.komf.mangabaka.KomfMangaBakaUnlinkDialog
@@ -184,129 +188,132 @@ fun SeriesContent(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
-            if (booksData.selectionMode) {
-                BooksBulkActionsToolbar(
-                    onCancel = { booksState.setSelectionMode(false) },
-                    books = booksData.books,
+    PauseGlassWhileBusy(scrollState.isScrollInProgress)
+    Column(Modifier.fillMaxSize()) {
+        KomeliaPageScaffold(modifier = Modifier.weight(1f), topBar = {
+            KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
+                if (booksData.selectionMode) {
+                    BooksBulkActionsToolbar(
+                        onCancel = { booksState.setSelectionMode(false) },
+                        books = booksData.books,
+                        actions = booksState.bookBulkMenuActions(),
+                        selectedBooks = booksData.selectedBooks,
+                        onBookSelect = booksState::onBookSelect
+                    )
+                } else {
+                    SeriesToolBar(
+                        series = series,
+                        seriesMenuActions = seriesMenuActions,
+                        onDownload = onDownload,
+                        mangaBaka = mangaBaka,
+                        onBackPress = onBackPress,
+                    )
+                }
+            }
+        }) { topInset ->
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                LazyVerticalGrid(
+                    state = scrollState,
+                    columns = snd.komelia.ui.common.itemlist.posterGridCells(gridMinWidth),
+                    horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                    verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                    contentPadding = PaddingValues(
+                        top = layout.topBarContentSpacing + topInset,
+                        bottom = layout.gridBottomPadding,
+                    ),
+                    modifier = Modifier
+                        .widthIn(max = layout.contentMaxWidth)
+                        .fillMaxSize()
+                        .padding(horizontal = layout.pageHorizontalPadding),
+                ) {
+
+                    if (series != null && library != null) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            if (mangaBaka != null) {
+                                MangaBakaSeriesContent(
+                                    series = series,
+                                    actions = seriesMenuActions,
+                                    library = library,
+                                    mangaBakaState = mangaBaka,
+                                    onLibraryClick = onLibraryClick
+                                )
+                            } else {
+                                Series(
+                                    series = series,
+                                    library = library,
+                                    onLibraryClick = onLibraryClick,
+                                    onFilterClick = onFilterClick,
+                                )
+                            }
+                        }
+
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            TabRow(
+                                currentTab = currentTab,
+                                onTabChange = onTabChange,
+                                showCollectionsTab = collectionsState.collections.isNotEmpty() && !booksData.selectionMode
+                            )
+                        }
+
+                        when (currentTab) {
+                            SeriesTab.BOOKS -> SeriesBooksContent(
+                                series = series,
+                                onBookClick = onBookClick,
+                                onBookReadClick = onBookReadClick,
+                                booksLoadState = booksLoadState,
+                                onBooksLayoutChange = booksState::onBookLayoutChange,
+                                onBooksPageSizeChange = booksState::onBookPageSizeChange,
+                                onPageChange = { page ->
+                                    pageNavigationState.request(page, booksState::onPageChange)
+                                },
+                                onBookSelect = booksState::onBookSelect,
+                                booksFilterState = booksState.filterState,
+                                bookContextMenuActions = bookMenuActions,
+                            )
+
+                            SeriesTab.COLLECTIONS -> item(span = { GridItemSpan(maxLineSpan) }) {
+                                SeriesCollectionsContent(
+                                    collections = collectionsState.collections,
+                                    onCollectionClick = onCollectionClick,
+                                    onSeriesClick = onSeriesClick,
+                                    cardWidth = collectionsState.cardWidth.collectAsState().value
+                                )
+                            }
+                        }
+                    }
+
+                }
+
+                val gridFullSpansCount = remember(currentTab, booksLoadState) {
+                    if (currentTab == SeriesTab.COLLECTIONS) return@remember 3
+
+                    val fullSpans = when (booksLoadState) {
+                        is LoadState.Success<BooksData> -> if (booksLoadState.value.totalPages > 1) 4 else 3
+                        else -> 2
+                    }
+                    when (booksData.layout) {
+                        BooksLayout.GRID -> fullSpans
+                        BooksLayout.LIST -> fullSpans + booksData.books.size
+                    }
+                }
+                VerticalScrollbarWithFullSpans(
+                    scrollState = scrollState,
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    fullSpanLines = gridFullSpansCount,
+                )
+            }
+        }
+
+        if (currentTab == SeriesTab.BOOKS &&
+            (width == COMPACT || width == MEDIUM) && booksData.selectedBooks.isNotEmpty()
+        ) {
+            BottomBulkActionsPanel {
+                BooksBulkActionsContent(
+                    books = booksData.selectedBooks,
                     actions = booksState.bookBulkMenuActions(),
-                    selectedBooks = booksData.selectedBooks,
-                    onBookSelect = booksState::onBookSelect
-                )
-            } else {
-                SeriesToolBar(
-                    series = series,
-                    seriesMenuActions = seriesMenuActions,
-                    onDownload = onDownload,
-                    mangaBaka = mangaBaka,
-                    onBackPress = onBackPress,
+                    compact = true
                 )
             }
-        }
-
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-            LazyVerticalGrid(
-                state = scrollState,
-                columns = snd.komelia.ui.common.itemlist.posterGridCells(gridMinWidth),
-                horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-                verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-                contentPadding = PaddingValues(
-                    top = layout.topBarContentSpacing,
-                    bottom = layout.gridBottomPadding,
-                ),
-                modifier = Modifier
-                    .widthIn(max = layout.contentMaxWidth)
-                    .fillMaxSize()
-                    .padding(horizontal = layout.pageHorizontalPadding),
-            ) {
-
-                if (series != null && library != null) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        if (mangaBaka != null) {
-                            MangaBakaSeriesContent(
-                                series = series,
-                                actions = seriesMenuActions,
-                                library = library,
-                                mangaBakaState = mangaBaka,
-                                onLibraryClick = onLibraryClick
-                            )
-                        } else {
-                            Series(
-                                series = series,
-                                library = library,
-                                onLibraryClick = onLibraryClick,
-                                onFilterClick = onFilterClick,
-                            )
-                        }
-                    }
-
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        TabRow(
-                            currentTab = currentTab,
-                            onTabChange = onTabChange,
-                            showCollectionsTab = collectionsState.collections.isNotEmpty() && !booksData.selectionMode
-                        )
-                    }
-
-                    when (currentTab) {
-                        SeriesTab.BOOKS -> SeriesBooksContent(
-                            series = series,
-                            onBookClick = onBookClick,
-                            onBookReadClick = onBookReadClick,
-                            booksLoadState = booksLoadState,
-                            onBooksLayoutChange = booksState::onBookLayoutChange,
-                            onBooksPageSizeChange = booksState::onBookPageSizeChange,
-                            onPageChange = { page ->
-                                pageNavigationState.request(page, booksState::onPageChange)
-                            },
-                            onBookSelect = booksState::onBookSelect,
-                            booksFilterState = booksState.filterState,
-                            bookContextMenuActions = bookMenuActions,
-                        )
-
-                        SeriesTab.COLLECTIONS -> item(span = { GridItemSpan(maxLineSpan) }) {
-                            SeriesCollectionsContent(
-                                collections = collectionsState.collections,
-                                onCollectionClick = onCollectionClick,
-                                onSeriesClick = onSeriesClick,
-                                cardWidth = collectionsState.cardWidth.collectAsState().value
-                            )
-                        }
-                    }
-                }
-
-            }
-
-            val gridFullSpansCount = remember(currentTab, booksLoadState) {
-                if (currentTab == SeriesTab.COLLECTIONS) return@remember 3
-
-                val fullSpans = when (booksLoadState) {
-                    is LoadState.Success<BooksData> -> if (booksLoadState.value.totalPages > 1) 4 else 3
-                    else -> 2
-                }
-                when (booksData.layout) {
-                    BooksLayout.GRID -> fullSpans
-                    BooksLayout.LIST -> fullSpans + booksData.books.size
-                }
-            }
-            VerticalScrollbarWithFullSpans(
-                scrollState = scrollState,
-                modifier = Modifier.align(Alignment.CenterEnd),
-                fullSpanLines = gridFullSpansCount,
-            )
-        }
-    }
-
-    if (currentTab == SeriesTab.BOOKS &&
-        (width == COMPACT || width == MEDIUM) && booksData.selectedBooks.isNotEmpty()
-    ) {
-        BottomPopupBulkActionsPanel {
-            BooksBulkActionsContent(
-                books = booksData.selectedBooks,
-                actions = booksState.bookBulkMenuActions(),
-                compact = true
-            )
         }
     }
 }
@@ -365,7 +372,7 @@ fun SeriesToolBar(
             Box {
                 var expandActions by remember { mutableStateOf(false) }
                 IconButton(onClick = { expandActions = true }) {
-                    Icon(Icons.Rounded.MoreVert, contentDescription = null)
+                    Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
                 }
 
                 SeriesActionsMenu(
@@ -385,7 +392,7 @@ fun SeriesToolBar(
             var showEditDialog by remember { mutableStateOf(false) }
             if (isAdmin && !isOffline) {
                 IconButton(onClick = { showEditDialog = true }) {
-                    Icon(Icons.Rounded.Edit, contentDescription = null)
+                    Icon(Icons.Rounded.Edit, contentDescription = stringResource(Res.string.series_edit))
                 }
             }
             var showDownloadConfirmationDialog by remember { mutableStateOf(false) }
@@ -394,7 +401,7 @@ fun SeriesToolBar(
                 IconButton(
                     onClick = { showDownloadConfirmationDialog = true },
                 ) {
-                    Icon(Icons.Default.Download, null)
+                    Icon(Icons.Default.Download, contentDescription = stringResource(Res.string.series_download))
                 }
             }
             if (showDownloadConfirmationDialog) {
@@ -425,7 +432,7 @@ fun SeriesActionMenuButton(
     Box {
         var expandActions by remember { mutableStateOf(false) }
         IconButton(onClick = { expandActions = true }) {
-            Icon(Icons.Rounded.MoreVert, contentDescription = null)
+            Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
         }
 
         SeriesActionsMenu(
@@ -451,7 +458,7 @@ fun SeriesEditDialogButton(series: KomeliaSeries) {
             tooltip = { PlainTooltip { Text(stringResource(Res.string.series_edit)) } }
         ) {
             IconButton(onClick = { showEditDialog = true }) {
-                Icon(Icons.Rounded.Edit, contentDescription = null)
+                Icon(Icons.Rounded.Edit, contentDescription = stringResource(Res.string.series_edit))
             }
         }
     }

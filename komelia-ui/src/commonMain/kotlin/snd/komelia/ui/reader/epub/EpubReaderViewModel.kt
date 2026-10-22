@@ -3,6 +3,8 @@ package snd.komelia.ui.reader.epub
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
+import kotlinx.coroutines.CancellationException
+import snd.komelia.settings.model.EpubReaderType
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.compose.ui.graphics.Color
 import snd.komelia.settings.model.EpubDisplaySettings
@@ -44,73 +46,73 @@ class EpubReaderViewModel(
 ) : StateScreenModel<LoadState<EpubReaderState>>(LoadState.Uninitialized) {
 
     val displaySettings = MutableStateFlow(EpubDisplaySettings())
+    val chromeAppearance = MutableStateFlow(EpubChromeAppearance())
+
+    private val retainedReader = RetainedEpubReader()
 
     override fun onDispose() {
-        (state.value as? LoadState.Success)?.value?.dispose()
+        retainedReader.dispose()
         super.onDispose()
     }
 
     suspend fun initialize(navigator: Navigator) {
+        if (state.value is LoadState.Loading) return
         displaySettings.value = epubSettingsRepository.getDisplaySettings().first()
-        when (val state = state.value) {
-            LoadState.Loading, is LoadState.Error -> {}
-            is LoadState.Success<EpubReaderState> -> state.value.initialize(navigator)
-            LoadState.Uninitialized -> {
-
-                when (epubSettingsRepository.getReaderType().first()) {
-                    KOMGA_EPUB -> {
-                        val komgaState = KomgaEpubReaderState(
-                            bookId = bookId,
-                            book = book,
-                            bookApi = bookApi,
-                            seriesApi = seriesApi,
-                            readListApi = readListApi,
-                            serverUrl = serverUrl,
-                            notifications = notifications,
-                            markReadProgress = markReadProgress,
-                            epubSettingsRepository = epubSettingsRepository,
-                            displaySettings = displaySettings,
-                            windowState = windowState,
-                            platformType = platformType,
-                            coroutineScope = screenModelScope,
-                            bookSiblingsContext = bookSiblingsContext,
-                        )
-                        komgaState.initialize(navigator)
-                        when (val res = komgaState.state.value) {
-                            is LoadState.Error -> mutableState.value = LoadState.Error(res.exception)
-                            is LoadState.Success<Unit> -> mutableState.value = LoadState.Success(komgaState)
-                            LoadState.Loading, LoadState.Uninitialized -> error("Unreachable. failed to initialize komga epub reader")
-                        }
-                    }
-
-                    TTSU_EPUB -> {
-                        val ttsuState = TtsuReaderState(
-                            bookId = bookId,
-                            book = book,
-                            bookApi = bookApi,
-                            notifications = notifications,
-                            markReadProgress = markReadProgress,
-                            serverUrl = serverUrl,
-                            epubSettingsRepository = epubSettingsRepository,
-                            displaySettings = displaySettings,
-                            localeTag = settingsRepository.getAppLanguage().first().explicitLocaleTag(),
-                            fontsRepository = fontsRepository,
-                            windowState = windowState,
-                            platformType = platformType,
-                            coroutineScope = screenModelScope,
-                            bookSiblingsContext = bookSiblingsContext,
-                        )
-                        ttsuState.initialize(navigator)
-                        when (val res = ttsuState.state.value) {
-                            is LoadState.Error -> mutableState.value = LoadState.Error(res.exception)
-                            is LoadState.Success<Unit> -> mutableState.value = LoadState.Success(ttsuState)
-                            LoadState.Loading, LoadState.Uninitialized -> error("Unreachable. failed to initialize ttsu epub reader")
-                        }
-                    }
-                }
+        val selectedType = epubSettingsRepository.getReaderType().first()
+        val reader = retainedReader.select(selectedType) { createReader(selectedType) }
+        if ((state.value as? LoadState.Success)?.value !== reader) mutableState.value = LoadState.Loading
+        try {
+            reader.initialize(navigator)
+            mutableState.value = when (val result = reader.state.value) {
+                is LoadState.Error -> LoadState.Error(result.exception)
+                is LoadState.Success -> LoadState.Success(reader)
+                LoadState.Loading, LoadState.Uninitialized -> error("EPUB reader did not initialize")
             }
+        } catch (cancelled: CancellationException) {
+            mutableState.value = LoadState.Uninitialized
+            throw cancelled
+        } catch (error: Exception) {
+            mutableState.value = LoadState.Error(error)
         }
     }
+
+    private suspend fun createReader(type: EpubReaderType): EpubReaderState = when (type) {
+        KOMGA_EPUB -> KomgaEpubReaderState(
+            bookId = bookId,
+            book = book,
+            bookApi = bookApi,
+            seriesApi = seriesApi,
+            readListApi = readListApi,
+            serverUrl = serverUrl,
+            notifications = notifications,
+            markReadProgress = markReadProgress,
+            epubSettingsRepository = epubSettingsRepository,
+            displaySettings = displaySettings,
+            chromeAppearance = chromeAppearance,
+            windowState = windowState,
+            platformType = platformType,
+            coroutineScope = screenModelScope,
+            bookSiblingsContext = bookSiblingsContext,
+        )
+        TTSU_EPUB -> TtsuReaderState(
+            bookId = bookId,
+            book = book,
+            bookApi = bookApi,
+            notifications = notifications,
+            markReadProgress = markReadProgress,
+            serverUrl = serverUrl,
+            epubSettingsRepository = epubSettingsRepository,
+            displaySettings = displaySettings,
+            chromeAppearance = chromeAppearance,
+            localeTag = settingsRepository.getAppLanguage().first().explicitLocaleTag(),
+            fontsRepository = fontsRepository,
+            windowState = windowState,
+            platformType = platformType,
+            coroutineScope = screenModelScope,
+            bookSiblingsContext = bookSiblingsContext,
+        )
+    }
+
 }
 
 interface EpubReaderState {

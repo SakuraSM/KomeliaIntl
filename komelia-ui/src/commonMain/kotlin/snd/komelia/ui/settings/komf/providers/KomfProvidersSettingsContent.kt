@@ -340,13 +340,13 @@ private fun CommonSettingsContent(
             currentValue = comicVineClientId ?: "",
             onValueSave = onComicVineClientIdSave,
             useEditButton = true,
-            label = { Text(stringResource(Res.string.komf_providers_comicvine_client_id)) }
+            label = stringResource(Res.string.komf_providers_comicvine_client_id)
         )
         SavableTextField(
             currentValue = malClientId ?: "",
             onValueSave = onMalClientIdSave,
             useEditButton = true,
-            label = { Text(stringResource(Res.string.komf_providers_mal_client_id)) }
+            label = stringResource(Res.string.komf_providers_mal_client_id)
         )
 
         HorizontalDivider()
@@ -807,14 +807,14 @@ private class ProviderSettingsTab(private val state: ProviderConfigState) : Dial
                 currentValue = remember(state.tagScoreThreshold) { state.tagScoreThreshold.toString() },
                 onValueSave = { state.onTagScoreThresholdChange(it.toInt()) },
                 valueChangePolicy = { it.toIntOrNull() != null },
-                label = { Text(stringResource(Res.string.komf_providers_anilist_tag_score_threshold)) }
+                label = stringResource(Res.string.komf_providers_anilist_tag_score_threshold)
             )
 
             SavableTextField(
                 currentValue = remember(state.tagSizeLimit) { state.tagSizeLimit.toString() },
                 onValueSave = { state.onTagSizeLimitChange(it.toInt()) },
                 valueChangePolicy = { it.toIntOrNull() != null },
-                label = { Text(stringResource(Res.string.komf_providers_anilist_tag_score_threshold)) }
+                label = stringResource(Res.string.komf_providers_anilist_tag_score_threshold)
             )
         }
     }

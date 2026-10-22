@@ -14,6 +14,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextOverflow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,7 +43,7 @@ import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.itemlist.SeriesLazyCardGrid
 import snd.komelia.ui.common.menus.CollectionActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
-import snd.komelia.ui.common.menus.bulk.BottomPopupBulkActionsPanel
+import snd.komelia.ui.common.menus.bulk.BottomBulkActionsPanel
 import snd.komelia.ui.common.menus.bulk.BulkActionsContainer
 import snd.komelia.ui.common.menus.bulk.CollectionBulkActionsContent
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
@@ -117,7 +120,7 @@ fun CollectionContent(
 
         val width = LocalWindowWidth.current
         if ((width == COMPACT || width == MEDIUM) && selectedSeries.isNotEmpty()) {
-            BottomPopupBulkActionsPanel {
+            BottomBulkActionsPanel {
                 CollectionBulkActionsContent(collection, selectedSeries, true)
             }
         }
@@ -142,14 +145,14 @@ private fun CollectionToolbar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 stringResource(Res.string.collection),
                 style = MaterialTheme.typography.labelMedium,
                 fontStyle = FontStyle.Italic
             )
             Spacer(Modifier.width(layout.controlSpacing))
-            Text(collection.name, style = MaterialTheme.typography.titleMedium)
+            Text(collection.name, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         SuggestionChip(
             onClick = {},
@@ -167,7 +170,7 @@ private fun CollectionToolbar(
             Box {
                 var expandActions by remember { mutableStateOf(false) }
                 IconButton(onClick = { expandActions = true }) {
-                    Icon(Icons.Rounded.MoreVert, null)
+                    Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more))
                 }
 
                 CollectionActionsMenu(
@@ -178,10 +181,9 @@ private fun CollectionToolbar(
                 )
             }
 
-            IconButton(onClick = onEditModeEnable) { Icon(Icons.Default.EditNote, null) }
+            IconButton(onClick = onEditModeEnable) { Icon(Icons.Default.EditNote, stringResource(Res.string.collection_edit)) }
         }
 
-        Spacer(Modifier.weight(1f))
         PageSizeSelectionDropdown(pageSize, onPageSizeChange)
     }
 }

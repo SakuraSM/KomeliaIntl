@@ -1,5 +1,10 @@
 package snd.komelia.ui.common.components
 
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.password_hide
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.password_show
+import org.jetbrains.compose.resources.stringResource
+
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -100,7 +105,7 @@ fun PasswordTextField(
                 Icons.Rounded.Visibility
             else Icons.Rounded.VisibilityOff
 
-            val description = if (passwordVisible) "Hide password" else "Show password"
+            val description = stringResource(if (passwordVisible) Res.string.password_hide else Res.string.password_show)
 
             IconButton(
                 onClick = { passwordVisible = !passwordVisible },

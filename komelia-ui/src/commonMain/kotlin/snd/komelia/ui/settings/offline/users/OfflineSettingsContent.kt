@@ -168,7 +168,7 @@ fun ServerCard(
 
             if (onServerDelete != null) {
                 IconButton(onClick = { showDeleteConfirmation = true }) {
-                    Icon(Icons.Default.Delete, null)
+                    Icon(Icons.Default.Delete, stringResource(Res.string.settings_offline_mode_users_delete_server_data))
                 }
 
                 if (showDeleteConfirmation) {
@@ -224,7 +224,7 @@ private fun UserCard(
         IconButton(
             onClick = { showDeleteConfirmation = true },
         ) {
-            Icon(Icons.Default.Delete, null)
+            Icon(Icons.Default.Delete, stringResource(Res.string.settings_offline_mode_users_delete_user_data))
         }
     }
 

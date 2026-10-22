@@ -17,6 +17,8 @@ import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.openFilePicker
 import io.github.vinceglb.filekit.name
 import io.ktor.http.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -78,6 +80,7 @@ class TtsuReaderState(
     private val platformType: PlatformType,
     private val coroutineScope: CoroutineScope,
     private val bookSiblingsContext: BookSiblingsContext,
+    private val chromeAppearance: StateFlow<EpubChromeAppearance> = MutableStateFlow(EpubChromeAppearance()),
 ) : EpubReaderState {
     override val state = MutableStateFlow<LoadState<Unit>>(LoadState.Uninitialized)
     override val book = MutableStateFlow(book)
@@ -87,6 +90,8 @@ class TtsuReaderState(
     val bookId = MutableStateFlow(bookId)
     private val webview = MutableStateFlow<KomeliaWebview?>(null)
     private val epubLoadTask = CompletableDeferred<TtuEpubData>()
+    private var epubLoadJob: Job? = null
+    private var webviewLoadJob: Job? = null
     private val availableSystemFonts = MutableStateFlow<List<String>>(emptyList())
     private val selectedFontFile = MutableStateFlow<PlatformFile?>(null)
     private val navigator = MutableStateFlow<Navigator?>(null)
@@ -102,9 +107,10 @@ class TtsuReaderState(
             Res.getUri("files/ttsu.html")
 
             if (book.value == null) book.value = bookApi.getOne(bookId.value)
-            coroutineScope.launch {
+            epubLoadJob = coroutineScope.launch {
                 runCatching { epubLoadTask.complete(generateEpubHtml(bookId.value)) }
                     .onFailure {
+                        if (it is CancellationException) throw it
                         logger.catching(it)
                         webview.value?.close()
                         state.value = LoadState.Error(it)
@@ -119,7 +125,8 @@ class TtsuReaderState(
 
     override fun onWebviewCreated(webview: KomeliaWebview) {
         this.webview.value = webview
-        coroutineScope.launch { loadEpub(webview) }
+        webviewLoadJob?.cancel()
+        webviewLoadJob = coroutineScope.launch { loadEpub(webview) }
     }
 
     override fun onBackButtonPress() {
@@ -138,6 +145,16 @@ class TtsuReaderState(
                 nav.replaceAll(MainScreen(screen))
             }
         }
+    }
+
+    override fun dispose() {
+        webviewLoadJob?.cancel()
+        epubLoadJob?.cancel()
+        if (!epubLoadTask.isCompleted) epubLoadTask.cancel()
+        val closing = webview.value
+        webview.value = null
+        closing?.navigate("about:blank")
+        closing?.close()
     }
 
     @OptIn(ExperimentalResourceApi::class)
@@ -161,6 +178,7 @@ class TtsuReaderState(
             )
         }
 
+        webview.bind<Unit, EpubChromeAppearance>("getChromeAppearance") { chromeAppearance.value }
         webview.bind<Unit, TtsuReaderSettings>("getSettings") {
             val settings = epubSettingsRepository.getTtsuReaderSettings()
             backgroundColor.value = ttsuReaderBackground(settings)

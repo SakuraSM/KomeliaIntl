@@ -7,6 +7,12 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.platform.LocalLayoutDirection
+import snd.komelia.ui.common.components.LocalNavigationBarInset
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -43,6 +49,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
@@ -90,6 +97,11 @@ import snd.komelia.ui.series.SeriesScreen
 import snd.komelia.ui.series.seriesScreen
 import snd.komelia.ui.settings.MobileSettingsScreen
 import snd.komelia.ui.settings.SettingsScreen
+import snd.komelia.ui.common.components.GlassBackdropScope
+import snd.komelia.ui.common.components.KomeliaChromeSurface
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.ui.common.components.glassBackdrop
+import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.ui.topbar.AppBar
 
 internal const val DISPOSE_DESTINATIONS_WHEN_HIDDEN = false
@@ -168,109 +180,126 @@ class MainScreen(
                 }
             }
 
-            CompositionLocalProvider(LocalAppNavigationController provides appNavigationController) {
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    Column(Modifier.komeliaTopBarScroll(topBarScrollState)) {
-                        if (platform != MOBILE) {
-                            AppBar(
-                                canNavigateBack = activeNavigator?.canPop == true,
-                                onNavigateBack = { activeNavigator?.pop() },
-                                currentScreen = activeNavigator?.lastItem,
-                                query = vm.searchBarState.currentQuery(),
-                                onQueryChange = vm.searchBarState::onQueryChange,
-                                isLoading = vm.searchBarState.isLoading,
-                                onSearchAllClick = { selectDestination(AppDestination.SEARCH, SearchScreen(it)) },
-                                searchResults = vm.searchBarState.searchResults(),
-                                libraryById = vm.searchBarState::getLibraryById,
-                                onBookClick = { selectDestination(AppDestination.LIBRARY, bookScreen(it)) },
-                                onSeriesClick = { selectDestination(AppDestination.LIBRARY, seriesScreen(it)) },
-                                onRefreshClick = vm::onScreenReload,
-                                notificationsState = vm.notificationsState,
-                                isOffline = vm.isOffline.collectAsState().value,
-                                onOfflineModeChange = vm::goOnline,
-                                isContentScrolled = topBarScrollState.isContentScrolled,
-                            )
-                        }
+            MainDestinationSurface(currentTab.destination) {
+                CompositionLocalProvider(LocalAppNavigationController provides appNavigationController) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        Column(Modifier.komeliaTopBarScroll(topBarScrollState)) {
+                            if (platform != MOBILE) {
+                                AppBar(
+                                    canNavigateBack = activeNavigator?.canPop == true,
+                                    onNavigateBack = { activeNavigator?.pop() },
+                                    currentScreen = activeNavigator?.lastItem,
+                                    query = vm.searchBarState.currentQuery(),
+                                    onQueryChange = vm.searchBarState::onQueryChange,
+                                    isLoading = vm.searchBarState.isLoading,
+                                    onSearchAllClick = { selectDestination(AppDestination.SEARCH, SearchScreen(it)) },
+                                    searchResults = vm.searchBarState.searchResults(),
+                                    libraryById = vm.searchBarState::getLibraryById,
+                                    onBookClick = { selectDestination(AppDestination.LIBRARY, bookScreen(it)) },
+                                    onSeriesClick = { selectDestination(AppDestination.LIBRARY, seriesScreen(it)) },
+                                    onRefreshClick = vm::onScreenReload,
+                                    notificationsState = vm.notificationsState,
+                                    isOffline = vm.isOffline.collectAsState().value,
+                                    onOfflineModeChange = vm::goOnline,
+                                    isContentScrolled = topBarScrollState.isContentScrolled,
+                                )
+                            }
 
-                        Scaffold(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentWindowInsets = if (platform == MOBILE) {
-                                WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
-                            } else {
-                                WindowInsets(0.dp)
-                            },
-                            bottomBar = {
-                                AnimatedVisibility(
-                                    visible = navigationPresentation(width) == NavigationPresentation.BottomBar,
-                                    enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
-                                        tween(
-                                            motion.duration(motion.containerDurationMillis),
-                                            easing = motion.standardEasing,
+                            Scaffold(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentWindowInsets = if (platform == MOBILE) {
+                                    WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+                                } else {
+                                    WindowInsets(0.dp)
+                                },
+                                bottomBar = {
+                                    AnimatedVisibility(
+                                        visible = navigationPresentation(width) == NavigationPresentation.BottomBar,
+                                        enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
+                                            tween(
+                                                motion.duration(motion.containerDurationMillis),
+                                                easing = motion.standardEasing,
+                                            ),
                                         ),
-                                    ),
-                                    exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
-                                        tween(
-                                            motion.duration(motion.containerDurationMillis),
-                                            easing = motion.standardEasing,
+                                        exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
+                                            tween(
+                                                motion.duration(motion.containerDurationMillis),
+                                                easing = motion.standardEasing,
+                                            ),
                                         ),
-                                    ),
+                                    ) {
+                                        AppBottomBar(currentTab.destination, ::selectDestination)
+                                    }
+                                },
+                            ) { contentPadding ->
+                                val floatingBar = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS &&
+                                    navigationPresentation(width) == NavigationPresentation.BottomBar
+                                val bottomInset = if (floatingBar) contentPadding.calculateBottomPadding() else 0.dp
+                                val direction = LocalLayoutDirection.current
+                                val layout = LocalKomeliaLayout.current
+                                Row(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(PaddingValues(
+                                            start = contentPadding.calculateLeftPadding(direction),
+                                            top = contentPadding.calculateTopPadding(),
+                                            end = contentPadding.calculateRightPadding(direction),
+                                            bottom = if (floatingBar) 0.dp else contentPadding.calculateBottomPadding(),
+                                        )),
                                 ) {
-                                    AppBottomBar(currentTab.destination, ::selectDestination)
-                                }
-                            },
-                        ) { contentPadding ->
-                            Row(
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(contentPadding),
-                            ) {
-                                AnimatedVisibility(
-                                    visible = navigationPresentation(width) == NavigationPresentation.Rail,
-                                    enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
-                                        tween(
-                                            motion.duration(motion.containerDurationMillis),
-                                            easing = motion.standardEasing,
+                                    AnimatedVisibility(
+                                        visible = navigationPresentation(width) == NavigationPresentation.Rail,
+                                        enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
+                                            tween(
+                                                motion.duration(motion.containerDurationMillis),
+                                                easing = motion.standardEasing,
+                                            ),
                                         ),
-                                    ),
-                                    exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
-                                        tween(
-                                            motion.duration(motion.containerDurationMillis),
-                                            easing = motion.standardEasing,
+                                        exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
+                                            tween(
+                                                motion.duration(motion.containerDurationMillis),
+                                                easing = motion.standardEasing,
+                                            ),
                                         ),
-                                    ),
-                                ) {
-                                    AppNavigationRail(currentTab.destination, ::selectDestination)
-                                }
+                                    ) {
+                                        AppNavigationRail(currentTab.destination, ::selectDestination)
+                                    }
 
-                                SingleLayerDestinationTransition(
-                                    targetTab = currentTab,
-                                    modifier = Modifier.weight(1f),
-                                ) { tab ->
-                                    tabNavigator.saveableState("destination", tab) {
-                                        Navigator(
-                                            screens = tab.initialScreens,
-                                            onBackPressed = null,
-                                            key = "$key-destination-${tab.destination.name.lowercase()}",
-                                        ) { navigator ->
-                                            SideEffect {
-                                                sessionNavigators.register(tab.destination, navigator)
-                                                if (tabNavigator.current == tab) {
-                                                    activeNavigator = navigator
-                                                    activeDestination = tab.destination
-                                                    vm.initialize(navigator)
+                                    CompositionLocalProvider(
+                                        LocalNavigationBarInset provides bottomInset,
+                                        LocalKomeliaLayout provides layout.copy(gridBottomPadding = layout.gridBottomPadding + bottomInset),
+                                    ) {
+                                        SingleLayerDestinationTransition(
+                                            targetTab = currentTab,
+                                            modifier = Modifier.weight(1f).glassBackdrop(),
+                                        ) { tab ->
+                                            tabNavigator.saveableState("destination", tab) {
+                                                Navigator(
+                                                    screens = tab.initialScreens,
+                                                    onBackPressed = null,
+                                                    key = "$key-destination-${tab.destination.name.lowercase()}",
+                                                ) { navigator ->
+                                                    SideEffect {
+                                                        sessionNavigators.register(tab.destination, navigator)
+                                                        if (tabNavigator.current == tab) {
+                                                            activeNavigator = navigator
+                                                            activeDestination = tab.destination
+                                                            vm.initialize(navigator)
+                                                        }
+                                                    }
+                                                    LaunchedEffect(tab, pendingScreen) {
+                                                        val pending = pendingScreen
+                                                        if (tabNavigator.current == tab && pending?.first == tab.destination) {
+                                                            navigator.replaceAll(destinationStack(tab.rootScreen, pending.second))
+                                                            pendingScreen = null
+                                                        }
+                                                    }
+                                                    DestinationContent(navigator)
                                                 }
                                             }
-                                            LaunchedEffect(tab, pendingScreen) {
-                                                val pending = pendingScreen
-                                                if (tabNavigator.current == tab && pending?.first == tab.destination) {
-                                                    navigator.replaceAll(destinationStack(tab.rootScreen, pending.second))
-                                                    pendingScreen = null
-                                                }
-                                            }
-                                            DestinationContent(navigator)
                                         }
                                     }
                                 }
@@ -278,8 +307,8 @@ class MainScreen(
                         }
                     }
                 }
-            }
 
+            }
             val backAction = appBackAction(activeNavigator?.canPop == true, currentTab.destination)
             if (backAction != AppBackAction.ExitApp) {
                 BackPressHandler {
@@ -451,22 +480,30 @@ private fun AppBottomBar(
     selected: AppDestination,
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp,
-        windowInsets = WindowInsets.navigationBars,
+    val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
+    KomeliaChromeSurface(
+        modifier = if (floating) Modifier.navigationBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp) else Modifier,
+        shape = RoundedCornerShape(if (floating) 28.dp else 0.dp),
+        shadowElevation = if (floating) 4.dp else 0.dp,
     ) {
-        CompositionLocalProvider(LocalRippleConfiguration provides null) {
-            destinationItems.forEach { item ->
-                NavigationBarItem(
-                    selected = selected == item.destination,
-                    onClick = { onSelect(item.destination, null) },
-                    icon = { DestinationIcon(item) },
-                    label = { Text(stringResource(item.label)) },
-                )
+        NavigationBar(
+            containerColor = Color.Transparent,
+            tonalElevation = 0.dp,
+            windowInsets = if (floating) WindowInsets(0.dp) else WindowInsets.navigationBars,
+        ) {
+            CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                destinationItems.forEach { item ->
+                    NavigationBarItem(
+                        selected = selected == item.destination,
+                        onClick = { onSelect(item.destination, null) },
+                        icon = { DestinationIcon(item) },
+                        label = { Text(stringResource(item.label)) },
+                    )
+                }
             }
         }
     }
+
 }
 
 @Composable
@@ -475,24 +512,45 @@ private fun AppNavigationRail(
     selected: AppDestination,
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
-    NavigationRail(
-        containerColor = MaterialTheme.colorScheme.surface,
-        windowInsets = WindowInsets.navigationBars,
+    val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
+    KomeliaChromeSurface(
+        modifier = if (floating) Modifier.padding(8.dp) else Modifier,
+        shape = RoundedCornerShape(if (floating) 28.dp else 0.dp),
     ) {
-        CompositionLocalProvider(LocalRippleConfiguration provides null) {
-            destinationItems.forEach { item ->
-                NavigationRailItem(
-                    selected = selected == item.destination,
-                    onClick = { onSelect(item.destination, null) },
-                    icon = { DestinationIcon(item) },
-                    label = { Text(stringResource(item.label)) },
-                )
+        NavigationRail(
+            containerColor = Color.Transparent,
+            windowInsets = WindowInsets.navigationBars,
+        ) {
+            CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                destinationItems.forEach { item ->
+                    NavigationRailItem(
+                        selected = selected == item.destination,
+                        onClick = { onSelect(item.destination, null) },
+                        icon = { DestinationIcon(item) },
+                        label = { Text(stringResource(item.label)) },
+                    )
+                }
             }
         }
     }
+
 }
 
 @Composable
 private fun DestinationIcon(item: DestinationItem) {
     Icon(item.icon, contentDescription = stringResource(item.label))
+}
+
+/** Owns the effective chrome for a destination without changing the saved appearance. */
+@Composable
+internal fun MainDestinationSurface(destination: AppDestination, content: @Composable () -> Unit) {
+    val appearance = LocalSurfaceAppearance.current
+    // Search exceeded the mobile frame budget even with capture paused. Use the solid
+    // navigation layout too, so scrolling and pull-to-refresh do not render beneath it.
+    val effective = if (destination == AppDestination.SEARCH && LocalPlatform.current == MOBILE) {
+        appearance.copy(style = AppSurfaceStyle.CLASSIC)
+    } else appearance
+    CompositionLocalProvider(LocalSurfaceAppearance provides effective) {
+        GlassBackdropScope(content)
+    }
 }

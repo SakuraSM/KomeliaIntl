@@ -1,6 +1,14 @@
 package snd.komelia.ui.common.components
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.foundation.BasicTooltipBox
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -98,6 +106,8 @@ fun <T> DropdownChoiceMenu(
     enabled: Boolean = true,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val anchorFocus = rememberMenuAnchorFocus(isExpanded)
+    val anchorInteraction = remember { MutableInteractionSource() }
     val selectedLabel = selectedOption?.let { localizedEnumLabel(it.value, it.label) }.orEmpty()
     ExposedDropdownMenuBox(
         modifier = modifier,
@@ -105,8 +115,17 @@ fun <T> DropdownChoiceMenu(
         onExpandedChange = { if (enabled) isExpanded = it },
     ) {
         InputField(
+            interactionSource = anchorInteraction,
             value = selectedLabel,
             modifier = Modifier
+                .focusRequester(anchorFocus)
+                .onKeyEvent { event ->
+                    if (enabled && event.type == KeyEventType.KeyUp && event.key in listOf(Key.Enter, Key.Spacebar, Key.DirectionDown)) {
+                        isExpanded = true
+                        true
+                    } else false
+                }
+                .focusable(enabled = enabled, interactionSource = anchorInteraction)
                 .menuAnchor(PrimaryNotEditable, enabled = enabled)
                 .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
                 .then(inputFieldModifier),
@@ -152,6 +171,8 @@ fun <T> DropdownMultiChoiceMenu(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val anchorFocus = rememberMenuAnchorFocus(isExpanded)
+    val anchorInteraction = remember { MutableInteractionSource() }
     val selectedLabels = mutableListOf<String>()
     for (option in selectedOptions) {
         selectedLabels += localizedEnumLabel(option.value, option.label)
@@ -162,10 +183,19 @@ fun <T> DropdownMultiChoiceMenu(
         onExpandedChange = { isExpanded = it },
     ) {
         InputField(
+            interactionSource = anchorInteraction,
             value = selectedLabels.joinToString().ifBlank {
                 placeholder ?: stringResource(Res.string.filter_any_value)
             },
             modifier = Modifier
+                .focusRequester(anchorFocus)
+                .onKeyEvent { event ->
+                    if (event.type == KeyEventType.KeyUp && event.key in listOf(Key.Enter, Key.Spacebar, Key.DirectionDown)) {
+                        isExpanded = true
+                        true
+                    } else false
+                }
+                .focusable(interactionSource = anchorInteraction)
                 .menuAnchor(PrimaryNotEditable)
                 .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
                 .then(inputFieldModifier),
@@ -197,6 +227,7 @@ fun <T> DropdownMultiChoiceMenu(
 
 @Composable
 private fun InputField(
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     value: String,
     modifier: Modifier,
     label: @Composable (() -> Unit)? = null,
@@ -204,7 +235,7 @@ private fun InputField(
     color: Color,
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    val focused by interactionSource.collectIsFocusedAsState()
     Surface(
         shadowElevation = 1.dp,
         color = color,
@@ -213,6 +244,7 @@ private fun InputField(
             .indication(interactionSource, LocalIndication.current)
             .hoverable(interactionSource)
             .then(modifier)
+            .border(if (focused) 2.dp else 0.dp, if (focused) MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(5.dp))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -765,4 +797,15 @@ data class LabeledEntry<T>(
         fun stringEntry(value: String): LabeledEntry<String> = LabeledEntry(value, value)
 
     }
+}
+
+@Composable
+private fun rememberMenuAnchorFocus(expanded: Boolean): FocusRequester {
+    val requester = remember { FocusRequester() }
+    var wasExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(expanded) {
+        if (wasExpanded && !expanded) requester.requestFocus()
+        wasExpanded = expanded
+    }
+    return requester
 }

@@ -25,6 +25,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -43,6 +44,8 @@ import snd.komelia.settings.model.ReaderType.PANELS
 import snd.komelia.ui.LocalNotifications
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowState
+import snd.komelia.ui.common.components.GlassBackdropScope
+import snd.komelia.ui.common.components.glassBackdrop
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType.MOBILE
@@ -77,9 +80,12 @@ fun ReaderContent(
     var showHelpDialog by remember { mutableStateOf(false) }
     var showSettingsMenu by remember { mutableStateOf(false) }
     var settingsDialogOpen by remember { mutableStateOf(false) }
-    LaunchedEffect(showSettingsMenu, settingsDialogOpen, pageShareAction?.isSharing) {
+    val controlsTimeout = LocalAccessibilityManager.current?.calculateRecommendedTimeoutMillis(
+        originalTimeoutMillis = 4_000, containsIcons = true, containsText = true, containsControls = true,
+    ) ?: 4_000L
+    LaunchedEffect(showSettingsMenu, settingsDialogOpen, pageShareAction?.isSharing, controlsTimeout) {
         if (showSettingsMenu && !settingsDialogOpen && pageShareAction?.isSharing != true) {
-            delay(4_000)
+            delay(controlsTimeout)
             showSettingsMenu = false
         }
     }
@@ -98,6 +104,7 @@ fun ReaderContent(
 
     val topLevelFocus = remember { FocusRequester() }
     val volumeKeysNavigation = commonReaderState.volumeKeysNavigation.collectAsState().value
+    val areaSize = screenScaleState.areaSize.collectAsState()
     var hasFocus by remember { mutableStateOf(false) }
 
     val isMobile = LocalPlatform.current == MOBILE
@@ -109,103 +116,104 @@ fun ReaderContent(
             ReaderBackAction.Exit -> onExit()
         }
     }
-    Box(
-        Modifier
-            .fillMaxSize()
-            .onSizeChanged {
-                screenScaleState.setAreaSize(it)
-            }
-            .focusable()
-            .focusRequester(topLevelFocus)
-            .onFocusChanged { hasFocus = it.hasFocus }
-            .onKeyEvent { event ->
-                if (event.type != KeyUp) return@onKeyEvent false
-
-                var consumed = true
-                when (event.key) {
-                    Key.M -> showSettingsMenu = !showSettingsMenu
-                    Key.Escape -> showSettingsMenu = false
-                    Key.H -> showHelpDialog = true
-                    Key.DirectionLeft -> if (event.isAltPressed) onExit() else consumed = false
-                    Key.U -> commonReaderState.onStretchToFitCycle()
-                    Key.C -> if (event.isAltPressed) commonReaderState.onColorCorrectionDisable() else consumed = false
-                    else -> consumed = false
+    GlassBackdropScope {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .onSizeChanged {
+                    screenScaleState.setAreaSize(it)
                 }
-                consumed
+                .focusable()
+                .focusRequester(topLevelFocus)
+                .onFocusChanged { hasFocus = it.hasFocus }
+                .onKeyEvent { event ->
+                    if (event.type != KeyUp) return@onKeyEvent false
+
+                    var consumed = true
+                    when (event.key) {
+                        Key.M -> showSettingsMenu = !showSettingsMenu
+                        Key.Escape -> showSettingsMenu = false
+                        Key.H -> showHelpDialog = true
+                        Key.DirectionLeft -> if (event.isAltPressed) onExit() else consumed = false
+                        Key.U -> commonReaderState.onStretchToFitCycle()
+                        Key.C -> if (event.isAltPressed) commonReaderState.onColorCorrectionDisable() else consumed = false
+                        else -> consumed = false
+                    }
+                    consumed
+                }
+        ) {
+            if (areaSize.value == IntSize.Zero) {
+                LoadingMaxSizeIndicator()
+                return@Box
             }
-    ) {
-        val areaSize = screenScaleState.areaSize.collectAsState()
-        if (areaSize.value == IntSize.Zero) {
-            LoadingMaxSizeIndicator()
-            return
+
+            Box(Modifier.fillMaxSize().glassBackdrop(active = showSettingsMenu)) {
+                when (commonReaderState.readerType.collectAsState().value) {
+                    PAGED -> {
+                        PagedReaderContent(
+                            showHelpDialog = showHelpDialog,
+                            onShowHelpDialogChange = { showHelpDialog = it },
+                            showSettingsMenu = showSettingsMenu,
+                            onShowSettingsMenuChange = { showSettingsMenu = it },
+                            screenScaleState = screenScaleState,
+                            pagedReaderState = pagedReaderState,
+                            volumeKeysNavigation = volumeKeysNavigation
+                        )
+                    }
+
+                    CONTINUOUS -> {
+                        ContinuousReaderContent(
+                            showHelpDialog = showHelpDialog,
+                            onShowHelpDialogChange = { showHelpDialog = it },
+                            showSettingsMenu = showSettingsMenu,
+                            onShowSettingsMenuChange = { showSettingsMenu = it },
+                            screenScaleState = screenScaleState,
+                            continuousReaderState = continuousReaderState,
+                            volumeKeysNavigation = volumeKeysNavigation
+                        )
+                    }
+
+                    PANELS -> {
+                        check(panelsReaderState != null)
+                        PanelsReaderContent(
+                            showHelpDialog = showHelpDialog,
+                            onShowHelpDialogChange = { showHelpDialog = it },
+                            showSettingsMenu = showSettingsMenu,
+                            onShowSettingsMenuChange = { showSettingsMenu = it },
+                            screenScaleState = screenScaleState,
+                            panelsReaderState = panelsReaderState,
+                            volumeKeysNavigation = volumeKeysNavigation
+                        )
+                    }
+
+                }
+
+            }
+            SettingsOverlay(
+                show = showSettingsMenu,
+                commonReaderState = commonReaderState,
+                pagedReaderState = pagedReaderState,
+                continuousReaderState = continuousReaderState,
+                panelsReaderState = panelsReaderState,
+                onnxRuntimeSettingsState = onnxRuntimeSettingsState,
+                screenScaleState = screenScaleState,
+                isColorCorrectionsActive = isColorCorrectionActive,
+                onColorCorrectionClick = onColorCorrectionClick,
+                onBackPress = onExit,
+                ohShowHelpDialogChange = { showHelpDialog = it },
+                onSettingsDialogVisibilityChange = { settingsDialogOpen = it },
+                pageShareAction = pageShareAction,
+            )
+
+            EInkFlashOverlay(
+                enabled = commonReaderState.flashOnPageChange.collectAsState().value,
+                pageChangeFlow = commonReaderState.pageChangeFlow,
+                flashEveryNPages = commonReaderState.flashEveryNPages.collectAsState().value,
+                flashWith = commonReaderState.flashWith.collectAsState().value,
+                flashDuration = commonReaderState.flashDuration.collectAsState().value
+            )
         }
-
-        when (commonReaderState.readerType.collectAsState().value) {
-            PAGED -> {
-                PagedReaderContent(
-                    showHelpDialog = showHelpDialog,
-                    onShowHelpDialogChange = { showHelpDialog = it },
-                    showSettingsMenu = showSettingsMenu,
-                    onShowSettingsMenuChange = { showSettingsMenu = it },
-                    screenScaleState = screenScaleState,
-                    pagedReaderState = pagedReaderState,
-                    volumeKeysNavigation = volumeKeysNavigation
-                )
-            }
-
-            CONTINUOUS -> {
-                ContinuousReaderContent(
-                    showHelpDialog = showHelpDialog,
-                    onShowHelpDialogChange = { showHelpDialog = it },
-                    showSettingsMenu = showSettingsMenu,
-                    onShowSettingsMenuChange = { showSettingsMenu = it },
-                    screenScaleState = screenScaleState,
-                    continuousReaderState = continuousReaderState,
-                    volumeKeysNavigation = volumeKeysNavigation
-                )
-            }
-
-            PANELS -> {
-                check(panelsReaderState != null)
-                PanelsReaderContent(
-                    showHelpDialog = showHelpDialog,
-                    onShowHelpDialogChange = { showHelpDialog = it },
-                    showSettingsMenu = showSettingsMenu,
-                    onShowSettingsMenuChange = { showSettingsMenu = it },
-                    screenScaleState = screenScaleState,
-                    panelsReaderState = panelsReaderState,
-                    volumeKeysNavigation = volumeKeysNavigation
-                )
-            }
-
-        }
-
-        SettingsOverlay(
-            show = showSettingsMenu,
-            commonReaderState = commonReaderState,
-            pagedReaderState = pagedReaderState,
-            continuousReaderState = continuousReaderState,
-            panelsReaderState = panelsReaderState,
-            onnxRuntimeSettingsState = onnxRuntimeSettingsState,
-            screenScaleState = screenScaleState,
-            isColorCorrectionsActive = isColorCorrectionActive,
-            onColorCorrectionClick = onColorCorrectionClick,
-            onBackPress = onExit,
-            ohShowHelpDialogChange = { showHelpDialog = it },
-            onSettingsDialogVisibilityChange = { settingsDialogOpen = it },
-            pageShareAction = pageShareAction,
-        )
-
-        EInkFlashOverlay(
-            enabled = commonReaderState.flashOnPageChange.collectAsState().value,
-            pageChangeFlow = commonReaderState.pageChangeFlow,
-            flashEveryNPages = commonReaderState.flashEveryNPages.collectAsState().value,
-            flashWith = commonReaderState.flashWith.collectAsState().value,
-            flashDuration = commonReaderState.flashDuration.collectAsState().value
-        )
-    }
-    LaunchedEffect(hasFocus) {
-        if (!hasFocus) topLevelFocus.requestFocus()
+        ReaderKeyboardFocusEffect(areaSize.value != IntSize.Zero, hasFocus, topLevelFocus)
     }
 }
 

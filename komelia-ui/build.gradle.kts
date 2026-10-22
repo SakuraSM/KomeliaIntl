@@ -62,6 +62,7 @@ kotlin {
             api(libs.compose.material3)
             api(libs.compose.materialIconsExtended)
             api(libs.compose.resources)
+            implementation(libs.haze.glass)
 
             implementation(libs.kotlin.logging)
             implementation(libs.kotlinx.datetime)

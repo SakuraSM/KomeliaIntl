@@ -4,6 +4,25 @@ Use the repository templates for every Release and fixed-issue reply. Do not rew
 
 Choose the version with [Version releases](versioning.md) before you prepare the notes.
 
+## Build installers before creating the immutable tag
+
+The desktop workflow supports `upload: false` to validate and build a release candidate from the
+selected workflow ref without creating a tag or changing a Release. It still checks the version
+increment and retains the DEB and MSI as workflow artifacts. Each platform installs and launches
+its package, then captures the application window and startup logs in a separate runtime-evidence
+artifact. Inspect the screenshots to confirm that the expected page rendered; a live process alone
+does not prove that the application initialized. For example:
+
+```shell
+gh workflow run release-desktop.yml --ref chore/release-X.Y.Z \
+  -f tag=vX.Y.Z -f level=minor -f platform=all -F upload=false
+```
+
+Verify the workflow's source commit and package contents before creating the final tag. The tagged
+tree must match the tested source tree. Then create a draft Release and upload the verified files.
+The default `upload: true` mode checks that the Release is still a draft immediately before each
+upload, and refuses to upload when it has been published.
+
 ## Prepare release notes
 
 1. Set the Release title to `Komelia vMAJOR.MINOR.PATCH` for stable releases or `Komelia vMAJOR.MINOR.PATCH-beta.N` for Beta releases. Do not use `Komelia Intl`. Do not omit the `v` or use only the version number.

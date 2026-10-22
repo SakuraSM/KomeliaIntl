@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing draft release tag, for example v0.20.0-beta.1
+        description: Version tag to build; must identify an existing draft Release when upload is enabled
         required: true
         type: string
       level:
@@ -24,6 +24,11 @@ on:
           - all
           - linux
           - windows
+      upload:
+        description: Upload installers to the existing draft Release after building
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -42,6 +47,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
           RELEASE_LEVEL: ${{ inputs.level }}
+          UPLOAD_ASSETS: ${{ inputs.upload }}
         run: |
           scripts/test-release-policy.sh
           previous_tag=$(gh release list --repo "$GITHUB_REPOSITORY" \
@@ -52,15 +58,18 @@ jobs:
             --tag "$RELEASE_TAG" \
             --previous "${previous_tag#v}" \
             --level "$RELEASE_LEVEL"
-          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
-            --json body --jq .body > /tmp/komelia-release-notes.md
-          release_title=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
-            --json name --jq .name)
-          scripts/check-release-notes.sh \
-            --file /tmp/komelia-release-notes.md \
-            --version "${RELEASE_TAG#v}" \
-            --title "$release_title" \
-            --level "$RELEASE_LEVEL"
+          if [[ "$UPLOAD_ASSETS" == 'true' ]]; then
+            test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+            gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --json body --jq .body > /tmp/komelia-release-notes.md
+            release_title=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --json name --jq .name)
+            scripts/check-release-notes.sh \
+              --file /tmp/komelia-release-notes.md \
+              --version "${RELEASE_TAG#v}" \
+              --title "$release_title" \
+              --level "$RELEASE_LEVEL"
+          fi
 
   linux:
     needs: validate
@@ -108,6 +117,23 @@ jobs:
           name: linux-installer
           path: release-artifacts/*
           if-no-files-found: error
+      - name: Install and launch the Linux package
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends xvfb xauth xdotool imagemagick libwebkit2gtk-4.1-0 libsecret-1-0
+          package=$(find release-artifacts -name '*.deb' -print -quit)
+          sudo apt-get install -y "$PWD/$package"
+          package_name=$(dpkg-deb -f "$package" Package)
+          launcher=$(dpkg -L "$package_name" | rg '/bin/Komelia$' | head -n 1)
+          test -x "$launcher"
+          SKIKO_RENDER_API=SOFTWARE xvfb-run -a --server-args='-screen 0 1440x1000x24' \
+            bash scripts/desktop-smoke-linux.sh "$launcher" "$PWD/runtime-evidence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-runtime-evidence
+          path: runtime-evidence
+          if-no-files-found: warn
 
   windows-native:
     needs: validate
@@ -179,9 +205,21 @@ jobs:
           name: windows-installer
           path: release-artifacts/*
           if-no-files-found: error
+      - name: Install and launch the Windows package
+        shell: pwsh
+        run: |
+          $installer = (Get-ChildItem release-artifacts -Filter '*.msi' | Select-Object -First 1).FullName
+          ./scripts/desktop-smoke-windows.ps1 -Installer $installer -Evidence runtime-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-runtime-evidence
+          path: runtime-evidence
+          if-no-files-found: warn
 
   upload-linux:
     needs: linux
+    if: ${{ inputs.upload }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -192,10 +230,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
-        run: gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
+        run: |
+          test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+          gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
 
   upload-windows:
     needs: windows
+    if: ${{ inputs.upload }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -206,4 +247,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
-        run: gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
+        run: |
+          test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+          gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"

@@ -180,7 +180,7 @@ class MainScreen(
                 }
             }
 
-            GlassBackdropScope {
+            MainDestinationSurface(currentTab.destination) {
                 CompositionLocalProvider(LocalAppNavigationController provides appNavigationController) {
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
@@ -539,4 +539,18 @@ private fun AppNavigationRail(
 @Composable
 private fun DestinationIcon(item: DestinationItem) {
     Icon(item.icon, contentDescription = stringResource(item.label))
+}
+
+/** Owns the effective chrome for a destination without changing the saved appearance. */
+@Composable
+internal fun MainDestinationSurface(destination: AppDestination, content: @Composable () -> Unit) {
+    val appearance = LocalSurfaceAppearance.current
+    // Search exceeded the mobile frame budget even with capture paused. Use the solid
+    // navigation layout too, so scrolling and pull-to-refresh do not render beneath it.
+    val effective = if (destination == AppDestination.SEARCH && LocalPlatform.current == MOBILE) {
+        appearance.copy(style = AppSurfaceStyle.CLASSIC)
+    } else appearance
+    CompositionLocalProvider(LocalSurfaceAppearance provides effective) {
+        GlassBackdropScope(content)
+    }
 }

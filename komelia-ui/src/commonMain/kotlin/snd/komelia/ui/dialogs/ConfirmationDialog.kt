@@ -37,6 +37,7 @@ fun ConfirmationDialog(
     buttonConfirm: String = stringResource(Res.string.dialog_confirm),
     buttonAlternate: String? = null,
     buttonConfirmColor: Color = MaterialTheme.colorScheme.secondaryContainer,
+    dismissOnConfirm: Boolean = true,
     onDialogConfirm: () -> Unit,
     onDialogConfirmAlternate: () -> Unit = {},
     onDialogDismiss: () -> Unit,
@@ -93,7 +94,7 @@ fun ConfirmationDialog(
                 FilledTonalButton(
                     onClick = {
                         onDialogConfirm()
-                        onDialogDismiss()
+                        if (dismissOnConfirm) onDialogDismiss()
                     },
                     enabled = confirmText == null || confirmed,
                     colors = ButtonDefaults.filledTonalButtonColors(

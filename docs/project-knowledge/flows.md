@@ -10,6 +10,16 @@
 
 Risk points: duplicate state owners, platform-specific behavior leaking into common code, failed requests represented as empty data, and persistence changes without migration tests.
 
+## Optional series metadata
+
+1. Load the base Komga series or collection page through the existing authenticated API.
+2. When both Komf integration and MangaBaka are enabled, fetch linked metadata within a three-second budget.
+3. Preserve series identity, ordering, pagination and reading counts while attaching optional metadata. A failed enrichment retains the base result and produces a localized notice; a failed Komga request still fails normally.
+4. Load MangaBaka tag suggestions separately from the detail page's loading state. Local-library routes do not request those suggestions.
+5. On cancellation, propagate cancellation instead of publishing a successful fallback. Repeated enrichment failures emit one notice until that loader observes a successful response.
+
+Risk points: optional service failures replacing useful catalog content, local IDs reaching Komf, changed pagination, and saved series JSON lacking the new optional field.
+
 ## Remote and LAN selection
 
 Each `MainScreen` owns a serializable navigation identity. A new login gets a new identity; Activity recreation retains the current one. `SessionNavigators` retains destination navigators while a reader hides their composition and disposes their screen models when the owning main-screen session ends. Unconditionally disposing nested navigators on composition removal would also destroy the reader's return stack.

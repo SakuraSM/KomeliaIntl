@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.map
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.komga.api.KomgaApi
 import snd.komelia.offline.local.isLocalLibrary
+import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.book.BookViewModel
 import snd.komelia.ui.collection.CollectionViewModel
 import snd.komelia.ui.color.ColorCorrectionViewModel
@@ -28,6 +29,8 @@ import snd.komelia.ui.dialogs.collectionedit.CollectionEditDialogViewModel
 import snd.komelia.ui.dialogs.filebrowser.FileBrowserDialogViewModel
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialogViewModel
 import snd.komelia.ui.dialogs.komf.identify.KomfLibraryIdentifyViewmodel
+import snd.komelia.ui.dialogs.komf.mangabaka.KomfMangaBakaLinkViewModel
+import snd.komelia.ui.dialogs.komf.mangabaka.KomfMangaBakaUnlinkViewModel
 import snd.komelia.ui.dialogs.komf.reset.KomfResetMetadataDialogViewModel
 import snd.komelia.ui.dialogs.libraryedit.LibraryEditDialogViewModel
 import snd.komelia.ui.dialogs.oneshot.OneshotEditDialogViewModel
@@ -64,6 +67,7 @@ import snd.komelia.ui.settings.imagereader.DefaultColorCorrectionDependencies
 import snd.komelia.ui.settings.komf.KomfSharedState
 import snd.komelia.ui.settings.komf.general.KomfSettingsViewModel
 import snd.komelia.ui.settings.komf.jobs.KomfJobsViewModel
+import snd.komelia.ui.settings.komf.mangabaka.KomfMangaBakaSettingsViewModel
 import snd.komelia.ui.settings.komf.notifications.KomfNotificationSettingsViewModel
 import snd.komelia.ui.settings.komf.processing.KomfProcessingSettingsViewModel
 import snd.komelia.ui.settings.komf.providers.KomfProvidersSettingsViewModel
@@ -90,7 +94,6 @@ import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.readlist.KomgaReadList
 import snd.komga.client.readlist.KomgaReadListId
-import snd.komga.client.series.KomgaSeries
 import snd.komga.client.series.KomgaSeriesId
 import snd.komga.client.user.KomgaUser
 
@@ -104,7 +107,7 @@ class ViewModelFactory(
 
     private fun komgaApiFor(
         book: KomeliaBook? = null,
-        series: KomgaSeries? = null,
+        series: KomeliaSeries? = null,
         bookId: KomgaBookId? = null,
         seriesId: KomgaSeriesId? = null,
     ): KomgaApi =
@@ -216,7 +219,7 @@ class ViewModelFactory(
 
     fun getSeriesViewModel(
         seriesId: KomgaSeriesId,
-        series: KomgaSeries? = null,
+        series: KomeliaSeries? = null,
         defaultTab: SeriesTab? = null,
     ): SeriesViewModel {
         val selectedApi = komgaApiFor(series = series, seriesId = seriesId)
@@ -226,6 +229,8 @@ class ViewModelFactory(
             libraries = dependencies.komgaSharedState.libraries,
             libraryApi = selectedApi.libraryApi,
             seriesApi = selectedApi.seriesApi,
+            komfMangaBakaClient = dependencies.komfClientFactory.mangaBaka(),
+            komfSettingsRepository = appRepositories.komfSettingsRepository,
             taskEmitter = dependencies.offlineDependencies?.taskEmitter,
             localLibraryManager = dependencies.offlineDependencies?.localLibraryManager,
             bookApi = selectedApi.bookApi,
@@ -257,7 +262,7 @@ class ViewModelFactory(
 
     fun getOneshotViewModel(
         seriesId: KomgaSeriesId,
-        series: KomgaSeries? = null,
+        series: KomeliaSeries? = null,
         book: KomeliaBook? = null,
     ): OneshotViewModel {
         val selectedApi = komgaApiFor(book = book, series = series, seriesId = seriesId)
@@ -336,7 +341,7 @@ class ViewModelFactory(
             appNotifications = dependencies.appNotifications,
         )
 
-    fun getSeriesEditDialogViewModel(series: KomgaSeries, onDismissRequest: () -> Unit) =
+    fun getSeriesEditDialogViewModel(series: KomeliaSeries, onDismissRequest: () -> Unit) =
         SeriesEditDialogViewModel(
             series = series,
             onDialogDismiss = onDismissRequest,
@@ -346,7 +351,7 @@ class ViewModelFactory(
             cardWidth = getGridCardWidth(),
         )
 
-    fun getSeriesBulkEditDialogViewModel(series: List<KomgaSeries>, onDismissRequest: () -> Unit) =
+    fun getSeriesBulkEditDialogViewModel(series: List<KomeliaSeries>, onDismissRequest: () -> Unit) =
         SeriesBulkEditDialogViewModel(
             series = series,
             onDialogDismiss = onDismissRequest,
@@ -367,7 +372,7 @@ class ViewModelFactory(
 
     fun getOneshotEditDialogViewModel(
         seriesId: KomgaSeriesId,
-        series: KomgaSeries?,
+        series: KomeliaSeries?,
         book: KomeliaBook?,
         onDismissRequest: () -> Unit
     ) = OneshotEditDialogViewModel(
@@ -411,7 +416,7 @@ class ViewModelFactory(
             cardWidth = getGridCardWidth(),
         )
 
-    fun getAddToCollectionDialogViewModel(series: List<KomgaSeries>, onDismissRequest: () -> Unit) =
+    fun getAddToCollectionDialogViewModel(series: List<KomeliaSeries>, onDismissRequest: () -> Unit) =
         AddToCollectionDialogViewModel(
             series = series,
             onDismissRequest = onDismissRequest,
@@ -622,8 +627,17 @@ class ViewModelFactory(
         )
     }
 
+    fun getKomfMangaBakaSettingsViewModel(): KomfMangaBakaSettingsViewModel {
+        return KomfMangaBakaSettingsViewModel(
+            settingsRepository = dependencies.appRepositories.komfSettingsRepository,
+            configClient = dependencies.komfClientFactory.configClient(),
+            appNotifications = dependencies.appNotifications,
+            komfSharedState = komfSharedState
+        )
+    }
+
     fun getKomfIdentifyDialogViewModel(
-        series: KomgaSeries,
+        series: KomeliaSeries,
         onDismissRequest: () -> Unit
     ): KomfIdentifyDialogViewModel {
         return KomfIdentifyDialogViewModel(
@@ -655,6 +669,32 @@ class ViewModelFactory(
             libraryId = KomfServerLibraryId(library.id.value),
             komfMetadataClient = dependencies.komfClientFactory.metadataClient(KOMGA),
             appNotifications = dependencies.appNotifications,
+        )
+    }
+
+    fun getKomfMangaBakaLinkDialogViewModel(
+        series: KomeliaSeries,
+        onDismissRequest: () -> Unit
+    ): KomfMangaBakaLinkViewModel {
+        return KomfMangaBakaLinkViewModel(
+            series = series,
+            mangaBakaClient = dependencies.komfClientFactory.mangaBaka(),
+            appNotifications = dependencies.appNotifications,
+            appEvents = dependencies.komgaEvents,
+            onDismiss = onDismissRequest
+        )
+    }
+
+    fun getKomfMangaBakaUnlinkDialogViewModel(
+        series: KomeliaSeries,
+        onDismissRequest: () -> Unit
+    ): KomfMangaBakaUnlinkViewModel {
+        return KomfMangaBakaUnlinkViewModel(
+            series = series,
+            mangaBakaClient = dependencies.komfClientFactory.mangaBaka(),
+            appNotifications = dependencies.appNotifications,
+            appEvents = dependencies.komgaEvents,
+            onDismiss = onDismissRequest
         )
     }
 

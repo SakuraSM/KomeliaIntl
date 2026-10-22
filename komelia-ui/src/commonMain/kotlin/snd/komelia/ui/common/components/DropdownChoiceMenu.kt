@@ -304,7 +304,7 @@ fun <T> DropdownChoiceMenuWithSearch(
                 selectedOptions.forEach {
                     val optionLabel = localizedEnumLabel(it.value, it.label)
                     NoPaddingChip(
-                        color = MaterialTheme.colorScheme.surface,
+                        containerColor = MaterialTheme.colorScheme.surface,
                         onClick = { onOptionSelect(it) }
                     ) {
                         Icon(Icons.Default.Close, null)
@@ -697,7 +697,7 @@ private fun TagFilterChip(
 
     NoPaddingChip(
         onClick = { onSelect(tag) },
-        color = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surface,
         borderColor = borderColor
     ) {
         Text(

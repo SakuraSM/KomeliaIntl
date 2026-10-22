@@ -58,6 +58,7 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.settings.model.BooksLayout.GRID
 import snd.komelia.settings.model.BooksLayout.LIST
@@ -89,10 +90,9 @@ import snd.komelia.ui.series.SeriesFilterState.TagInclusionMode
 import snd.komelia.ui.strings.AppStrings
 import snd.komga.client.book.KomgaReadStatus
 import snd.komga.client.common.KomgaAuthor
-import snd.komga.client.series.KomgaSeries
 
 fun LazyGridScope.SeriesBooksContent(
-    series: KomgaSeries?,
+    series: KomeliaSeries?,
     booksLoadState: LoadState<BooksData>,
     onBookClick: (KomeliaBook) -> Unit,
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
@@ -211,8 +211,7 @@ private fun LazyGridScope.BooksContent(
 
 @Composable
 private fun BooksToolBar(
-    series: KomgaSeries?,
-
+    series: KomeliaSeries?,
     booksLayout: BooksLayout,
     onBooksLayoutChange: (BooksLayout) -> Unit,
     booksPageSize: Int,

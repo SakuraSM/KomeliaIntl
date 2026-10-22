@@ -249,6 +249,7 @@ tasks.register<Exec>("komgaNpmInstall") {
     workingDir(epubReaderKomga)
     inputs.file("$epubReaderKomga/package.json")
     outputs.dir("$epubReaderKomga/node_modules")
+    environment("NPM_CONFIG_ALLOW_GIT", "all")
     commandLine(
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             "npm.cmd"
@@ -507,6 +508,10 @@ tasks.register<DefaultTask>("komfWebUI") {
                 include("*.html")
             },
             "$output/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/files"
+        )
+        gzipFiles(
+            injected.objectFactory.fileTree().from("$appResourcesInput/drawable"),
+            "$output/composeResources/io.github.snd_r.komelia.ui.komelia_ui.generated.resources/drawable"
         )
         File(appResourcesInput).listFiles()
             ?.filter { it.isDirectory && it.name.startsWith("values") }

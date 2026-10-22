@@ -59,12 +59,14 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.komga.api.model.KomeliaSeries
+import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.common.menus.SeriesMenuActions
-import snd.komga.client.series.KomgaSeries
+import snd.komelia.ui.platform.PlatformType
 
 @Composable
 internal fun HomeContent(
@@ -73,7 +75,7 @@ internal fun HomeContent(
     onFilterChange: (Int) -> Unit,
 
     cardWidth: Dp,
-    onSeriesClick: (KomgaSeries) -> Unit,
+    onSeriesClick: (KomeliaSeries) -> Unit,
     seriesMenuActions: SeriesMenuActions,
     bookMenuActions: BookMenuActions,
     onBookClick: (KomeliaBook) -> Unit,
@@ -464,7 +466,7 @@ private fun DisplayContent(
     activeFilterNumber: Int,
     gridState: LazyGridState,
     cardWidth: Dp,
-    onSeriesClick: (KomgaSeries) -> Unit,
+    onSeriesClick: (KomeliaSeries) -> Unit,
     seriesMenuActions: SeriesMenuActions,
     bookMenuActions: BookMenuActions,
     onBookClick: (KomeliaBook) -> Unit,
@@ -552,8 +554,8 @@ private fun LazyGridScope.BookFilterEntry(
 
 private fun LazyGridScope.SeriesFilterEntries(
     label: String,
-    series: List<KomgaSeries>,
-    onSeriesClick: (KomgaSeries) -> Unit,
+    series: List<KomeliaSeries>,
+    onSeriesClick: (KomeliaSeries) -> Unit,
     seriesMenuActions: SeriesMenuActions,
 ) {
     if (series.isEmpty()) return

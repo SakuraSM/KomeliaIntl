@@ -113,6 +113,7 @@ fun MainView(
                 LocalNotifications provides dependencies.appNotifications,
                 LocalKomgaEvents provides dependencies.komgaEvents.events,
                 LocalKomfIntegration provides dependencies.appRepositories.komfSettingsRepository.getKomfEnabled(),
+                LocalKomfMangaBakaIntegration provides dependencies.appRepositories.komfSettingsRepository.getMangaBakaEnabled(),
                 LocalKeyEvents provides keyEvents,
                 LocalPlatform provides platformType,
                 LocalKomeliaLayout provides komeliaLayoutSpec(platformType, windowWidth),

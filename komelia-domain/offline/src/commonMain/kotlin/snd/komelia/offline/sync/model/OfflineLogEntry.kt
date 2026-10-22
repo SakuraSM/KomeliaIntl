@@ -43,7 +43,7 @@ data class OfflineLogEntry(
                     append(message())
                     error?.let {
                         append("\n")
-                        append("${it::class.simpleName}: ${it.message}")
+                        append("$it")
                     }
                 },
                 type = Type.ERROR

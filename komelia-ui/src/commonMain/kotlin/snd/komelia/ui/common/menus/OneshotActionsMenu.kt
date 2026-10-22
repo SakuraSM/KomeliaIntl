@@ -31,6 +31,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_reset_me
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.local.isLocalLibrary
+import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LocalKomfIntegration
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineMode
@@ -39,11 +40,10 @@ import snd.komelia.ui.dialogs.collectionadd.AddToCollectionDialog
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialog
 import snd.komelia.ui.dialogs.komf.reset.KomfResetSeriesMetadataDialog
 import snd.komelia.ui.dialogs.readlistadd.AddToReadListDialog
-import snd.komga.client.series.KomgaSeries
 
 @Composable
 fun OneshotActionsMenu(
-    series: KomgaSeries,
+    series: KomeliaSeries,
     book: KomeliaBook,
     actions: BookMenuActions,
     expanded: Boolean,

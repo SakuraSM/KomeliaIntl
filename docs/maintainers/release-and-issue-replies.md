@@ -34,6 +34,12 @@ This mode rejects application-source changes and changes to the original build j
 the downloaded MSI hash before installation. Record both the installer build commit and the
 verification commit; a changed application or packaging command requires a new installer.
 
+The Windows runtime fixture places the system Windows PowerShell directory first in the child
+application's PATH and checks that the database path is absolute. The existing `dev.dirs` 26
+dependency passes `-Version 2`, which makes `pwsh` print its version instead of executing the
+directory lookup. A custom user PATH that prioritizes `pwsh` retains this dependency limitation;
+the verification fixture does not migrate or change application storage paths.
+
 ## Prepare release notes
 
 1. Set the Release title to `Komelia vMAJOR.MINOR.PATCH` for stable releases or `Komelia vMAJOR.MINOR.PATCH-beta.N` for Beta releases. Do not use `Komelia Intl`. Do not omit the `v` or use only the version number.

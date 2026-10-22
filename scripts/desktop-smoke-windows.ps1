@@ -75,9 +75,21 @@ function Save-Screenshot([System.Drawing.Rectangle]$Bounds, [string]$Name) {
     }
 }
 
-$app = Start-Process $launcher -PassThru `
-    -RedirectStandardOutput (Join-Path $Evidence 'stdout.log') `
-    -RedirectStandardError (Join-Path $Evidence 'stderr.log')
+# dev.dirs 26 passes the Windows PowerShell '-Version 2' option. In pwsh that
+# option prints a version instead of running its directory lookup command.
+$systemPowerShell = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0'
+if (-not (Test-Path (Join-Path $systemPowerShell 'powershell.exe'))) {
+    throw 'The standard Windows PowerShell executable is required for this runtime fixture.'
+}
+$inheritedPath = $env:PATH
+try {
+    $env:PATH = "$systemPowerShell;$inheritedPath"
+    $app = Start-Process $launcher -PassThru `
+        -RedirectStandardOutput (Join-Path $Evidence 'stdout.log') `
+        -RedirectStandardError (Join-Path $Evidence 'stderr.log')
+} finally {
+    $env:PATH = $inheritedPath
+}
 $ownedIds = [System.Collections.Generic.HashSet[int]]::new()
 $ownedIds.Add($app.Id) | Out-Null
 $initialized = $false
@@ -111,6 +123,11 @@ try {
     }
     if (-not $window) { throw 'No usable Komelia window belongs to the installed application process tree.' }
     if (-not $initialized) { throw 'The desktop window opened without completing application initialization.' }
+    $database = [regex]::Match((Get-Content (Join-Path $Evidence 'stdout.log') -Raw),
+        'Database: jdbc:sqlite:([^\r\n]*[/\\]komelia\.sqlite)')
+    if (-not $database.Success -or -not [System.IO.Path]::IsPathFullyQualified($database.Groups[1].Value)) {
+        throw 'The application did not resolve an absolute database path.'
+    }
     $screen = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
     [KomeliaSmokeWindow]::SetWindowPos($window.Handle, [IntPtr]::Zero, $screen.Left + 10, $screen.Top + 10,
         [Math]::Min(1280, $screen.Width - 20), [Math]::Min(800, $screen.Height - 20), 0x0040) | Out-Null
@@ -124,7 +141,8 @@ try {
     if ($width -lt 300 -or $height -lt 200) { throw 'The application window is not visible at a usable size.' }
     Save-Screenshot ([System.Drawing.Rectangle]::new($bounds.Left, $bounds.Top, $width, $height)) 'desktop-startup.png'
     @{ processAlive = $true; windowPresent = $true; applicationInitialized = $true;
-       rootProcessId = $app.Id; windowProcessId = $window.ProcessId; width = $width; height = $height } |
+       dataDirectoryAbsolute = $true; rootProcessId = $app.Id; windowProcessId = $window.ProcessId;
+       width = $width; height = $height } |
         ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $Evidence 'result.json')
 } catch {
     $failure = $_

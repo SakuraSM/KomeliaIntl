@@ -63,6 +63,8 @@ import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
+import snd.komelia.ui.common.components.KomeliaPageScaffold
+import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.common.menus.SeriesMenuActions
@@ -88,7 +90,8 @@ internal fun HomeContent(
             gridState.firstVisibleItemIndex > 0 || gridState.firstVisibleItemScrollOffset > 0
         }
     }
-    Column {
+    PauseGlassWhileBusy(gridState.isScrollInProgress)
+    KomeliaPageScaffold(topBar = {
         Toolbar(
             filters = filters,
             currentFilterNumber = activeFilterNumber,
@@ -98,7 +101,9 @@ internal fun HomeContent(
                 coroutineScope.launch { gridState.animateScrollToItem(0) }
             },
         )
+    }) { topInset ->
         DisplayContent(
+            topInset = topInset,
             filters = filters,
             activeFilterNumber = activeFilterNumber,
 
@@ -462,6 +467,7 @@ internal fun homeToolbarEntries(
 
 @Composable
 private fun DisplayContent(
+    topInset: Dp,
     filters: List<HomeFilterData>,
     activeFilterNumber: Int,
     gridState: LazyGridState,
@@ -485,7 +491,7 @@ private fun DisplayContent(
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             contentPadding = PaddingValues(
-                top = layout.topBarContentSpacing,
+                top = layout.topBarContentSpacing + topInset,
                 bottom = layout.gridBottomPadding + layout.sectionSpacing,
             )
         ) {

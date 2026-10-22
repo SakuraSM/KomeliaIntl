@@ -8,6 +8,7 @@ import snd.komelia.db.SettingsStateWrapper
 import snd.komelia.settings.CommonSettingsRepository
 import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppTheme
+import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.updates.AppVersion
 import kotlin.time.Instant
@@ -118,6 +119,18 @@ class SettingsRepositoryWrapper(
 
     override suspend fun putAppTheme(theme: AppTheme) {
         wrapper.transform { it.copy(appTheme = theme) }
+    }
+
+    override fun getSurfaceStyle(): Flow<AppSurfaceStyle> = wrapper.mapState { it.surfaceStyle }
+
+    override suspend fun putSurfaceStyle(style: AppSurfaceStyle) {
+        wrapper.transform { it.copy(surfaceStyle = style) }
+    }
+
+    override fun getReduceTransparency(): Flow<Boolean> = wrapper.mapState { it.reduceTransparency }
+
+    override suspend fun putReduceTransparency(enabled: Boolean) {
+        wrapper.transform { it.copy(reduceTransparency = enabled) }
     }
 
     override fun getAppLanguage(): Flow<AppLanguage> {

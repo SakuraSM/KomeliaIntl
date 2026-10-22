@@ -3,6 +3,9 @@ package snd.komelia.ui.common.menus.bulk
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -42,20 +45,19 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.bulk_select_all
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.bulk_selected_count
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.common.components.LocalNavigationBarInset
+import snd.komelia.ui.platform.WindowSizeClass
+import androidx.compose.ui.semantics.Role
 import snd.komelia.ui.platform.cursorForHand
 import kotlin.math.roundToInt
 
@@ -76,7 +78,7 @@ fun BulkActionsContainer(
             .clip(RoundedCornerShape(5.dp))
             .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
     ) {
-        IconButton(onClick = onCancel) { Icon(Icons.Default.Close, null) }
+        IconButton(onClick = onCancel) { Icon(Icons.Default.Close, stringResource(Res.string.dialog_cancel)) }
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(5.dp))
@@ -101,32 +103,21 @@ fun BulkActionsContainer(
 }
 
 @Composable
-fun BottomPopupBulkActionsPanel(content: @Composable RowScope.() -> Unit) {
-    Popup(popupPositionProvider = BottomScreenPopupPositionProvider) {
-        Surface {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
-            ) {
-                content()
-            }
-        }
+fun BottomBulkActionsPanel(content: @Composable RowScope.() -> Unit) {
+    val bottomInset = if (LocalWindowWidth.current == WindowSizeClass.COMPACT) {
+        LocalNavigationBarInset.current
+    } else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    Surface(Modifier.fillMaxWidth().padding(bottom = bottomInset)) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f)),
+            content = content,
+        )
     }
-
-}
-
-object BottomScreenPopupPositionProvider : PopupPositionProvider {
-    override fun calculatePosition(
-        anchorBounds: IntRect,
-        windowSize: IntSize,
-        layoutDirection: LayoutDirection,
-        popupContentSize: IntSize
-    ) = IntOffset(0, windowSize.height)
 }
 
 @Composable
@@ -142,7 +133,7 @@ private fun BulkActionButton(
             modifier = Modifier
                 .fillMaxHeight()
                 .widthIn(min = 50.dp)
-                .clickable { onClick() }
+                .clickable(role = Role.Button) { onClick() }
                 .padding(horizontal = layout.controlSpacing)
                 .pointerHoverIcon(PointerIcon.Hand),
             verticalArrangement = Arrangement.Center,

@@ -2,6 +2,14 @@ package snd.komelia.ui.settings
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.core.tween
+import snd.komelia.ui.LocalKomeliaMotion
+import snd.komelia.ui.common.components.GlassBackdropScope
+import snd.komelia.ui.common.components.glassBackdrop
+import snd.komelia.ui.common.components.komeliaChrome
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -66,48 +74,50 @@ class SettingsScreen(
             screen = AppSettingsScreen(),
             onBackPressed = null
         ) { navigator ->
-            Column {
-                if (!topLevel) PlatformTitleBar()
-                SettingsScreenLayout(
-                    navMenu = {
-                        Row(
-                            Modifier
-                                .background(MaterialTheme.colorScheme.surface)
-                                .padding(top = settingsDesktopTopPadding, start = 16.dp, end = 16.dp)
-                        ) {
-                            Spacer(Modifier.weight(1f))
-                            SettingsNavigationMenu(
-                                currentScreen = navigator.lastItem,
-                                onNavigation = { navigator.replaceAll(it) },
-                                hasMediaErrors = vm.hasMediaErrors,
-                                komfEnabled = vm.komfEnabledFlow.collectAsState().value,
-                                updatesEnabled = vm.updatesEnabled,
-                                newVersionIsAvailable = vm.newVersionIsAvailable,
-                                onLogout = vm::logout,
-                                contentColor = MaterialTheme.colorScheme.surface,
-                                modifier = Modifier.width(settingsDesktopNavMenuWidth),
-                                user = vm.user.collectAsState().value
-                            )
-                        }
-                    },
-                    dismissButton = {
-                        if (!topLevel) {
-                            OutlinedIconButton(
-                                onClick = { currentNavigator.pop() },
-                                modifier = Modifier.cursorForHand().padding(top = settingsDesktopTopPadding),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                                content = {
-                                    Icon(
-                                        Icons.Rounded.Close,
-                                        contentDescription = stringResource(Res.string.navigation_close_settings),
-                                    )
-                                },
-                            )
-                        }
-                    },
-                    content = { CrossfadeTransition(navigator) },
-                )
-
+            val motion = LocalKomeliaMotion.current
+            GlassBackdropScope {
+                Column {
+                    if (!topLevel) PlatformTitleBar()
+                    SettingsScreenLayout(
+                        navMenu = {
+                            Row(
+                                Modifier
+                                    .komeliaChrome(RoundedCornerShape(0.dp), MaterialTheme.colorScheme.surface)
+                                    .padding(top = settingsDesktopTopPadding, start = 16.dp, end = 16.dp)
+                            ) {
+                                Spacer(Modifier.weight(1f))
+                                SettingsNavigationMenu(
+                                    currentScreen = navigator.lastItem,
+                                    onNavigation = { navigator.replaceAll(it) },
+                                    hasMediaErrors = vm.hasMediaErrors,
+                                    komfEnabled = vm.komfEnabledFlow.collectAsState().value,
+                                    updatesEnabled = vm.updatesEnabled,
+                                    newVersionIsAvailable = vm.newVersionIsAvailable,
+                                    onLogout = vm::logout,
+                                    contentColor = MaterialTheme.colorScheme.surface,
+                                    modifier = Modifier.width(settingsDesktopNavMenuWidth),
+                                    user = vm.user.collectAsState().value
+                                )
+                            }
+                        },
+                        dismissButton = {
+                            if (!topLevel) {
+                                OutlinedIconButton(
+                                    onClick = { currentNavigator.pop() },
+                                    modifier = Modifier.cursorForHand().padding(top = settingsDesktopTopPadding),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                                    content = {
+                                        Icon(
+                                            Icons.Rounded.Close,
+                                            contentDescription = stringResource(Res.string.navigation_close_settings),
+                                        )
+                                    },
+                                )
+                            }
+                        },
+                        content = { Box(Modifier.fillMaxSize().glassBackdrop()) { CrossfadeTransition(navigator, animationSpec = tween(motion.duration(motion.contentDurationMillis))) } },
+                    )
+                }
             }
         }
         if (!topLevel) BackPressHandler { currentNavigator.pop() }

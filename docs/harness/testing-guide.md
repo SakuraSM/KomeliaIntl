@@ -149,3 +149,17 @@ TTU's `npm run test:browser` compiles the production styles and checks document 
 ## Server announcements
 
 `AnnouncementsViewModelTest` covers server-content order and fields, empty feeds, request errors, and coroutine cancellation without an update-client dependency. JVM Compose `AnnouncementsContentTest` checks the server notice and empty state without application release sections. For device validation, use an authorized server-admin session to open Server settings / Announcements, then verify App settings / App updates independently. Non-admin accounts cannot open server settings; do not change permissions merely to pass a test.
+
+## Surface material and EPUB implementation selection
+
+Run `APPEARANCE-01` through `APPEARANCE-03` and `EPUB-IMPL-01` from the regression catalog. `SurfaceStyleIntegrationTest` covers V17/V18 to V19 migration, legacy checksums, fresh data and reopen. `SurfaceStyleBrowserStorageTest` covers legacy browser JSON and persistence. `AppearancePreferenceTest` covers rapid choices, failure/retry, obsolete failures and writes accepted before leaving settings.
+
+`KomeliaPageScaffoldTest` mounts real Compose layout with an empty toolbar and verifies identical first-item position/scroll range across materials. `GlassScrollBudgetTest` checks overlapping scroll owners, the settle interval and disposal. `ReducedMaterialMotionTest`, `DropdownChoiceFocusTest`, and `SettingsScreenLayoutTest` cover material motion, anchor focus and responsive layout. `GlassContrastTest` bounds neutral backdrop tones; it does not replace rendered contrast inspection on every device.
+
+For runtime performance, prewarm both modes on the same APK/device/content and keep all raw repetitions. Report P95 and modern/legacy Android jank counters separately; do not select the best repetition or substitute emulator statistics for the physical-device gate. Record idle rendered-frame counts with reading controls hidden and memory before/after repeated entries. Run native accessibility with TalkBack enabled; UI hierarchy inspection alone is not screen-reader operation.
+
+The Compose 1.12.1 Wasm popup accessibility limitation is tracked in [the verification report](../verification/liquid-glass-20261022.md). A visible popup closing and a unit test restoring focus do not establish a working browser accessibility tree.
+
+`PosterGridDensityTest.tabletGridDoesNotStretchTheDefaultCoverToHalfThePage` measures a real 740dp grid beside a tablet navigation rail. `CoverCaptionFontScaleTest` requires a complete supporting line at 130% font scale. `BottomBulkActionsLayoutTest` requires the inline actions to remain below content and above the reserved navigation area. Repeat both 840dp default density and 360dp large-font captions on the final APK.
+
+`ReaderKeyboardFocusEffectTest` mounts a delayed page key target and requires the first navigation key to reach it. Focus must be requested only after the viewport is measured; a wrapper that changes an early return can otherwise request focus before the target exists. `SearchGlassSamplingTest` mounts the real search field and checks capture pause while focused and recovery after focus is released.

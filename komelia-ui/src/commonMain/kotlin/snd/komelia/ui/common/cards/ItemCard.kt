@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -53,7 +54,7 @@ import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.ui.platform.cursorForHand
 
-const val defaultCardWidth = 240
+const val defaultCardWidth = snd.komelia.settings.model.DEFAULT_MOBILE_CARD_WIDTH
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -168,7 +169,7 @@ fun CoverCardCaption(
 ) {
     val platform = LocalPlatform.current
     val isMobile = platform == PlatformType.MOBILE
-    val captionHeight = coverCaptionHeight(variant, platform)
+    val captionHeight = coverCaptionHeight(variant, platform) * LocalDensity.current.fontScale.coerceAtLeast(1f)
     Box(
         modifier = Modifier
             .fillMaxWidth()

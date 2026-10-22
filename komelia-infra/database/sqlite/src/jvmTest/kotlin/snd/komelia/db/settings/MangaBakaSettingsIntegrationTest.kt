@@ -30,7 +30,7 @@ class MangaBakaSettingsIntegrationTest {
         val preferences = AppSettings(appLanguage = AppLanguage.ZH_CN, appTheme = AppTheme.DARKER)
         val reader = ImageReaderSettings(cropBorders = true, panelPrerenderCount = 2)
         val oldDatabase = Database.connect(url, driver = "org.sqlite.JDBC")
-        ExposedSettingsRepository(oldDatabase).save(preferences)
+        saveVersion17AppSettings(url, preferences)
         ExposedImageReaderSettingsRepository(oldDatabase).save(reader)
         DriverManager.getConnection(url).use { connection ->
             connection.createStatement().use { statement ->

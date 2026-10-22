@@ -42,6 +42,12 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_settings_l
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_unknown_library
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.platform.cursorForHand
+import snd.komelia.ui.LocalKomeliaLayout
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_library_remove_override
+import snd.komelia.ui.LocalKomeliaMotion
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_add
 import snd.komf.api.mediaserver.KomfMediaServerLibrary
 import snd.komf.api.mediaserver.KomfMediaServerLibraryId
 
@@ -67,6 +73,7 @@ fun <T> LibraryTabs(
     content: @Composable (T) -> Unit,
 ) {
 
+    val reducedMotion = LocalKomeliaMotion.current.isReducedMotion
     Column {
         var selectedTabIndex by remember { mutableStateOf(0) }
         var selectedState by remember(defaultProcessingState) { mutableStateOf(defaultProcessingState) }
@@ -110,20 +117,19 @@ fun <T> LibraryTabs(
                                 ?: "${stringResource(Res.string.komf_unknown_library)}, ${libraryId.value}",
                             overflow = TextOverflow.Ellipsis, maxLines = 1
                         )
-                        Box(
-                            Modifier
-                                .clickable {
-                                    onLibraryConfigRemove(libraryId)
-                                    if (selectedTabIndex == index + 1) {
-                                        selectedTabIndex = 0
-                                        selectedState = defaultProcessingState
-                                    }
+                        IconButton(
+                            onClick = {
+                                onLibraryConfigRemove(libraryId)
+                                if (selectedTabIndex == index + 1) {
+                                    selectedTabIndex = 0
+                                    selectedState = defaultProcessingState
                                 }
-                                .padding(3.dp)
+                            },
+                            modifier = Modifier.size(LocalKomeliaLayout.current.minimumTouchTarget),
                         ) {
                             Icon(
                                 Icons.Rounded.Close,
-                                null,
+                                stringResource(Res.string.komf_library_remove_override),
                                 modifier = Modifier.size(20.dp),
                                 tint = MaterialTheme.colorScheme.secondary
                             )
@@ -143,7 +149,7 @@ fun <T> LibraryTabs(
                         .menuAnchor(PrimaryNotEditable),
 
                     ) {
-                    Icon(Icons.Rounded.Add, null)
+                    Icon(Icons.Rounded.Add, stringResource(Res.string.library_add))
                 }
 
                 ExposedDropdownMenu(
@@ -169,7 +175,7 @@ fun <T> LibraryTabs(
         HorizontalDivider(Modifier.padding(bottom = 5.dp))
         AnimatedContent(
             targetState = IndexedState(selectedTabIndex, selectedState),
-            transitionSpec = tabTransitionSpec(),
+            transitionSpec = if (reducedMotion) { { EnterTransition.None togetherWith ExitTransition.None } } else tabTransitionSpec(),
             contentKey = { it.index }
         ) {
             content(it.state)

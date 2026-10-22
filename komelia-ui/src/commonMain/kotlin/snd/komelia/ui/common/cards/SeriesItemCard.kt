@@ -1,5 +1,6 @@
 package snd.komelia.ui.common.cards
 
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -172,7 +173,7 @@ private fun SeriesCardHoverOverlay(
                                 onClick = { isActionsMenuExpanded = true },
                                 colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
                             ) {
-                                Icon(Icons.Rounded.MoreVert, contentDescription = null)
+                                Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
                             }
 
                             SeriesActionsMenu(

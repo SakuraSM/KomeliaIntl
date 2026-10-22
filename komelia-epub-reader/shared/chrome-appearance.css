@@ -1,0 +1,63 @@
+/* Only marked application controls use the host material. Never select book content. */
+:root[data-komelia-surface="glass"] [data-komelia-chrome] {
+  --komelia-chrome-color: #f0f0f3;
+  --komelia-chrome-background: rgb(21 21 26 / 86%);
+  color: var(--komelia-chrome-color) !important;
+  background: var(--komelia-chrome-background) !important;
+  border: 1px solid rgb(197 198 205 / 30%);
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+}
+:root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] {
+  --komelia-chrome-color: #1b1c20;
+  --komelia-chrome-background: rgb(252 252 255 / 88%);
+  border-color: rgb(85 89 100 / 30%);
+}
+:root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-chrome] {
+  --komelia-chrome-background: rgb(0 0 0 / 90%);
+}
+:root[data-komelia-reduced-motion="true"] [data-komelia-chrome],
+:root[data-komelia-reduced-motion="true"] [data-komelia-chrome-motion] {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-komelia-chrome], [data-komelia-chrome-motion] {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-komelia-surface="glass"] [data-komelia-chrome] {
+    background: #15151a !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] { background: #fcfcff !important; }
+  :root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-chrome] { background: #000 !important; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-komelia-surface="glass"] [data-komelia-chrome] { background: #15151a !important; }
+  :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] { background: #fcfcff !important; }
+  :root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-chrome] { background: #000 !important; }
+}
+
+:root[data-komelia-surface="solid"] [data-komelia-chrome] {
+  background: #15151a !important;
+  color: #f0f0f3 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+:root[data-komelia-surface="solid"][data-komelia-theme="LIGHT"] [data-komelia-chrome] { background: #fcfcff !important; color: #1b1c20 !important; }
+:root[data-komelia-surface="solid"][data-komelia-theme="DARKER"] [data-komelia-chrome] { background: #000 !important; }
+
+:root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"]) [data-komelia-chrome] :is(button, [class*="text-white"]) {
+  color: inherit !important;
+}
+[data-komelia-chrome] button { min-width: 48px; min-height: 48px; }
+[data-komelia-chrome] :focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+@media (pointer: fine) {
+  [data-komelia-chrome] button { min-width: 40px; min-height: 40px; }
+}

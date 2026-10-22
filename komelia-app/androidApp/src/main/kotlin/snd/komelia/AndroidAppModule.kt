@@ -149,7 +149,7 @@ class AndroidAppModule(
             settingsRepository = ExposedSettingsRepository(databases.app).let { repository ->
                 SettingsRepositoryWrapper(
                     SettingsStateWrapper(
-                        settings = repository.get() ?: AppSettings(cardWidth = 150),
+                        settings = repository.get() ?: AppSettings(cardWidth = snd.komelia.settings.model.DEFAULT_MOBILE_CARD_WIDTH),
                         saveSettings = repository::save
                     )
                 )

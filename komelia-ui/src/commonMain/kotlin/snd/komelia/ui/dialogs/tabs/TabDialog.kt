@@ -121,7 +121,7 @@ private fun CompactTabDialog(
                     onClick = onDismissRequest,
                     modifier = Modifier.cursorForHand()
                 ) {
-                    Icon(Icons.Default.Close, null)
+                    Icon(Icons.Default.Close, stringResource(Res.string.dialog_cancel))
                 }
             }
             Text(

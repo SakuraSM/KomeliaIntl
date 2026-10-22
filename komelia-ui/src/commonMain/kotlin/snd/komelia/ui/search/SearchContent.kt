@@ -37,6 +37,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_remote_o
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_series_tab
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.ui.common.components.LocalNavigationBarInset
+import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LocalWindowWidth
@@ -77,6 +79,7 @@ fun SearchContent(
             .fillMaxWidth()
             .padding(horizontal = layout.pageHorizontalPadding)
         val scrollState = rememberLazyListState()
+        PauseGlassWhileBusy(scrollState.isScrollInProgress)
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -98,7 +101,7 @@ fun SearchContent(
                 state = scrollState,
                 verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(bottom = layout.pageVerticalPadding),
+                contentPadding = PaddingValues(bottom = layout.pageVerticalPadding + LocalNavigationBarInset.current),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 when (searchType) {

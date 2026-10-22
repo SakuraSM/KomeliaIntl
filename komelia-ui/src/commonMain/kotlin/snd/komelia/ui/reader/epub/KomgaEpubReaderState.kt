@@ -56,6 +56,7 @@ class KomgaEpubReaderState(
     private val platformType: PlatformType,
     private val coroutineScope: CoroutineScope,
     private val bookSiblingsContext: BookSiblingsContext,
+    private val chromeAppearance: StateFlow<EpubChromeAppearance> = MutableStateFlow(EpubChromeAppearance()),
 ) : EpubReaderState {
     override val state = MutableStateFlow<LoadState<Unit>>(Uninitialized)
     override val book = MutableStateFlow(book)
@@ -194,6 +195,7 @@ class KomgaEpubReaderState(
             serverUrl.first()
         }
 
+        bindActive<Unit, EpubChromeAppearance>(webview, session, "getChromeAppearance") { chromeAppearance.value }
         bindActive<Unit, JsonObject>(webview, session, "getSettings") {
             epubSettingsRepository.getKomgaReaderSettings().also {
                 session.requireOpen()

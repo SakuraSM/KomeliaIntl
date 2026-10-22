@@ -1,5 +1,8 @@
 package snd.komelia.ui.common.cards
 
+import org.jetbrains.compose.resources.stringResource
+
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -92,7 +95,7 @@ private fun ReadListCardHoverOverlay(
                     IconButton(
                         onClick = { isActionsMenuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
-                    ) { Icon(Icons.Rounded.MoreVert, contentDescription = null) }
+                    ) { Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more)) }
 
                     ReadListActionsMenu(
                         readList = readList,

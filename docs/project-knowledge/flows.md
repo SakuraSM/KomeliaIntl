@@ -151,3 +151,13 @@ Risk points: raw enum/API values shown to users, duplicated string systems, stal
 8. Reply in each reporter's language and close fixed issues only after the relevant published assets are verified.
 
 Risk points: merged code described as released, stale About version, wrong repository changelog, mutable tags, untranslated notes, and asset presence mistaken for runtime verification.
+
+## Appearance and retained reading sessions
+
+1. Restore material and transparency preferences with classic defaults for legacy data. Keep theme enum values and publication settings unchanged.
+2. Persist appearance choices through the existing settings repository. On save failure, show the last saved choice and a retry action; a newer queued choice takes precedence over an obsolete failure.
+3. Compose chrome in a sibling layer to its sampled content. Disable capture for solid fallback and hidden reader controls. During scrolling, share a pause budget across nested scopes and wait 250ms after the last scroll before restoring capture.
+4. Select the retained EPUB implementation by reader type on each entry. Reuse the same type; dispose the previous implementation when replacing it. Changing chrome must not key/reload the publication view.
+5. Query the optional chrome bridge when EPUB controls open. Older hosts and a hung/missing bridge retain classic chrome; publication CSS and positions are outside this contract.
+
+Risk points: persisted enum changes, sampling an ancestor containing the same effect, empty toolbar subcomposition, capture-layer churn between consecutive gestures, Web popup accessibility regressions, and confusing emulator frame statistics with physical-device acceptance. See [the appearance verification report](../verification/liquid-glass-20261022.md).

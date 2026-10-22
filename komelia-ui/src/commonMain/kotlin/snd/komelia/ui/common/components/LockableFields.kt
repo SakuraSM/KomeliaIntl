@@ -1,5 +1,10 @@
 package snd.komelia.ui.common.components
 
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.metadata_lock_field
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.metadata_unlock_field
+import org.jetbrains.compose.resources.stringResource
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -44,13 +49,13 @@ fun LockIcon(
         if (locked) {
             Icon(
                 Icons.Rounded.Lock,
-                contentDescription = null,
+                contentDescription = stringResource(Res.string.metadata_unlock_field),
                 tint = MaterialTheme.colorScheme.tertiary
             )
         } else {
             Icon(
                 Icons.Rounded.LockOpen,
-                contentDescription = null,
+                contentDescription = stringResource(Res.string.metadata_lock_field),
                 tint = MaterialTheme.colorScheme.primary
             )
         }

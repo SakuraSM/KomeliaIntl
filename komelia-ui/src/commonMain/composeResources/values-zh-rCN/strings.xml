@@ -1478,4 +1478,22 @@
     <string name="mangabaka_link_social">社交平台</string>
     <string name="mangabaka_link_info">资讯</string>
     <string name="mangabaka_link_other">其他</string>
+    <string name="appearance_surface_style">界面材质</string>
+    <string name="appearance_classic">经典</string>
+    <string name="appearance_liquid_glass">液态玻璃</string>
+    <string name="appearance_surface_hint">玻璃效果用于导航和控件，阅读页面和输入框保持实色背景。</string>
+    <string name="appearance_reduce_transparency">减少透明效果</string>
+    <string name="appearance_reduce_transparency_hint">使用实色界面，提高对比度并减少渲染开销。</string>
+    <string name="appearance_solid_fallback">当前设备暂不适合渲染玻璃效果，已使用实色界面。</string>
+    <string name="appearance_save_failed">设置保存失败，已恢复之前的选项。</string>
+    <string name="appearance_retry">重新保存</string>
+    <string name="appearance_reset_density">恢复默认封面密度</string>
+    <string name="komf_connection_failed_hint">无法连接 Komf。请检查地址和服务状态，然后点击连接重试。</string>
+    <string name="error_show_details">查看错误详情</string>
+    <string name="error_hide_details">收起错误详情</string>
+    <string name="komf_library_remove_override">移除书库独立配置</string>
+    <string name="password_show">显示密码</string>
+    <string name="password_hide">隐藏密码</string>
+    <string name="metadata_lock_field">锁定字段</string>
+    <string name="metadata_unlock_field">解锁字段</string>
 </resources>

@@ -80,11 +80,13 @@ fun BasicAppDialog(
             )
     ) {
         val focusManager = LocalFocusManager.current
+        val layout = LocalKomeliaLayout.current
         Surface(
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceContainerHighest),
-            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            shape = MaterialTheme.shapes.extraLarge,
             color = color,
-            modifier = modifier
+            modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding, vertical = layout.controlSpacing)
+                .then(modifier)
                 .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
                 .then(dialogAnimateContentSize),
             content = content

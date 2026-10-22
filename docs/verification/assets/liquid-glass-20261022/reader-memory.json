@@ -1,0 +1,22 @@
+[
+  {
+    "entries": 0,
+    "pssKb": 296769,
+    "rssKb": 451408
+  },
+  {
+    "entries": 5,
+    "pssKb": 306433,
+    "rssKb": 461312
+  },
+  {
+    "entries": 10,
+    "pssKb": 304305,
+    "rssKb": 459440
+  },
+  {
+    "entries": 20,
+    "pssKb": 298625,
+    "rssKb": 454224
+  }
+]

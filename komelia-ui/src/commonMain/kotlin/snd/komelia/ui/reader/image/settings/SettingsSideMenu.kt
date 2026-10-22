@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.RoundedCornerShape
+import snd.komelia.ui.common.components.komeliaChrome
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -150,7 +152,7 @@ fun SettingsSideMenuOverlay(
         )
         Column(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .komeliaChrome(RoundedCornerShape(20.dp), MaterialTheme.colorScheme.surfaceVariant)
                 .width(350.dp)
                 .padding(horizontal = 10.dp)
                 .imePadding()

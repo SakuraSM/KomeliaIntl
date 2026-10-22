@@ -95,6 +95,8 @@ import snd.komelia.settings.model.ReaderType.CONTINUOUS
 import snd.komelia.settings.model.ReaderType.PAGED
 import snd.komelia.settings.model.ReaderType.PANELS
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalKomeliaMotion
+import snd.komelia.ui.common.components.komeliaChrome
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.SwitchWithLabel
@@ -161,7 +163,7 @@ fun BottomSheetSettingsOverlay(
                 vertical = layoutSpec.controlSpacing / 2,
             )
             .clip(RoundedCornerShape(18.dp))
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+            .komeliaChrome(RoundedCornerShape(18.dp), MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -194,7 +196,7 @@ fun BottomSheetSettingsOverlay(
                     it.metadata.title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+                    modifier = Modifier.basicMarquee(iterations = if (LocalKomeliaMotion.current.isReducedMotion) 0 else Int.MAX_VALUE)
                 )
             }
         }

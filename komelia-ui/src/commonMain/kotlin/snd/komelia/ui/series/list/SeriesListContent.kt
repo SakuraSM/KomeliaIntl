@@ -48,7 +48,7 @@ import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.itemlist.SeriesLazyCardGrid
 import snd.komelia.ui.common.menus.SeriesMenuActions
-import snd.komelia.ui.common.menus.bulk.BottomPopupBulkActionsPanel
+import snd.komelia.ui.common.menus.bulk.BottomBulkActionsPanel
 import snd.komelia.ui.common.menus.bulk.BulkActionsContainer
 import snd.komelia.ui.common.menus.bulk.SeriesBulkActionsContent
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
@@ -118,10 +118,11 @@ fun SeriesListContent(
 
             },
             minSize = minSize,
+            modifier = Modifier.weight(1f),
         )
         val width = LocalWindowWidth.current
         if ((width == COMPACT || width == MEDIUM) && selectedSeries.isNotEmpty()) {
-            BottomPopupBulkActionsPanel {
+            BottomBulkActionsPanel {
                 SeriesBulkActionsContent(selectedSeries, true)
             }
         }

@@ -1,5 +1,9 @@
 package snd.komelia.ui.oneshot
 
+import snd.komelia.ui.common.components.LocalNavigationBarInset
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_edit
+
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
@@ -106,7 +110,7 @@ fun OneshotScreenContent(
             Column(
                 modifier = contentPadding
                     .fillMaxWidth()
-                    .verticalScroll(state = scrollState),
+                    .verticalScroll(state = scrollState).padding(bottom = LocalNavigationBarInset.current),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.Start
             ) {
@@ -188,7 +192,7 @@ private fun ToolbarOneshotActions(
         Box {
             var expandActions by remember { mutableStateOf(false) }
             IconButton(onClick = { expandActions = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = null)
+                Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
             }
             OneshotActionsMenu(
                 series = series,
@@ -203,7 +207,7 @@ private fun ToolbarOneshotActions(
         var showEditDialog by remember { mutableStateOf(false) }
         if (isAdmin && !book.libraryId.isLocalLibrary()) {
             IconButton(onClick = { showEditDialog = true }) {
-                Icon(Icons.Default.Edit, null)
+                Icon(Icons.Default.Edit, stringResource(Res.string.book_edit))
             }
         }
         if (showEditDialog) {

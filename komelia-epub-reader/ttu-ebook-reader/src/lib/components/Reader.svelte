@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { refreshChromeAppearance, prefersReducedChromeMotion } from "../../../../shared/chrome-appearance.mjs";
   import {
     debounceTime,
     EMPTY,
@@ -138,6 +139,9 @@
   let showHeader = $state(false);
   let isBookmarkScreen = $state(false);
   let showFooter = $state(false);
+  $effect(() => {
+    if (showHeader || showFooter) void refreshChromeAppearance();
+  });
   let exploredCharCount = $state(0);
   let bookCharCount = $state(0);
   let autoScroller: AutoScroller | undefined = $state();
@@ -1144,7 +1148,8 @@
   {#if showHeader}
     <div
         class="elevation-4 writing-horizontal-tb fixed inset-x-0 top-0 z-10 w-full"
-        transition:fly|local={{ y: -300, easing: quintInOut }}
+        data-komelia-chrome-motion
+        transition:fly|local={{ y: -24, duration: prefersReducedChromeMotion() ? 0 : 220, easing: quintInOut }}
         use:clickOutside={() => (showHeader = false)}
     >
       <BookReaderHeader

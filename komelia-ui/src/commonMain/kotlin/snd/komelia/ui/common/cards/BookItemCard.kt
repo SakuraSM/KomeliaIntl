@@ -1,5 +1,6 @@
 package snd.komelia.ui.common.cards
 
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -488,7 +489,7 @@ private fun BookDetailedListDetails(
                         onClick = { isMenuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        Icon(Icons.Default.MoreVert, null)
+                        Icon(Icons.Default.MoreVert, stringResource(Res.string.actions_show_more))
                     }
                     BookActionsMenu(
                         book = book,
@@ -516,7 +517,7 @@ private fun BookMenuActionsDropdown(
             onClick = { onActionsMenuExpand(true) },
             colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Icon(Icons.Default.MoreVert, null)
+            Icon(Icons.Default.MoreVert, stringResource(Res.string.actions_show_more))
         }
 
         BookActionsMenu(

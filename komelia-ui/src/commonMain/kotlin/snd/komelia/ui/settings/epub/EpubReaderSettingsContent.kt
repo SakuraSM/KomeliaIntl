@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,7 +48,7 @@ fun EpubReaderSettingsContent(
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             DropdownChoiceMenu(
                 selectedOption = LabeledEntry(
                     readerType,
@@ -57,14 +58,14 @@ fun EpubReaderSettingsContent(
                 onOptionChange = { onReaderChange(it.value) },
                 label = { Text(stringResource(Res.string.settings_epub_reader_type)) },
                 inputFieldModifier = Modifier.fillMaxWidth().animateContentSize(),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
             )
 
             AnimatedVisibility(readerType == TTSU_EPUB) {
                 val uriHandler = LocalUriHandler.current
                 ElevatedButton(
                     onClick = { uriHandler.openUri("https://github.com/ttu-ttu/ebook-reader") },
-                    modifier = Modifier.cursorForHand().padding(start = 20.dp)
+                    modifier = Modifier.cursorForHand()
                 ) {
                     Text(stringResource(Res.string.settings_epub_reader_type_ttsu_github))
                 }

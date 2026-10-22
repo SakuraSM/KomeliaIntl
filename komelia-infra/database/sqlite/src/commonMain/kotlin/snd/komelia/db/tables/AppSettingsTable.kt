@@ -15,6 +15,8 @@ object AppSettingsTable : Table("AppSettings") {
     val bookListLayout = text("book_list_layout")
     val appTheme = text("app_theme")
     val appLanguage = text("app_language").nullable()
+    val surfaceStyle = text("surface_style")
+    val reduceTransparency = bool("reduce_transparency")
 
     val checkForUpdatesOnStartup = bool("check_for_updates_on_startup")
 

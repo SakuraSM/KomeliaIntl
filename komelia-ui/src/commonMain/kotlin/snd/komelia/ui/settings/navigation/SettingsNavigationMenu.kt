@@ -1,5 +1,9 @@
 package snd.komelia.ui.settings.navigation
 
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.platform.WindowSizeClass
+import snd.komelia.ui.common.components.LocalNavigationBarInset
+
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_navigation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -10,6 +14,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.settings.model.AppSurfaceStyle
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -219,7 +228,7 @@ fun SettingsNavigationMenu(
     }
 
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState()),
+        modifier = modifier.verticalScroll(rememberScrollState()).padding(bottom = LocalNavigationBarInset.current),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         SettingsNavigationSection(
@@ -380,13 +389,14 @@ fun NavigationButton(
     val platform = LocalPlatform.current
     val containerColor = when {
         isSelected -> MaterialTheme.colorScheme.primaryContainer
-        platform == MOBILE -> Color.Transparent
+        platform == MOBILE || LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS -> Color.Transparent
         else -> color
     }
 
     val height = when (platform) {
         MOBILE -> 48.dp
-        DESKTOP, WEB_KOMF -> 40.dp
+        DESKTOP -> 40.dp
+        WEB_KOMF -> if (LocalWindowWidth.current == WindowSizeClass.COMPACT) 48.dp else 40.dp
     }
 
     Surface(
@@ -395,8 +405,9 @@ fun NavigationButton(
         color = containerColor,
         contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
         modifier = Modifier
-            .height(height)
+            .heightIn(min = height)
             .fillMaxWidth()
+            .semantics { selected = isSelected }
             .cursorForHand()
     ) {
         Row(
@@ -429,7 +440,8 @@ fun NavigationButton(
                 } else {
                     MaterialTheme.typography.titleMedium
                 },
-                maxLines = 1,
+                modifier = Modifier.weight(1f),
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.width(5.dp))
@@ -444,7 +456,6 @@ fun NavigationButton(
                     drawCircle(color = color)
                 }
             }
-            Spacer(Modifier.weight(1f))
             if (platform == MOBILE) {
                 Icon(
                     Icons.Rounded.ChevronRight,

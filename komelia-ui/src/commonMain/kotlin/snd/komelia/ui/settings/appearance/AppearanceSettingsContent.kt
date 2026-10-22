@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Slider
@@ -31,6 +34,10 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_app_th
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppTheme
+import snd.komelia.settings.model.AppSurfaceStyle
+import snd.komelia.ui.common.components.SwitchWithLabel
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.*
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.posterColumnCount
@@ -51,17 +58,52 @@ fun AppearanceSettingsContent(
     onThemeChange: (AppTheme) -> Unit,
     currentLanguage: AppLanguage,
     onLanguageChange: (AppLanguage) -> Unit,
+    surfaceStyle: AppSurfaceStyle,
+    onSurfaceStyleChange: (AppSurfaceStyle) -> Unit,
+    reduceTransparency: Boolean,
+    onReduceTransparencyChange: (Boolean) -> Unit,
+    hasSaveError: Boolean,
+    onRetrySave: () -> Unit,
+    onResetCardWidth: () -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
 
+        if (hasSaveError) {
+            Surface(color = MaterialTheme.colorScheme.errorContainer, shape = MaterialTheme.shapes.medium) {
+                Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text(stringResource(Res.string.appearance_save_failed))
+                    TextButton(onClick = onRetrySave) { Text(stringResource(Res.string.appearance_retry)) }
+                }
+            }
+        }
+        DropdownChoiceMenu(
+            label = { Text(stringResource(Res.string.appearance_surface_style)) },
+            selectedOption = LabeledEntry(surfaceStyle, surfaceLabel(surfaceStyle)),
+            options = AppSurfaceStyle.entries.map { LabeledEntry(it, surfaceLabel(it)) },
+            onOptionChange = { onSurfaceStyleChange(it.value) },
+            inputFieldModifier = Modifier.fillMaxWidth(),
+        )
+        Text(stringResource(Res.string.appearance_surface_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        SwitchWithLabel(
+            checked = reduceTransparency,
+            onCheckedChange = onReduceTransparencyChange,
+            label = { Text(stringResource(Res.string.appearance_reduce_transparency)) },
+            supportingText = { Text(stringResource(Res.string.appearance_reduce_transparency_hint)) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (surfaceStyle == AppSurfaceStyle.LIQUID_GLASS && !LocalSurfaceAppearance.current.renderingSupported) {
+            Text(stringResource(Res.string.appearance_solid_fallback), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        HorizontalDivider()
         DropdownChoiceMenu(
             label = { Text(stringResource(Res.string.settings_app_theme)) },
             selectedOption = LabeledEntry(currentTheme, stringResource(AppStrings.forAppTheme(currentTheme))),
             options = stringLabels(AppTheme.entries) { AppStrings.forAppTheme(it) },
             onOptionChange = { onThemeChange(it.value) },
-            inputFieldModifier = Modifier.widthIn(min = 250.dp)
+            inputFieldModifier = Modifier.fillMaxWidth()
         )
 
         HorizontalDivider()
@@ -71,12 +113,13 @@ fun AppearanceSettingsContent(
             selectedOption = LabeledEntry(currentLanguage, languageLabel(currentLanguage)),
             options = AppLanguage.entries.map { LabeledEntry(it, languageLabel(it)) },
             onOptionChange = { onLanguageChange(it.value) },
-            inputFieldModifier = Modifier.widthIn(min = 250.dp),
+            inputFieldModifier = Modifier.fillMaxWidth(),
         )
 
         HorizontalDivider()
 
-        Text(stringResource(Res.string.settings_app_image_card_size), modifier = Modifier.padding(10.dp))
+        Text(stringResource(Res.string.settings_app_image_card_size), style = MaterialTheme.typography.titleMedium)
+        TextButton(onClick = onResetCardWidth) { Text(stringResource(Res.string.appearance_reset_density)) }
         Slider(
             value = cardWidth.value.coerceIn(150f, 350f),
             onValueChange = { onCardWidthChange(it.roundToInt().dp) },
@@ -112,5 +155,13 @@ private fun languageLabel(language: AppLanguage): String = stringResource(
         AppLanguage.SYSTEM -> Res.string.settings_app_language_system
         AppLanguage.EN -> Res.string.settings_app_language_english
         AppLanguage.ZH_CN -> Res.string.settings_app_language_chinese_simplified
+    }
+)
+
+@Composable
+private fun surfaceLabel(style: AppSurfaceStyle): String = stringResource(
+    when (style) {
+        AppSurfaceStyle.CLASSIC -> Res.string.appearance_classic
+        AppSurfaceStyle.LIQUID_GLASS -> Res.string.appearance_liquid_glass
     }
 )

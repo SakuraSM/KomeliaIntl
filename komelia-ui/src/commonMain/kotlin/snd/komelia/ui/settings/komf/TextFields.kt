@@ -24,6 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalKomeliaMotion
+import snd.komelia.ui.platform.WindowSizeClass
+import androidx.compose.animation.core.tween
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_settings_text_discard
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_settings_text_edit
@@ -37,14 +43,20 @@ import snd.komelia.ui.common.components.PasswordTextField
 fun SavableTextField(
     currentValue: String,
     onValueSave: (String) -> Unit,
-    label: @Composable () -> Unit,
+    label: String,
     supportingText: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
     valueChangePolicy: (String) -> Boolean = { true },
     useEditButton: Boolean = false,
     isPassword: Boolean = false,
 ) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    val motion = LocalKomeliaMotion.current
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        maxItemsInEachRow = if (LocalWindowWidth.current == WindowSizeClass.COMPACT) 1 else Int.MAX_VALUE,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         var isChanged by remember { mutableStateOf(false) }
         var editable by remember { mutableStateOf(!useEditButton) }
         var textFieldValue by remember(currentValue) { mutableStateOf(currentValue) }
@@ -61,8 +73,8 @@ fun SavableTextField(
                 },
                 supportingText = supportingText,
                 isError = isError,
-                label = label,
-                modifier = Modifier.weight(1f).animateContentSize()
+                label = { Text(label) },
+                modifier = Modifier.weight(1f).semantics { contentDescription = label }.animateContentSize(tween(motion.duration(motion.stateDurationMillis), easing = motion.standardEasing))
             )
         } else {
             TextField(
@@ -74,11 +86,11 @@ fun SavableTextField(
                         isChanged = true
                     }
                 },
-                label = label,
+                label = { Text(label) },
                 supportingText = supportingText,
                 isError = isError,
                 singleLine = true,
-                modifier = Modifier.weight(1f).animateContentSize()
+                modifier = Modifier.weight(1f).semantics { contentDescription = label }.animateContentSize(tween(motion.duration(motion.stateDurationMillis), easing = motion.standardEasing))
             )
         }
 
@@ -135,7 +147,12 @@ fun SavableHttpTextField(
     isError: Boolean = false,
     supportingText: @Composable (() -> Unit)? = null,
 ) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        maxItemsInEachRow = if (LocalWindowWidth.current == WindowSizeClass.COMPACT) 1 else Int.MAX_VALUE,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         var isChanged by remember { mutableStateOf(false) }
         var textFieldValue by remember(currentValue) { mutableStateOf(currentValue) }
         HttpTextField(
@@ -145,7 +162,7 @@ fun SavableHttpTextField(
                 isChanged = true
             },
             label = { Text(label) },
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).semantics { contentDescription = label },
             isError = isError,
             supportingText = supportingText
         )
@@ -219,6 +236,7 @@ fun LanguageSelectionField(
                 label = { Text(label) },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .semantics { contentDescription = label }
                     .menuAnchor(PrimaryEditable)
             )
 

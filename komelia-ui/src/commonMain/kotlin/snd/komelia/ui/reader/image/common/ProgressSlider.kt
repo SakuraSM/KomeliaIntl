@@ -31,6 +31,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Surface
+import snd.komelia.ui.common.components.KomeliaChromeSurface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -184,11 +185,9 @@ private fun Slider(
             }
         }
 
-        Surface(
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
-            contentColor = MaterialTheme.colorScheme.onSurface,
+        KomeliaChromeSurface(
+            color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(24.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             shadowElevation = 8.dp,
         ) {
             Row(

@@ -34,6 +34,13 @@ class AppSettingsScreen : Screen {
                     onThemeChange = vm::onAppThemeChange,
                     currentLanguage = vm.currentLanguage,
                     onLanguageChange = vm::onAppLanguageChange,
+                    surfaceStyle = vm.surfaceStyle,
+                    onSurfaceStyleChange = vm::onSurfaceStyleChange,
+                    reduceTransparency = vm.reduceTransparency,
+                    onReduceTransparencyChange = vm::onReduceTransparencyChange,
+                    hasSaveError = vm.hasSaveError,
+                    onRetrySave = vm::retryFailedChanges,
+                    onResetCardWidth = vm::onResetCardWidth,
                 )
             }
         }

@@ -59,6 +59,9 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
+import snd.komelia.ui.common.components.LocalNavigationBarInset
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_edit
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineAvailable
@@ -67,6 +70,8 @@ import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.detailCoverWidth
 import snd.komelia.ui.common.BookReadButton
 import snd.komelia.ui.common.components.ExpandableText
+import snd.komelia.ui.common.components.KomeliaPageScaffold
+import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.images.BookThumbnail
 import snd.komelia.ui.common.menus.BookActionsMenu
@@ -106,8 +111,9 @@ fun BookScreenContent(
     val scrollState: ScrollState = rememberScrollState()
     val layout = LocalKomeliaLayout.current
     val isContentScrolled by remember(scrollState) { derivedStateOf { scrollState.value > 0 } }
-    Column(modifier = Modifier.fillMaxSize()) {
-        if (book == null || library == null) return
+    if (book == null || library == null) return
+    PauseGlassWhileBusy(scrollState.isScrollInProgress)
+    KomeliaPageScaffold(topBar = {
         KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
             BookToolBar(
                 book = book,
@@ -115,18 +121,18 @@ fun BookScreenContent(
                 onBackPress = onBackPress,
             )
         }
-
+    }) { topInset ->
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Column(
                 modifier = Modifier
                     .widthIn(max = layout.contentMaxWidth)
                     .fillMaxWidth()
+                    .verticalScroll(state = scrollState)
                     .padding(horizontal = layout.pageHorizontalPadding)
                     .padding(
-                        top = layout.topBarContentSpacing,
-                        bottom = layout.pageVerticalPadding,
-                    )
-                    .verticalScroll(state = scrollState),
+                        top = layout.topBarContentSpacing + topInset,
+                        bottom = layout.pageVerticalPadding + LocalNavigationBarInset.current,
+                    ),
                 verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
                 horizontalAlignment = Alignment.Start
             ) {
@@ -228,7 +234,7 @@ private fun ToolbarBookActions(
         Box {
             var expandActions by remember { mutableStateOf(false) }
             IconButton(onClick = { expandActions = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = null)
+                Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
             }
             BookActionsMenu(
                 book = book,
@@ -246,7 +252,7 @@ private fun ToolbarBookActions(
 
         if (isAdmin && !isOffline && !book.libraryId.isLocalLibrary()) {
             IconButton(onClick = { showEditDialog = true }) {
-                Icon(Icons.Default.Edit, null)
+                Icon(Icons.Default.Edit, stringResource(Res.string.book_edit))
             }
         }
         if (showEditDialog) {

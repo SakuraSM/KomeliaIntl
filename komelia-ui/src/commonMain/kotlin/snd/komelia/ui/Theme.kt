@@ -1,5 +1,9 @@
 package snd.komelia.ui
 
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.snap
+import androidx.compose.material3.MotionScheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -164,6 +168,7 @@ val LocalKomeliaMotion = staticCompositionLocalOf {
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun KomeliaTheme(
     appTheme: AppTheme,
@@ -175,6 +180,7 @@ fun KomeliaTheme(
     androidx.compose.runtime.CompositionLocalProvider(LocalKomeliaMotion provides motion) {
         MaterialTheme(
             colorScheme = theme.colorScheme,
+            motionScheme = if (isReducedMotion) ReducedMaterialMotion else MaterialTheme.motionScheme,
             typography = KomeliaTypography,
             shapes = KomeliaShapes,
             content = content,
@@ -199,4 +205,14 @@ enum class Theme(
         fun AppTheme.toTheme(): Theme = valueOf(name)
         fun Theme.toAppTheme(): AppTheme = AppTheme.valueOf(name)
     }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private object ReducedMaterialMotion : MotionScheme {
+    override fun <T> defaultSpatialSpec(): FiniteAnimationSpec<T> = snap()
+    override fun <T> fastSpatialSpec(): FiniteAnimationSpec<T> = snap()
+    override fun <T> slowSpatialSpec(): FiniteAnimationSpec<T> = snap()
+    override fun <T> defaultEffectsSpec(): FiniteAnimationSpec<T> = snap()
+    override fun <T> fastEffectsSpec(): FiniteAnimationSpec<T> = snap()
+    override fun <T> slowEffectsSpec(): FiniteAnimationSpec<T> = snap()
 }

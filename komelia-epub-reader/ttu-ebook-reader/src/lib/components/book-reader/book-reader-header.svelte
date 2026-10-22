@@ -86,6 +86,7 @@
 </script>
 
 <nav
+    data-komelia-chrome
     class="flex items-center justify-between gap-3 bg-slate-950/92 px-3 shadow-lg shadow-black/30 backdrop-blur-md md:px-6 {baseHeaderClasses}"
     aria-label={t('Reader toolbar')}
 >

@@ -1,9 +1,13 @@
 package snd.komelia.ui.search
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -61,6 +65,7 @@ import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.common.cards.BookSimpleImageCard
 import snd.komelia.ui.common.cards.SeriesSimpleImageCard
 import snd.komelia.ui.common.components.NoPaddingTextField
+import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.platform.cursorForHand
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.library.KomgaLibraryId
@@ -280,6 +285,8 @@ fun SearchTextField(
     placeholder: String = stringResource(Res.string.search_search_input_placeholder),
 ) {
     val focusManager = LocalFocusManager.current
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    PauseGlassWhileBusy(isFocused)
     val layout = LocalKomeliaLayout.current
     NoPaddingTextField(
         text = query,
@@ -294,6 +301,7 @@ fun SearchTextField(
         ),
         interactionSource = interactionSource,
         modifier = modifier
+            .semantics { contentDescription = placeholder }
             .heightIn(min = layout.minimumTouchTarget)
             .fillMaxWidth()
             .onKeyEvent { keyEvent ->

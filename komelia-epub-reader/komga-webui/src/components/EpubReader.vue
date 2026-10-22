@@ -2,6 +2,7 @@
   <div id="root" :key="bookId">
     <v-slide-y-transition>
       <v-toolbar
+          data-komelia-chrome
           v-if="showToolbars"
           dense elevation="1"
           class="settings full-width"
@@ -9,6 +10,7 @@
       >
         <v-btn
             icon
+            :aria-label="t('bookreader.shortcuts.close')"
             @click="closeBook"
         >
           <v-icon :icon="mdiArrowLeft"/>
@@ -17,6 +19,7 @@
         <v-btn
             :disabled="!hasToc && !hasLandmarks && !hasPageList"
             icon
+            :aria-label="t('epubreader.shortcuts.show_hide_toc')"
             @click="showToc = !showToc">
           <v-icon :icon="mdiTableOfContents"/>
         </v-btn>
@@ -27,18 +30,21 @@
         <v-btn
             v-if="fullscreenIsAvailable"
             icon
+            :aria-label="t('bookreader.shortcuts.fullscreen')"
             @click="switchFullscreen()">
           <v-icon :icon="mdiFullscreen"/>
         </v-btn>
 
         <v-btn
             icon
+            :aria-label="t('bookreader.shortcuts.show_hide_help')"
             @click="showHelp = !showHelp">
           <v-icon :icon="mdiHelpCircle"/>
         </v-btn>
 
         <v-btn
             icon
+            :aria-label="t('bookreader.shortcuts.settings')"
             @click="toggleSettings"
         >
           <v-icon :icon="mdiCog"/>
@@ -49,6 +55,7 @@
     <v-slide-y-reverse-transition>
       <!-- Bottom Toolbar-->
       <v-toolbar
+          data-komelia-chrome
           dense
           elevation="1"
           class="settings full-width"
@@ -66,6 +73,7 @@
         <v-btn
             icon
             :disabled="!historyCanGoBack"
+            :aria-label="t('epubreader.shortcuts.previous')"
             @click="historyBack"
         >
           <v-icon :icon="mdiChevronLeft"/>
@@ -78,6 +86,7 @@
         <v-btn
             icon
             :disabled="!historyCanGoForward"
+            :aria-label="t('epubreader.shortcuts.next')"
             @click="historyForward"
         >
           <v-icon :icon="mdiChevronRight"/>
@@ -93,6 +102,7 @@
     </v-slide-y-reverse-transition>
 
     <v-navigation-drawer
+        data-komelia-chrome
         v-model="showToc"
         temporary
         :width="smAndUp ? 500 : width - 50"
@@ -177,7 +187,7 @@
     >
       <v-card>
         <v-toolbar dark color="primary">
-          <v-btn icon dark @click="showSettings = false">
+          <v-btn icon dark :aria-label="t('bookreader.shortcuts.close')" @click="showSettings = false">
             <v-icon :icon="mdiClose"/>
           </v-btn>
           <v-toolbar-title>{{ t('bookreader.reader_settings') }}</v-toolbar-title>
@@ -319,7 +329,8 @@
 
 <script setup lang="ts">
 import {useI18n} from 'vue-i18n'
-import {computed, ComputedRef, nextTick, onBeforeUnmount, onMounted, reactive, Ref, ref} from 'vue'
+import {computed, ComputedRef, nextTick, onBeforeUnmount, onMounted, reactive, Ref, ref, watch} from 'vue'
+import { refreshChromeAppearance } from '../../../shared/chrome-appearance.mjs'
 import D2Reader, {Locator, ReadingPosition} from '@d-i-t-a/reader'
 import {Locations} from "@d-i-t-a/reader/dist/types/model/Locator";
 import {BookDto} from '@/types/komga-books'
@@ -384,6 +395,9 @@ const showSettings = ref(false)
 const showToolbars = ref(false)
 const showToc = ref(false)
 const showHelp = ref(false)
+watch([showToolbars, showSettings, showToc], states => {
+  if (states.some(Boolean)) void refreshChromeAppearance()
+})
 const readerLoading = ref(true)
 let readerLoadGeneration = 0
 const tab: Ref<string> = ref("hasToc")

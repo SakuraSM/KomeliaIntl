@@ -24,6 +24,30 @@ import kotlin.test.assertEquals
 class PosterGridDensityTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun tabletGridDoesNotStretchTheDefaultCoverToHalfThePage() {
+        lateinit var grid: LazyGridState
+        compose.setContent {
+            CompositionLocalProvider(
+                LocalPlatform provides PlatformType.MOBILE,
+                LocalWindowWidth provides WindowSizeClass.EXPANDED,
+                LocalKomeliaLayout provides komeliaLayoutSpec(PlatformType.MOBILE, WindowSizeClass.EXPANDED),
+            ) {
+                MaterialTheme {
+                    grid = rememberLazyGridState()
+                    // The navigation rail occupies the rest of an 840dp window.
+                    Box(Modifier.size(740.dp, 600.dp)) {
+                        PlaceHolderLazyCardGrid(elements = 12, minSize = 240.dp, scrollState = grid)
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        compose.runOnIdle {
+            val items = grid.layoutInfo.visibleItemsInfo
+            assertEquals(4, items.count { it.row == items.first().row })
+        }
+    }
+
     @Test fun changingCardSizeChangesTheActualMobileGrid() {
         val cardWidth = mutableStateOf(150.dp)
         lateinit var grid: LazyGridState

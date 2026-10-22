@@ -383,7 +383,9 @@ fun loadWebviewLibraries() {
 fun loadVipsLibraries() {
     measureTime {
         try {
-            VipsSharedLibraries.load()
+            VipsSharedLibraries.load(
+                systemGlibLoaded = DesktopPlatform.Current == DesktopPlatform.Linux && WebviewSharedLibraries.isAvailable
+            )
         } catch (e: UnsatisfiedLinkError) {
             logger.error(e) { "Couldn't load libvips. Vips decoder will not work" }
         }

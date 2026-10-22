@@ -48,7 +48,17 @@ The settings flag is stored by `KomfSettingsRepository`; fork migration V18 adds
 - `.node-version` declares the local Node version; the Release workflow currently declares a different Node version.
 - `.gitmodules` lists native and UI submodules. Initialize recursively for native/package builds.
 - `cmake/` builds native dependencies for supported host/target combinations.
-- `.github/workflows/release-desktop.yml` validates and uploads Linux/Windows desktop packages to an existing draft Release.
+- `.github/workflows/release-desktop.yml` builds and starts Linux/Windows installers before uploading them to a draft Release.
+
+Linux startup loads system WebKit first. When that succeeds, `DesktopAppModule` tells
+`VipsSharedLibraries` to reuse the loaded system GLib family. Loading bundled GObject or GIO
+against a different system GLib can fail with missing symbols. Without an available WebView,
+the decoder retains its bundled-library path. Windows keeps its bundled dependencies.
+
+The desktop smoke scripts require the `Application dependencies initialized` log event as well
+as a visible window. Inspect the captured page too: startup error windows are still visible
+windows. The Linux CI fixture prepares a desktop-menu directory and a private D-Bus session
+with a test keyring; it does not change application credential storage.
 
 ## Detailed catalog lists
 

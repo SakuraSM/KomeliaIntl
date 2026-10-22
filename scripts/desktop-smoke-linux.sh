@@ -21,7 +21,7 @@ for attempt in $(seq 1 60); do
     exit 1
   fi
   window_id="$(xdotool search --onlyvisible --pid "$app_pid" --name '^Komelia$' 2>/dev/null | head -n 1 || true)"
-  if [[ -n "$window_id" ]]; then break; fi
+  if [[ -n "$window_id" ]] && grep -q 'Application dependencies initialized' "$evidence/stdout.log"; then break; fi
   sleep 1
 done
 test -n "$window_id"
@@ -33,4 +33,9 @@ xdotool key --window "$window_id" Tab
 sleep 1
 kill -0 "$app_pid"
 import -window "$window_id" "$evidence/desktop-keyboard-focus.png"
-printf '{"processAlive":true,"windowPresent":true,"screenshotsCaptured":2}\n' >"$evidence/result.json"
+if ! grep -q 'Application dependencies initialized' "$evidence/stdout.log"; then
+  cat "$evidence/stdout.log" "$evidence/stderr.log" >&2
+  echo 'The desktop window opened without completing application initialization.' >&2
+  exit 1
+fi
+printf '{"processAlive":true,"windowPresent":true,"applicationInitialized":true,"screenshotsCaptured":2}\n' >"$evidence/result.json"

@@ -108,6 +108,7 @@ fun main() {
         try {
             val module = DesktopAppModule(windowState)
             dependencies.value = module.initDependencies()
+            logger.info { "Application dependencies initialized" }
         } catch (e: Throwable) {
             ensureActive()
             initError.value = e

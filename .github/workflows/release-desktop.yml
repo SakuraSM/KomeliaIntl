@@ -120,7 +120,7 @@ jobs:
       - name: Install and launch the Linux package
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends xvfb xauth xdotool imagemagick libwebkit2gtk-4.1-0 libsecret-1-0
+          sudo apt-get install -y --no-install-recommends xvfb xauth xdotool imagemagick libwebkit2gtk-4.1-0 libsecret-1-0 dbus-x11 gnome-keyring
           # The headless runner lacks the menu directory required by xdg-desktop-menu.
           sudo install -d -m 0755 /usr/share/desktop-directories
           package=$(find release-artifacts -name '*.deb' -print -quit)
@@ -128,8 +128,17 @@ jobs:
           package_name=$(dpkg-deb -f "$package" Package)
           launcher=$(dpkg -L "$package_name" | rg '/bin/Komelia$' | head -n 1)
           test -x "$launcher"
-          SKIKO_RENDER_API=SOFTWARE xvfb-run -a --server-args='-screen 0 1440x1000x24' \
-            bash scripts/desktop-smoke-linux.sh "$launcher" "$PWD/runtime-evidence"
+          app_lib="$(dirname "$launcher")/../lib/app"
+          mkdir -p runtime-evidence
+          for mode in system-webview bundled; do
+            java "-Dcompose.application.resources.dir=$app_lib/resources" -cp "$app_lib/*" \
+              scripts/DesktopNativeSmoke.java "$mode" > "runtime-evidence/native-$mode.log" 2>&1
+          done
+          dbus-run-session -- bash -euo pipefail -c '
+            printf "%s" "komelia-ci" | gnome-keyring-daemon --unlock --components=secrets
+            SKIKO_RENDER_API=SOFTWARE xvfb-run -a --server-args="-screen 0 1440x1000x24" \
+              bash scripts/desktop-smoke-linux.sh "$1" "$2"
+          ' bash "$launcher" "$PWD/runtime-evidence"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -78,6 +78,20 @@ When the user will validate on a physical device, follow [Android device validat
 
 In the pull request or handoff, list each executed command and manual scenario with its result. If a required check is blocked, include the reason and the closest substitute; do not silently omit it. Installed and launched packages are stronger evidence than artifact presence alone.
 
+## Desktop startup
+
+Run the installer smoke scripts in the desktop workflow. Require both a visible window and the
+application-initialization log event, then inspect the screenshot. A native-library or keyring
+failure can open an error window while the process stays alive.
+
+Linux verification needs WebKitGTK, a desktop-menu directory, and a D-Bus session with a test
+keyring. After changing native-library loading, verify initialization with the system WebView
+loaded first and exercise the bundled image decoder. Preserve the decoder's bundled GLib path
+when the WebView is unavailable. Keep container reproduction separate from the final CI package.
+`scripts/DesktopNativeSmoke.java` runs against the installed jars, calls the production library
+initializer, then decodes and resizes a synthetic PNG and checks every RGBA pixel. Linux runs
+both `system-webview` and `bundled` modes in separate processes; Windows runs `bundled` mode.
+
 ## Image upsampling and local-library cleanup
 
 For global color correction, run core `EffectiveColorCorrectionTest`, SQLite `DefaultColorCorrectionIntegrationTest`, UI JVM `DefaultColorCorrectionContentTest`, `DefaultColorCorrectionStateTest`, `GlobalColorProcessingTest`, and the UI Wasm `ColorCorrectionBrowserStorageTest`. These cover default-off, legacy overrides, inheritance, explicit off, identity overrides, transaction rollback, save cancellation/failure, live lookup-table changes, grayscale ownership, IndexedDB reopen and old browser settings JSON.

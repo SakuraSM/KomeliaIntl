@@ -14,6 +14,10 @@ if ($install.ExitCode -notin @(0, 3010)) { throw "MSI installation failed: $($in
 
 $launcher = Join-Path $env:ProgramFiles 'Komelia\Komelia.exe'
 if (-not (Test-Path $launcher)) { throw 'Installed Komelia launcher is missing.' }
+$appLibrary = Join-Path $env:ProgramFiles 'Komelia\app'
+& java "-Dcompose.application.resources.dir=$appLibrary\resources" -cp "$appLibrary\*" `
+    (Join-Path $PSScriptRoot 'DesktopNativeSmoke.java') bundled *> (Join-Path $Evidence 'native-bundled.log')
+if ($LASTEXITCODE -ne 0) { throw 'The installed native image decoder failed its smoke test.' }
 $app = Start-Process $launcher -PassThru `
     -RedirectStandardOutput (Join-Path $Evidence 'stdout.log') `
     -RedirectStandardError (Join-Path $Evidence 'stderr.log')
@@ -21,7 +25,8 @@ try {
     for ($attempt = 0; $attempt -lt 60; $attempt++) {
         $app.Refresh()
         if ($app.HasExited) { throw "Desktop application exited: $($app.ExitCode)" }
-        if ($app.MainWindowHandle -ne 0) { break }
+        $initialized = Select-String -Path (Join-Path $Evidence 'stdout.log') -SimpleMatch 'Application dependencies initialized' -Quiet
+        if ($app.MainWindowHandle -ne 0 -and $initialized) { break }
         Start-Sleep -Seconds 1
     }
     if ($app.MainWindowHandle -eq 0) { throw 'The installed desktop application did not open a window.' }
@@ -54,7 +59,8 @@ public static class KomeliaSmokeWindow {
         $graphics.Dispose()
         $bitmap.Dispose()
     }
-    @{ processAlive = $true; windowPresent = $true; width = $width; height = $height } |
+    if (-not $initialized) { throw 'The desktop window opened without completing application initialization.' }
+    @{ processAlive = $true; windowPresent = $true; applicationInitialized = $true; width = $width; height = $height } |
         ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $Evidence 'result.json')
 } finally {
     if (-not $app.HasExited) { Stop-Process -Id $app.Id }

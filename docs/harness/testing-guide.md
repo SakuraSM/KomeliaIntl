@@ -91,6 +91,10 @@ when the WebView is unavailable. Keep container reproduction separate from the f
 `scripts/DesktopNativeSmoke.java` runs against the installed jars, calls the production library
 initializer, then decodes and resizes a synthetic PNG and checks every RGBA pixel. Linux runs
 both `system-webview` and `bundled` modes in separate processes; Windows runs `bundled` mode.
+The same probe constructs a lookup-table operation and checks PNG/JPEG thumbnail decoding.
+The lookup-table graph reproduces GLib sorting-symbol failures missed by a single-input resize.
+The Linux native build checks all GLib symbols required by VIPS and the JNI libraries against
+the system compilation baseline before packaging.
 
 ## Image upsampling and local-library cleanup
 

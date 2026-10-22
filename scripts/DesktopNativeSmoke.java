@@ -40,6 +40,29 @@ public final class DesktopNativeSmoke {
                     }
                 }
             }
+            byte[] identityLut = new byte[256 * decoded.getBands()];
+            for (int value = 0; value < 256; value++) {
+                for (int band = 0; band < decoded.getBands(); band++) {
+                    identityLut[value * decoded.getBands() + band] = (byte) value;
+                }
+            }
+            try (var mapped = decoded.mapLookupTable(identityLut)) {
+                if (mapped.getWidth() != decoded.getWidth() || mapped.getHeight() != decoded.getHeight()) {
+                    throw new AssertionError("Lookup-table construction changed image dimensions");
+                }
+            }
+        }
+        try (var thumbnail = VipsImage.thumbnailBuffer(bytes.toByteArray(), 8, 6, false)) {
+            if (thumbnail.getWidth() != 8 || thumbnail.getHeight() != 6 || thumbnail.getBytes().length != 8 * 6 * 4) {
+                throw new AssertionError("Cover thumbnail dimensions or pixel count differ from the fixture");
+            }
+        }
+        var jpeg = new ByteArrayOutputStream();
+        if (!ImageIO.write(source, "jpeg", jpeg)) throw new AssertionError("JPEG fixture encoding failed");
+        try (var thumbnail = VipsImage.thumbnailBuffer(jpeg.toByteArray(), 8, 6, false)) {
+            if (thumbnail.getWidth() != 8 || thumbnail.getHeight() != 6 || thumbnail.getBytes().length != 8 * 6 * 4) {
+                throw new AssertionError("JPEG cover thumbnail dimensions or pixel count differ from the fixture");
+            }
         }
         System.out.println("NATIVE_MEDIA_SMOKE_PASSED " + args[0]);
     }

@@ -54,6 +54,10 @@ Linux startup loads system WebKit first. When that succeeds, `DesktopAppModule` 
 `VipsSharedLibraries` to reuse the loaded system GLib family. Loading bundled GObject or GIO
 against a different system GLib can fail with missing symbols. Without an available WebView,
 the decoder retains its bundled-library path. Windows keeps its bundled dependencies.
+The Linux build also prioritizes the builder's system GLib pkg-config files. Release builds
+therefore compile against Bookworm's GLib 2.74 headers instead of selecting newer APIs from the
+bundled GLib headers. `cmake/check-linux-glib-abi.sh` rejects native consumers with GLib symbols
+missing from that baseline. The bundled GLib source and revision remain unchanged.
 
 The desktop smoke scripts require the `Application dependencies initialized` log event as well
 as a visible window. Inspect the captured page too: startup error windows are still visible

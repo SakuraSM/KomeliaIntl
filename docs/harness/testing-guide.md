@@ -96,6 +96,9 @@ The lookup-table graph reproduces GLib sorting-symbol failures missed by a singl
 The Linux native build checks all GLib symbols required by VIPS and the JNI libraries against
 the system compilation baseline before packaging.
 
+`LoginContentLayoutTest` measures the real login form at desktop and phone widths. Keep the
+maximum width before `fillMaxWidth` so an incoming full-width constraint cannot defeat it.
+
 ## Image upsampling and local-library cleanup
 
 For global color correction, run core `EffectiveColorCorrectionTest`, SQLite `DefaultColorCorrectionIntegrationTest`, UI JVM `DefaultColorCorrectionContentTest`, `DefaultColorCorrectionStateTest`, `GlobalColorProcessingTest`, and the UI Wasm `ColorCorrectionBrowserStorageTest`. These cover default-off, legacy overrides, inheritance, explicit off, identity overrides, transaction rollback, save cancellation/failure, live lookup-table changes, grayscale ownership, IndexedDB reopen and old browser settings JSON.

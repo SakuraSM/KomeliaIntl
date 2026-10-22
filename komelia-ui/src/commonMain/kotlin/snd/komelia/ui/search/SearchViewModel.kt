@@ -20,6 +20,7 @@ import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.local.LocalLibraryManager
+import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.home.bookHomeComparator
 import snd.komelia.ui.home.localBookSearch
@@ -30,7 +31,7 @@ import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.common.KomgaSort
 import snd.komga.client.common.Page
 import snd.komga.client.library.KomgaLibraryId
-import snd.komga.client.series.KomgaSeries
+import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.series.KomgaSeriesSearch
 
 private val logger = KotlinLogging.logger { }
@@ -45,7 +46,7 @@ class SearchViewModel(
     private val appNotifications: AppNotifications,
 ) : StateScreenModel<LoadState<Unit>>(LoadState.Uninitialized) {
 
-    var seriesResults by mutableStateOf<List<KomgaSeries>>(emptyList())
+    var seriesResults by mutableStateOf<List<KomeliaSeries>>(emptyList())
         private set
     var seriesCurrentPage by mutableStateOf(1)
         private set
@@ -140,7 +141,7 @@ class SearchViewModel(
     private suspend fun fetchSeriesPage(
         pageNumber: Int,
         localLibraryIds: Result<List<KomgaLibraryId>>,
-    ): SearchLoadResult<KomgaSeries> {
+    ): SearchLoadResult<KomeliaSeries> {
         val sort = KomgaSort.KomgaSeriesSort.byLastModifiedDateDesc()
         val pageRequest = searchPageRequest(pageNumber, sort)
         val search = KomgaSeriesSearch(fullTextSearch = query)
@@ -195,7 +196,7 @@ class SearchViewModel(
         )
     }
 
-    private fun applySeriesPage(result: SearchLoadResult<KomgaSeries>) {
+    private fun applySeriesPage(result: SearchLoadResult<KomeliaSeries>) {
         seriesResults = result.page.content
         seriesCurrentPage = result.page.currentPage
         seriesTotalPages = result.page.totalPages
@@ -280,6 +281,6 @@ internal suspend fun <T, K> loadUnifiedSearchPage(
 }
 
 data class SearchResults(
-    val series: List<KomgaSeries>,
+    val series: List<KomeliaSeries>,
     val books: List<KomeliaBook>,
 )

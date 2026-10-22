@@ -54,6 +54,7 @@ private suspend fun AppNotificationMessage.localizedText(): String = when (this)
             AppNotificationMessageKey.ALL_LIBRARIES_TRASH_EMPTIED -> Res.string.notification_all_libraries_trash_emptied
             AppNotificationMessageKey.NO_TASKS_TO_CANCEL -> Res.string.notification_no_tasks_to_cancel
             AppNotificationMessageKey.TASKS_CANCELLED -> Res.string.notification_tasks_cancelled
+            AppNotificationMessageKey.MANGABAKA_METADATA_UNAVAILABLE -> Res.string.notification_mangabaka_unavailable
         }
         getString(resource, *arguments.toTypedArray())
     }

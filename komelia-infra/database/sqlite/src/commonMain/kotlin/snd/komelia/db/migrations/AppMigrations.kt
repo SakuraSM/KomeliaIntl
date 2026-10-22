@@ -24,6 +24,7 @@ class AppMigrations : MigrationResourcesProvider() {
         "V15__epub_display_settings.sql",
         "V16__panel_prerender_count.sql",
         "V17__default_color_correction.sql",
+        "V18__komf_mangabaka.sql",
     )
 
     override suspend fun getMigration(name: String): ByteArray? {

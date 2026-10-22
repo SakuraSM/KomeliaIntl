@@ -21,13 +21,13 @@ import snd.komelia.homefilters.HomeScreenFilter
 import snd.komelia.homefilters.SeriesHomeScreenFilter
 import snd.komelia.komga.api.KomgaCollectionsApi
 import snd.komelia.komga.api.KomgaSeriesApi
+import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.home.edit.SeriesMatchConditionState.SeriesConditionType
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.common.KomgaSort
 import snd.komga.client.common.KomgaSort.Direction.ASC
 import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.search.KomgaSearchCondition
-import snd.komga.client.series.KomgaSeries
 import snd.komga.client.series.KomgaSeriesSearch
 
 class SeriesFilterEditState(
@@ -38,7 +38,7 @@ class SeriesFilterEditState(
     private val options: StateFlow<FilterSuggestionOptions>,
     val cardWidth: StateFlow<Dp>,
     initialFilter: SeriesHomeScreenFilter?,
-    initialSeries: List<KomgaSeries>?,
+    initialSeries: List<KomeliaSeries>?,
     newFilterLabel: String? = null,
 ) : FilterEditState {
     override val label = MutableStateFlow(initialFilter?.label ?: requireNotNull(newFilterLabel))
@@ -86,7 +86,7 @@ class SeriesFilterEditState(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val series: StateFlow<List<KomgaSeries>> = filter.flatMapLatest { it.series }
+    val series: StateFlow<List<KomeliaSeries>> = filter.flatMapLatest { it.series }
         .stateIn(coroutineScope, SharingStarted.Eagerly, emptyList())
 
     val type = filter.map {
@@ -152,7 +152,7 @@ class SeriesFilterEditState(
 }
 
 sealed interface SeriesFilterStateType {
-    val series: StateFlow<List<KomgaSeries>>
+    val series: StateFlow<List<KomeliaSeries>>
 }
 
 class SeriesRecentlyAddedFilterState(
@@ -160,7 +160,7 @@ class SeriesRecentlyAddedFilterState(
     private val appNotifications: AppNotifications,
     private val coroutineScope: CoroutineScope,
     initial: SeriesHomeScreenFilter.RecentlyAdded?,
-    initialSeries: List<KomgaSeries>?,
+    initialSeries: List<KomeliaSeries>?,
 ) : SeriesFilterStateType {
     val libraryIds = MutableStateFlow<List<KomgaLibraryId>>(emptyList())
     val pageSize = MutableStateFlow(initial?.pageSize ?: 20)
@@ -183,7 +183,7 @@ class SeriesRecentlyAddedFilterState(
         this.pageSize.value = pageSize
     }
 
-    private suspend fun getSeries(libraryIds: List<KomgaLibraryId>, pageSize: Int): List<KomgaSeries> {
+    private suspend fun getSeries(libraryIds: List<KomgaLibraryId>, pageSize: Int): List<KomeliaSeries> {
         return appNotifications.runCatchingToNotifications {
             val page = KomgaPageRequest(size = pageSize)
             seriesApi.getNewSeries(
@@ -205,7 +205,7 @@ class SeriesRecentlyUpdatedFilterState(
     private val appNotifications: AppNotifications,
     private val coroutineScope: CoroutineScope,
     initial: SeriesHomeScreenFilter.RecentlyUpdated?,
-    initialSeries: List<KomgaSeries>?,
+    initialSeries: List<KomeliaSeries>?,
 ) : SeriesFilterStateType {
     val libraryIds = MutableStateFlow<List<KomgaLibraryId>>(emptyList())
     val pageSize = MutableStateFlow(initial?.pageSize ?: 20)
@@ -227,7 +227,7 @@ class SeriesRecentlyUpdatedFilterState(
         this.pageSize.value = pageSize
     }
 
-    private suspend fun getSeries(libraryIds: List<KomgaLibraryId>, pageSize: Int): List<KomgaSeries> {
+    private suspend fun getSeries(libraryIds: List<KomgaLibraryId>, pageSize: Int): List<KomeliaSeries> {
         return appNotifications.runCatchingToNotifications {
             val page = KomgaPageRequest(size = pageSize)
             seriesApi.getUpdatedSeries(
@@ -252,7 +252,7 @@ class SeriesCustomFilterState(
     private val options: StateFlow<FilterSuggestionOptions>,
     private val coroutineScope: CoroutineScope,
     initial: SeriesHomeScreenFilter.CustomFilter?,
-    initialSeries: List<KomgaSeries>?,
+    initialSeries: List<KomeliaSeries>?,
     initialPage: KomgaPageRequest?,
 ) : SeriesFilterStateType {
     val conditionState: MutableStateFlow<SeriesConditionState?> = MutableStateFlow(
@@ -270,7 +270,7 @@ class SeriesCustomFilterState(
     val sortDirection = MutableStateFlow(initialPage?.sort?.orders?.firstOrNull()?.direction ?: ASC)
 
 
-    override val series: StateFlow<List<KomgaSeries>>
+    override val series: StateFlow<List<KomeliaSeries>>
 
     init {
         series = combine(
@@ -401,7 +401,7 @@ class SeriesCustomFilterState(
     private suspend fun getSeries(
         condition: KomgaSearchCondition.SeriesCondition?,
         page: KomgaPageRequest,
-    ): List<KomgaSeries> {
+    ): List<KomeliaSeries> {
         return appNotifications.runCatchingToNotifications {
             val search = KomgaSeriesSearch(condition)
             val seriesPage = seriesApi.getSeriesList(

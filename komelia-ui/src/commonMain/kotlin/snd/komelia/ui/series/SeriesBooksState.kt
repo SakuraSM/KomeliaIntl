@@ -22,6 +22,7 @@ import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaReferentialApi
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.settings.CommonSettingsRepository
@@ -34,12 +35,11 @@ import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.KomgaBookReadProgressUpdateRequest
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.search.allOfBooks
-import snd.komga.client.series.KomgaSeries
 import snd.komga.client.series.KomgaSeriesId
 import snd.komga.client.sse.KomgaEvent
 
 class SeriesBooksState(
-    private val series: StateFlow<KomgaSeries?>,
+    private val series: StateFlow<KomeliaSeries?>,
     private val settingsRepository: CommonSettingsRepository,
     private val notifications: AppNotifications,
     private val bookApi: KomgaBookApi,

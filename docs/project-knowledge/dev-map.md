@@ -34,6 +34,12 @@ Some Gradle project dependencies are not a textbook layered graph because shared
 
 Local-folder libraries enter through `komelia-ui/.../settings/local`, are orchestrated by `komelia-domain/offline/.../local/LocalLibraryManager`, and reuse the offline SQLite repositories and reader APIs. Android storage access and hourly background work live in the offline Android source set; JVM folder/archive implementations live in the JVM source set; Wasm exposes the unsupported boundary explicitly.
 
+## Optional MangaBaka metadata
+
+Series-facing application APIs return `KomeliaSeries`, which preserves the Komga series fields and adds nullable MangaBaka metadata. Remote series and collection queries enrich their results only when Komf and MangaBaka are enabled. `MangaBakaMetadataLoader` limits optional requests to three seconds, preserves cancellation, and reports an unavailable-metadata notice while retaining the base catalog. Local and offline series remain independent of Komf and return no MangaBaka enrichment.
+
+The settings flag is stored by `KomfSettingsRepository`; fork migration V18 adds it without changing published V1–V17 migrations. Series detail, linking dialogs and Komf settings live in the shared UI's `mangabaka` packages. Treat fetched titles, descriptions and tags as catalog content; application controls use synchronized English and Simplified Chinese resources.
+
 ## Build and dependency surfaces
 
 - `settings.gradle.kts` is the module registry and repository policy.

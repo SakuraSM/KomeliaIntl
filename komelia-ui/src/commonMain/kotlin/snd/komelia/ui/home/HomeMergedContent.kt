@@ -7,7 +7,7 @@ import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.search.KomgaSearchCondition
 import snd.komga.client.search.anyOfBooks
 import snd.komga.client.search.anyOfSeries
-import snd.komga.client.series.KomgaSeries
+import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komga.client.series.KomgaSeriesSearch
 
 internal fun localBookSearch(
@@ -64,7 +64,7 @@ internal fun bookHomeComparator(sort: KomgaSort?): Comparator<KomeliaBook>? {
     }
 }
 
-internal fun seriesHomeComparator(sort: KomgaSort?): Comparator<KomgaSeries>? {
+internal fun seriesHomeComparator(sort: KomgaSort?): Comparator<KomeliaSeries>? {
     val orders = (sort as? KomgaSort.KomgaSeriesSort)?.orders.orEmpty()
     if (orders.isEmpty()) return null
     return Comparator { left, right ->
@@ -89,7 +89,7 @@ private fun compareBookProperty(left: KomeliaBook, right: KomeliaBook, property:
     else -> 0
 }
 
-private fun compareSeriesProperty(left: KomgaSeries, right: KomgaSeries, property: String): Int = when (property) {
+private fun compareSeriesProperty(left: KomeliaSeries, right: KomeliaSeries, property: String): Int = when (property) {
     "metadata.titleSort" -> left.metadata.titleSort.compareTo(right.metadata.titleSort, ignoreCase = true)
     "created" -> left.created.compareTo(right.created)
     "booksMetadata.releaseDate" -> compareValues(left.booksMetadata.releaseDate, right.booksMetadata.releaseDate)

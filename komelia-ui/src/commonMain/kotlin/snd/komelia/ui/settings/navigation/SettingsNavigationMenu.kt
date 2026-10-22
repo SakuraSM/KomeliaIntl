@@ -1,5 +1,6 @@
 package snd.komelia.ui.settings.navigation
 
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_navigation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
@@ -103,6 +104,7 @@ import snd.komelia.ui.settings.epub.EpubReaderSettingsScreen
 import snd.komelia.ui.settings.imagereader.ImageReaderSettingsScreen
 import snd.komelia.ui.settings.komf.general.KomfSettingsScreen
 import snd.komelia.ui.settings.komf.jobs.KomfJobsScreen
+import snd.komelia.ui.settings.komf.mangabaka.KomfMangaBakaSettingsScreen
 import snd.komelia.ui.settings.komf.notifications.KomfNotificationSettingsScreen
 import snd.komelia.ui.settings.komf.processing.KomfProcessingSettingsScreen
 import snd.komelia.ui.settings.komf.providers.KomfProvidersSettingsScreen
@@ -277,6 +279,7 @@ fun SettingsNavigationMenu(
                 val komfEntries = buildList {
                     add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_connection), Icons.Rounded.Link, KomfSettingsScreen(), currentScreen is KomfSettingsScreen))
                     if (komfEnabled) {
+                        add(NavigationEntry(stringResource(Res.string.mangabaka_navigation), Icons.Rounded.Extension, KomfMangaBakaSettingsScreen(), currentScreen is KomfMangaBakaSettingsScreen))
                         add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_processing), Icons.Rounded.Tune, KomfProcessingSettingsScreen(KOMGA), currentScreen is KomfProcessingSettingsScreen))
                         add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_providers), Icons.Rounded.Extension, KomfProvidersSettingsScreen(), currentScreen is KomfProvidersSettingsScreen))
                         add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_notifications), Icons.Rounded.Notifications, KomfNotificationSettingsScreen(), currentScreen is KomfNotificationSettingsScreen))

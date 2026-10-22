@@ -37,6 +37,7 @@ import snd.komelia.AppNotification
 import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaSeriesApi
+import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.ui.LocalKomfIntegration
 import snd.komelia.ui.LocalKomgaState
@@ -48,11 +49,10 @@ import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialog
 import snd.komelia.ui.dialogs.komf.reset.KomfResetSeriesMetadataDialog
 import snd.komelia.ui.dialogs.permissions.DownloadNotificationRequestDialog
 import snd.komelia.ui.dialogs.series.edit.SeriesEditDialog
-import snd.komga.client.series.KomgaSeries
 
 @Composable
 fun SeriesActionsMenu(
-    series: KomgaSeries,
+    series: KomeliaSeries,
     actions: SeriesMenuActions,
     expanded: Boolean,
     showEditOption: Boolean,
@@ -88,27 +88,6 @@ fun SeriesActionsMenu(
         })
     }
 
-    var showKomfDialog by remember { mutableStateOf(false) }
-    if (showKomfDialog) {
-        KomfIdentifyDialog(
-            series = series,
-            onDismissRequest = {
-                showKomfDialog = false
-                onDismissRequest()
-            }
-        )
-    }
-    var showKomfResetDialog by remember { mutableStateOf(false) }
-    if (showKomfResetDialog) {
-        KomfResetSeriesMetadataDialog(
-            series = series,
-            onDismissRequest = {
-                showKomfResetDialog = false
-                onDismissRequest()
-            }
-        )
-    }
-
     var showAddToCollectionDialog by remember { mutableStateOf(false) }
     if (showAddToCollectionDialog) {
         AddToCollectionDialog(
@@ -134,8 +113,6 @@ fun SeriesActionsMenu(
 
     val showDropdown = derivedStateOf {
         expanded &&
-                !showKomfDialog &&
-                !showKomfResetDialog &&
                 !showEditDialog &&
                 !showAddToCollectionDialog
     }
@@ -218,31 +195,18 @@ fun SeriesActionsMenu(
             )
 
         }
-
-        val komfIntegration = LocalKomfIntegration.current.collectAsState(false)
-        if (komfIntegration.value) {
-            DropdownMenuItem(
-                text = { Text(stringResource(Res.string.series_identify)) },
-                onClick = { showKomfDialog = true },
-            )
-
-            DropdownMenuItem(
-                text = { Text(stringResource(Res.string.series_reset_metadata)) },
-                onClick = { showKomfResetDialog = true },
-            )
-        }
     }
 }
 
 data class SeriesMenuActions(
-    val analyze: (KomgaSeries) -> Unit,
-    val refreshMetadata: (KomgaSeries) -> Unit,
-    val addToCollection: (KomgaSeries) -> Unit,
-    val markAsRead: (KomgaSeries) -> Unit,
-    val markAsUnread: (KomgaSeries) -> Unit,
-    val delete: (KomgaSeries) -> Unit,
-    val download: (KomgaSeries) -> Unit,
-    val deleteDownloaded: (KomgaSeries) -> Unit,
+    val analyze: (KomeliaSeries) -> Unit,
+    val refreshMetadata: (KomeliaSeries) -> Unit,
+    val addToCollection: (KomeliaSeries) -> Unit,
+    val markAsRead: (KomeliaSeries) -> Unit,
+    val markAsUnread: (KomeliaSeries) -> Unit,
+    val delete: (KomeliaSeries) -> Unit,
+    val download: (KomeliaSeries) -> Unit,
+    val deleteDownloaded: (KomeliaSeries) -> Unit,
 ) {
     constructor(
         seriesApi: KomgaSeriesApi,

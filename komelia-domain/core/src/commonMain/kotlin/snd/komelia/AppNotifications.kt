@@ -135,6 +135,7 @@ enum class AppNotificationMessageKey {
     ALL_LIBRARIES_TRASH_EMPTIED,
     NO_TASKS_TO_CANCEL,
     TASKS_CANCELLED,
+    MANGABAKA_METADATA_UNAVAILABLE,
 }
 
 sealed interface AppNotificationMessage {

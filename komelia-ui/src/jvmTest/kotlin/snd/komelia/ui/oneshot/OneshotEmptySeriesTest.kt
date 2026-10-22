@@ -29,7 +29,7 @@ import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.library.ScanInterval
 import snd.komga.client.library.SeriesCover
-import snd.komga.client.series.KomgaSeries
+import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komga.client.series.KomgaSeriesBookMetadata
 import snd.komga.client.series.KomgaSeriesId
 import snd.komga.client.series.KomgaSeriesMetadata
@@ -130,7 +130,8 @@ class OneshotEmptySeriesTest {
             id = KomgaBookId("local-book-test"), seriesId = KomgaSeriesId("local-series-empty"),
             seriesTitle = "Synthetic series", libraryId = KomgaLibraryId("local-library-test"),
             name = "Synthetic book", url = "local://synthetic", number = 1,
-            created = now, lastModified = now, fileLastModified = now, sizeBytes = 20, size = "20 B",
+            created = now, lastModified = now, fileLastModified = now,
+            sizeBytes = 20, size = "20 B",
             media = Media(KomgaMediaStatus.READY, "application/zip", 3, "", false, false, MediaProfile.DIVINA),
             metadata = KomgaBookMetadata("Synthetic book", "", "1", 1f, null, emptyList(), emptyList(), "", emptyList(),
                 false, false, false, false, false, false, false, false, false, now, now),
@@ -152,9 +153,9 @@ class OneshotEmptySeriesTest {
         oneshotsDirectory = null, unavailable = false,
     )
 
-    private fun series(): KomgaSeries {
+    private fun series(): KomeliaSeries {
         val now = Instant.fromEpochMilliseconds(1_000)
-        return KomgaSeries(
+        return KomeliaSeries(
             id = KomgaSeriesId("local-series-empty"),
             libraryId = KomgaLibraryId("local-library-test"),
             name = "Synthetic series",
@@ -185,6 +186,7 @@ class OneshotEmptySeriesTest {
             created = now,
             lastModified = now,
             fileLastModified = now,
+            mangaBakaMetadata = null,
         )
     }
 

@@ -43,6 +43,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
+            implementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
             // Match the Compose/Skiko version used by the consuming UI in browser tests.
             implementation(libs.compose.foundation)
         }

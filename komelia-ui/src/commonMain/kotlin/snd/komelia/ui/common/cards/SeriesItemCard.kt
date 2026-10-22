@@ -40,17 +40,18 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_unavaila
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LocalLibraries
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.images.SeriesThumbnail
 import snd.komelia.ui.common.menus.SeriesActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.platform.cursorForHand
-import snd.komga.client.series.KomgaSeries
+import snd.komelia.ui.series.mangabaka.state.MangaBakaTitlesState
 
 @Composable
 fun SeriesImageCard(
-    series: KomgaSeries,
+    series: KomeliaSeries,
     onSeriesClick: (() -> Unit)? = null,
     isSelected: Boolean = false,
     onSeriesSelect: (() -> Unit)? = null,
@@ -103,7 +104,7 @@ fun SeriesImageCard(
 
 @Composable
 fun SeriesSimpleImageCard(
-    series: KomgaSeries,
+    series: KomeliaSeries,
     onSeriesClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -128,7 +129,7 @@ fun SeriesSimpleImageCard(
 
 @Composable
 private fun SeriesCardHoverOverlay(
-    series: KomgaSeries,
+    series: KomeliaSeries,
     isSelected: Boolean,
     onSeriesSelect: (() -> Unit)?,
     seriesActions: SeriesMenuActions?,
@@ -192,7 +193,7 @@ private fun SeriesCardHoverOverlay(
 
 @Composable
 private fun SeriesImageOverlay(
-    series: KomgaSeries,
+    series: KomeliaSeries,
     libraryIsDeleted: Boolean,
     showTitle: Boolean = true,
     content: @Composable () -> Unit
@@ -236,8 +237,13 @@ private fun SeriesImageOverlay(
             verticalArrangement = Arrangement.Bottom
         ) {
             if (showTitle) {
-
-                CardOutlinedText(text = series.metadata.title, maxLines = 2)
+                val mangaBaka = series.mangaBakaMetadata
+                val title = if (mangaBaka != null) {
+                    remember(series) { MangaBakaTitlesState(mangaBaka).mainTitle.title }
+                } else {
+                    series.metadata.title
+                }
+                CardOutlinedText(text = title, maxLines = 2)
                 if (series.deleted || libraryIsDeleted) {
                     CardOutlinedText(
                         stringResource(Res.string.series_unavailable),
@@ -251,7 +257,7 @@ private fun SeriesImageOverlay(
 
 @Composable
 fun SeriesDetailedListCard(
-    series: KomgaSeries,
+    series: KomeliaSeries,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -275,7 +281,7 @@ fun SeriesDetailedListCard(
 }
 
 @Composable
-private fun SeriesDetails(series: KomgaSeries) {
+private fun SeriesDetails(series: KomeliaSeries) {
     val layout = LocalKomeliaLayout.current
     Column {
         Row(

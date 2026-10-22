@@ -121,6 +121,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends xvfb xauth xdotool imagemagick libwebkit2gtk-4.1-0 libsecret-1-0
+          # The headless runner lacks the menu directory required by xdg-desktop-menu.
+          sudo install -d -m 0755 /usr/share/desktop-directories
           package=$(find release-artifacts -name '*.deb' -print -quit)
           sudo apt-get install -y "$PWD/$package"
           package_name=$(dpkg-deb -f "$package" Package)

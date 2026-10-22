@@ -189,6 +189,7 @@ jobs:
       - name: Build EPUB resources and MSI
         shell: bash
         run: |
+          ./gradlew releaseVersionCheck
           ./gradlew buildEpubReaders
           ./gradlew desktopMsi
       - name: Stage Windows installer

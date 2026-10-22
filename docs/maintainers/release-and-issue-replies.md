@@ -23,6 +23,10 @@ tree must match the tested source tree. Then create a draft Release and upload t
 The default `upload: true` mode checks that the Release is still a draft immediately before each
 upload, and refuses to upload when it has been published.
 
+On Windows, the Gradle version check selects Git for Windows' Bash from its standard installation
+directories. The system `bash.exe` can be the WSL launcher, which does not execute Windows checkout
+paths. For a custom Git installation, pass `-Pkomelia.bashExecutable=C:/path/to/Git/bin/bash.exe`.
+
 ## Prepare release notes
 
 1. Set the Release title to `Komelia vMAJOR.MINOR.PATCH` for stable releases or `Komelia vMAJOR.MINOR.PATCH-beta.N` for Beta releases. Do not use `Komelia Intl`. Do not omit the `v` or use only the version number.

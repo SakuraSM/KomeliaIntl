@@ -27,6 +27,13 @@ On Windows, the Gradle version check selects Git for Windows' Bash from its stan
 directories. The system `bash.exe` can be the WSL launcher, which does not execute Windows checkout
 paths. For a custom Git installation, pass `-Pkomelia.bashExecutable=C:/path/to/Git/bin/bash.exe`.
 
+When only Windows verification scripts or their documentation change, the same workflow can
+verify an existing MSI without rebuilding it. Set `verify_installer_run_id` to its build run,
+`installer_sha256` to the verified MSI digest, `platform: windows`, and `upload: false`.
+This mode rejects application-source changes and changes to the original build jobs. It checks
+the downloaded MSI hash before installation. Record both the installer build commit and the
+verification commit; a changed application or packaging command requires a new installer.
+
 ## Prepare release notes
 
 1. Set the Release title to `Komelia vMAJOR.MINOR.PATCH` for stable releases or `Komelia vMAJOR.MINOR.PATCH-beta.N` for Beta releases. Do not use `Komelia Intl`. Do not omit the `v` or use only the version number.

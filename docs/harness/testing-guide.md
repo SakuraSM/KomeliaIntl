@@ -99,6 +99,11 @@ the system compilation baseline before packaging.
 `LoginContentLayoutTest` measures the real login form at desktop and phone widths. Keep the
 maximum width before `fillMaxWidth` so an incoming full-width constraint cannot defeat it.
 
+Windows verification enumerates visible windows owned by the launched application process tree.
+`Process.MainWindowHandle` alone can miss a window owned by a child process or another native
+window. On failure, retain the scoped process/window inventory and a runner screenshot so a
+window-discovery failure can be distinguished from application initialization or rendering errors.
+
 ## Image upsampling and local-library cleanup
 
 For global color correction, run core `EffectiveColorCorrectionTest`, SQLite `DefaultColorCorrectionIntegrationTest`, UI JVM `DefaultColorCorrectionContentTest`, `DefaultColorCorrectionStateTest`, `GlobalColorProcessingTest`, and the UI Wasm `ColorCorrectionBrowserStorageTest`. These cover default-off, legacy overrides, inheritance, explicit off, identity overrides, transaction rollback, save cancellation/failure, live lookup-table changes, grayscale ownership, IndexedDB reopen and old browser settings JSON.

@@ -30,15 +30,27 @@ on:
         default: true
         type: boolean
 
+      verify_installer_run_id:
+        description: Verify an existing Windows installer from this run instead of rebuilding
+        required: false
+        default: ''
+        type: string
+      installer_sha256:
+        description: Expected MSI SHA-256 when verifying an existing installer
+        required: false
+        default: ''
+        type: string
+
 permissions:
   contents: write
 
 concurrency:
-  group: release-desktop-${{ inputs.tag }}
+  group: ${{ inputs.verify_installer_run_id && format('verify-windows-{0}', inputs.verify_installer_run_id) || format('release-desktop-{0}', inputs.tag) }}
   cancel-in-progress: false
 
 jobs:
   validate:
+    if: ${{ inputs.verify_installer_run_id == '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -262,3 +274,96 @@ jobs:
         run: |
           test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
           gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
+
+  verify-source:
+    if: ${{ inputs.verify_installer_run_id != '' }}
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify that installer application inputs are unchanged
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_RUN_ID: ${{ inputs.verify_installer_run_id }}
+          INSTALLER_SHA256: ${{ inputs.installer_sha256 }}
+        run: |
+          [[ "$ARTIFACT_RUN_ID" =~ ^[0-9]+$ ]]
+          [[ "$INSTALLER_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          source_head=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$ARTIFACT_RUN_ID" --jq .head_sha)
+          git cat-file -e "$source_head^{commit}"
+          git diff --name-only "$source_head" "$GITHUB_SHA" > changed-inputs.txt
+          SOURCE_HEAD="$source_head" python3 - <<'PY'
+          from pathlib import Path
+          import os, re, subprocess
+          allowed = {
+              '.github/workflows/release-desktop.yml',
+              'scripts/desktop-smoke-windows.ps1',
+              'scripts/DesktopNativeSmoke.java',
+              'docs/harness/testing-guide.md',
+              'docs/maintainers/release-and-issue-replies.md',
+          }
+          changed = Path('changed-inputs.txt').read_text().splitlines()
+          unexpected = sorted(set(changed) - allowed)
+          if unexpected:
+              raise SystemExit('Rebuild the installer because application inputs changed: ' + ', '.join(unexpected))
+          workflow = '.github/workflows/release-desktop.yml'
+          before = subprocess.check_output(['git', 'show', os.environ['SOURCE_HEAD'] + ':' + workflow], text=True)
+          after = Path(workflow).read_text()
+          def jobs(text):
+              return dict(re.findall(r'(?ms)^  ([a-z][a-z0-9-]*):\n(.*?)(?=^  [a-z][a-z0-9-]*:\n|\Z)', text.split('\njobs:\n', 1)[1]))
+          old_jobs, new_jobs = jobs(before), jobs(after)
+          for name, old in old_jobs.items():
+              if name in ('verify-source', 'verify-windows'):
+                  continue
+              new = new_jobs.get(name, '')
+              if name == 'validate':
+                  condition = "    if: $" + "{{ inputs.verify_installer_run_id == '' }}\n"
+                  new = new.replace(condition, '')
+                  old = old.replace(condition, '')
+              if old.rstrip() != new.rstrip():
+                  raise SystemExit('Rebuild the installer because build job changed: ' + name)
+          print('Installer application sources and build jobs are unchanged.')
+          PY
+          printf 'Installer build source: %s\nVerification source: %s\n' "$source_head" "$GITHUB_SHA"
+
+  verify-windows:
+    permissions:
+      actions: read
+      contents: read
+    needs: verify-source
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: release-artifacts
+          run-id: ${{ inputs.verify_installer_run_id }}
+          github-token: ${{ github.token }}
+      - name: Verify and launch the unchanged MSI
+        shell: pwsh
+        env:
+          INSTALLER_SHA256: ${{ inputs.installer_sha256 }}
+        run: |
+          $packages = @(Get-ChildItem release-artifacts -Filter '*.msi')
+          if ($packages.Count -ne 1) { throw 'Expected exactly one MSI.' }
+          $installer = $packages[0].FullName
+          if ((Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant() -ne $env:INSTALLER_SHA256) {
+            throw 'The downloaded MSI does not match the expected hash.'
+          }
+          ./scripts/desktop-smoke-windows.ps1 -Installer $installer -Evidence runtime-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-runtime-evidence
+          path: runtime-evidence
+          if-no-files-found: warn

@@ -73,8 +73,21 @@ Local-library index removal deletes reading progress before books and series ins
 
 `AppSurfaceStyle` is independent of `AppTheme`. SQLite migration V19 adds `surface_style` and `reduce_transparency`; browser `AppSettings` supplies legacy defaults. `AppearancePreference` serializes/coalesces accepted choices and exposes save failure/retry without discarding a newer selection.
 
-`GlassSurface.kt` owns all experimental Haze 2.0.1 APIs. Each backdrop captures content separately from controls; Haze's default `Behind` selection excludes ancestor sources. `KomeliaPageScaffold` measures optional toolbars, preserving content scroll range while allowing content beneath floating chrome. Android capability checks and reduced transparency select solid surfaces. `GlassSamplingBudget` pauses sampling during active scrolling and resumes after 250ms of idle time; its owners are released when their composition leaves.
+`GlassSurface.kt` owns all experimental Haze 2.0.1 APIs. Each backdrop captures content separately from controls; Haze's default `Behind` selection excludes ancestor sources. `KomeliaPageScaffold` measures optional toolbars, preserving content scroll range while allowing content beneath floating chrome. Android capability checks and reduced transparency select solid surfaces. `GlassSamplingBudget` pauses sampling during active scrolling and resumes after 250ms of idle time; its owners are released when their composition leaves. `MainDestinationSurface` uses the solid Classic layout for mobile search, including its navigation, because capture pauses alone did not meet the frame budget. This local fallback preserves the saved preference and restores it when leaving search. Desktop keeps the selected material.
 
 The two EPUB bundles import `komelia-epub-reader/shared/chrome-appearance.mjs` and its scoped CSS. `getChromeAppearance` is an optional host bridge, and only elements marked `data-komelia-chrome` receive material styles. `RetainedEpubReader` owns the selected reader implementation so changing the EPUB preference applies to the next entry into the same book.
 
 Mobile poster density defaults to 3 columns below 840dp, 4 below 1200dp and 6 above it, while still scaling with the persisted density setting. `CoverCardCaption` reserves height for the system font scale. Desktop poster grids retain adaptive widths. `BottomBulkActionsPanel` is an inline footer shared by series, collections and read lists. Their content uses the remaining column height; the footer reserves the navigation inset.
+
+## Web rendering compatibility
+
+Wasm configurations use the `compose-web` core-library version to include the semantics-owner fix
+for CMP-9368/CMP-10623. Android and JVM retain `compose-multiplatform`; Material3 retains its own
+version. The override lives in the root Gradle build and does not change submodule revisions.
+
+The Web Skiko bindings and JavaScript/Wasm runtime must use the same `skiko-web` version. Skiko
+0.153 publishes the runtime as the `skiko-runtime` variant of `skiko-wasm-js`; the older Compose
+Gradle plugin otherwise requests the obsolete standalone runtime module. Keep that variant
+selection paired with the Wasm dependency override. Remove the overrides when the shared stable
+Compose stack contains the accessibility fix. Browser popup and bitmap-decoder tests guard this
+boundary; a successful Wasm compile alone does not verify the runtime pairing.

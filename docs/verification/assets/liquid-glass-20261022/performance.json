@@ -335,6 +335,493 @@
           }
         }
       }
+    },
+    "perf-search-solid": {
+      "metadata": {
+        "apkSha256": "09acb343e9dc0912b83bbe138d298ae5e872bb811e99d38b05f3a1b58bb82243",
+        "baseCommit": "13b74471dabfce992847a6361ba006881dca9fd4",
+        "sourceDiffSha256": "f56087950d7c5efa059e01271f9e5ae57032fbdc1a8d68449d4f62c6b82eda58",
+        "policy": "Mobile search keeps sampling paused while results are composed. Native Compose remains 1.12.1.",
+        "java": "Temurin 21.0.13+9",
+        "scenario": "Empty-query global search, Series results; four fixed scroll round trips and one second for settling. Input is unfocused and keyboard closed.",
+        "warmupPerMode": 3,
+        "measurementOrder": [
+          "classic",
+          "glass",
+          "glass",
+          "classic",
+          "classic",
+          "glass",
+          "glass",
+          "classic"
+        ],
+        "p95Aggregation": "median of per-run P95",
+        "jankAggregation": "sum modern janky frames / sum frames",
+        "wmSize": "Physical size: 1080x2400",
+        "wmDensity": "Physical density: 420",
+        "fontScale": "1.0",
+        "animationScale": "null",
+        "effectiveAnimationScale": 1.0
+      },
+      "samples": [
+        {
+          "mode": "classic",
+          "phase": "warmup",
+          "index": 0,
+          "frames": 234,
+          "jankyFrames": 45,
+          "p95ms": 20
+        },
+        {
+          "mode": "classic",
+          "phase": "warmup",
+          "index": 1,
+          "frames": 246,
+          "jankyFrames": 34,
+          "p95ms": 20
+        },
+        {
+          "mode": "classic",
+          "phase": "warmup",
+          "index": 2,
+          "frames": 245,
+          "jankyFrames": 35,
+          "p95ms": 22
+        },
+        {
+          "mode": "glass",
+          "phase": "warmup",
+          "index": 0,
+          "frames": 203,
+          "jankyFrames": 57,
+          "p95ms": 23
+        },
+        {
+          "mode": "glass",
+          "phase": "warmup",
+          "index": 1,
+          "frames": 213,
+          "jankyFrames": 54,
+          "p95ms": 32
+        },
+        {
+          "mode": "glass",
+          "phase": "warmup",
+          "index": 2,
+          "frames": 207,
+          "jankyFrames": 56,
+          "p95ms": 22
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 0,
+          "frames": 262,
+          "jankyFrames": 1,
+          "p95ms": 20
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 0,
+          "frames": 224,
+          "jankyFrames": 57,
+          "p95ms": 32
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 1,
+          "frames": 239,
+          "jankyFrames": 24,
+          "p95ms": 19
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 1,
+          "frames": 221,
+          "jankyFrames": 46,
+          "p95ms": 30
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 2,
+          "frames": 260,
+          "jankyFrames": 20,
+          "p95ms": 20
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 2,
+          "frames": 240,
+          "jankyFrames": 41,
+          "p95ms": 22
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 3,
+          "frames": 212,
+          "jankyFrames": 52,
+          "p95ms": 24
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 3,
+          "frames": 274,
+          "jankyFrames": 6,
+          "p95ms": 20
+        }
+      ],
+      "modes": {
+        "classic": {
+          "p95MedianMs": 20.0,
+          "modernJankPercent": 7.177974434611603,
+          "frames": 1017
+        },
+        "glass": {
+          "p95MedianMs": 23.0,
+          "modernJankPercent": 19.016393442622952,
+          "frames": 915
+        }
+      },
+      "comparison": {
+        "p95IncreasePercent": 14.999999999999991,
+        "jankIncreasePoints": 11.83841900801135,
+        "withinInitialGate": false
+      }
+    },
+    "perf-search-page": {
+      "metadata": {
+        "apkSha256": "02eedee6b01864ae8f2d4a0b9e053f44c4dc0c074fde87c40ee7e7c6292bb943",
+        "baseCommit": "13b74471dabfce992847a6361ba006881dca9fd4",
+        "sourceDiffSha256": "01de2f45b05913e97e6f77b434a33213822eb14ef591bad57a575b050b9e6f70",
+        "policy": "SearchPageLayout holds the mobile sampling pause through loading, results, errors and pull-to-refresh; leaving search releases it. Native Compose remains 1.12.1.",
+        "java": "Temurin 21.0.13+9",
+        "scenario": "Empty-query global search, Series results; four fixed scroll round trips (including top-edge pull-to-refresh) and one second for settling. Input is unfocused and keyboard closed.",
+        "warmupPerMode": 3,
+        "measurementOrder": [
+          "classic",
+          "glass",
+          "glass",
+          "classic",
+          "classic",
+          "glass",
+          "glass",
+          "classic"
+        ],
+        "p95Aggregation": "median of per-run P95",
+        "jankAggregation": "sum modern janky frames / sum frames",
+        "wmSize": "Physical size: 1080x2400",
+        "wmDensity": "Physical density: 420",
+        "fontScale": "1.0",
+        "animationScale": "null",
+        "effectiveAnimationScale": 1.0
+      },
+      "samples": [
+        {
+          "mode": "classic",
+          "phase": "warmup",
+          "index": 0,
+          "frames": 261,
+          "jankyFrames": 1,
+          "p95ms": 20
+        },
+        {
+          "mode": "classic",
+          "phase": "warmup",
+          "index": 1,
+          "frames": 221,
+          "jankyFrames": 42,
+          "p95ms": 23
+        },
+        {
+          "mode": "classic",
+          "phase": "warmup",
+          "index": 2,
+          "frames": 261,
+          "jankyFrames": 19,
+          "p95ms": 20
+        },
+        {
+          "mode": "glass",
+          "phase": "warmup",
+          "index": 0,
+          "frames": 223,
+          "jankyFrames": 40,
+          "p95ms": 21
+        },
+        {
+          "mode": "glass",
+          "phase": "warmup",
+          "index": 1,
+          "frames": 258,
+          "jankyFrames": 24,
+          "p95ms": 22
+        },
+        {
+          "mode": "glass",
+          "phase": "warmup",
+          "index": 2,
+          "frames": 209,
+          "jankyFrames": 54,
+          "p95ms": 22
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 0,
+          "frames": 264,
+          "jankyFrames": 1,
+          "p95ms": 19
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 0,
+          "frames": 223,
+          "jankyFrames": 57,
+          "p95ms": 22
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 1,
+          "frames": 208,
+          "jankyFrames": 56,
+          "p95ms": 23
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 1,
+          "frames": 261,
+          "jankyFrames": 1,
+          "p95ms": 20
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 2,
+          "frames": 243,
+          "jankyFrames": 20,
+          "p95ms": 20
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 2,
+          "frames": 249,
+          "jankyFrames": 35,
+          "p95ms": 32
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 3,
+          "frames": 208,
+          "jankyFrames": 56,
+          "p95ms": 25
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 3,
+          "frames": 263,
+          "jankyFrames": 1,
+          "p95ms": 19
+        }
+      ],
+      "modes": {
+        "classic": {
+          "p95MedianMs": 19.5,
+          "modernJankPercent": 2.2308438409311346,
+          "frames": 1031
+        },
+        "glass": {
+          "p95MedianMs": 24.0,
+          "modernJankPercent": 22.972972972972972,
+          "frames": 888
+        }
+      },
+      "comparison": {
+        "p95IncreasePercent": 23.076923076923084,
+        "jankIncreasePoints": 20.74212913204184,
+        "withinInitialGate": false
+      }
+    },
+    "perf-search-solid-layout": {
+      "metadata": {
+        "apkSha256": "28845cc77dd712d823cbf30a96d192d4b55f1b46aff6dea78d723b44d5ab3acc",
+        "baseCommit": "13b74471dabfce992847a6361ba006881dca9fd4",
+        "sourceDiffSha256": "ce1feb41bdfa5a2ff388b63a55ef12e35113ca6b965f548d5f7400be88ddcdbf",
+        "policy": "MainDestinationSurface uses Classic solid content and navigation for mobile search only, preserving the saved material and restoring it on exit. Native Compose remains 1.12.1.",
+        "java": "Temurin 21.0.13+9",
+        "scenario": "Empty-query global search, Series results; four fixed scroll round trips (including top-edge pull-to-refresh) and one second for settling. Input is unfocused and keyboard closed.",
+        "warmupPerMode": 3,
+        "measurementOrder": [
+          "classic",
+          "glass",
+          "glass",
+          "classic",
+          "classic",
+          "glass",
+          "glass",
+          "classic"
+        ],
+        "p95Aggregation": "median of per-run P95",
+        "jankAggregation": "sum modern janky frames / sum frames",
+        "wmSize": "Physical size: 1080x2400",
+        "wmDensity": "Physical density: 420",
+        "fontScale": "1.0",
+        "animationScale": "null",
+        "effectiveAnimationScale": 1.0
+      },
+      "samples": [
+        {
+          "mode": "classic",
+          "phase": "warmup",
+          "index": 0,
+          "frames": 261,
+          "jankyFrames": 1,
+          "p95ms": 19
+        },
+        {
+          "mode": "classic",
+          "phase": "warmup",
+          "index": 1,
+          "frames": 263,
+          "jankyFrames": 19,
+          "p95ms": 34
+        },
+        {
+          "mode": "classic",
+          "phase": "warmup",
+          "index": 2,
+          "frames": 235,
+          "jankyFrames": 46,
+          "p95ms": 20
+        },
+        {
+          "mode": "glass",
+          "phase": "warmup",
+          "index": 0,
+          "frames": 262,
+          "jankyFrames": 1,
+          "p95ms": 18
+        },
+        {
+          "mode": "glass",
+          "phase": "warmup",
+          "index": 1,
+          "frames": 259,
+          "jankyFrames": 21,
+          "p95ms": 22
+        },
+        {
+          "mode": "glass",
+          "phase": "warmup",
+          "index": 2,
+          "frames": 262,
+          "jankyFrames": 1,
+          "p95ms": 19
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 0,
+          "frames": 246,
+          "jankyFrames": 33,
+          "p95ms": 20
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 0,
+          "frames": 232,
+          "jankyFrames": 31,
+          "p95ms": 22
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 1,
+          "frames": 221,
+          "jankyFrames": 41,
+          "p95ms": 22
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 1,
+          "frames": 229,
+          "jankyFrames": 34,
+          "p95ms": 20
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 2,
+          "frames": 241,
+          "jankyFrames": 43,
+          "p95ms": 30
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 2,
+          "frames": 259,
+          "jankyFrames": 1,
+          "p95ms": 19
+        },
+        {
+          "mode": "glass",
+          "phase": "measure",
+          "index": 3,
+          "frames": 261,
+          "jankyFrames": 1,
+          "p95ms": 18
+        },
+        {
+          "mode": "classic",
+          "phase": "measure",
+          "index": 3,
+          "frames": 262,
+          "jankyFrames": 1,
+          "p95ms": 18
+        }
+      ],
+      "modes": {
+        "classic": {
+          "p95MedianMs": 20.0,
+          "modernJankPercent": 11.349693251533742,
+          "frames": 978
+        },
+        "glass": {
+          "p95MedianMs": 20.5,
+          "modernJankPercent": 7.605344295991778,
+          "frames": 973
+        }
+      },
+      "comparison": {
+        "p95IncreasePercent": 2.499999999999991,
+        "jankIncreasePoints": -3.7443489555419633,
+        "withinInitialGate": true
+      }
     }
-  }
+  },
+  "excludedFollowupRuns": [
+    {
+      "directory": "perf-search-solid-aborted-navigation",
+      "reason": "Navigation preflight did not complete; no comparison was calculated."
+    },
+    {
+      "directory": "perf-search-page-aborted-connection",
+      "reason": "Cold restoration showed a connection error before any warmup or measured sample; recovered with Retry."
+    }
+  ]
 }

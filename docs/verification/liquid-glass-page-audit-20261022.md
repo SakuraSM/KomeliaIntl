@@ -10,7 +10,7 @@
 | `HomeScreen` · 首页 | 长标题、空工具栏、字号130% | 默认密度、平板四列、大字体副标题、滚动采样；空工具栏崩溃已修复 | `16-current-home` → `74-font130-fixed360` | 已运行走查 |
 | `LibraryScreen` · 书库及筛选 | 系列/合集/阅读列表、空书库 | 共享导航与网格；工具栏标签和筛选布局；原筛选业务保留 | `37-library-root` → `85-library-current` | 已运行走查 |
 | `LocalContentScreen` · 本地/下载 | 3本导入、1本下载 | 共享密度和底部留白；保留来源筛选与索引规则 | `77-local-page` → `76-local-imports-and-download` | 已运行走查 |
-| `SearchScreen` · 全局搜索 | 空结果、系列和书籍结果 | 持久读屏标签、底部留白与滚动采样；保留搜索范围和排序 | `78-search` → `80-search-books` | 已运行走查 |
+| `SearchScreen` · 全局搜索 | 空结果、系列和书籍结果 | 持久读屏标签、底部留白与滚动采样；保留搜索范围和排序 | `78-search` → `80-search-books` | 已运行走查；移动端改用含导航的实色布局，192/193 验证回退与恢复 |
 | `BookScreen` · 书籍详情 | 合成CBZ/PDF/EPUB | 顶部材质、菜单/编辑标签、安全区；下载与阅读入口不变 | `44-book-detail` → `29-book-detail` | 已运行走查 |
 | `SeriesScreen` · 系列详情 | 1/1.5/2章节、批量选择 | 顶部采样与菜单标签；章节顺序保留 | `43-series-detail` → `87-series-final` | 已运行走查 |
 | `OneshotScreen` · 单行本 | 合成单行本详情与菜单 | 补充菜单/编辑标签和导航留白；既有封面/元数据布局保留 | `70-oneshot-detail` → `82-oneshot-detail` | 已运行走查 |
@@ -61,7 +61,7 @@
 | 合集菜单/编辑 | 94-collection-actions、95-collection-edit | 名字、排序和海报入口；未保存 |
 | 阅读列表菜单/编辑 | 96-readlist-actions、97-readlist-edit | 名字、说明、排序；未保存 |
 | 用户编辑/改密/删除/新增 | 101-user-edit 至 104-add-user-dialog | 两个合成账号；未填写新密码、未提交删除或新增 |
-| 外观/语言/主题下拉 | 10-style-menu、54-epub-options、70-theme-options、73-language-options | 实际选择、重启与Web Esc；Web关闭后读屏树失败 |
+| 外观/语言/主题下拉 | 10-style-menu、54-epub-options、70-theme-options、73-language-options；web-release/browser-accessibility.json | 实际选择、重启与 Web Esc；依赖修复后，实际 Chrome 可访问树恢复主页面，移除已关闭选项 |
 | 书库筛选 | 86-library-filters | 筛选表单与下拉；未更改持久业务数据 |
 | 图片阅读设置 | 32-image-options、33-image-settings-panel | 模式与图像页签 |
 | EPUB目录/设置/导航 | 48-komga-toc、51-komga-settings-open、56-ttu-controls、57-ttu-settings | 两套实现，正文与控件分别检查 |

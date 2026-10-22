@@ -158,8 +158,14 @@ Run `APPEARANCE-01` through `APPEARANCE-03` and `EPUB-IMPL-01` from the regressi
 
 For runtime performance, prewarm both modes on the same APK/device/content and keep all raw repetitions. Report P95 and modern/legacy Android jank counters separately; do not select the best repetition or substitute emulator statistics for the physical-device gate. Record idle rendered-frame counts with reading controls hidden and memory before/after repeated entries. Run native accessibility with TalkBack enabled; UI hierarchy inspection alone is not screen-reader operation.
 
-The Compose 1.12.1 Wasm popup accessibility limitation is tracked in [the verification report](../verification/liquid-glass-20261022.md). A visible popup closing and a unit test restoring focus do not establish a working browser accessibility tree.
+`PopupSemanticsBrowserTest` mounts a real browser viewport and requires the main accessibility tree
+to keep updating after repeated popup and dialog dismissal. `ImageLoadingBrowserTest` exercises
+Coil decoding against the selected Web Skiko runtime. Run `:komelia-ui:wasmJsBrowserTest` after any
+Web runtime change. Its Karma configuration enables software WebGL and allows real frame waits;
+without a rendering context, a viewport can exist without producing semantics. A visible popup
+closing or a JVM focus test does not establish a working browser accessibility tree. The dependency
+boundary and actual browser evidence are recorded in [the verification report](../verification/liquid-glass-20261022.md).
 
 `PosterGridDensityTest.tabletGridDoesNotStretchTheDefaultCoverToHalfThePage` measures a real 740dp grid beside a tablet navigation rail. `CoverCaptionFontScaleTest` requires a complete supporting line at 130% font scale. `BottomBulkActionsLayoutTest` requires the inline actions to remain below content and above the reserved navigation area. Repeat both 840dp default density and 360dp large-font captions on the final APK.
 
-`ReaderKeyboardFocusEffectTest` mounts a delayed page key target and requires the first navigation key to reach it. Focus must be requested only after the viewport is measured; a wrapper that changes an early return can otherwise request focus before the target exists. `SearchGlassSamplingTest` mounts the real search field and checks capture pause while focused and recovery after focus is released.
+`ReaderKeyboardFocusEffectTest` mounts a delayed page key target and requires the first navigation key to reach it. Focus must be requested only after the viewport is measured; a wrapper that changes an early return can otherwise request focus before the target exists. `SearchGlassSamplingTest` checks input-focus sampling pauses. `MainDestinationSurfaceTest` covers the mobile search fallback for both content and navigation, preservation of the saved material and theme, restoration when leaving search, and unchanged desktop appearance.

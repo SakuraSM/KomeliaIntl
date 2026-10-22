@@ -1,6 +1,7 @@
 import org.apache.commons.io.IOUtils
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.file.DuplicatesStrategy.EXCLUDE
+import org.gradle.api.attributes.Usage
 import java.io.FileOutputStream
 import java.util.zip.GZIPOutputStream
 
@@ -15,6 +16,42 @@ plugins {
     alias(libs.plugins.jetbrainsCompose) apply false
     alias(libs.plugins.compose.compiler) apply false
     alias(libs.plugins.parcelize) apply false
+}
+
+// Keep the Web semantics fix scoped to Wasm; native targets retain the upstream 1.12.1 stack.
+// Remove this override once a stable shared version includes CMP-9368 / CMP-10623.
+val composeWebVersion = libs.versions.compose.web.get()
+val skikoWebVersion = libs.versions.skiko.web.get()
+val composeWebGroups = setOf(
+    "org.jetbrains.compose.animation",
+    "org.jetbrains.compose.foundation",
+    "org.jetbrains.compose.runtime",
+    "org.jetbrains.compose.ui",
+    "org.jetbrains.compose.components",
+)
+subprojects {
+    configurations.configureEach {
+        if (name.startsWith("wasmJs", ignoreCase = true)) {
+            resolutionStrategy.eachDependency {
+                val isMaterial = requested.group == "org.jetbrains.compose.material" &&
+                    !requested.name.startsWith("material-icons")
+                if (requested.group in composeWebGroups || isMaterial) {
+                    useVersion(composeWebVersion)
+                    because("Restore the main Web accessibility tree after popup and dialog dismissal (CMP-9368)")
+                } else if (requested.group == "org.jetbrains.skiko") {
+                    useVersion(skikoWebVersion)
+                    because("Keep Wasm bindings and the Skiko JavaScript runtime at the same version")
+                }
+            }
+        } else if (name == "COMPOSE_SKIKO_JS_WASM_RUNTIME" &&
+            project.configurations.findByName("wasmJsRuntimeClasspath") != null
+        ) {
+            // Skiko 0.153 publishes this as a variant of skiko-wasm-js, replacing the old
+            // skiko-js-wasm-runtime module requested by the 1.12 Compose Gradle plugin.
+            attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "skiko-runtime"))
+            dependencies.add(project.dependencies.create("org.jetbrains.skiko:skiko-wasm-js:$skikoWebVersion"))
+        }
+    }
 }
 
 val linuxBuildDir = "$projectDir/cmake/build"

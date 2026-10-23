@@ -27,11 +27,11 @@ On Windows, the Gradle version check selects Git for Windows' Bash from its stan
 directories. The system `bash.exe` can be the WSL launcher, which does not execute Windows checkout
 paths. For a custom Git installation, pass `-Pkomelia.bashExecutable=C:/path/to/Git/bin/bash.exe`.
 
-When only Windows verification scripts or their documentation change, the same workflow can
-verify an existing MSI without rebuilding it. Set `verify_installer_run_id` to its build run,
-`installer_sha256` to the verified MSI digest, `platform: windows`, and `upload: false`.
-This mode rejects application-source changes and changes to the original build jobs. It checks
-the downloaded MSI hash before installation. Record both the installer build commit and the
+When only verification scripts or their documentation change, the same workflow can verify an
+existing installer without rebuilding it. Set `verify_installer_run_id` to its build run,
+`installer_sha256` to the verified package digest, one `platform` (`linux` or `windows`), and
+`upload: false`. This mode rejects application-source changes and changes to that platform's
+build steps. It checks the downloaded package hash before installation. Record both the build commit and the
 verification commit; a changed application or packaging command requires a new installer.
 
 The Windows runtime fixture places the system Windows PowerShell directory first in the child

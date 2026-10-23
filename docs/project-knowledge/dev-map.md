@@ -63,6 +63,9 @@ The desktop smoke scripts require the `Application dependencies initialized` log
 as a visible window. Inspect the captured page too: startup error windows are still visible
 windows. The Linux CI fixture prepares a desktop-menu directory and a private D-Bus session
 with a test keyring; it does not change application credential storage.
+`scripts/verify-linux-installer.sh` owns fixture preparation, installation, and native probes.
+The desktop workflow can repeat installation checks on an existing artifact after verifying its
+hash and confirming that application sources and the selected platform's build steps did not change.
 
 ## Detailed catalog lists
 

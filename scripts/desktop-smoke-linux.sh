@@ -29,7 +29,7 @@ xdotool windowsize "$window_id" 1280 800
 sleep 5
 kill -0 "$app_pid"
 import -window "$window_id" "$evidence/desktop-startup.png"
-xdotool key --window "$window_id" Tab
+xdotool key Tab
 sleep 1
 kill -0 "$app_pid"
 import -window "$window_id" "$evidence/desktop-keyboard-focus.png"

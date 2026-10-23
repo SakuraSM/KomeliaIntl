@@ -88,6 +88,9 @@ Linux verification needs WebKitGTK, a desktop-menu directory, and a D-Bus sessio
 keyring. After changing native-library loading, verify initialization with the system WebView
 loaded first and exercise the bundled image decoder. Preserve the decoder's bundled GLib path
 when the WebView is unavailable. Keep container reproduction separate from the final CI package.
+`scripts/verify-linux-installer.sh` prepares the Linux fixture, installs the DEB, runs the native
+probes, and delegates GUI capture to `scripts/desktop-smoke-linux.sh`. Its package lookup uses
+the system `grep`; the runner does not need ripgrep installed.
 `scripts/DesktopNativeSmoke.java` runs against the installed jars, calls the production library
 initializer, then decodes and resizes a synthetic PNG and checks every RGBA pixel. Linux runs
 both `system-webview` and `bundled` modes in separate processes; Windows runs `bundled` mode.

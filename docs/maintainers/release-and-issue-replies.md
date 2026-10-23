@@ -4,6 +4,42 @@ Use the repository templates for every Release and fixed-issue reply. Do not rew
 
 Choose the version with [Version releases](versioning.md) before you prepare the notes.
 
+## Build installers before creating the immutable tag
+
+The desktop workflow supports `upload: false` to validate and build a release candidate from the
+selected workflow ref without creating a tag or changing a Release. It still checks the version
+increment and retains the DEB and MSI as workflow artifacts. Each platform installs and launches
+its package, then captures the application window and startup logs in a separate runtime-evidence
+artifact. Inspect the screenshots to confirm that the expected page rendered; a live process alone
+does not prove that the application initialized. For example:
+
+```shell
+gh workflow run release-desktop.yml --ref chore/release-X.Y.Z \
+  -f tag=vX.Y.Z -f level=minor -f platform=all -F upload=false
+```
+
+Verify the workflow's source commit and package contents before creating the final tag. The tagged
+tree must match the tested source tree. Then create a draft Release and upload the verified files.
+The default `upload: true` mode checks that the Release is still a draft immediately before each
+upload, and refuses to upload when it has been published.
+
+On Windows, the Gradle version check selects Git for Windows' Bash from its standard installation
+directories. The system `bash.exe` can be the WSL launcher, which does not execute Windows checkout
+paths. For a custom Git installation, pass `-Pkomelia.bashExecutable=C:/path/to/Git/bin/bash.exe`.
+
+When only verification scripts or their documentation change, the same workflow can verify an
+existing installer without rebuilding it. Set `verify_installer_run_id` to its build run,
+`installer_sha256` to the verified package digest, one `platform` (`linux` or `windows`), and
+`upload: false`. This mode rejects application-source changes and changes to that platform's
+build steps. It checks the downloaded package hash before installation. Record both the build commit and the
+verification commit; a changed application or packaging command requires a new installer.
+
+The Windows runtime fixture places the system Windows PowerShell directory first in the child
+application's PATH and checks that the database path is absolute. The existing `dev.dirs` 26
+dependency passes `-Version 2`, which makes `pwsh` print its version instead of executing the
+directory lookup. A custom user PATH that prioritizes `pwsh` retains this dependency limitation;
+the verification fixture does not migrate or change application storage paths.
+
 ## Prepare release notes
 
 1. Set the Release title to `Komelia vMAJOR.MINOR.PATCH` for stable releases or `Komelia vMAJOR.MINOR.PATCH-beta.N` for Beta releases. Do not use `Komelia Intl`. Do not omit the `v` or use only the version number.

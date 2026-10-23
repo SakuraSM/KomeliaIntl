@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing draft release tag, for example v0.20.0-beta.1
+        description: Version tag to build; must identify an existing draft Release when upload is enabled
         required: true
         type: string
       level:
@@ -24,16 +24,33 @@ on:
           - all
           - linux
           - windows
+      upload:
+        description: Upload installers to the existing draft Release after building
+        required: true
+        default: true
+        type: boolean
+
+      verify_installer_run_id:
+        description: Verify an existing installer from this run instead of rebuilding; select one platform
+        required: false
+        default: ''
+        type: string
+      installer_sha256:
+        description: Expected installer SHA-256 when verifying an existing installer
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-desktop-${{ inputs.tag }}
+  group: ${{ inputs.verify_installer_run_id && format('verify-{0}-{1}', inputs.platform, inputs.verify_installer_run_id) || format('release-desktop-{0}', inputs.tag) }}
   cancel-in-progress: false
 
 jobs:
   validate:
+    if: ${{ inputs.verify_installer_run_id == '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +59,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
           RELEASE_LEVEL: ${{ inputs.level }}
+          UPLOAD_ASSETS: ${{ inputs.upload }}
         run: |
           scripts/test-release-policy.sh
           previous_tag=$(gh release list --repo "$GITHUB_REPOSITORY" \
@@ -52,15 +70,18 @@ jobs:
             --tag "$RELEASE_TAG" \
             --previous "${previous_tag#v}" \
             --level "$RELEASE_LEVEL"
-          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
-            --json body --jq .body > /tmp/komelia-release-notes.md
-          release_title=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
-            --json name --jq .name)
-          scripts/check-release-notes.sh \
-            --file /tmp/komelia-release-notes.md \
-            --version "${RELEASE_TAG#v}" \
-            --title "$release_title" \
-            --level "$RELEASE_LEVEL"
+          if [[ "$UPLOAD_ASSETS" == 'true' ]]; then
+            test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+            gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --json body --jq .body > /tmp/komelia-release-notes.md
+            release_title=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --json name --jq .name)
+            scripts/check-release-notes.sh \
+              --file /tmp/komelia-release-notes.md \
+              --version "${RELEASE_TAG#v}" \
+              --title "$release_title" \
+              --level "$RELEASE_LEVEL"
+          fi
 
   linux:
     needs: validate
@@ -108,6 +129,16 @@ jobs:
           name: linux-installer
           path: release-artifacts/*
           if-no-files-found: error
+      - name: Install and launch the Linux package
+        run: |
+          package=$(find release-artifacts -name '*.deb' -print -quit)
+          bash scripts/verify-linux-installer.sh "$package" "$PWD/runtime-evidence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-runtime-evidence
+          path: runtime-evidence
+          if-no-files-found: warn
 
   windows-native:
     needs: validate
@@ -163,6 +194,7 @@ jobs:
       - name: Build EPUB resources and MSI
         shell: bash
         run: |
+          ./gradlew releaseVersionCheck
           ./gradlew buildEpubReaders
           ./gradlew desktopMsi
       - name: Stage Windows installer
@@ -179,9 +211,21 @@ jobs:
           name: windows-installer
           path: release-artifacts/*
           if-no-files-found: error
+      - name: Install and launch the Windows package
+        shell: pwsh
+        run: |
+          $installer = (Get-ChildItem release-artifacts -Filter '*.msi' | Select-Object -First 1).FullName
+          ./scripts/desktop-smoke-windows.ps1 -Installer $installer -Evidence runtime-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-runtime-evidence
+          path: runtime-evidence
+          if-no-files-found: warn
 
   upload-linux:
     needs: linux
+    if: ${{ inputs.upload }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -192,10 +236,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
-        run: gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
+        run: |
+          test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+          gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
 
   upload-windows:
     needs: windows
+    if: ${{ inputs.upload }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -206,4 +253,143 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
-        run: gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
+        run: |
+          test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+          gh release upload "$RELEASE_TAG" release-artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
+
+  verify-source:
+    if: ${{ inputs.verify_installer_run_id != '' }}
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify that installer application inputs are unchanged
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_RUN_ID: ${{ inputs.verify_installer_run_id }}
+          INSTALLER_SHA256: ${{ inputs.installer_sha256 }}
+          VERIFY_PLATFORM: ${{ inputs.platform }}
+        run: |
+          [[ "$ARTIFACT_RUN_ID" =~ ^[0-9]+$ ]]
+          [[ "$INSTALLER_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$VERIFY_PLATFORM" == linux || "$VERIFY_PLATFORM" == windows ]]
+          source_head=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$ARTIFACT_RUN_ID" --jq .head_sha)
+          git cat-file -e "$source_head^{commit}"
+          git diff --name-only "$source_head" "$GITHUB_SHA" > changed-inputs.txt
+          SOURCE_HEAD="$source_head" python3 - <<'PY'
+          from pathlib import Path
+          import os, re, subprocess
+          allowed = {
+              '.github/workflows/release-desktop.yml',
+              'scripts/desktop-smoke-windows.ps1',
+              'scripts/desktop-smoke-linux.sh',
+              'scripts/verify-linux-installer.sh',
+              'scripts/DesktopNativeSmoke.java',
+              'docs/harness/testing-guide.md',
+              'docs/project-knowledge/dev-map.md',
+              'docs/maintainers/release-and-issue-replies.md',
+          }
+          changed = Path('changed-inputs.txt').read_text().splitlines()
+          unexpected = sorted(set(changed) - allowed)
+          if unexpected:
+              raise SystemExit('Rebuild the installer because application inputs changed: ' + ', '.join(unexpected))
+          workflow = '.github/workflows/release-desktop.yml'
+          before = subprocess.check_output(['git', 'show', os.environ['SOURCE_HEAD'] + ':' + workflow], text=True)
+          after = Path(workflow).read_text()
+          def jobs(text):
+              return dict(re.findall(r'(?ms)^  ([a-z][a-z0-9-]*):\n(.*?)(?=^  [a-z][a-z0-9-]*:\n|\Z)', text.split('\njobs:\n', 1)[1]))
+          old_jobs, new_jobs = jobs(before), jobs(after)
+          platform = os.environ['VERIFY_PLATFORM']
+          required = ['validate', 'linux'] if platform == 'linux' else ['validate', 'windows-native', 'windows']
+          for name in required:
+              old, new = old_jobs[name], new_jobs.get(name, '')
+              if name in ('linux', 'windows'):
+                  marker = '      - name: Install and launch the '
+                  old, new = old.split(marker, 1)[0], new.split(marker, 1)[0]
+              if name == 'validate':
+                  condition = "    if: $" + "{{ inputs.verify_installer_run_id == '' }}\n"
+                  new = new.replace(condition, '')
+                  old = old.replace(condition, '')
+              if old.rstrip() != new.rstrip():
+                  raise SystemExit('Rebuild the installer because build job changed: ' + name)
+          print('Installer application sources and ' + platform + ' build jobs are unchanged.')
+          PY
+          printf 'Installer build source: %s\nVerification source: %s\n' "$source_head" "$GITHUB_SHA"
+
+  verify-windows:
+    if: ${{ inputs.platform == 'windows' }}
+    permissions:
+      actions: read
+      contents: read
+    needs: verify-source
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: release-artifacts
+          run-id: ${{ inputs.verify_installer_run_id }}
+          github-token: ${{ github.token }}
+      - name: Verify and launch the unchanged MSI
+        shell: pwsh
+        env:
+          INSTALLER_SHA256: ${{ inputs.installer_sha256 }}
+        run: |
+          $packages = @(Get-ChildItem release-artifacts -Filter '*.msi')
+          if ($packages.Count -ne 1) { throw 'Expected exactly one MSI.' }
+          $installer = $packages[0].FullName
+          if ((Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant() -ne $env:INSTALLER_SHA256) {
+            throw 'The downloaded MSI does not match the expected hash.'
+          }
+          ./scripts/desktop-smoke-windows.ps1 -Installer $installer -Evidence runtime-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-runtime-evidence
+          path: runtime-evidence
+          if-no-files-found: warn
+
+  verify-linux:
+    if: ${{ inputs.platform == 'linux' }}
+    permissions:
+      actions: read
+      contents: read
+    needs: verify-source
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-installer
+          path: release-artifacts
+          run-id: ${{ inputs.verify_installer_run_id }}
+          github-token: ${{ github.token }}
+      - name: Verify and launch the unchanged DEB
+        env:
+          INSTALLER_SHA256: ${{ inputs.installer_sha256 }}
+        run: |
+          mapfile -t packages < <(find release-artifacts -maxdepth 1 -name '*.deb')
+          test "${#packages[@]}" -eq 1
+          printf '%s  %s\n' "$INSTALLER_SHA256" "${packages[0]}" | sha256sum -c -
+          bash scripts/verify-linux-installer.sh "${packages[0]}" "$PWD/runtime-evidence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-runtime-evidence
+          path: runtime-evidence
+          if-no-files-found: warn

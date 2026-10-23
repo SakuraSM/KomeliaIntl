@@ -135,7 +135,7 @@ fun LoginContent(
         val platform = LocalPlatform.current
         when (platform) {
             MOBILE, DESKTOP -> Surface(
-                modifier = Modifier.fillMaxWidth().widthIn(max = 440.dp),
+                modifier = Modifier.widthIn(max = 440.dp).fillMaxWidth(),
                 shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),

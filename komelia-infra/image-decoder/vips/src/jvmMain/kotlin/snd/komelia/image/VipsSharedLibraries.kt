@@ -29,6 +29,8 @@ object VipsSharedLibraries {
     var loadError: Throwable? = null
         private set
 
+    private val linuxGlibLibs = setOf("glib-2.0", "gmodule-2.0", "gobject-2.0", "gio-2.0")
+
     private val linuxLibs = listOf(
         "z",
         "ffi",
@@ -97,12 +99,13 @@ object VipsSharedLibraries {
         "libkomelia_vips",
     )
 
-    fun load() {
+    @JvmOverloads
+    fun load(systemGlibLoaded: Boolean = false) {
         if (!loaded.compareAndSet(false, true)) return
         try {
 
             when (DesktopPlatform.Current) {
-                Linux -> loadLinuxLibs()
+                Linux -> loadLinuxLibs(systemGlibLoaded)
                 Windows -> loadLibs(windowsLibs)
                 MacOS, Unknown -> error("Unsupported OS")
             }
@@ -126,9 +129,12 @@ object VipsSharedLibraries {
         }
     }
 
-    private fun loadLinuxLibs() {
+    private fun loadLinuxLibs(systemGlibLoaded: Boolean) {
         try {
-            loadLibs(linuxLibs)
+            // WebKit already loads the system GLib family. A bundled GObject can require
+            // symbols missing from that GLib, so keep the entire family from one provider.
+            val libs = if (systemGlibLoaded) linuxLibs.filterNot { it in linuxGlibLibs } else linuxLibs
+            loadLibs(libs)
             isAvailable = true
         } catch (e: UnsatisfiedLinkError) {
             loadRequiredLinuxLibs()

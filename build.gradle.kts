@@ -411,7 +411,19 @@ tasks.register("komeliaBuildNonJvmDependencies") {
 val releaseVersionCheck = tasks.register<Exec>("releaseVersionCheck") {
     description = "verify all release version declarations are synchronized"
     group = "verification"
-    commandLine("bash", "$rootDir/scripts/check-release-version.sh")
+    val configuredBash = providers.gradleProperty("komelia.bashExecutable").orNull
+    val bash = configuredBash ?: if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        // Windows' System32/bash.exe starts WSL, which cannot run this Windows checkout.
+        val gitBash = listOfNotNull(
+            providers.environmentVariable("ProgramFiles").orNull,
+            providers.environmentVariable("ProgramFiles(x86)").orNull,
+            providers.environmentVariable("LOCALAPPDATA").orNull?.let { "$it/Programs" },
+        ).map { File(it, "Git/bin/bash.exe") }.firstOrNull { it.isFile }
+        requireNotNull(gitBash) {
+            "Install Git for Windows or set -Pkomelia.bashExecutable to its bash.exe path."
+        }.absolutePath
+    } else "bash"
+    commandLine(bash, rootProject.file("scripts/check-release-version.sh").invariantSeparatorsPath)
 }
 
 tasks.register("desktopRun") {

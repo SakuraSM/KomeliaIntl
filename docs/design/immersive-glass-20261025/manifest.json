@@ -16,10 +16,13 @@
       "file": "screens/01-home.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "selected-direction.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2315346,
-      "sha256": "07a5f6323f1dcb6f171cceb12dfd56ce2789219d69492ae353fc6333e1d84043",
+      "bytes": 2116110,
+      "sha256": "51c490569b72e5ca2793e67e3382d8620f4ef078710027f94a31747f74cff43f",
       "owners": [
         {
           "screen": "MainScreen",
@@ -29,7 +32,8 @@
           "screen": "HomeScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/home/HomeScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 2,
@@ -40,16 +44,20 @@
       "file": "screens/02-library.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2314466,
-      "sha256": "ba184a1a2537dbff83413f0947b90fe890080d30a0a38f596e5d6828e7e46805",
+      "bytes": 2008881,
+      "sha256": "4de53592752c9e8ec5ddf1b5446dfbeb5f7d56a95d3ffcba6a85da62e2acee31",
       "owners": [
         {
           "screen": "LibraryScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/library/LibraryScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 3,
@@ -60,16 +68,20 @@
       "file": "screens/03-local.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2298218,
-      "sha256": "01aa7b92890f038d5333b6c3f2dfedcec3f4b734a9d027a6a12dc95eecb17be5",
+      "bytes": 2016002,
+      "sha256": "8501d6731b2261c046cf3f1ac8775e362e1d943424a6cc4462a3b802b9b1ce32",
       "owners": [
         {
           "screen": "LocalContentScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/local/LocalContentScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 4,
@@ -80,16 +92,20 @@
       "file": "screens/04-search.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2213665,
-      "sha256": "2ce6b39393e0fafc0cde859c8ef7e84066b588edd0440bc26a4c022258898817",
+      "bytes": 1621438,
+      "sha256": "4a8dd599517b50b016a4c7b47bb96972ba1b5fa3f3f96bfb2bbe96f2f945a892",
       "owners": [
         {
           "screen": "SearchScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/search/SearchScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 5,
@@ -100,16 +116,20 @@
       "file": "screens/05-book.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2108449,
-      "sha256": "c287d067f06380fea702565dc46e5e2ea06d648f62aecd4f0261fc1320702cef",
+      "bytes": 2007790,
+      "sha256": "82aac323e1808ffde5338a5a5fdc736e0cc79ca45e902621540459ccf3c13666",
       "owners": [
         {
           "screen": "BookScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/book/BookScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 6,
@@ -120,16 +140,20 @@
       "file": "screens/06-series.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2099032,
-      "sha256": "440745d42169b064a55ada6da5780253a2125f7fdac6e2f0a5e9823f53e019b4",
+      "bytes": 1622014,
+      "sha256": "da3cbd8f41d376682d5e8c6a147b733534ce1029b6b19d3bcac87556b8f24396",
       "owners": [
         {
           "screen": "SeriesScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/series/SeriesScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 7,
@@ -140,16 +164,20 @@
       "file": "screens/07-oneshot.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2024063,
-      "sha256": "6f5eee63a5a15fc2030af61acdefe6ef9767308ee9fcf0c7a7b956b30457ef1c",
+      "bytes": 1415205,
+      "sha256": "d31e73961b188eef47a95cad11379a95d3aba4c4fb73181bc20cf88b185f5b46",
       "owners": [
         {
           "screen": "OneshotScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/oneshot/OneshotScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 8,
@@ -160,16 +188,20 @@
       "file": "screens/08-collection.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1843,
-      "bytes": 2293141,
-      "sha256": "10f1513d29a60e7f8284882f12558d8e10ec9dd72c5496db67f185d76ca4af9d",
+      "bytes": 1622242,
+      "sha256": "c45d1e0387481f0563215829cbd3b9a348f3a87273694ea4c6aded6715b0b2a5",
       "owners": [
         {
           "screen": "CollectionScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/collection/CollectionScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 9,
@@ -180,16 +212,20 @@
       "file": "screens/09-readlist.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1898442,
-      "sha256": "d4f18fc71f3014e1ebbfa9517881f9df668e126f289b5d5b1dd5a4e034a30eec",
+      "bytes": 1476944,
+      "sha256": "6bb139365013ea5aed5793c37615188221d394237231ef2d444abce572012f12",
       "owners": [
         {
           "screen": "ReadListScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/readlist/ReadListScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 10,
@@ -200,16 +236,20 @@
       "file": "screens/10-image-reader.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2784226,
-      "sha256": "381cdad35d19e2d08764c79be0408078e0c9c6941f0b0a2e7e4cb00bd1ec34a7",
+      "bytes": 2498767,
+      "sha256": "1cc3c9bf0b643adb5fb177cfc8563cadf9110e9111ba0f3b8cde776e6ff121b5",
       "owners": [
         {
           "screen": "ImageReaderScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/reader/ImageReaderScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 11,
@@ -220,16 +260,20 @@
       "file": "screens/11-epub-reader.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2004793,
-      "sha256": "b1a56830e3c394d3db98d1156d13b2ba3d093c07f3fe170f0a19ed6fcf57865b",
+      "bytes": 1804555,
+      "sha256": "5c7f769559ff39045f7be0fe213815bf2a88b9e0823c525c5c5eb9dcad2de6c9",
       "owners": [
         {
           "screen": "EpubScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/reader/EpubScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 12,
@@ -240,16 +284,20 @@
       "file": "screens/12-color-correction.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2287251,
-      "sha256": "81a02d6a73b881551cd82db4a593ebbfe205751a6cbec3abbc83e28e849c6299",
+      "bytes": 2200208,
+      "sha256": "bd6178b1ae7bb080fc5cc3160560c23387a4b2bdf45927773b9ddb864b7d73e0",
       "owners": [
         {
           "screen": "ColorCorrectionScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/color/view/ColorCorrectionScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 13,
@@ -260,16 +308,20 @@
       "file": "screens/13-home-groups.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1568707,
-      "sha256": "d0ea89de466f62fd1990c295b2e01d255b3db0b007c62f3def54cac575ec6b9c",
+      "bytes": 1292673,
+      "sha256": "a5c9ec0348c47522a38988a8d79545d27fe0519d14d520d3529e2cbd8039ca39",
       "owners": [
         {
           "screen": "FilterEditScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/home/edit/FilterEditScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 14,
@@ -280,16 +332,20 @@
       "file": "screens/14-login.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2038127,
-      "sha256": "e29695ac1aa526e9c4f46d58e2b53783a3fe5c8f4aaf2e5e860a965b2b7048b8",
+      "bytes": 1381088,
+      "sha256": "91845035c96cb977e90b74deb03eeab76991d7aceec98f03dc1d5ff82db45c1b",
       "owners": [
         {
           "screen": "LoginScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/login/LoginScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 15,
@@ -300,16 +356,20 @@
       "file": "screens/15-offline-login.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1967756,
-      "sha256": "e69c8954af712ea42518d0fd33311582cbefd7d73e527e136d96482e13b9ff18",
+      "bytes": 1456807,
+      "sha256": "04cda44e90e852842bbc6ca00412a31194dae7801e18cb5802e379df0eed6b82",
       "owners": [
         {
           "screen": "OfflineLoginScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/login/offline/OfflineLoginScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 16,
@@ -320,16 +380,20 @@
       "file": "screens/16-mobile-settings.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1639024,
-      "sha256": "d055f77cfc932ddfdc9b3b34404f95919a4059a380f972fe69af1a274517c078",
+      "bytes": 1302226,
+      "sha256": "a84015501bf67848635bdf3c1f08321106a2838e91bb9f1caf1efe9ee9c276f7",
       "owners": [
         {
           "screen": "MobileSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/MobileSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 17,
@@ -340,16 +404,21 @@
       "file": "screens/17-desktop-settings.png",
       "kind": "concept",
       "platform": "desktop",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 1487,
       "heightPx": 1058,
-      "bytes": 1799375,
-      "sha256": "abe16249518e521053f134d8632b844ba6c9bfeee3030ef3d8d061f4888962ac",
+      "bytes": 1585670,
+      "sha256": "284f50a5edfecc4fc657a3afee48e02c5a3af016ebf2db731d61fa91023912fa",
       "owners": [
         {
           "screen": "DesktopSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/DesktopSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 18,
@@ -360,16 +429,21 @@
       "file": "screens/18-appearance.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1955720,
-      "sha256": "1b7d1e5eade9a384a8b250457899ddf1c9a940163c9b37f1fec9cf3db6c0a163",
+      "bytes": 1595981,
+      "sha256": "29c3f07d9a1b81742ff88a390f46d64871e77a01fb33a9023db565764c2127fb",
       "owners": [
         {
           "screen": "AppSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/appearance/AppSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 19,
@@ -380,16 +454,21 @@
       "file": "screens/19-network.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1686019,
-      "sha256": "007bdb33008333dc266ea45b6277520cf4a91990517c6ad68368676217d9ea54",
+      "bytes": 1314978,
+      "sha256": "9a18e44af45b39464be72fbdd15e44abcf34674746e9c86da09769a61322e035",
       "owners": [
         {
           "screen": "NetworkSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/network/NetworkSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 20,
@@ -400,16 +479,21 @@
       "file": "screens/20-image-reader-settings.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1688019,
-      "sha256": "8be4f60e0748b3f3a710eeea318cfafe22ea06e6891cfe0a36924aecdbf94ac9",
+      "bytes": 1433548,
+      "sha256": "87c4d5fec605d64c844919318966d773beac3acfdac35ad7766c34c610e8a1c6",
       "owners": [
         {
           "screen": "ImageReaderSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/imagereader/ImageReaderSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 21,
@@ -420,16 +504,21 @@
       "file": "screens/21-epub-settings.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1702581,
-      "sha256": "d894884738ad14a9a46919e52d0f596901870ba76bede1fc82445d29da9123e0",
+      "bytes": 1266979,
+      "sha256": "18be53a2748d8c62d01afd86b91a081ec1d904b7ed5c006e22a435543cdd5dfa",
       "owners": [
         {
           "screen": "EpubReaderSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/epub/EpubReaderSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 22,
@@ -440,16 +529,21 @@
       "file": "screens/22-updates.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1725965,
-      "sha256": "c5d35fb282ee110f0dcb7e0565a722ecda475e4e1b8030ca37497b359145d56f",
+      "bytes": 1269899,
+      "sha256": "753f36b5ebe2864da318a0f224683dcff5d3406aebc673f1a44f0df5aaf95b1d",
       "owners": [
         {
           "screen": "AppUpdatesScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/updates/AppUpdatesScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 23,
@@ -460,16 +554,21 @@
       "file": "screens/23-local-folders.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1812197,
-      "sha256": "1a3b3dec0a83b346962619a051d618ad3d52ecffa49a36adc02193536c949197",
+      "bytes": 1347138,
+      "sha256": "7b013e19c7f189a4749e0bc26133f529634af2cd97fa653585844b8c39603d41",
       "owners": [
         {
           "screen": "LocalLibrarySettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/local/LocalLibrarySettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 24,
@@ -480,16 +579,21 @@
       "file": "screens/24-offline-management.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1899908,
-      "sha256": "8248f5278249a2942f9e72f76c30d2d4c260426344ab950e22b7fead18d30e1b",
+      "bytes": 1526178,
+      "sha256": "c5e17b25b84ae8e78f5e457bb3f6f6e83990f8455303170f2aad28d05361f058",
       "owners": [
         {
           "screen": "OfflineSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/offline/OfflineSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 25,
@@ -500,16 +604,21 @@
       "file": "screens/25-about.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1934552,
-      "sha256": "e8a3bdd354f8cdabda6576546f1f3ac1e82edbe1f69b785833bf286ca8e4ca53",
+      "bytes": 1326172,
+      "sha256": "981ff6e41f8ad5a76084385db4c4220a6027f179171420fb7a1429937eb56dec",
       "owners": [
         {
           "screen": "AboutSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/about/AboutSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 26,
@@ -520,16 +629,21 @@
       "file": "screens/26-account.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1704877,
-      "sha256": "1ca464a7b402fc3dc4937cca6ebaab2adcd6a587c1442f86a117a7678040cbc9",
+      "bytes": 1237239,
+      "sha256": "0afc8a7c4dc7f70c5b6f646d1bc7860a62c7b91d5f7140a985d60b457560115c",
       "owners": [
         {
           "screen": "AccountSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/account/AccountSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 27,
@@ -540,16 +654,21 @@
       "file": "screens/27-authentication.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1699745,
-      "sha256": "4f3d4bdadf62eacf3709c63b67f5bbdc75a3eff1a4073d07f561ee264c502ec8",
+      "bytes": 1301075,
+      "sha256": "9f83c25bdfa1ccc39e370c34379edf25f8744d80fbfdae190d3d7f06d6d1ad48",
       "owners": [
         {
           "screen": "AuthenticationActivityScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/authactivity/AuthenticationActivityScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 28,
@@ -560,16 +679,21 @@
       "file": "screens/28-server.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1568682,
-      "sha256": "f64e4ad4632dba748fce025bd5c8c545d4d9cab8acc3aff058445295e36e0d30",
+      "bytes": 1309093,
+      "sha256": "fd1e6760a1213eacc160ecfc1f0faf671a8d04f926d5f230792b8865cbeac82b",
       "owners": [
         {
           "screen": "ServerSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/server/ServerSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 29,
@@ -580,16 +704,21 @@
       "file": "screens/29-users.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1740731,
-      "sha256": "965f60d230668299d764b17b9d5b7f117ce031cfc5a287e94e7b8c996fb3a649",
+      "bytes": 1269417,
+      "sha256": "fb84ad91cba41531a9d83498378a92b7efec4270a68e0ddb1490c95ddb311e49",
       "owners": [
         {
           "screen": "UsersScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/users/UsersScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 30,
@@ -600,16 +729,21 @@
       "file": "screens/30-media.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1784447,
-      "sha256": "15ade06886bdb1c62d42b9237968dcf2b6bbe7ba3125d45aad5b4b3c2d931c43",
+      "bytes": 1182249,
+      "sha256": "4d312fa5d0c5b84e91b07d7da404c321e1460d5ca8b475f871cceab07b1704a2",
       "owners": [
         {
           "screen": "MediaAnalysisScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/analysis/MediaAnalysisScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 31,
@@ -620,16 +754,21 @@
       "file": "screens/31-announcements.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 2073357,
-      "sha256": "82ff84fc350565fdc289078b6eaa0399b895dae74cf5aef6fedd78341b4dd348",
+      "bytes": 1318344,
+      "sha256": "cc579e11ad1d28f5cfcc67ba8e0aec025cc345fd46e66d0034a02cf2c4b71aa4",
       "owners": [
         {
           "screen": "AnnouncementsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/announcements/AnnouncementsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 32,
@@ -640,16 +779,21 @@
       "file": "screens/32-komf-web.png",
       "kind": "concept",
       "platform": "web",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/17-desktop-settings.png"
+      ],
       "widthPx": 1487,
       "heightPx": 1058,
-      "bytes": 1711371,
-      "sha256": "a0f1430a48fa2c43260492223811500b00a1b0adcdd5d126af28a04d3ee90774",
+      "bytes": 1435668,
+      "sha256": "9f589a82fe50aee9a15f146da8a92d426b4d1c2f23e74e14d7eccd47f2dc1256",
       "owners": [
         {
           "screen": "KomfMainScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/komf/KomfMainScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 33,
@@ -660,16 +804,21 @@
       "file": "screens/33-komf-connection.png",
       "kind": "concept",
       "platform": "mobile",
+      "referenceFiles": [
+        "screens/01-home.png",
+        "screens/16-mobile-settings.png"
+      ],
       "widthPx": 853,
       "heightPx": 1844,
-      "bytes": 1671955,
-      "sha256": "f9d979667b3fe7afe7bbb028f0015d9b59d01ef067e6d3329d41a7637fa40c72",
+      "bytes": 1337767,
+      "sha256": "b1baaf4d53266b211d7d996156048dcca6e16094a3e26b643850d74e16886765",
       "owners": [
         {
           "screen": "KomfSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/general/KomfSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 34,
@@ -680,16 +829,20 @@
       "file": "screens/34-komf-processing.png",
       "kind": "concept",
       "platform": "web",
+      "referenceFiles": [
+        "screens/32-komf-web.png"
+      ],
       "widthPx": 1487,
       "heightPx": 1058,
-      "bytes": 1725010,
-      "sha256": "c4deb76ce1d7aedcca2da9af1ea53caa99576d54fb5a51a6832997bd73bba933",
+      "bytes": 1458776,
+      "sha256": "ffb89df87872d6677fc2f7e6fce91faa2778898f2d296f96bbe4c31582fc462c",
       "owners": [
         {
           "screen": "KomfProcessingSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/processing/KomfProcessingSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 35,
@@ -700,16 +853,20 @@
       "file": "screens/35-komf-providers.png",
       "kind": "concept",
       "platform": "web",
+      "referenceFiles": [
+        "screens/32-komf-web.png"
+      ],
       "widthPx": 1487,
       "heightPx": 1058,
-      "bytes": 1692935,
-      "sha256": "1f2e7cb7070b9e6c3a7aca9c8f95fbf4b9565f631dca40907d2bc3572d817197",
+      "bytes": 1413822,
+      "sha256": "e48ace1684b0f4e49a7a8acb992febefab7c5c996dd533ebdf8e6d0999d14947",
       "owners": [
         {
           "screen": "KomfProvidersSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/providers/KomfProvidersSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 36,
@@ -720,16 +877,20 @@
       "file": "screens/36-komf-notifications.png",
       "kind": "concept",
       "platform": "web",
+      "referenceFiles": [
+        "screens/32-komf-web.png"
+      ],
       "widthPx": 1487,
       "heightPx": 1058,
-      "bytes": 1797529,
-      "sha256": "8b75873443b6df5c19512f5a9ccd0907fb78c873d609c33f697b95921a077c63",
+      "bytes": 1450449,
+      "sha256": "97b6e70fb52612c0facd6907d731446938242bd624dd7f06ab060d05b502ddb4",
       "owners": [
         {
           "screen": "KomfNotificationSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/notifications/KomfNotificationSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 37,
@@ -740,16 +901,20 @@
       "file": "screens/37-komf-jobs.png",
       "kind": "concept",
       "platform": "web",
-      "widthPx": 1485,
-      "heightPx": 1059,
-      "bytes": 1649093,
-      "sha256": "2487de8c2d3f40c8cd4aa297ce492c3b07c200cd9e2b765c784648c61bf5cd12",
+      "referenceFiles": [
+        "screens/32-komf-web.png"
+      ],
+      "widthPx": 1484,
+      "heightPx": 1060,
+      "bytes": 1300587,
+      "sha256": "ad2360a15366fe9f4f71a85006c194ccf7365d74e9d6e84643f42cbbbd144cf7",
       "owners": [
         {
           "screen": "KomfJobsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/jobs/KomfJobsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     },
     {
       "id": 38,
@@ -760,18 +925,25 @@
       "file": "screens/38-komf-mangabaka.png",
       "kind": "concept",
       "platform": "web",
-      "widthPx": 1487,
-      "heightPx": 1058,
-      "bytes": 1639187,
-      "sha256": "fa9bb727ebf4d503f245403705d60dc10e32edd91d8f5130cd7cc9a5a8f6fcf4",
+      "referenceFiles": [
+        "screens/32-komf-web.png"
+      ],
+      "widthPx": 1485,
+      "heightPx": 1059,
+      "bytes": 1338846,
+      "sha256": "c2f75ea9661a02cc4d092827b14b5e82983ca219c2206d9f55e2fef67e7baa1b",
       "owners": [
         {
           "screen": "KomfMangaBakaSettingsScreen",
           "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/mangabaka/KomfMangaBakaSettingsScreen.kt"
         }
-      ]
+      ],
+      "backgroundRevision": "background-scope-v2"
     }
   ],
+  "revision": "background-scope-v2",
+  "correctionRecord": "background-correction.json",
+  "selectedReferenceStatus": "historical-material-reference; global scene background superseded",
   "supportingImages": [
     {
       "file": "selected-direction.png",
@@ -780,33 +952,33 @@
     },
     {
       "file": "overview-01.jpg",
-      "bytes": 1483655,
-      "sha256": "7a80f99cbf74b64292e7a2e8be2390a7e00cbce5693b4b32f542ec9ac29ab1d6"
+      "bytes": 1042315,
+      "sha256": "c28f9e6e5e864e3076b797beebc441c049ed0600d67f24583d22df5f0aaf0031"
     },
     {
       "file": "overview-02.jpg",
-      "bytes": 1250871,
-      "sha256": "b14dd2be912380162fee66c0259ea88e923ffcba133247d14230815461c0999c"
+      "bytes": 818000,
+      "sha256": "58dc36248210775a6195d736c87492a96984858c7585c311aa36c47fb5e626f4"
     },
     {
       "file": "overview-03.jpg",
-      "bytes": 1078635,
-      "sha256": "c25ee8d6bbf2d3e8d5b4d7698c47bd983d914e2ab094e03c15827d1d7a41b289"
+      "bytes": 580672,
+      "sha256": "a8e61e860b3cc95bafe3f4a3b2181b93b52280bf6a1641e1db2513b2332f4e98"
     },
     {
       "file": "overview-04.jpg",
-      "bytes": 848970,
-      "sha256": "15fb6a3125c78f508ec7862ccbc26b86270388e331117bb8fd77806c110cbbc7"
+      "bytes": 420989,
+      "sha256": "d576571b86b2b478d109a68e946f4cbde59983ec359adb4bcfffd1c35fe78f25"
     },
     {
       "file": "overview-05.jpg",
-      "bytes": 672821,
-      "sha256": "e25ee1f07552bd826c5f8a2196b93d9ad8a29ac94ba8d133337ee5dfb43736ee"
+      "bytes": 428559,
+      "sha256": "e65040ac864f56f07002f0a2676d686e104350847deb942f377f29ab1bba1666"
     },
     {
       "file": "overview-06.jpg",
-      "bytes": 497501,
-      "sha256": "29ea6ba6a8d74fd6ea6194225d709681a66f5fa898ee17b95055264532819347"
+      "bytes": 292133,
+      "sha256": "d495dd436187b7e147cfd0ab24de84b8c4bb2971f5f7422491d816512cdf9d78"
     }
   ]
 }

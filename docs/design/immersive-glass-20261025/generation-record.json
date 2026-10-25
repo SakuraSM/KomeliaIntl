@@ -576,5 +576,9 @@
       ]
     }
   ],
-  "baseCommit": "a22baef4b9e10e4ea5ea1c2a3d8b38354f4859b6"
+  "baseCommit": "a22baef4b9e10e4ea5ea1c2a3d8b38354f4859b6",
+  "currentRevision": "background-scope-v2",
+  "initialRevisionCommit": "3bf01e91",
+  "initialPromptsAreHistorical": true,
+  "latestCorrectionRecord": "background-correction.json"
 }

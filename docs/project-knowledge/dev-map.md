@@ -1,5 +1,9 @@
 # Development map
 
+## Design references
+
+[Versioned design concepts](../design/README.md) record selected visual directions, Screen mappings, and implementation boundaries. Generated images are design targets, not runtime or performance evidence.
+
 ## Product surfaces
 
 | Surface | Entry area | Main dependencies | Build alias |

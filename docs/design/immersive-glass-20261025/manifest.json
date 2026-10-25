@@ -1,0 +1,812 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-25",
+  "kind": "generated-design-concepts",
+  "selectedDirection": "2 / immersive dark glass",
+  "screenCount": 39,
+  "imageCount": 38,
+  "images": [
+    {
+      "id": 1,
+      "title": "首页与主导航",
+      "screens": [
+        "MainScreen",
+        "HomeScreen"
+      ],
+      "file": "screens/01-home.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2315346,
+      "sha256": "07a5f6323f1dcb6f171cceb12dfd56ce2789219d69492ae353fc6333e1d84043",
+      "owners": [
+        {
+          "screen": "MainScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/MainScreen.kt"
+        },
+        {
+          "screen": "HomeScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/home/HomeScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "书库",
+      "screens": [
+        "LibraryScreen"
+      ],
+      "file": "screens/02-library.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2314466,
+      "sha256": "ba184a1a2537dbff83413f0947b90fe890080d30a0a38f596e5d6828e7e46805",
+      "owners": [
+        {
+          "screen": "LibraryScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/library/LibraryScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "本地与下载",
+      "screens": [
+        "LocalContentScreen"
+      ],
+      "file": "screens/03-local.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2298218,
+      "sha256": "01aa7b92890f038d5333b6c3f2dfedcec3f4b734a9d027a6a12dc95eecb17be5",
+      "owners": [
+        {
+          "screen": "LocalContentScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/local/LocalContentScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "全局搜索",
+      "screens": [
+        "SearchScreen"
+      ],
+      "file": "screens/04-search.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2213665,
+      "sha256": "2ce6b39393e0fafc0cde859c8ef7e84066b588edd0440bc26a4c022258898817",
+      "owners": [
+        {
+          "screen": "SearchScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/search/SearchScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "书籍详情",
+      "screens": [
+        "BookScreen"
+      ],
+      "file": "screens/05-book.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2108449,
+      "sha256": "c287d067f06380fea702565dc46e5e2ea06d648f62aecd4f0261fc1320702cef",
+      "owners": [
+        {
+          "screen": "BookScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/book/BookScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "系列详情",
+      "screens": [
+        "SeriesScreen"
+      ],
+      "file": "screens/06-series.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2099032,
+      "sha256": "440745d42169b064a55ada6da5780253a2125f7fdac6e2f0a5e9823f53e019b4",
+      "owners": [
+        {
+          "screen": "SeriesScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/series/SeriesScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "单行本详情",
+      "screens": [
+        "OneshotScreen"
+      ],
+      "file": "screens/07-oneshot.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2024063,
+      "sha256": "6f5eee63a5a15fc2030af61acdefe6ef9767308ee9fcf0c7a7b956b30457ef1c",
+      "owners": [
+        {
+          "screen": "OneshotScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/oneshot/OneshotScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "合集详情",
+      "screens": [
+        "CollectionScreen"
+      ],
+      "file": "screens/08-collection.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1843,
+      "bytes": 2293141,
+      "sha256": "10f1513d29a60e7f8284882f12558d8e10ec9dd72c5496db67f185d76ca4af9d",
+      "owners": [
+        {
+          "screen": "CollectionScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/collection/CollectionScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "阅读列表详情",
+      "screens": [
+        "ReadListScreen"
+      ],
+      "file": "screens/09-readlist.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1898442,
+      "sha256": "d4f18fc71f3014e1ebbfa9517881f9df668e126f289b5d5b1dd5a4e034a30eec",
+      "owners": [
+        {
+          "screen": "ReadListScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/readlist/ReadListScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "图片与 PDF 阅读器",
+      "screens": [
+        "ImageReaderScreen"
+      ],
+      "file": "screens/10-image-reader.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2784226,
+      "sha256": "381cdad35d19e2d08764c79be0408078e0c9c6941f0b0a2e7e4cb00bd1ec34a7",
+      "owners": [
+        {
+          "screen": "ImageReaderScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/reader/ImageReaderScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "EPUB 阅读器",
+      "screens": [
+        "EpubScreen"
+      ],
+      "file": "screens/11-epub-reader.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2004793,
+      "sha256": "b1a56830e3c394d3db98d1156d13b2ba3d093c07f3fe170f0a19ed6fcf57865b",
+      "owners": [
+        {
+          "screen": "EpubScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/reader/EpubScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "色彩校正",
+      "screens": [
+        "ColorCorrectionScreen"
+      ],
+      "file": "screens/12-color-correction.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2287251,
+      "sha256": "81a02d6a73b881551cd82db4a593ebbfe205751a6cbec3abbc83e28e849c6299",
+      "owners": [
+        {
+          "screen": "ColorCorrectionScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/color/view/ColorCorrectionScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "首页分组编辑",
+      "screens": [
+        "FilterEditScreen"
+      ],
+      "file": "screens/13-home-groups.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1568707,
+      "sha256": "d0ea89de466f62fd1990c295b2e01d255b3db0b007c62f3def54cac575ec6b9c",
+      "owners": [
+        {
+          "screen": "FilterEditScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/home/edit/FilterEditScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "在线登录",
+      "screens": [
+        "LoginScreen"
+      ],
+      "file": "screens/14-login.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2038127,
+      "sha256": "e29695ac1aa526e9c4f46d58e2b53783a3fe5c8f4aaf2e5e860a965b2b7048b8",
+      "owners": [
+        {
+          "screen": "LoginScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/login/LoginScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "离线账号选择",
+      "screens": [
+        "OfflineLoginScreen"
+      ],
+      "file": "screens/15-offline-login.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1967756,
+      "sha256": "e69c8954af712ea42518d0fd33311582cbefd7d73e527e136d96482e13b9ff18",
+      "owners": [
+        {
+          "screen": "OfflineLoginScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/login/offline/OfflineLoginScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "手机设置入口",
+      "screens": [
+        "MobileSettingsScreen"
+      ],
+      "file": "screens/16-mobile-settings.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1639024,
+      "sha256": "d055f77cfc932ddfdc9b3b34404f95919a4059a380f972fe69af1a274517c078",
+      "owners": [
+        {
+          "screen": "MobileSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/MobileSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "桌面设置入口",
+      "screens": [
+        "DesktopSettingsScreen"
+      ],
+      "file": "screens/17-desktop-settings.png",
+      "kind": "concept",
+      "platform": "desktop",
+      "widthPx": 1487,
+      "heightPx": 1058,
+      "bytes": 1799375,
+      "sha256": "abe16249518e521053f134d8632b844ba6c9bfeee3030ef3d8d061f4888962ac",
+      "owners": [
+        {
+          "screen": "DesktopSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/DesktopSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "外观设置",
+      "screens": [
+        "AppSettingsScreen"
+      ],
+      "file": "screens/18-appearance.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1955720,
+      "sha256": "1b7d1e5eade9a384a8b250457899ddf1c9a940163c9b37f1fec9cf3db6c0a163",
+      "owners": [
+        {
+          "screen": "AppSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/appearance/AppSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "title": "网络连接",
+      "screens": [
+        "NetworkSettingsScreen"
+      ],
+      "file": "screens/19-network.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1686019,
+      "sha256": "007bdb33008333dc266ea45b6277520cf4a91990517c6ad68368676217d9ea54",
+      "owners": [
+        {
+          "screen": "NetworkSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/network/NetworkSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "图片阅读设置",
+      "screens": [
+        "ImageReaderSettingsScreen"
+      ],
+      "file": "screens/20-image-reader-settings.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1688019,
+      "sha256": "8be4f60e0748b3f3a710eeea318cfafe22ea06e6891cfe0a36924aecdbf94ac9",
+      "owners": [
+        {
+          "screen": "ImageReaderSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/imagereader/ImageReaderSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "title": "EPUB 阅读设置",
+      "screens": [
+        "EpubReaderSettingsScreen"
+      ],
+      "file": "screens/21-epub-settings.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1702581,
+      "sha256": "d894884738ad14a9a46919e52d0f596901870ba76bede1fc82445d29da9123e0",
+      "owners": [
+        {
+          "screen": "EpubReaderSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/epub/EpubReaderSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "应用更新",
+      "screens": [
+        "AppUpdatesScreen"
+      ],
+      "file": "screens/22-updates.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1725965,
+      "sha256": "c5d35fb282ee110f0dcb7e0565a722ecda475e4e1b8030ca37497b359145d56f",
+      "owners": [
+        {
+          "screen": "AppUpdatesScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/updates/AppUpdatesScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "本地目录设置",
+      "screens": [
+        "LocalLibrarySettingsScreen"
+      ],
+      "file": "screens/23-local-folders.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1812197,
+      "sha256": "1a3b3dec0a83b346962619a051d618ad3d52ecffa49a36adc02193536c949197",
+      "owners": [
+        {
+          "screen": "LocalLibrarySettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/local/LocalLibrarySettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "title": "离线管理",
+      "screens": [
+        "OfflineSettingsScreen"
+      ],
+      "file": "screens/24-offline-management.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1899908,
+      "sha256": "8248f5278249a2942f9e72f76c30d2d4c260426344ab950e22b7fead18d30e1b",
+      "owners": [
+        {
+          "screen": "OfflineSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/offline/OfflineSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "title": "关于",
+      "screens": [
+        "AboutSettingsScreen"
+      ],
+      "file": "screens/25-about.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1934552,
+      "sha256": "e8a3bdd354f8cdabda6576546f1f3ac1e82edbe1f69b785833bf286ca8e4ca53",
+      "owners": [
+        {
+          "screen": "AboutSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/about/AboutSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "title": "我的账号",
+      "screens": [
+        "AccountSettingsScreen"
+      ],
+      "file": "screens/26-account.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1704877,
+      "sha256": "1ca464a7b402fc3dc4937cca6ebaab2adcd6a587c1442f86a117a7678040cbc9",
+      "owners": [
+        {
+          "screen": "AccountSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/account/AccountSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "title": "认证活动",
+      "screens": [
+        "AuthenticationActivityScreen"
+      ],
+      "file": "screens/27-authentication.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1699745,
+      "sha256": "4f3d4bdadf62eacf3709c63b67f5bbdc75a3eff1a4073d07f561ee264c502ec8",
+      "owners": [
+        {
+          "screen": "AuthenticationActivityScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/authactivity/AuthenticationActivityScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "title": "服务器设置",
+      "screens": [
+        "ServerSettingsScreen"
+      ],
+      "file": "screens/28-server.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1568682,
+      "sha256": "f64e4ad4632dba748fce025bd5c8c545d4d9cab8acc3aff058445295e36e0d30",
+      "owners": [
+        {
+          "screen": "ServerSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/server/ServerSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "title": "用户管理",
+      "screens": [
+        "UsersScreen"
+      ],
+      "file": "screens/29-users.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1740731,
+      "sha256": "965f60d230668299d764b17b9d5b7f117ce031cfc5a287e94e7b8c996fb3a649",
+      "owners": [
+        {
+          "screen": "UsersScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/users/UsersScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "title": "媒体管理",
+      "screens": [
+        "MediaAnalysisScreen"
+      ],
+      "file": "screens/30-media.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1784447,
+      "sha256": "15ade06886bdb1c62d42b9237968dcf2b6bbe7ba3125d45aad5b4b3c2d931c43",
+      "owners": [
+        {
+          "screen": "MediaAnalysisScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/analysis/MediaAnalysisScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "title": "公告",
+      "screens": [
+        "AnnouncementsScreen"
+      ],
+      "file": "screens/31-announcements.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 2073357,
+      "sha256": "82ff84fc350565fdc289078b6eaa0399b895dae74cf5aef6fedd78341b4dd348",
+      "owners": [
+        {
+          "screen": "AnnouncementsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/announcements/AnnouncementsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "title": "Komf Web 入口",
+      "screens": [
+        "KomfMainScreen"
+      ],
+      "file": "screens/32-komf-web.png",
+      "kind": "concept",
+      "platform": "web",
+      "widthPx": 1487,
+      "heightPx": 1058,
+      "bytes": 1711371,
+      "sha256": "a0f1430a48fa2c43260492223811500b00a1b0adcdd5d126af28a04d3ee90774",
+      "owners": [
+        {
+          "screen": "KomfMainScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/komf/KomfMainScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "title": "Komf 连接设置",
+      "screens": [
+        "KomfSettingsScreen"
+      ],
+      "file": "screens/33-komf-connection.png",
+      "kind": "concept",
+      "platform": "mobile",
+      "widthPx": 853,
+      "heightPx": 1844,
+      "bytes": 1671955,
+      "sha256": "f9d979667b3fe7afe7bbb028f0015d9b59d01ef067e6d3329d41a7637fa40c72",
+      "owners": [
+        {
+          "screen": "KomfSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/general/KomfSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "title": "Komf 处理设置",
+      "screens": [
+        "KomfProcessingSettingsScreen"
+      ],
+      "file": "screens/34-komf-processing.png",
+      "kind": "concept",
+      "platform": "web",
+      "widthPx": 1487,
+      "heightPx": 1058,
+      "bytes": 1725010,
+      "sha256": "c4deb76ce1d7aedcca2da9af1ea53caa99576d54fb5a51a6832997bd73bba933",
+      "owners": [
+        {
+          "screen": "KomfProcessingSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/processing/KomfProcessingSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "title": "Komf 元数据源",
+      "screens": [
+        "KomfProvidersSettingsScreen"
+      ],
+      "file": "screens/35-komf-providers.png",
+      "kind": "concept",
+      "platform": "web",
+      "widthPx": 1487,
+      "heightPx": 1058,
+      "bytes": 1692935,
+      "sha256": "1f2e7cb7070b9e6c3a7aca9c8f95fbf4b9565f631dca40907d2bc3572d817197",
+      "owners": [
+        {
+          "screen": "KomfProvidersSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/providers/KomfProvidersSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "title": "Komf 通知设置",
+      "screens": [
+        "KomfNotificationSettingsScreen"
+      ],
+      "file": "screens/36-komf-notifications.png",
+      "kind": "concept",
+      "platform": "web",
+      "widthPx": 1487,
+      "heightPx": 1058,
+      "bytes": 1797529,
+      "sha256": "8b75873443b6df5c19512f5a9ccd0907fb78c873d609c33f697b95921a077c63",
+      "owners": [
+        {
+          "screen": "KomfNotificationSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/notifications/KomfNotificationSettingsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "title": "Komf 任务历史",
+      "screens": [
+        "KomfJobsScreen"
+      ],
+      "file": "screens/37-komf-jobs.png",
+      "kind": "concept",
+      "platform": "web",
+      "widthPx": 1485,
+      "heightPx": 1059,
+      "bytes": 1649093,
+      "sha256": "2487de8c2d3f40c8cd4aa297ce492c3b07c200cd9e2b765c784648c61bf5cd12",
+      "owners": [
+        {
+          "screen": "KomfJobsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/jobs/KomfJobsScreen.kt"
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "title": "MangaBaka 设置",
+      "screens": [
+        "KomfMangaBakaSettingsScreen"
+      ],
+      "file": "screens/38-komf-mangabaka.png",
+      "kind": "concept",
+      "platform": "web",
+      "widthPx": 1487,
+      "heightPx": 1058,
+      "bytes": 1639187,
+      "sha256": "fa9bb727ebf4d503f245403705d60dc10e32edd91d8f5130cd7cc9a5a8f6fcf4",
+      "owners": [
+        {
+          "screen": "KomfMangaBakaSettingsScreen",
+          "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/settings/komf/mangabaka/KomfMangaBakaSettingsScreen.kt"
+        }
+      ]
+    }
+  ],
+  "supportingImages": [
+    {
+      "file": "selected-direction.png",
+      "bytes": 2349296,
+      "sha256": "6805d9bab0a92f6d3884bdf94b2057231ad6709221807a47698150adb58fe4c5"
+    },
+    {
+      "file": "overview-01.jpg",
+      "bytes": 1483655,
+      "sha256": "7a80f99cbf74b64292e7a2e8be2390a7e00cbce5693b4b32f542ec9ac29ab1d6"
+    },
+    {
+      "file": "overview-02.jpg",
+      "bytes": 1250871,
+      "sha256": "b14dd2be912380162fee66c0259ea88e923ffcba133247d14230815461c0999c"
+    },
+    {
+      "file": "overview-03.jpg",
+      "bytes": 1078635,
+      "sha256": "c25ee8d6bbf2d3e8d5b4d7698c47bd983d914e2ab094e03c15827d1d7a41b289"
+    },
+    {
+      "file": "overview-04.jpg",
+      "bytes": 848970,
+      "sha256": "15fb6a3125c78f508ec7862ccbc26b86270388e331117bb8fd77806c110cbbc7"
+    },
+    {
+      "file": "overview-05.jpg",
+      "bytes": 672821,
+      "sha256": "e25ee1f07552bd826c5f8a2196b93d9ad8a29ac94ba8d133337ee5dfb43736ee"
+    },
+    {
+      "file": "overview-06.jpg",
+      "bytes": 497501,
+      "sha256": "29ea6ba6a8d74fd6ea6194225d709681a66f5fa898ee17b95055264532819347"
+    }
+  ]
+}

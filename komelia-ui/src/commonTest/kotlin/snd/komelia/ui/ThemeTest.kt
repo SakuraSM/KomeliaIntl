@@ -1,7 +1,7 @@
 package snd.komelia.ui
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.ui.graphics.Color
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import snd.komelia.settings.model.AppTheme
@@ -11,18 +11,18 @@ class ThemeTest {
     fun lightThemeUsesAccessibleContentPalette() {
         val colors = Theme.LIGHT.colorScheme
 
-        assertEquals(Color(0xFFF8F8FC), colors.background)
-        assertEquals(Color(0xFF1B1C20), colors.onBackground)
-        assertEquals(Color(0xFF5F5D8E), colors.primary)
+        assertEquals(Color(0xFFF5F8FC), colors.background)
+        assertEquals(Color(0xFF172330), colors.onBackground)
+        assertEquals(Color(0xFF00639A), colors.primary)
     }
 
     @Test
     fun darkThemeUsesNeutralReadingSurfaces() {
         val colors = Theme.DARK.colorScheme
 
-        assertEquals(Color(0xFF101014), colors.background)
-        assertEquals(Color(0xFF15151A), colors.surface)
-        assertEquals(Color(0xFFC5C2F0), colors.primary)
+        assertEquals(Color(0xFF0D131C), colors.background)
+        assertEquals(Color(0xFF101923), colors.surface)
+        assertEquals(Color(0xFF69C9FF), colors.primary)
     }
 
     @Test

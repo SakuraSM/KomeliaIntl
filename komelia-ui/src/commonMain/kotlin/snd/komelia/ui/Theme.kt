@@ -1,14 +1,14 @@
 package snd.komelia.ui
 
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.snap
-import androidx.compose.material3.MotionScheme
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
@@ -24,40 +24,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import snd.komelia.settings.model.AppTheme
 
-private val BlueViolet = Color(0xFF5F5D8E)
-private val BlueVioletLight = Color(0xFFC5C2F0)
-private val Ochre = Color(0xFF8A6428)
+private val SkyBlue = Color(0xFF69C9FF)
+private val DeepBlue = Color(0xFF00639A)
 private val ErrorLight = Color(0xFFBA1A1A)
 private val ErrorDark = Color(0xFFFFB4AB)
 
 private val LightColors = lightColorScheme(
-    primary = BlueViolet,
+    primary = DeepBlue,
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFE5E3F5),
-    onPrimaryContainer = Color(0xFF25233F),
-    secondary = Color(0xFF5E6473),
+    primaryContainer = Color(0xFFD0E8FA),
+    onPrimaryContainer = Color(0xFF00324F),
+    secondary = Color(0xFF526474),
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFE1E4EA),
-    onSecondaryContainer = Color(0xFF20242C),
-    tertiary = Ochre,
-    onTertiary = Color(0xFF2A1700),
-    tertiaryContainer = Color(0xFFFFE0A3),
-    onTertiaryContainer = Color(0xFF261900),
-    background = Color(0xFFF8F8FC),
-    onBackground = Color(0xFF1B1C20),
-    surface = Color(0xFFFCFCFF),
-    onSurface = Color(0xFF1B1C20),
-    surfaceVariant = Color(0xFFF1F0F8),
-    onSurfaceVariant = Color(0xFF555964),
+    secondaryContainer = Color(0xFFDCE7F0),
+    onSecondaryContainer = Color(0xFF182B3B),
+    tertiary = DeepBlue,
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFD0E8FA),
+    onTertiaryContainer = Color(0xFF00324F),
+    background = Color(0xFFF5F8FC),
+    onBackground = Color(0xFF172330),
+    surface = Color(0xFFFAFCFF),
+    onSurface = Color(0xFF172330),
+    surfaceVariant = Color(0xFFEDF2F8),
+    onSurfaceVariant = Color(0xFF4D5E70),
     surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFF5F4FC),
-    surfaceContainer = Color(0xFFEFEEF8),
-    surfaceContainerHigh = Color(0xFFE9E7F4),
-    surfaceContainerHighest = Color(0xFFE1DFEE),
-    surfaceDim = Color(0xFFE0DFE8),
+    surfaceContainerLow = Color(0xFFF2F6FB),
+    surfaceContainer = Color(0xFFEAF0F7),
+    surfaceContainerHigh = Color(0xFFE2EAF3),
+    surfaceContainerHighest = Color(0xFFD8E3EE),
+    surfaceDim = Color(0xFFDDE6EF),
     surfaceBright = Color.White,
-    outline = Color(0xFF777985),
-    outlineVariant = Color(0xFFD9D7E4),
+    outline = Color(0xFF718294),
+    outlineVariant = Color(0xFFCCD8E5),
     error = ErrorLight,
     onError = Color.White,
     errorContainer = Color(0xFFFFDAD6),
@@ -65,33 +64,33 @@ private val LightColors = lightColorScheme(
 )
 
 private val DarkColors = darkColorScheme(
-    primary = BlueVioletLight,
-    onPrimary = Color(0xFF292641),
-    primaryContainer = Color(0xFF454269),
-    onPrimaryContainer = Color(0xFFE6E3FF),
-    secondary = Color(0xFFC5C8D2),
-    onSecondary = Color(0xFF2B2E36),
-    secondaryContainer = Color(0xFF3F424C),
-    onSecondaryContainer = Color(0xFFE1E3EB),
-    tertiary = Color(0xFFFFC56D),
-    onTertiary = Color(0xFF422C00),
-    tertiaryContainer = Color(0xFF5F4100),
-    onTertiaryContainer = Color(0xFFFFDFA0),
-    background = Color(0xFF101014),
-    onBackground = Color(0xFFF0F0F3),
-    surface = Color(0xFF15151A),
-    onSurface = Color(0xFFF0F0F3),
-    surfaceVariant = Color(0xFF1D1C24),
-    onSurfaceVariant = Color(0xFFC5C6CD),
-    surfaceContainerLowest = Color(0xFF0B0C0E),
-    surfaceContainerLow = Color(0xFF15151A),
-    surfaceContainer = Color(0xFF1D1C24),
-    surfaceContainerHigh = Color(0xFF25242E),
-    surfaceContainerHighest = Color(0xFF2E2C38),
-    surfaceDim = Color(0xFF101014),
-    surfaceBright = Color(0xFF35333F),
-    outline = Color(0xFF8F909A),
-    outlineVariant = Color(0xFF34363E),
+    primary = SkyBlue,
+    onPrimary = Color(0xFF00324A),
+    primaryContainer = Color(0xFF203B53),
+    onPrimaryContainer = Color(0xFFD5EEFF),
+    secondary = Color(0xFFB6C5D6),
+    onSecondary = Color(0xFF203043),
+    secondaryContainer = Color(0xFF26394E),
+    onSecondaryContainer = Color(0xFFDCE7F4),
+    tertiary = SkyBlue,
+    onTertiary = Color(0xFF00324A),
+    tertiaryContainer = SkyBlue,
+    onTertiaryContainer = Color(0xFF00324A),
+    background = Color(0xFF0D131C),
+    onBackground = Color(0xFFF4F7FC),
+    surface = Color(0xFF101923),
+    onSurface = Color(0xFFF4F7FC),
+    surfaceVariant = Color(0xFF152131),
+    onSurfaceVariant = Color(0xFFADB8C9),
+    surfaceContainerLowest = Color(0xFF0E1823),
+    surfaceContainerLow = Color(0xFF111D2A),
+    surfaceContainer = Color(0xFF172536),
+    surfaceContainerHigh = Color(0xFF1D2E42),
+    surfaceContainerHighest = Color(0xFF293C53),
+    surfaceDim = Color(0xFF0D131C),
+    surfaceBright = Color(0xFF31465E),
+    outline = Color(0xFF7D90A8),
+    outlineVariant = Color(0xFF2B3B4E),
     error = ErrorDark,
     onError = Color(0xFF690005),
     errorContainer = Color(0xFF93000A),
@@ -101,12 +100,12 @@ private val DarkColors = darkColorScheme(
 private val OledColors = DarkColors.copy(
     background = Color.Black,
     surface = Color.Black,
-    surfaceVariant = Color(0xFF12111A),
+    surfaceVariant = Color(0xFF0B1520),
     surfaceContainerLowest = Color.Black,
-    surfaceContainerLow = Color(0xFF08080C),
-    surfaceContainer = Color(0xFF12111A),
-    surfaceContainerHigh = Color(0xFF191824),
-    surfaceContainerHighest = Color(0xFF22202E),
+    surfaceContainerLow = Color(0xFF07101A),
+    surfaceContainer = Color(0xFF101D2B),
+    surfaceContainerHigh = Color(0xFF172638),
+    surfaceContainerHighest = Color(0xFF21334A),
     surfaceDim = Color.Black,
 )
 

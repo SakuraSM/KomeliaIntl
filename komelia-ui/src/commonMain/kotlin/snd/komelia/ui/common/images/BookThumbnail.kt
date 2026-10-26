@@ -19,6 +19,7 @@ fun BookThumbnail(
     bookId: KomgaBookId,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
+    onLoadResult: ((Boolean) -> Unit)? = null,
 ) {
     val komgaEvents = LocalKomgaEvents.current
     var requestData by remember(bookId) { mutableStateOf(BookDefaultThumbnailRequest(bookId)) }
@@ -35,6 +36,7 @@ fun BookThumbnail(
         data = requestData,
         cacheKey = bookId.value,
         contentScale = contentScale,
+        onLoadResult = onLoadResult,
         modifier = modifier
     )
 }

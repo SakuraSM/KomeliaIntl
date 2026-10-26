@@ -19,8 +19,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,10 +35,10 @@ import com.dokar.chiptextfield.Chip
 import com.dokar.chiptextfield.m3.ChipTextField
 import com.dokar.chiptextfield.rememberChipTextFieldState
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_authors_name
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_authors_role
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_alt_titles_label
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_alt_titles_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_authors_name
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_authors_role
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_book_add
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_book_author
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_context_book_id
@@ -94,7 +94,6 @@ import snd.komelia.ui.settings.komf.notifications.NotificationContextState.Autho
 import snd.komelia.ui.settings.komf.notifications.NotificationContextState.BookContextState
 import snd.komelia.ui.settings.komf.notifications.NotificationContextState.WebLinkContext
 
-
 @Composable
 fun NotificationContextDialog(
     notificationContextState: NotificationContextState,
@@ -125,13 +124,13 @@ fun NotificationContextDialogContent(
             stringResource(Res.string.komf_notification_context_library),
             style = MaterialTheme.typography.titleLarge
         )
-        TextField(
+        OutlinedTextField(
             value = state.libraryId,
             onValueChange = state::libraryId::set,
             label = { Text(stringResource(Res.string.komf_notification_context_library_id)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.libraryName,
             onValueChange = state::libraryName::set,
             label = { Text(stringResource(Res.string.komf_notification_context_library_name)) },
@@ -143,13 +142,13 @@ fun NotificationContextDialogContent(
             stringResource(Res.string.komf_notification_context_series),
             style = MaterialTheme.typography.titleLarge
         )
-        TextField(
+        OutlinedTextField(
             value = state.seriesId,
             onValueChange = state::seriesId::set,
             label = { Text(stringResource(Res.string.komf_notification_context_series_id)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.seriesName,
             onValueChange = state::seriesName::set,
             label = { Text(stringResource(Res.string.komf_notification_context_series_name)) },
@@ -161,37 +160,37 @@ fun NotificationContextDialogContent(
             label = { Text(stringResource(Res.string.komf_notification_context_series_book_count)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.seriesStatus,
             onValueChange = state::seriesStatus::set,
             label = { Text(stringResource(Res.string.komf_notification_context_series_status)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.seriesTitle,
             onValueChange = state::seriesTitle::set,
             label = { Text(stringResource(Res.string.komf_notification_context_series_metadata_title)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.seriesTitleSort,
             onValueChange = state::seriesTitleSort::set,
             label = { Text(stringResource(Res.string.komf_notification_context_series_metadata_title_sort)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.seriesSummary,
             onValueChange = state::seriesSummary::set,
             label = { Text(stringResource(Res.string.komf_notification_context_series_summary)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.seriesReadingDirection,
             onValueChange = state::seriesReadingDirection::set,
             label = { Text(stringResource(Res.string.komf_notification_context_series_reading_direction)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.seriesPublisher,
             onValueChange = state::seriesPublisher::set,
             label = { Text(stringResource(Res.string.komf_notification_context_series_publisher)) },
@@ -203,7 +202,7 @@ fun NotificationContextDialogContent(
             label = { Text(stringResource(Res.string.komf_notification_context_series_age_rating)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.seriesLanguage,
             onValueChange = state::seriesLanguage::set,
             label = { Text(stringResource(Res.string.komf_notification_context_series_language)) },
@@ -300,17 +299,16 @@ fun NotificationContextDialogContent(
     }
 }
 
-
 @Composable
 private fun BookContext(state: BookContextState) {
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        TextField(
+        OutlinedTextField(
             value = state.id,
             onValueChange = state::id::set,
             label = { Text(stringResource(Res.string.komf_notification_context_book_id)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.name,
             onValueChange = state::name::set,
             label = { Text(stringResource(Res.string.komf_notification_context_book_name)) },
@@ -322,37 +320,37 @@ private fun BookContext(state: BookContextState) {
             label = { Text(stringResource(Res.string.komf_notification_context_book_number)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.title,
             onValueChange = state::title::set,
             label = { Text(stringResource(Res.string.komf_notification_context_book_metadata_title)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.summary,
             onValueChange = state::summary::set,
             label = { Text(stringResource(Res.string.komf_notification_context_book_summary)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.metadataNumber,
             onValueChange = state::metadataNumber::set,
             label = { Text(stringResource(Res.string.komf_notification_context_book_metadata_number)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.metadataNumberSort,
             onValueChange = state::metadataNumberSort::set,
             label = { Text(stringResource(Res.string.komf_notification_context_book_metadata_number_sort)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.releaseDate,
             onValueChange = state::releaseDate::set,
             label = { Text(stringResource(Res.string.komf_notification_context_book_release_date)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.isbn,
             onValueChange = state::isbn::set,
             label = { Text(stringResource(Res.string.komf_notification_context_book_isbn)) },
@@ -383,7 +381,6 @@ private fun BookContext(state: BookContextState) {
         }
     }
 }
-
 
 @Composable
 private fun StringValueList(
@@ -453,13 +450,13 @@ private fun <T> ValueList(
 @Composable
 private fun AlternativeTitlesEdit(state: AlternativeTitleContext) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        TextField(
+        OutlinedTextField(
             value = state.label,
             onValueChange = state::label::set,
             label = { Text(stringResource(Res.string.komf_notification_context_alt_titles_label)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.title,
             onValueChange = state::title::set,
             label = { Text(stringResource(Res.string.komf_notification_context_alt_titles_title)) },
@@ -471,13 +468,13 @@ private fun AlternativeTitlesEdit(state: AlternativeTitleContext) {
 @Composable
 private fun AuthorsEdit(state: AuthorContext) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        TextField(
+        OutlinedTextField(
             value = state.name,
             onValueChange = state::name::set,
             label = { Text(stringResource(Res.string.komf_notification_context_authors_name)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.role,
             onValueChange = state::role::set,
             label = { Text(stringResource(Res.string.komf_notification_context_authors_role)) },
@@ -489,13 +486,13 @@ private fun AuthorsEdit(state: AuthorContext) {
 @Composable
 private fun WebLinksEdit(state: WebLinkContext) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        TextField(
+        OutlinedTextField(
             value = state.label,
             onValueChange = state::label::set,
             label = { Text(stringResource(Res.string.komf_notification_context_weblink_label)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = state.url,
             onValueChange = state::url::set,
             label = { Text(stringResource(Res.string.komf_notification_context_weblink_url)) },

@@ -24,12 +24,14 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile_subtitle
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile_title
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.appRootNavigator
-import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
+import snd.komelia.ui.common.components.KomeliaWordmark
 import snd.komelia.ui.common.components.komeliaTopBarScroll
 import snd.komelia.ui.common.components.rememberKomeliaTopBarScrollState
 import snd.komelia.ui.platform.BackPressHandler
@@ -59,7 +61,7 @@ class MobileSettingsScreen(
                     .komeliaTopBarScroll(topBarScrollState),
                 verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
             ) {
-                KomeliaTopBarSurface(
+                if (!topLevel) KomeliaTopBarSurface(
                     isContentScrolled = topBarScrollState.isContentScrolled,
                 ) {
                     Row(
@@ -83,6 +85,18 @@ class MobileSettingsScreen(
                 }
 
                 SettingsNavigationMenu(
+                    header = {
+                        if (topLevel) Column(
+                            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            KomeliaWordmark()
+                            Text(stringResource(Res.string.settings_mobile_title), style = MaterialTheme.typography.headlineLarge)
+                            Text(stringResource(Res.string.settings_mobile_subtitle),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    },
                     currentScreen = currentNavigator.lastItem,
                     onNavigation = { currentNavigator.push(it) },
                     hasMediaErrors = vm.hasMediaErrors,

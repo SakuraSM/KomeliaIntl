@@ -10,12 +10,7 @@
     faRotateLeft, faSignOutAlt
   } from '@fortawesome/free-solid-svg-icons';
   import Popover from '$lib/components/popover/popover.svelte';
-  import {
-    baseHeaderClasses,
-    baseIconClasses,
-    nTranslateXHeaderFa,
-    translateXHeaderFa
-  } from '$lib/css-classes';
+  import {baseIconClasses} from '$lib/css-classes';
   import {customReadingPointEnabled$, viewMode$} from '$lib/data/store';
   import {ViewMode} from '$lib/data/view-mode';
   import {isMobile$} from '$lib/functions/utils';
@@ -75,7 +70,7 @@
   ]);
 
   let customReadingPointMenuElm: Popover | undefined = $state();
-  const toolbarGroupClasses = 'flex items-center gap-1 rounded-full bg-white/10 p-1 shadow-inner';
+  const toolbarGroupClasses = 'flex flex-auto flex-wrap items-center justify-around';
 
   function dispatchCustomReadingPointAction(action: () => void) {
     action()
@@ -87,10 +82,11 @@
 
 <nav
     data-komelia-chrome
-    class="flex items-center justify-between gap-3 bg-slate-950/92 px-3 shadow-lg shadow-black/30 backdrop-blur-md md:px-6 {baseHeaderClasses}"
+    data-komelia-toolbar="top"
+    class="relative flex min-h-12 flex-wrap items-center justify-between bg-slate-950/92 text-white shadow-lg shadow-black/30 backdrop-blur-md xl:min-h-10"
     aria-label={t('Reader toolbar')}
 >
-  <div class="{toolbarGroupClasses} transform-gpu {nTranslateXHeaderFa}">
+  <div class={toolbarGroupClasses}>
     {#if hasChapterData}
       <button
           type="button"
@@ -132,7 +128,7 @@
     {/if}
   </div>
 
-  <div class="{toolbarGroupClasses} transform-gpu {translateXHeaderFa}">
+  <div class={toolbarGroupClasses}>
     <button
         type="button"
         title={t('Complete Book')}

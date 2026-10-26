@@ -1,10 +1,5 @@
 package snd.komelia.ui.common.components
 
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.password_hide
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.password_show
-import org.jetbrains.compose.resources.stringResource
-
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -66,16 +61,20 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.password_hide
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.password_show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.formatDecimal
 
 @Composable
@@ -90,7 +89,8 @@ fun PasswordTextField(
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
-    TextField(
+    OutlinedTextField(
+        shape = RoundedCornerShape(10.dp),
         value = value,
         onValueChange = onValueChange,
         enabled = enabled,
@@ -142,7 +142,6 @@ fun Modifier.withTextFieldNavigation(onEnterPress: (() -> Unit)? = null): Modifi
         }
     )
 }
-
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -312,7 +311,6 @@ private fun HttpPrefixButton(
     }
 }
 
-
 @Composable
 fun NumberField(
     value: Int?,
@@ -368,7 +366,6 @@ fun NumberField(
         colors = colors
     )
 }
-
 
 @Composable
 fun NumberFieldWithIncrements(

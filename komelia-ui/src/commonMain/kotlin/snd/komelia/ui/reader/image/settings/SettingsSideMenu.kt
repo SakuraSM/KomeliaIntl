@@ -4,8 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.shape.RoundedCornerShape
-import snd.komelia.ui.common.components.komeliaChrome
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,6 +22,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -68,6 +67,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_pages_in
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_zoom
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.image.ReduceKernel
@@ -87,8 +87,10 @@ import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.NumberFieldWithIncrements
 import snd.komelia.ui.common.components.SwitchWithLabel
+import snd.komelia.ui.common.components.komeliaChrome
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.cursorForHand
+import snd.komelia.ui.reader.image.PageShareAction
 import snd.komelia.ui.reader.image.continuous.ContinuousReaderState
 import snd.komelia.ui.reader.image.paged.PagedReaderState
 import snd.komelia.ui.reader.image.panels.PanelsReaderState
@@ -98,9 +100,7 @@ import snd.komelia.ui.settings.imagereader.onnxruntime.TileSizeSelector
 import snd.komelia.ui.settings.imagereader.onnxruntime.UpscaleModeSelector
 import snd.komelia.ui.settings.imagereader.onnxruntime.isOnnxRuntimeInstalled
 import snd.komelia.ui.strings.AppStrings
-import snd.komelia.ui.reader.image.PageShareAction
 import snd.komelia.ui.strings.stringLabels
-import kotlin.math.roundToInt
 
 @Composable
 fun SettingsSideMenuOverlay(
@@ -152,7 +152,8 @@ fun SettingsSideMenuOverlay(
         )
         Column(
             modifier = Modifier
-                .komeliaChrome(RoundedCornerShape(20.dp), MaterialTheme.colorScheme.surfaceVariant)
+                .padding(12.dp)
+                .komeliaChrome(RoundedCornerShape(24.dp), MaterialTheme.colorScheme.surface)
                 .width(350.dp)
                 .padding(horizontal = 10.dp)
                 .imePadding()
@@ -356,7 +357,6 @@ fun SettingsSideMenuOverlay(
     }
 
 }
-
 
 @Composable
 private fun ColumnScope.ContinuousReaderSettingsContent(state: ContinuousReaderState) {
@@ -563,7 +563,6 @@ private fun SamplingModeSettings(
                 inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
             )
         }
-
 
         val platform = LocalPlatform.current
         if (platform != PlatformType.WEB_KOMF) {

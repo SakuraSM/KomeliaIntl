@@ -1,6 +1,7 @@
 package snd.komelia.ui.settings.komf.providers
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,6 +67,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_database_download_date
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_edit
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_edit_close
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_empty
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mal_client_id
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mangabaka_database
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_mangabaka_database_checksum
@@ -79,7 +82,6 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_media_type
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_name_matching_mode
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_series_age_rating
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_series_authors
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_series_book_count
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_series_cover
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_series_genres
@@ -93,6 +95,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_series_tags
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_series_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_providers_unset
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -104,6 +107,7 @@ import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.ChipFieldWithSuggestions
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.DropdownMultiChoiceMenu
+import snd.komelia.ui.common.components.EmptyState
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.common.components.UpdateProgressContent
@@ -132,7 +136,6 @@ import snd.komf.api.config.DownloadProgress
 import snd.komf.api.config.MangaBakaDatabaseDto
 import snd.komf.api.mediaserver.KomfMediaServerLibrary
 import snd.komf.api.mediaserver.KomfMediaServerLibraryId
-import kotlin.time.Instant
 
 @Composable
 fun KomfProvidersSettingsContent(
@@ -197,6 +200,13 @@ private fun ProvidersConfigContent(
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
+        if (state.enabledProviders.isEmpty()) {
+            EmptyState(
+                title = stringResource(Res.string.komf_providers_empty),
+                imageVector = Icons.Outlined.Extension,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 180.dp),
+            )
+        }
         ReorderableColumn(
             list = state.enabledProviders,
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -207,12 +217,13 @@ private fun ProvidersConfigContent(
                 ReorderableItem {
                     Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(5.dp))
-                            .height(70.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                            .heightIn(min = 70.dp)
                             .fillMaxWidth()
                             .background(
                                 if (isDragging) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .5f)
-                                else MaterialTheme.colorScheme.surfaceVariant
+                                else MaterialTheme.colorScheme.surfaceContainerLow
                             ),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -246,7 +257,6 @@ private fun ProvidersConfigContent(
         enabledProviders = remember(state.enabledProviders) { state.enabledProviders.map { it.provider } },
     )
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

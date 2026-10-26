@@ -20,9 +20,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -89,7 +89,7 @@ fun AppriseContent(
         urls.forEach { url ->
 
             Row {
-                TextField(
+                OutlinedTextField(
                     value = url,
                     onValueChange = {},
                     enabled = false,
@@ -169,7 +169,7 @@ fun AddUrlDialog(
             Column(
                 modifier = Modifier.padding(10.dp).fillMaxWidth(),
             ) {
-                TextField(
+                OutlinedTextField(
                     value = newWebhook,
                     onValueChange = { newWebhook = it },
                     label = { Text(stringResource(Res.string.komf_notification_apprise_url)) },
@@ -253,14 +253,14 @@ private fun TemplatesEditor(
             )
         }
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            TextField(
+            OutlinedTextField(
                 value = titleTemplate,
                 onValueChange = onTitleTemplateChange,
                 label = { Text(stringResource(Res.string.komf_notification_apprise_template_title)) },
                 maxLines = 1,
                 modifier = Modifier.fillMaxWidth()
             )
-            TextField(
+            OutlinedTextField(
                 value = bodyTemplate,
                 onValueChange = onBodyTemplateChange,
                 label = { Text(stringResource(Res.string.komf_notification_apprise_template_body)) },

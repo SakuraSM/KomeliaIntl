@@ -3,13 +3,11 @@ package snd.komelia.ui.common.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import snd.komelia.settings.model.AppSurfaceStyle
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -24,6 +22,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.ui.LocalKomeliaMotion
 
 internal data class KomeliaTopBarElevation(
@@ -108,7 +107,7 @@ fun KomeliaTopBarSurface(
     val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     KomeliaChromeSurface(
         modifier = modifier.fillMaxWidth().then(if (floating) Modifier.padding(horizontal = 12.dp, vertical = 6.dp) else Modifier),
-        shape = RoundedCornerShape(if (floating) 20.dp else 0.dp),
+        shape = RoundedCornerShape(if (floating) 28.dp else 0.dp),
         color = containerColor,
         tonalElevation = tonalElevation,
         shadowElevation = shadowElevation,

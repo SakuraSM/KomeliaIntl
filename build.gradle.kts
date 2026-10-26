@@ -302,6 +302,7 @@ tasks.register<Exec>("komgaNpmBuild") {
     dependsOn("komgaNpmInstall")
     workingDir(epubReaderKomga)
     inputs.dir(epubReaderKomga)
+    inputs.dir("$epubReader/shared")
     outputs.dir("$epubReaderKomga/dist")
     commandLine(
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -334,6 +335,7 @@ tasks.register<Exec>("ttsuNpmBuild") {
     dependsOn("ttsuNpmInstall")
     workingDir(epubReaderTtsu)
     inputs.dir(epubReaderTtsu)
+    inputs.dir("$epubReader/shared")
     outputs.dir("$epubReaderTtsu/dist")
     commandLine(
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {

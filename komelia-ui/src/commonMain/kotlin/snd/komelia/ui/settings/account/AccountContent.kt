@@ -1,10 +1,18 @@
 package snd.komelia.ui.settings.account
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import snd.komelia.ui.common.components.KomeliaChromeSurface
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
@@ -24,41 +32,43 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_accoun
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_account_email
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_account_roles
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.common.components.SettingsSection
 import snd.komelia.ui.dialogs.user.PasswordChangeDialog
 import snd.komelia.ui.strings.AppStrings
 import snd.komga.client.user.KomgaUser
 
 @Composable
 fun AccountSettingsContent(user: KomgaUser) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
+    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         EmailDetails(user)
         RolesDetails(user)
-        PasswordDetails(user)
+        SettingsSection { PasswordDetails(user) }
     }
 }
 
 @Composable
 private fun EmailDetails(user: KomgaUser) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        KomeliaChromeSurface(shape = RoundedCornerShape(50)) {
+            Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
+                Icon(Icons.Outlined.Person, contentDescription = null, modifier = Modifier.size(36.dp))
+            }
+        }
         Text(
             stringResource(Res.string.settings_account_email, user.email),
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f),
         )
     }
 }
 
 @Composable
 private fun RolesDetails(user: KomgaUser) {
-    Row(
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             stringResource(Res.string.settings_account_roles),
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 10.dp)
+            style = MaterialTheme.typography.titleMedium
         )
         FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             user.roles.forEach { role ->
@@ -77,7 +87,7 @@ private fun PasswordDetails(user: KomgaUser) {
     var showPasswordDialog by remember { mutableStateOf(false) }
     FilledTonalButton(
         onClick = { showPasswordDialog = true },
-        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+        modifier = Modifier.fillMaxWidth().pointerHoverIcon(PointerIcon.Hand),
     ) {
         Text(stringResource(Res.string.settings_account_change_password))
     }
@@ -85,4 +95,3 @@ private fun PasswordDetails(user: KomgaUser) {
         PasswordChangeDialog(user = user, onDismiss = { showPasswordDialog = false })
     }
 }
-

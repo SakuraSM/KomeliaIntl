@@ -1494,4 +1494,9 @@
     <string name="password_hide">Hide password</string>
     <string name="metadata_lock_field">Lock field</string>
     <string name="metadata_unlock_field">Unlock field</string>
+    <string name="home_continue_reading">Continue reading</string>
+    <string name="home_hero_details">Book details: %1$s</string>
+    <string name="home_progress_percent">Read %1$d%</string>
+    <string name="settings_mobile_subtitle">Make reading feel your own</string>
+    <string name="komf_providers_empty">No metadata sources added</string>
 </resources>

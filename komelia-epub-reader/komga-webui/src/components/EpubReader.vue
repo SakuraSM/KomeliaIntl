@@ -3,6 +3,7 @@
     <v-slide-y-transition>
       <v-toolbar
           data-komelia-chrome
+          data-komelia-toolbar="top"
           v-if="showToolbars"
           dense elevation="1"
           class="settings full-width"
@@ -56,6 +57,7 @@
       <!-- Bottom Toolbar-->
       <v-toolbar
           data-komelia-chrome
+          data-komelia-toolbar="bottom"
           dense
           elevation="1"
           class="settings full-width"

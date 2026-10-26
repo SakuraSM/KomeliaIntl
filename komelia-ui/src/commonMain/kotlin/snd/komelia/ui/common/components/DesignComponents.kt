@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -53,6 +54,19 @@ enum class KomeliaIconButtonStyle {
 enum class KomeliaIconButtonSize(val minimumSize: Dp, val iconSize: Dp) {
     Compact(minimumSize = 40.dp, iconSize = 20.dp),
     Regular(minimumSize = 48.dp, iconSize = 24.dp),
+}
+
+@Composable
+internal fun FloatingChromeIconButton(
+    onClick: () -> Unit,
+    floating: Boolean,
+    content: @Composable () -> Unit,
+) {
+    if (floating) {
+        KomeliaChromeSurface(shape = RoundedCornerShape(50), shadowElevation = 2.dp) {
+            IconButton(onClick = onClick, content = content)
+        }
+    } else IconButton(onClick = onClick, content = content)
 }
 
 @Composable
@@ -206,15 +220,15 @@ fun DetailMetadataRow(
 
 @Composable
 fun SettingsSection(
-    title: String,
+    title: String? = null,
     modifier: Modifier = Modifier,
     supportingText: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val layout = LocalKomeliaLayout.current
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
-        SectionHeader(title = title, supportingText = supportingText)
-        KomeliaCard(modifier = Modifier.fillMaxWidth()) {
+        if (title != null) SectionHeader(title = title, supportingText = supportingText)
+        KomeliaCard(modifier = Modifier.fillMaxWidth(), containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(layout.cardContentPadding),
                 verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),

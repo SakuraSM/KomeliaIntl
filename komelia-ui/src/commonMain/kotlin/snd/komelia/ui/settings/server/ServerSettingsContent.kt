@@ -12,7 +12,7 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +46,7 @@ import snd.komelia.ui.StateHolder
 import snd.komelia.ui.common.components.CheckboxWithLabel
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
+import snd.komelia.ui.common.components.SettingsSection
 import snd.komelia.ui.common.components.withTextFieldNavigation
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.strings.AppStrings
@@ -96,7 +97,6 @@ fun ServerSettingsContent(
         onDiscard = onGeneralSettingsDiscard,
     )
 
-
     ServerManagementContent(
         onScanAllLibraries = onScanAllLibraries,
         onEmptyTrash = onEmptyTrash,
@@ -120,7 +120,7 @@ fun GeneralSettingsContent(
     thumbnailSize: OptionsStateHolder<KomgaThumbnailSize>,
 ) {
 
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    SettingsSection {
 
         Row(horizontalArrangement = Arrangement.spacedBy(40.dp)) {
             DropdownChoiceMenu(
@@ -148,7 +148,7 @@ fun GeneralSettingsContent(
             )
         }
 
-        TextField(
+        OutlinedTextField(
             value = taskPoolSize.value?.toString() ?: "",
             onValueChange = { newValue ->
                 if (newValue.isBlank()) taskPoolSize.setValue(null)
@@ -164,7 +164,7 @@ fun GeneralSettingsContent(
         )
 
         Column {
-            TextField(
+            OutlinedTextField(
                 value = rememberMeDurationDays.value?.toString() ?: "",
                 onValueChange = { newValue ->
                     if (newValue.isBlank()) rememberMeDurationDays.setValue(null)
@@ -188,7 +188,7 @@ fun GeneralSettingsContent(
             )
         }
 
-        TextField(
+        OutlinedTextField(
             value = serverPort.value?.toString() ?: "",
             onValueChange = { newValue ->
                 if (newValue.isBlank()) serverPort.setValue(null)
@@ -201,7 +201,7 @@ fun GeneralSettingsContent(
             modifier = Modifier.fillMaxWidth().withTextFieldNavigation(),
         )
 
-        TextField(
+        OutlinedTextField(
             value = serverContextPath.value ?: "",
             onValueChange = { serverContextPath.setValue(it) },
             label = { Text(stringResource(Res.string.settings_server_context_path)) },
@@ -211,7 +211,6 @@ fun GeneralSettingsContent(
 
     }
 }
-
 
 @Composable
 fun ChangesConfirmationButton(

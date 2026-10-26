@@ -2,9 +2,7 @@ package snd.komelia.ui.reader.image.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -26,6 +24,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -58,7 +57,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuous_page_spacing
@@ -67,8 +65,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuo
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_downsampling_kernel
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_linear_light_downsampling
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_linear_light_downsampling_desc
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_upsampling_mode
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_upsampling_mode
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_layout
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_offset_pages
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_reading_direction
@@ -80,6 +78,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_con
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_paged
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_panels
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_zoom
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.image.ReduceKernel
@@ -94,20 +93,19 @@ import snd.komelia.settings.model.ReaderType
 import snd.komelia.settings.model.ReaderType.CONTINUOUS
 import snd.komelia.settings.model.ReaderType.PAGED
 import snd.komelia.settings.model.ReaderType.PANELS
-import snd.komelia.ui.LocalWindowWidth
-import snd.komelia.ui.LocalKomeliaMotion
-import snd.komelia.ui.common.components.komeliaChrome
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalKomeliaMotion
+import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.SwitchWithLabel
+import snd.komelia.ui.common.components.komeliaChrome
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
 import snd.komelia.ui.platform.cursorForHand
+import snd.komelia.ui.reader.image.PageShareAction
 import snd.komelia.ui.reader.image.continuous.ContinuousReaderState
 import snd.komelia.ui.reader.image.paged.PagedReaderState
 import snd.komelia.ui.reader.image.panels.PanelsReaderState
 import snd.komelia.ui.strings.AppStrings
-import snd.komelia.ui.reader.image.PageShareAction
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -162,9 +160,8 @@ fun BottomSheetSettingsOverlay(
                 horizontal = layoutSpec.pageHorizontalPadding,
                 vertical = layoutSpec.controlSpacing / 2,
             )
-            .clip(RoundedCornerShape(18.dp))
-            .komeliaChrome(RoundedCornerShape(18.dp), MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp)),
+            .clip(RoundedCornerShape(28.dp))
+            .komeliaChrome(RoundedCornerShape(28.dp), MaterialTheme.colorScheme.surface),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
@@ -717,7 +714,6 @@ private fun SamplingModeSettings(
             }
         }
     }
-
 
     SwitchWithLabel(
         checked = linearLightDownsampling,

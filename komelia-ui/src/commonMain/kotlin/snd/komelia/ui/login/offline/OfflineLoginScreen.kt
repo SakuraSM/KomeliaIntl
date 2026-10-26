@@ -22,6 +22,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.appRootNavigator
 import snd.komelia.ui.login.LoginScreen
 import snd.komelia.ui.platform.PlatformTitleBar
@@ -44,7 +46,7 @@ class OfflineLoginScreen : Screen {
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = if (LocalPlatform.current == PlatformType.MOBILE) Arrangement.Top else Arrangement.Center,
             ) {
                 OfflineLoginContent(
                     serverUsers = vm.offlineUsers.collectAsState().value,

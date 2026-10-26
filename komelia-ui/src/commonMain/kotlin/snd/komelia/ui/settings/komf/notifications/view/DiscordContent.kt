@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -29,13 +30,14 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -81,11 +83,12 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notificati
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_discord_webhooks
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_template
 import io.ktor.http.*
+import kotlin.math.max
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.StateHolder
 import snd.komelia.ui.common.components.CheckboxWithLabel
-import snd.komelia.ui.common.components.HttpTextField
+import snd.komelia.ui.common.components.OutlinedHttpTextField
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.dialogs.AppDialog
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
@@ -93,7 +96,6 @@ import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.settings.komf.notifications.DiscordState.EmbedFieldState
 import snd.komelia.ui.settings.komf.notifications.NotificationContextState
 import snd.komf.api.notifications.EmbedField
-import kotlin.math.max
 
 @Composable
 fun DiscordNotificationsContent(
@@ -128,7 +130,7 @@ fun DiscordNotificationsContent(
         Text(stringResource(Res.string.komf_notification_discord_webhooks))
         discordWebhooks.forEach { webhook ->
             Row {
-                TextField(
+                OutlinedTextField(
                     value = webhook,
                     onValueChange = {},
                     enabled = false,
@@ -224,7 +226,7 @@ private fun AddDiscordWebhookDialog(
                 modifier = Modifier.padding(10.dp).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextField(
+                OutlinedTextField(
                     value = newWebhook,
                     onValueChange = { newWebhook = it },
                     label = { Text(stringResource(Res.string.komf_notification_discord_webhook_url)) },
@@ -312,61 +314,75 @@ private fun TemplatesContent(
             )
         }
 
-        var selectedTab by remember { mutableStateOf(0) }
-        SecondaryTabRow(selectedTabIndex = selectedTab) {
-            Tab(
-                selected = selectedTab == 0,
-                onClick = { selectedTab = 0 },
-                modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
-            ) {
-                Text(stringResource(Res.string.komf_notification_discord_template_write))
-            }
-            Tab(
-                selected = selectedTab == 1,
-                onClick = {
-                    onTemplateRender()
-                    selectedTab = 1
-                },
-                modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
-            ) {
-                Text(stringResource(Res.string.komf_notification_discord_template_preview))
-            }
-        }
-
-        Layout(content = {
-            TemplatesEditor(
-                titleTemplate = titleTemplate,
-                titleUrlTemplate = titleUrlTemplate,
-                descriptionTemplate = descriptionTemplate,
-                fieldTemplates = fieldTemplates,
-                onFieldAdd = onFieldAdd,
-                onFieldDelete = onFieldDelete,
-                footerTemplate = footerTemplate
-            )
-            if (selectedTab == 1) {
-                Surface(modifier = Modifier.background(MaterialTheme.colorScheme.surface).fillMaxHeight()) {
-                    Column {
-                        TemplatesPreview(
-                            titlePreview = titlePreview,
-                            titleUrlPreview = titleUrlPreview,
-                            descriptionPreview = descriptionPreview,
-                            fieldPreview = fieldPreview,
-                            footerPreview = footerPreview
-                        )
-                        Spacer(Modifier.weight(1f))
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val sideBySide = maxWidth >= 680.dp
+            LaunchedEffect(sideBySide) { if (sideBySide) onTemplateRender() }
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                var selectedTab by remember { mutableStateOf(0) }
+                if (sideBySide) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(Res.string.komf_notification_discord_template_write), Modifier.weight(1f))
+                        TextButton(onClick = onTemplateRender, modifier = Modifier.weight(1f)) {
+                            Text(stringResource(Res.string.komf_notification_discord_template_preview))
+                        }
+                    }
+                } else SecondaryTabRow(selectedTabIndex = selectedTab) {
+                    Tab(
+                        selected = selectedTab == 0,
+                        onClick = { selectedTab = 0 },
+                        modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
+                    ) {
+                        Text(stringResource(Res.string.komf_notification_discord_template_write))
+                    }
+                    Tab(
+                        selected = selectedTab == 1,
+                        onClick = {
+                            onTemplateRender()
+                            selectedTab = 1
+                        },
+                        modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
+                    ) {
+                        Text(stringResource(Res.string.komf_notification_discord_template_preview))
                     }
                 }
-            }
-        }
-        ) { measurables, constraints ->
-            val editor = measurables[0].measure(constraints.copy(minHeight = 0))
-            val preview = measurables.getOrNull(1)?.measure(
-                constraints.copy(minHeight = 0, maxHeight = editor.height)
-            )
-            val maxHeight = preview?.height?.let { max(editor.height, it) } ?: editor.height
-            layout(constraints.maxWidth, maxHeight) {
-                editor.placeRelative(0, 0)
-                preview?.placeRelative(0, 0)
+
+                Layout(content = {
+                    TemplatesEditor(
+                        titleTemplate = titleTemplate,
+                        titleUrlTemplate = titleUrlTemplate,
+                        descriptionTemplate = descriptionTemplate,
+                        fieldTemplates = fieldTemplates,
+                        onFieldAdd = onFieldAdd,
+                        onFieldDelete = onFieldDelete,
+                        footerTemplate = footerTemplate
+                    )
+                    if (sideBySide || selectedTab == 1) {
+                        Surface(modifier = Modifier.background(MaterialTheme.colorScheme.surface).fillMaxHeight()) {
+                            Column {
+                                TemplatesPreview(
+                                    titlePreview = titlePreview,
+                                    titleUrlPreview = titleUrlPreview,
+                                    descriptionPreview = descriptionPreview,
+                                    fieldPreview = fieldPreview,
+                                    footerPreview = footerPreview
+                                )
+                                Spacer(Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+                ) { measurables, constraints ->
+                    val gap = if (sideBySide) 16.dp.roundToPx() else 0
+                    val columnWidth = if (sideBySide) (constraints.maxWidth - gap) / 2 else constraints.maxWidth
+                    val childConstraints = constraints.copy(minWidth = columnWidth, maxWidth = columnWidth, minHeight = 0)
+                    val editor = measurables[0].measure(childConstraints)
+                    val preview = measurables.getOrNull(1)?.measure(childConstraints.copy(maxHeight = editor.height))
+                    val maxHeight = preview?.height?.let { max(editor.height, it) } ?: editor.height
+                    layout(constraints.maxWidth, maxHeight) {
+                        editor.placeRelative(0, 0)
+                        preview?.placeRelative(if (sideBySide) columnWidth + gap else 0, 0)
+                    }
+                }
             }
         }
 
@@ -407,7 +423,6 @@ private fun TemplatesContent(
             })
     }
 
-
 }
 
 @Composable
@@ -421,20 +436,20 @@ private fun TemplatesEditor(
     footerTemplate: StateHolder<String>,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        TextField(
+        OutlinedTextField(
             value = titleTemplate.value,
             onValueChange = { titleTemplate.setValue(it) },
             label = { Text(stringResource(Res.string.komf_notification_discord_template_title)) },
             maxLines = 1,
             modifier = Modifier.fillMaxWidth()
         )
-        HttpTextField(
+        OutlinedHttpTextField(
             value = titleUrlTemplate.value,
             onValueChange = { titleUrlTemplate.setValue(it) },
             label = { Text(stringResource(Res.string.komf_notification_discord_template_title_url)) },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
+        OutlinedTextField(
             value = descriptionTemplate.value,
             onValueChange = { descriptionTemplate.setValue(it) },
             label = { Text(stringResource(Res.string.komf_notification_discord_template_description)) },
@@ -443,7 +458,7 @@ private fun TemplatesEditor(
         )
 
         TemplateFieldsEditor(fieldTemplates, onFieldAdd, onFieldDelete)
-        TextField(
+        OutlinedTextField(
             value = footerTemplate.value,
             onValueChange = { footerTemplate.setValue(it) },
             label = { Text(stringResource(Res.string.komf_notification_discord_template_footer)) },
@@ -511,7 +526,7 @@ private fun TemplateFieldEditor(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextField(
+            OutlinedTextField(
                 value = state.nameTemplate,
                 onValueChange = { state.nameTemplate = it },
                 label = { Text(stringResource(Res.string.komf_notification_discord_template_field_name)) },
@@ -523,7 +538,7 @@ private fun TemplateFieldEditor(
                 onCheckedChange = { state.inline = it },
                 label = { Text(stringResource(Res.string.komf_notification_discord_template_field_inline)) })
         }
-        TextField(
+        OutlinedTextField(
             value = state.valueTemplate,
             onValueChange = { state.valueTemplate = it },
             label = { Text(stringResource(Res.string.komf_notification_discord_template_field_value)) },
@@ -654,5 +669,3 @@ private fun PreviewContent(
         }
     }
 }
-
-

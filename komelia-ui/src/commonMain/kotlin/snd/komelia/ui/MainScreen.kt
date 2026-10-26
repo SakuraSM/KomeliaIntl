@@ -7,35 +7,40 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.ui.platform.LocalLayoutDirection
-import snd.komelia.ui.common.components.LocalNavigationBarInset
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.rounded.CloudDownload
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,8 +55,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType.Companion.KeyUp
@@ -59,6 +64,7 @@ import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -80,9 +86,15 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.ui.book.BookScreen
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.collection.CollectionScreen
+import snd.komelia.ui.common.components.GlassBackdropScope
+import snd.komelia.ui.common.components.KomeliaChromeSurface
+import snd.komelia.ui.common.components.LocalNavigationBarInset
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.ui.common.components.glassBackdrop
 import snd.komelia.ui.common.components.komeliaTopBarScroll
 import snd.komelia.ui.common.components.rememberKomeliaTopBarScrollState
 import snd.komelia.ui.home.HomeScreen
@@ -97,11 +109,6 @@ import snd.komelia.ui.series.SeriesScreen
 import snd.komelia.ui.series.seriesScreen
 import snd.komelia.ui.settings.MobileSettingsScreen
 import snd.komelia.ui.settings.SettingsScreen
-import snd.komelia.ui.common.components.GlassBackdropScope
-import snd.komelia.ui.common.components.KomeliaChromeSurface
-import snd.komelia.ui.common.components.LocalSurfaceAppearance
-import snd.komelia.ui.common.components.glassBackdrop
-import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.ui.topbar.AppBar
 
 internal const val DISPOSE_DESTINATIONS_WHEN_HIDDEN = false
@@ -180,7 +187,7 @@ class MainScreen(
                 }
             }
 
-            MainDestinationSurface(currentTab.destination) {
+            GlassBackdropScope {
                 CompositionLocalProvider(LocalAppNavigationController provides appNavigationController) {
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
@@ -464,15 +471,16 @@ private data class DestinationItem(
     val destination: AppDestination,
     val label: StringResource,
     val icon: ImageVector,
+    val selectedIcon: ImageVector = icon,
 )
 
 private val destinationItems = listOf(
-    DestinationItem(AppDestination.LIBRARY, Res.string.navbar_libraries, Icons.Default.LocalLibrary),
-    DestinationItem(AppDestination.HOME, Res.string.navbar_home, Icons.Default.Home),
-    DestinationItem(AppDestination.LOCAL, Res.string.navbar_local, Icons.Rounded.CloudDownload),
-    DestinationItem(AppDestination.SEARCH, Res.string.navbar_search, Icons.Default.Search),
-    DestinationItem(AppDestination.SETTINGS, Res.string.navbar_settings, Icons.Default.Settings),
-)
+    DestinationItem(AppDestination.HOME, Res.string.navbar_home, Icons.Outlined.Home, Icons.Default.Home),
+    DestinationItem(AppDestination.LIBRARY, Res.string.navbar_libraries, Icons.AutoMirrored.Outlined.MenuBook, Icons.AutoMirrored.Filled.MenuBook),
+    DestinationItem(AppDestination.LOCAL, Res.string.navbar_local, Icons.Outlined.Folder, Icons.Rounded.Folder),
+    DestinationItem(AppDestination.SEARCH, Res.string.navbar_search, Icons.Outlined.Search),
+    DestinationItem(AppDestination.SETTINGS, Res.string.navbar_settings, Icons.Outlined.Settings, Icons.Default.Settings),
+).sortedBy { primaryDestinationOrder.indexOf(it.destination) }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -483,7 +491,7 @@ private fun AppBottomBar(
     val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     KomeliaChromeSurface(
         modifier = if (floating) Modifier.navigationBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp) else Modifier,
-        shape = RoundedCornerShape(if (floating) 28.dp else 0.dp),
+        shape = RoundedCornerShape(if (floating) 40.dp else 0.dp),
         shadowElevation = if (floating) 4.dp else 0.dp,
     ) {
         NavigationBar(
@@ -496,8 +504,15 @@ private fun AppBottomBar(
                     NavigationBarItem(
                         selected = selected == item.destination,
                         onClick = { onSelect(item.destination, null) },
-                        icon = { DestinationIcon(item) },
-                        label = { Text(stringResource(item.label)) },
+                        icon = { DestinationIcon(item, selected == item.destination) },
+                        label = { Text(stringResource(item.label), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = Color.Transparent,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
                     )
                 }
             }
@@ -526,8 +541,15 @@ private fun AppNavigationRail(
                     NavigationRailItem(
                         selected = selected == item.destination,
                         onClick = { onSelect(item.destination, null) },
-                        icon = { DestinationIcon(item) },
-                        label = { Text(stringResource(item.label)) },
+                        icon = { DestinationIcon(item, selected == item.destination) },
+                        label = { Text(stringResource(item.label), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                        colors = NavigationRailItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
                     )
                 }
             }
@@ -537,20 +559,6 @@ private fun AppNavigationRail(
 }
 
 @Composable
-private fun DestinationIcon(item: DestinationItem) {
-    Icon(item.icon, contentDescription = stringResource(item.label))
-}
-
-/** Owns the effective chrome for a destination without changing the saved appearance. */
-@Composable
-internal fun MainDestinationSurface(destination: AppDestination, content: @Composable () -> Unit) {
-    val appearance = LocalSurfaceAppearance.current
-    // Search exceeded the mobile frame budget even with capture paused. Use the solid
-    // navigation layout too, so scrolling and pull-to-refresh do not render beneath it.
-    val effective = if (destination == AppDestination.SEARCH && LocalPlatform.current == MOBILE) {
-        appearance.copy(style = AppSurfaceStyle.CLASSIC)
-    } else appearance
-    CompositionLocalProvider(LocalSurfaceAppearance provides effective) {
-        GlassBackdropScope(content)
-    }
+private fun DestinationIcon(item: DestinationItem, isSelected: Boolean) {
+    Icon(if (isSelected) item.selectedIcon else item.icon, contentDescription = null)
 }

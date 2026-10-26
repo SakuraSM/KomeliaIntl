@@ -1,5 +1,6 @@
 package snd.komelia.ui.collection
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,16 +8,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
-import androidx.compose.ui.text.style.TextOverflow
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,21 +22,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_edit
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_edit_mode_desc
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_edit_ordered_mode_desc
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.collection_series_count
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaSeries
-import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
+import snd.komelia.ui.common.components.FloatingChromeIconButton
 import snd.komelia.ui.common.itemlist.SeriesLazyCardGrid
 import snd.komelia.ui.common.menus.CollectionActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
@@ -127,7 +130,6 @@ fun CollectionContent(
     }
 }
 
-
 @Composable
 private fun CollectionToolbar(
     collection: KomgaCollection,
@@ -140,51 +142,40 @@ private fun CollectionToolbar(
 
     ) {
     val layout = LocalKomeliaLayout.current
-    Row(
-        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    val navigator = LocalNavigator.currentOrThrow
+    Column(Modifier.padding(horizontal = layout.pageHorizontalPadding)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FloatingChromeIconButton(onClick = { navigator.pop() }, floating = true) {
+                Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(Res.string.navigation_back))
+            }
+            Spacer(Modifier.weight(1f))
 
-        Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                stringResource(Res.string.collection),
-                style = MaterialTheme.typography.labelMedium,
-                fontStyle = FontStyle.Italic
-            )
-            Spacer(Modifier.width(layout.controlSpacing))
-            Text(collection.name, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        }
-        SuggestionChip(
-            onClick = {},
-            label = {
-                Text(
-                    pluralStringResource(Res.plurals.collection_series_count, totalSeriesCount, totalSeriesCount),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            },
-            modifier = Modifier.padding(horizontal = layout.controlSpacing),
-        )
+            val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
+            if (isAdmin) {
+                Box {
+                    var expandActions by remember { mutableStateOf(false) }
+                    FloatingChromeIconButton(onClick = { expandActions = true }, floating = true) {
+                        Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more))
+                    }
 
-        val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
-        if (isAdmin) {
-            Box {
-                var expandActions by remember { mutableStateOf(false) }
-                IconButton(onClick = { expandActions = true }) {
-                    Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more))
+                    CollectionActionsMenu(
+                        collection = collection,
+                        onCollectionDelete = onCollectionDelete,
+                        expanded = expandActions,
+                        onDismissRequest = { expandActions = false }
+                    )
                 }
 
-                CollectionActionsMenu(
-                    collection = collection,
-                    onCollectionDelete = onCollectionDelete,
-                    expanded = expandActions,
-                    onDismissRequest = { expandActions = false }
-                )
+                FloatingChromeIconButton(onClick = onEditModeEnable, floating = true) { Icon(Icons.Default.EditNote, stringResource(Res.string.collection_edit)) }
             }
 
-            IconButton(onClick = onEditModeEnable) { Icon(Icons.Default.EditNote, stringResource(Res.string.collection_edit)) }
+            PageSizeSelectionDropdown(pageSize, onPageSizeChange)
         }
-
-        PageSizeSelectionDropdown(pageSize, onPageSizeChange)
+        Text(collection.name, style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.padding(vertical = 12.dp), maxLines = 3, overflow = TextOverflow.Ellipsis)
+        Text(pluralStringResource(Res.plurals.collection_series_count, totalSeriesCount, totalSeriesCount),
+            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 12.dp))
     }
 }
 

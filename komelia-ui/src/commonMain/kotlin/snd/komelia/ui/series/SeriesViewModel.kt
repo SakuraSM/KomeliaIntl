@@ -111,7 +111,11 @@ class SeriesViewModel(
     )
 
     suspend fun initialize() {
-        if (state.value !is Uninitialized) return
+        if (state.value !is Uninitialized) {
+            // The retained list can miss progress events while a reader is visible.
+            booksState.reload()
+            return
+        }
 
         val providedSeries = series.value
         if (providedSeries == null) loadSeries()
@@ -169,7 +173,6 @@ class SeriesViewModel(
             series.value?.let { checkNotNull(taskEmitter).downloadSeries(it.id) }
         }
     }
-
 
     private suspend fun loadSeries() {
         notifications.runCatchingToNotifications {

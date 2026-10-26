@@ -1,9 +1,7 @@
 package snd.komelia.ui.library
 
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
-
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +54,7 @@ import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_unknown
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_add
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_all_libraries
@@ -66,14 +65,17 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_ser
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_source
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries_unavailable
+import kotlin.jvm.Transient
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LoadState.Error
 import snd.komelia.ui.LoadState.Loading
 import snd.komelia.ui.LoadState.Success
 import snd.komelia.ui.LoadState.Uninitialized
+import snd.komelia.ui.LocalAppNavigationController
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalLibraries
-import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalReloadEvents
@@ -82,6 +84,7 @@ import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.collection.CollectionScreen
 import snd.komelia.ui.common.components.AppFilterChipDefaults
+import snd.komelia.ui.common.components.BrowsePageHeader
 import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
@@ -99,14 +102,13 @@ import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.ScreenPullToRefreshBox
 import snd.komelia.ui.platform.WindowSizeClass.FULL
 import snd.komelia.ui.readlist.ReadListScreen
+import snd.komelia.ui.search.SearchScreen
 import snd.komelia.ui.series.list.SeriesListContent
 import snd.komelia.ui.series.seriesScreen
 import snd.komga.client.common.KomgaAuthor
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.series.KomgaSeriesStatus
-import snd.komelia.offline.local.isLocalLibrary
-import kotlin.jvm.Transient
 
 class LibraryScreen(
     val libraryId: KomgaLibraryId? = null,
@@ -184,6 +186,12 @@ class LibraryScreen(
                                 .komeliaTopBarScroll(topBarScrollState)
                         ) {
                             if (vm.showToolbar.collectAsState().value) {
+                                if (LocalPlatform.current == MOBILE) {
+                                    val appNavigation = LocalAppNavigationController.current
+                                    BrowsePageHeader(stringResource(Res.string.navbar_libraries)) {
+                                        appNavigation.open(SearchScreen(null))
+                                    }
+                                }
                                 KomeliaTopBarSurface(
                                     isContentScrolled = topBarScrollState.isContentScrolled,
                                 ) {
@@ -803,7 +811,6 @@ private fun LibraryScopeRow(
         tonalElevation = 0.dp,
     )
 }
-
 
 data class SeriesScreenFilter(
     val publicationStatus: List<KomgaSeriesStatus>? = null,

@@ -1,7 +1,5 @@
 package snd.komelia.ui.local
 
-import snd.komelia.ui.search.SearchTextField
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,9 +15,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.CloudDownload
-import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
@@ -40,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_books
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_sort_file_modified
@@ -64,10 +61,13 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.local.AvailableBookSource
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.BookImageCard
+import snd.komelia.ui.common.components.BrowsePageHeader
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.Pagination
+import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.home.LocalHomeBookSort
+import snd.komelia.ui.search.SearchTextField
 
 @Composable
 internal fun LocalContent(
@@ -90,10 +90,12 @@ internal fun LocalContent(
     val layout = LocalKomeliaLayout.current
     val gridState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
+    PauseGlassWhileBusy(gridState.isScrollInProgress)
     val isContentScrolled by remember(gridState) {
         derivedStateOf { gridState.firstVisibleItemIndex > 0 || gridState.firstVisibleItemScrollOffset > 0 }
     }
     Column(Modifier.fillMaxSize()) {
+        BrowsePageHeader(stringResource(Res.string.local_content_title))
         KomeliaTopBarSurface(isContentScrolled) {
             LocalToolbar(
                 query = query,
@@ -164,10 +166,6 @@ private fun LocalToolbar(
             .fillMaxWidth()
             .padding(horizontal = layout.pageHorizontalPadding, vertical = layout.controlSpacing),
     ) {
-        Text(
-            stringResource(Res.string.local_content_title),
-            style = MaterialTheme.typography.headlineSmall,
-        )
         SearchTextField(
             query = query,
             onQueryChange = onQueryChange,

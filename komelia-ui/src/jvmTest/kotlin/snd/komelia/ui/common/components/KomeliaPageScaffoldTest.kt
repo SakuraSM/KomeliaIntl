@@ -17,14 +17,38 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.dp
+import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import snd.komelia.settings.model.AppSurfaceStyle
-import kotlin.test.assertEquals
 
 class KomeliaPageScaffoldTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test fun readingActionsStayAtTheViewportBottomWhenContentScrolls() {
+        compose.setContent {
+            Box(Modifier.size(360.dp, 600.dp)) {
+                KomeliaPageScaffold(
+                    topBar = {},
+                    bottomBar = { Box(Modifier.fillMaxWidth().height(72.dp).testTag("reading-actions")) },
+                ) { inset ->
+                    Column(Modifier.verticalScroll(rememberScrollState()).padding(top = inset)) {
+                        Box(Modifier.fillMaxWidth().height(1200.dp).testTag("long-content"))
+                        Text("Last detail", Modifier.testTag("last-detail"))
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("last-detail").performScrollTo()
+        val actions = compose.onNodeWithTag("reading-actions").getUnclippedBoundsInRoot()
+        assertEquals(600.dp, actions.bottom)
+        assertEquals(72.dp, actions.bottom - actions.top)
+        val content = compose.onNodeWithTag("long-content").getUnclippedBoundsInRoot()
+        assertEquals(1200.dp, content.bottom - content.top)
+    }
 
     @Test fun optionalTopBarCanBeEmptyWhileHomeIsLoading() {
         compose.setContent {

@@ -2,16 +2,14 @@ package snd.komelia.ui.settings.authactivity
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +32,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_auth_a
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.ui.common.components.KomeliaCard
 import snd.komelia.ui.common.components.Pagination
 import snd.komga.client.user.KomgaAuthenticationActivity
 
@@ -52,7 +51,6 @@ fun AuthenticationActivityContent(
                 showEmail = !forMe,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(130.dp)
             )
         }
 
@@ -72,14 +70,13 @@ private fun AuthenticationInfoCard(
     showEmail: Boolean = true,
     modifier: Modifier = Modifier
 ) {
-    Card(modifier) {
-        Column(Modifier.padding(10.dp)) {
-            Row {
+    KomeliaCard(modifier, containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Column(Modifier.padding(16.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 val formattedDate = remember(activity) {
                     activity.dateTime.toLocalDateTime(currentSystemDefault()).toString()
                 }
                 Text(formattedDate)
-                Spacer(Modifier.weight(1f))
                 Text(stringResource(Res.string.settings_auth_activity_source, activity.source))
             }
 
@@ -93,7 +90,7 @@ private fun AuthenticationInfoCard(
                 Spacer(Modifier.width(20.dp))
             }
 
-            Row {
+            FlowRow(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text(
                     buildAnnotatedString {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
@@ -102,7 +99,6 @@ private fun AuthenticationInfoCard(
                         append(activity.ip)
                     },
                 )
-                Spacer(Modifier.weight(1f))
                 if (activity.success) {
                     Text(stringResource(Res.string.settings_auth_activity_successful))
                     Icon(

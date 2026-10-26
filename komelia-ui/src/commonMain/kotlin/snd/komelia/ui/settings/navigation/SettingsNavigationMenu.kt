@@ -1,10 +1,5 @@
 package snd.komelia.ui.settings.navigation
 
-import snd.komelia.ui.LocalWindowWidth
-import snd.komelia.ui.platform.WindowSizeClass
-import snd.komelia.ui.common.components.LocalNavigationBarInset
-
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_navigation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
@@ -15,39 +10,35 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import snd.komelia.ui.common.components.LocalSurfaceAppearance
-import snd.komelia.settings.model.AppSurfaceStyle
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.selected
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.rounded.Logout
-import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material.icons.rounded.Campaign
-import androidx.compose.material.icons.rounded.CloudDownload
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Campaign
+import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material.icons.outlined.Extension
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Lan
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Storage
+import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.Extension
-import androidx.compose.material.icons.rounded.Group
-import androidx.compose.material.icons.rounded.History
-import androidx.compose.material.icons.rounded.Folder
-import androidx.compose.material.icons.rounded.Image
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Lan
-import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.automirrored.rounded.MenuBook
-import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.Schedule
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Storage
-import androidx.compose.material.icons.rounded.SystemUpdate
-import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -62,16 +53,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_announcements
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_navigation
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_about
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_announcements
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_app_settings
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_appearance
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_home_groups
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_epub_reader
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_home_groups
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_image_reader
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_connection
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_jobs
@@ -79,12 +73,12 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_naviga
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_processing
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_providers
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_komf_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_local_library
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_log_out
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_log_out_confirm
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_my_account
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_my_auth_activity
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_offline_mode
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_local_library
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_auth_activity
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_general
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_server_media_management
@@ -94,17 +88,22 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_naviga
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_user_settings
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_network_title
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.common.components.LocalNavigationBarInset
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.home.edit.HomeGroupsSettingsScreen
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
+import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.ui.platform.cursorForHand
-import snd.komelia.ui.settings.account.AccountSettingsScreen
 import snd.komelia.ui.settings.about.AboutSettingsScreen
+import snd.komelia.ui.settings.account.AccountSettingsScreen
 import snd.komelia.ui.settings.analysis.MediaAnalysisScreen
 import snd.komelia.ui.settings.announcements.AnnouncementsScreen
 import snd.komelia.ui.settings.appearance.AppSettingsScreen
@@ -117,9 +116,9 @@ import snd.komelia.ui.settings.komf.mangabaka.KomfMangaBakaSettingsScreen
 import snd.komelia.ui.settings.komf.notifications.KomfNotificationSettingsScreen
 import snd.komelia.ui.settings.komf.processing.KomfProcessingSettingsScreen
 import snd.komelia.ui.settings.komf.providers.KomfProvidersSettingsScreen
+import snd.komelia.ui.settings.local.LocalLibrarySettingsScreen
 import snd.komelia.ui.settings.network.NetworkSettingsScreen
 import snd.komelia.ui.settings.offline.OfflineSettingsScreen
-import snd.komelia.ui.settings.local.LocalLibrarySettingsScreen
 import snd.komelia.ui.settings.server.ServerSettingsScreen
 import snd.komelia.ui.settings.updates.AppUpdatesScreen
 import snd.komelia.ui.settings.users.UsersScreen
@@ -138,7 +137,8 @@ fun SettingsNavigationMenu(
     onLogout: () -> Unit,
     user: KomgaUser?,
     contentColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    header: @Composable () -> Unit = {},
 ) {
     val isAdmin = remember(user) { user?.roleAdmin() ?: true }
     val offlineAvailable = LocalOfflineAvailable.current
@@ -149,7 +149,7 @@ fun SettingsNavigationMenu(
         add(
             NavigationEntry(
                 stringResource(Res.string.settings_navigation_appearance),
-                Icons.Rounded.Palette,
+                Icons.Outlined.Palette,
                 AppSettingsScreen(),
                 currentScreen is AppSettingsScreen,
             )
@@ -157,7 +157,7 @@ fun SettingsNavigationMenu(
         add(
             NavigationEntry(
                 stringResource(Res.string.settings_navigation_home_groups),
-                Icons.Rounded.Tune,
+                Icons.Outlined.Tune,
                 HomeGroupsSettingsScreen(),
                 currentScreen is HomeGroupsSettingsScreen,
             )
@@ -165,7 +165,7 @@ fun SettingsNavigationMenu(
         add(
             NavigationEntry(
                 stringResource(Res.string.settings_network_title),
-                Icons.Rounded.Lan,
+                Icons.Outlined.Lan,
                 NetworkSettingsScreen(),
                 currentScreen is NetworkSettingsScreen,
             )
@@ -173,7 +173,7 @@ fun SettingsNavigationMenu(
         add(
             NavigationEntry(
                 stringResource(Res.string.settings_navigation_image_reader),
-                Icons.Rounded.Image,
+                Icons.Outlined.Image,
                 ImageReaderSettingsScreen(),
                 currentScreen is ImageReaderSettingsScreen,
             )
@@ -182,7 +182,7 @@ fun SettingsNavigationMenu(
             add(
                 NavigationEntry(
                     stringResource(Res.string.settings_navigation_epub_reader),
-                    Icons.AutoMirrored.Rounded.MenuBook,
+                    Icons.AutoMirrored.Outlined.MenuBook,
                     EpubReaderSettingsScreen(),
                     currentScreen is EpubReaderSettingsScreen,
                 )
@@ -192,7 +192,7 @@ fun SettingsNavigationMenu(
             add(
                 NavigationEntry(
                     stringResource(Res.string.settings_navigation_updates),
-                    Icons.Rounded.SystemUpdate,
+                    Icons.Outlined.SystemUpdate,
                     AppUpdatesScreen(),
                     currentScreen is AppUpdatesScreen,
                     error = newVersionIsAvailable,
@@ -203,7 +203,7 @@ fun SettingsNavigationMenu(
             add(
                 NavigationEntry(
                     stringResource(Res.string.settings_navigation_local_library),
-                    Icons.Rounded.Folder,
+                    Icons.Outlined.Folder,
                     LocalLibrarySettingsScreen(),
                     currentScreen is LocalLibrarySettingsScreen,
                 )
@@ -211,7 +211,7 @@ fun SettingsNavigationMenu(
             add(
                 NavigationEntry(
                     stringResource(Res.string.settings_navigation_offline_mode),
-                    Icons.Rounded.CloudDownload,
+                    Icons.Outlined.CloudDownload,
                     OfflineSettingsScreen(),
                     currentScreen is OfflineSettingsScreen,
                 )
@@ -220,7 +220,7 @@ fun SettingsNavigationMenu(
         add(
             NavigationEntry(
                 stringResource(Res.string.settings_navigation_about),
-                Icons.Rounded.Info,
+                Icons.Outlined.Info,
                 AboutSettingsScreen(),
                 currentScreen is AboutSettingsScreen,
             )
@@ -231,6 +231,7 @@ fun SettingsNavigationMenu(
         modifier = modifier.verticalScroll(rememberScrollState()).padding(bottom = LocalNavigationBarInset.current),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        header()
         SettingsNavigationSection(
             title = stringResource(Res.string.settings_navigation_app_settings),
             entries = appEntries,
@@ -244,13 +245,13 @@ fun SettingsNavigationMenu(
                 entries = listOf(
                     NavigationEntry(
                         stringResource(Res.string.settings_navigation_my_account),
-                        Icons.Rounded.AccountCircle,
+                        Icons.Outlined.AccountCircle,
                         AccountSettingsScreen(),
                         currentScreen is AccountSettingsScreen,
                     ),
                     NavigationEntry(
                         stringResource(Res.string.settings_navigation_my_auth_activity),
-                        Icons.Rounded.History,
+                        Icons.Outlined.History,
                         AuthenticationActivityScreen(true),
                         currentScreen is AuthenticationActivityScreen && currentScreen.forMe,
                     ),
@@ -262,22 +263,22 @@ fun SettingsNavigationMenu(
                 SettingsNavigationSection(
                     title = stringResource(Res.string.settings_navigation_server_settings),
                     entries = listOf(
-                        NavigationEntry(stringResource(Res.string.settings_navigation_server_general), Icons.Rounded.Settings, ServerSettingsScreen(), currentScreen is ServerSettingsScreen),
-                        NavigationEntry(stringResource(Res.string.settings_navigation_server_users), Icons.Rounded.Group, UsersScreen(), currentScreen is UsersScreen),
+                        NavigationEntry(stringResource(Res.string.settings_navigation_server_general), Icons.Outlined.Settings, ServerSettingsScreen(), currentScreen is ServerSettingsScreen),
+                        NavigationEntry(stringResource(Res.string.settings_navigation_server_users), Icons.Outlined.Group, UsersScreen(), currentScreen is UsersScreen),
                         NavigationEntry(
                             stringResource(Res.string.settings_navigation_server_auth_activity),
-                            Icons.Rounded.History,
+                            Icons.Outlined.History,
                             AuthenticationActivityScreen(false),
                             currentScreen is AuthenticationActivityScreen && !currentScreen.forMe,
                         ),
                         NavigationEntry(
                             stringResource(Res.string.settings_navigation_server_media_management),
-                            Icons.Rounded.Storage,
+                            Icons.Outlined.Storage,
                             MediaAnalysisScreen(),
                             currentScreen is MediaAnalysisScreen,
                             error = hasMediaErrors,
                         ),
-                        NavigationEntry(stringResource(Res.string.settings_navigation_announcements), Icons.Rounded.Campaign, AnnouncementsScreen(), currentScreen is AnnouncementsScreen),
+                        NavigationEntry(stringResource(Res.string.settings_navigation_announcements), Icons.Outlined.Campaign, AnnouncementsScreen(), currentScreen is AnnouncementsScreen),
                     ),
                     contentColor = contentColor,
                     onNavigation = onNavigation,
@@ -286,13 +287,13 @@ fun SettingsNavigationMenu(
 
             if (isAdmin) {
                 val komfEntries = buildList {
-                    add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_connection), Icons.Rounded.Link, KomfSettingsScreen(), currentScreen is KomfSettingsScreen))
+                    add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_connection), Icons.Outlined.Link, KomfSettingsScreen(), currentScreen is KomfSettingsScreen))
                     if (komfEnabled) {
-                        add(NavigationEntry(stringResource(Res.string.mangabaka_navigation), Icons.Rounded.Extension, KomfMangaBakaSettingsScreen(), currentScreen is KomfMangaBakaSettingsScreen))
-                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_processing), Icons.Rounded.Tune, KomfProcessingSettingsScreen(KOMGA), currentScreen is KomfProcessingSettingsScreen))
-                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_providers), Icons.Rounded.Extension, KomfProvidersSettingsScreen(), currentScreen is KomfProvidersSettingsScreen))
-                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_notifications), Icons.Rounded.Notifications, KomfNotificationSettingsScreen(), currentScreen is KomfNotificationSettingsScreen))
-                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_jobs), Icons.Rounded.Schedule, KomfJobsScreen(), currentScreen is KomfJobsScreen))
+                        add(NavigationEntry(stringResource(Res.string.mangabaka_navigation), Icons.Outlined.Extension, KomfMangaBakaSettingsScreen(), currentScreen is KomfMangaBakaSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_processing), Icons.Outlined.Tune, KomfProcessingSettingsScreen(KOMGA), currentScreen is KomfProcessingSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_providers), Icons.Outlined.Extension, KomfProvidersSettingsScreen(), currentScreen is KomfProvidersSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_notifications), Icons.Outlined.Notifications, KomfNotificationSettingsScreen(), currentScreen is KomfNotificationSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_jobs), Icons.Outlined.Schedule, KomfJobsScreen(), currentScreen is KomfJobsScreen))
                     }
                 }
                 SettingsNavigationSection(
@@ -306,7 +307,7 @@ fun SettingsNavigationMenu(
 
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         ) {
             NavigationButton(
@@ -345,16 +346,16 @@ private fun SettingsNavigationSection(
     contentColor: Color,
     onNavigation: (Screen) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             title,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 4.dp),
+            modifier = Modifier.padding(start = 8.dp),
         )
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         ) {
             Column {
@@ -373,7 +374,6 @@ private fun SettingsNavigationSection(
         }
     }
 }
-
 
 @Composable
 fun NavigationButton(
@@ -413,7 +413,7 @@ fun NavigationButton(
         Row(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp)
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             Box(
                 modifier = Modifier.size(22.dp),
@@ -427,7 +427,7 @@ fun NavigationButton(
                         tint = if (isSelected) {
                             MaterialTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                            MaterialTheme.colorScheme.onSurface
                         },
                     )
                 }

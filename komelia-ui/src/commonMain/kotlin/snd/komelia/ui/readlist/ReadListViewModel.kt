@@ -75,13 +75,15 @@ class ReadListViewModel(
     private val reloadEventsEnabled = MutableStateFlow(true)
     private val reloadJobsFlow = MutableSharedFlow<Unit>(1, 0, BufferOverflow.DROP_OLDEST)
     fun initialize() {
-        if (state.value !is Uninitialized) return
+        if (state.value !is Uninitialized) {
+            reload()
+            return
+        }
 
         screenModelScope.launch {
             loadReadList()
             loadBooks(1)
         }
-
 
         isAnyItemDragging
             .filter { isDragging -> !isDragging && state.value != Uninitialized }

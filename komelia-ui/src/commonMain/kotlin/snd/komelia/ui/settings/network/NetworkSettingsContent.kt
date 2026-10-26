@@ -1,10 +1,8 @@
 package snd.komelia.ui.settings.network
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -29,6 +27,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_networ
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.settings.ServerConnectionStatus
 import snd.komelia.ui.common.ServerUrlValidationError
+import snd.komelia.ui.common.components.SettingsSection
 import snd.komelia.ui.common.components.SwitchWithLabel
 
 @Composable
@@ -47,10 +46,7 @@ fun NetworkSettingsContent(
         lanAutoSwitchEnabled = lanAutoSwitchEnabled,
         connectionStatus = connectionStatus,
     )
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
+    SettingsSection {
         SwitchWithLabel(
             checked = lanAutoSwitchEnabled,
             onCheckedChange = onLanAutoSwitchEnabledChange,
@@ -78,7 +74,7 @@ fun NetworkSettingsContent(
                 { Text(error.localizedMessage()) }
             },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth().widthIn(min = 250.dp),
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Row(

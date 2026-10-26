@@ -15,6 +15,7 @@ import snd.komelia.settings.model.AppSurfaceStyle
 fun KomeliaPageScaffold(
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit,
+    bottomBar: @Composable () -> Unit = {},
     content: @Composable (topContentInset: Dp) -> Unit,
 ) {
     val overlay = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
@@ -24,6 +25,9 @@ fun KomeliaPageScaffold(
                 constraints.copy(minHeight = 0),
             )
             val topInset = if (overlay) header.height.toDp() else 0.dp
+            val footer = subcompose(PageSlot.Footer) { Box { bottomBar() } }.single().measure(
+                constraints.copy(minHeight = 0),
+            )
             val body = subcompose(PageSlot.Content) {
                 Box(Modifier.fillMaxSize().glassBackdrop()) { content(topInset) }
             }.single().measure(
@@ -35,9 +39,10 @@ fun KomeliaPageScaffold(
             layout(constraints.maxWidth, constraints.maxHeight) {
                 body.placeRelative(0, if (overlay) 0 else header.height)
                 header.placeRelative(0, 0, zIndex = 1f)
+                footer.placeRelative(0, constraints.maxHeight - footer.height, zIndex = 1f)
             }
         }
     }
 }
 
-private enum class PageSlot { Header, Content }
+private enum class PageSlot { Header, Content, Footer }

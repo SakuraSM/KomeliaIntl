@@ -1,11 +1,11 @@
 package snd.komelia.ui.settings.komf.processing
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +49,7 @@ import snd.komelia.ui.common.components.ChipFieldWithSuggestions
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.DropdownMultiChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
+import snd.komelia.ui.common.components.SettingsSection
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.settings.komf.LanguageSelectionField
 import snd.komelia.ui.settings.komf.LibraryTabs
@@ -88,196 +89,195 @@ private fun ProcessingConfigContent(
     serverType: MediaServer,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        DropdownMultiChoiceMenu(
-            selectedOptions = state.updateModes.map { LabeledEntry(it, it.name) },
-            options = remember { KomfUpdateMode.entries.map { LabeledEntry(it, it.name) } },
-            onOptionSelect = { state.onUpdateModeSelect(it.value) },
-            label = { Text(stringResource(Res.string.komf_processing_update_modes)) },
-            placeholder = stringResource(Res.string.komf_processing_none),
-            inputFieldModifier = Modifier.fillMaxWidth()
-        )
-
-        DropdownChoiceMenu(
-            selectedOption = LabeledEntry(state.libraryType, state.libraryType.name),
-            options = remember { KomfMediaType.entries.map { LabeledEntry(it, it.name) } },
-            onOptionChange = { state.onLibraryTypeChange(it.value) },
-            label = { Text(stringResource(Res.string.komf_processing_library_type)) },
-            inputFieldModifier = Modifier.fillMaxWidth(),
-        )
-
-        SwitchWithLabel(
-            checked = state.orderBooks,
-            onCheckedChange = state::onOrderBooksChange,
-            label = { Text(stringResource(Res.string.komf_processing_order_books)) },
-
-            supportingText = {
-                Text(
-                    stringResource(Res.string.komf_processing_order_books_desc),
-                    style = MaterialTheme.typography.labelLarge,
-                )
+        SettingsSection {
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                FlowRow(
+                    maxItemsInEachRow = if (maxWidth >= 640.dp) 2 else 1,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(Modifier.weight(1f)) {
+                        DropdownMultiChoiceMenu(
+                            selectedOptions = state.updateModes.map { LabeledEntry(it, it.name) },
+                            options = remember { KomfUpdateMode.entries.map { LabeledEntry(it, it.name) } },
+                            onOptionSelect = { state.onUpdateModeSelect(it.value) },
+                            label = { Text(stringResource(Res.string.komf_processing_update_modes)) },
+                            placeholder = stringResource(Res.string.komf_processing_none),
+                            inputFieldModifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    Box(Modifier.weight(1f)) {
+                        DropdownChoiceMenu(
+                            selectedOption = LabeledEntry(state.libraryType, state.libraryType.name),
+                            options = remember { KomfMediaType.entries.map { LabeledEntry(it, it.name) } },
+                            onOptionChange = { state.onLibraryTypeChange(it.value) },
+                            label = { Text(stringResource(Res.string.komf_processing_library_type)) },
+                            inputFieldModifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
             }
-        )
-        HorizontalDivider()
 
-        Text(
-            stringResource(Res.string.komf_processing_aggreation_settings),
-            style = MaterialTheme.typography.titleLarge
-        )
-        SwitchWithLabel(
-            checked = state.aggregate,
-            onCheckedChange = state::onAggregateChange,
-            label = { Text(stringResource(Res.string.komf_processing_aggregate)) },
-            supportingText = {
-                Text(
-                    stringResource(Res.string.komf_processing_aggregate_desc),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        )
+            SwitchWithLabel(
+                checked = state.orderBooks,
+                onCheckedChange = state::onOrderBooksChange,
+                label = { Text(stringResource(Res.string.komf_processing_order_books)) },
 
-        SwitchWithLabel(
-            checked = state.mergeGenres,
-            onCheckedChange = state::onMergeGenresChange,
-            enabled = state.aggregate,
-            label = { Text(stringResource(Res.string.komf_processing_merge_genres)) },
-            supportingText = {
-                Text(
-                    stringResource(Res.string.komf_processing_merge_genres_desc),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        )
-
-        SwitchWithLabel(
-            checked = state.mergeTags,
-            onCheckedChange = state::onMergeTagsChange,
-            enabled = state.aggregate,
-            label = { Text(stringResource(Res.string.komf_processing_merge_tags)) },
-
-            supportingText = {
-                Text(
-                    stringResource(Res.string.komf_processing_merge_tags_desc),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        )
-
-        HorizontalDivider()
-        Text(
-            stringResource(Res.string.komf_processing_cover_settings),
-            style = MaterialTheme.typography.titleLarge
-        )
-        SwitchWithLabel(
-            checked = state.seriesCovers,
-            onCheckedChange = state::onSeriesCoversChange,
-            label = { Text(stringResource(Res.string.komf_processing_series_covers)) },
-
-            supportingText = {
-                Text(
-                    stringResource(Res.string.komf_processing_series_covers_desc),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        )
-
-        SwitchWithLabel(
-            checked = state.bookCovers,
-            onCheckedChange = state::onBookCoversChange,
-            label = { Text(stringResource(Res.string.komf_processing_book_covers)) },
-
-            supportingText = {
-                Text(
-                    stringResource(Res.string.komf_processing_book_covers_desc),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        )
-
-        SwitchWithLabel(
-            checked = state.overrideExistingCovers,
-            onCheckedChange = state::onOverrideExistingCoversChange,
-            label = { Text(stringResource(Res.string.komf_processing_override_covers)) },
-
-            supportingText = {
-                Text(
-                    stringResource(Res.string.komf_processing_override_covers_desc),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        )
-
-        HorizontalDivider()
-        Text(
-            stringResource(Res.string.komf_processing_title_settings),
-            style = MaterialTheme.typography.titleLarge
-        )
-        SwitchWithLabel(
-            checked = state.seriesTitle,
-            onCheckedChange = state::onSeriesTitleChange,
-            label = { Text(stringResource(Res.string.komf_processing_series_title)) },
-
-            supportingText = {
-                Text(
-                    stringResource(Res.string.komf_processing_series_title_desc),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        )
-        SwitchWithLabel(
-            checked = state.alternativeSeriesTitles,
-            onCheckedChange = state::onAlternativeSeriesTitlesChange,
-            label = { Text(stringResource(Res.string.komf_processing_series_alt_title)) },
-
-            supportingText = {
-                Text(
-                    stringResource(Res.string.komf_processing_series_alt_title_desc),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        )
-        SwitchWithLabel(
-            checked = state.fallbackToAltTitle,
-            onCheckedChange = state::onFallbackToAltTitleChange,
-            label = { Text(stringResource(Res.string.komf_processing_alt_title_fallback)) },
-
-            supportingText = {
-                Text(
-                    stringResource(Res.string.komf_processing_alt_title_fallback_desc),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        )
-        LanguageSelectionField(
-            label = stringResource(Res.string.komf_processing_series_title_language),
-            languageValue = state.seriesTitleLanguage,
-            onLanguageValueChange = state::onSeriesTitleLanguageChange,
-            onLanguageValueSave = state::onSeriesTitleLanguageSave
-        )
-        ChipFieldWithSuggestions(
-            label = { Text(stringResource(Res.string.komf_processing_series_alt_title_language)) },
-            values = state.alternativeSeriesTitleLanguages,
-            onValuesChange = state::onAlternativeTitleLanguagesChange,
-            suggestions = komfLanguageTagsSuggestions
-        )
-        HorizontalDivider()
-        Text(
-            stringResource(Res.string.komf_processing_default_values),
-            style = MaterialTheme.typography.titleLarge
-        )
-        val noneString = stringResource(Res.string.komf_processing_none)
-        if (serverType == KOMGA) {
-            DropdownChoiceMenu(
-                selectedOption = LabeledEntry(state.readingDirectionValue, state.readingDirectionValue?.name ?: "None"),
-                options = remember {
-                    listOf(LabeledEntry<KomfReadingDirection?>(null, noneString)) +
-                            KomfReadingDirection.entries.map { LabeledEntry(it, it.name) }
-                },
-                onOptionChange = { state.onReadingDirectionChange(it.value) },
-                label = { Text(stringResource(Res.string.komf_processing_default_reading_direction)) },
-                inputFieldModifier = Modifier.fillMaxWidth(),
+                supportingText = {
+                    Text(
+                        stringResource(Res.string.komf_processing_order_books_desc),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
             )
+        }
+        SettingsSection(title = stringResource(Res.string.komf_processing_aggreation_settings)) {
+            SwitchWithLabel(
+                checked = state.aggregate,
+                onCheckedChange = state::onAggregateChange,
+                label = { Text(stringResource(Res.string.komf_processing_aggregate)) },
+                supportingText = {
+                    Text(
+                        stringResource(Res.string.komf_processing_aggregate_desc),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            )
+
+            SwitchWithLabel(
+                checked = state.mergeGenres,
+                onCheckedChange = state::onMergeGenresChange,
+                enabled = state.aggregate,
+                label = { Text(stringResource(Res.string.komf_processing_merge_genres)) },
+                supportingText = {
+                    Text(
+                        stringResource(Res.string.komf_processing_merge_genres_desc),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            )
+
+            SwitchWithLabel(
+                checked = state.mergeTags,
+                onCheckedChange = state::onMergeTagsChange,
+                enabled = state.aggregate,
+                label = { Text(stringResource(Res.string.komf_processing_merge_tags)) },
+
+                supportingText = {
+                    Text(
+                        stringResource(Res.string.komf_processing_merge_tags_desc),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            )
+
+        }
+        SettingsSection(title = stringResource(Res.string.komf_processing_cover_settings)) {
+            SwitchWithLabel(
+                checked = state.seriesCovers,
+                onCheckedChange = state::onSeriesCoversChange,
+                label = { Text(stringResource(Res.string.komf_processing_series_covers)) },
+
+                supportingText = {
+                    Text(
+                        stringResource(Res.string.komf_processing_series_covers_desc),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            )
+
+            SwitchWithLabel(
+                checked = state.bookCovers,
+                onCheckedChange = state::onBookCoversChange,
+                label = { Text(stringResource(Res.string.komf_processing_book_covers)) },
+
+                supportingText = {
+                    Text(
+                        stringResource(Res.string.komf_processing_book_covers_desc),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            )
+
+            SwitchWithLabel(
+                checked = state.overrideExistingCovers,
+                onCheckedChange = state::onOverrideExistingCoversChange,
+                label = { Text(stringResource(Res.string.komf_processing_override_covers)) },
+
+                supportingText = {
+                    Text(
+                        stringResource(Res.string.komf_processing_override_covers_desc),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            )
+
+        }
+        SettingsSection(title = stringResource(Res.string.komf_processing_title_settings)) {
+            SwitchWithLabel(
+                checked = state.seriesTitle,
+                onCheckedChange = state::onSeriesTitleChange,
+                label = { Text(stringResource(Res.string.komf_processing_series_title)) },
+
+                supportingText = {
+                    Text(
+                        stringResource(Res.string.komf_processing_series_title_desc),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            )
+            SwitchWithLabel(
+                checked = state.alternativeSeriesTitles,
+                onCheckedChange = state::onAlternativeSeriesTitlesChange,
+                label = { Text(stringResource(Res.string.komf_processing_series_alt_title)) },
+
+                supportingText = {
+                    Text(
+                        stringResource(Res.string.komf_processing_series_alt_title_desc),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            )
+            SwitchWithLabel(
+                checked = state.fallbackToAltTitle,
+                onCheckedChange = state::onFallbackToAltTitleChange,
+                label = { Text(stringResource(Res.string.komf_processing_alt_title_fallback)) },
+
+                supportingText = {
+                    Text(
+                        stringResource(Res.string.komf_processing_alt_title_fallback_desc),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            )
+            LanguageSelectionField(
+                label = stringResource(Res.string.komf_processing_series_title_language),
+                languageValue = state.seriesTitleLanguage,
+                onLanguageValueChange = state::onSeriesTitleLanguageChange,
+                onLanguageValueSave = state::onSeriesTitleLanguageSave
+            )
+            ChipFieldWithSuggestions(
+                label = { Text(stringResource(Res.string.komf_processing_series_alt_title_language)) },
+                values = state.alternativeSeriesTitleLanguages,
+                onValuesChange = state::onAlternativeTitleLanguagesChange,
+                suggestions = komfLanguageTagsSuggestions
+            )
+        }
+        SettingsSection(title = stringResource(Res.string.komf_processing_default_values)) {
+            val noneString = stringResource(Res.string.komf_processing_none)
+            if (serverType == KOMGA) {
+                DropdownChoiceMenu(
+                    selectedOption = LabeledEntry(state.readingDirectionValue, state.readingDirectionValue?.name ?: "None"),
+                    options = remember {
+                        listOf(LabeledEntry<KomfReadingDirection?>(null, noneString)) +
+                                KomfReadingDirection.entries.map { LabeledEntry(it, it.name) }
+                    },
+                    onOptionChange = { state.onReadingDirectionChange(it.value) },
+                    label = { Text(stringResource(Res.string.komf_processing_default_reading_direction)) },
+                    inputFieldModifier = Modifier.fillMaxWidth(),
+                )
         }
         LanguageSelectionField(
             label = stringResource(Res.string.komf_processing_default_language),
@@ -286,6 +286,6 @@ private fun ProcessingConfigContent(
             onLanguageValueSave = state::onDefaultLanguageSave
         )
 
-        Spacer(Modifier.height(30.dp))
+        }
     }
 }

@@ -2,6 +2,11 @@ package snd.komelia.ui.common.itemlist
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,7 +14,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,6 +29,7 @@ import sh.calvin.reorderable.rememberReorderableLazyGridState
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.BookImageCard
+import snd.komelia.ui.common.cards.BookDetailedListCard
 import snd.komelia.ui.common.cards.DraggableImageCard
 import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.common.menus.BookMenuActions
@@ -49,6 +55,8 @@ fun BookLazyCardGrid(
 
     minSize: Dp = 200.dp,
     gridState: LazyGridState = rememberLazyGridState(),
+    listMode: Boolean = false,
+    firstItemNumber: Int = 1,
 ) {
     val layout = LocalKomeliaLayout.current
     val coroutineScope = rememberCoroutineScope()
@@ -62,10 +70,10 @@ fun BookLazyCardGrid(
 
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyVerticalGrid(
-            columns = posterGridCells(minSize),
+            columns = if (listMode) GridCells.Fixed(1) else posterGridCells(minSize),
             state = gridState,
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-            verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            verticalArrangement = Arrangement.spacedBy(if (listMode) 0.dp else layout.gridSpacing),
             contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
             modifier = Modifier
                 .widthIn(max = layout.contentMaxWidth)
@@ -73,14 +81,31 @@ fun BookLazyCardGrid(
                 .padding(horizontal = layout.pageHorizontalPadding)
         ) {
 
-            items(books, key = { it.id.value }) { book ->
+            itemsIndexed(books, key = { _, book -> book.id.value }) { index, book ->
                 val isSelected = remember(selectedBooks) { selectedBooks.any { it.id == book.id } }
                 DraggableImageCard(
                     key = book.id.value,
                     dragEnabled = reorderable,
                     reorderableState = reorderableLazyGridState
                 ) {
-                    BookImageCard(
+                    if (listMode) {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text((firstItemNumber + index).toString().padStart(2, '0'),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.widthIn(min = 28.dp))
+                            BookDetailedListCard(
+                                book = book,
+                                onClick = onBookClick?.let { { it(book) } },
+                                onBookReadClick = onBookReadClick?.let { read -> { markProgress -> read(book, markProgress) } },
+                                bookMenuActions = bookMenuActions,
+                                isSelected = isSelected,
+                                onSelect = onBookSelect?.let { select -> { select(book) } },
+                                compact = true,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    } else BookImageCard(
                         book = book,
                         onBookClick = onBookClick?.let { { onBookClick(book) } },
                         bookMenuActions = bookMenuActions,

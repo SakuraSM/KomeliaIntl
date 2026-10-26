@@ -1,20 +1,23 @@
 /* Only marked application controls use the host material. Never select book content. */
 :root[data-komelia-surface="glass"] [data-komelia-chrome] {
-  --komelia-chrome-color: #f0f0f3;
-  --komelia-chrome-background: rgb(21 21 26 / 86%);
+  --komelia-chrome-color: #f4f7fc;
+  --komelia-chrome-background: rgb(29 46 66 / 35%);
+  --komelia-chrome-filter: blur(12px) saturate(1.04) brightness(.28) contrast(1.05);
   color: var(--komelia-chrome-color) !important;
   background: var(--komelia-chrome-background) !important;
-  border: 1px solid rgb(197 198 205 / 30%);
-  backdrop-filter: blur(16px) saturate(1.25);
-  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  border: 1px solid rgb(226 238 255 / 36%);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 26%), inset 0 -1px 2px rgb(255 255 255 / 10%), 0 8px 24px rgb(0 0 0 / 18%);
+  backdrop-filter: var(--komelia-chrome-filter);
+  -webkit-backdrop-filter: var(--komelia-chrome-filter);
 }
 :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] {
-  --komelia-chrome-color: #1b1c20;
-  --komelia-chrome-background: rgb(252 252 255 / 88%);
+  --komelia-chrome-color: #182637;
+  --komelia-chrome-background: rgb(250 252 255 / 68%);
+  --komelia-chrome-filter: blur(12px) saturate(1.15) contrast(.2903226) brightness(1.55);
   border-color: rgb(85 89 100 / 30%);
 }
 :root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-chrome] {
-  --komelia-chrome-background: rgb(0 0 0 / 90%);
+  --komelia-chrome-background: rgb(23 38 56 / 30%);
 }
 :root[data-komelia-reduced-motion="true"] [data-komelia-chrome],
 :root[data-komelia-reduced-motion="true"] [data-komelia-chrome-motion] {
@@ -31,27 +34,27 @@
 }
 @media (prefers-reduced-transparency: reduce) {
   :root[data-komelia-surface="glass"] [data-komelia-chrome] {
-    background: #15151a !important;
+    background: #1d2e42 !important;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
-  :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] { background: #fcfcff !important; }
-  :root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-chrome] { background: #000 !important; }
+  :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] { background: #fafcff !important; }
+  :root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-chrome] { background: #172638 !important; }
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  :root[data-komelia-surface="glass"] [data-komelia-chrome] { background: #15151a !important; }
-  :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] { background: #fcfcff !important; }
-  :root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-chrome] { background: #000 !important; }
+  :root[data-komelia-surface="glass"] [data-komelia-chrome] { background: #1d2e42 !important; }
+  :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] { background: #fafcff !important; }
+  :root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-chrome] { background: #172638 !important; }
 }
 
 :root[data-komelia-surface="solid"] [data-komelia-chrome] {
-  background: #15151a !important;
-  color: #f0f0f3 !important;
+  background: #1d2e42 !important;
+  color: #f4f7fc !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-:root[data-komelia-surface="solid"][data-komelia-theme="LIGHT"] [data-komelia-chrome] { background: #fcfcff !important; color: #1b1c20 !important; }
-:root[data-komelia-surface="solid"][data-komelia-theme="DARKER"] [data-komelia-chrome] { background: #000 !important; }
+:root[data-komelia-surface="solid"][data-komelia-theme="LIGHT"] [data-komelia-chrome] { background: #fafcff !important; color: #182637 !important; }
+:root[data-komelia-surface="solid"][data-komelia-theme="DARKER"] [data-komelia-chrome] { background: #172638 !important; }
 
 :root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"]) [data-komelia-chrome] :is(button, [class*="text-white"]) {
   color: inherit !important;
@@ -60,4 +63,17 @@
 [data-komelia-chrome] :focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 @media (pointer: fine) {
   [data-komelia-chrome] button { min-width: 40px; min-height: 40px; }
+}
+
+/* Float only the reader bars; drawers and publication containers retain their own geometry. */
+:root[data-komelia-surface="glass"] [data-komelia-toolbar] {
+  inset-inline: 12px;
+  width: calc(100% - 24px) !important;
+  border-radius: 28px;
+}
+:root[data-komelia-surface="glass"] [data-komelia-toolbar="top"] {
+  top: max(8px, env(safe-area-inset-top)) !important;
+}
+:root[data-komelia-surface="glass"] [data-komelia-toolbar="bottom"] {
+  bottom: max(12px, env(safe-area-inset-bottom)) !important;
 }

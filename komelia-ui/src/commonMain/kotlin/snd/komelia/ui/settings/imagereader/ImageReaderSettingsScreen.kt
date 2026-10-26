@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
-import androidx.compose.material3.HorizontalDivider
+import snd.komelia.ui.common.components.SettingsSection
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
@@ -24,10 +24,11 @@ class ImageReaderSettingsScreen : Screen {
         val scope = rememberCoroutineScope()
 
         SettingsScreenContainer(stringResource(Res.string.settings_image_title)) {
-            DefaultColorCorrectionSettings(vm.defaultColorCorrection) {
-                scope.launch { vm.defaultColorCorrection.initialize() }
+            SettingsSection {
+                DefaultColorCorrectionSettings(vm.defaultColorCorrection) {
+                    scope.launch { vm.defaultColorCorrection.initialize() }
+                }
             }
-            HorizontalDivider()
             ImageReaderSettingsContent(
                 loadThumbnailPreviews = vm.loadThumbnailsPreview.collectAsState().value,
                 onLoadThumbnailPreviewsChange = vm::onLoadThumbnailsPreviewChange,

@@ -1,23 +1,18 @@
 package snd.komelia.ui.common.components
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.foundation.BasicTooltipBox
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -35,6 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -65,6 +62,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -127,10 +129,10 @@ fun <T> DropdownChoiceMenu(
                 }
                 .focusable(enabled = enabled, interactionSource = anchorInteraction)
                 .menuAnchor(PrimaryNotEditable, enabled = enabled)
-                .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .then(inputFieldModifier),
             label = label,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
+            trailingIcon = { Icon(if (isExpanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null, Modifier.padding(end = 8.dp)) },
             color = inputFieldColor,
             contentPadding = contentPadding
         )
@@ -197,7 +199,7 @@ fun <T> DropdownMultiChoiceMenu(
                 }
                 .focusable(interactionSource = anchorInteraction)
                 .menuAnchor(PrimaryNotEditable)
-                .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .then(inputFieldModifier),
             label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
@@ -237,14 +239,16 @@ private fun InputField(
 ) {
     val focused by interactionSource.collectIsFocusedAsState()
     Surface(
-        shadowElevation = 1.dp,
+        shadowElevation = 0.dp,
+        shape = RoundedCornerShape(10.dp),
+        border = BorderStroke(if (focused) 2.dp else 1.dp,
+            if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
         color = color,
         modifier = Modifier
             .cursorForHand()
             .indication(interactionSource, LocalIndication.current)
             .hoverable(interactionSource)
             .then(modifier)
-            .border(if (focused) 2.dp else 0.dp, if (focused) MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(5.dp))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -425,7 +429,6 @@ fun <T> FilterDropdownMultiChoiceWithSearch(
         textFieldModifier = Modifier.fillMaxWidth()
     )
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

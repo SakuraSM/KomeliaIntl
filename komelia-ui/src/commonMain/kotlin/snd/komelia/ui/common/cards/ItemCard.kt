@@ -5,11 +5,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,11 +34,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -66,16 +66,15 @@ fun ItemCard(
     image: @Composable () -> Unit,
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
-    Card(
-        shape = MaterialTheme.shapes.medium,
+    Column(
         modifier = modifier
             .combinedClickable(onClick = onClick ?: {}, onLongClick = onLongClick)
             .then(if (onClick != null || onLongClick != null) Modifier.cursorForHand() else Modifier),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Box(modifier = Modifier.aspectRatio(0.703f)) { image() }
+        Box(Modifier.aspectRatio(0.703f)
+            .clip(MaterialTheme.shapes.small)
+            .background(containerColor)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.small)) { image() }
         content()
     }
 }
@@ -174,7 +173,7 @@ fun CoverCardCaption(
         modifier = Modifier
             .fillMaxWidth()
             .height(captionHeight)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 1.dp, vertical = 6.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -273,7 +272,6 @@ fun CardGradientOverlay() {
 @Composable
 fun overlayBorderModifier() =
     Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.primary), MaterialTheme.shapes.medium)
-
 
 @Composable
 fun CardOutlinedText(

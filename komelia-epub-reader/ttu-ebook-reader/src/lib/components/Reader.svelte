@@ -1147,12 +1147,14 @@
   />
   {#if showHeader}
     <div
-        class="elevation-4 writing-horizontal-tb fixed inset-x-0 top-0 z-10 w-full"
+        class="writing-horizontal-tb fixed inset-x-0 top-0 z-10 w-full"
         data-komelia-chrome-motion
         transition:fly|local={{ y: -24, duration: prefersReducedChromeMotion() ? 0 : 220, easing: quintInOut }}
         use:clickOutside={() => (showHeader = false)}
     >
       <BookReaderHeader
+          title={$rawBookData$?.title ?? t('Loading')}
+          chapterTitle={activeChapterLabel}
           hasChapterData={!!$sectionData$?.length}
           hasCustomReadingPoint={!!(
             ($customReadingPointEnabled$ || isPaginated) &&

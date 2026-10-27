@@ -2,7 +2,6 @@ package snd.komelia.ui.reader.image.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -11,29 +10,14 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -55,17 +39,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuous_page_spacing
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuous_reading_direction
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_continuous_side_padding
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_downsampling_kernel
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_linear_light_downsampling
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_linear_light_downsampling_desc
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_settings
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_upsampling_mode
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_layout
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_offset_pages
@@ -93,13 +74,10 @@ import snd.komelia.settings.model.ReaderType
 import snd.komelia.settings.model.ReaderType.CONTINUOUS
 import snd.komelia.settings.model.ReaderType.PAGED
 import snd.komelia.settings.model.ReaderType.PANELS
-import snd.komelia.ui.LocalKomeliaLayout
-import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.common.components.KomeliaChromeContent
-import snd.komelia.ui.common.components.komeliaChrome
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.reader.image.PageShareAction
@@ -147,65 +125,16 @@ fun BottomSheetSettingsOverlay(
     pageShareAction: PageShareAction? = null,
 ) = KomeliaChromeContent {
 
-    val windowWidth = LocalWindowWidth.current
-    val layoutSpec = LocalKomeliaLayout.current
     var showSettingsDialog by remember { mutableStateOf(false) }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .komeliaChrome(RoundedCornerShape(0.dp), MaterialTheme.colorScheme.surface)
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
-            .padding(horizontal = layoutSpec.pageHorizontalPadding),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(
-            onClick = onBackPress,
-            modifier = Modifier.size(layoutSpec.minimumTouchTarget)
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(Res.string.navigation_back),
-            )
-        }
-
-        book?.let {
-            Column(
-                Modifier.weight(1f)
-                    .padding(horizontal = layoutSpec.controlSpacing)
-            ) {
-                val titleStyle =
-                    if (windowWidth == COMPACT) MaterialTheme.typography.titleMedium
-                    else MaterialTheme.typography.titleLarge
-
-                Text(
-                    it.seriesTitle,
-                    maxLines = 1,
-                    style = titleStyle,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    it.metadata.title,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.basicMarquee(iterations = if (LocalKomeliaMotion.current.isReducedMotion) 0 else Int.MAX_VALUE)
-                )
-            }
-        }
-        pageShareAction?.let { PageShareButton(it) }
-        FilledIconButton(
-            onClick = {
-                showSettingsDialog = true
-                onSettingsDialogVisibilityChange(true)
-            },
-            modifier = Modifier.size(layoutSpec.minimumTouchTarget)
-
-        ) {
-            Icon(
-                Icons.Default.Settings,
-                contentDescription = stringResource(Res.string.reader_image_settings),
-            )
-        }
-    }
+    ImageReaderToolbar(
+        book = book,
+        onBackPress = onBackPress,
+        onSettingsClick = {
+            showSettingsDialog = true
+            onSettingsDialogVisibilityChange(true)
+        },
+        pageShareAction = pageShareAction,
+    )
 
     BoxWithConstraints {
 

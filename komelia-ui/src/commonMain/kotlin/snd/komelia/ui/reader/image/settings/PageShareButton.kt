@@ -25,7 +25,7 @@ internal fun PageShareButton(action: PageShareAction, modifier: Modifier = Modif
         enabled = !action.isSharing,
         modifier = modifier.size(LocalKomeliaLayout.current.minimumTouchTarget).semantics { contentDescription = label },
     ) {
-        if (action.isSharing) CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
-        else Icon(Icons.Default.Share, contentDescription = null)
+        if (action.isSharing) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+        else Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(20.dp))
     }
 }

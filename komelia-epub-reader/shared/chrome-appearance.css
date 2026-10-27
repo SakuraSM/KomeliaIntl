@@ -83,8 +83,58 @@
   [data-komelia-chrome] button, button[data-komelia-chrome] { min-width: 40px; min-height: 40px; }
 }
 
-/* Float only the reader bars; drawers and publication containers retain their own geometry. */
-:root[data-komelia-surface="glass"] [data-komelia-toolbar] {
+/* The top bar follows the native image/PDF reader; progress controls remain floating. */
+[data-komelia-toolbar="top"] {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  box-sizing: border-box;
+  inset-inline: 0;
+  width: 100%;
+  min-height: 48px;
+  padding-inline: 12px;
+  border-radius: 0;
+  color: #f4f7fc;
+  background: #1d2e42;
+}
+.komelia-reader-title {
+  flex: 1;
+  min-width: 0;
+  margin-inline: 8px;
+  line-height: 24px;
+  text-align: start;
+}
+.komelia-reader-title > * {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.komelia-reader-title > strong { font-size: 16px; font-weight: 500; }
+.komelia-reader-title > span { font-size: 16px; font-weight: 400; }
+.komelia-reader-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.komelia-reader-action:disabled { opacity: .38; cursor: default; }
+.komelia-reader-action :is(svg, .v-icon) { width: 20px; height: 20px; font-size: 20px; }
+@media (pointer: fine) {
+  [data-komelia-toolbar="top"] { min-height: 40px; }
+  .komelia-reader-action { flex-basis: 40px; width: 40px; height: 40px; }
+  .komelia-reader-title { line-height: 20px; }
+  .komelia-reader-title > span { font-size: 14px; }
+}
+:root[data-komelia-surface="glass"] [data-komelia-toolbar="bottom"] {
   inset-inline: 12px;
   width: calc(100% - 24px) !important;
   border-radius: 28px;

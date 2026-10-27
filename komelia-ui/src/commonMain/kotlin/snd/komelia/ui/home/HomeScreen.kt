@@ -9,6 +9,7 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import snd.komelia.ui.LoadState
+import snd.komelia.ui.LocalAppNavigationController
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalReloadEvents
@@ -18,6 +19,7 @@ import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.platform.ScreenPullToRefreshBox
 import snd.komelia.ui.reader.readerScreen
+import snd.komelia.ui.search.SearchScreen
 import snd.komelia.ui.series.seriesScreen
 import snd.komga.client.library.KomgaLibraryId
 
@@ -39,6 +41,7 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
         val vm = rememberScreenModel(vmKey) { viewModelFactory.getHomeViewModel() }
         val navigator = LocalNavigator.currentOrThrow
         val reloadEvents = LocalReloadEvents.current
+        val appNavigation = LocalAppNavigationController.current
 
         LaunchedEffect(Unit) {
             vm.initialize()
@@ -62,6 +65,7 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
                         filters = vm.currentFilters.collectAsState().value,
                         activeFilterNumber = vm.activeFilterNumber.collectAsState().value,
                         onFilterChange = vm::onFilterChange,
+                        onSearchClick = { appNavigation.open(SearchScreen(null)) },
                         cardWidth = vm.cardWidth.collectAsState().value,
                         onSeriesClick = { navigator push seriesScreen(it) },
                         seriesMenuActions = vm.seriesMenuActions(),

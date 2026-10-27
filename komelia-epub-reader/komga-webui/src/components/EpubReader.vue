@@ -1,61 +1,28 @@
 <template>
   <div id="root" :key="bookId">
     <v-slide-y-transition>
-      <v-toolbar
-          data-komelia-chrome
+      <epub-reader-toolbar
           v-if="showToolbars"
-          dense elevation="1"
-          class="settings full-width"
-          style="position: fixed; top: 0;z-index: 14"
-      >
-        <v-btn
-            icon
-            :aria-label="t('bookreader.shortcuts.close')"
-            @click="closeBook"
-        >
-          <v-icon :icon="mdiArrowLeft"/>
-        </v-btn>
-
-        <v-btn
-            :disabled="!hasToc && !hasLandmarks && !hasPageList"
-            icon
-            :aria-label="t('epubreader.shortcuts.show_hide_toc')"
-            @click="showToc = !showToc">
-          <v-icon :icon="mdiTableOfContents"/>
-        </v-btn>
-
-        <v-toolbar-title> {{ bookTitle }}</v-toolbar-title>
-        <v-spacer></v-spacer>
-
-        <v-btn
-            v-if="fullscreenIsAvailable"
-            icon
-            :aria-label="t('bookreader.shortcuts.fullscreen')"
-            @click="switchFullscreen()">
-          <v-icon :icon="mdiFullscreen"/>
-        </v-btn>
-
-        <v-btn
-            icon
-            :aria-label="t('bookreader.shortcuts.show_hide_help')"
-            @click="showHelp = !showHelp">
-          <v-icon :icon="mdiHelpCircle"/>
-        </v-btn>
-
-        <v-btn
-            icon
-            :aria-label="t('bookreader.shortcuts.settings')"
-            @click="toggleSettings"
-        >
-          <v-icon :icon="mdiCog"/>
-        </v-btn>
-      </v-toolbar>
+          :title="series?.metadata?.title || book?.metadata?.title || ''"
+          :subtitle="series?.metadata?.title ? book?.metadata?.title : undefined"
+          :has-navigation="hasToc || hasLandmarks || hasPageList"
+          :is-toc-open="showToc"
+          :is-settings-open="showSettings"
+          :is-fullscreen-available="fullscreenIsAvailable"
+          @close="closeBook"
+          @toggle-toc="showToc = !showToc"
+          @toggle-settings="toggleSettings"
+          @toggle-help="showHelp = !showHelp"
+          @fullscreen="switchFullscreen"
+          @overflow-visibility-change="isOverflowMenuOpen = $event"
+      />
     </v-slide-y-transition>
 
     <v-slide-y-reverse-transition>
       <!-- Bottom Toolbar-->
       <v-toolbar
           data-komelia-chrome
+          data-komelia-toolbar="bottom"
           dense
           elevation="1"
           class="settings full-width"
@@ -186,7 +153,7 @@
         scrollable
     >
       <v-card>
-        <v-toolbar dark color="primary">
+        <v-toolbar data-komelia-chrome dark color="primary">
           <v-btn icon dark :aria-label="t('bookreader.shortcuts.close')" @click="showSettings = false">
             <v-icon :icon="mdiClose"/>
           </v-btn>
@@ -338,6 +305,7 @@ import {getBookTitleCompact} from '@/functions/book-title'
 import {SeriesDto} from '@/types/komga-series'
 import {TocEntry} from '@/types/epub'
 import TocList from '@/components/TocList.vue'
+import EpubReaderToolbar from '@/components/EpubReaderToolbar.vue'
 import {flattenToc} from '@/functions/toc'
 import ShortcutHelpDialog from '@/components/ShortcutHelpDialog.vue'
 import SettingsSelect from '@/components/SettingsSelect.vue'
@@ -349,17 +317,13 @@ import {EpubReaderSettings} from "@/types/epub-reader-settings";
 import {externalFunctions} from "@/main";
 import IconFormatLineSpacingDown from "@/components/IconFormatLineSpacingDown.vue";
 import {
-  mdiArrowLeft,
   mdiCheck,
   mdiChevronLeft,
   mdiChevronRight,
   mdiClose,
-  mdiCog,
   mdiEiffelTower,
   mdiFormatLetterSpacing,
   mdiFormatTitle,
-  mdiFullscreen,
-  mdiHelpCircle,
   mdiNumeric,
   mdiRedo,
   mdiTableOfContents,
@@ -395,7 +359,9 @@ const showSettings = ref(false)
 const showToolbars = ref(false)
 const showToc = ref(false)
 const showHelp = ref(false)
+const isOverflowMenuOpen = ref(false)
 watch([showToolbars, showSettings, showToc], states => {
+  if (!states[0]) isOverflowMenuOpen.value = false
   if (states.some(Boolean)) void refreshChromeAppearance()
 })
 const readerLoading = ref(true)
@@ -656,11 +622,6 @@ const hasLandmarks = computed(() => {
 const hasPageList = computed(() => {
   return tocs.pageList?.length > 0
 })
-const bookTitle = computed(() => {
-  if (!!book.value && !!series.value)
-    return getBookTitleCompact(book.value.metadata.title, series.value.metadata.title)
-  return book.value?.metadata?.title
-})
 const appearance = computed({
   get(): string {
     return settings.appearance
@@ -799,6 +760,7 @@ function toggleHelp() {
 }
 
 function keyPressed(e: KeyboardEvent) {
+  if (isOverflowMenuOpen.value) return
   shortcuts.value[e.key]?.action()
 }
 

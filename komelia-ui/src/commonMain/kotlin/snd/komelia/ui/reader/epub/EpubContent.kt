@@ -28,7 +28,8 @@ fun EpubContent(
     backgroundColor: Color,
 ) {
     val mobile = LocalPlatform.current == PlatformType.MOBILE
-    val insets = if (mobile && !displaySettings.immersiveMode) WindowInsets.safeDrawing else WindowInsets(0)
+    // Fullscreen controls system-bar visibility, not permission to cover a display cutout.
+    val insets = if (mobile) WindowInsets.safeDrawing else WindowInsets(0)
     Box(
         Modifier.fillMaxSize()
             .background(backgroundColor)

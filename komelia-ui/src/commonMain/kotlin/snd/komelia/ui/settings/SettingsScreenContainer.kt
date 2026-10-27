@@ -22,7 +22,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,14 +32,12 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import org.jetbrains.compose.resources.stringResource
-import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.common.components.LocalNavigationBarInset
 import snd.komelia.ui.LocalKomeliaLayout
-import snd.komelia.ui.common.components.GlassBackdropScope
-import snd.komelia.ui.common.components.glassBackdrop
+import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.common.components.BrowsePageHeader
 import snd.komelia.ui.common.components.KomeliaPageScaffold
+import snd.komelia.ui.common.components.LocalNavigationBarInset
 import snd.komelia.ui.common.components.PauseGlassWhileBusy
-import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
@@ -65,29 +62,14 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
     val layout = LocalKomeliaLayout.current
     val scrollState = rememberScrollState()
     PauseGlassWhileBusy(scrollState.isScrollInProgress)
-    val isContentScrolled by remember(scrollState) { derivedStateOf { scrollState.value > 0 } }
     KomeliaPageScaffold(
         modifier = Modifier.background(MaterialTheme.colorScheme.background),
         topBar = {
-        KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = layout.pageHorizontalPadding)
-                    .padding(vertical = layout.controlSpacing),
-                horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            BrowsePageHeader(title, navigationIcon = {
                 IconButton(onClick = { navigator.pop() }) {
-                    Icon(
-                        Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = stringResource(Res.string.navigation_back)
-                    )
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(Res.string.navigation_back))
                 }
-
-                Text(title, style = MaterialTheme.typography.titleLarge)
-            }
-        }
+            })
     }) { topInset ->
         Column(
             modifier = Modifier

@@ -1,141 +1,123 @@
-# Komelia UI 二次优化视觉 QA
+# 视觉实现检查
 
-## 验收环境
+final result: passed（代表状态的视觉复核；2026-10-26 透明材质与主导航补充检查。最终自动回归及包身份见 handoff.json，真机验收仍暂停）
 
-- Android 模拟器：1080 × 2400 px，420 dpi（约 411 × 914 dp）
-- 语言：简体中文
-- 数据：已打码的真实 Komga 测试会话；凭据、服务器地址未写入仓库或测试日志
-- 状态覆盖：首页、搜索、设置、首页分组管理、系列详情、书籍详情、PDF 阅读、EPUB 阅读
+范围为 38 张背景范围修正版视觉稿对应的 39 个 Screen 入口。实现沿用 Kotlin/Compose 应用和两种现有 EPUB 阅读器。视觉目标是中性墨蓝底色、天蓝操作色、独立玻璃导航、清晰表单与作品区域大图。
 
-## 对比输入
+## 本轮发现与修复
 
-| 页面 | 参考图 | 实现截图 | 同屏对比 |
-| --- | --- | --- | --- |
-| 首页 | `/var/folders/6k/w12ht07j5p95l2qn8_63g1zm0000gn/T/codex-clipboard-bccdeb2e-0f51-4262-8688-53153be80851.png`（786 × 1548） | `/private/tmp/komelia-home-after-2.png`（1080 × 2400） | `/private/tmp/komelia-home-comparison.png` |
-| 搜索 | `/var/folders/6k/w12ht07j5p95l2qn8_63g1zm0000gn/T/codex-clipboard-cd1d7bf9-6768-4515-b27c-3b463e6cc507.png`（742 × 1470） | `/private/tmp/komelia-search-after.png`（1080 × 2400） | `/private/tmp/komelia-search-comparison.png` |
-| 设置 | `/var/folders/6k/w12ht07j5p95l2qn8_63g1zm0000gn/T/codex-clipboard-f313a805-219d-4836-8edb-997956f26738.png`（748 × 1050） | `/private/tmp/komelia-settings-after.png`（1080 × 2400） | `/private/tmp/komelia-settings-comparison.png` |
-| 首页分组迭代 | 设置页圆角区块语义与首轮实现 | `/private/tmp/komelia-home-groups-after-fix-2.png`（1080 × 2400） | `/private/tmp/komelia-home-groups-iteration-comparison.png` |
+| 级别 | 问题及证据 | 修复与复核 |
+|---|---|---|
+| P1 | 系列页滚动后，悬浮标题压在正文上；`60-series-list-scrolled-v4.png` | 滚动后使用单层完整工具栏，初始状态使用独立圆形按钮；`65-series-header-fixed.png` |
+| P1 | 阅读列表仍为封面网格，与 09 号纵向列表稿不同；`72-readlist-detail.png` | 改为带顺序编号、页数、真实进度和操作菜单的纵向列表，保留分页、选择、排序及阅读上下文 |
+| P1 | 从阅读器返回系列或阅读列表时，进度可能仍显示旧值；PDF 第 2 页重进正常，但系列仍显示未读 | 保留模型重新进入时刷新书籍列表；两项回归测试在旧行为下均报 expected 2 / actual 1，修复后通过；阅读列表实际返回从 50% 更新为 75%，系列 PDF 从 67% 更新为 100% |
+| P2 | 360dp、150% 字体时续读按钮挤压书名，英文导航出现单字母换行；API35 `08-oled-360-large-home.png` | 续读标题与按钮按宽度、字号上下排列；导航标签单行截断，保留完整语义；三个 Compose 布局测试及 `41-large-home-fixed.png` |
+| P2 | 宽屏通知页只显示编辑或预览；`21-notifications-v4-settled.png` | 宽屏并列编辑与真实模板预览，620px 窄屏保留分页；`24-notifications-wide-v6.png`、`25-notifications-narrow-v6.png` |
+| P2 | 单行本、合集与阅读列表的顶部操作缺少独立圆形层次 | 复用同一悬浮按钮，保留各页菜单和权限条件；单行本 `96-oneshot-fixed.png`，合集 `65-collection-final.png`、阅读列表 `55-readlist-compact-final.png` |
+| P2 | 离线账号选择页内容过度居中，在线登录品牌偏小 | 手机离线入口改为靠上排列，返回入口占满可用宽度；在线登录放大字标；`124-login-final.png`、`125-offline-login-final.png` |
+| P2 | 账号页、默认色彩校正和服务器表单的分组层次不足 | 账号页区分身份、角色与密码操作；默认校正独立分组；服务器字段采用描边输入框；`127-account-final.png` 至 `129-server-settings-final.png` |
+| P1 | 桌面下拉菜单关闭时立即跨越宽窄布局分界可触发 RootNodeOwner 已释放错误；旧版与更新前版本均复现 | 表单与侧栏采用可移动组合，跨断点保留焦点和弹层所有者；生命周期回归由重建 3 次变为 1 次，旧版 `26-base-escape-resize.png` 复现，修复版 `30-fixed-menu-ready.png` → `31-fixed-escape-resize.png` 正常，修复进程日志未再出现该错误 |
 
-参考图包含设备外框，实现图为模拟器完整屏幕，因此同屏图按内容区高度归一化；视觉判断只比较应用内容，不比较设备外框。
+## 2026-10-26 透明材质与细节补充
 
-## 全屏与重点区域检查
+本轮按用户明确选择调整为更透明的玻璃。首页、书库、本地、搜索和设置共用同一底栏形状与材质，移除移动搜索的单独 Classic 布局。模糊半径由 28dp 减至 12dp，并减轻边缘折射与阴影；浅色、深色、OLED 的色调分别校准。`GlassContrastTest` 同时约束正文对比度和可见的背景变化，旧的高遮盖方案在后一个检查中失败。滚动与编辑期间保留当前作用域的最近一帧，停止新采样，避免每次拖动都切成实色面板。
 
-- 首页：三列封面层级保持清晰；系列卡片统一使用固定 `TitleOnly` 槽位，首页书籍统一使用固定 `TitleWithSupporting` 槽位，同排底边对齐；单行标题垂直居中，无原 72dp 灰色空块。
-- 首页导航：页面、卡片、底部导航分别使用近白、白色和极浅蓝紫表面；主色仅用于选中态。顶部只显示“全部 + 当前分组 + 更多”，设置入口已迁移。
-- 搜索：分段切换紧凑；结果卡片使用白色高层表面和轻描边；标签可换行，最多显示三项并以 `+N` 汇总，未发现横向裁切或页面溢出。
-- 设置：分组采用 16dp 圆角卡片；分隔线只存在于相邻行之间；新增“首页分组”入口。
-- 阅读器：PDF 实际打开至 96/201 页；EPUB 实际打开 2184 页套装正文。两者均能显示真实内容、阅读进度与工具栏，未发现固定栏遮挡正文。
+- API 37：`emulator-clear/16-final-home-light.png`、`19-final-home-oled.png`、`20-final-local-oled.png`、`21-final-search-oled.png`；默认 412dp、360dp/150% 字体与键盘展开分别检查。`23-final-360-large-home.png` 中续读按钮换行，导航文字可读；`17-final-search-ime.png` 中输入区位于键盘上方。
+- API 35：`android-api35/70-clear-final-start.png` 至 `75-reduced-transparency.png`，检查英文、空本地库、搜索、600dp 导航栏及减少透明效果。截图只证明相应模拟器状态。
+- 未知页数不再生成百分比；零进度或未知长度书籍不进入大型续读区。封面加载失败时详情缩为 136dp 占位区，EPUB 使用书籍标题。对应回归测试先失败后通过，`emulator-clear/22-final-missing-artwork.png` 记录了模拟器上的缺图详情。最终复核还发现有页数、无封面的书籍仍会占用首页大图区域，因此首页也按实际封面加载结果收缩为标题与续读控件，保留封面重载能力；补充前后截图与最终包检查记录在 handoff.json。
+- TTU 顶栏旧的分组偏移把关闭按钮推出屏幕。移除偏移并允许按钮组换行，保留 48px 触控尺寸；`emulator-clear/26-epub-controls-oled.png` 为问题截图，`29-ttu-controls-visible-360.png` 记录窄屏修复。两种 EPUB 只改变控件材质，正文不参与过滤。
+- EPUB 共享样式原先不在 Gradle 的 npm 构建输入中，导致仅修改样式时复用旧 HTML。两项构建任务已声明 `shared/` 输入，`clear-all-builds.log` 记录两种阅读器重新构建，产物包含 12px 模糊样式。
+- Web：`web/33-clear-connection-settled.png`、`35-clear-escape-resize.png`、`36-clear-drawer.png`、`39-clear-notifications-ready.png`、`40-clear-notifications-narrow-ready.png` 检查最终材质、弹层关闭后的宽窄切换、透明侧栏及通知编辑/预览。未发送通知。
 
-## 迭代记录
+搜索滚动的一次模拟器诊断采样为 339 帧、P95 24ms，现代 jank 35.99%、legacy jank 10.32%。它来自候选包的 3 组往返滚动，保留在 `emulator-clear/search-scroll-gfx.txt`；没有同条件 Classic 对照，不能用来声称性能提升或通过真机性能门槛。
 
-1. 首轮检查发现 P1：首页分组编辑页未消费系统顶部安全区，标题和返回按钮与状态栏重叠；列表仍使用整行分隔线，与新的圆角分组语义不一致。
-2. 修复：增加 `WindowInsets.systemBars` 顶部占位；每个分组改为 16dp 圆角高层表面、1dp 描边和独立间距；拖动态使用 3dp 语义强调描边。
-3. 二次同屏复核：状态栏重叠消失，返回/完成/重置操作完整可见；卡片圆角、间距和边界一致，无裁切、错位或横向溢出。
+用户要求暂停真机后，本轮后续安装、截图和输入均改用专用模拟器。此前真机发现的问题已记录，包含私有书库信息的截图仅保存在忽略目录，未写入版本库。最终透明方案尚未获得真机确认。
 
-## 遗留问题
+## 对照方式与五项检查
 
-- 无阻断问题。真实 2184 页 EPUB 首次打开约需二十秒，加载期间显示进度状态；属于内容体积相关性能观察，不影响本次 UI 验收。
+共享磨砂、无边框高光阴影与顶部挖孔避让的后续调整，以 [2026-10-27 共享材质复核](docs/verification/shared-glass-20261027.md) 为准。此前截图仅代表对应阶段，不作为本轮最终版本的完整验收。
 
-## EPUB 阅读控制专项复核
+源图为 ImageGen 概念稿，手机图为 853×1844 像素，没有真实设备 DPR。Android 原图为 1080×2400；默认密度 420，另检查 360dp、600dp 宽度和 150% 系统字号。Web 检查 1280×900 与 620×900，DPR 1。桌面使用 Linux 开发运行环境检查 1280×910 客户区、840px 窄窗与键盘操作；对照图裁掉窗口标题栏和 Xvfb 外围黑边，原始截图保留。
 
-- 源视觉真值：`/var/folders/6k/w12ht07j5p95l2qn8_63g1zm0000gn/T/codex-clipboard-b706ed70-13aa-4983-8362-92cea5e3ef3f.png`，742 × 1572 px，底部控制栏显示状态。
-- 实现证据：`/private/tmp/komelia-epub-chrome-visible-after.png` 与 `/private/tmp/komelia-epub-chrome-hidden-retoggle.png`，均为 1080 × 2400 px、420 dpi；原生 Compose/WebView 屏幕无 CSS viewport 或浏览器缩放。
-- 归一化：源图去除设备外框，裁剪为 678 × 1506 px 后缩放至 1080 × 2400 px；实现图保持原始像素。全屏同屏对比为 `/private/tmp/komelia-epub-chrome-full-comparison.png`。
-- 重点区域：底部 480 px 控件对比为 `/private/tmp/komelia-epub-chrome-controls-comparison.png`，可清楚判断控件边界、阴影、正文遮挡及独立按钮移除情况。
-- 状态：在真实 2184 页 EPUB 中完成“沉浸态 → 中央轻触显示顶部/底部 chrome → 再次中央轻触收起”的完整交互；目录、书签、设置和翻页入口保持可用。
+`build/verification/immersive-glass/comparisons/` 保存同一图像内的参考稿与运行截图。比较图按等比缩放对齐密度，不拉伸原图；手机系统安全区与原图的构图留白单独判断。表中早期截图用于展示未再改动的区域，最后修复项另有前后对照。检查不等同于像素级复刻。
 
-### Findings
+- **字体与排版**：界面沿用系统无衬线字体及中英文回退，字标使用统一字距。标题、正文、说明与字段层级分别核对。中文完整字形、英文长标题、150% 字体已检查；窄屏允许合理换行与截断。EPUB 正文字体由出版物和阅读偏好决定。
+- **间距与布局**：沿用仓库的布局与触控尺寸。导航悬浮在独立层，书籍详情阅读条不随正文滚动；长页面可滚动到末项。表单使用实色分组，桌面侧栏有独立边界。阅读列表保留真实顺序，紧凑行在文字变长时可增高。
+- **颜色与材质**：深色背景采用 `#0D131C`，主色 `#69C9FF`，正文 `#F4F7FC`。浅色、OLED、Classic 与减少透明效果的路径保留。边缘只绘制中性高光；玻璃采样真实内容，滚动和拖动期间沿用降级预算。对比度单元测试是模型约束，不能替代每种 GPU 和背景下的实测。
+- **图片质量**：封面保留在作品卡片、续读区和书籍详情。运行素材为受控合成书库，只有雨夜封面是为本轮测试生成的素材。缺失封面显示中性书籍图标，不伪造作品图片；实际品牌保留项目 K 图标。缩略图采用平滑采样。阅读页、PDF、EPUB 正文未添加滤镜或场景背景。
+- **文案与数据**：新增用户文案同步英文和简体中文。页数、进度、版本、任务状态、权限和公告来自实际状态；不照抄图中的虚构日期、字数、下载速度或成功提示。视觉稿中进度条图形与数字不一致时，按真实进度比例绘制。
 
-- 无 P0/P1/P2。原 P1 问题是左下角“隐藏”按钮脱离底部导航胶囊、重复表达控制栏状态并遮挡正文；修复后独立按钮已移除，阅读控制作为单一 chrome 同步显示和隐藏。
-- 字体与文案：删除孤立“隐藏”文案后，底部只保留章节、进度和导航信息，字号与字重未发生回归。
-- 间距与布局：底部导航胶囊保持居中，左右留白对称；沉浸态不再有左下角悬浮层，正文可使用完整宽度和底部区域。
-- 色彩与令牌：保留既有 `slate-950/90` 半透明阅读控制表面、白色前景和焦点环，未引入新的强调色。
-- 图像质量：EPUB 原始封面与正文图片未做重采样或替换；本轮没有新增图像资产或自绘图标。
-- 图标与无障碍：沿用 Font Awesome 同族图标；现有控制保持语义标签、焦点环和 40px 视觉按钮，移动端整体胶囊提供足够触控空间。
+## 保留的产品约束
 
-### Comparison history
+视觉稿的作品、账号数量、公告长度、库配置和默认选项与测试数据不同。数据缺失、空列表、长英文标题和未配置状态不按“填满画面”处理。
 
-1. 修复前：底部控制栏显示时，左下角额外出现“隐藏”胶囊，形成两个视觉中心并覆盖正文。
-2. 修复：移除 `ReaderChrome` 的独立 `onToggleFooter` 按钮；将阅读区中央点击改为统一切换顶部与底部 chrome。翻页、切章和自动滚动后仍调用 `hideReaderChrome()`。
-3. 修复后：全屏及底部重点区域复核均无独立按钮；连续两次中央点击分别显示和收起整套控件，没有裁切、溢出、残影或无法恢复的问题。
+移动封面密度仍使用已有偏好，默认三列；来源筛选、页大小、批量操作与高级首页过滤条件完整保留。移动搜索与首页、本地、书库、设置共用玻璃导航；滚动和编辑时暂停新采样并保留当前作用域的最近一帧。阅读器保留已有目录、分享、模式、设置与书签入口及自动隐藏行为；两种 EPUB 不强制改写正文主题。Komf 每字段保存与连接状态由现有状态持有者负责，通知预览没有发送测试消息。
 
-## 首页标签自适应与全局间距复核
+## 页面覆盖
 
-### 响应式证据
+运行截图相对目录为 `build/verification/immersive-glass/`。这是代表状态覆盖，包含正常、空数据、未配置、下载完成、设置展开和阅读控制栏状态，不代表每个平台上的所有组合都已执行。
 
-| 可用宽度 | 截图 | 验收结果 |
-| --- | --- | --- |
-| 360dp | `/private/tmp/komelia-home-360.png` | 单行显示“全部 + 当前分组 + 更多”；当前长中文标签受剩余宽度约束，无裁切或横向滚动。 |
-| 600dp | `/private/tmp/komelia-home-600.png` | 可见普通分组数量随宽度增加；当前分组保持顶部可见，被替换分组进入“更多”。 |
-| 1280dp | `/private/tmp/komelia-home-1280.png` | 全部分组可容纳，“更多”自动隐藏；页面内容居中并保持 1200dp 最大宽度。 |
+| 编号 | 视觉目标 | 运行证据 |
+|---|---|---|
+| 01 | [首页与主导航](docs/design/immersive-glass-20261025/screens/01-home.png) | `android-first/39-home-v3.png` |
+| 02 | [书库](docs/design/immersive-glass-20261025/screens/02-library.png) | `android-first/67-library-settled-v6.png` |
+| 03 | [本地与下载](docs/design/immersive-glass-20261025/screens/03-local.png) | `android-first/56-local-downloads.png` |
+| 04 | [全局搜索](docs/design/immersive-glass-20261025/screens/04-search.png) | `android-first/73-search.png` |
+| 05 | [书籍详情](docs/design/immersive-glass-20261025/screens/05-book.png) | `android-first/40-book-v3.png` |
+| 06 | [系列详情](docs/design/immersive-glass-20261025/screens/06-series.png) | `android-first/59-series-list-v4.png` |
+| 07 | [单行本详情](docs/design/immersive-glass-20261025/screens/07-oneshot.png) | `android-first/96-oneshot-fixed.png` |
+| 08 | [合集详情](docs/design/immersive-glass-20261025/screens/08-collection.png) | `android-api35/65-collection-final.png` |
+| 09 | [阅读列表详情](docs/design/immersive-glass-20261025/screens/09-readlist.png) | `android-api35/55-readlist-compact-final.png` |
+| 10 | [图片与 PDF 阅读器](docs/design/immersive-glass-20261025/screens/10-image-reader.png) | `android-first/44-reader-controls.png` |
+| 11 | [EPUB 阅读器](docs/design/immersive-glass-20261025/screens/11-epub-reader.png) | `android-api35/33-komga-controls.png` |
+| 12 | [色彩校正](docs/design/immersive-glass-20261025/screens/12-color-correction.png) | `android-first/104-color-final.png` |
+| 13 | [首页分组编辑](docs/design/immersive-glass-20261025/screens/13-home-groups.png) | `android-first/85-home-group-expanded.png` |
+| 14 | [在线登录](docs/design/immersive-glass-20261025/screens/14-login.png) | `android-first/124-login-final.png` |
+| 15 | [离线账号选择](docs/design/immersive-glass-20261025/screens/15-offline-login.png) | `android-first/125-offline-login-final.png` |
+| 16 | [手机设置入口](docs/design/immersive-glass-20261025/screens/16-mobile-settings.png) | `android-first/74-settings-v6.png` |
+| 17 | [桌面设置入口](docs/design/immersive-glass-20261025/screens/17-desktop-settings.png) | `desktop/20-final-settings-client.png` |
+| 18 | [外观设置](docs/design/immersive-glass-20261025/screens/18-appearance.png) | `android-first/27-appearance-matrix.png` |
+| 19 | [网络连接](docs/design/immersive-glass-20261025/screens/19-network.png) | `android-first/28-network.png` |
+| 20 | [图片阅读设置](docs/design/immersive-glass-20261025/screens/20-image-reader-settings.png) | `android-first/128-image-settings-final.png` |
+| 21 | [EPUB 阅读设置](docs/design/immersive-glass-20261025/screens/21-epub-settings.png) | `android-first/31-epub-settings.png` |
+| 22 | [应用更新](docs/design/immersive-glass-20261025/screens/22-updates.png) | `android-first/83-app-updates.png` |
+| 23 | [本地目录设置](docs/design/immersive-glass-20261025/screens/23-local-folders.png) | `android-first/33-local-folders.png` |
+| 24 | [离线管理](docs/design/immersive-glass-20261025/screens/24-offline-management.png) | `android-first/82-download-tasks.png` |
+| 25 | [关于](docs/design/immersive-glass-20261025/screens/25-about.png) | `android-first/80-about.png` |
+| 26 | [我的账号](docs/design/immersive-glass-20261025/screens/26-account.png) | `android-first/127-account-final.png` |
+| 27 | [认证活动](docs/design/immersive-glass-20261025/screens/27-authentication.png) | `android-first/77-auth-activity.png` |
+| 28 | [服务器设置](docs/design/immersive-glass-20261025/screens/28-server.png) | `android-first/129-server-settings-final.png` |
+| 29 | [用户管理](docs/design/immersive-glass-20261025/screens/29-users.png) | `android-first/76-users.png` |
+| 30 | [媒体管理](docs/design/immersive-glass-20261025/screens/30-media.png) | `android-first/78-media-management.png` |
+| 31 | [公告](docs/design/immersive-glass-20261025/screens/31-announcements.png) | `android-first/79-announcements.png` |
+| 32 | [Komf Web 入口](docs/design/immersive-glass-20261025/screens/32-komf-web.png) | `web/23-connection-v6.png` |
+| 33 | [Komf 连接设置](docs/design/immersive-glass-20261025/screens/33-komf-connection.png) | `android-first/94-komf-connected-settled.png` |
+| 34 | [Komf 处理设置](docs/design/immersive-glass-20261025/screens/34-komf-processing.png) | `web/26-processing-wide-v6.png` |
+| 35 | [Komf 元数据源](docs/design/immersive-glass-20261025/screens/35-komf-providers.png) | `web/11-providers-settled.png` |
+| 36 | [Komf 通知设置](docs/design/immersive-glass-20261025/screens/36-komf-notifications.png) | `web/24-notifications-wide-v6.png` |
+| 37 | [Komf 任务历史](docs/design/immersive-glass-20261025/screens/37-komf-jobs.png) | `web/14-jobs.png` |
+| 38 | [MangaBaka 设置](docs/design/immersive-glass-20261025/screens/38-komf-mangabaka.png) | `web/15-mangabaka.png` |
 
-- 412dp 真实设备密度基线：`/private/tmp/komelia-home-spacing.png`；“更多”底部面板：`/private/tmp/komelia-home-more.png`；溢出分组选中并提升后：`/private/tmp/komelia-home-promoted.png`。
-- “更多”只显示顶部未出现的两个分组，并保留原配置顺序与项目数量；选择“最近添加的系列”后，该分组提升到顶部选中态，原末尾普通分组返回“更多”。
-- 窗口从 360dp、600dp 切换到 1280dp 时没有保留横向滚动状态，也没有出现换行、标签重叠或布局闪烁。
+## 执行证据
 
-### 页面族与间距
+- `platform-matrix-4.log`：共享 UI 全量 JVM/Wasm 测试及 Android、桌面 JAR、Komf Web、两种 EPUB 构建通过。该轮为 271 个 JVM、170 个 Wasm 用例，失败及跳过均为 0；随后增加的两项目录进度测试另有先失败再通过的记录。
+- `catalog-progress-red-3.log`、`readlist-progress-fix.log`：进度回归红绿记录。早期测试夹具配置失败与缺失导入的编译失败另保留，不计为行为复现。
+- `visual-candidate-10.log`：布局、进度回归及 Android/桌面候选构建记录；`settings-resize-red-2.log`、`settings-resize-fix.log` 记录断点切换的失败、修复和重新构建。最终完整回归以 `premerge-final.log` 及其指向的 `build/regression/` 记录为准；自动命令与人工条目分开记录。
+- Android：专用 API 35 与 API 37 AVD，覆盖安装保留数据。实际检查三种阅读格式、进度返回/重进、无痕阅读、下载与离线账号入口。冷启动恢复曾出现连接失败，实际点击重试可恢复；原因尚未由本轮验证确定，不能声称所有冷启动均成功。
+- 桌面：当前 UI/shared JAR 在受控 Linux 容器中运行，复用既有原生依赖，使用系统 JDK 启动。已检查宽窄窗口、弹层 Esc、键盘焦点与开关。此证据属于开发运行环境，不是新安装包验收；复用包的启动器曾退出 139，未把替代启动方式描述为安装器修复。
+- Web：使用现有 Ego 浏览器任务空间检查完整打包产物、中文显示、侧栏、宽窄布局、菜单与通知预览；调试记录保留在 `web/`。
 
-- 搜索：`/private/tmp/komelia-search-spacing.png`。页面边距、结果项间隔与卡片内边距使用响应式布局令牌；标签保持三项加 `+N` 汇总，无横向溢出。
-- 设置：`/private/tmp/komelia-settings-spacing.png`。页面水平边距统一，16dp 圆角分组保持完整；分隔线只位于相邻行之间，退出登录维持独立危险操作区。
-- 共享组件：书库/首页网格、书籍与系列详情、收藏/阅读列表、登录、批量操作、编辑弹窗、设置容器和图片阅读控制均消费 `KomeliaLayoutSpec` 的页面、章节、列表项、控件、卡片和弹窗语义间距。
-- 触控目标：移动端 48dp、桌面与 Web 40dp；图片阅读顶部控制同步使用平台触控目标。功能尺寸（封面比例、滑块厚度、缩略图尺寸）未机械替换。
-- 主题：Light 实机复核通过；布局令牌不依赖色值，既有 Dark/OLED 主题映射测试继续通过。中英文超长标签、当前项提升、空分组过滤和极窄宽度由公共测试覆盖。
+## 尚未覆盖的验收
 
-### 自动验证
+最终透明材质的真机验收、硬件 GPU 的 P95/jank、TalkBack 完整操作、所有平台的安装器、原始用户书籍、全部离线异常分支和正式签名包升级未由本轮证明。回归目录中的人工用例只有在其完整步骤和证据齐备时才可标记通过；不能把模拟器截图或绿色构建替代这些门槛。
 
-- `git diff --check`：通过。
-- `./gradlew :komelia-ui:allTests`：通过，包含 JVM 与 Wasm 浏览器测试。
-- EPUB `npm run check && npm run build`：0 错误、0 警告，生产构建通过。
-- `./gradlew buildEpubReaders :androidDebug :desktopJar :komfWebUI`：通过；Android APK、macOS arm64 JAR 和 Wasm WebUI 均生成成功。
-- APK：`komelia-app/androidApp/build/outputs/apk/debug/androidApp-debug.apk`，已安装到 `emulator-5554` 并使用真实书库会话完成回归；测试凭据未写入仓库或日志。
+本次不变更数据库、服务端 API、依赖版本、子模块、包名、正式签名或 Release 策略。代码与本地测试包留在隔离工作区，未执行推送、PR、合并或发布。
 
-### Findings
+## 交付检查清单
 
-- 无 P0/P1/P2。构建仍报告既存 Skiko 依赖版本兼容提示、Wasm 资源体积提示和 Browserslist 数据过期提示；均未由本轮 UI 变更引入，也未阻断测试或产物生成。
-- 响应式截图后模拟器已恢复为物理参数 1080 × 2400 px、420 dpi。
+- [x] 38 张参考图与对应入口逐项核对，保留代表状态及数据差异说明。
+- [x] 统一颜色、表单、导航和封面展示，移除全局插画与虚构反光。
+- [x] 发现的标题遮挡、大字体挤压、通知预览和列表进度问题已修复并添加或复用验证。
+- [x] 透明材质、统一导航、缺图详情与 EPUB 工具栏已完成代表状态复核；最终包与完整检查结果单独记录。
 
-## 下拉数据与 EPUB 设置汉化复核
-
-- 首页分组编辑：`/private/tmp/komelia-home-dropdown-i18n.png`。真实配置中的 `Custom`、`ReadDate`、`DESC`、`All`、`ReadStatus`、`Equals`、`IN_PROGRESS` 已分别显示为“自定义、阅读日期、降序、全部、阅读状态、等于、阅读中”。保存值和服务端字段保持原枚举值，不受展示文案影响。
-- EPUB 设置：`/private/tmp/komelia-epub-settings-i18n-final.png`。在真实 2184 页 EPUB 中验证“主题、阅读模式、连续滚动、分页阅读、衬线字体、无衬线字体、字体大小、行高、阅读器上下边距、阅读区域最大宽度”等文案；主题名、开关值、振假名模式和字体管理弹窗也使用同一语言表。
-- 应用语言桥接：EPUB WebView 在加载设置前读取 Komelia 的 `SYSTEM/EN/ZH_CN` 选择；英文保持英文，简体中文使用 `zh-CN`，未显式选择时回退浏览器语言。语言仅影响阅读器界面，不修改出版物正文和字体名称。
-- 构建复核发现 `buildEpubReaders` 与 `androidDebug` 同次调用时可能并行，导致 APK 打入上一版 EPUB 资源；最终验收按“先生成 EPUB、再单独执行 `:androidDebug`”完成，并直接检查 APK 内含“主题/阅读模式/连续滚动”后安装复验。
-- 共享下拉覆盖：首页书籍/系列条件、阅读状态、排序方向、媒体状态之外，继续覆盖 Komf 媒体类型、匹配模式、作者角色、阅读方向、数据源、外部链接类型，以及色彩校正通道；用户或服务器自定义名称保持原样。
-- 自动验证：EPUB `npm run check` 为 0 错误、0 警告，`npm run build` 通过；`:komelia-ui:allTests`、`:komelia-ui:compileAndroidMain`、`buildEpubReaders`、`:androidDebug`、`:desktopJar`、`:komfWebUI` 均通过。新增枚举映射测试覆盖截图中的原始值、扩展设置枚举、常见状态值和未知值回退。
-
-## 自适应导航与动效专项复核
-
-- 问题输入：用户提供的录屏附件。原全局抽屉只覆盖内容区，底部导航可穿透点击，导致抽屉后页面切换且书库无正确选中态。
-- 修复后回归视频：`/private/tmp/komelia-adaptive-navigation-passed-capture.mp4`，12.67 秒、38 帧；由模拟器连续原始截图编码，规避 Android Emulator `screenrecord` 对 Compose 硬件层只记录关键帧的问题，未插入设计稿或静态替代页面。
-- Compact 证据：首页 `/private/tmp/komelia-adaptive-main-restarted-loaded.png`；搜索 `/private/tmp/komelia-live-selection-search.png`；书库直达 `/private/tmp/komelia-live-selection-library.png`；书库范围底部面板 `/private/tmp/komelia-adaptive-final-scope-sheet.png`。
-- Medium 证据：约 720dp 宽度 `/private/tmp/komelia-adaptive-final-rail-720dp.png`，一级导航切换为左侧 Navigation Rail；模拟器随后恢复 1080 × 2400 px、420 dpi。
-- 快速切换压力回归：以 250ms 间隔连续切换首页、搜索和书库，最终截图 `/private/tmp/komelia-adaptive-rapid-switch-final.png` 中书库内容与书库选中态一致，`MainActivity` 保持前台，日志无重复 SaveableState key 或崩溃。
-
-### Findings 与修复闭环
-
-1. 移除全局抽屉、`DrawerState`、汉堡按钮与 `toggleNavBar()`；书库按钮直接进入全部书库，一级导航在 Compact 使用底部栏，其余断点使用约 80dp Rail。
-2. 书库范围选择降级为页面内部控件：手机使用阻断下层点击的底部面板，桌面/Wasm 使用锚定弹层，Full 使用 232dp supporting pane。返回或 Esc 只关闭顶层面板。
-3. 一级目的地使用单层 200ms fade-through；详情使用单层 8dp/200ms 淡入位移。单层过渡避免 Compose 在快速往返时同时组合两个相同 `Screen.key`，reduced-motion 下直接切换。
-4. 首轮压力录屏发现并修复 `HomeScreen:screen was used multiple times` 竞态；同时将导航点击改为读取 Voyager 当前目的地，而非使用可能过期的组合闭包，消除“选中书库但仍显示首页”的瞬时错配。
-5. 顶部工具栏、窗口标题栏、内容区和导航使用连续 `surface`；首页分组标题不再用整行分隔线。卡片、弹窗和必要数据行仍保留语义边界。
-6. 自动验证：`git diff --check`、`:komelia-ui:allTests`、EPUB `npm run check && npm run build`、`buildEpubReaders :androidDebug :desktopJar :komfWebUI` 全部通过。APK 已单独执行 `:androidDebug`，确认包含简中 Compose Resources 后安装到 `emulator-5554`，并使用真实 Komga 内容完成上述路径复验。
-
-## 首页/书库职责与 Tab 双闪复核
-
-- 职责边界：首页负责“继续阅读、待读、最近添加/更新”等动态聚合和快捷恢复；书库负责全部系列、合集、阅读列表、书库范围、筛选排序与批量管理。两者共享内容卡片但服务于不同任务，保留为独立一级入口。
-- 语义修订：首页聚合入口由“全部”改为“概览”，避免与书库中的“全部书库”混淆；筛选结果、排序和业务数据均未改变。
-- 根因证据：将系统动画时长临时放大 10 倍后，一次“首页 → 书库”点击先执行目的地容器淡出/淡入，再执行书库根页面首次挂载的详情淡出/淡入，形成两个连续明暗脉冲。修复前序列保存在 `/private/tmp/komelia-double-flash-01.png` 至 `/private/tmp/komelia-double-flash-14.png`，动画倍率已恢复系统默认。
-- 修复策略：保留一次一级目的地 fade-through；详情过渡仅在已显示页面的 `Screen.key` 真正变化时执行。根页面首次挂载和同 key 重置直接显示，详情前进/返回仍保留 8dp/200ms 克制动效，reduced-motion 行为不变。
-- 回归保护：纯状态决策测试覆盖首次挂载、同页面重置和详情切换三条路径，防止未来再次把根页面初始化当成详情导航动画。
-- 修复后证据：同样以 10 倍时长采集 `/private/tmp/komelia-single-transition-01.png` 至 `/private/tmp/komelia-single-transition-10.png`，书库根页面随一级容器单次出现，未再发生第二次淡出；恢复正常时长后快速切换书库、首页、搜索、书库、首页，最终截图 `/private/tmp/komelia-tab-fix-settled.png` 仅首页保持选中，正文与选中态一致。
-- 真实数据说明：书库范围选择器出现后，11 个系列需要等待服务端请求完成才显示；最终证据为 `/private/tmp/komelia-tab-fix-library-loaded.png`。该阶段透明度不再变化，属于数据加载而非第二段页面动画。
-- 自动验证：`git diff --check`、`:komelia-ui:allTests`、`:androidDebug` 均通过；修复后的 APK 已覆盖安装到 `emulator-5554`。压力回归日志无重复 `Screen.key`、SaveableState、`IllegalArgumentException` 或崩溃。
-
-## 首页顶部标签与内容节奏复核
-
-- 首页顶部筛选标签与首个内容章节原仅使用 8dp 控件间距，两个不同层级在视觉上紧贴。现改用响应式章节间距：Compact 16dp、Medium 20dp、Expanded/Full 24dp。
-- 间距复用 `KomeliaLayoutSpec.sectionSpacing`，未新增固定 dp、分隔线、背景色块或额外阴影；标签栏、章节标题和网格仍处于同一连续表面。
-- Compact 实机密度证据：`/private/tmp/komelia-home-section-spacing.png`，1080 × 2400 px、420 dpi。顶部标签与“继续阅读”标题层级清晰，首屏仍完整容纳两排卡片，无水平溢出或底部导航遮挡。
-- 自动验证：`git diff --check`、`:komelia-ui:allTests`、`:androidDebug` 均通过；新 APK 已覆盖安装到 `emulator-5554` 并使用真实首页内容复核。
-
-final result: passed
+最终构建、APK 身份/签名/摘要、实际安装和测试服务清理结果写入忽略目录中的 `build/verification/immersive-glass/handoff.json`。完整回归日志与人工条目以对应运行记录为准，保留源码、包与证据供后续真机检查。

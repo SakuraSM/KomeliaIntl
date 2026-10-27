@@ -14,6 +14,15 @@ enum class AppDestination {
     SETTINGS,
 }
 
+/** Display order is independent of destination ordinals and saved navigation keys. */
+internal val primaryDestinationOrder = listOf(
+    AppDestination.HOME,
+    AppDestination.LIBRARY,
+    AppDestination.LOCAL,
+    AppDestination.SEARCH,
+    AppDestination.SETTINGS,
+)
+
 internal fun interface AppNavigationController {
     fun open(screen: Screen)
 }

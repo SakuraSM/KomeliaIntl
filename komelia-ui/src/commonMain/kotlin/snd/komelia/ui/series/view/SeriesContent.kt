@@ -1,34 +1,23 @@
 package snd.komelia.ui.series.view
 
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_actions
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_identify
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_link_series
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_reset_metadata
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_unlink_series
-import snd.komelia.ui.dialogs.permissions.DownloadNotificationRequestDialog
-import snd.komelia.ui.dialogs.ConfirmationDialog
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
@@ -59,16 +48,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_penciller
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_actions
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_identify
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_link_series
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_reset_metadata
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_unlink_series
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_penciller
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_writers
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download_confirm
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_genres
@@ -76,20 +70,19 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_links
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_publisher
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_tab_books
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_tab_collections
+import kotlin.math.max
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.komga.api.model.KomeliaSeries
-import snd.komelia.settings.model.BooksLayout
 import snd.komelia.offline.local.isLocalLibrary
-import snd.komelia.ui.LoadState
+import snd.komelia.settings.model.BooksLayout
 import snd.komelia.ui.KomeliaSpacing
-import snd.komelia.ui.LocalKomgaState
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download
+import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalKomeliaLayout
-import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalKomfIntegration
 import snd.komelia.ui.LocalKomfMangaBakaIntegration
+import snd.komelia.ui.LocalKomgaState
+import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.collection.SeriesCollectionsContent
@@ -97,25 +90,26 @@ import snd.komelia.ui.collection.SeriesCollectionsState
 import snd.komelia.ui.common.TagList
 import snd.komelia.ui.common.components.AppFilterChipDefaults
 import snd.komelia.ui.common.components.DescriptionChips
+import snd.komelia.ui.common.components.FloatingChromeIconButton
 import snd.komelia.ui.common.components.KomeliaPageScaffold
-import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.LabeledEntry.Companion.stringEntry
+import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.common.images.SeriesThumbnail
 import snd.komelia.ui.common.menus.SeriesActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.common.menus.bulk.BooksBulkActionsContent
 import snd.komelia.ui.common.menus.bulk.BottomBulkActionsPanel
+import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialog
 import snd.komelia.ui.dialogs.komf.mangabaka.KomfMangaBakaLinkDialog
 import snd.komelia.ui.dialogs.komf.mangabaka.KomfMangaBakaUnlinkDialog
 import snd.komelia.ui.dialogs.komf.reset.KomfResetSeriesMetadataDialog
+import snd.komelia.ui.dialogs.permissions.DownloadNotificationRequestDialog
 import snd.komelia.ui.dialogs.series.edit.SeriesEditDialog
 import snd.komelia.ui.icons.AppIcons
-import snd.komelia.ui.icons.outlined.ChevronForward
 import snd.komelia.ui.icons.outlined.LinkedServices
-import snd.komelia.ui.icons.outlined.NewsStand
 import snd.komelia.ui.library.SeriesScreenFilter
 import snd.komelia.ui.platform.VerticalScrollbarWithFullSpans
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
@@ -130,7 +124,6 @@ import snd.komelia.ui.series.mangabaka.MangaBakaSeriesContent
 import snd.komelia.ui.series.mangabaka.state.MangaBakaMetadataState
 import snd.komga.client.collection.KomgaCollection
 import snd.komga.client.library.KomgaLibrary
-import kotlin.math.max
 
 @Composable
 fun SeriesContent(
@@ -191,8 +184,9 @@ fun SeriesContent(
     PauseGlassWhileBusy(scrollState.isScrollInProgress)
     Column(Modifier.fillMaxSize()) {
         KomeliaPageScaffold(modifier = Modifier.weight(1f), topBar = {
-            KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
-                if (booksData.selectionMode) {
+            val compact = windowWidth == COMPACT || windowWidth == MEDIUM
+            if (booksData.selectionMode) {
+                KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
                     BooksBulkActionsToolbar(
                         onCancel = { booksState.setSelectionMode(false) },
                         books = booksData.books,
@@ -200,14 +194,13 @@ fun SeriesContent(
                         selectedBooks = booksData.selectedBooks,
                         onBookSelect = booksState::onBookSelect
                     )
-                } else {
-                    SeriesToolBar(
-                        series = series,
-                        seriesMenuActions = seriesMenuActions,
-                        onDownload = onDownload,
-                        mangaBaka = mangaBaka,
-                        onBackPress = onBackPress,
-                    )
+                }
+            } else if (compact && !isContentScrolled) {
+                SeriesToolBar(series, seriesMenuActions, mangaBaka, onDownload, onBackPress,
+                    floating = true, showTitle = false)
+            } else {
+                KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
+                    SeriesToolBar(series, seriesMenuActions, mangaBaka, onDownload, onBackPress)
                 }
             }
         }) { topInset ->
@@ -347,13 +340,16 @@ fun SeriesToolBar(
     mangaBaka: MangaBakaMetadataState?,
     onDownload: () -> Unit,
     onBackPress: () -> Unit,
+    floating: Boolean = false,
+    showTitle: Boolean = true,
 ) {
     val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = layout.pageHorizontalPadding),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBackPress) {
+        FloatingChromeIconButton(onClick = onBackPress, floating = floating) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = stringResource(Res.string.navigation_back),
@@ -362,7 +358,7 @@ fun SeriesToolBar(
 
         if (series != null) {
             Text(
-                mangaBaka?.titleState?.mainTitle?.title ?: series.metadata.title,
+                if (showTitle) mangaBaka?.titleState?.mainTitle?.title ?: series.metadata.title else "",
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleMedium,
@@ -371,7 +367,7 @@ fun SeriesToolBar(
 
             Box {
                 var expandActions by remember { mutableStateOf(false) }
-                IconButton(onClick = { expandActions = true }) {
+                FloatingChromeIconButton(onClick = { expandActions = true }, floating = floating) {
                     Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
                 }
 
@@ -391,15 +387,16 @@ fun SeriesToolBar(
             val isOffline = LocalOfflineMode.current.collectAsState().value
             var showEditDialog by remember { mutableStateOf(false) }
             if (isAdmin && !isOffline) {
-                IconButton(onClick = { showEditDialog = true }) {
+                FloatingChromeIconButton(onClick = { showEditDialog = true }, floating = floating) {
                     Icon(Icons.Rounded.Edit, contentDescription = stringResource(Res.string.series_edit))
                 }
             }
             var showDownloadConfirmationDialog by remember { mutableStateOf(false) }
             val offlineAvailable = LocalOfflineAvailable.current
             if (!isOffline && offlineAvailable) {
-                IconButton(
+                FloatingChromeIconButton(
                     onClick = { showDownloadConfirmationDialog = true },
+                    floating = floating,
                 ) {
                     Icon(Icons.Default.Download, contentDescription = stringResource(Res.string.series_download))
                 }
@@ -595,6 +592,9 @@ fun Series(
                 contentScale = ContentScale.Crop,
             )
 
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(series.metadata.title, style = MaterialTheme.typography.headlineSmall,
+                    maxLines = 3, overflow = TextOverflow.Ellipsis)
             SeriesDescriptionRow(
                 library = library,
                 onLibraryClick = onLibraryClick,
@@ -606,8 +606,9 @@ fun Series(
                 deleted = series.deleted || library.unavailable,
                 alternateTitles = series.metadata.alternateTitles,
                 onFilterClick = onFilterClick,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
             )
+            }
         }
 
         SeriesSummary(

@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalWindowWidth
@@ -24,6 +25,8 @@ import snd.komelia.ui.platform.WindowSizeClass
 @Composable
 internal fun DetailedListCardLayout(
     modifier: Modifier = Modifier,
+    coverWidth: Dp? = null,
+    minimumCoverHeight: Dp? = null,
     cover: @Composable BoxScope.() -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -32,8 +35,8 @@ internal fun DetailedListCardLayout(
         LocalWindowWidth.current == WindowSizeClass.MEDIUM
     Row(modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(layout.cardContentPadding)) {
         Box(
-            Modifier.width(if (compact) 104.dp else 130.dp)
-                .heightIn(min = if (compact) 148.dp else 185.dp)
+            Modifier.width(coverWidth ?: if (compact) 104.dp else 130.dp)
+                .heightIn(min = minimumCoverHeight ?: if (compact) 148.dp else 185.dp)
                 .fillMaxHeight()
                 .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceContainerLow)

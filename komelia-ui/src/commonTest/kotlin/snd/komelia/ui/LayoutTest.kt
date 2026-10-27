@@ -9,8 +9,6 @@ import snd.komelia.ui.common.cards.coverCaptionHeight
 import snd.komelia.ui.common.cards.metadataTagLimit
 import snd.komelia.ui.common.cards.summarizeMetadataTags
 import snd.komelia.ui.common.components.komeliaTopBarElevation
-import snd.komelia.ui.home.calculateHomeGroupOverflowLayout
-import snd.komelia.ui.home.HomeGroupOverflowLayout
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.updates.AppProjectMetadata
@@ -96,62 +94,6 @@ class LayoutTest {
     }
 
     @Test
-    fun homeGroupsHideMoreWhenEverythingFits() {
-        val result = calculateHomeGroupOverflowLayout(
-            availableWidth = 420,
-            allChipWidth = 60,
-            moreChipWidth = 72,
-            groupWidths = listOf(80, 90, 100),
-            activeGroupIndex = 1,
-            spacing = 8,
-        )
-
-        assertEquals(listOf(0, 1, 2), result.visibleGroupIndices)
-        assertEquals(emptyList(), result.overflowGroupIndices)
-    }
-
-    @Test
-    fun homeGroupsKeepAStablePrefixAndOverflowOrder() {
-        val result = calculateHomeGroupOverflowLayout(
-            availableWidth = 300,
-            allChipWidth = 60,
-            moreChipWidth = 72,
-            groupWidths = listOf(70, 80, 90, 100),
-            activeGroupIndex = null,
-            spacing = 8,
-        )
-
-        assertEquals(listOf(0), result.visibleGroupIndices)
-        assertEquals(listOf(1, 2, 3), result.overflowGroupIndices)
-    }
-
-    @Test
-    fun activeOverflowGroupIsPromotedAndDisplacedGroupReturnsToMore() {
-        val result = calculateHomeGroupOverflowLayout(
-            availableWidth = 320,
-            allChipWidth = 60,
-            moreChipWidth = 72,
-            groupWidths = listOf(70, 80, 90, 240),
-            activeGroupIndex = 3,
-            spacing = 8,
-        )
-
-        assertEquals(listOf(3), result.visibleGroupIndices)
-        assertEquals(listOf(0, 1, 2), result.overflowGroupIndices)
-    }
-
-    @Test
-    fun invalidOrEmptyGroupsNeverDestabilizeTheOverflowResult() {
-        assertEquals(
-            HomeGroupOverflowLayout(emptyList(), emptyList()),
-            calculateHomeGroupOverflowLayout(320, 60, 72, emptyList(), 4, 8),
-        )
-        val result = calculateHomeGroupOverflowLayout(220, 60, 72, listOf(400, 70), 99, 8)
-        assertEquals(emptyList(), result.visibleGroupIndices)
-        assertEquals(listOf(0, 1), result.overflowGroupIndices)
-    }
-
-    @Test
     fun coverCaptionVariantsKeepStablePageLevelHeights() {
         assertEquals(48.dp, coverCaptionHeight(CoverCaptionVariant.TitleOnly, PlatformType.MOBILE))
         assertEquals(68.dp, coverCaptionHeight(CoverCaptionVariant.TitleWithSupporting, PlatformType.MOBILE))
@@ -174,6 +116,12 @@ class LayoutTest {
         assertEquals(0.dp, komeliaTopBarElevation(false).shadow)
         assertEquals(1.dp, komeliaTopBarElevation(true).tonal)
         assertEquals(2.dp, komeliaTopBarElevation(true).shadow)
+    }
+
+    @Test
+    fun glassTopBarDoesNotCastAScrollShadow() {
+        assertEquals(0.dp, komeliaTopBarElevation(true, useGlass = true).tonal)
+        assertEquals(0.dp, komeliaTopBarElevation(true, useGlass = true).shadow)
     }
 
     @Test

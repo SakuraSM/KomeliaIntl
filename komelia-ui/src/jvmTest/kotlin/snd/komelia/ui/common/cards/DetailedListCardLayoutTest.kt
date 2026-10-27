@@ -82,4 +82,26 @@ class DetailedListCardLayoutTest {
         compose.onNodeWithTag("cover").assertHeightIsEqualTo(240.dp)
         compose.onNodeWithTag("details").assertHeightIsEqualTo(240.dp)
     }
+
+    @Test fun compactChapterRowKeepsProgressAndActionsVisibleWhenContentGrows() {
+        compose.setContent {
+            CompositionLocalProvider(
+                LocalWindowWidth provides WindowSizeClass.COMPACT,
+                LocalKomeliaLayout provides komeliaLayoutSpec(PlatformType.MOBILE, WindowSizeClass.COMPACT),
+            ) {
+                MaterialTheme {
+                    DetailedListCardLayout(
+                        modifier = Modifier.width(320.dp).testTag("card"),
+                        coverWidth = 84.dp,
+                        minimumCoverHeight = 96.dp,
+                        cover = { Box(Modifier.fillMaxSize().testTag("cover")) },
+                        content = { Box(Modifier.height(160.dp).testTag("largeTextAndActions")) },
+                    )
+                }
+            }
+        }
+        compose.onNodeWithTag("card").assertHeightIsEqualTo(184.dp)
+        compose.onNodeWithTag("cover").assertHeightIsEqualTo(160.dp)
+        compose.onNodeWithTag("largeTextAndActions").assertHeightIsEqualTo(160.dp)
+    }
 }

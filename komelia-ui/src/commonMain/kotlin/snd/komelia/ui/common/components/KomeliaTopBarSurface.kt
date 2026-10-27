@@ -3,19 +3,19 @@ package snd.komelia.ui.common.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import snd.komelia.settings.model.AppSurfaceStyle
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -26,13 +26,34 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import snd.komelia.ui.LocalKomeliaMotion
 
+private val LocalHeaderMaterialProvided = staticCompositionLocalOf { false }
+
+/** Paints one header material through the status area and consumes its safe inset once. */
+@Composable
+fun KomeliaSafeTopBar(content: @Composable () -> Unit) {
+    if (LocalHeaderMaterialProvided.current) {
+        content()
+        return
+    }
+    val topInset = LocalPageTopInset.current
+    KomeliaChromeSurface(color = MaterialTheme.colorScheme.background) {
+        Box(Modifier.fillMaxWidth().padding(top = topInset)) {
+            CompositionLocalProvider(
+                LocalPageTopInset provides 0.dp,
+                LocalHeaderMaterialProvided provides true,
+                content = content,
+            )
+        }
+    }
+}
+
 internal data class KomeliaTopBarElevation(
     val tonal: Dp,
     val shadow: Dp,
 )
 
-internal fun komeliaTopBarElevation(isContentScrolled: Boolean): KomeliaTopBarElevation =
-    if (isContentScrolled) {
+internal fun komeliaTopBarElevation(isContentScrolled: Boolean, useGlass: Boolean = false): KomeliaTopBarElevation =
+    if (isContentScrolled && !useGlass) {
         KomeliaTopBarElevation(tonal = 1.dp, shadow = 2.dp)
     } else {
         KomeliaTopBarElevation(tonal = 0.dp, shadow = 0.dp)
@@ -77,7 +98,7 @@ fun KomeliaTopBarSurface(
     content: @Composable () -> Unit,
 ) {
     val motion = LocalKomeliaMotion.current
-    val targetElevation = komeliaTopBarElevation(isContentScrolled)
+    val targetElevation = komeliaTopBarElevation(isContentScrolled, LocalSurfaceAppearance.current.useGlass)
     val animationSpec = tween<Dp>(
         durationMillis = motion.duration(motion.pressDurationMillis),
         easing = motion.standardEasing,
@@ -105,10 +126,9 @@ fun KomeliaTopBarSurface(
         label = "topBarContainerColor",
     )
 
-    val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     KomeliaChromeSurface(
-        modifier = modifier.fillMaxWidth().then(if (floating) Modifier.padding(horizontal = 12.dp, vertical = 6.dp) else Modifier),
-        shape = RoundedCornerShape(if (floating) 20.dp else 0.dp),
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(0.dp),
         color = containerColor,
         tonalElevation = tonalElevation,
         shadowElevation = shadowElevation,

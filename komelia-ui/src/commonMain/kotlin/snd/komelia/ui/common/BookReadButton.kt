@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
@@ -29,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
@@ -40,6 +42,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_read_butto
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_read_button_incognito
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.platform.cursorForHand
 import snd.komga.client.book.MediaProfile.EPUB
 import snd.webview.webviewIsAvailable
@@ -52,10 +55,10 @@ fun BookReadButton(
     modifier: Modifier = Modifier,
     onRead: () -> Unit,
     onIncognitoRead: () -> Unit,
-    onDropdownOpenChange: (Boolean) -> Unit = {}
+    onDropdownOpenChange: (Boolean) -> Unit = {},
+    containerColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
 ) {
-    val containerColor = MaterialTheme.colorScheme.tertiaryContainer
-    val contentColor = MaterialTheme.colorScheme.onTertiaryContainer
     Surface(
         shape = CircleShape,
         modifier = modifier.semantics { role = Role.Button }.pointerHoverIcon(PointerIcon.Hand),
@@ -63,7 +66,7 @@ fun BookReadButton(
         contentColor = contentColor,
     ) {
         Row(
-            Modifier.height(40.dp),
+            Modifier.height(LocalKomeliaLayout.current.minimumTouchTarget),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -73,7 +76,7 @@ fun BookReadButton(
             )
             VerticalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
             IncognitoDropDown(
-                modifier = Modifier.padding(end = 5.dp).fillMaxHeight(),
+                modifier = Modifier.widthIn(min = LocalKomeliaLayout.current.minimumTouchTarget).padding(end = 5.dp).fillMaxHeight(),
                 onIncognitoRead = onIncognitoRead,
                 onDropdownOpenChange = onDropdownOpenChange
             )

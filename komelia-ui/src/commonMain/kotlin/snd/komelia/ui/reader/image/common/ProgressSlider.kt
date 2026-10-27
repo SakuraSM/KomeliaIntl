@@ -28,10 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
-import androidx.compose.material3.Surface
-import snd.komelia.ui.common.components.KomeliaChromeSurface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -57,17 +54,15 @@ import coil3.request.ImageRequest
 import coil3.request.ImageResult
 import coil3.request.crossfade
 import coil3.size.Precision
-import coil3.size.Size
-import coil3.size.SizeResolver
-import org.jetbrains.compose.resources.stringResource
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_next_page
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_previous_page
-import snd.komelia.image.ReaderImage
+import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.stringResource
 import snd.komelia.image.coil.BookPageThumbnailRequest
 import snd.komelia.ui.common.components.AppSliderDefaults
+import snd.komelia.ui.common.components.KomeliaChromeSurface
 import snd.komelia.ui.reader.image.PageMetadata
-import kotlin.math.roundToInt
 
 @Composable
 fun ProgressSlider(
@@ -187,7 +182,7 @@ private fun Slider(
 
         KomeliaChromeSurface(
             color = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(32.dp),
             shadowElevation = 8.dp,
         ) {
             Row(
@@ -221,12 +216,8 @@ private fun Slider(
                     state = sliderState,
                     modifier = Modifier.weight(1f),
                     colors = AppSliderDefaults.colors(),
-                    track = { state ->
-                        SliderDefaults.Track(
-                            sliderState = state,
-                            colors = AppSliderDefaults.colors(),
-                        )
-                    }
+                    thumb = { AppSliderDefaults.Thumb() },
+                    track = { AppSliderDefaults.Track(it) },
                 )
 
                 Text(

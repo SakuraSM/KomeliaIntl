@@ -30,6 +30,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_exclude_lo
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_exclude_local_confirm_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_mark_read
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_mark_unread
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_read_button
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_read_button_incognito
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_refresh_metadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -39,8 +41,8 @@ import snd.komelia.AppNotificationMessageKey
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.model.KomeliaBook
-import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.offline.local.LocalLibraryManager
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineAvailable
@@ -59,6 +61,7 @@ fun BookActionsMenu(
     showEditOption: Boolean,
     showDownloadOption: Boolean,
     onDismissRequest: () -> Unit,
+    onReadClick: ((markProgress: Boolean) -> Unit)? = null,
 ) {
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
@@ -135,6 +138,16 @@ fun BookActionsMenu(
         expanded = showDropdown.value,
         onDismissRequest = onDismissRequest
     ) {
+        if (onReadClick != null) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.book_read_button)) },
+                onClick = { onDismissRequest(); onReadClick(true) },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.book_read_button_incognito)) },
+                onClick = { onDismissRequest(); onReadClick(false) },
+            )
+        }
         if (isAdmin && !isOffline && !isLocalBook) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.book_analyze)) },

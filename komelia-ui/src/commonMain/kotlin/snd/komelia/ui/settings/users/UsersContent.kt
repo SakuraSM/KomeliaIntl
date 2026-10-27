@@ -2,6 +2,7 @@ package snd.komelia.ui.settings.users
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -34,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
@@ -110,10 +113,12 @@ private fun UserCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
             .clickable { expandActions = !expandActions }
             .cursorForHand()
-            .padding(10.dp),
+            .padding(16.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             UserInfo(user, latestActivity)
@@ -121,7 +126,6 @@ private fun UserCard(
             Spacer(Modifier.weight(1f))
             Icon(if (expandActions) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
         }
-
 
         Column(Modifier.animateContentSize()) {
             if (expandActions) {
@@ -233,7 +237,6 @@ private fun UserActions(
             Spacer(Modifier.width(10.dp))
             Text(stringResource(Res.string.settings_users_change_password))
         }
-
 
         if (!isSelf)
             FilledTonalButton(

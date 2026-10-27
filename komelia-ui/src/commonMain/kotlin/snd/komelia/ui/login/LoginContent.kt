@@ -1,7 +1,7 @@
 package snd.komelia.ui.login
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -14,19 +14,18 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AutoStories
-import androidx.compose.material.icons.rounded.ErrorOutline
-import androidx.compose.material.icons.rounded.FolderOpen
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,18 +44,18 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_cancel
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_go_offline
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_komf_desc
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_komf_title
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_login
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_local_library
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_invalid_port
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_invalid_url
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_komf_desc
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_komf_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_local_library
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_login
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_offline_mode
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_password
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_retry
@@ -67,16 +66,16 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.login_with_anot
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.KomeliaSpacing
+import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.common.components.KomeliaWordmark
 import snd.komelia.ui.common.components.OutlinedHttpTextField
 import snd.komelia.ui.common.components.withTextFieldNavigation
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.cursorForHand
-
 
 @Composable
 fun LoginContent(
@@ -134,56 +133,43 @@ fun LoginContent(
     } else {
         val platform = LocalPlatform.current
         when (platform) {
-            MOBILE, DESKTOP -> Surface(
+            MOBILE, DESKTOP -> Column(
                 modifier = Modifier.widthIn(max = 440.dp).fillMaxWidth(),
-                shape = MaterialTheme.shapes.extraLarge,
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(32.dp),
             ) {
-                Column(
-                    modifier = Modifier.padding(layout.cardContentPadding),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.large),
+                Column(horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    KomeliaWordmark(style = MaterialTheme.typography.headlineLarge)
+                    Text(stringResource(Res.string.login_subtitle), style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Surface(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(KomeliaSpacing.medium),
-                        verticalAlignment = Alignment.CenterVertically,
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(layout.cardContentPadding),
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.spacedBy(KomeliaSpacing.large),
                     ) {
-                        Surface(
-                            shape = MaterialTheme.shapes.large,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                        ) {
-                            Icon(
-                                Icons.Rounded.AutoStories,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(KomeliaSpacing.medium),
-                            )
-                        }
-                        Column {
-                            Text("Komelia", style = MaterialTheme.typography.headlineSmall)
-                            Text(
-                                stringResource(Res.string.login_subtitle),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                        LoginForm(
+                            url = url,
+                            onUrlChange = onUrlChange,
+                            user = user,
+                            onUserChange = onUserChange,
+                            password = password,
+                            onPasswordChange = onPasswordChange,
+                            errorMessage = serverUrlErrorMessage ?: userLoginError,
+                            onLogin = onLogin,
+                            offlineIsAvailable = offlineIsAvailable,
+                            onOfflineSelect = onOfflineSelect,
+                            localLibraryIsAvailable = localLibraryIsAvailable,
+                            onLocalLibrarySelect = onLocalLibrarySelect,
+                            textFieldsModifier = Modifier.fillMaxWidth(),
+                        )
                     }
-                    LoginForm(
-                        url = url,
-                        onUrlChange = onUrlChange,
-                        user = user,
-                        onUserChange = onUserChange,
-                        password = password,
-                        onPasswordChange = onPasswordChange,
-                        errorMessage = serverUrlErrorMessage ?: userLoginError,
-                        onLogin = onLogin,
-                        offlineIsAvailable = offlineIsAvailable,
-                        onOfflineSelect = onOfflineSelect,
-                        localLibraryIsAvailable = localLibraryIsAvailable,
-                        onLocalLibrarySelect = onLocalLibrarySelect,
-                        textFieldsModifier = Modifier.fillMaxWidth(),
-                    )
                 }
             }
 

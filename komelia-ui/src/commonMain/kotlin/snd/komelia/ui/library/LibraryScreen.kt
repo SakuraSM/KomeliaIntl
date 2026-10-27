@@ -1,15 +1,15 @@
 package snd.komelia.ui.library
 
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
-
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -29,7 +29,7 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
+import snd.komelia.ui.common.components.ChromeFilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -56,6 +56,7 @@ import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_unknown
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_add
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_all_libraries
@@ -66,14 +67,17 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_ser
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_source
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries_unavailable
+import kotlin.jvm.Transient
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LoadState.Error
 import snd.komelia.ui.LoadState.Loading
 import snd.komelia.ui.LoadState.Success
 import snd.komelia.ui.LoadState.Uninitialized
+import snd.komelia.ui.LocalAppNavigationController
+import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalLibraries
-import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalReloadEvents
@@ -82,7 +86,10 @@ import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.collection.CollectionScreen
 import snd.komelia.ui.common.components.AppFilterChipDefaults
+import snd.komelia.ui.common.components.LocalPageTopInset
+import snd.komelia.ui.common.components.BrowsePageHeader
 import snd.komelia.ui.common.components.ErrorContent
+import snd.komelia.ui.common.components.KomeliaPageScaffold
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.common.components.komeliaTopBarScroll
@@ -99,14 +106,13 @@ import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.ScreenPullToRefreshBox
 import snd.komelia.ui.platform.WindowSizeClass.FULL
 import snd.komelia.ui.readlist.ReadListScreen
+import snd.komelia.ui.search.SearchScreen
 import snd.komelia.ui.series.list.SeriesListContent
 import snd.komelia.ui.series.seriesScreen
 import snd.komga.client.common.KomgaAuthor
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.series.KomgaSeriesStatus
-import snd.komelia.offline.local.isLocalLibrary
-import kotlin.jvm.Transient
 
 class LibraryScreen(
     val libraryId: KomgaLibraryId? = null,
@@ -178,36 +184,45 @@ class LibraryScreen(
                         }
 
                         val topBarScrollState = rememberKomeliaTopBarScrollState()
-                        Column(
-                            Modifier
-                                .weight(1f)
-                                .komeliaTopBarScroll(topBarScrollState)
-                        ) {
-                            if (vm.showToolbar.collectAsState().value) {
-                                KomeliaTopBarSurface(
-                                    isContentScrolled = topBarScrollState.isContentScrolled,
-                                ) {
-                                    LibraryToolBar(
-                                        library = vm.library.collectAsState().value,
-                                        libraries = libraryScopes,
-                                        showScopeSelector = width != FULL,
-                                        selectedLibraryId = libraryId,
-                                        onLibrarySelect = onScopeSelected,
-                                        currentTab = vm.currentTab,
-                                        libraryActions = libraryActions,
-                                        collectionsCount = vm.collectionsCount,
-                                        readListsCount = vm.readListsCount,
-                                        onBrowseClick = vm::toBrowseTab,
-                                        onCollectionsClick = vm::toCollectionsTab,
-                                        onReadListsClick = vm::toReadListsTab
-                                    )
+                        KomeliaPageScaffold(
+                            modifier = Modifier.weight(1f).komeliaTopBarScroll(topBarScrollState),
+                            topBar = {
+                                Column {
+                                    if (vm.showToolbar.collectAsState().value) {
+                                        if (LocalPlatform.current == MOBILE) {
+                                            val appNavigation = LocalAppNavigationController.current
+                                            BrowsePageHeader(stringResource(Res.string.navbar_libraries), onSearchClick = {
+                                                appNavigation.open(SearchScreen(null))
+                                            })
+                                        }
+                                        KomeliaTopBarSurface(
+                                            isContentScrolled = topBarScrollState.isContentScrolled,
+                                        ) {
+                                            LibraryToolBar(
+                                                library = vm.library.collectAsState().value,
+                                                libraries = libraryScopes,
+                                                showScopeSelector = width != FULL,
+                                                selectedLibraryId = libraryId,
+                                                onLibrarySelect = onScopeSelected,
+                                                currentTab = vm.currentTab,
+                                                libraryActions = libraryActions,
+                                                collectionsCount = vm.collectionsCount,
+                                                readListsCount = vm.readListsCount,
+                                                onBrowseClick = vm::toBrowseTab,
+                                                onCollectionsClick = vm::toCollectionsTab,
+                                                onReadListsClick = vm::toReadListsTab
+                                            )
+                                        }
+                                    }
                                 }
-                            }
-
-                            when (vm.currentTab) {
-                                SERIES -> BrowseTab(vm.seriesTabState)
-                                COLLECTIONS -> CollectionsTab(vm.collectionsTabState)
-                                READ_LISTS -> ReadListsTab(vm.readListsTabState)
+                            },
+                        ) { topInset ->
+                            Box(Modifier.fillMaxSize().padding(top = topInset)) {
+                                when (vm.currentTab) {
+                                    SERIES -> BrowseTab(vm.seriesTabState)
+                                    COLLECTIONS -> CollectionsTab(vm.collectionsTabState)
+                                    READ_LISTS -> ReadListsTab(vm.readListsTabState)
+                                }
                             }
                         }
                     }
@@ -414,7 +429,7 @@ private fun LibraryToolBar(
 
             if (collectionsCount > 0 || readListsCount > 0)
                 item {
-                    FilterChip(
+                    ChromeFilterChip(
                         onClick = onBrowseClick,
                         selected = currentTab == SERIES,
                         label = { Text(stringResource(Res.string.library_tab_series)) },
@@ -425,7 +440,7 @@ private fun LibraryToolBar(
 
             if (collectionsCount > 0)
                 item {
-                    FilterChip(
+                    ChromeFilterChip(
                         onClick = onCollectionsClick,
                         selected = currentTab == COLLECTIONS,
                         label = { Text(stringResource(Res.string.library_tab_collections)) },
@@ -436,7 +451,7 @@ private fun LibraryToolBar(
 
             if (readListsCount > 0)
                 item {
-                    FilterChip(
+                    ChromeFilterChip(
                         onClick = onReadListsClick,
                         selected = currentTab == READ_LISTS,
                         label = { Text(stringResource(Res.string.library_tab_readlists)) },
@@ -479,7 +494,7 @@ private fun MobileLibraryScopeBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         item("all-libraries") {
-            FilterChip(
+            ChromeFilterChip(
                 selected = selectedLibraryId == null,
                 onClick = { onSelect(null) },
                 label = { Text(stringResource(Res.string.library_all_libraries)) },
@@ -489,7 +504,7 @@ private fun MobileLibraryScopeBar(
         }
         if (overflowLibraries.isNotEmpty()) {
             item("more-libraries") {
-                FilterChip(
+                ChromeFilterChip(
                     selected = false,
                     onClick = { expanded = true },
                     leadingIcon = { Icon(Icons.Rounded.MoreHoriz, contentDescription = null) },
@@ -500,7 +515,7 @@ private fun MobileLibraryScopeBar(
             }
         }
         items(visibleLibraries, key = { it.id.value }) { item ->
-            FilterChip(
+            ChromeFilterChip(
                 selected = item.id == selectedLibraryId,
                 onClick = { onSelect(item.id) },
                 label = {
@@ -638,7 +653,8 @@ private fun LibrarySupportingPane(
     Surface(
         modifier = Modifier
             .width(232.dp)
-            .fillMaxHeight(),
+            .fillMaxHeight()
+            .padding(top = LocalPageTopInset.current),
         color = MaterialTheme.colorScheme.surface,
     ) {
         Text(
@@ -803,7 +819,6 @@ private fun LibraryScopeRow(
         tonalElevation = 0.dp,
     )
 }
-
 
 data class SeriesScreenFilter(
     val publicationStatus: List<KomgaSeriesStatus>? = null,

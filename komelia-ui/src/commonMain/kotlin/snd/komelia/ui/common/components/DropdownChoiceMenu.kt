@@ -1,23 +1,18 @@
 package snd.komelia.ui.common.components
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.foundation.BasicTooltipBox
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -35,6 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -65,7 +62,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
@@ -127,10 +132,10 @@ fun <T> DropdownChoiceMenu(
                 }
                 .focusable(enabled = enabled, interactionSource = anchorInteraction)
                 .menuAnchor(PrimaryNotEditable, enabled = enabled)
-                .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .then(inputFieldModifier),
             label = label,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
+            trailingIcon = { Icon(if (isExpanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null, Modifier.padding(end = 8.dp)) },
             color = inputFieldColor,
             contentPadding = contentPadding
         )
@@ -145,12 +150,15 @@ fun <T> DropdownChoiceMenu(
 
             options.forEach {
                 val optionLabel = localizedEnumLabel(it.value, it.label)
+                val isSelected = selectedOption != null && selectedOption.value == it.value
                 DropdownMenuItem(
-                    text = { Text(optionLabel) },
+                    text = { Text(optionLabel, fontWeight = if (isSelected && LocalSurfaceAppearance.current.useGlass) FontWeight.SemiBold else null) },
                     onClick = {
                         onOptionChange(it)
                         isExpanded = false
                     }, modifier = Modifier.cursorForHand()
+                        .komeliaHighlight(isSelected, MaterialTheme.shapes.small, inset = 4.dp)
+                        .semantics { selected = isSelected }
                 )
             }
         }
@@ -197,7 +205,7 @@ fun <T> DropdownMultiChoiceMenu(
                 }
                 .focusable(interactionSource = anchorInteraction)
                 .menuAnchor(PrimaryNotEditable)
-                .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .then(inputFieldModifier),
             label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
@@ -237,14 +245,16 @@ private fun InputField(
 ) {
     val focused by interactionSource.collectIsFocusedAsState()
     Surface(
-        shadowElevation = 1.dp,
+        shadowElevation = 0.dp,
+        shape = RoundedCornerShape(10.dp),
+        border = BorderStroke(if (focused) 2.dp else 1.dp,
+            if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
         color = color,
         modifier = Modifier
             .cursorForHand()
             .indication(interactionSource, LocalIndication.current)
             .hoverable(interactionSource)
             .then(modifier)
-            .border(if (focused) 2.dp else 0.dp, if (focused) MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(5.dp))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -425,7 +435,6 @@ fun <T> FilterDropdownMultiChoiceWithSearch(
         textFieldModifier = Modifier.fillMaxWidth()
     )
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -747,12 +756,17 @@ private fun <T> DropdownMultiChoiceItem(
     onOptionSelect: (LabeledEntry<T>) -> Unit,
     selected: Boolean,
 ) {
-    val color = if (selected) MaterialTheme.colorScheme.tertiary else Color.Unspecified
+    val glass = LocalSurfaceAppearance.current.useGlass
+    val color = if (selected) {
+        if (glass) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.tertiary
+    } else Color.Unspecified
     val optionLabel = localizedEnumLabel(option.value, option.label)
     DropdownMenuItem(
-        text = { Text(text = optionLabel, color = color) },
+        text = { Text(text = optionLabel, color = color, fontWeight = if (selected && glass) FontWeight.SemiBold else null) },
         onClick = { onOptionSelect(option) },
-        modifier = Modifier.cursorForHand(),
+        modifier = Modifier.cursorForHand()
+            .komeliaHighlight(selected, MaterialTheme.shapes.small, inset = 4.dp)
+            .semantics { this.selected = selected },
         leadingIcon = {
             if (selected) Icon(Icons.Default.RadioButtonChecked, null, tint = color)
             else Icon(Icons.Default.RadioButtonUnchecked, null)

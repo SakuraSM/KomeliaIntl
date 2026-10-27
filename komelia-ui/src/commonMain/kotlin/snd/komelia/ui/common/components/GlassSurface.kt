@@ -3,10 +3,10 @@
 package snd.komelia.ui.common.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -15,9 +15,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,17 +28,17 @@ import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazePerformanceMode
 import dev.chrisbanes.haze.HazeSourceRetention
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.glass.GlassReducedMotionPolicy
 import dev.chrisbanes.haze.glass.GlassStyle
 import dev.chrisbanes.haze.glass.hazeGlass
-import snd.komelia.settings.model.AppSurfaceStyle
-import snd.komelia.settings.model.AppTheme
-import snd.komelia.ui.LocalKomeliaMotion
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import snd.komelia.settings.model.AppSurfaceStyle
+import snd.komelia.settings.model.AppTheme
+import snd.komelia.ui.LocalKomeliaMotion
 
 @Immutable
 data class SurfaceAppearance(
@@ -52,6 +52,7 @@ data class SurfaceAppearance(
 
 val LocalSurfaceAppearance = staticCompositionLocalOf { SurfaceAppearance() }
 val LocalNavigationBarInset = staticCompositionLocalOf { 0.dp }
+val LocalPageTopInset = staticCompositionLocalOf { 0.dp }
 private val LocalGlassBackdrop = staticCompositionLocalOf<HazeState?> { null }
 internal val LocalGlassSamplingBudget = staticCompositionLocalOf<GlassSamplingBudget?> { null }
 
@@ -78,7 +79,7 @@ internal class GlassSamplingBudget(private val scope: CoroutineScope) {
     }
 }
 
-/** Scrolling and active editing use solid chrome; idle controls restore the selected material. */
+/** Scrolling and active editing pause capture; chrome keeps its last available backdrop. */
 @Composable
 fun PauseGlassWhileBusy(isBusy: Boolean) {
     val budget = LocalGlassSamplingBudget.current
@@ -116,23 +117,26 @@ fun KomeliaChromeSurface(
     tonalElevation: Dp = 0.dp,
     shadowElevation: Dp = 0.dp,
     interactionSource: InteractionSource? = null,
+    highlighted: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val appearance = LocalSurfaceAppearance.current
     val state = LocalGlassBackdrop.current
     val colors = MaterialTheme.colorScheme
-    val glass = appearance.useGlass && state != null && LocalGlassSamplingBudget.current?.isPaused != true
+    val baseColor = chromeBaseColor(appearance, colors, color)
+    val glass = appearance.useGlass && state != null
     Surface(
-        modifier = modifier,
+        modifier = modifier.komeliaHighlight(highlighted, shape, interactionSource = interactionSource),
         shape = shape,
-        color = color,
+        color = if (glass) Color.Transparent else baseColor,
         contentColor = colors.onSurface,
         tonalElevation = if (glass) 0.dp else tonalElevation,
         shadowElevation = shadowElevation,
-        border = if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) BorderStroke(1.dp, colors.outlineVariant) else null,
     ) {
-        val effect = if (glass) Modifier.komeliaChrome(shape, color, interactionSource) else Modifier
-        Box(effect) { content() }
+        val effect = if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) {
+            Modifier.komeliaChrome(shape, baseColor, interactionSource)
+        } else Modifier
+        Box(effect) { KomeliaChromeContent(content) }
     }
 }
 
@@ -147,28 +151,31 @@ fun Modifier.komeliaChrome(
     val state = LocalGlassBackdrop.current
     val motion = LocalKomeliaMotion.current
     val colors = MaterialTheme.colorScheme
-    if (!appearance.useGlass || state == null || LocalGlassSamplingBudget.current?.isPaused == true) {
-        val solid = if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) color.copy(alpha = 1f) else color
+    val baseColor = chromeBaseColor(appearance, colors, color)
+    if (!appearance.useGlass || state == null) {
+        val solid = if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) baseColor.copy(alpha = 1f) else baseColor
         return background(solid, shape)
     }
-    val material = remember(appearance.theme, colors.surface, shape) {
-        // Override every appearance-dependent Regular channel; app and OS themes can differ.
-        val dark = appearance.theme != AppTheme.LIGHT
-        val tone = glassTone(appearance.theme)
+    val material = remember(appearance.theme, baseColor, shape) {
+        // Override the library's optical edge and white-point defaults for uniform frosted chrome.
         GlassStyle.regular.then {
             shape(shape)
-            backgroundColor(colors.surface)
-            tint(colors.surface.copy(alpha = tone.opacity))
-            specularIntensity(if (dark) 0.38f else 0.48f)
-            edgeShadow(Color.Black.copy(alpha = if (dark) 0.32f else 0.14f))
-            ambientResponse(if (dark) 0.08f else 0.15f)
-            contrast(tone.contrast)
-            whitePoint(tone.whitePoint)
-            chromaMultiplier(if (dark) 1.1f else 1.5f)
+            optics(blurRadius = KomeliaChromeStyle.blurRadius, refractionStrength = 0f, refractionDetailIntensity = 0f)
+            backgroundColor(baseColor)
+            tint(baseColor.copy(alpha = KomeliaChromeStyle.tintOpacity))
+            specularIntensity(0f)
+            edgeShadow(Color.Transparent)
+            // Do not blend the sharp source back into the last pixel band of frosted shapes.
+            edgeSoftness(0.dp)
+            ambientResponse(0f)
+            contrast(0f)
+            whitePoint(0f)
+            chromaMultiplier(1.1f)
+            contentNormalBlend(0f)
         }
     }
-    return background(color, shape).clip(shape).hazeGlass(
-        input = HazeInput.Sources(state, retention = HazeSourceRetention.ClearWhenUnavailable),
+    return clip(shape).hazeGlass(
+        input = HazeInput.Sources(state, retention = HazeSourceRetention.KeepLastFrame),
         style = material,
         performanceMode = HazePerformanceMode.Balanced,
         interactionSource = interactionSource,
@@ -176,11 +183,5 @@ fun Modifier.komeliaChrome(
     )
 }
 
-internal data class GlassTone(val whitePoint: Float, val contrast: Float, val opacity: Float)
-
-// Regular's theme response, selected from the app preference rather than the OS appearance.
-internal fun glassTone(theme: AppTheme): GlassTone = if (theme == AppTheme.LIGHT) {
-    GlassTone(whitePoint = 0.55f, contrast = 0f, opacity = 0.78f)
-} else {
-    GlassTone(whitePoint = -0.22f, contrast = 0.08f, opacity = 0.72f)
-}
+private fun chromeBaseColor(appearance: SurfaceAppearance, colors: ColorScheme, requested: Color): Color =
+    if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) glassTintColor(appearance.theme, colors) else requested

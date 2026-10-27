@@ -1,5 +1,9 @@
 # Development map
 
+## Design references
+
+[Versioned design concepts](../design/README.md) record selected visual directions, Screen mappings, and implementation boundaries. Generated images are design targets, not runtime or performance evidence.
+
 ## Product surfaces
 
 | Surface | Entry area | Main dependencies | Build alias |
@@ -69,7 +73,7 @@ hash and confirming that application sources and the selected platform's build s
 
 ## Detailed catalog lists
 
-`komelia-ui/.../common/cards/DetailedListCardLayout.kt` owns the shared book/series list geometry. The text column determines row height above a minimum portrait-cover height; the cover fills the measured row without imposing an image intrinsic size. Search results and series book lists reuse this layout. `DetailedListCardLayoutTest` runs Compose measurement regressions on JVM through `:komelia-ui:jvmTest`.
+`komelia-ui/.../common/cards/DetailedListCardLayout.kt` owns the shared book/series list geometry. The text column determines row height above a minimum cover height; the cover fills the measured row without imposing an image intrinsic size. Book rows use a compact cover, page count and reading progress; series rows retain their metadata layout. Search results and series book lists reuse this layout. Read lists select the numbered single-column variant of `BookLazyCardGrid`; pagination, selection, drag reordering and reading callbacks share the existing owners. `DetailedListCardLayoutTest` runs Compose measurement regressions on JVM through `:komelia-ui:jvmTest`.
 
 ### Android reader and search validation
 
@@ -78,7 +82,7 @@ hash and confirming that application sources and the selected platform's build s
 - `komelia-ui/src/commonMain/kotlin/snd/komelia/ui/reader/epub/EpubContent.kt` owns the EPUB host safe drawing insets, including landscape cutouts.
 - Local and global search share `SearchTextField`; long placeholders remain one line. Runtime checks are in [Android device validation](../harness/android-device-validation.md).
 
-- `EpubDisplaySettings` stores native EPUB immersion and extra top spacing separately from web reader preferences; database migration V15 preserves existing reader settings and defaults to automatic safe-area handling plus 8dp spacing.
+- `EpubDisplaySettings` stores native EPUB immersion and extra top spacing separately from web reader preferences; database migration V15 preserves existing reader settings. Current defaults use automatic safe-area handling with zero additional spacing; explicit custom spacing is retained.
 - `EpubBackground.kt` maps Komga/TTU reading themes to the native margin background; Android WebView initialization happens once per created view so theme recomposition does not reload the book.
 - Standalone Android update discovery is enabled independently of self-installation. `AppUpdatesViewModel` exposes manual checks and retry states; `StartupUpdateChecker` preserves the opt-out and daily throttle. Debug update actions open the download page.
 
@@ -90,11 +94,23 @@ Local-library index removal deletes reading progress before books and series ins
 
 `AppSurfaceStyle` is independent of `AppTheme`. SQLite migration V19 adds `surface_style` and `reduce_transparency`; browser `AppSettings` supplies legacy defaults. `AppearancePreference` serializes/coalesces accepted choices and exposes save failure/retry without discarding a newer selection.
 
-`GlassSurface.kt` owns all experimental Haze 2.0.1 APIs. Each backdrop captures content separately from controls; Haze's default `Behind` selection excludes ancestor sources. `KomeliaPageScaffold` measures optional toolbars, preserving content scroll range while allowing content beneath floating chrome. Android capability checks and reduced transparency select solid surfaces. `GlassSamplingBudget` pauses sampling during active scrolling and resumes after 250ms of idle time; its owners are released when their composition leaves. `MainDestinationSurface` uses the solid Classic layout for mobile search, including its navigation, because capture pauses alone did not meet the frame budget. This local fallback preserves the saved preference and restores it when leaving search. Desktop keeps the selected material.
+`GlassSurface.kt` owns all experimental Haze 2.0.1 APIs. Each backdrop captures content separately from controls; Haze's default `Behind` selection excludes ancestor sources. `KomeliaPageScaffold` measures optional toolbars, preserving content scroll range while allowing content beneath floating chrome. Android capability checks and reduced transparency select solid surfaces. `GlassSamplingBudget` pauses sampling during active scrolling and resumes after 250ms of idle time; its owners are released when their composition leaves. All main destinations share one material and navigation geometry, including mobile search. While capture is paused, Haze retains the last available frame in the current backdrop scope; it resumes after scrolling or editing settles. This avoids changing the chrome to an opaque panel during each gesture. The retained frame is released with the scope.
 
-The two EPUB bundles import `komelia-epub-reader/shared/chrome-appearance.mjs` and its scoped CSS. `getChromeAppearance` is an optional host bridge, and only elements marked `data-komelia-chrome` receive material styles. `RetainedEpubReader` owns the selected reader implementation so changing the EPUB preference applies to the next entry into the same book.
+The two EPUB bundles import `komelia-epub-reader/shared/chrome-appearance.mjs` and its scoped CSS. Both Gradle npm build tasks declare the shared directory as an input, so chrome-only changes invalidate the embedded HTML bundles. `getChromeAppearance` is an optional host bridge, and only elements marked `data-komelia-chrome` receive material styles. `RetainedEpubReader` owns the selected reader implementation so changing the EPUB preference applies to the next entry into the same book.
+
+`ImageReaderToolbar` owns the compact image/PDF header. It uses the existing standard icon button with 20dp glyphs and platform touch targets. EPUB's `EpubReaderToolbar.vue` and TTU `book-reader-header.svelte` use the shared CSS for a full-width top bar, two-line titles and matching action sizes. Secondary actions stay in accessible overflow menus; their reading, bookmark and settings callbacks remain in the parent readers. Native layout continues to own WebView safe insets.
+
+The [immersive glass references](../design/immersive-glass-20261025/README.md) guide the shared presentation layer. `HomeFeaturedBook` selects a started, unfinished book with a known positive page count from the existing visible home groups without fetching or owning new data. `ContinueReadingHero` captures only that book's thumbnail; browsing and settings backgrounds remain neutral. `BookReadingProgress` supplies a clamped fraction for covers, chapter rows and reading controls. An unfinished book with an unknown page count returns no fraction, so the UI uses a status label instead of inventing a percentage. EPUB details use the book title. A failed cover load collapses the detail image to a compact placeholder and the home hero to its heading and reading controls, including books with a known page count. `KomeliaPageScaffold` keeps the detail reading bar outside the captured scrolling content so it can sample the content beneath it. The navigation display order is separate from persisted `AppDestination` ordinals. The hero stacks its title and reading action on narrow layouts or with large system text; `ContinueReadingHeroLayoutTest` measures the actual controls.
+
+`SeriesViewModel.initialize` and `ReadListViewModel.initialize` refresh retained book lists on re-entry so progress does not depend on receiving an SSE event while the reader is visible. `CatalogProgressRefreshTest` verifies refresh without duplicate event subscriptions.
+
+`SettingsScreenLayout` keeps the active form and navigation composition movable across its responsive breakpoint; focus and popup owners are retained instead of disposed during a resize. `SettingsScreenLayoutTest` checks lifecycle continuity and updated content.
+
+`SettingsSection` provides solid form groups and `SettingsChoiceRow` switches between horizontal and stacked labels according to available width and font scale. `GlassSurfaceDecoration` draws neutral material edges; it does not add scene artwork or simulated colored reflections. Reduced transparency and unsupported renderers retain the solid material path with the same glass outline. Glass tint and backdrop grading preserve readable text while transmitting content variation; control surfaces use a 12dp blur radius. The updated EPUB toolbar CSS is scoped to chrome attributes and leaves publication styling and progress handling unchanged. TTU toolbar groups wrap on narrow viewports so their 48px touch targets, including Close, remain inside the floating bar.
 
 Mobile poster density defaults to 3 columns below 840dp, 4 below 1200dp and 6 above it, while still scaling with the persisted density setting. `CoverCardCaption` reserves height for the system font scale. Desktop poster grids retain adaptive widths. `BottomBulkActionsPanel` is an inline footer shared by series, collections and read lists. Their content uses the remaining column height; the footer reserves the navigation inset.
+
+Shared chrome uses `KomeliaChromeStyle` for 28dp blur, neutral tint and borderless highlight shadows. `KomeliaChromeContent` scopes readable foreground colors without rebuilding its content. Native navigation, menus and reader controls share these rules with EPUB chrome CSS. `BrowsePageHeader` unifies destination and mobile settings headers; main destinations use `KomeliaPageScaffold` so header effects are siblings of the content capture. `ChromeFilterChip` shares their white selection light with native semantics. Glass toolbars have no scroll elevation. `LocalPageTopInset` and `KomeliaSafeTopBar` let the background reach the status area while controls consume the cutout inset and header material once. EPUB keeps native safe-area ownership and defaults additional top spacing to zero. See the [shared glass verification](../verification/shared-glass-20261027.md).
 
 ## Web rendering compatibility
 

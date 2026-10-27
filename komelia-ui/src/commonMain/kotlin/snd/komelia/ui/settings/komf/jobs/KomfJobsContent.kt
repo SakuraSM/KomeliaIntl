@@ -12,13 +12,16 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ListAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.ButtonDefaults
@@ -59,6 +62,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_job_failed
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_job_nothing_to_show
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_job_running
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_job_unknown_series
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.format
@@ -67,6 +72,7 @@ import snd.komelia.DefaultDateTimeFormats.dateTimeFormat
 import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.common.cards.SeriesImageCard
 import snd.komelia.ui.common.components.AppFilterChipDefaults
+import snd.komelia.ui.common.components.EmptyState
 import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.platform.cursorForHand
@@ -76,8 +82,6 @@ import snd.komf.api.job.KomfMetadataJobStatus.COMPLETED
 import snd.komf.api.job.KomfMetadataJobStatus.FAILED
 import snd.komf.api.job.KomfMetadataJobStatus.RUNNING
 import snd.komga.client.series.KomgaSeriesId
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
 
 @Composable
 fun KomfJobsContent(
@@ -115,7 +119,11 @@ fun KomfJobsContent(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 if (loading) CircularProgressIndicator()
                 else if (jobs.isEmpty()) {
-                    Text(stringResource(Res.string.komf_job_nothing_to_show))
+                    EmptyState(
+                        title = stringResource(Res.string.komf_job_nothing_to_show),
+                        imageVector = Icons.AutoMirrored.Outlined.ListAlt,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 320.dp),
+                    )
                 } else {
                     key(currentPage, selectedStatus) {
                         jobs.forEach {
@@ -170,9 +178,10 @@ private fun JobCard(
 
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(5.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .height(70.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+            .heightIn(min = 70.dp)
             .padding(end = 5.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically

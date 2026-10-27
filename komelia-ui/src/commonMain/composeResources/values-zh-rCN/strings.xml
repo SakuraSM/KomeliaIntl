@@ -1400,7 +1400,7 @@
 
     <string name="search_clear_query">清空搜索</string>
     <string name="settings_epub_immersive">全屏沉浸式</string>
-    <string name="settings_epub_immersive_desc">默认关闭，自动避让挖孔和系统导航区域。开启后使用整个屏幕，内容可能延伸到摄像头下方。</string>
+    <string name="settings_epub_immersive_desc">默认关闭，保留系统导航。开启后隐藏系统栏，始终避让挖孔和屏幕切口。</string>
     <string name="settings_epub_top_spacing">顶部额外留白</string>
     <string name="settings_epub_spacing_value">%1$d dp</string>
     <string name="settings_updates_external_hint">更新将打开下载页面，测试版与正式版保持独立安装。</string>
@@ -1496,4 +1496,9 @@
     <string name="password_hide">隐藏密码</string>
     <string name="metadata_lock_field">锁定字段</string>
     <string name="metadata_unlock_field">解锁字段</string>
+    <string name="home_continue_reading">继续阅读</string>
+    <string name="home_hero_details">书籍详情：%1$s</string>
+    <string name="home_progress_percent">已读 %1$d%</string>
+    <string name="settings_mobile_subtitle">让阅读更符合你的习惯</string>
+    <string name="komf_providers_empty">尚未添加元数据源</string>
 </resources>

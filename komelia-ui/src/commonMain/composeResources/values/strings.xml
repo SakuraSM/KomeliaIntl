@@ -1412,7 +1412,7 @@
 
     <string name="search_clear_query">Clear search</string>
     <string name="settings_epub_immersive">Immersive full screen</string>
-    <string name="settings_epub_immersive_desc">Off by default: automatically avoid camera cutouts and system bars. Turn on to use the entire screen; content may extend beneath the camera.</string>
+    <string name="settings_epub_immersive_desc">Off by default to keep system navigation available. Turn on to hide system bars. Camera cutouts are always avoided.</string>
     <string name="settings_epub_top_spacing">Extra top spacing</string>
     <string name="settings_epub_spacing_value">%1$d dp</string>
     <string name="settings_updates_external_hint">Updates open the download page. Test and production apps remain separate.</string>
@@ -1494,4 +1494,9 @@
     <string name="password_hide">Hide password</string>
     <string name="metadata_lock_field">Lock field</string>
     <string name="metadata_unlock_field">Unlock field</string>
+    <string name="home_continue_reading">Continue reading</string>
+    <string name="home_hero_details">Book details: %1$s</string>
+    <string name="home_progress_percent">Read %1$d%</string>
+    <string name="settings_mobile_subtitle">Make reading feel your own</string>
+    <string name="komf_providers_empty">No metadata sources added</string>
 </resources>

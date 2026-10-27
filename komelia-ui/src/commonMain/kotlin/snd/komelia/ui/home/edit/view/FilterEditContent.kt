@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_add_filter
@@ -77,6 +78,9 @@ import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.KomeliaIconButton
 import snd.komelia.ui.common.components.KomeliaIconButtonSize
 import snd.komelia.ui.common.components.KomeliaIconButtonStyle
+import snd.komelia.ui.common.components.KomeliaPageScaffold
+import snd.komelia.ui.common.components.PauseGlassWhileBusy
+import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.home.edit.BookCustomFilterState
@@ -102,14 +106,18 @@ fun FilterEditContent(
     onFilterRemove: (FilterEditState) -> Unit,
     onFiltersReset: () -> Unit,
 ) {
-    Column(Modifier.fillMaxSize()) {
-        Toolbar(onExit, onEditEnd, onFiltersReset)
+    KomeliaPageScaffold(topBar = {
+        KomeliaTopBarSurface(isContentScrolled = false) {
+            Toolbar(onExit, onEditEnd, onFiltersReset)
+        }
+    }) { topInset ->
         EditContent(
             filters = filters,
             onFilterAdd = onFilterAdd,
             onFilterRemove = onFilterRemove,
             onFilterMove = onFilterMove,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxSize(),
+            topContentInset = topInset,
         )
     }
 }
@@ -172,9 +180,11 @@ private fun EditContent(
     onFilterRemove: (FilterEditState) -> Unit,
     onFilterMove: (Int, Int) -> Unit,
     modifier: Modifier = Modifier,
+    topContentInset: Dp = 0.dp,
 ) {
     val layout = LocalKomeliaLayout.current
     val lazyListState = rememberLazyListState()
+    PauseGlassWhileBusy(lazyListState.isScrollInProgress)
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
         filterReorderIndices(from.index, to.index, filters.size)?.let { (fromIndex, toIndex) ->
             onFilterMove(fromIndex, toIndex)
@@ -184,7 +194,7 @@ private fun EditContent(
     LazyColumn(
         state = lazyListState,
         contentPadding = PaddingValues(
-            top = layout.controlSpacing,
+            top = layout.controlSpacing + topContentInset,
             bottom = layout.gridBottomPadding,
         ),
         verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
@@ -202,6 +212,7 @@ private fun EditContent(
         }
         items(filters, key = { it.hashCode() }) { data ->
             ReorderableItem(reorderableLazyListState, key = data.hashCode()) { isDragging ->
+                PauseGlassWhileBusy(isDragging)
                 FilterContent(
                     filterState = data,
                     isDragging = isDragging,

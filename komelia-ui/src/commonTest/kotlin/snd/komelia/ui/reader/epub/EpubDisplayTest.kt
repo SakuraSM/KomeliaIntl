@@ -12,12 +12,17 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
 class EpubDisplayTest {
-    @Test fun oldSettingsDefaultToAutomaticCutoutAvoidance() {
+    @Test fun oldSettingsKeepCutoutAvoidanceWithoutExtraGap() {
         val settings = Json.decodeFromString<EpubDisplaySettings>("{}")
         assertFalse(settings.immersiveMode)
-        assertEquals(8, settings.topSpacingDp)
+        assertEquals(0, settings.topSpacingDp)
         assertEquals(0, EpubDisplaySettings(extraTopSpacingDp = -10).topSpacingDp)
         assertEquals(48, EpubDisplaySettings(extraTopSpacingDp = Int.MAX_VALUE).topSpacingDp)
+    }
+
+    @Test fun explicitTopSpacingIsPreserved() {
+        val settings = Json.decodeFromString<EpubDisplaySettings>("{\"extraTopSpacingDp\":24,\"immersiveMode\":true}")
+        assertEquals(24, settings.topSpacingDp)
     }
 
     @Test fun komgaMarginsMatchAllReadingThemes() {

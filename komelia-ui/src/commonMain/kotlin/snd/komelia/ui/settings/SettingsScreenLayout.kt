@@ -19,6 +19,9 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.key.Key
@@ -45,9 +48,14 @@ fun SettingsScreenLayout(
     content: @Composable () -> Unit,
     dismissButton: @Composable () -> Unit,
 ) {
+    val latestContent = rememberUpdatedState(content)
+    val latestNavMenu = rememberUpdatedState(navMenu)
+    // Keep focus and popup owners alive when the navigation changes at the breakpoint.
+    val retainedContent = remember { movableContentOf { latestContent.value() } }
+    val retainedNavMenu = remember { movableContentOf { latestNavMenu.value() } }
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        if (maxWidth < 840.dp) CompactSettingsLayout(navMenu, content, dismissButton)
-        else DesktopSettingsLayout(navMenu, content, dismissButton)
+        if (maxWidth < 840.dp) CompactSettingsLayout(retainedNavMenu, retainedContent, dismissButton)
+        else DesktopSettingsLayout(retainedNavMenu, retainedContent, dismissButton)
     }
 }
 

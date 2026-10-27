@@ -1,16 +1,10 @@
 package snd.komelia.ui.color.view
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
@@ -26,6 +20,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -34,17 +34,19 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.color_correction
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
-import snd.komelia.color.BookColorCorrectionMode
-import snd.komelia.ui.platform.BackPressHandler
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.color.BookColorCorrectionMode
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.common.components.ErrorContent
+import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
+import snd.komelia.ui.common.components.SettingsSection
+import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komga.client.book.KomgaBookId
-import kotlin.uuid.Uuid
 
 class ColorCorrectionScreen(
     val bookId: KomgaBookId,
@@ -81,6 +83,7 @@ class ColorCorrectionScreen(
                 true
             } else false
         }) {
+            KomeliaTopBarSurface(isContentScrolled = false) {
             PlatformTitleBar {
                 IconButton(
                     onClick = onLeave,
@@ -102,12 +105,15 @@ class ColorCorrectionScreen(
                 )
 
             }
+            }
             when (val state = vm.state.collectAsState().value) {
                 LoadState.Loading, LoadState.Uninitialized -> LoadingMaxSizeIndicator()
                 is LoadState.Error -> ErrorContent(state.exception, onExit = onLeave)
                 is LoadState.Success<Unit> -> {
                     val mode = vm.mode.collectAsState().value
-                    BookColorCorrectionModeControl(mode, vm.isSaving.collectAsState().value, vm::onModeChange)
+                    SettingsSection {
+                        BookColorCorrectionModeControl(mode, vm.isSaving.collectAsState().value, vm::onModeChange)
+                    }
                     if (mode == BookColorCorrectionMode.CUSTOM) ColorCorrectionContent(
                     currentCurveType = vm.correctionType.collectAsState().value,
                     onCurveTypeChange = vm::onCurveTypeChange,

@@ -3,8 +3,8 @@ package snd.komelia.ui
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import snd.komelia.ui.BookSiblingsContext
 import snd.komelia.ui.book.BookScreen
@@ -42,6 +42,15 @@ class AppNavigationTest {
             ),
             AppDestination.entries,
         )
+    }
+
+    @Test
+    fun visualNavigationStartsAtHomeWithoutChangingPersistedDestinations() {
+        assertEquals(AppDestination.HOME, primaryDestinationOrder.first())
+        assertEquals(AppDestination.entries.toSet(), primaryDestinationOrder.toSet())
+        assertEquals(AppDestination.entries.size, primaryDestinationOrder.size)
+        assertEquals(0, AppDestination.LIBRARY.ordinal)
+        assertEquals(1, AppDestination.HOME.ordinal)
     }
 
     @Test

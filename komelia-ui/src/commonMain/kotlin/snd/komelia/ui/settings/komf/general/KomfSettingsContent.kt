@@ -8,23 +8,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TextButton
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.text.selection.SelectionContainer
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_connection_failed_hint
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_show_details
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_hide_details
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,8 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_hide_details
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_show_details
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_connection_connect
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_connection_connected
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_connection_failed_hint
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_connection_kavita
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_connection_kavita_api_key
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_connection_kavita_url
@@ -60,6 +58,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.common.components.DropdownMultiChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
+import snd.komelia.ui.common.components.SettingsSection
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.settings.komf.SavableHttpTextField
@@ -113,15 +112,16 @@ fun KomfSettingsContent(
 
         AnimatedVisibility(komfEnabled || !integrationToggleEnabled) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                KomfConnectionDetails(
-                    komfUrl = komfUrl,
-                    onKomfUrlChange = onKomfUrlChange,
-                    komfConnectionError = komfConnectionError
-                )
+                SettingsSection {
+                    KomfConnectionDetails(
+                        komfUrl = komfUrl,
+                        onKomfUrlChange = onKomfUrlChange,
+                        komfConnectionError = komfConnectionError
+                    )
+                }
 
                 AnimatedVisibility(komfConnectionError == null) {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        HorizontalDivider(Modifier.padding(vertical = 10.dp))
+                    SettingsSection {
                         when {
                             komgaState != null && kavitaState != null -> KomgaAndKavitaConnectionSettings(
                                 komgaState = komgaState,
@@ -300,7 +300,6 @@ private fun KavitaConnectionDetails(
         onNotificationsLibraryFilterSelect = onNotificationsLibraryFilterSelect,
         libraries = libraries
     )
-
 
 }
 

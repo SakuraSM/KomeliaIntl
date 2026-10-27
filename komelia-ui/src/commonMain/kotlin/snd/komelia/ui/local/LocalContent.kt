@@ -1,7 +1,5 @@
 package snd.komelia.ui.local
 
-import snd.komelia.ui.search.SearchTextField
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,12 +15,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.CloudDownload
-import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
+import snd.komelia.ui.common.components.ChromeFilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_books
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_sort_file_modified
@@ -64,10 +61,14 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.local.AvailableBookSource
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.BookImageCard
+import snd.komelia.ui.common.components.BrowsePageHeader
+import snd.komelia.ui.common.components.KomeliaPageScaffold
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.Pagination
+import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.home.LocalHomeBookSort
+import snd.komelia.ui.search.SearchTextField
 
 @Composable
 internal fun LocalContent(
@@ -90,57 +91,64 @@ internal fun LocalContent(
     val layout = LocalKomeliaLayout.current
     val gridState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
+    PauseGlassWhileBusy(gridState.isScrollInProgress)
     val isContentScrolled by remember(gridState) {
         derivedStateOf { gridState.firstVisibleItemIndex > 0 || gridState.firstVisibleItemScrollOffset > 0 }
     }
-    Column(Modifier.fillMaxSize()) {
-        KomeliaTopBarSurface(isContentScrolled) {
-            LocalToolbar(
-                query = query,
-                onQueryChange = onQueryChange,
-                selectedSource = selectedSource,
-                onSourceChange = {
-                    onSourceChange(it)
-                    scope.launch { gridState.scrollToItem(0) }
-                },
-                selectedSort = selectedSort,
-                onSortChange = onSortChange,
-            )
-        }
-        if (loading) {
-            LinearProgressIndicator(Modifier.fillMaxWidth())
-        }
-        if (!loading && books.isEmpty()) {
-            LocalEmptyContent(hasQuery = query.isNotBlank(), selectedSource = selectedSource)
-            return@Column
-        }
-        LazyVerticalGrid(
-            columns = snd.komelia.ui.common.itemlist.posterGridCells(cardWidth),
-            state = gridState,
-            horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-            verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-            contentPadding = PaddingValues(
-                top = layout.topBarContentSpacing,
-                bottom = layout.gridBottomPadding + layout.sectionSpacing,
-            ),
-            modifier = Modifier
-                .widthIn(max = layout.contentMaxWidth)
-                .fillMaxSize()
-                .padding(horizontal = layout.pageHorizontalPadding),
-        ) {
-            items(books, key = { it.id.value }) { book ->
-                BookImageCard(
-                    book = book,
-                    onBookClick = { onBookClick(book) },
-                    onBookReadClick = { onBookReadClick(book, it) },
-                    bookMenuActions = bookMenuActions,
-                    showSeriesTitle = true,
-                    modifier = Modifier.fillMaxSize(),
+    KomeliaPageScaffold(topBar = {
+        Column {
+            BrowsePageHeader(stringResource(Res.string.local_content_title))
+            KomeliaTopBarSurface(isContentScrolled) {
+                LocalToolbar(
+                    query = query,
+                    onQueryChange = onQueryChange,
+                    selectedSource = selectedSource,
+                    onSourceChange = {
+                        onSourceChange(it)
+                        scope.launch { gridState.scrollToItem(0) }
+                    },
+                    selectedSort = selectedSort,
+                    onSortChange = onSortChange,
                 )
             }
-            if (totalPages > 1) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    Pagination(totalPages, currentPage, onPageChange)
+        }
+    }) { topInset ->
+        Column(Modifier.fillMaxSize().padding(top = topInset)) {
+            if (loading) {
+                LinearProgressIndicator(Modifier.fillMaxWidth())
+            }
+            if (!loading && books.isEmpty()) {
+                LocalEmptyContent(hasQuery = query.isNotBlank(), selectedSource = selectedSource)
+                return@Column
+            }
+            LazyVerticalGrid(
+                columns = snd.komelia.ui.common.itemlist.posterGridCells(cardWidth),
+                state = gridState,
+                horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                contentPadding = PaddingValues(
+                    top = layout.topBarContentSpacing,
+                    bottom = layout.gridBottomPadding + layout.sectionSpacing,
+                ),
+                modifier = Modifier
+                    .widthIn(max = layout.contentMaxWidth)
+                    .fillMaxSize()
+                    .padding(horizontal = layout.pageHorizontalPadding),
+            ) {
+                items(books, key = { it.id.value }) { book ->
+                    BookImageCard(
+                        book = book,
+                        onBookClick = { onBookClick(book) },
+                        onBookReadClick = { onBookReadClick(book, it) },
+                        bookMenuActions = bookMenuActions,
+                        showSeriesTitle = true,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                if (totalPages > 1) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Pagination(totalPages, currentPage, onPageChange)
+                    }
                 }
             }
         }
@@ -164,10 +172,6 @@ private fun LocalToolbar(
             .fillMaxWidth()
             .padding(horizontal = layout.pageHorizontalPadding, vertical = layout.controlSpacing),
     ) {
-        Text(
-            stringResource(Res.string.local_content_title),
-            style = MaterialTheme.typography.headlineSmall,
-        )
         SearchTextField(
             query = query,
             onQueryChange = onQueryChange,
@@ -205,7 +209,7 @@ private fun LocalToolbar(
 
 @Composable
 private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    FilterChip(
+    ChromeFilterChip(
         selected = selected,
         onClick = onClick,
         label = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -213,6 +217,7 @@ private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit, mo
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
+        border = FilterChipDefaults.filterChipBorder(enabled = true, selected = selected),
         modifier = modifier.heightIn(min = LocalKomeliaLayout.current.minimumTouchTarget),
     )
 }

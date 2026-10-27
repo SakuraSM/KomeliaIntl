@@ -1,14 +1,20 @@
 package snd.komelia.ui.settings.updates
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Sync
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,30 +28,32 @@ import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_check
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_check_failed
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_check_on_startup
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_current
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_current_version
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_empty
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_external_hint
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_last_checked_date
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_last_checked_version
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_release_date
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_release_notes
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_update
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_external_hint
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_current
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_check_failed
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_updates_empty
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.DefaultDateTimeFormats.localDateFormat
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.common.components.KomeliaChromeSurface
+import snd.komelia.ui.common.components.SettingsSection
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.dialogs.update.UpdateProgressDialog
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.updates.AppRelease
 import snd.komelia.updates.AppVersion
 import snd.komelia.updates.UpdateProgress
-import kotlin.time.Instant
 
 @Composable
 fun AppUpdatesContent(
@@ -69,46 +77,60 @@ fun AppUpdatesContent(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
 
-        SwitchWithLabel(
-            checked = checkForUpdates,
-            onCheckedChange = onCheckForUpdatesChange,
-            label = { Text(stringResource(Res.string.settings_updates_check_on_startup)) }
-        )
-        HorizontalDivider(Modifier.padding(bottom = 20.dp))
-        VersionDetails(currentVersion, latestVersion, lastChecked, versionCheckInProgress)
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            verticalAlignment = Alignment.Bottom,
+        SettingsSection {
+            SwitchWithLabel(
+                checked = checkForUpdates,
+                onCheckedChange = onCheckForUpdatesChange,
+                label = { Text(stringResource(Res.string.settings_updates_check_on_startup)) }
+            )
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-
-            FilledTonalButton(
-                onClick = { onCheckForUpdates() },
-                enabled = !versionCheckInProgress,
-            ) { Text(stringResource(Res.string.settings_updates_check)) }
-
-            if (LocalPlatform.current != PlatformType.WEB_KOMF &&
-                latestVersion != null && currentVersion < latestVersion
-            ) {
-                FilledTonalButton(
-                    onClick = { onUpdate() },
-                ) { Text(stringResource(Res.string.settings_updates_update)) }
+            KomeliaChromeSurface(shape = RoundedCornerShape(50)) {
+                Box(Modifier.size(88.dp), contentAlignment = Alignment.Center) {
+                    if (versionCheckInProgress) CircularProgressIndicator(Modifier.size(36.dp))
+                    else Icon(Icons.Rounded.Sync, contentDescription = null, modifier = Modifier.size(44.dp))
+                }
             }
+            if (checkFailed) Text(stringResource(Res.string.settings_updates_check_failed), color = MaterialTheme.colorScheme.error)
+            else if (!versionCheckInProgress && lastChecked != null) {
+                when {
+                    latestVersion == null -> Text(stringResource(Res.string.settings_updates_empty))
+                    latestVersion <= currentVersion -> Text(stringResource(Res.string.settings_updates_current), style = MaterialTheme.typography.titleLarge)
+                }
+            }
+        }
+        SettingsSection {
+            VersionDetails(currentVersion, latestVersion, lastChecked)
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                verticalAlignment = Alignment.Bottom,
+            ) {
+
+                Button(
+                    onClick = { onCheckForUpdates() },
+                    enabled = !versionCheckInProgress,
+                    modifier = Modifier.weight(1f),
+                ) { Text(stringResource(Res.string.settings_updates_check)) }
+
+                if (LocalPlatform.current != PlatformType.WEB_KOMF &&
+                    latestVersion != null && currentVersion < latestVersion
+                ) {
+                    FilledTonalButton(
+                        onClick = { onUpdate() },
+                    ) { Text(stringResource(Res.string.settings_updates_update)) }
+                }
         }
 
         if (LocalPlatform.current == PlatformType.MOBILE && !installsInApp) {
             Text(stringResource(Res.string.settings_updates_external_hint), style = MaterialTheme.typography.bodySmall)
         }
-        if (checkFailed) {
-            Text(stringResource(Res.string.settings_updates_check_failed), color = MaterialTheme.colorScheme.error)
-        }
-        if (!versionCheckInProgress && !checkFailed && lastChecked != null) {
-            when {
-                latestVersion == null -> Text(stringResource(Res.string.settings_updates_empty))
-                latestVersion <= currentVersion -> Text(stringResource(Res.string.settings_updates_current))
-            }
-        }
 
+        }
         if (releases.isNotEmpty()) {
             HorizontalDivider(Modifier.padding(vertical = 20.dp))
             Text(
@@ -166,14 +188,11 @@ private fun VersionDetails(
     currentVersion: AppVersion,
     latestVersion: AppVersion?,
     lastChecked: Instant?,
-    versionCheckInProgress: Boolean,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        Text(stringResource(Res.string.settings_updates_current_version), style = MaterialTheme.typography.labelLarge)
-        Text("$currentVersion", style = MaterialTheme.typography.titleLarge)
+        VersionRow(stringResource(Res.string.settings_updates_current_version), "$currentVersion")
         if (latestVersion != null) {
-            Text(stringResource(Res.string.settings_updates_last_checked_version), style = MaterialTheme.typography.labelLarge)
-            Text("$latestVersion", style = MaterialTheme.typography.titleLarge)
+            VersionRow(stringResource(Res.string.settings_updates_last_checked_version), "$latestVersion")
         }
         if (lastChecked != null) {
             val localDate = remember(lastChecked) {
@@ -181,6 +200,14 @@ private fun VersionDetails(
             }
             Text(stringResource(Res.string.settings_updates_last_checked_date, localDate), style = MaterialTheme.typography.bodySmall)
         }
-        if (versionCheckInProgress) CircularProgressIndicator(Modifier.size(24.dp))
+
+    }
+}
+
+@Composable
+private fun VersionRow(label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        Text(value, style = MaterialTheme.typography.bodyMedium)
     }
 }

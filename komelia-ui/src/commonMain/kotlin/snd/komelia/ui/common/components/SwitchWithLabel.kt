@@ -1,25 +1,25 @@
 package snd.komelia.ui.common.components
 
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun SwitchWithLabel(
@@ -35,8 +35,8 @@ fun SwitchWithLabel(
     val contentColor = if (enabled) LocalContentColor.current else LocalContentColor.current.copy(alpha = .4f)
     val actualSupportingTextColor = if (enabled) supportingTextColor else LocalContentColor.current.copy(alpha = .4f)
     val colors = SwitchDefaults.colors(
-        checkedTrackColor = MaterialTheme.colorScheme.secondary,
-        checkedThumbColor = MaterialTheme.colorScheme.onSecondary
+        checkedTrackColor = MaterialTheme.colorScheme.primary,
+        checkedThumbColor = MaterialTheme.colorScheme.onPrimary
     )
     CompositionLocalProvider(LocalContentColor provides contentColor) {
         Row(
@@ -53,15 +53,14 @@ fun SwitchWithLabel(
             Column(Modifier.weight(1f)) {
                 label()
                 CompositionLocalProvider(LocalContentColor provides actualSupportingTextColor) {
-                    supportingText()
+                    ProvideTextStyle(MaterialTheme.typography.bodyMedium) { supportingText() }
                 }
             }
             Switch(
                 checked = checked,
                 onCheckedChange = null,
                 enabled = enabled,
-                colors = colors,
-                modifier = Modifier.scale(1f, .9f)
+                colors = colors
             )
         }
 

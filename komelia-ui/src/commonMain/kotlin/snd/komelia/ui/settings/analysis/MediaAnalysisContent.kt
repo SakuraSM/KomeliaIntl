@@ -1,13 +1,17 @@
 package snd.komelia.ui.settings.analysis
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,6 +25,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_media_analysis_nothing_to_show
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.ui.common.components.EmptyState
 import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.strings.AppStrings
@@ -46,7 +51,11 @@ fun MediaAnalysisContent(
         )
 
         if (books.isEmpty()) {
-            Text(stringResource(Res.string.settings_media_analysis_nothing_to_show))
+            EmptyState(
+                title = stringResource(Res.string.settings_media_analysis_nothing_to_show),
+                imageVector = Icons.Outlined.PhotoLibrary,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 320.dp),
+            )
         } else {
             books.forEach {
                 BookAnalysisCard(
@@ -72,8 +81,9 @@ private fun BookAnalysisCard(
     modifier: Modifier
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(5.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier.fillMaxWidth()
     ) {
         Column(

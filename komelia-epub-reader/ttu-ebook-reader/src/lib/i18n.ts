@@ -91,6 +91,7 @@ const zhCN: Record<string, string> = {
   'Close dialog': '关闭弹窗',
   'Reader dialog': '阅读器弹窗',
   'Reader toolbar': '阅读器工具栏',
+  'More options': '更多选项',
   'Open Table of Contents': '打开目录',
   'Create Bookmark': '创建书签',
   'Update Bookmark': '更新书签',

@@ -19,6 +19,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notificati
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komf_notification_discord
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.StateHolder
+import snd.komelia.ui.common.components.SettingsSection
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.settings.komf.notifications.AppriseState
 import snd.komelia.ui.settings.komf.notifications.DiscordState
@@ -48,56 +49,55 @@ fun KomfSettingsContent(
         }
         Spacer(Modifier.height(30.dp))
 
-        when (selectedTab) {
-            0 -> DiscordNotificationsContent(
-                discordUploadSeriesCover = StateHolder(
-                    discordState.discordUploadSeriesCover,
-                    discordState::onSeriesCoverChange
-                ),
-                discordWebhooks = discordState.discordWebhooks,
-                onDiscordWebhookAdd = discordState::onDiscordWebhookAdd,
-                onDiscordWebhookRemove = discordState::onDiscordWebhookRemove,
+        SettingsSection {
+            when (selectedTab) {
+                0 -> DiscordNotificationsContent(
+                    discordUploadSeriesCover = StateHolder(
+                        discordState.discordUploadSeriesCover,
+                        discordState::onSeriesCoverChange
+                    ),
+                    discordWebhooks = discordState.discordWebhooks,
+                    onDiscordWebhookAdd = discordState::onDiscordWebhookAdd,
+                    onDiscordWebhookRemove = discordState::onDiscordWebhookRemove,
 
-                titleTemplate = StateHolder(discordState.titleTemplate, discordState::titleTemplate::set),
-                titleUrlTemplate = StateHolder(discordState.titleUrlTemplate, discordState::onTitleUrlTemplateChange),
-                descriptionTemplate = StateHolder(
-                    discordState.descriptionTemplate,
-                    discordState::descriptionTemplate::set
-                ),
-                fieldTemplates = discordState.fieldTemplates,
-                onFieldAdd = discordState::onFieldAdd,
-                onFieldDelete = discordState::onFieldDelete,
-                footerTemplate = StateHolder(discordState.footerTemplate, discordState::footerTemplate::set),
+                    titleTemplate = StateHolder(discordState.titleTemplate, discordState::titleTemplate::set),
+                    titleUrlTemplate = StateHolder(discordState.titleUrlTemplate, discordState::onTitleUrlTemplateChange),
+                    descriptionTemplate = StateHolder(
+                        discordState.descriptionTemplate,
+                        discordState::descriptionTemplate::set
+                    ),
+                    fieldTemplates = discordState.fieldTemplates,
+                    onFieldAdd = discordState::onFieldAdd,
+                    onFieldDelete = discordState::onFieldDelete,
+                    footerTemplate = StateHolder(discordState.footerTemplate, discordState::footerTemplate::set),
 
-                titlePreview = discordState.titlePreview,
-                titleUrlPreview = discordState.titleUrlPreview,
-                descriptionPreview = discordState.descriptionPreview,
-                fieldPreviews = discordState.fieldPreviews,
-                footerPreview = discordState.footerPreview,
+                    titlePreview = discordState.titlePreview,
+                    titleUrlPreview = discordState.titleUrlPreview,
+                    descriptionPreview = discordState.descriptionPreview,
+                    fieldPreviews = discordState.fieldPreviews,
+                    footerPreview = discordState.footerPreview,
 
-                notificationContextState = discordState.notificationContext,
-                onTemplateSave = discordState::onTemplatesSave,
-                onTemplateSend = discordState::onTemplatesSend,
-                onTemplateRender = discordState::onTemplateRender,
-            )
+                    notificationContextState = discordState.notificationContext,
+                    onTemplateSave = discordState::onTemplatesSave,
+                    onTemplateSend = discordState::onTemplatesSend,
+                    onTemplateRender = discordState::onTemplateRender,
+                )
 
-            else -> AppriseContent(
-                urls = appriseState.appriseUrls,
-                onUrlAdd = appriseState::onUrlAdd,
-                onUrlRemove = appriseState::onUrlRemove,
-                uploadSeriesCover = appriseState.uploadSeriesCover,
-                onUploadSeriesCoverChange = appriseState::onSeriesCoverChange,
-                titleTemplate = appriseState.titleTemplate,
-                onTitleTemplateChange = appriseState::titleTemplate::set,
-                bodyTemplate = appriseState.bodyTemplate,
-                onBodyTemplateChange = appriseState::bodyTemplate::set,
-                notificationContextState = appriseState.notificationContext,
-                onTemplateSend = appriseState::onTemplatesSend,
-                onTemplateSave = appriseState::onTemplatesSave
-            )
+                else -> AppriseContent(
+                    urls = appriseState.appriseUrls,
+                    onUrlAdd = appriseState::onUrlAdd,
+                    onUrlRemove = appriseState::onUrlRemove,
+                    uploadSeriesCover = appriseState.uploadSeriesCover,
+                    onUploadSeriesCoverChange = appriseState::onSeriesCoverChange,
+                    titleTemplate = appriseState.titleTemplate,
+                    onTitleTemplateChange = appriseState::titleTemplate::set,
+                    bodyTemplate = appriseState.bodyTemplate,
+                    onBodyTemplateChange = appriseState::bodyTemplate::set,
+                    notificationContextState = appriseState.notificationContext,
+                    onTemplateSend = appriseState::onTemplatesSend,
+                    onTemplateSave = appriseState::onTemplatesSave
+                )
         }
-
-
+        }
     }
 }
-

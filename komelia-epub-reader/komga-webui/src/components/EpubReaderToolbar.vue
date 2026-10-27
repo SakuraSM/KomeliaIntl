@@ -15,13 +15,13 @@
             :aria-expanded="isSettingsOpen" @click="emit('toggleSettings')">
       <v-icon :icon="mdiCog" />
     </button>
-    <v-menu location="bottom end">
+    <v-menu location="bottom end" @update:model-value="emit('overflowVisibilityChange', $event)">
       <template #activator="{ props }">
         <button v-bind="props" type="button" class="komelia-reader-action" :aria-label="t('bookreader.shortcuts.more_options')">
           <v-icon :icon="mdiDotsVertical" />
         </button>
       </template>
-      <v-list data-komelia-chrome role="menu" density="compact" min-width="220" :aria-label="t('bookreader.shortcuts.more_options')">
+      <v-list data-komelia-chrome role="menu" density="compact" elevation="0" min-width="220" :aria-label="t('bookreader.shortcuts.more_options')">
         <v-list-item v-if="isFullscreenAvailable" tag="button" type="button" role="menuitem" :title="t('bookreader.shortcuts.fullscreen')" :prepend-icon="mdiFullscreen"
                      @click="emit('fullscreen')" />
         <v-list-item tag="button" type="button" role="menuitem" :title="t('bookreader.shortcuts.show_hide_help')" :prepend-icon="mdiHelpCircle" @click="emit('toggleHelp')" />
@@ -48,6 +48,7 @@ const emit = defineEmits<{
   toggleSettings: []
   toggleHelp: []
   fullscreen: []
+  overflowVisibilityChange: [isOpen: boolean]
 }>()
 const { t } = useI18n()
 </script>

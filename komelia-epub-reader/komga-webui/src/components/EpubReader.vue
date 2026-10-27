@@ -14,6 +14,7 @@
           @toggle-settings="toggleSettings"
           @toggle-help="showHelp = !showHelp"
           @fullscreen="switchFullscreen"
+          @overflow-visibility-change="isOverflowMenuOpen = $event"
       />
     </v-slide-y-transition>
 
@@ -358,7 +359,9 @@ const showSettings = ref(false)
 const showToolbars = ref(false)
 const showToc = ref(false)
 const showHelp = ref(false)
+const isOverflowMenuOpen = ref(false)
 watch([showToolbars, showSettings, showToc], states => {
+  if (!states[0]) isOverflowMenuOpen.value = false
   if (states.some(Boolean)) void refreshChromeAppearance()
 })
 const readerLoading = ref(true)
@@ -757,6 +760,7 @@ function toggleHelp() {
 }
 
 function keyPressed(e: KeyboardEvent) {
+  if (isOverflowMenuOpen.value) return
   shortcuts.value[e.key]?.action()
 }
 

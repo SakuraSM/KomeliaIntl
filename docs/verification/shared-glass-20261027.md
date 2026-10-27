@@ -48,3 +48,5 @@ WebView 的安全区由原生布局负责，CSS 不再额外强制 8px 顶部距
 证据目录为 `build/verification/reader-chrome-20261027/`。`native-toolbar-red-behavior.log` 记录旧实心按钮与返回按钮的像素差异；`web-toolbar-red-behavior.log` 记录旧 EPUB 顶栏两侧 12px 缩进和 28px 圆角。局部修正通过了相同检查。渲染测试挂载真实组件并覆盖菜单动作，最终 Android 包摘要、浏览器和模拟器检查范围由该目录的交付记录保存。
 
 规范检查脚本在 macOS 自带 Bash 与 UTF-8 环境下发生变量解析错误；改用 `LC_ALL=C` 后可执行，但仓库未安装 ESLint，检查未完成。没有为此安装依赖或修改技能。包内 Vue/Svelte 类型检查、构建、渲染测试及平台矩阵分别记录，不能把它们写成 ESLint 已通过。
+
+Komga 的更多菜单在生产样式加载顺序下仍会出现 Vuetify 默认的深色投影。渲染夹具对齐生产入口的 CSS 导入顺序后，`komga-menu-shadow-red-production-order.log` 复现了该差异；菜单显式设为零 elevation，避免覆盖共享磨砂样式。打开菜单时由菜单处理键盘事件，Escape 先关闭菜单并保留顶栏与焦点；关闭顶栏时清理菜单状态。

@@ -1,3 +1,5 @@
+// Match main.ts: host chrome loads before Vuetify component styles.
+import '../../shared/chrome-appearance.css';
 import {createApp, h, reactive} from 'vue';
 import {createI18n} from 'vue-i18n';
 import {VApp} from 'vuetify/components';
@@ -5,7 +7,6 @@ import EpubReaderToolbar from '../src/components/EpubReaderToolbar.vue';
 import {registerPlugins} from '../src/plugins';
 import en from '../src/locales/en.json';
 import zhCN from '../src/locales/zh-CN.json';
-import '../../shared/chrome-appearance.css';
 
 const parameters = new URLSearchParams(location.search);
 document.documentElement.dataset.komeliaSurface = parameters.get('surface') ?? 'glass';
@@ -22,6 +23,7 @@ const app = createApp({
     onToggleToc: () => { state.isTocOpen = !state.isTocOpen; record('toc'); },
     onToggleSettings: () => { state.isSettingsOpen = !state.isSettingsOpen; record('settings'); },
     onToggleHelp: () => record('help'), onFullscreen: () => record('fullscreen'),
+    onOverflowVisibilityChange: (isOpen: boolean) => { document.querySelector('output')!.dataset.overflowOpen = String(isOpen); },
   }) }),
 });
 registerPlugins(app);

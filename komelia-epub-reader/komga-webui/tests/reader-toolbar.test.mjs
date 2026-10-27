@@ -34,6 +34,10 @@ test('Komga EPUB toolbar preserves touch targets, navigation and overflow action
     assert.equal(await page.locator('output').textContent(), 'toc');
     const more = page.getByRole('button', {name: 'More options'});
     await more.click();
+    assert.equal(await page.locator('output').getAttribute('data-overflow-open'), 'true');
+    const shadow = await page.getByRole('menu', {name: 'More options'}).evaluate(node => getComputedStyle(node).boxShadow);
+    const shadowLengths = shadow.match(/-?[\d.]+px/g) ?? [];
+    assert.ok(shadow === 'none' || (shadowLengths.length > 0 && shadowLengths.every(length => parseFloat(length) === 0)), shadow);
     await page.getByText('Show/hide help', {exact: true}).click();
     assert.equal(await page.locator('output').textContent(), 'help');
     await more.focus();
@@ -41,6 +45,7 @@ test('Komga EPUB toolbar preserves touch targets, navigation and overflow action
     await page.getByText('Enter/exit full screen', {exact: true}).waitFor();
     await page.keyboard.press('Escape');
     await page.getByText('Enter/exit full screen', {exact: true}).waitFor({state: 'hidden'});
+    assert.equal(await page.locator('output').getAttribute('data-overflow-open'), 'false');
     assert.equal(await more.evaluate(node => node === document.activeElement), true);
     await more.click();
     await page.getByText('Enter/exit full screen', {exact: true}).click();

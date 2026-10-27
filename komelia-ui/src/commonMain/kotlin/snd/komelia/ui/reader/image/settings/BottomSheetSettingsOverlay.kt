@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -98,6 +98,7 @@ import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.SwitchWithLabel
+import snd.komelia.ui.common.components.KomeliaChromeContent
 import snd.komelia.ui.common.components.komeliaChrome
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
 import snd.komelia.ui.platform.cursorForHand
@@ -144,7 +145,7 @@ fun BottomSheetSettingsOverlay(
     onBackPress: () -> Unit,
     onSettingsDialogVisibilityChange: (Boolean) -> Unit,
     pageShareAction: PageShareAction? = null,
-) {
+) = KomeliaChromeContent {
 
     val windowWidth = LocalWindowWidth.current
     val layoutSpec = LocalKomeliaLayout.current
@@ -152,16 +153,9 @@ fun BottomSheetSettingsOverlay(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .windowInsetsPadding(
-                WindowInsets.statusBars
-                    .add(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
-            )
-            .padding(
-                horizontal = layoutSpec.pageHorizontalPadding,
-                vertical = layoutSpec.controlSpacing / 2,
-            )
-            .clip(RoundedCornerShape(28.dp))
-            .komeliaChrome(RoundedCornerShape(28.dp), MaterialTheme.colorScheme.surface),
+            .komeliaChrome(RoundedCornerShape(0.dp), MaterialTheme.colorScheme.surface)
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+            .padding(horizontal = layoutSpec.pageHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(

@@ -40,6 +40,7 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.common.components.KomeliaSafeTopBar
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.components.FloatingChromeIconButton
 import snd.komelia.ui.common.itemlist.BookLazyCardGrid
@@ -79,23 +80,26 @@ fun ReadListContent(
 ) {
     val layout = LocalKomeliaLayout.current
     Column {
-        if (editMode)
-            BulkActionsToolbar(
-                onCancel = { onEditModeChange(false) },
-                readList = readList,
-                books = books,
-                selectedBooks = selectedBooks,
-                onBookSelect = onBookSelect
-            )
-        else {
-            ReadListToolbar(
-                readList = readList,
-                onReadListDelete = onReadListDelete,
-                onEditModeEnable = { onEditModeChange(true) },
+        KomeliaSafeTopBar {
+            if (editMode)
+                BulkActionsToolbar(
+                    onCancel = { onEditModeChange(false) },
+                    readList = readList,
+                    books = books,
+                    selectedBooks = selectedBooks,
+                    onBookSelect = onBookSelect
+                )
+            else {
+                ReadListToolbar(
+                    readList = readList,
+                    onReadListDelete = onReadListDelete,
+                    onEditModeEnable = { onEditModeChange(true) },
 
-                pageSize = pageSize,
-                onPageSizeChange = onPageSizeChange,
-            )
+                    pageSize = pageSize,
+                    onPageSizeChange = onPageSizeChange,
+                )
+            }
+
         }
 
         if (readList.summary.isNotBlank()) {

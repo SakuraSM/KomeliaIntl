@@ -270,7 +270,7 @@ fun BookToolBar(
 ) {
     val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = layout.pageHorizontalPadding, vertical = if (floating) 8.dp else 0.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = layout.pageHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FloatingChromeIconButton(onBackPress, floating) {

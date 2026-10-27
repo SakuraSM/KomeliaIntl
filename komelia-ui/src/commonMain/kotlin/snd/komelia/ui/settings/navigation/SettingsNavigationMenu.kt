@@ -14,6 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -56,6 +60,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
@@ -94,6 +99,7 @@ import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.LocalNavigationBarInset
+import snd.komelia.ui.common.components.komeliaHighlight
 import snd.komelia.ui.common.components.LocalSurfaceAppearance
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.home.edit.HomeGroupsSettingsScreen
@@ -375,6 +381,7 @@ private fun SettingsNavigationSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationButton(
     label: String,
@@ -385,10 +392,14 @@ fun NavigationButton(
     error: Boolean = false,
     color: Color,
     showDivider: Boolean = false,
+) = CompositionLocalProvider(
+    LocalRippleConfiguration provides if (LocalSurfaceAppearance.current.useGlass) null else LocalRippleConfiguration.current,
 ) {
     val platform = LocalPlatform.current
+    val glass = LocalSurfaceAppearance.current.useGlass
+    val interactions = remember { MutableInteractionSource() }
     val containerColor = when {
-        isSelected -> MaterialTheme.colorScheme.primaryContainer
+        isSelected && !glass -> MaterialTheme.colorScheme.primaryContainer
         platform == MOBILE || LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS -> Color.Transparent
         else -> color
     }
@@ -403,10 +414,12 @@ fun NavigationButton(
         onClick = { if (!isSelected) onClick() },
         shape = if (isSelected) RoundedCornerShape(12.dp) else RoundedCornerShape(0.dp),
         color = containerColor,
-        contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+        contentColor = if (isSelected && !glass) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+        interactionSource = interactions,
         modifier = Modifier
             .heightIn(min = height)
             .fillMaxWidth()
+            .komeliaHighlight(isSelected, RoundedCornerShape(12.dp), interactionSource = interactions)
             .semantics { selected = isSelected }
             .cursorForHand()
     ) {
@@ -424,7 +437,7 @@ fun NavigationButton(
                         imageVector = icon,
                         contentDescription = null,
                         modifier = Modifier.size(22.dp),
-                        tint = if (isSelected) {
+                        tint = if (isSelected && !glass) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.onSurface
@@ -435,6 +448,7 @@ fun NavigationButton(
             Spacer(Modifier.width(12.dp))
             Text(
                 text = label,
+                fontWeight = if (isSelected && glass) FontWeight.SemiBold else null,
                 style = if (platform == MOBILE) {
                     MaterialTheme.typography.bodyLarge
                 } else {

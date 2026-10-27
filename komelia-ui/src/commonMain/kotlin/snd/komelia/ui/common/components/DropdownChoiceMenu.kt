@@ -68,6 +68,9 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
@@ -147,12 +150,15 @@ fun <T> DropdownChoiceMenu(
 
             options.forEach {
                 val optionLabel = localizedEnumLabel(it.value, it.label)
+                val isSelected = selectedOption != null && selectedOption.value == it.value
                 DropdownMenuItem(
-                    text = { Text(optionLabel) },
+                    text = { Text(optionLabel, fontWeight = if (isSelected && LocalSurfaceAppearance.current.useGlass) FontWeight.SemiBold else null) },
                     onClick = {
                         onOptionChange(it)
                         isExpanded = false
                     }, modifier = Modifier.cursorForHand()
+                        .komeliaHighlight(isSelected, MaterialTheme.shapes.small, inset = 4.dp)
+                        .semantics { selected = isSelected }
                 )
             }
         }
@@ -750,12 +756,17 @@ private fun <T> DropdownMultiChoiceItem(
     onOptionSelect: (LabeledEntry<T>) -> Unit,
     selected: Boolean,
 ) {
-    val color = if (selected) MaterialTheme.colorScheme.tertiary else Color.Unspecified
+    val glass = LocalSurfaceAppearance.current.useGlass
+    val color = if (selected) {
+        if (glass) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.tertiary
+    } else Color.Unspecified
     val optionLabel = localizedEnumLabel(option.value, option.label)
     DropdownMenuItem(
-        text = { Text(text = optionLabel, color = color) },
+        text = { Text(text = optionLabel, color = color, fontWeight = if (selected && glass) FontWeight.SemiBold else null) },
         onClick = { onOptionSelect(option) },
-        modifier = Modifier.cursorForHand(),
+        modifier = Modifier.cursorForHand()
+            .komeliaHighlight(selected, MaterialTheme.shapes.small, inset = 4.dp)
+            .semantics { this.selected = selected },
         leadingIcon = {
             if (selected) Icon(Icons.Default.RadioButtonChecked, null, tint = color)
             else Icon(Icons.Default.RadioButtonUnchecked, null)

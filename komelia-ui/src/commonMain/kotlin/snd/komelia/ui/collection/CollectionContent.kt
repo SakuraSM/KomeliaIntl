@@ -41,6 +41,7 @@ import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.common.components.KomeliaSafeTopBar
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.components.FloatingChromeIconButton
 import snd.komelia.ui.common.itemlist.SeriesLazyCardGrid
@@ -82,24 +83,27 @@ fun CollectionContent(
     cardMinSize: Dp,
 ) {
     Column {
-        if (editMode) {
-            BulkActionsToolbar(
-                onCancel = { onEditModeChange(false) },
+        KomeliaSafeTopBar {
+            if (editMode) {
+                BulkActionsToolbar(
+                    onCancel = { onEditModeChange(false) },
+                    collection = collection,
+                    series = series,
+                    selectedSeries = selectedSeries,
+                    onSeriesSelect = onSeriesSelect
+                )
+            } else CollectionToolbar(
                 collection = collection,
-                series = series,
-                selectedSeries = selectedSeries,
-                onSeriesSelect = onSeriesSelect
-            )
-        } else CollectionToolbar(
-            collection = collection,
-            onCollectionDelete = onCollectionDelete,
-            onEditModeEnable = { onEditModeChange(true) },
+                onCollectionDelete = onCollectionDelete,
+                onEditModeEnable = { onEditModeChange(true) },
 
-            totalSeriesCount = totalSeriesCount,
-            pageSize = pageSize,
-            onPageSizeChange = onPageSizeChange,
+                totalSeriesCount = totalSeriesCount,
+                pageSize = pageSize,
+                onPageSizeChange = onPageSizeChange,
 
-            )
+                )
+
+        }
 
         SeriesLazyCardGrid(
             series = series,

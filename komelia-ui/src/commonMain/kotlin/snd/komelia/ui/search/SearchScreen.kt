@@ -23,6 +23,7 @@ import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.common.components.BrowsePageHeader
+import snd.komelia.ui.common.components.KomeliaPageScaffold
 import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.platform.PlatformType
@@ -44,43 +45,45 @@ class SearchScreen(
         val navigator = LocalNavigator.currentOrThrow
 
         ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (LocalPlatform.current == PlatformType.MOBILE) {
+            KomeliaPageScaffold(topBar = {
+                if (LocalPlatform.current == PlatformType.MOBILE) Column {
                     BrowsePageHeader(stringResource(Res.string.navbar_search))
                     SearchField(vm)
                 }
-
-                when (val state = vm.state.collectAsState().value) {
-                    is LoadState.Error -> ErrorContent(
-                        exception = state.exception,
-                        onReload = vm::reload
-                    )
-
-                    LoadState.Uninitialized, LoadState.Loading -> LoadingMaxSizeIndicator()
-                    is LoadState.Success -> {
-
-                        SearchContent(
-                            query = vm.query,
-                            searchType = vm.currentTab,
-                            coverage = vm.currentCoverage,
-                            onSearchTypeChange = vm::onSearchTypeChange,
-
-                            seriesResults = vm.seriesResults,
-                            seriesCurrentPage = vm.seriesCurrentPage,
-                            seriesTotalPages = vm.seriesTotalPages,
-                            onSeriesPageChange = vm::onSeriesPageChange,
-                            onSeriesClick = { navigator.push(seriesScreen(it)) },
-
-                            bookResults = vm.bookResults,
-                            bookCurrentPage = vm.bookCurrentPage,
-                            bookTotalPages = vm.bookTotalPages,
-                            onBookPageChange = vm::onBookPageChange,
-                            onBookClick = { navigator.push(bookScreen(it)) },
+            }) { topInset ->
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(top = topInset),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    when (val state = vm.state.collectAsState().value) {
+                        is LoadState.Error -> ErrorContent(
+                            exception = state.exception,
+                            onReload = vm::reload
                         )
 
+                        LoadState.Uninitialized, LoadState.Loading -> LoadingMaxSizeIndicator()
+                        is LoadState.Success -> {
+
+                            SearchContent(
+                                query = vm.query,
+                                searchType = vm.currentTab,
+                                coverage = vm.currentCoverage,
+                                onSearchTypeChange = vm::onSearchTypeChange,
+
+                                seriesResults = vm.seriesResults,
+                                seriesCurrentPage = vm.seriesCurrentPage,
+                                seriesTotalPages = vm.seriesTotalPages,
+                                onSeriesPageChange = vm::onSeriesPageChange,
+                                onSeriesClick = { navigator.push(seriesScreen(it)) },
+
+                                bookResults = vm.bookResults,
+                                bookCurrentPage = vm.bookCurrentPage,
+                                bookTotalPages = vm.bookTotalPages,
+                                onBookPageChange = vm::onBookPageChange,
+                                onBookClick = { navigator.push(bookScreen(it)) },
+                            )
+
+                        }
                     }
                 }
             }

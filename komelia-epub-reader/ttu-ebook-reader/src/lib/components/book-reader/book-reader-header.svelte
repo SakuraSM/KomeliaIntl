@@ -102,6 +102,7 @@
         type="button"
         title={t('Create Bookmark')}
         aria-label={isBookmarkScreen ? t('Update Bookmark') : t('Create Bookmark')}
+        data-komelia-highlight={isBookmarkScreen}
         class={baseIconClasses}
         onclick={bookmarkClick}
     >

@@ -27,6 +27,41 @@ import snd.komelia.settings.model.AppSurfaceStyle
 class KomeliaPageScaffoldTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun nestedHeadersConsumeTheCutoutInsetOnlyOnce() {
+        compose.setContent {
+            CompositionLocalProvider(LocalPageTopInset provides 32.dp) {
+                KomeliaSafeTopBar {
+                    KomeliaSafeTopBar {
+                        Box(Modifier.size(48.dp).testTag("nested-control"))
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        assertEquals(32.dp, compose.onNodeWithTag("nested-control").getUnclippedBoundsInRoot().top)
+    }
+
+    @Test fun backgroundReachesTheTopWhileHeaderControlsAvoidTheCutout() {
+        compose.setContent {
+            CompositionLocalProvider(
+                LocalSurfaceAppearance provides SurfaceAppearance(style = AppSurfaceStyle.LIQUID_GLASS, renderingSupported = false),
+                LocalPageTopInset provides 32.dp,
+            ) {
+                Box(Modifier.size(360.dp, 600.dp)) {
+                    KomeliaPageScaffold(topBar = { Box(Modifier.fillMaxWidth().height(48.dp).testTag("safe-header")) }) { inset ->
+                        Box(Modifier.size(360.dp, 600.dp).testTag("edge-background")) {
+                            Text("Content", Modifier.padding(top = inset).testTag("safe-content"))
+                        }
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        assertEquals(0.dp, compose.onNodeWithTag("edge-background").getUnclippedBoundsInRoot().top)
+        assertEquals(32.dp, compose.onNodeWithTag("safe-header").getUnclippedBoundsInRoot().top)
+        assertEquals(80.dp, compose.onNodeWithTag("safe-content").getUnclippedBoundsInRoot().top)
+    }
+
     @Test fun readingActionsStayAtTheViewportBottomWhenContentScrolls() {
         compose.setContent {
             Box(Modifier.size(360.dp, 600.dp)) {
@@ -67,7 +102,10 @@ class KomeliaPageScaffoldTest {
         var maxScroll = 0
         compose.setContent {
             MaterialTheme {
-                CompositionLocalProvider(LocalSurfaceAppearance provides appearance.value) {
+                CompositionLocalProvider(
+                    LocalSurfaceAppearance provides appearance.value,
+                    LocalPageTopInset provides 32.dp,
+                ) {
                     Box(Modifier.size(360.dp, 600.dp)) {
                         KomeliaPageScaffold(topBar = { Box(Modifier.fillMaxWidth().height(64.dp)) }) { inset ->
                             val scroll = rememberScrollState()

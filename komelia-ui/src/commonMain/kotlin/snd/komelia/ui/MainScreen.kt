@@ -65,6 +65,8 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -91,8 +93,11 @@ import snd.komelia.ui.book.BookScreen
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.collection.CollectionScreen
 import snd.komelia.ui.common.components.GlassBackdropScope
+import snd.komelia.ui.common.components.KomeliaChromeStyle
+import snd.komelia.ui.common.components.komeliaHighlight
 import snd.komelia.ui.common.components.KomeliaChromeSurface
 import snd.komelia.ui.common.components.LocalNavigationBarInset
+import snd.komelia.ui.common.components.LocalPageTopInset
 import snd.komelia.ui.common.components.LocalSurfaceAppearance
 import snd.komelia.ui.common.components.glassBackdrop
 import snd.komelia.ui.common.components.komeliaTopBarScroll
@@ -187,10 +192,15 @@ class MainScreen(
                 }
             }
 
+            val safeDrawing = WindowInsets.safeDrawing
+            val pageTopInset = if (platform == MOBILE) with(LocalDensity.current) { safeDrawing.getTop(this).toDp() } else 0.dp
             GlassBackdropScope {
-                CompositionLocalProvider(LocalAppNavigationController provides appNavigationController) {
+                CompositionLocalProvider(
+                    LocalAppNavigationController provides appNavigationController,
+                    LocalPageTopInset provides pageTopInset,
+                ) {
                     Surface(
-                        color = MaterialTheme.colorScheme.surface,
+                        color = if (platform == MOBILE) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.surface,
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         Column(Modifier.komeliaTopBarScroll(topBarScrollState)) {
@@ -216,9 +226,9 @@ class MainScreen(
                             }
 
                             Scaffold(
-                                containerColor = MaterialTheme.colorScheme.surface,
+                                containerColor = if (platform == MOBILE) Color.Transparent else MaterialTheme.colorScheme.surface,
                                 contentWindowInsets = if (platform == MOBILE) {
-                                    WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+                                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
                                 } else {
                                     WindowInsets(0.dp)
                                 },
@@ -252,7 +262,6 @@ class MainScreen(
                                         .fillMaxSize()
                                         .padding(PaddingValues(
                                             start = contentPadding.calculateLeftPadding(direction),
-                                            top = contentPadding.calculateTopPadding(),
                                             end = contentPadding.calculateRightPadding(direction),
                                             bottom = if (floatingBar) 0.dp else contentPadding.calculateBottomPadding(),
                                         )),
@@ -489,10 +498,12 @@ private fun AppBottomBar(
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
     val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
+    val glass = LocalSurfaceAppearance.current.useGlass
+    val colors = MaterialTheme.colorScheme
     KomeliaChromeSurface(
         modifier = if (floating) Modifier.navigationBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp) else Modifier,
         shape = RoundedCornerShape(if (floating) 40.dp else 0.dp),
-        shadowElevation = if (floating) 4.dp else 0.dp,
+        shadowElevation = if (floating) 2.dp else 0.dp,
     ) {
         NavigationBar(
             containerColor = Color.Transparent,
@@ -501,17 +512,25 @@ private fun AppBottomBar(
         ) {
             CompositionLocalProvider(LocalRippleConfiguration provides null) {
                 destinationItems.forEach { item ->
+                    val interactions = remember(item.destination) { MutableInteractionSource() }
                     NavigationBarItem(
+                        modifier = Modifier.komeliaHighlight(
+                            selected == item.destination, KomeliaChromeStyle.navigationHighlightShape,
+                            inset = KomeliaChromeStyle.navigationHighlightInset,
+                            interactionSource = interactions,
+                        ),
+                        interactionSource = interactions,
                         selected = selected == item.destination,
                         onClick = { onSelect(item.destination, null) },
                         icon = { DestinationIcon(item, selected == item.destination) },
-                        label = { Text(stringResource(item.label), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                        label = { Text(stringResource(item.label), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            fontWeight = if (glass && selected == item.destination) FontWeight.SemiBold else null) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            selectedIconColor = if (glass) colors.onSurface else colors.primary,
+                            selectedTextColor = if (glass) colors.onSurface else colors.primary,
                             indicatorColor = Color.Transparent,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedIconColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
+                            unselectedTextColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
                         ),
                     )
                 }
@@ -528,8 +547,10 @@ private fun AppNavigationRail(
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
     val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
+    val glass = LocalSurfaceAppearance.current.useGlass
+    val colors = MaterialTheme.colorScheme
     KomeliaChromeSurface(
-        modifier = if (floating) Modifier.padding(8.dp) else Modifier,
+        modifier = (if (floating) Modifier.padding(8.dp) else Modifier).padding(top = LocalPageTopInset.current),
         shape = RoundedCornerShape(if (floating) 28.dp else 0.dp),
     ) {
         NavigationRail(
@@ -538,17 +559,25 @@ private fun AppNavigationRail(
         ) {
             CompositionLocalProvider(LocalRippleConfiguration provides null) {
                 destinationItems.forEach { item ->
+                    val interactions = remember(item.destination) { MutableInteractionSource() }
                     NavigationRailItem(
+                        modifier = Modifier.komeliaHighlight(
+                            selected == item.destination, KomeliaChromeStyle.navigationHighlightShape,
+                            inset = KomeliaChromeStyle.navigationHighlightInset,
+                            interactionSource = interactions,
+                        ),
+                        interactionSource = interactions,
                         selected = selected == item.destination,
                         onClick = { onSelect(item.destination, null) },
                         icon = { DestinationIcon(item, selected == item.destination) },
-                        label = { Text(stringResource(item.label), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                        label = { Text(stringResource(item.label), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            fontWeight = if (glass && selected == item.destination) FontWeight.SemiBold else null) },
                         colors = NavigationRailItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            selectedIconColor = if (glass) colors.onSurface else colors.primary,
+                            selectedTextColor = if (glass) colors.onSurface else colors.primary,
+                            indicatorColor = if (glass) Color.Transparent else colors.primary.copy(alpha = 0.1f),
+                            unselectedIconColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
+                            unselectedTextColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
                         ),
                     )
                 }

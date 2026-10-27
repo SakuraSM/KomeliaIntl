@@ -17,6 +17,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.CrossfadeTransition
 import snd.komelia.ui.LocalKomeliaMotion
+import snd.komelia.ui.common.components.KomeliaChromeContent
 import snd.komelia.ui.common.components.GlassBackdropScope
 import snd.komelia.ui.common.components.glassBackdrop
 import snd.komelia.ui.common.components.komeliaChrome
@@ -40,19 +41,21 @@ class KomfMainScreen : Screen {
                     PlatformTitleBar()
                     SettingsScreenLayout(
                         navMenu = {
-                            Row(
-                                Modifier
-                                    .padding(12.dp)
-                                    .komeliaChrome(RoundedCornerShape(24.dp), MaterialTheme.colorScheme.surface)
-                                    .padding(top = settingsDesktopTopPadding, start = 10.dp, end = 10.dp)
-                            ) {
-                                Spacer(Modifier.weight(1f))
-                                KomfNavigationContent(
-                                    currentScreen = navigator.lastItem,
-                                    onNavigation = { navigator.replaceAll(it) },
-                                    contentColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    modifier = Modifier.width(settingsDesktopNavMenuWidth)
-                                )
+                            KomeliaChromeContent {
+                                Row(
+                                    Modifier
+                                        .padding(12.dp)
+                                        .komeliaChrome(RoundedCornerShape(24.dp), MaterialTheme.colorScheme.surface)
+                                        .padding(top = settingsDesktopTopPadding, start = 10.dp, end = 10.dp)
+                                ) {
+                                    Spacer(Modifier.weight(1f))
+                                    KomfNavigationContent(
+                                        currentScreen = navigator.lastItem,
+                                        onNavigation = { navigator.replaceAll(it) },
+                                        contentColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        modifier = Modifier.width(settingsDesktopNavMenuWidth)
+                                    )
+                                }
                             }
                         },
                         dismissButton = {},

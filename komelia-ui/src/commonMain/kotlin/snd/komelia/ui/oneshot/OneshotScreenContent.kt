@@ -175,7 +175,6 @@ fun OneshotToolBar(
     Row(
         modifier = Modifier.fillMaxWidth().padding(
             horizontal = LocalKomeliaLayout.current.pageHorizontalPadding,
-            vertical = if (floating) 8.dp else 0.dp,
         ),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically

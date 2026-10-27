@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -87,6 +89,7 @@ import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.NumberFieldWithIncrements
 import snd.komelia.ui.common.components.SwitchWithLabel
+import snd.komelia.ui.common.components.KomeliaChromeContent
 import snd.komelia.ui.common.components.komeliaChrome
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.cursorForHand
@@ -143,16 +146,17 @@ fun SettingsSideMenuOverlay(
     onBackPress: () -> Unit,
     onShowHelpMenu: () -> Unit,
     pageShareAction: PageShareAction? = null,
-) {
+) = KomeliaChromeContent {
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(
             Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .windowInsetsPadding(WindowInsets.statusBars)
+                .komeliaChrome(RoundedCornerShape(0.dp), MaterialTheme.colorScheme.surface)
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
         )
         Column(
             modifier = Modifier
-                .padding(12.dp)
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+                .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
                 .komeliaChrome(RoundedCornerShape(24.dp), MaterialTheme.colorScheme.surface)
                 .width(350.dp)
                 .padding(horizontal = 10.dp)

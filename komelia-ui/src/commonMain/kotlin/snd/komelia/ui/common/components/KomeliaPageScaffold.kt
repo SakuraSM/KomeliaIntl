@@ -1,8 +1,11 @@
 package snd.komelia.ui.common.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.Constraints
@@ -21,7 +24,7 @@ fun KomeliaPageScaffold(
     val overlay = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     GlassBackdropScope {
         SubcomposeLayout(modifier.fillMaxSize()) { constraints ->
-            val header = subcompose(PageSlot.Header) { Box { topBar() } }.single().measure(
+            val header = subcompose(PageSlot.Header) { KomeliaSafeTopBar(topBar) }.single().measure(
                 constraints.copy(minHeight = 0),
             )
             val topInset = if (overlay) header.height.toDp() else 0.dp
@@ -29,7 +32,9 @@ fun KomeliaPageScaffold(
                 constraints.copy(minHeight = 0),
             )
             val body = subcompose(PageSlot.Content) {
-                Box(Modifier.fillMaxSize().glassBackdrop()) { content(topInset) }
+                CompositionLocalProvider(LocalPageTopInset provides 0.dp) {
+                    Box(Modifier.fillMaxSize().glassBackdrop().background(MaterialTheme.colorScheme.background)) { content(topInset) }
+                }
             }.single().measure(
                 Constraints.fixed(
                     constraints.maxWidth,

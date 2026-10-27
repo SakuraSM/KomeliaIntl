@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -23,7 +22,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,7 +34,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalPlatform
-import snd.komelia.ui.common.components.KomeliaChromeSurface
+import snd.komelia.ui.common.components.BrowsePageHeader
 import snd.komelia.ui.common.components.KomeliaPageScaffold
 import snd.komelia.ui.common.components.LocalNavigationBarInset
 import snd.komelia.ui.common.components.PauseGlassWhileBusy
@@ -64,24 +62,14 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
     val layout = LocalKomeliaLayout.current
     val scrollState = rememberScrollState()
     PauseGlassWhileBusy(scrollState.isScrollInProgress)
-    val isContentScrolled by remember(scrollState) { derivedStateOf { scrollState.value > 0 } }
     KomeliaPageScaffold(
         modifier = Modifier.background(MaterialTheme.colorScheme.background),
         topBar = {
-        Box(Modifier.fillMaxWidth().padding(horizontal = layout.pageHorizontalPadding, vertical = 6.dp)) {
-            KomeliaChromeSurface(shape = RoundedCornerShape(28.dp), shadowElevation = if (isContentScrolled) 2.dp else 0.dp) {
-                Row(
-                    Modifier.widthIn(min = 164.dp).padding(horizontal = 8.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(onClick = { navigator.pop() }) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(Res.string.navigation_back))
-                    }
-                    Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f, false))
+            BrowsePageHeader(title, navigationIcon = {
+                IconButton(onClick = { navigator.pop() }) {
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(Res.string.navigation_back))
                 }
-            }
-        }
+            })
     }) { topInset ->
         Column(
             modifier = Modifier

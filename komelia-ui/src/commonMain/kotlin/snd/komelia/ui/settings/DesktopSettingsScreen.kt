@@ -37,6 +37,7 @@ import snd.komelia.ui.LocalKeyEvents
 import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.appRootNavigator
+import snd.komelia.ui.common.components.KomeliaChromeContent
 import snd.komelia.ui.common.components.GlassBackdropScope
 import snd.komelia.ui.common.components.KomeliaWordmark
 import snd.komelia.ui.common.components.glassBackdrop
@@ -80,26 +81,28 @@ class SettingsScreen(
                     if (!topLevel) PlatformTitleBar()
                     SettingsScreenLayout(
                         navMenu = {
-                            Row(
-                                Modifier
-                                    .padding(12.dp)
-                                    .komeliaChrome(RoundedCornerShape(24.dp), MaterialTheme.colorScheme.surface)
-                                    .padding(top = settingsDesktopTopPadding, start = 16.dp, end = 16.dp)
-                            ) {
-                                Spacer(Modifier.weight(1f))
-                                SettingsNavigationMenu(
-                                    header = { KomeliaWordmark(Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) },
-                                    currentScreen = navigator.lastItem,
-                                    onNavigation = { navigator.replaceAll(it) },
-                                    hasMediaErrors = vm.hasMediaErrors,
-                                    komfEnabled = vm.komfEnabledFlow.collectAsState().value,
-                                    updatesEnabled = vm.updatesEnabled,
-                                    newVersionIsAvailable = vm.newVersionIsAvailable,
-                                    onLogout = vm::logout,
-                                    contentColor = MaterialTheme.colorScheme.surface,
-                                    modifier = Modifier.width(settingsDesktopNavMenuWidth),
-                                    user = vm.user.collectAsState().value
-                                )
+                            KomeliaChromeContent {
+                                Row(
+                                    Modifier
+                                        .padding(12.dp)
+                                        .komeliaChrome(RoundedCornerShape(24.dp), MaterialTheme.colorScheme.surface)
+                                        .padding(top = settingsDesktopTopPadding, start = 16.dp, end = 16.dp)
+                                ) {
+                                    Spacer(Modifier.weight(1f))
+                                    SettingsNavigationMenu(
+                                        header = { KomeliaWordmark(Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) },
+                                        currentScreen = navigator.lastItem,
+                                        onNavigation = { navigator.replaceAll(it) },
+                                        hasMediaErrors = vm.hasMediaErrors,
+                                        komfEnabled = vm.komfEnabledFlow.collectAsState().value,
+                                        updatesEnabled = vm.updatesEnabled,
+                                        newVersionIsAvailable = vm.newVersionIsAvailable,
+                                        onLogout = vm::logout,
+                                        contentColor = MaterialTheme.colorScheme.surface,
+                                        modifier = Modifier.width(settingsDesktopNavMenuWidth),
+                                        user = vm.user.collectAsState().value
+                                    )
+                                }
                             }
                         },
                         dismissButton = {

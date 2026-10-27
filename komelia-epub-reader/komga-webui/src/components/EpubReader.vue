@@ -21,6 +21,7 @@
             :disabled="!hasToc && !hasLandmarks && !hasPageList"
             icon
             :aria-label="t('epubreader.shortcuts.show_hide_toc')"
+            :aria-expanded="showToc"
             @click="showToc = !showToc">
           <v-icon :icon="mdiTableOfContents"/>
         </v-btn>
@@ -39,6 +40,7 @@
         <v-btn
             icon
             :aria-label="t('bookreader.shortcuts.show_hide_help')"
+            :aria-expanded="showHelp"
             @click="showHelp = !showHelp">
           <v-icon :icon="mdiHelpCircle"/>
         </v-btn>
@@ -46,6 +48,7 @@
         <v-btn
             icon
             :aria-label="t('bookreader.shortcuts.settings')"
+            :aria-expanded="showSettings"
             @click="toggleSettings"
         >
           <v-icon :icon="mdiCog"/>

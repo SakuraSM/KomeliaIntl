@@ -24,6 +24,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.ui.common.components.komeliaHighlight
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -208,6 +211,29 @@ fun SearchToolBar(
     modifier: Modifier
 ) {
     if (!hasSeries && !hasBooks) return
+    if (LocalSurfaceAppearance.current.useGlass) {
+        Row(modifier.selectableGroup().padding(bottom = LocalKomeliaLayout.current.itemSpacing)) {
+            if (hasSeries) Tab(
+                selected = searchType == SearchResultsTab.SERIES,
+                onClick = { onSearchTypeChange(SearchResultsTab.SERIES) },
+                modifier = Modifier.weight(1f).heightIn(min = LocalKomeliaLayout.current.minimumTouchTarget)
+                    .komeliaHighlight(searchType == SearchResultsTab.SERIES),
+                selectedContentColor = MaterialTheme.colorScheme.onSurface,
+                unselectedContentColor = MaterialTheme.colorScheme.onSurface,
+                text = { Text(stringResource(Res.string.search_series_tab), style = MaterialTheme.typography.titleSmall) },
+            )
+            if (hasBooks) Tab(
+                selected = searchType == SearchResultsTab.BOOKS,
+                onClick = { onSearchTypeChange(SearchResultsTab.BOOKS) },
+                modifier = Modifier.weight(1f).heightIn(min = LocalKomeliaLayout.current.minimumTouchTarget)
+                    .komeliaHighlight(searchType == SearchResultsTab.BOOKS),
+                selectedContentColor = MaterialTheme.colorScheme.onSurface,
+                unselectedContentColor = MaterialTheme.colorScheme.onSurface,
+                text = { Text(stringResource(Res.string.search_books_tab), style = MaterialTheme.typography.titleSmall) },
+            )
+        }
+        return
+    }
     SecondaryTabRow(
         selectedTabIndex = if (searchType == SearchResultsTab.BOOKS && hasSeries && hasBooks) 1 else 0,
         modifier = modifier.padding(bottom = LocalKomeliaLayout.current.itemSpacing),

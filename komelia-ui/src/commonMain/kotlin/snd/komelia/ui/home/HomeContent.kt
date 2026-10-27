@@ -1,6 +1,5 @@
 package snd.komelia.ui.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Search
@@ -35,7 +33,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,7 +48,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_all
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_group_items
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_groups
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_search_groups
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_search
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_home
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
@@ -61,9 +58,11 @@ import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
-import snd.komelia.ui.common.components.KomeliaChromeSurface
 import snd.komelia.ui.common.components.KomeliaPageScaffold
-import snd.komelia.ui.common.components.KomeliaWordmark
+import snd.komelia.ui.common.components.BrowsePageHeader
+import snd.komelia.ui.common.components.komeliaHighlight
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.common.menus.SeriesMenuActions
@@ -85,17 +84,11 @@ internal fun HomeContent(
 ) {
     val gridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
-    val isContentScrolled by remember(gridState) {
-        derivedStateOf {
-            gridState.firstVisibleItemIndex > 0 || gridState.firstVisibleItemScrollOffset > 0
-        }
-    }
     PauseGlassWhileBusy(gridState.isScrollInProgress)
     KomeliaPageScaffold(topBar = {
         Toolbar(
             filters = filters,
             currentFilterNumber = activeFilterNumber,
-            isContentScrolled = isContentScrolled,
             onSearchClick = onSearchClick,
             onFilterChange = {
                 onFilterChange(it)
@@ -123,11 +116,9 @@ internal fun HomeContent(
 private fun Toolbar(
     filters: List<HomeFilterData>,
     currentFilterNumber: Int,
-    isContentScrolled: Boolean,
     onSearchClick: () -> Unit,
     onFilterChange: (Int) -> Unit,
 ) {
-    val layout = LocalKomeliaLayout.current
     val toolbarFilters = remember(filters) { homeToolbarEntries(filters) }
     val allLabel = stringResource(Res.string.home_filter_all)
     val entries = listOf(HomeToolbarEntry(HOME_ALL_TAB_ID, allLabel, filters.sumOf { it.itemCount() })) + toolbarFilters
@@ -136,40 +127,22 @@ private fun Toolbar(
     val useBottomSheet = LocalWindowWidth.current == snd.komelia.ui.platform.WindowSizeClass.COMPACT ||
         LocalWindowWidth.current == snd.komelia.ui.platform.WindowSizeClass.MEDIUM
     LaunchedEffect(currentFilterNumber, toolbarFilters) {
-        if (currentFilterNumber != 0 && currentFilter == null) onFilterChange(0)
+        if (currentFilterNumber != 0 && toolbarFilters.none { it.id == currentFilterNumber }) onFilterChange(0)
     }
-    Row(
-        modifier = Modifier.fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = layout.pageHorizontalPadding, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    BrowsePageHeader(
+        title = currentFilter?.label ?: stringResource(Res.string.navbar_home),
+        onSearchClick = if (LocalPlatform.current != PlatformType.DESKTOP) onSearchClick else null,
     ) {
-        Column(Modifier.weight(1f).padding(start = 8.dp)) {
-            KomeliaWordmark()
-            currentFilter?.let {
-                Text(it.label, style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
         if (toolbarFilters.isNotEmpty()) {
             Box {
                 IconButton(onClick = { pickerOpen = true }) {
-                    Icon(Icons.Rounded.Tune, stringResource(Res.string.home_filter_groups),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Rounded.Tune, stringResource(Res.string.home_filter_groups))
                 }
                 if (!useBottomSheet) DropdownMenu(pickerOpen, onDismissRequest = { pickerOpen = false }) {
                     HomeGroupPickerItems(entries, currentFilterNumber, Modifier.width(320.dp)) {
                         pickerOpen = false
                         onFilterChange(it)
                     }
-                }
-            }
-        }
-        if (LocalPlatform.current != PlatformType.DESKTOP) {
-            KomeliaChromeSurface(shape = RoundedCornerShape(50), shadowElevation = if (isContentScrolled) 2.dp else 0.dp) {
-                IconButton(onClick = onSearchClick) {
-                    Icon(Icons.Rounded.Search, stringResource(Res.string.navbar_search))
                 }
             }
         }
@@ -236,6 +209,8 @@ private fun HomeGroupPickerItems(
             items(visibleFilters.size) { index ->
                 val data = visibleFilters[index]
                 DropdownMenuItem(
+                    modifier = Modifier.komeliaHighlight(data.id == currentFilterNumber, MaterialTheme.shapes.small, inset = 4.dp)
+                        .semantics { selected = data.id == currentFilterNumber },
                     text = {
                         Column {
                             Text(data.label, maxLines = 1, overflow = TextOverflow.Ellipsis)

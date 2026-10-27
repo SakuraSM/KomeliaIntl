@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class EpubDisplaySettings(
     val immersiveMode: Boolean = false,
-    val extraTopSpacingDp: Int = 8,
+    val extraTopSpacingDp: Int = 0,
 ) {
     val topSpacingDp: Int get() = extraTopSpacingDp.coerceIn(0, 48)
 }

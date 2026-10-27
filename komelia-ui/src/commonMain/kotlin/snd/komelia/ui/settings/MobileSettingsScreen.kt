@@ -1,8 +1,8 @@
 package snd.komelia.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -26,14 +25,13 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile_subtitle
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.appRootNavigator
-import snd.komelia.ui.common.components.KomeliaTopBarSurface
-import snd.komelia.ui.common.components.KomeliaWordmark
-import snd.komelia.ui.common.components.komeliaTopBarScroll
-import snd.komelia.ui.common.components.rememberKomeliaTopBarScrollState
+import snd.komelia.ui.common.components.BrowsePageHeader
+import snd.komelia.ui.common.components.KomeliaPageScaffold
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.settings.navigation.SettingsNavigationMenu
 
@@ -48,68 +46,51 @@ class MobileSettingsScreen(
             viewModelFactory.getSettingsNavigationViewModel(currentNavigator.appRootNavigator())
         }
         val layout = LocalKomeliaLayout.current
-        val topBarScrollState = rememberKomeliaTopBarScrollState()
         LaunchedEffect(Unit) { vm.initialize() }
 
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.surface,
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .komeliaTopBarScroll(topBarScrollState),
-                verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
-            ) {
-                if (!topLevel) KomeliaTopBarSurface(
-                    isContentScrolled = topBarScrollState.isContentScrolled,
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = layout.pageHorizontalPadding)
-                            .padding(vertical = layout.controlSpacing),
-                        horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (!topLevel) {
+            KomeliaPageScaffold(topBar = {
+                BrowsePageHeader(
+                    title = stringResource(Res.string.settings_mobile_title),
+                    navigationIcon = if (topLevel) null else {
+                        {
                             IconButton(onClick = { currentNavigator.pop() }) {
-                                Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                                Icon(Icons.AutoMirrored.Default.ArrowBack, stringResource(Res.string.navigation_back))
                             }
                         }
-                        Text(
-                            stringResource(Res.string.settings_mobile_title),
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                    }
-                }
-
-                SettingsNavigationMenu(
-                    header = {
-                        if (topLevel) Column(
-                            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            KomeliaWordmark()
-                            Text(stringResource(Res.string.settings_mobile_title), style = MaterialTheme.typography.headlineLarge)
-                            Text(stringResource(Res.string.settings_mobile_subtitle),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
                     },
-                    currentScreen = currentNavigator.lastItem,
-                    onNavigation = { currentNavigator.push(it) },
-                    hasMediaErrors = vm.hasMediaErrors,
-                    komfEnabled = vm.komfEnabledFlow.collectAsState().value,
-                    updatesEnabled = vm.updatesEnabled,
-                    newVersionIsAvailable = vm.newVersionIsAvailable,
-                    onLogout = vm::logout,
-                    user = vm.user.collectAsState().value,
-                    contentColor = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = layout.pageHorizontalPadding)
                 )
+
+            }) { topInset ->
+                Box(Modifier.fillMaxSize().padding(top = topInset + layout.controlSpacing)) {
+                    SettingsNavigationMenu(
+                        header = {
+                            if (topLevel) Column(
+                                Modifier.fillMaxWidth().padding(horizontal = 8.dp).padding(bottom = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Text(stringResource(Res.string.settings_mobile_subtitle),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        },
+                        currentScreen = currentNavigator.lastItem,
+                        onNavigation = { currentNavigator.push(it) },
+                        hasMediaErrors = vm.hasMediaErrors,
+                        komfEnabled = vm.komfEnabledFlow.collectAsState().value,
+                        updatesEnabled = vm.updatesEnabled,
+                        newVersionIsAvailable = vm.newVersionIsAvailable,
+                        onLogout = vm::logout,
+                        user = vm.user.collectAsState().value,
+                        contentColor = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = layout.pageHorizontalPadding)
+                    )
+                }
             }
         }
         if (!topLevel) BackPressHandler { currentNavigator.pop() }

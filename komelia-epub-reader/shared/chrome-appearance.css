@@ -1,23 +1,25 @@
 /* Only marked application controls use the host material. Never select book content. */
 :root[data-komelia-surface="glass"] [data-komelia-chrome] {
   --komelia-chrome-color: #f4f7fc;
-  --komelia-chrome-background: rgb(29 46 66 / 35%);
-  --komelia-chrome-filter: blur(12px) saturate(1.04) brightness(.28) contrast(1.05);
+  --komelia-chrome-background: rgb(0 0 0 / 60%);
+  --komelia-chrome-filter: blur(28px) saturate(1.1);
+  --komelia-highlight-shadow: transparent;
+  --komelia-highlight-light: rgb(255 255 255 / 6.5%);
   color: var(--komelia-chrome-color) !important;
   background: var(--komelia-chrome-background) !important;
-  border: 1px solid rgb(226 238 255 / 36%);
-  box-shadow: inset 0 1px 1px rgb(255 255 255 / 26%), inset 0 -1px 2px rgb(255 255 255 / 10%), 0 8px 24px rgb(0 0 0 / 18%);
+  border: 0;
+  box-shadow: none;
   backdrop-filter: var(--komelia-chrome-filter);
   -webkit-backdrop-filter: var(--komelia-chrome-filter);
 }
 :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] {
-  --komelia-chrome-color: #182637;
-  --komelia-chrome-background: rgb(250 252 255 / 68%);
-  --komelia-chrome-filter: blur(12px) saturate(1.15) contrast(.2903226) brightness(1.55);
-  border-color: rgb(85 89 100 / 30%);
+  --komelia-chrome-color: #172330;
+  --komelia-chrome-background: rgb(250 252 255 / 60%);
+  --komelia-highlight-shadow: transparent;
+  --komelia-highlight-light: rgb(255 255 255 / 48%);
 }
 :root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-chrome] {
-  --komelia-chrome-background: rgb(23 38 56 / 30%);
+  --komelia-chrome-background: rgb(0 0 0 / 60%);
 }
 :root[data-komelia-reduced-motion="true"] [data-komelia-chrome],
 :root[data-komelia-reduced-motion="true"] [data-komelia-chrome-motion] {
@@ -56,13 +58,29 @@
 :root[data-komelia-surface="solid"][data-komelia-theme="LIGHT"] [data-komelia-chrome] { background: #fafcff !important; color: #182637 !important; }
 :root[data-komelia-surface="solid"][data-komelia-theme="DARKER"] [data-komelia-chrome] { background: #172638 !important; }
 
-:root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"]) [data-komelia-chrome] :is(button, [class*="text-white"]) {
+:root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"]) [data-komelia-chrome] :is(button, a, [role="tab"], [role="option"], .v-list-item, [class*="text-white"]) {
   color: inherit !important;
 }
-[data-komelia-chrome] button { min-width: 48px; min-height: 48px; }
+:root[data-komelia-surface="glass"] [data-komelia-chrome] :is([aria-selected="true"], [aria-pressed="true"], [aria-expanded="true"], [data-komelia-highlight="true"], .v-btn--active, .v-list-item--active, :focus-visible) {
+  background: transparent !important;
+  border: 0 !important;
+  outline: none;
+  box-shadow: 0 -2px 12px var(--komelia-highlight-light);
+  font-weight: 600;
+}
+:root[data-komelia-surface="glass"] [data-komelia-chrome] :is(.v-btn--active, .v-list-item--active) > :is(.v-btn__overlay, .v-list-item__overlay) {
+  opacity: 0 !important;
+}
+:root[data-komelia-surface="glass"] [data-komelia-chrome] .v-tab__slider { display: none; }
+[data-komelia-chrome] button, button[data-komelia-chrome] { min-width: 48px; min-height: 48px; }
 [data-komelia-chrome] :focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+:root[data-komelia-surface="glass"] [data-komelia-chrome] :focus-visible { outline: none; }
+:root[data-komelia-surface="glass"] button[data-komelia-chrome]:focus-visible {
+  outline: none;
+  box-shadow: 0 -2px 12px var(--komelia-highlight-light);
+}
 @media (pointer: fine) {
-  [data-komelia-chrome] button { min-width: 40px; min-height: 40px; }
+  [data-komelia-chrome] button, button[data-komelia-chrome] { min-width: 40px; min-height: 40px; }
 }
 
 /* Float only the reader bars; drawers and publication containers retain their own geometry. */
@@ -72,7 +90,7 @@
   border-radius: 28px;
 }
 :root[data-komelia-surface="glass"] [data-komelia-toolbar="top"] {
-  top: max(8px, env(safe-area-inset-top)) !important;
+  top: env(safe-area-inset-top, 0px) !important;
 }
 :root[data-komelia-surface="glass"] [data-komelia-toolbar="bottom"] {
   bottom: max(12px, env(safe-area-inset-bottom)) !important;

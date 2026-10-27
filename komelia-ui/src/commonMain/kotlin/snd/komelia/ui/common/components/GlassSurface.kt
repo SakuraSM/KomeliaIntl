@@ -52,6 +52,7 @@ data class SurfaceAppearance(
 
 val LocalSurfaceAppearance = staticCompositionLocalOf { SurfaceAppearance() }
 val LocalNavigationBarInset = staticCompositionLocalOf { 0.dp }
+val LocalPageTopInset = staticCompositionLocalOf { 0.dp }
 private val LocalGlassBackdrop = staticCompositionLocalOf<HazeState?> { null }
 internal val LocalGlassSamplingBudget = staticCompositionLocalOf<GlassSamplingBudget?> { null }
 
@@ -116,6 +117,7 @@ fun KomeliaChromeSurface(
     tonalElevation: Dp = 0.dp,
     shadowElevation: Dp = 0.dp,
     interactionSource: InteractionSource? = null,
+    highlighted: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val appearance = LocalSurfaceAppearance.current
@@ -124,9 +126,9 @@ fun KomeliaChromeSurface(
     val baseColor = chromeBaseColor(appearance, colors, color)
     val glass = appearance.useGlass && state != null
     Surface(
-        modifier = modifier,
+        modifier = modifier.komeliaHighlight(highlighted, shape, interactionSource = interactionSource),
         shape = shape,
-        color = baseColor,
+        color = if (glass) Color.Transparent else baseColor,
         contentColor = colors.onSurface,
         tonalElevation = if (glass) 0.dp else tonalElevation,
         shadowElevation = shadowElevation,
@@ -134,7 +136,7 @@ fun KomeliaChromeSurface(
         val effect = if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) {
             Modifier.komeliaChrome(shape, baseColor, interactionSource)
         } else Modifier
-        Box(effect) { content() }
+        Box(effect) { KomeliaChromeContent(content) }
     }
 }
 
@@ -152,26 +154,27 @@ fun Modifier.komeliaChrome(
     val baseColor = chromeBaseColor(appearance, colors, color)
     if (!appearance.useGlass || state == null) {
         val solid = if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) baseColor.copy(alpha = 1f) else baseColor
-        return background(solid, shape).glassSurfaceEdge(shape)
+        return background(solid, shape)
     }
-    val material = remember(appearance.theme, baseColor, colors.surface, colors.surfaceContainerHigh, shape) {
-        // Override every appearance-dependent Regular channel; app and OS themes can differ.
-        val dark = appearance.theme != AppTheme.LIGHT
-        val tone = glassTone(appearance.theme)
+    val material = remember(appearance.theme, baseColor, shape) {
+        // Override the library's optical edge and white-point defaults for uniform frosted chrome.
         GlassStyle.regular.then {
             shape(shape)
-            optics(blurRadius = 12.dp, refractionStrength = 0.35f)
+            optics(blurRadius = KomeliaChromeStyle.blurRadius, refractionStrength = 0f, refractionDetailIntensity = 0f)
             backgroundColor(baseColor)
-            tint(glassTintColor(appearance.theme, colors).copy(alpha = tone.opacity))
-            specularIntensity(if (dark) 0.42f else 0.32f)
-            edgeShadow(Color.Black.copy(alpha = if (dark) 0.16f else 0.04f))
-            ambientResponse(if (dark) 0.08f else 0.15f)
-            contrast(tone.contrast)
-            whitePoint(tone.whitePoint)
-            chromaMultiplier(if (dark) 1.04f else 1.15f)
+            tint(baseColor.copy(alpha = KomeliaChromeStyle.tintOpacity))
+            specularIntensity(0f)
+            edgeShadow(Color.Transparent)
+            // Do not blend the sharp source back into the last pixel band of frosted shapes.
+            edgeSoftness(0.dp)
+            ambientResponse(0f)
+            contrast(0f)
+            whitePoint(0f)
+            chromaMultiplier(1.1f)
+            contentNormalBlend(0f)
         }
     }
-    return background(baseColor, shape).clip(shape).glassSurfaceEdge(shape).hazeGlass(
+    return clip(shape).hazeGlass(
         input = HazeInput.Sources(state, retention = HazeSourceRetention.KeepLastFrame),
         style = material,
         performanceMode = HazePerformanceMode.Balanced,
@@ -180,17 +183,5 @@ fun Modifier.komeliaChrome(
     )
 }
 
-internal data class GlassTone(val whitePoint: Float, val contrast: Float, val opacity: Float)
-
-// Regular's theme response, selected from the app preference rather than the OS appearance.
-internal fun glassTone(theme: AppTheme): GlassTone = when (theme) {
-    AppTheme.LIGHT -> GlassTone(whitePoint = 0.55f, contrast = 0f, opacity = 0.68f)
-    AppTheme.DARK -> GlassTone(whitePoint = -0.72f, contrast = 0.05f, opacity = 0.35f)
-    AppTheme.DARKER -> GlassTone(whitePoint = -0.72f, contrast = 0.05f, opacity = 0.3f)
-}
-
 private fun chromeBaseColor(appearance: SurfaceAppearance, colors: ColorScheme, requested: Color): Color =
     if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) glassTintColor(appearance.theme, colors) else requested
-
-internal fun glassTintColor(theme: AppTheme, colors: ColorScheme): Color =
-    if (theme == AppTheme.LIGHT) colors.surface else colors.surfaceContainerHigh

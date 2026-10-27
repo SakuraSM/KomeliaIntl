@@ -63,8 +63,10 @@ internal fun FloatingChromeIconButton(
     content: @Composable () -> Unit,
 ) {
     if (floating) {
-        KomeliaChromeSurface(shape = RoundedCornerShape(50), shadowElevation = 2.dp) {
-            IconButton(onClick = onClick, content = content)
+        val interactions = remember { MutableInteractionSource() }
+        KomeliaChromeSurface(shape = RoundedCornerShape(50),
+            interactionSource = interactions) {
+            IconButton(onClick = onClick, interactionSource = interactions, content = content)
         }
     } else IconButton(onClick = onClick, content = content)
 }

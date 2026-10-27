@@ -119,6 +119,12 @@ class LayoutTest {
     }
 
     @Test
+    fun glassTopBarDoesNotCastAScrollShadow() {
+        assertEquals(0.dp, komeliaTopBarElevation(true, useGlass = true).tonal)
+        assertEquals(0.dp, komeliaTopBarElevation(true, useGlass = true).shadow)
+    }
+
+    @Test
     fun appUpdatesUseTheKomeliaIntlRepository() {
         assertEquals(
             "https://api.github.com/repos/SakuraSM/KomeliaIntl/releases",

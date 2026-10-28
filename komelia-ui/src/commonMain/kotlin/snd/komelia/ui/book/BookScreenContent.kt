@@ -23,10 +23,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -275,7 +275,7 @@ fun BookToolBar(
     ) {
         FloatingChromeIconButton(onBackPress, floating) {
             Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
+                Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = stringResource(Res.string.navigation_back),
             )
         }
@@ -300,7 +300,7 @@ private fun ToolbarBookActions(
         Box {
             var expandActions by remember { mutableStateOf(false) }
             FloatingChromeIconButton(onClick = { expandActions = true }, floating = floating) {
-                Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
+                Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
             }
             BookActionsMenu(
                 book = book,
@@ -318,7 +318,7 @@ private fun ToolbarBookActions(
 
         if (isAdmin && !isOffline && !book.libraryId.isLocalLibrary()) {
             FloatingChromeIconButton(onClick = { showEditDialog = true }, floating = floating) {
-                Icon(Icons.Default.Edit, stringResource(Res.string.book_edit))
+                Icon(Icons.Rounded.Edit, stringResource(Res.string.book_edit))
             }
         }
         if (showEditDialog) {
@@ -425,7 +425,7 @@ fun DownloadButton(
                         modifier = Modifier.size(24.dp),
                     )
                     Icon(
-                        imageVector = Icons.Default.Download,
+                        imageVector = Icons.Rounded.Download,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(20.dp),
@@ -434,7 +434,7 @@ fun DownloadButton(
             }
 
             else -> {
-                Icon(Icons.Default.Download, null)
+                Icon(Icons.Rounded.Download, null)
             }
         }
         Spacer(Modifier.width(3.dp))

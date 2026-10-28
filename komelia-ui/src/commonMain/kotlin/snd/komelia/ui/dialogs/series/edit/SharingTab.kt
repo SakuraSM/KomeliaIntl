@@ -1,7 +1,7 @@
 package snd.komelia.ui.dialogs.series.edit
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.rounded.People
 import androidx.compose.runtime.Composable
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit_sharing_labels
@@ -18,7 +18,7 @@ internal class SharingTab(
 
     override fun options() = TabItem(
         title = Res.string.series_edit_tab_sharing,
-        icon = Icons.Default.People
+        icon = Icons.Rounded.People
     )
 
     @Composable

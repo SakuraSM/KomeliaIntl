@@ -1,5 +1,6 @@
 package snd.komelia.ui.settings.komf
 
+import snd.komelia.ui.common.components.KomeliaExposedDropdownMenu
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -243,7 +244,7 @@ fun LanguageSelectionField(
                     .menuAnchor(PrimaryEditable)
             )
 
-            ExposedDropdownMenu(
+            KomeliaExposedDropdownMenu(
                 expanded = isExpanded,
                 onDismissRequest = { isExpanded = false }
             ) {

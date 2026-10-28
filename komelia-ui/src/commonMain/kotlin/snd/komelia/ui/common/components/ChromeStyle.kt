@@ -19,6 +19,14 @@ internal object KomeliaChromeStyle {
     val highlightLightOffset = DpOffset(0.dp, (-2).dp)
     val navigationHighlightInset = 6.dp
     val navigationHighlightShape = RoundedCornerShape(20.dp)
+    val navigationMarkerWidth = 18.dp
+    val navigationMarkerHeight = 3.dp
+    val navigationMarkerSpacing = 3.dp
+    val menuShape = RoundedCornerShape(20.dp)
+    val dialogCornerRadius = 28.dp
+    val dialogShape = RoundedCornerShape(dialogCornerRadius)
+    val sheetHandleShape = RoundedCornerShape(topStart = dialogCornerRadius, topEnd = dialogCornerRadius)
+    val sheetBodyShape = RoundedCornerShape(bottomStart = dialogCornerRadius, bottomEnd = dialogCornerRadius)
 }
 
 internal fun glassTintColor(theme: AppTheme, colors: ColorScheme): Color =

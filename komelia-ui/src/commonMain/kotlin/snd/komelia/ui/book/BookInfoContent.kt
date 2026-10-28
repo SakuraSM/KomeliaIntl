@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
-import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.automirrored.rounded.LibraryBooks
+import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -124,7 +124,7 @@ fun BookInfoColumn(
             label = stringResource(Res.string.book_links),
             chipValues = linkEntries,
             onChipClick = { entry -> uriHandler.openUri(entry.url) },
-            icon = Icons.Default.Link,
+            icon = Icons.Rounded.Link,
         )
 
         Spacer(Modifier.size(0.dp))
@@ -196,7 +196,7 @@ fun BookInfoRow(
                     onClick = onSeriesButtonClick,
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    Icon(Icons.AutoMirrored.Outlined.LibraryBooks, null)
+                    Icon(Icons.AutoMirrored.Rounded.LibraryBooks, null)
                     Spacer(Modifier.width(3.dp))
                     Text(
                         text = book.seriesTitle,

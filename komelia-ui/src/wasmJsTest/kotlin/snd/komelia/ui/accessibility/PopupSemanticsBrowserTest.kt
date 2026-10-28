@@ -1,12 +1,18 @@
 package snd.komelia.ui.accessibility
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ComposeViewport
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
@@ -21,9 +27,74 @@ import org.w3c.dom.HTMLElement
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import snd.komelia.settings.model.AppSurfaceStyle
+import snd.komelia.ui.common.components.GlassBackdropScope
+import snd.komelia.ui.common.components.KomeliaDropdownMenu
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.ui.common.components.SurfaceAppearance
+import snd.komelia.ui.common.components.glassBackdrop
+import snd.komelia.ui.dialogs.BasicAppDialog
 
 /** Exercises the browser's real semantics mirror, including the dependency's popup lifecycle. */
 class PopupSemanticsBrowserTest {
+    @OptIn(ExperimentalComposeUiApi::class)
+    @Test fun glassOverlaysAndSolidFallbackKeepTheBrowserSemanticsUpdating() = runTest {
+        withContext(Dispatchers.Default) {
+            val host = document.createElement("div") as HTMLDivElement
+            host.style.width = "640px"
+            host.style.height = "480px"
+            document.body!!.appendChild(host)
+            var active by mutableStateOf(true)
+            var popup by mutableStateOf(false)
+            var dialog by mutableStateOf(false)
+            var revision by mutableStateOf(0)
+            var reduceTransparency by mutableStateOf(false)
+            try {
+                ComposeViewport(host) {
+                    if (active) MaterialTheme {
+                        CompositionLocalProvider(LocalSurfaceAppearance provides SurfaceAppearance(
+                            style = AppSurfaceStyle.LIQUID_GLASS, reduceTransparency = reduceTransparency,
+                        )) {
+                            GlassBackdropScope {
+                                Box(Modifier.fillMaxSize()) {
+                                    Box(Modifier.fillMaxSize().glassBackdrop().background(Color(0xFF305860))) {
+                                        Text("Glass page revision $revision")
+                                    }
+                                    KomeliaDropdownMenu(popup, onDismissRequest = { popup = false }) {
+                                        Text("Glass popup choice")
+                                    }
+                                    if (dialog) BasicAppDialog(onDismissRequest = { dialog = false }) {
+                                        Text("Glass modal contents")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                delay(250)
+                revision++
+                awaitSemantics(host, "Glass page revision $revision")
+                repeat(2) { cycle ->
+                    reduceTransparency = cycle == 1
+                    popup = true
+                    awaitSemantics(host, "Glass popup choice")
+                    popup = false
+                    revision++
+                    awaitSemantics(host, "Glass page revision $revision", removedText = "Glass popup choice")
+                    dialog = true
+                    awaitSemantics(host, "Glass modal contents")
+                    dialog = false
+                    revision++
+                    awaitSemantics(host, "Glass page revision $revision", removedText = "Glass modal contents")
+                }
+            } finally {
+                active = false
+                delay(50)
+                host.remove()
+            }
+        }
+    }
+
     @OptIn(ExperimentalComposeUiApi::class)
     @Test fun mainPageKeepsUpdatingAfterPopupAndDialogDismissal() = runTest {
         withContext(Dispatchers.Default) {

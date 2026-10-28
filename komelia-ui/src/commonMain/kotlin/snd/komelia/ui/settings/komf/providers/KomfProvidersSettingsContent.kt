@@ -1,5 +1,6 @@
 package snd.komelia.ui.settings.komf.providers
 
+import snd.komelia.ui.common.components.KomeliaExposedDropdownMenu
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,9 +18,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.Extension
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -203,7 +204,7 @@ private fun ProvidersConfigContent(
         if (state.enabledProviders.isEmpty()) {
             EmptyState(
                 title = stringResource(Res.string.komf_providers_empty),
-                imageVector = Icons.Outlined.Extension,
+                imageVector = Icons.Rounded.Extension,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 180.dp),
             )
         }
@@ -279,7 +280,7 @@ private fun AddNewProviderButton(
         }
 
         val scrollState = rememberScrollState()
-        ExposedDropdownMenu(
+        KomeliaExposedDropdownMenu(
             expanded = addProviderExpanded,
             onDismissRequest = { addProviderExpanded = false },
             scrollState = scrollState,
@@ -526,14 +527,14 @@ private fun ProviderCard(
             onClick = { showEditDialog = true },
             modifier = Modifier.cursorForHand()
         ) {
-            Icon(Icons.Default.Edit, null)
+            Icon(Icons.Rounded.Edit, null)
         }
         Spacer(Modifier.weight(1.0f))
         IconButton(
             onClick = { onProviderRemove(state) },
             modifier = Modifier.cursorForHand()
         ) {
-            Icon(Icons.Default.Delete, null)
+            Icon(Icons.Rounded.Delete, null)
         }
     }
 

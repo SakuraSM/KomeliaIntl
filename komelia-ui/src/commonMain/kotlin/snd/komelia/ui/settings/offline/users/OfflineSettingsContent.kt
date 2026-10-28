@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.SupervisorAccount
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.SupervisorAccount
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -164,11 +164,11 @@ fun ServerCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Icon(if (showUsers) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
+            Icon(if (showUsers) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null)
 
             if (onServerDelete != null) {
                 IconButton(onClick = { showDeleteConfirmation = true }) {
-                    Icon(Icons.Default.Delete, stringResource(Res.string.settings_offline_mode_users_delete_server_data))
+                    Icon(Icons.Rounded.Delete, stringResource(Res.string.settings_offline_mode_users_delete_server_data))
                 }
 
                 if (showDeleteConfirmation) {
@@ -209,7 +209,7 @@ private fun UserCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            Icons.Default.Person,
+            Icons.Rounded.Person,
             null,
         )
 
@@ -224,7 +224,7 @@ private fun UserCard(
         IconButton(
             onClick = { showDeleteConfirmation = true },
         ) {
-            Icon(Icons.Default.Delete, stringResource(Res.string.settings_offline_mode_users_delete_user_data))
+            Icon(Icons.Rounded.Delete, stringResource(Res.string.settings_offline_mode_users_delete_user_data))
         }
     }
 
@@ -255,7 +255,7 @@ fun RootUserCard(goOffline: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Icon(
-                    Icons.Default.SupervisorAccount,
+                    Icons.Rounded.SupervisorAccount,
                     null,
                     tint = MaterialTheme.colorScheme.tertiaryContainer
                 )

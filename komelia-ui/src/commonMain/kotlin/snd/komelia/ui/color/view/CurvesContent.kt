@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SettingsBackupRestore
+import androidx.compose.material.icons.rounded.SettingsBackupRestore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -401,7 +401,7 @@ fun ChannelSelection(
         )
         Tooltip(stringResource(Res.string.color_correction_channel_reset)) {
             IconButton(onClick = onChannelReset) {
-                Icon(Icons.Default.SettingsBackupRestore, null)
+                Icon(Icons.Rounded.SettingsBackupRestore, null)
             }
         }
     }

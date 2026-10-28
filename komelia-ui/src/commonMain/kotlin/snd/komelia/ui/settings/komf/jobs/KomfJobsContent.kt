@@ -21,9 +21,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ListAlt
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.automirrored.rounded.ListAlt
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -121,7 +121,7 @@ fun KomfJobsContent(
                 else if (jobs.isEmpty()) {
                     EmptyState(
                         title = stringResource(Res.string.komf_job_nothing_to_show),
-                        imageVector = Icons.AutoMirrored.Outlined.ListAlt,
+                        imageVector = Icons.AutoMirrored.Rounded.ListAlt,
                         modifier = Modifier.fillMaxWidth().heightIn(min = 320.dp),
                     )
                 } else {
@@ -252,14 +252,14 @@ private fun JobCard(
                     },
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Error,
+                        imageVector = Icons.Rounded.Error,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
 
             COMPLETED -> Icon(
-                imageVector = Icons.Default.Check,
+                imageVector = Icons.Rounded.Check,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.secondary
             )

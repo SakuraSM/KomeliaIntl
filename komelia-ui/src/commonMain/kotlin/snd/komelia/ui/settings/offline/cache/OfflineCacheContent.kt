@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.BrokenImage
+import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -185,7 +185,7 @@ private fun CacheSummary(catalog: OfflineCacheCatalog, onDeleteAll: () -> Unit) 
                 }
             }
             OutlinedButton(onClick = onDeleteAll, enabled = catalog.bookCount > 0) {
-                Icon(Icons.Default.DeleteOutline, null)
+                Icon(Icons.Rounded.DeleteOutline, null)
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(Res.string.settings_offline_cache_delete_all))
             }
@@ -197,7 +197,7 @@ private fun CacheSummary(catalog: OfflineCacheCatalog, onDeleteAll: () -> Unit) 
 private fun CacheSeriesRow(item: OfflineCacheSeriesItem, onOpen: () -> Unit, onDelete: () -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
         Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.AutoMirrored.Filled.MenuBook, null)
+            Icon(Icons.AutoMirrored.Rounded.MenuBook, null)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(item.title, style = MaterialTheme.typography.titleMedium)
@@ -221,7 +221,7 @@ private fun CacheSeriesRow(item: OfflineCacheSeriesItem, onOpen: () -> Unit, onD
 private fun CacheBookRow(book: OfflineCacheBookRecord, onOpen: () -> Unit, onDelete: () -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
         Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(if (book.isAvailable) Icons.AutoMirrored.Filled.MenuBook else Icons.Default.BrokenImage, null)
+            Icon(if (book.isAvailable) Icons.AutoMirrored.Rounded.MenuBook else Icons.Rounded.BrokenImage, null)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(book.title, style = MaterialTheme.typography.titleMedium)

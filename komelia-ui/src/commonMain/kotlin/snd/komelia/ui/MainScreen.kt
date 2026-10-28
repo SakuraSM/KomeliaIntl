@@ -3,11 +3,9 @@ package snd.komelia.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,15 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,7 +36,6 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -55,7 +47,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -65,7 +56,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -83,9 +73,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_librarie
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_local
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_search
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_settings
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.settings.model.AppSurfaceStyle
@@ -96,6 +84,7 @@ import snd.komelia.ui.common.components.GlassBackdropScope
 import snd.komelia.ui.common.components.KomeliaChromeStyle
 import snd.komelia.ui.common.components.komeliaHighlight
 import snd.komelia.ui.common.components.KomeliaChromeSurface
+import snd.komelia.ui.common.components.NavigationDestinationLabel
 import snd.komelia.ui.common.components.LocalNavigationBarInset
 import snd.komelia.ui.common.components.LocalPageTopInset
 import snd.komelia.ui.common.components.LocalSurfaceAppearance
@@ -349,7 +338,7 @@ class MainScreen(
     }
 }
 
-private class AppTab(
+internal class AppTab(
     val destination: AppDestination,
     val rootScreen: Screen,
     val initialScreens: List<Screen>,
@@ -396,83 +385,21 @@ private fun destinationFor(screen: Screen): AppDestination = when (screen) {
 }
 
 @Composable
-private fun DestinationContent(navigator: Navigator) {
-    val motion = LocalKomeliaMotion.current
-    val detailOffset = with(LocalDensity.current) { 8.dp.roundToPx() }
-    val targetScreen = navigator.lastItem
-    var displayedScreen by remember { mutableStateOf(targetScreen) }
-    var displayedScreenKey by remember { mutableStateOf<String?>(null) }
-    val alpha = remember { Animatable(1f) }
-    val offset = remember { Animatable(0f) }
-
-    LaunchedEffect(targetScreen, motion.isReducedMotion) {
-        val transitionAction = screenTransitionAction(displayedScreenKey, targetScreen.key)
-        if (motion.isReducedMotion || transitionAction != ScreenTransitionAction.AnimateChange) {
-            displayedScreen = targetScreen
-            displayedScreenKey = targetScreen.key
-            alpha.snapTo(1f)
-            offset.snapTo(0f)
-            return@LaunchedEffect
-        }
-
-        val totalDuration = motion.duration(motion.contentDurationMillis)
-        val exitDuration = (totalDuration * 0.4f).toInt()
-        coroutineScope {
-            launch { alpha.animateTo(0f, tween(exitDuration, easing = motion.standardEasing)) }
-            launch { offset.animateTo(-detailOffset.toFloat(), tween(exitDuration, easing = motion.standardEasing)) }
-        }
-        displayedScreen = targetScreen
-        displayedScreenKey = targetScreen.key
-        offset.snapTo(detailOffset.toFloat())
-        val enterDuration = totalDuration - exitDuration
-        coroutineScope {
-            launch { alpha.animateTo(1f, tween(enterDuration, easing = motion.standardEasing)) }
-            launch { offset.animateTo(0f, tween(enterDuration, easing = motion.standardEasing)) }
-        }
-    }
-
-    val screen = displayedScreen
-    androidx.compose.foundation.layout.Box(
-        Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                this.alpha = alpha.value
-                translationX = offset.value
-            },
-    ) {
+internal fun DestinationContent(navigator: Navigator) {
+    val screen = navigator.lastItem
+    SingleLayerPageTransition(targetKey = screen.key, enterOffset = 8.dp) {
         navigator.saveableState("screen", screen) { screen.Content() }
     }
 }
 
 @Composable
-private fun SingleLayerDestinationTransition(
+internal fun SingleLayerDestinationTransition(
     targetTab: AppTab,
     modifier: Modifier = Modifier,
     content: @Composable (AppTab) -> Unit,
 ) {
-    val motion = LocalKomeliaMotion.current
-    var displayedTab by remember { mutableStateOf(targetTab) }
-    val alpha = remember { Animatable(1f) }
-
-    LaunchedEffect(targetTab, motion.isReducedMotion) {
-        if (motion.isReducedMotion) {
-            displayedTab = targetTab
-            alpha.snapTo(1f)
-            return@LaunchedEffect
-        }
-
-        val totalDuration = motion.duration(motion.contentDurationMillis)
-        val exitDuration = (totalDuration * 0.35f).toInt()
-        alpha.animateTo(0f, tween(exitDuration, easing = motion.standardEasing))
-        displayedTab = targetTab
-        alpha.snapTo(0f)
-        alpha.animateTo(1f, tween(totalDuration - exitDuration, easing = motion.standardEasing))
-    }
-
-    androidx.compose.foundation.layout.Box(
-        modifier.graphicsLayer { this.alpha = alpha.value },
-    ) {
-        content(displayedTab)
+    SingleLayerPageTransition(targetKey = targetTab.key, modifier = modifier) {
+        content(targetTab)
     }
 }
 
@@ -484,16 +411,16 @@ private data class DestinationItem(
 )
 
 private val destinationItems = listOf(
-    DestinationItem(AppDestination.HOME, Res.string.navbar_home, Icons.Outlined.Home, Icons.Default.Home),
-    DestinationItem(AppDestination.LIBRARY, Res.string.navbar_libraries, Icons.AutoMirrored.Outlined.MenuBook, Icons.AutoMirrored.Filled.MenuBook),
-    DestinationItem(AppDestination.LOCAL, Res.string.navbar_local, Icons.Outlined.Folder, Icons.Rounded.Folder),
-    DestinationItem(AppDestination.SEARCH, Res.string.navbar_search, Icons.Outlined.Search),
-    DestinationItem(AppDestination.SETTINGS, Res.string.navbar_settings, Icons.Outlined.Settings, Icons.Default.Settings),
+    DestinationItem(AppDestination.HOME, Res.string.navbar_home, Icons.Rounded.Home, Icons.Rounded.Home),
+    DestinationItem(AppDestination.LIBRARY, Res.string.navbar_libraries, Icons.AutoMirrored.Rounded.MenuBook, Icons.AutoMirrored.Rounded.MenuBook),
+    DestinationItem(AppDestination.LOCAL, Res.string.navbar_local, Icons.Rounded.Folder, Icons.Rounded.Folder),
+    DestinationItem(AppDestination.SEARCH, Res.string.navbar_search, Icons.Rounded.Search),
+    DestinationItem(AppDestination.SETTINGS, Res.string.navbar_settings, Icons.Rounded.Settings, Icons.Rounded.Settings),
 ).sortedBy { primaryDestinationOrder.indexOf(it.destination) }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun AppBottomBar(
+internal fun AppBottomBar(
     selected: AppDestination,
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
@@ -523,8 +450,7 @@ private fun AppBottomBar(
                         selected = selected == item.destination,
                         onClick = { onSelect(item.destination, null) },
                         icon = { DestinationIcon(item, selected == item.destination) },
-                        label = { Text(stringResource(item.label), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                            fontWeight = if (glass && selected == item.destination) FontWeight.SemiBold else null) },
+                        label = { NavigationDestinationLabel(stringResource(item.label), selected == item.destination) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = if (glass) colors.onSurface else colors.primary,
                             selectedTextColor = if (glass) colors.onSurface else colors.primary,
@@ -542,7 +468,7 @@ private fun AppBottomBar(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun AppNavigationRail(
+internal fun AppNavigationRail(
     selected: AppDestination,
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
@@ -570,8 +496,7 @@ private fun AppNavigationRail(
                         selected = selected == item.destination,
                         onClick = { onSelect(item.destination, null) },
                         icon = { DestinationIcon(item, selected == item.destination) },
-                        label = { Text(stringResource(item.label), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                            fontWeight = if (glass && selected == item.destination) FontWeight.SemiBold else null) },
+                        label = { NavigationDestinationLabel(stringResource(item.label), selected == item.destination) },
                         colors = NavigationRailItemDefaults.colors(
                             selectedIconColor = if (glass) colors.onSurface else colors.primary,
                             selectedTextColor = if (glass) colors.onSurface else colors.primary,

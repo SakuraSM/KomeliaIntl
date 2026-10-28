@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FormatAlignCenter
+import androidx.compose.material.icons.rounded.FormatAlignCenter
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,7 +41,7 @@ class OneshotGeneralTab(
 ) : DialogTab {
     override fun options() = TabItem(
         title = Res.string.edit_tab_general,
-        icon = Icons.Default.FormatAlignCenter
+        icon = Icons.Rounded.FormatAlignCenter
     )
 
     @Composable

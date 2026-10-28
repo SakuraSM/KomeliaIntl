@@ -1,7 +1,7 @@
 package snd.komelia.ui.common.images
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -43,7 +43,7 @@ fun ThumbnailImage(
 
     val surface = MaterialTheme.colorScheme.surfaceContainerLow
     val outline = MaterialTheme.colorScheme.outlineVariant
-    val coverIcon = rememberVectorPainter(Icons.AutoMirrored.Outlined.MenuBook)
+    val coverIcon = rememberVectorPainter(Icons.AutoMirrored.Rounded.MenuBook)
     val fallback = remember(surface, outline, coverIcon) { CoverPlaceholderPainter(surface, outline, coverIcon) }
     AsyncImage(
         model = request,

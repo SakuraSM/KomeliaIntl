@@ -1499,4 +1499,8 @@
     <string name="home_progress_percent">Read %1$d%</string>
     <string name="settings_mobile_subtitle">Make reading feel your own</string>
     <string name="komf_providers_empty">No metadata sources added</string>
+    <string name="browse_options">View and filters</string>
+    <string name="browse_content_type">Show</string>
+    <string name="browse_source">Source</string>
+    <string name="browse_page_size">Items per page</string>
 </resources>

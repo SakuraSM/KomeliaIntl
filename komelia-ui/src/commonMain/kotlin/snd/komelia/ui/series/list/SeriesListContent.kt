@@ -15,14 +15,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.DropdownMenu
+import snd.komelia.ui.common.components.KomeliaDropdownMenu as DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import snd.komelia.ui.common.components.KomeliaModalBottomSheet as ModalBottomSheet
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -82,6 +82,7 @@ fun SeriesListContent(
     onPageSizeChange: (Int) -> Unit,
 
     minSize: Dp,
+    showToolbar: Boolean = true,
 ) {
     Column {
         if (editMode) {
@@ -106,7 +107,7 @@ fun SeriesListContent(
             onPageChange = onPageChange,
 
             beforeContent = {
-                AnimatedVisibility(!editMode) {
+                AnimatedVisibility(showToolbar && !editMode) {
                     ToolBar(
                         seriesTotalCount = seriesTotalCount,
                         pageSize = pageSize,
@@ -240,7 +241,7 @@ private fun ToolBar(
                                 modifier = Modifier.cursorForHand(),
                             ) {
                                 Icon(
-                                    Icons.Default.FilterList,
+                                    Icons.Rounded.FilterList,
                                     contentDescription = stringResource(Res.string.series_filter_title),
                                     tint = color,
                                 )

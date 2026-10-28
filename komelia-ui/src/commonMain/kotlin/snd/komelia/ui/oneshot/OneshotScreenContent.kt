@@ -18,8 +18,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -203,7 +203,7 @@ private fun ToolbarOneshotActions(
         Box {
             var expandActions by remember { mutableStateOf(false) }
             FloatingChromeIconButton(onClick = { expandActions = true }, floating = floating) {
-                Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
+                Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
             }
             OneshotActionsMenu(
                 series = series,
@@ -218,7 +218,7 @@ private fun ToolbarOneshotActions(
         var showEditDialog by remember { mutableStateOf(false) }
         if (isAdmin && !book.libraryId.isLocalLibrary()) {
             FloatingChromeIconButton(onClick = { showEditDialog = true }, floating = floating) {
-                Icon(Icons.Default.Edit, stringResource(Res.string.book_edit))
+                Icon(Icons.Rounded.Edit, stringResource(Res.string.book_edit))
             }
         }
         if (showEditDialog) {

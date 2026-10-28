@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.PriorityHigh
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.People
+import androidx.compose.material.icons.rounded.PriorityHigh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +45,7 @@ class AuthorsTab(
 ) : DialogTab {
     override fun options() = TabItem(
         title = Res.string.book_edit_tab_authors,
-        icon = Icons.Default.People
+        icon = Icons.Rounded.People
     )
 
     @Composable
@@ -77,7 +77,7 @@ private fun AuthorsTabContent(
                 .padding(20.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
-            Icon(Icons.Default.PriorityHigh, null, tint = warningColor)
+            Icon(Icons.Rounded.PriorityHigh, null, tint = warningColor)
             Text(
                 text = stringResource(Res.string.book_edit_bulk_warning),
                 color = warningColor
@@ -100,6 +100,7 @@ private fun AuthorsTabContent(
 
         var newCustomRole by remember { mutableStateOf("") }
         TextField(
+            shape = MaterialTheme.shapes.small,
             value = newCustomRole,
             onValueChange = { newCustomRole = it },
             label = { Text(stringResource(Res.string.book_edit_add_custom_role)) },
@@ -128,7 +129,7 @@ private fun AuthorsTabContent(
                         newCustomRole = ""
                     }
                 }) {
-                    Icon(Icons.Default.Add, contentDescription = null)
+                    Icon(Icons.Rounded.Add, contentDescription = null)
                 }
             }
         )

@@ -1,5 +1,6 @@
 package snd.komelia.ui.common.menus.bulk
 
+import snd.komelia.ui.common.components.KomeliaExposedDropdownMenu
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,9 +19,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.MoreHoriz
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -78,7 +79,7 @@ fun BulkActionsContainer(
             .clip(RoundedCornerShape(5.dp))
             .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
     ) {
-        IconButton(onClick = onCancel) { Icon(Icons.Default.Close, stringResource(Res.string.dialog_cancel)) }
+        IconButton(onClick = onCancel) { Icon(Icons.Rounded.Close, stringResource(Res.string.dialog_cancel)) }
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(5.dp))
@@ -222,11 +223,11 @@ private fun MoreActionsDropdown(actions: List<BulkActionButtonData>, compact: Bo
     ) {
         BulkActionButton(
             description = stringResource(Res.string.actions_show_more),
-            icon = if (compact) Icons.Default.MoreHoriz else Icons.Default.MoreVert,
+            icon = if (compact) Icons.Rounded.MoreHoriz else Icons.Rounded.MoreVert,
             onClick = { showDropdown = true },
             compact = compact
         )
-        ExposedDropdownMenu(
+        KomeliaExposedDropdownMenu(
             expanded = showDropdown,
             onDismissRequest = { showDropdown = false },
             matchAnchorWidth = false

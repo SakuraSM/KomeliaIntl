@@ -21,9 +21,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.DropdownMenu
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Search
+import snd.komelia.ui.common.components.KomeliaDropdownMenu as DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -327,14 +327,14 @@ fun SearchTextField(
                     onDismiss()
                 }) {
                     Icon(
-                        Icons.Filled.Close,
+                        Icons.Rounded.Close,
                         stringResource(Res.string.search_clear_query),
                         tint = MaterialTheme.colorScheme.secondary,
                     )
                 }
             } else {
                 Icon(
-                    Icons.Filled.Search, null,
+                    Icons.Rounded.Search, null,
                     modifier = Modifier.cursorForHand()
                 )
             }

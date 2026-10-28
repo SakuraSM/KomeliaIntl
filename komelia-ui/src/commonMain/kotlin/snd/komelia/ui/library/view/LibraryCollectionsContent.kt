@@ -36,11 +36,12 @@ fun LibraryCollectionsContent(
     onPageChange: (Int) -> Unit,
     onPageSizeChange: (Int) -> Unit,
 
-    minSize: Dp
+    minSize: Dp,
+    showToolbar: Boolean = true,
 ) {
     Column(verticalArrangement = Arrangement.Center) {
 
-        Row(
+        if (showToolbar) Row(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)
         ) {

@@ -1,6 +1,6 @@
 package snd.komelia.ui.color.view
 
-import androidx.compose.material3.PlainTooltip
+import snd.komelia.ui.common.components.KomeliaPlainTooltip as PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox

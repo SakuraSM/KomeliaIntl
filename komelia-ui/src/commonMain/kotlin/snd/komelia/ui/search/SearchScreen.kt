@@ -1,15 +1,22 @@
 package snd.komelia.ui.search
 
+import androidx.compose.material3.Text
+import snd.komelia.ui.common.components.BrowseSearchHeader
+import snd.komelia.ui.common.components.BrowseOptionsButton
+import snd.komelia.ui.common.components.DropdownChoiceMenu
+import snd.komelia.ui.common.components.LabeledEntry
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_content_type
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_series_tab
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_books_tab
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -17,7 +24,6 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_search
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState
-import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.ReloadableScreen
@@ -46,9 +52,15 @@ class SearchScreen(
 
         ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
             KomeliaPageScaffold(topBar = {
-                if (LocalPlatform.current == PlatformType.MOBILE) Column {
-                    BrowsePageHeader(stringResource(Res.string.navbar_search))
-                    SearchField(vm)
+                if (LocalPlatform.current == PlatformType.MOBILE) {
+                    BrowseSearchHeader(
+                        title = stringResource(Res.string.navbar_search),
+                        query = vm.query,
+                        onQueryChange = { vm.query = it },
+                        searchVisible = true,
+                    ) { SearchViewOptions(vm) }
+                } else {
+                    BrowsePageHeader(stringResource(Res.string.navbar_search)) { SearchViewOptions(vm) }
                 }
             }) { topInset ->
                 Column(
@@ -81,6 +93,7 @@ class SearchScreen(
                                 bookTotalPages = vm.bookTotalPages,
                                 onBookPageChange = vm::onBookPageChange,
                                 onBookClick = { navigator.push(bookScreen(it)) },
+                                showToolbar = false,
                             )
 
                         }
@@ -91,18 +104,22 @@ class SearchScreen(
     }
 
     @Composable
-    private fun SearchField(vm: SearchViewModel) {
-        val focusManager = LocalFocusManager.current
-        val layout = LocalKomeliaLayout.current
-
-        SearchTextField(
-            query = vm.query,
-            onQueryChange = vm::query::set,
-            onDone = { focusManager.clearFocus() },
-            onDismiss = { vm.query = "" },
-            modifier = Modifier
-                .widthIn(max = layout.contentMaxWidth)
-                .padding(horizontal = layout.pageHorizontalPadding, vertical = layout.controlSpacing)
-        )
+    private fun SearchViewOptions(viewModel: SearchViewModel) {
+        val options = buildList {
+            if (viewModel.seriesResults.isNotEmpty() || viewModel.currentTab == SearchViewModel.SearchResultsTab.SERIES) {
+                add(LabeledEntry(SearchViewModel.SearchResultsTab.SERIES, stringResource(Res.string.search_series_tab)))
+            }
+            if (viewModel.bookResults.isNotEmpty() || viewModel.currentTab == SearchViewModel.SearchResultsTab.BOOKS) {
+                add(LabeledEntry(SearchViewModel.SearchResultsTab.BOOKS, stringResource(Res.string.search_books_tab)))
+            }
+        }
+        BrowseOptionsButton(active = viewModel.currentTab == SearchViewModel.SearchResultsTab.BOOKS) { dismiss ->
+            DropdownChoiceMenu(
+                selectedOption = options.first { it.value == viewModel.currentTab },
+                options = options,
+                onOptionChange = { viewModel.onSearchTypeChange(it.value); dismiss() },
+                label = { Text(stringResource(Res.string.browse_content_type)) },
+            )
+        }
     }
 }

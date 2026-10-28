@@ -766,7 +766,9 @@
       "scroll": "Change layout to scroll",
       "settings": "Settings",
       "show_hide_toc": "Show/hide table of contents"
-    }
+    },
+    "expand_section": "Expand {title}",
+    "collapse_section": "Collapse {title}"
   },
   "error_codes": {
     "ERR_1000": "File could not be accessed during analysis",

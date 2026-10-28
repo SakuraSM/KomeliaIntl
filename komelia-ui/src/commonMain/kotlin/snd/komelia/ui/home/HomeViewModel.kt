@@ -30,6 +30,7 @@ import snd.komelia.homefilters.HomeScreenFilterRepository
 import snd.komelia.homefilters.SeriesHomeScreenFilter
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaSeriesApi
+import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.ui.LoadState
@@ -67,10 +68,14 @@ class HomeViewModel(
     private val reloadJobsFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = DROP_OLDEST)
 
     val currentFilters = MutableStateFlow(emptyList<HomeFilterData>())
+    val recentlyReadBooks = MutableStateFlow(emptyList<KomeliaBook>())
     val activeFilterNumber = MutableStateFlow(0)
 
     suspend fun initialize() {
-        if (state.value !is Uninitialized) return
+        if (state.value !is Uninitialized) {
+            reload()
+            return
+        }
 
         mutableState.value = LoadState.Loading
         screenModelScope.launch {
@@ -92,14 +97,17 @@ class HomeViewModel(
             val localLibraryIds = runCatching {
                 localLibraryManager?.getLibraries()?.map { it.id }.orEmpty()
             }.onFailure { logger.catching(it) }.getOrDefault(emptyList())
-            val loadedFilters = coroutineScope {
-                orderedHomeScreenFilters(filters)
+            val (loadedFilters, recentBooks) = coroutineScope {
+                val recent = async { loadRecentlyReadBooks(bookApi, offlineBookApi, localLibraryIds) }
+                val configured = orderedHomeScreenFilters(filters)
                     .map { it.withLocalizedDefaultLabel() }
                     .map { async { fetchFilterData(it, localLibraryIds) } }
                     .awaitAll()
                     .filterNotNull()
+                configured to recent.await()
             }
             currentFilters.value = loadedFilters
+            recentlyReadBooks.value = recentBooks
             activeFilterNumber.value = reconcileActiveHomeFilter(
                 activeFilterNumber = activeFilterNumber.value,
                 availableFilterNumbers = currentFilters.value.map { it.filter.order },

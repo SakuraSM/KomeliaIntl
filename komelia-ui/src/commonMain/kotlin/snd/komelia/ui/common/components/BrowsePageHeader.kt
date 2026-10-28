@@ -27,6 +27,8 @@ internal fun BrowsePageHeader(
     title: String,
     onSearchClick: (() -> Unit)? = null,
     navigationIcon: @Composable (() -> Unit)? = null,
+    titleContent: (@Composable (Modifier) -> Unit)? = null,
+    searchButtonModifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {},
 ) = KomeliaSafeTopBar {
     val layout = LocalKomeliaLayout.current
@@ -36,10 +38,14 @@ internal fun BrowsePageHeader(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         navigationIcon?.invoke()
-        Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        if (titleContent == null) {
+            Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        } else {
+            titleContent(Modifier.weight(1f))
+        }
         actions()
         if (onSearchClick != null) {
-            IconButton(onClick = onSearchClick) {
+            IconButton(onClick = onSearchClick, modifier = searchButtonModifier) {
                 Icon(Icons.Rounded.Search, stringResource(Res.string.navbar_search))
             }
         }

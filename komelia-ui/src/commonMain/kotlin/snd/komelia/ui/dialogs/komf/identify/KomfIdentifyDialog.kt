@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
@@ -127,6 +127,7 @@ fun IdentifyConfigContent(state: ConfigState) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextField(
+                shape = MaterialTheme.shapes.small,
                 value = state.searchName,
                 onValueChange = state::searchName::set,
                 label = { Text(stringResource(Res.string.komf_identify_title)) },
@@ -234,7 +235,7 @@ private fun ProviderProgressCard(progress: ProviderProgressStatus) {
                 ProgressStatus.COMPLETED -> {
                     Text(stringResource(Res.string.komf_identify_completed))
                     Icon(
-                        imageVector = Icons.Default.Check,
+                        imageVector = Icons.Rounded.Check,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.secondary
                     )
@@ -242,7 +243,7 @@ private fun ProviderProgressCard(progress: ProviderProgressStatus) {
 
                 ProgressStatus.ERROR -> {
                     Icon(
-                        imageVector = Icons.Default.Error,
+                        imageVector = Icons.Rounded.Error,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error
                     )

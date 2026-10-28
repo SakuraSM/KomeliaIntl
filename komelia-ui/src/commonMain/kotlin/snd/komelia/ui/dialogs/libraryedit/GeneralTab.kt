@@ -1,12 +1,13 @@
 package snd.komelia.ui.dialogs.libraryedit
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -34,7 +35,7 @@ class GeneralTab(
 ) : DialogTab {
     override fun options() = TabItem(
         title = Res.string.edit_tab_general,
-        icon = Icons.Default.Category
+        icon = Icons.Rounded.Category
     )
 
     @Composable
@@ -66,6 +67,7 @@ private fun GeneralTabContent(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         TextField(
+            shape = MaterialTheme.shapes.small,
             value = name.value,
             onValueChange = name.setValue,
             label = { Text(stringResource(Res.string.library_edit_name)) },
@@ -76,6 +78,7 @@ private fun GeneralTabContent(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextField(
+                shape = MaterialTheme.shapes.small,
                 value = rootFolder.value,
                 onValueChange = rootFolder.setValue,
                 label = { Text(stringResource(Res.string.library_edit_root_folder)) },

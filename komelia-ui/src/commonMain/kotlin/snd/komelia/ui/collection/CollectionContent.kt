@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -170,7 +170,7 @@ private fun CollectionToolbar(
                     )
                 }
 
-                FloatingChromeIconButton(onClick = onEditModeEnable, floating = true) { Icon(Icons.Default.EditNote, stringResource(Res.string.collection_edit)) }
+                FloatingChromeIconButton(onClick = onEditModeEnable, floating = true) { Icon(Icons.Rounded.EditNote, stringResource(Res.string.collection_edit)) }
             }
 
             PageSizeSelectionDropdown(pageSize, onPageSizeChange)

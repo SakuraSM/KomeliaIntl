@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FormatAlignCenter
+import androidx.compose.material.icons.rounded.FormatAlignCenter
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,7 +28,7 @@ internal class GeneralTab(
 
     override fun options() = TabItem(
         title = Res.string.edit_tab_general,
-        icon = Icons.Default.FormatAlignCenter
+        icon = Icons.Rounded.FormatAlignCenter
     )
 
     @Composable
@@ -37,6 +37,7 @@ internal class GeneralTab(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             TextField(
+                shape = MaterialTheme.shapes.small,
                 value = vm.name,
                 onValueChange = vm::name::set,
                 label = { Text(stringResource(Res.string.collection_edit_name)) },

@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -39,7 +39,7 @@ internal class MetadataTab(
 
     override fun options() = TabItem(
         title = Res.string.library_edit_tab_metadata,
-        icon = Icons.Default.Book
+        icon = Icons.Rounded.Book
     )
 
     @Composable

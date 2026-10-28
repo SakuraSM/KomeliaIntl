@@ -766,7 +766,9 @@
       "scroll": "切换为滚动布局",
       "settings": "设置",
       "show_hide_toc": "显示/隐藏目录"
-    }
+    },
+    "expand_section": "展开{title}",
+    "collapse_section": "收起{title}"
   },
   "error_codes": {
     "ERR_1000": "File could not be accessed during analysis",

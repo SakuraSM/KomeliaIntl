@@ -1,5 +1,6 @@
 package snd.komelia.ui.dialogs.filebrowser
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -14,9 +15,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,8 +33,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_filebrowser_cancel
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_filebrowser_choose
@@ -44,6 +42,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_filebro
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.dialogs.BasicAppDialog
 import snd.komelia.ui.platform.VerticalScrollbar
 import snd.komelia.ui.platform.cursorForHand
 import snd.komga.client.filesystem.DirectoryListing
@@ -61,47 +60,42 @@ fun FileBrowserDialogContent(
 
     val coroutineScope = rememberCoroutineScope()
     val directoryListing = viewmodel.directoryListing
-    Dialog(
+    BasicAppDialog(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth(),
     ) {
-        Card(
-            modifier = Modifier
-                .widthIn(max = 400.dp)
-                .fillMaxWidth()
-        ) {
-            Column(Modifier.padding(20.dp)) {
-                if (directoryListing == null) return@Column
+        Column(Modifier.padding(20.dp)) {
+            if (directoryListing == null) return@Column
 
-                Text(
-                    stringResource(Res.string.library_filebrowser_root),
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(vertical = 10.dp)
+            Text(
+                stringResource(Res.string.library_filebrowser_root),
+                fontSize = 20.sp,
+                modifier = Modifier.padding(vertical = 10.dp)
+            )
+
+            TextField(
+                shape = MaterialTheme.shapes.small,
+                value = viewmodel.selectedPath,
+                readOnly = true,
+                onValueChange = {},
+                modifier = Modifier.padding(vertical = 10.dp)
+            )
+
+            val scrollState = rememberScrollState()
+            Box(
+                Modifier
+                    .heightIn(min = 100.dp, max = 400.dp)
+            ) {
+                DirectoryListing(
+                    listing = directoryListing,
+                    onDirectoryClick = { coroutineScope.launch { viewmodel.selectDirectory(it) } },
+                    scrollState = scrollState
                 )
 
-                TextField(
-                    value = viewmodel.selectedPath,
-                    readOnly = true,
-                    onValueChange = {},
-                    modifier = Modifier.padding(vertical = 10.dp)
-                )
-
-                val scrollState = rememberScrollState()
-                Box(
-                    Modifier
-                        .heightIn(min = 100.dp, max = 400.dp)
-                ) {
-                    DirectoryListing(
-                        listing = directoryListing,
-                        onDirectoryClick = { coroutineScope.launch { viewmodel.selectDirectory(it) } },
-                        scrollState = scrollState
-                    )
-
-                    VerticalScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
-                }
-
-                DialogControlButtons(viewmodel.selectedPath, onDismissRequest, onDirectoryChoice)
+                VerticalScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
             }
+
+            DialogControlButtons(viewmodel.selectedPath, onDismissRequest, onDirectoryChoice)
         }
     }
 }
@@ -120,7 +114,7 @@ private fun DirectoryListing(
         val parent = listing.parent
         if (parent != null) {
             DirectoryListingItem(
-                icon = Icons.Default.ChevronLeft,
+                icon = Icons.Rounded.ChevronLeft,
                 title = stringResource(Res.string.library_filebrowser_parent),
                 onClick = { onDirectoryClick(parent) }
             )
@@ -129,7 +123,7 @@ private fun DirectoryListing(
         listing.directories.forEach {
             if (it.type == stringResource(Res.string.library_filebrowser_directory)) {
                 DirectoryListingItem(
-                    icon = Icons.Default.Folder,
+                    icon = Icons.Rounded.Folder,
                     title = it.name,
                     onClick = { onDirectoryClick(it.path) })
             }

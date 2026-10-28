@@ -69,6 +69,7 @@ fun SearchContent(
     seriesTotalPages: Int,
     onSeriesPageChange: (Int) -> Unit,
     onSeriesClick: (KomeliaSeries) -> Unit,
+    showToolbar: Boolean = true,
 ) {
     if (query.isNotBlank() && bookResults.isEmpty() && seriesResults.isEmpty()) {
         EmptySearchResults()
@@ -88,7 +89,7 @@ fun SearchContent(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            SearchToolBar(
+            if (showToolbar) SearchToolBar(
                 searchType = searchType,
                 onSearchTypeChange = onSearchTypeChange,
                 hasSeries = seriesResults.isNotEmpty(),

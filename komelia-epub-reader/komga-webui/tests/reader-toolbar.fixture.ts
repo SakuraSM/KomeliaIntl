@@ -3,6 +3,10 @@ import '../../shared/chrome-appearance.css';
 import {createApp, h, reactive} from 'vue';
 import {createI18n} from 'vue-i18n';
 import {VApp} from 'vuetify/components';
+// Expose template-generated imports to Vite's entry scan before the first menu opens.
+import 'vuetify/components/VIcon';
+import 'vuetify/components/VList';
+import 'vuetify/components/VMenu';
 import EpubReaderToolbar from '../src/components/EpubReaderToolbar.vue';
 import {registerPlugins} from '../src/plugins';
 import en from '../src/locales/en.json';

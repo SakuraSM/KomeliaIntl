@@ -1,11 +1,12 @@
 package snd.komelia.ui.dialogs.book.edit
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.People
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -38,7 +39,7 @@ class AuthorsTab(
 ) : DialogTab {
     override fun options() = TabItem(
         title = Res.string.book_edit_tab_authors,
-        icon = Icons.Default.People
+        icon = Icons.Rounded.People
     )
 
     @Composable
@@ -77,6 +78,7 @@ private fun AuthorsTabContent(
 
         var newCustomRole by remember { mutableStateOf("") }
         TextField(
+            shape = MaterialTheme.shapes.small,
             value = newCustomRole,
             onValueChange = { newCustomRole = it },
             label = { Text(stringResource(Res.string.book_edit_add_custom_role)) },
@@ -105,7 +107,7 @@ private fun AuthorsTabContent(
                         newCustomRole = ""
                     }
                 }) {
-                    Icon(Icons.Default.Add, contentDescription = null)
+                    Icon(Icons.Rounded.Add, contentDescription = null)
                 }
             }
         )

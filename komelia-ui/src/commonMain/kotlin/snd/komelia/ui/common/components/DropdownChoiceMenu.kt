@@ -1,5 +1,6 @@
 package snd.komelia.ui.common.components
 
+import snd.komelia.ui.common.components.KomeliaExposedDropdownMenu
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BasicTooltipBox
 import androidx.compose.foundation.BorderStroke
@@ -27,13 +28,13 @@ import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.RadioButtonChecked
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.RadioButtonChecked
+import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
+import snd.komelia.ui.common.components.KomeliaDropdownMenu as DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryNotEditable
@@ -141,7 +142,7 @@ fun <T> DropdownChoiceMenu(
         )
 
         val scrollState = rememberScrollState()
-        ExposedDropdownMenu(
+        KomeliaExposedDropdownMenu(
             expanded = isExpanded,
             onDismissRequest = { isExpanded = false },
             scrollState = scrollState,
@@ -214,7 +215,7 @@ fun <T> DropdownMultiChoiceMenu(
         )
 
         val scrollState = rememberScrollState()
-        ExposedDropdownMenu(
+        KomeliaExposedDropdownMenu(
             expanded = isExpanded,
             onDismissRequest = { isExpanded = false },
             scrollState = scrollState,
@@ -244,13 +245,15 @@ private fun InputField(
     contentPadding: PaddingValues = PaddingValues(10.dp)
 ) {
     val focused by interactionSource.collectIsFocusedAsState()
+    val shape = MaterialTheme.shapes.small
     Surface(
         shadowElevation = 0.dp,
-        shape = RoundedCornerShape(10.dp),
+        shape = shape,
         border = BorderStroke(if (focused) 2.dp else 1.dp,
             if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
         color = color,
         modifier = Modifier
+            .clip(shape)
             .cursorForHand()
             .indication(interactionSource, LocalIndication.current)
             .hoverable(interactionSource)
@@ -349,7 +352,7 @@ fun <T> DropdownChoiceMenuWithSearch(
                         containerColor = MaterialTheme.colorScheme.surface,
                         onClick = { onOptionSelect(it) }
                     ) {
-                        Icon(Icons.Default.Close, null)
+                        Icon(Icons.Rounded.Close, null)
                         Text(optionLabel, style = MaterialTheme.typography.labelMedium)
                     }
                 }
@@ -768,8 +771,8 @@ private fun <T> DropdownMultiChoiceItem(
             .komeliaHighlight(selected, MaterialTheme.shapes.small, inset = 4.dp)
             .semantics { this.selected = selected },
         leadingIcon = {
-            if (selected) Icon(Icons.Default.RadioButtonChecked, null, tint = color)
-            else Icon(Icons.Default.RadioButtonUnchecked, null)
+            if (selected) Icon(Icons.Rounded.RadioButtonChecked, null, tint = color)
+            else Icon(Icons.Rounded.RadioButtonUnchecked, null)
         }
     )
 }

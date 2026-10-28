@@ -10,14 +10,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -34,6 +32,10 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_confirm
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.settings.model.AppSurfaceStyle
+import snd.komelia.ui.common.components.KomeliaChromeStyle
+import snd.komelia.ui.common.components.KomeliaChromeSurface
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
 import snd.komelia.ui.platform.VerticalScrollbar
 import snd.komelia.ui.platform.cursorForHand
 import kotlin.math.roundToInt
@@ -81,9 +83,11 @@ fun BasicAppDialog(
     ) {
         val focusManager = LocalFocusManager.current
         val layout = LocalKomeliaLayout.current
-        Surface(
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-            shape = MaterialTheme.shapes.extraLarge,
+        KomeliaChromeSurface(
+            border = if (LocalSurfaceAppearance.current.style == AppSurfaceStyle.CLASSIC) {
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            } else null,
+            shape = KomeliaChromeStyle.dialogShape,
             color = color,
             modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding, vertical = layout.controlSpacing)
                 .then(modifier)

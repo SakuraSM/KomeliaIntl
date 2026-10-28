@@ -20,7 +20,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
+import snd.komelia.ui.common.components.KomeliaPlainTooltip as PlainTooltip
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition

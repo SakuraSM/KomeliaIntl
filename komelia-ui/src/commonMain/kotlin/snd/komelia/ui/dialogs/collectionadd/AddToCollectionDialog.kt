@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -77,7 +77,7 @@ private fun Header(onDismissRequest: () -> Unit) {
         ) {
             Text(stringResource(Res.string.series_add_to_collection), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.weight(1f))
-            IconButton(onClick = onDismissRequest) { Icon(Icons.Default.Close, null) }
+            IconButton(onClick = onDismissRequest) { Icon(Icons.Rounded.Close, null) }
         }
         HorizontalDivider()
     }
@@ -100,6 +100,7 @@ private fun DialogContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextField(
+                shape = MaterialTheme.shapes.small,
                 value = query,
                 onValueChange = { query = it },
                 label = { Text(stringResource(Res.string.collection_search_or_create)) },

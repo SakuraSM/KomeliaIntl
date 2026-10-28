@@ -63,6 +63,7 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
                 else ->
                     HomeContent(
                         filters = vm.currentFilters.collectAsState().value,
+                        recentlyReadBooks = vm.recentlyReadBooks.collectAsState().value,
                         activeFilterNumber = vm.activeFilterNumber.collectAsState().value,
                         onFilterChange = vm::onFilterChange,
                         onSearchClick = { appNavigation.open(SearchScreen(null)) },

@@ -844,6 +844,45 @@
         "EpubReaderSessionTest",
         "chrome-appearance.test.mjs"
       ]
+    },
+    {
+      "id": "HOME-RECENT-01",
+      "title": "首页最近阅读与返回刷新",
+      "area": "home",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": ["最终 debug APK；受控合成在线书库；至少两本不同阅读时间的书籍，其中一本已读完"],
+      "steps": ["检查首页先显示最近阅读和可继续阅读的书籍；打开非末页继续阅读，返回首页后再次进入；检查已读完书籍仍出现在最近阅读；切换已有自定义分组后返回全部；冷启动检查同一账户记录"],
+      "expected": ["按实际阅读时间显示，已读完与未读完均保留；返回后的进度和续读位置更新；自定义分组的查询、顺序和选择范围不变；不混入其他账户记录"],
+      "profiles": ["core", "premerge", "release"],
+      "evidence": ["最终 APK SHA256、源代码指纹、模拟器/API", "最近阅读及完成状态截图", "返回、重进和冷启动的进度证据"],
+      "automatedTests": ["HomeFeaturedBookTest", "RecentlyReadBooksTest", "ReadingOverviewFilterTest", "HomeGroupPickerLayoutTest"]
+    },
+    {
+      "id": "GLASS-OVERLAY-01",
+      "title": "原生玻璃弹层、底栏选中态与圆角",
+      "area": "settings",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": ["最终 debug APK；受控图文内容；专用 Android 模拟器"],
+      "steps": ["在图文内容上打开并关闭对话框、选择菜单和底部面板；用返回键关闭且继续操作原页面；切换五个底部目的地；检查浅色、深色、OLED、降低透明度，以及中英文；检查 360dp、840dp 和大字体布局；在圆角输入框中输入并取消"],
+      "expected": ["玻璃弹层显示真实模糊背景，降低透明度使用实心回退；控件、焦点和关闭行为可用；当前底栏项目有明确的圆角位置标记和加粗标签；图标和控件圆角一致，文字与触控区域不溢出"],
+      "profiles": ["core", "reader", "premerge", "release"],
+      "evidence": ["最终 APK SHA256、源代码指纹和环境", "各类弹层与三种主题截图", "目的地切换、返回、输入取消和尺寸验证"],
+      "automatedTests": ["NavigationSelectionTest", "PopupSemanticsBrowserTest", "DropdownChoiceFocusTest", "GlassContrastTest", "ModalSheetLayoutTest"]
+    },
+    {
+      "id": "BROWSE-HEADER-01",
+      "title": "单行标题栏与浏览选项",
+      "area": "ui",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": ["最终 debug APK；合成书库含系列、合集、阅读列表和空书库；手机与平板宽度"],
+      "steps": ["检查首页、书库、本地、搜索、设置的标题与操作保持一行；切换书库范围和内容类型；修改并恢复每页数量与筛选；切换本地来源和排序；展开搜索、输入、清空并退出；切换全局搜索结果类型；检查中英文、大字体、Back/Escape 与焦点恢复"],
+      "expected": ["筛选等操作从标题行进入，内容区没有重复工具栏；原有查询、分页、权限入口与选择范围保留；搜索不增加第二行，键盘操作与焦点恢复正常；空数据状态仍能切换选项"],
+      "profiles": ["core", "premerge", "release"],
+      "evidence": ["最终 APK SHA256与源码指纹", "各主入口、选项面板、查询和分页结果", "手机/平板、语言、字号与输入方式"],
+      "automatedTests": ["BrowseHeaderLayoutTest", "BrowsePageHeaderTest", "DestinationResponseTest"]
     }
   ]
 }

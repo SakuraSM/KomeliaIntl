@@ -3,6 +3,7 @@
 package snd.komelia.ui.common.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -108,7 +109,7 @@ fun Modifier.glassBackdrop(active: Boolean = true): Modifier {
     return if (active && !paused && LocalSurfaceAppearance.current.useGlass && state != null) hazeSource(state) else this
 }
 
-/** Cross-window dialogs deliberately use their existing solid Surface, never this sampler. */
+/** Sources retain the shared material and alignment in dialog and popup windows. */
 @Composable
 fun KomeliaChromeSurface(
     modifier: Modifier = Modifier,
@@ -116,6 +117,7 @@ fun KomeliaChromeSurface(
     color: Color = MaterialTheme.colorScheme.surface,
     tonalElevation: Dp = 0.dp,
     shadowElevation: Dp = 0.dp,
+    border: BorderStroke? = null,
     interactionSource: InteractionSource? = null,
     highlighted: Boolean = false,
     content: @Composable () -> Unit,
@@ -132,6 +134,7 @@ fun KomeliaChromeSurface(
         contentColor = colors.onSurface,
         tonalElevation = if (glass) 0.dp else tonalElevation,
         shadowElevation = shadowElevation,
+        border = border,
     ) {
         val effect = if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) {
             Modifier.komeliaChrome(shape, baseColor, interactionSource)

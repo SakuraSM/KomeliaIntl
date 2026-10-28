@@ -4,7 +4,7 @@
       v-model="dialog"
       scrollable
   >
-    <v-card>
+    <v-card data-komelia-chrome data-komelia-popup>
       <v-btn icon absolute top right @click="dialog = false">
         <v-icon :icon="mdiClose"/>
       </v-btn>

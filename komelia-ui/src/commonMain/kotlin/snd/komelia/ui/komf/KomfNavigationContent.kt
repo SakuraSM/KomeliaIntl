@@ -6,14 +6,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Extension
-import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material.icons.outlined.LocalLibrary
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.outlined.Storage
-import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.rounded.Extension
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.LocalLibrary
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -61,7 +61,7 @@ fun KomfNavigationContent(
         KomeliaWordmark(Modifier.padding(horizontal = 12.dp, vertical = 8.dp))
         NavigationButton(
             label = stringResource(Res.string.komf_komga_webui),
-            icon = Icons.Outlined.LocalLibrary,
+            icon = Icons.Rounded.LocalLibrary,
             onClick = { onNavigation(LoginScreen()) },
             isSelected = currentScreen is LoginScreen,
             color = contentColor,
@@ -74,49 +74,49 @@ fun KomfNavigationContent(
         )
         NavigationButton(
             label = stringResource(Res.string.komf_connection),
-            icon = Icons.Outlined.Link,
+            icon = Icons.Rounded.Link,
             onClick = { onNavigation(KomfSettingsScreen(integrationToggleEnabled = false, showKavitaSettings = true)) },
             isSelected = currentScreen is KomfSettingsScreen,
             color = contentColor,
         )
         NavigationButton(
             label = stringResource(Res.string.komf_processing_komga),
-            icon = Icons.Outlined.Tune,
+            icon = Icons.Rounded.Tune,
             onClick = { onNavigation(KomfProcessingSettingsScreen(KOMGA)) },
             isSelected = currentScreen is KomfProcessingSettingsScreen && currentScreen.serverType == KOMGA,
             color = contentColor,
         )
         NavigationButton(
             label = stringResource(Res.string.komf_processing_kavita),
-            icon = Icons.Outlined.Tune,
+            icon = Icons.Rounded.Tune,
             onClick = { onNavigation(KomfProcessingSettingsScreen(KAVITA)) },
             isSelected = currentScreen is KomfProcessingSettingsScreen && currentScreen.serverType == KAVITA,
             color = contentColor,
         )
         NavigationButton(
             label = stringResource(Res.string.komf_providers),
-            icon = Icons.Outlined.Extension,
+            icon = Icons.Rounded.Extension,
             onClick = { onNavigation(KomfProvidersSettingsScreen()) },
             isSelected = currentScreen is KomfProvidersSettingsScreen,
             color = contentColor,
         )
         NavigationButton(
             label = stringResource(Res.string.komf_notifications),
-            icon = Icons.Outlined.Notifications,
+            icon = Icons.Rounded.Notifications,
             onClick = { onNavigation(KomfNotificationSettingsScreen()) },
             isSelected = currentScreen is KomfNotificationSettingsScreen,
             color = contentColor,
         )
         NavigationButton(
             label = stringResource(Res.string.komf_job_history),
-            icon = Icons.Outlined.History,
+            icon = Icons.Rounded.History,
             onClick = { onNavigation(KomfJobsScreen(false)) },
             isSelected = currentScreen is KomfJobsScreen,
             color = contentColor,
         )
         NavigationButton(
             label = stringResource(Res.string.mangabaka_settings),
-            icon = Icons.Outlined.Storage,
+            icon = Icons.Rounded.Storage,
             onClick = { onNavigation(KomfMangaBakaSettingsScreen()) },
             isSelected = currentScreen is KomfMangaBakaSettingsScreen,
             color = contentColor,
@@ -124,7 +124,7 @@ fun KomfNavigationContent(
         HorizontalDivider(Modifier.padding(vertical = 10.dp))
         NavigationButton(
             label = stringResource(Res.string.settings_appearance_title),
-            icon = Icons.Outlined.Palette,
+            icon = Icons.Rounded.Palette,
             onClick = { onNavigation(AppSettingsScreen()) },
             isSelected = currentScreen is AppSettingsScreen,
             color = contentColor,

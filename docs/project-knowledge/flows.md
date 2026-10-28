@@ -10,6 +10,15 @@
 
 Risk points: duplicate state owners, platform-specific behavior leaking into common code, failed requests represented as empty data, and persistence changes without migration tests.
 
+## Home reading overview
+
+1. Query the selected book API for unfinished and completed books ordered by their real read date. The query runs even when the user has no configured Home groups.
+2. Merge local-folder books through the existing offline API, restricted to those libraries and the current catalog identity. Deduplicate book IDs before applying the 20-book limit. A failed request remains an error.
+3. Show recent reading first in All, with an unfinished book available for continuation. Unknown page counts use the existing status label rather than a fabricated percentage. Exact default reading groups are represented by the overview; custom groups remain selectable and persist unchanged.
+4. Re-entering Home requests fresh data without requiring an SSE event. Reuse the existing reader entry and progress protocol.
+
+Risk points: treating file-modification dates as reading dates, mixing another account's cache, depending on configured groups for history, stale progress after returning, and hiding custom filtered groups.
+
 ## Optional series metadata
 
 1. Load the base Komga series or collection page through the existing authenticated API.
@@ -32,7 +41,7 @@ Each `MainScreen` owns a serializable navigation identity. A new login gets a ne
 
 Risk points: probe races, stale active URL, destructive settings rewrites, and treating authentication failure as network unavailability.
 
-`ServerUrlResolver.resolution` distinguishes pending selection, a resolved route, and an unconfigured server. A configured initial address is not proof of readiness. Each selection has a generation; cancelled probes cannot publish over a newer configuration. `isCurrent` also checks the settings inputs before their collector runs.
+`ServerUrlResolver.resolution` distinguishes pending selection, a resolved route, and an unconfigured server. A configured initial address is not proof of readiness. Each selection has a generation; cancelled probes cannot publish over a newer configuration. `isCurrent` also checks the settings inputs before their collector runs. When LAN selection is unavailable or disabled and the settings are unchanged, repeated network notifications retain the primary route's generation so they cannot cancel an in-flight login.
 
 `LoginViewModel` owns one login task with a 15-second total deadline, including preparation and route selection. `OnlineLoginCoordinator` gives automatic network attempts six seconds each, with at most two attempts and a 300-millisecond retry delay. Connection failures, timeouts, and HTTP 502/503/504 can retry. Credentials are submitted once. Only a complete session from the current task and route can update authentication. Offline login bypasses route selection. The existing background authentication reload keeps its separate three-second policy.
 
@@ -161,3 +170,5 @@ Risk points: merged code described as released, stale About version, wrong repos
 5. Query the optional chrome bridge when EPUB controls open. Older hosts and a hung/missing bridge retain classic chrome; publication CSS and positions are outside this contract.
 
 Risk points: persisted enum changes, sampling an ancestor containing the same effect, empty toolbar subcomposition, capture-layer churn between consecutive gestures, Web popup accessibility regressions, and confusing emulator frame statistics with physical-device acceptance. See [the appearance verification report](../verification/liquid-glass-20261022.md).
+
+First-party dialogs, menus, sheets and tooltips use the same `HazeInput.Sources` material as their owning content. Native dialog and popup primitives retain focus and dismissal ownership. Do not replace source input with a current-window backdrop for cross-window overlays. The pinned Haze [dialog contract](https://chrisbanes.github.io/haze/2.0.1/core-concepts/#dialogs) describes this boundary. Keep reduced transparency, source lifetime and scrolling budgets intact.

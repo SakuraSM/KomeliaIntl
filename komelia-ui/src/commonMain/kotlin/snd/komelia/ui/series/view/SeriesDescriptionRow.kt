@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -76,7 +76,7 @@ fun SeriesDescriptionRow(
                 onClick = { onLibraryClick(library) },
                 modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
             ) {
-                Icon(Icons.AutoMirrored.Outlined.MenuBook, null)
+                Icon(Icons.AutoMirrored.Rounded.MenuBook, null)
                 Spacer(Modifier.width(3.dp))
                 Text(text = library.name, textDecoration = TextDecoration.Underline)
             }

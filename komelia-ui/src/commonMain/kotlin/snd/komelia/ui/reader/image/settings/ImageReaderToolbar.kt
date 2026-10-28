@@ -14,8 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import snd.komelia.ui.icons.AppIcons
+import snd.komelia.ui.icons.outlined.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,7 +53,7 @@ internal fun ImageReaderToolbar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         KomeliaIconButton(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
             contentDescription = stringResource(Res.string.navigation_back),
             onClick = onBackPress,
             modifier = Modifier.size(layout.minimumTouchTarget),
@@ -76,7 +77,7 @@ internal fun ImageReaderToolbar(
         } else Spacer(Modifier.weight(1f))
         pageShareAction?.let { PageShareButton(it) }
         KomeliaIconButton(
-            imageVector = Icons.Default.Settings,
+            imageVector = AppIcons.Outlined.Settings,
             contentDescription = stringResource(Res.string.reader_image_settings),
             onClick = onSettingsClick,
             modifier = Modifier.size(layout.minimumTouchTarget),

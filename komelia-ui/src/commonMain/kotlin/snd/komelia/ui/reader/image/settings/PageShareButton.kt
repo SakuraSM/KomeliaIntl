@@ -2,7 +2,7 @@ package snd.komelia.ui.reader.image.settings
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +26,6 @@ internal fun PageShareButton(action: PageShareAction, modifier: Modifier = Modif
         modifier = modifier.size(LocalKomeliaLayout.current.minimumTouchTarget).semantics { contentDescription = label },
     ) {
         if (action.isSharing) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-        else Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(20.dp))
+        else Icon(Icons.Rounded.Share, contentDescription = null, modifier = Modifier.size(20.dp))
     }
 }

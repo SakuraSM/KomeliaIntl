@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FormatAlignCenter
+import androidx.compose.material.icons.rounded.FormatAlignCenter
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +35,7 @@ internal class GeneralTab(
 
     override fun options() = TabItem(
         title = Res.string.series_edit_tab_general,
-        icon = Icons.Default.FormatAlignCenter
+        icon = Icons.Rounded.FormatAlignCenter
     )
 
     @Composable

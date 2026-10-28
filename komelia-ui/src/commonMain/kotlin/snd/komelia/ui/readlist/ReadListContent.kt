@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -179,7 +179,7 @@ private fun ReadListToolbar(
                         onDismissRequest = { expandActions = false }
                     )
                 }
-                FloatingChromeIconButton(onClick = onEditModeEnable, floating = true) { Icon(Icons.Default.EditNote, stringResource(Res.string.readlist_edit)) }
+                FloatingChromeIconButton(onClick = onEditModeEnable, floating = true) { Icon(Icons.Rounded.EditNote, stringResource(Res.string.readlist_edit)) }
             }
 
             PageSizeSelectionDropdown(pageSize, onPageSizeChange)

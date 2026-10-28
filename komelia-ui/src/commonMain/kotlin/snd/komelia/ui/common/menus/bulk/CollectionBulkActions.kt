@@ -1,7 +1,7 @@
 package snd.komelia.ui.common.menus.bulk
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LayersClear
+import androidx.compose.material.icons.rounded.LayersClear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -116,7 +116,7 @@ data class CollectionBulkActionsState(
             add(
                 BulkActionButtonData(
                     description = Res.string.collection_remove_series,
-                    icon = Icons.Default.LayersClear,
+                    icon = Icons.Rounded.LayersClear,
                     onClick = { showDeleteDialog = true }
                 )
             )

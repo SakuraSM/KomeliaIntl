@@ -1,5 +1,6 @@
 package snd.komelia.ui.settings.komf
 
+import snd.komelia.ui.common.components.KomeliaExposedDropdownMenu
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
@@ -152,7 +153,7 @@ fun <T> LibraryTabs(
                     Icon(Icons.Rounded.Add, stringResource(Res.string.library_add))
                 }
 
-                ExposedDropdownMenu(
+                KomeliaExposedDropdownMenu(
                     expanded = isExpanded,
                     onDismissRequest = { isExpanded = false },
                     modifier = Modifier.widthIn(min = 200.dp)

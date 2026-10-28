@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -78,6 +78,7 @@ fun UpscaleModeSelector(
             modifier = Modifier.padding(start = 10.dp)
         ) {
             TextField(
+                shape = MaterialTheme.shapes.small,
                 value = currentModelPath?.toString() ?: "",
                 onValueChange = {},
                 enabled = false,
@@ -146,7 +147,7 @@ fun TileSizeSelector(
             },
             state = rememberBasicTooltipState(),
         ) {
-            Icon(Icons.Default.Info, null)
+            Icon(Icons.Rounded.Info, null)
         }
 
     }

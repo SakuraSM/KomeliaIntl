@@ -1,5 +1,6 @@
 package snd.komelia.ui.home.edit.view
 
+import snd.komelia.ui.common.components.KomeliaExposedDropdownMenu
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -271,7 +272,7 @@ fun AddConditionButton(
             Text(stringResource(Res.string.home_filter_add_filter))
         }
 
-        ExposedDropdownMenu(
+        KomeliaExposedDropdownMenu(
             expanded = dropDownExpanded,
             onDismissRequest = { dropDownExpanded = false },
             modifier = Modifier.widthIn(min = 200.dp)

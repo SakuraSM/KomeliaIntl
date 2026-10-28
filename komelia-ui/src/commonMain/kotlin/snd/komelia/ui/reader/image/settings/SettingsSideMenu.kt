@@ -27,11 +27,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Help
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.Help
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -171,13 +171,13 @@ fun SettingsSideMenuOverlay(
                     onClick = { onBackPress() },
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, null)
                     Spacer(Modifier.width(3.dp))
                     Text(stringResource(Res.string.reader_close_book))
                 }
                 Spacer(Modifier.weight(1f))
                 pageShareAction?.let { PageShareButton(it) }
-                IconButton(onClick = { onShowHelpMenu() }) { Icon(Icons.AutoMirrored.Default.Help, null) }
+                IconButton(onClick = { onShowHelpMenu() }) { Icon(Icons.AutoMirrored.Rounded.Help, null) }
             }
             if (book != null) {
                 BookTitles(book)
@@ -230,7 +230,7 @@ fun SettingsSideMenuOverlay(
                 Text(stringResource(Res.string.reader_image_settings))
                 Spacer(Modifier.weight(1f))
                 Icon(
-                    Icons.Filled.ArrowDropDown,
+                    Icons.Rounded.ArrowDropDown,
                     null,
                     Modifier.rotate(if (showImageSettings) 180f else 0f)
                 )
@@ -281,7 +281,7 @@ fun SettingsSideMenuOverlay(
                     Text(stringResource(Res.string.settings_image_onnxruntime))
                     Spacer(Modifier.weight(1f))
                     Icon(
-                        Icons.Filled.ArrowDropDown,
+                        Icons.Rounded.ArrowDropDown,
                         null,
                         Modifier.rotate(if (showOnnxRuntimeSettings) 180f else 0f)
                     )
@@ -340,7 +340,7 @@ fun SettingsSideMenuOverlay(
                         Text(stringResource(Res.string.reader_pages_info))
                         Spacer(Modifier.weight(1f))
                         Icon(
-                            Icons.Filled.ArrowDropDown,
+                            Icons.Rounded.ArrowDropDown,
                             null,
                             Modifier.rotate(if (showPagesInfo) 180f else 0f)
                         )
@@ -500,7 +500,7 @@ private fun BookTitles(book: KomeliaBook) {
         if (!book.oneshot) {
             Row(verticalAlignment = Alignment.Top) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Default.MenuBook,
+                    imageVector = Icons.AutoMirrored.Rounded.MenuBook,
                     contentDescription = null,
                     modifier = Modifier.size(35.dp).padding(end = 10.dp)
                 )
@@ -514,7 +514,7 @@ private fun BookTitles(book: KomeliaBook) {
 
         Row(verticalAlignment = Alignment.Top) {
             Icon(
-                imageVector = Icons.Default.Book,
+                imageVector = Icons.Rounded.Book,
                 contentDescription = null,
                 modifier = Modifier.size(35.dp).padding(end = 10.dp)
             )

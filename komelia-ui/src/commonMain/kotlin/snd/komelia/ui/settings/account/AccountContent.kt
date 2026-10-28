@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import snd.komelia.ui.common.components.KomeliaChromeSurface
@@ -51,7 +51,7 @@ private fun EmailDetails(user: KomgaUser) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         KomeliaChromeSurface(shape = RoundedCornerShape(50)) {
             Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
-                Icon(Icons.Outlined.Person, contentDescription = null, modifier = Modifier.size(36.dp))
+                Icon(Icons.Rounded.Person, contentDescription = null, modifier = Modifier.size(36.dp))
             }
         }
         Text(

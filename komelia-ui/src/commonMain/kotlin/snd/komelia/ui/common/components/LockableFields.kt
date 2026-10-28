@@ -79,6 +79,7 @@ fun LockableTextField(
         LockIcon(lock)
 
         TextField(
+            shape = MaterialTheme.shapes.small,
             value = text,
             onValueChange = onTextChange,
             label = label?.let { { Text(label) } },

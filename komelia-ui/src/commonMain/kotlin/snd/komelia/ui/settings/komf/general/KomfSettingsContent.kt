@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -192,7 +192,7 @@ private fun KomfConnectionDetails(
                         stringResource(Res.string.komf_connection_connected),
                         color = MaterialTheme.colorScheme.secondary
                     )
-                    Icon(Icons.Default.Check, null)
+                    Icon(Icons.Rounded.Check, null)
                 }
             }
         }

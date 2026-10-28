@@ -11,7 +11,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -22,13 +23,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material3.DropdownMenu
+import snd.komelia.ui.common.components.KomeliaDropdownMenu as DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import snd.komelia.ui.common.components.KomeliaModalBottomSheet as ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +49,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_all
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_group_items
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_groups
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_search_groups
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_default_recently_read_books
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_home
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -81,6 +83,7 @@ internal fun HomeContent(
     bookMenuActions: BookMenuActions,
     onBookClick: (KomeliaBook) -> Unit,
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
+    recentlyReadBooks: List<KomeliaBook> = emptyList(),
 ) {
     val gridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
@@ -88,6 +91,7 @@ internal fun HomeContent(
     KomeliaPageScaffold(topBar = {
         Toolbar(
             filters = filters,
+            recentlyReadBooks = recentlyReadBooks,
             currentFilterNumber = activeFilterNumber,
             onSearchClick = onSearchClick,
             onFilterChange = {
@@ -99,6 +103,7 @@ internal fun HomeContent(
         DisplayContent(
             topInset = topInset,
             filters = filters,
+            recentlyReadBooks = recentlyReadBooks,
             activeFilterNumber = activeFilterNumber,
 
             gridState = gridState,
@@ -115,13 +120,14 @@ internal fun HomeContent(
 @Composable
 private fun Toolbar(
     filters: List<HomeFilterData>,
+    recentlyReadBooks: List<KomeliaBook>,
     currentFilterNumber: Int,
     onSearchClick: () -> Unit,
     onFilterChange: (Int) -> Unit,
 ) {
     val toolbarFilters = remember(filters) { homeToolbarEntries(filters) }
     val allLabel = stringResource(Res.string.home_filter_all)
-    val entries = listOf(HomeToolbarEntry(HOME_ALL_TAB_ID, allLabel, filters.sumOf { it.itemCount() })) + toolbarFilters
+    val entries = listOf(HomeToolbarEntry(HOME_ALL_TAB_ID, allLabel, homeAllItemCount(filters, recentlyReadBooks))) + toolbarFilters
     val currentFilter = toolbarFilters.firstOrNull { it.id == currentFilterNumber }
     var pickerOpen by remember { mutableStateOf(false) }
     val useBottomSheet = LocalWindowWidth.current == snd.komelia.ui.platform.WindowSizeClass.COMPACT ||
@@ -183,7 +189,7 @@ private fun HomeGroupPickerSheet(
 }
 
 @Composable
-private fun HomeGroupPickerItems(
+internal fun HomeGroupPickerItems(
     filters: List<HomeToolbarEntry>,
     currentFilterNumber: Int,
     modifier: Modifier = Modifier,
@@ -205,9 +211,10 @@ private fun HomeGroupPickerItems(
                 modifier = Modifier.fillMaxWidth().padding(bottom = layout.controlSpacing),
             )
         }
-        LazyColumn {
-            items(visibleFilters.size) { index ->
-                val data = visibleFilters[index]
+        // DropdownMenu measures intrinsic width. A regular bounded scroll column also works
+        // in the compact sheet, where LazyColumn cannot answer those menu measurements.
+        Column(Modifier.verticalScroll(rememberScrollState())) {
+            visibleFilters.forEach { data ->
                 DropdownMenuItem(
                     modifier = Modifier.komeliaHighlight(data.id == currentFilterNumber, MaterialTheme.shapes.small, inset = 4.dp)
                         .semantics { selected = data.id == currentFilterNumber },
@@ -236,6 +243,14 @@ private fun HomeFilterData.itemCount(): Int = when (this) {
     is SeriesFilterData -> series.size
 }
 
+internal fun homeAllItemCount(filters: List<HomeFilterData>, recentlyReadBooks: List<KomeliaBook>): Int {
+    if (recentlyReadBooks.isEmpty()) return filters.sumOf { it.itemCount() }
+    val hero = mostRecentlyReadingBook(recentlyReadBooks) ?: homeFeaturedBook(filters, HOME_ALL_TAB_ID)?.book
+    val extraHero = if (hero != null && recentlyReadBooks.none { it.id == hero.id }) 1 else 0
+    return recentlyReadBooks.size + extraHero +
+        filters.filterNot { isReadingOverviewFilter(it.filter) }.sumOf { it.itemCount() }
+}
+
 internal fun homeGroupToolbarFilters(filters: List<HomeFilterData>): List<HomeFilterData> =
     filters.sortedBy { it.filter.order }
 
@@ -257,6 +272,7 @@ internal fun homeToolbarEntries(
 private fun DisplayContent(
     topInset: Dp,
     filters: List<HomeFilterData>,
+    recentlyReadBooks: List<KomeliaBook>,
     activeFilterNumber: Int,
     gridState: LazyGridState,
     cardWidth: Dp,
@@ -269,6 +285,8 @@ private fun DisplayContent(
     val layout = LocalKomeliaLayout.current
     val columns = snd.komelia.ui.common.itemlist.posterGridCells(cardWidth)
     val featured = remember(filters, activeFilterNumber) { homeFeaturedBook(filters, activeFilterNumber) }
+    val recentLabel = stringResource(Res.string.home_filter_default_recently_read_books)
+    val recentFeatured = remember(recentlyReadBooks) { mostRecentlyReadingBook(recentlyReadBooks) }
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyVerticalGrid(
             modifier = Modifier
@@ -284,13 +302,27 @@ private fun DisplayContent(
                 bottom = layout.gridBottomPadding + layout.sectionSpacing,
             )
         ) {
+            if (activeFilterNumber == HOME_ALL_TAB_ID && recentlyReadBooks.isNotEmpty()) {
+                BookFilterEntry(
+                    label = recentLabel,
+                    books = recentlyReadBooks,
+                    featuredBook = recentFeatured ?: featured?.book,
+                    bookMenuActions = bookMenuActions,
+                    onBookClick = onBookClick,
+                    onBookReadClick = onBookReadClick,
+                )
+            }
             for (data in filters) {
                 if (activeFilterNumber == HOME_ALL_TAB_ID || data.filter.order == activeFilterNumber) {
+                    if (activeFilterNumber == HOME_ALL_TAB_ID && recentlyReadBooks.isNotEmpty() && isReadingOverviewFilter(data.filter)) continue
                     when (data) {
                         is BookFilterData -> BookFilterEntry(
                             label = data.filter.label,
                             books = data.books,
-                            featuredBook = featured?.takeIf { it.groupOrder == data.filter.order }?.book,
+                            featuredBook = featured?.takeIf {
+                                it.groupOrder == data.filter.order &&
+                                    (activeFilterNumber != HOME_ALL_TAB_ID || recentlyReadBooks.isEmpty())
+                            }?.book,
                             bookMenuActions = bookMenuActions,
                             onBookClick = onBookClick,
                             onBookReadClick = onBookReadClick,

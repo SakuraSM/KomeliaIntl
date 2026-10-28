@@ -111,6 +111,7 @@ fun UserAddDialog(
             ) {
 
                 TextField(
+                    shape = MaterialTheme.shapes.small,
                     value = email,
                     onValueChange = onEmailChange,
                     label = { Text(stringResource(Res.string.user_add_email)) },

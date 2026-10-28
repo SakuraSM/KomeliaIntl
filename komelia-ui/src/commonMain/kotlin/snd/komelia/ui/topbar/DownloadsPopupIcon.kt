@@ -1,6 +1,5 @@
 package snd.komelia.ui.topbar
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,8 +16,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ElevatedButton
@@ -28,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipDefaults
@@ -49,6 +47,8 @@ import kotlinx.datetime.format
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.DefaultDateTimeFormats.localTimeFormat
 import snd.komelia.formatDecimal
+import snd.komelia.ui.common.components.KomeliaChromeSurface
+import snd.komelia.ui.common.components.KomeliaChromeStyle
 import snd.komelia.ui.platform.VerticalScrollbar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +87,7 @@ fun DownloadsPopupIcon(
             },
         ) {
             Icon(
-                Icons.Default.Download, null,
+                Icons.Rounded.Download, null,
             )
 
             if (showNotifications) {
@@ -115,10 +115,9 @@ private fun NotificationsContent(
     onNotificationsClear: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    Surface(
+    KomeliaChromeSurface(
         modifier = Modifier.widthIn(max = 400.dp).heightIn(min = 200.dp, max = 600.dp),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceContainerHighest),
-        shape = RoundedCornerShape(12.dp),
+        shape = KomeliaChromeStyle.dialogShape,
     ) {
         Column {
             Row(
@@ -132,7 +131,7 @@ private fun NotificationsContent(
                 Spacer(Modifier.weight(1f))
                 ElevatedButton(onClick = onNotificationsClear) {
                     Text(stringResource(Res.string.topbar_downloads_clear))
-                    Icon(Icons.Default.Clear, null)
+                    Icon(Icons.Rounded.Clear, null)
                 }
             }
             HorizontalDivider()

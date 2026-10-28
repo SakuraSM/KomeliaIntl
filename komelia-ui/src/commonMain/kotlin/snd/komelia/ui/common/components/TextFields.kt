@@ -219,6 +219,7 @@ fun HttpTextField(
     val httpText = derivedStateOf { if (isHttps) "https://" else "http://" }
     val interactionSource = remember { MutableInteractionSource() }
     TextField(
+        shape = MaterialTheme.shapes.small,
         value = strippedValue,
         onValueChange = {
             onValueChange(httpText.value + it.replace(httpRegex, ""))

@@ -1,4 +1,17 @@
 /* Only marked application controls use the host material. Never select book content. */
+[data-komelia-popup] {
+  border-radius: 28px !important;
+}
+[data-komelia-chrome] :is(button, a, [role="option"], [role="tab"], .v-list-item):not(.komelia-reader-action) {
+  border-radius: 12px;
+}
+[data-komelia-chrome] :is(input:not([type]), input[type="text"], input[type="number"], input[type="search"], textarea, select) {
+  border-radius: 12px;
+}
+:root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"]) [data-komelia-popup] :is(.v-table, th, td) {
+  background: transparent !important;
+  color: inherit !important;
+}
 :root[data-komelia-surface="glass"] [data-komelia-chrome] {
   --komelia-chrome-color: #f4f7fc;
   --komelia-chrome-background: rgb(0 0 0 / 60%);

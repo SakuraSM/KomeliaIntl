@@ -78,6 +78,10 @@ class DefaultServerUrlResolver(
 
     private suspend fun resolveServerUrl(config: LanSwitchConfig) = resolutionMutex.withLock {
         if (config != currentConfig()) return@withLock
+        // Repeated Android network callbacks cannot change a primary-only route. Keep an
+        // in-flight login valid; LAN probes and actual configuration changes still invalidate it.
+        if (!config.canProbeLan() && resolvedConfig.value == config &&
+            resolution.value is ServerUrlResolution.Resolved) return@withLock
         val currentGeneration = ++generation
         probeJob?.cancel()
         resolution.value = ServerUrlResolution.Pending(currentGeneration, config.primaryUrl)

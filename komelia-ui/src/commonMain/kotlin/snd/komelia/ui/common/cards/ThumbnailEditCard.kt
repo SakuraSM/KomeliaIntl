@@ -14,12 +14,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.CloudDone
+import androidx.compose.material.icons.rounded.CloudUpload
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -104,10 +104,10 @@ fun ThumbnailEditCard(
         }
     ) {
         val (icon, tooltip) = when (thumbnail.type) {
-            USER_UPLOADED -> Icons.Default.CloudDone to stringResource(Res.string.thumbnail_user_uploaded)
-            SIDECAR -> Icons.Default.Folder to stringResource(Res.string.thumbnail_local_artwork)
-            GENERATED -> Icons.AutoMirrored.Filled.InsertDriveFile to stringResource(Res.string.thumbnail_generated)
-            UNKNOWN -> Icons.Default.Folder to ""
+            USER_UPLOADED -> Icons.Rounded.CloudDone to stringResource(Res.string.thumbnail_user_uploaded)
+            SIDECAR -> Icons.Rounded.Folder to stringResource(Res.string.thumbnail_local_artwork)
+            GENERATED -> Icons.AutoMirrored.Rounded.InsertDriveFile to stringResource(Res.string.thumbnail_generated)
+            UNKNOWN -> Icons.Rounded.Folder to ""
         }
 
         ThumbnailCardContent(
@@ -143,7 +143,7 @@ fun ThumbnailUploadCard(
             isSelected = thumbnail.selected,
             isDeleted = false,
             filesize = thumbnail.file.size(),
-            typeIcon = Icons.Default.CloudUpload,
+            typeIcon = Icons.Rounded.CloudUpload,
             typeTooltip = stringResource(Res.string.thumbnail_to_be_uploaded),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -193,7 +193,7 @@ private fun ThumbnailCardContent(
             IconWithTooltip(tooltip = stringResource(Res.string.thumbnail_mark_as_selected)) {
                 IconButton(onClick = onSelect) {
                     Icon(
-                        Icons.Default.Check,
+                        Icons.Rounded.Check,
                         null,
                         tint = if (isSelected) MaterialTheme.colorScheme.secondary
                         else LocalContentColor.current
@@ -205,7 +205,7 @@ private fun ThumbnailCardContent(
                 IconWithTooltip(tooltip = stringResource(Res.string.thumbnail_delete)) {
                     IconButton(onClick = onDelete) {
                         Icon(
-                            Icons.Default.Delete,
+                            Icons.Rounded.Delete,
                             null,
                             tint = if (isDeleted) MaterialTheme.colorScheme.errorContainer
                             else LocalContentColor.current

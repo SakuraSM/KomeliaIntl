@@ -1,5 +1,7 @@
 package snd.komelia.ui.home.edit.view
 
+import androidx.compose.material3.MaterialTheme
+import snd.komelia.ui.common.components.KomeliaExposedDropdownMenu
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -14,10 +16,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.DateRange
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
@@ -39,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -63,6 +67,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.common.components.DropdownChoiceMenu
+import snd.komelia.settings.model.AppSurfaceStyle
+import snd.komelia.ui.common.components.KomeliaChromeStyle
+import snd.komelia.ui.common.components.KomeliaChromeContent
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.ui.common.components.komeliaChrome
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.scrollbar
 import snd.komelia.ui.home.BooleanOpState
@@ -97,7 +106,7 @@ fun <T> SimpleConditionLayout(
     content: @Composable RowScope.() -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onConditionRemove) { Icon(Icons.Default.Delete, null) }
+        IconButton(onClick = onConditionRemove) { Icon(Icons.Rounded.Delete, null) }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -328,6 +337,7 @@ fun StringSelectionField(
             onExpandedChange = { isExpanded = it },
         ) {
             TextField(
+                shape = MaterialTheme.shapes.small,
                 value = value,
                 onValueChange = { newText ->
                     onValueChange(newText)
@@ -340,7 +350,7 @@ fun StringSelectionField(
                 interactionSource = interactionSource
             )
 
-            ExposedDropdownMenu(
+            KomeliaExposedDropdownMenu(
                 expanded = isExpanded || focused,
                 onDismissRequest = { isExpanded = false }
             ) {
@@ -384,6 +394,7 @@ fun <T> SearchableOptionSelectionField(
             onExpandedChange = { isExpanded = it },
         ) {
             TextField(
+                shape = MaterialTheme.shapes.small,
                 value = textFieldText,
                 onValueChange = { newText ->
                     textFieldText = newText
@@ -396,7 +407,7 @@ fun <T> SearchableOptionSelectionField(
                 label = { Text(label) }
             )
 
-            ExposedDropdownMenu(
+            KomeliaExposedDropdownMenu(
                 expanded = isExpanded || focused,
                 onDismissRequest = { isExpanded = false }
             ) {
@@ -434,6 +445,7 @@ fun RowScope.StringOpContent(
 
     var textValue by remember { mutableStateOf(value ?: "") }
     TextField(
+        shape = MaterialTheme.shapes.small,
         value = textValue,
         onValueChange = {
             textValue = it
@@ -478,6 +490,7 @@ fun IntTextField(
 ) {
     var valueText by remember { mutableStateOf(value?.toString() ?: "") }
     TextField(
+        shape = MaterialTheme.shapes.small,
         value = valueText,
         onValueChange = { newText ->
             if (newText.isBlank()) {
@@ -504,6 +517,7 @@ fun FloatTextField(
 ) {
     var valueText by remember { mutableStateOf(value?.toString() ?: "") }
     TextField(
+        shape = MaterialTheme.shapes.small,
         value = valueText,
         onValueChange = { newText ->
             if (newText.isBlank()) {
@@ -533,11 +547,12 @@ private fun DatePickerField(
 
 
     TextField(
+        shape = MaterialTheme.shapes.small,
         value = currentDate?.toLocalDateTime(TimeZone.currentSystemDefault())?.toString() ?: "",
         onValueChange = { },
         placeholder = { Text(stringResource(Res.string.home_filter_date_placeholder)) },
         trailingIcon = {
-            Icon(Icons.Default.DateRange, null)
+            Icon(Icons.Rounded.DateRange, null)
         },
         modifier = Modifier
             .pointerInput(currentDate) {
@@ -554,25 +569,33 @@ private fun DatePickerField(
             }
     )
     if (showDatePicker) {
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let {
-                        onDateChange(Instant.fromEpochMilliseconds(it))
+        KomeliaChromeContent {
+            val glassStyle = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
+            val pickerColors = if (glassStyle) DatePickerDefaults.colors(containerColor = Color.Transparent)
+            else DatePickerDefaults.colors()
+            DatePickerDialog(
+                modifier = if (glassStyle) Modifier.komeliaChrome(KomeliaChromeStyle.dialogShape) else Modifier,
+                shape = KomeliaChromeStyle.dialogShape,
+                colors = pickerColors,
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        datePickerState.selectedDateMillis?.let {
+                            onDateChange(Instant.fromEpochMilliseconds(it))
+                        }
+                        showDatePicker = false
+                    }) {
+                        Text(stringResource(Res.string.home_filter_datepicker_ok))
                     }
-                    showDatePicker = false
-                }) {
-                    Text(stringResource(Res.string.home_filter_datepicker_ok))
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text(stringResource(Res.string.home_filter_datepicker_canel))
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text(stringResource(Res.string.home_filter_datepicker_canel))
-                }
+            ) {
+                DatePicker(state = datePickerState, colors = pickerColors)
             }
-        ) {
-            DatePicker(state = datePickerState)
         }
     }
 }
@@ -586,6 +609,7 @@ private fun PeriodPickerField(
 
     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         TextField(
+            shape = MaterialTheme.shapes.small,
             value = durationText,
             onValueChange = { newText ->
                 if (newText.isBlank()) {
@@ -626,7 +650,7 @@ fun <T> ConditionAddButton(
         }
 
         val scrollState = rememberScrollState()
-        ExposedDropdownMenu(
+        KomeliaExposedDropdownMenu(
             expanded = dropDownExpanded,
             onDismissRequest = { dropDownExpanded = false },
             scrollState = scrollState,
@@ -748,6 +772,7 @@ fun <T> PageSettingsContent(
 fun PageSizeSettingsContent(pageSize: Int, onPageSizeChange: (Int) -> Unit) {
     var pageSizeText by remember { mutableStateOf(pageSize.toString()) }
     TextField(
+        shape = MaterialTheme.shapes.small,
         value = pageSizeText,
         onValueChange = { newText ->
             if (newText.isBlank()) {

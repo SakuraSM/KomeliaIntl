@@ -83,6 +83,23 @@ class DefaultServerUrlResolverTest {
         assertEquals(PRIMARY, current.effectiveUrl)
     }
 
+    @Test fun networkCallbacksKeepThePrimaryRouteWhenLanSelectionCannotChange() = runTest {
+        for ((lan, enabled) in listOf("" to true, LAN to false)) {
+            val events = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+            val resolver = DefaultServerUrlResolver(MutableStateFlow(PRIMARY), MutableStateFlow(lan),
+                MutableStateFlow(enabled), events, LanServerProbe { error("LAN must not be probed") }, backgroundScope)
+            runCurrent()
+            val loginRoute = assertIs<ServerUrlResolution.Resolved>(resolver.resolution.value)
+
+            // Android reports the initial network and its capabilities separately during login.
+            repeat(3) { events.emit(Unit); runCurrent() }
+            resolver.refresh(); runCurrent()
+
+            assertTrue(resolver.isCurrent(loginRoute), "An unchanged primary route must remain valid for login")
+            assertEquals(loginRoute, resolver.resolution.value)
+        }
+    }
+
     @Test fun changedSettingsInvalidateCommitEvenBeforeCollectorRuns() = runTest {
         val primary = MutableStateFlow(PRIMARY)
         val resolver = DefaultServerUrlResolver(primary, MutableStateFlow(LAN), MutableStateFlow(false),

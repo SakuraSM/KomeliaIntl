@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LockPerson
-import androidx.compose.material.icons.filled.RecentActors
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.rounded.LockPerson
+import androidx.compose.material.icons.rounded.RecentActors
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -89,7 +89,7 @@ fun UserEditDialog(
 class UserRolesTab(private val vm: UserEditDialogViewModel) : DialogTab {
     override fun options() = TabItem(
         title = Res.string.user_edit_tab_roles,
-        icon = Icons.Default.RecentActors
+        icon = Icons.Rounded.RecentActors
     )
 
     @Composable
@@ -135,7 +135,7 @@ class UserSharedLibrariesTab(private val vm: UserEditDialogViewModel) : DialogTa
 
     override fun options() = TabItem(
         title = Res.string.user_edit_tab_shared_libraries,
-        icon = Icons.Default.Share
+        icon = Icons.Rounded.Share
     )
 
     @Composable
@@ -198,7 +198,7 @@ class UserContentRestrictionTab(private val vm: UserEditDialogViewModel) : Dialo
 
     override fun options() = TabItem(
         title = Res.string.user_edit_tab_content_restriction,
-        icon = Icons.Default.LockPerson
+        icon = Icons.Rounded.LockPerson
     )
 
     @Composable
@@ -240,6 +240,7 @@ class UserContentRestrictionTab(private val vm: UserEditDialogViewModel) : Dialo
                         inputFieldModifier = Modifier.weight(1f)
                     )
                     TextField(
+                        shape = MaterialTheme.shapes.small,
                         value = age.value.toString(),
                         onValueChange = {
                             val newValue = it.toIntOrNull()

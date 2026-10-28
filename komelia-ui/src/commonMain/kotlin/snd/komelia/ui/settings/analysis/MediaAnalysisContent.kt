@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -53,7 +53,7 @@ fun MediaAnalysisContent(
         if (books.isEmpty()) {
             EmptyState(
                 title = stringResource(Res.string.settings_media_analysis_nothing_to_show),
-                imageVector = Icons.Outlined.PhotoLibrary,
+                imageVector = Icons.Rounded.PhotoLibrary,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 320.dp),
             )
         } else {

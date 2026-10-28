@@ -1,5 +1,6 @@
 package snd.komelia.ui.dialogs.komf.mangabaka
 
+import androidx.compose.material3.MaterialTheme
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_series_id
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_link_by_id
 import androidx.compose.foundation.layout.Arrangement
@@ -120,6 +121,7 @@ private fun SearchTabContent(
         ) {
             var titleText by remember { mutableStateOf(series.metadata.title) }
             TextField(
+                shape = MaterialTheme.shapes.small,
                 value = titleText,
                 onValueChange = { titleText = it },
                 label = { Text(stringResource(Res.string.komf_identify_title)) },
@@ -142,6 +144,7 @@ private fun SearchTabContent(
         ) {
             var seriesIdText by remember { mutableStateOf("") }
             TextField(
+                shape = MaterialTheme.shapes.small,
                 value = seriesIdText,
                 onValueChange = { newText ->
                     newText.toLongOrNull()?.let { seriesIdText = newText }

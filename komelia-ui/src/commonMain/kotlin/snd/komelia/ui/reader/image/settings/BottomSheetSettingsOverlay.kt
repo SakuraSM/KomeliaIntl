@@ -20,7 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import snd.komelia.ui.common.components.KomeliaModalBottomSheet as ModalBottomSheet
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider

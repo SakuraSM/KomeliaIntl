@@ -20,9 +20,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.SyncProblem
 import androidx.compose.material3.CircularProgressIndicator
@@ -274,7 +274,7 @@ private fun BookDownloadCardOverlay(book: KomeliaBook) {
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .8f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Download, null, tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Rounded.Download, null, tint = MaterialTheme.colorScheme.primary)
                 CircularProgressIndicator(
                     progress = { event.completed / event.total.toFloat() },
                     color = MaterialTheme.colorScheme.primary,
@@ -462,7 +462,7 @@ private fun BookDetailedListDetails(
         Column(Modifier.padding(start = 4.dp)) {
             if (onBookReadClick != null && !compact) {
                 IconButton(onClick = { onBookReadClick(true) }, enabled = canRead) {
-                    Icon(Icons.AutoMirrored.Outlined.MenuBook, stringResource(Res.string.book_read_button),
+                    Icon(Icons.AutoMirrored.Rounded.MenuBook, stringResource(Res.string.book_read_button),
                         tint = if (canRead) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
@@ -470,7 +470,7 @@ private fun BookDetailedListDetails(
                 Box {
                     var isMenuExpanded by remember { mutableStateOf(false) }
                     IconButton(onClick = { isMenuExpanded = true }) {
-                        Icon(Icons.Default.MoreVert, stringResource(Res.string.actions_show_more))
+                        Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more))
                     }
                     BookActionsMenu(
                         book = book,
@@ -499,7 +499,7 @@ private fun BookMenuActionsDropdown(
             onClick = { onActionsMenuExpand(true) },
             colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Icon(Icons.Default.MoreVert, stringResource(Res.string.actions_show_more))
+            Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more))
         }
 
         BookActionsMenu(

@@ -21,26 +21,26 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.automirrored.rounded.Logout
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Campaign
-import androidx.compose.material.icons.outlined.CloudDownload
-import androidx.compose.material.icons.outlined.Extension
-import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.outlined.Group
-import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Lan
-import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Storage
-import androidx.compose.material.icons.outlined.SystemUpdate
-import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Campaign
+import androidx.compose.material.icons.rounded.CloudDownload
+import androidx.compose.material.icons.rounded.Extension
+import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.Group
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Lan
+import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -155,7 +155,7 @@ fun SettingsNavigationMenu(
         add(
             NavigationEntry(
                 stringResource(Res.string.settings_navigation_appearance),
-                Icons.Outlined.Palette,
+                Icons.Rounded.Palette,
                 AppSettingsScreen(),
                 currentScreen is AppSettingsScreen,
             )
@@ -163,7 +163,7 @@ fun SettingsNavigationMenu(
         add(
             NavigationEntry(
                 stringResource(Res.string.settings_navigation_home_groups),
-                Icons.Outlined.Tune,
+                Icons.Rounded.Tune,
                 HomeGroupsSettingsScreen(),
                 currentScreen is HomeGroupsSettingsScreen,
             )
@@ -171,7 +171,7 @@ fun SettingsNavigationMenu(
         add(
             NavigationEntry(
                 stringResource(Res.string.settings_network_title),
-                Icons.Outlined.Lan,
+                Icons.Rounded.Lan,
                 NetworkSettingsScreen(),
                 currentScreen is NetworkSettingsScreen,
             )
@@ -179,7 +179,7 @@ fun SettingsNavigationMenu(
         add(
             NavigationEntry(
                 stringResource(Res.string.settings_navigation_image_reader),
-                Icons.Outlined.Image,
+                Icons.Rounded.Image,
                 ImageReaderSettingsScreen(),
                 currentScreen is ImageReaderSettingsScreen,
             )
@@ -188,7 +188,7 @@ fun SettingsNavigationMenu(
             add(
                 NavigationEntry(
                     stringResource(Res.string.settings_navigation_epub_reader),
-                    Icons.AutoMirrored.Outlined.MenuBook,
+                    Icons.AutoMirrored.Rounded.MenuBook,
                     EpubReaderSettingsScreen(),
                     currentScreen is EpubReaderSettingsScreen,
                 )
@@ -198,7 +198,7 @@ fun SettingsNavigationMenu(
             add(
                 NavigationEntry(
                     stringResource(Res.string.settings_navigation_updates),
-                    Icons.Outlined.SystemUpdate,
+                    Icons.Rounded.SystemUpdate,
                     AppUpdatesScreen(),
                     currentScreen is AppUpdatesScreen,
                     error = newVersionIsAvailable,
@@ -209,7 +209,7 @@ fun SettingsNavigationMenu(
             add(
                 NavigationEntry(
                     stringResource(Res.string.settings_navigation_local_library),
-                    Icons.Outlined.Folder,
+                    Icons.Rounded.Folder,
                     LocalLibrarySettingsScreen(),
                     currentScreen is LocalLibrarySettingsScreen,
                 )
@@ -217,7 +217,7 @@ fun SettingsNavigationMenu(
             add(
                 NavigationEntry(
                     stringResource(Res.string.settings_navigation_offline_mode),
-                    Icons.Outlined.CloudDownload,
+                    Icons.Rounded.CloudDownload,
                     OfflineSettingsScreen(),
                     currentScreen is OfflineSettingsScreen,
                 )
@@ -226,7 +226,7 @@ fun SettingsNavigationMenu(
         add(
             NavigationEntry(
                 stringResource(Res.string.settings_navigation_about),
-                Icons.Outlined.Info,
+                Icons.Rounded.Info,
                 AboutSettingsScreen(),
                 currentScreen is AboutSettingsScreen,
             )
@@ -251,13 +251,13 @@ fun SettingsNavigationMenu(
                 entries = listOf(
                     NavigationEntry(
                         stringResource(Res.string.settings_navigation_my_account),
-                        Icons.Outlined.AccountCircle,
+                        Icons.Rounded.AccountCircle,
                         AccountSettingsScreen(),
                         currentScreen is AccountSettingsScreen,
                     ),
                     NavigationEntry(
                         stringResource(Res.string.settings_navigation_my_auth_activity),
-                        Icons.Outlined.History,
+                        Icons.Rounded.History,
                         AuthenticationActivityScreen(true),
                         currentScreen is AuthenticationActivityScreen && currentScreen.forMe,
                     ),
@@ -269,22 +269,22 @@ fun SettingsNavigationMenu(
                 SettingsNavigationSection(
                     title = stringResource(Res.string.settings_navigation_server_settings),
                     entries = listOf(
-                        NavigationEntry(stringResource(Res.string.settings_navigation_server_general), Icons.Outlined.Settings, ServerSettingsScreen(), currentScreen is ServerSettingsScreen),
-                        NavigationEntry(stringResource(Res.string.settings_navigation_server_users), Icons.Outlined.Group, UsersScreen(), currentScreen is UsersScreen),
+                        NavigationEntry(stringResource(Res.string.settings_navigation_server_general), Icons.Rounded.Settings, ServerSettingsScreen(), currentScreen is ServerSettingsScreen),
+                        NavigationEntry(stringResource(Res.string.settings_navigation_server_users), Icons.Rounded.Group, UsersScreen(), currentScreen is UsersScreen),
                         NavigationEntry(
                             stringResource(Res.string.settings_navigation_server_auth_activity),
-                            Icons.Outlined.History,
+                            Icons.Rounded.History,
                             AuthenticationActivityScreen(false),
                             currentScreen is AuthenticationActivityScreen && !currentScreen.forMe,
                         ),
                         NavigationEntry(
                             stringResource(Res.string.settings_navigation_server_media_management),
-                            Icons.Outlined.Storage,
+                            Icons.Rounded.Storage,
                             MediaAnalysisScreen(),
                             currentScreen is MediaAnalysisScreen,
                             error = hasMediaErrors,
                         ),
-                        NavigationEntry(stringResource(Res.string.settings_navigation_announcements), Icons.Outlined.Campaign, AnnouncementsScreen(), currentScreen is AnnouncementsScreen),
+                        NavigationEntry(stringResource(Res.string.settings_navigation_announcements), Icons.Rounded.Campaign, AnnouncementsScreen(), currentScreen is AnnouncementsScreen),
                     ),
                     contentColor = contentColor,
                     onNavigation = onNavigation,
@@ -293,13 +293,13 @@ fun SettingsNavigationMenu(
 
             if (isAdmin) {
                 val komfEntries = buildList {
-                    add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_connection), Icons.Outlined.Link, KomfSettingsScreen(), currentScreen is KomfSettingsScreen))
+                    add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_connection), Icons.Rounded.Link, KomfSettingsScreen(), currentScreen is KomfSettingsScreen))
                     if (komfEnabled) {
-                        add(NavigationEntry(stringResource(Res.string.mangabaka_navigation), Icons.Outlined.Extension, KomfMangaBakaSettingsScreen(), currentScreen is KomfMangaBakaSettingsScreen))
-                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_processing), Icons.Outlined.Tune, KomfProcessingSettingsScreen(KOMGA), currentScreen is KomfProcessingSettingsScreen))
-                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_providers), Icons.Outlined.Extension, KomfProvidersSettingsScreen(), currentScreen is KomfProvidersSettingsScreen))
-                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_notifications), Icons.Outlined.Notifications, KomfNotificationSettingsScreen(), currentScreen is KomfNotificationSettingsScreen))
-                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_jobs), Icons.Outlined.Schedule, KomfJobsScreen(), currentScreen is KomfJobsScreen))
+                        add(NavigationEntry(stringResource(Res.string.mangabaka_navigation), Icons.Rounded.Extension, KomfMangaBakaSettingsScreen(), currentScreen is KomfMangaBakaSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_processing), Icons.Rounded.Tune, KomfProcessingSettingsScreen(KOMGA), currentScreen is KomfProcessingSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_providers), Icons.Rounded.Extension, KomfProvidersSettingsScreen(), currentScreen is KomfProvidersSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_notifications), Icons.Rounded.Notifications, KomfNotificationSettingsScreen(), currentScreen is KomfNotificationSettingsScreen))
+                        add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_jobs), Icons.Rounded.Schedule, KomfJobsScreen(), currentScreen is KomfJobsScreen))
                     }
                 }
                 SettingsNavigationSection(
@@ -412,7 +412,7 @@ fun NavigationButton(
 
     Surface(
         onClick = { if (!isSelected) onClick() },
-        shape = if (isSelected) RoundedCornerShape(12.dp) else RoundedCornerShape(0.dp),
+        shape = RoundedCornerShape(12.dp),
         color = containerColor,
         contentColor = if (isSelected && !glass) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
         interactionSource = interactions,

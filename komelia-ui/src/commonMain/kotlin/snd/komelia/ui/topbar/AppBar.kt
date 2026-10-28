@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.FullscreenExit
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.FullscreenExit
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -81,7 +81,7 @@ fun AppBar(
                 onClick = onNavigateBack,
                 enabled = canNavigateBack,
             ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+                Icon(Icons.AutoMirrored.Rounded.ArrowBack, null)
             }
             val reloadableScreen = remember(currentScreen) { currentScreen as? ReloadableScreen }
             RefreshIndicator(
@@ -116,7 +116,7 @@ fun AppBar(
                     modifier = Modifier.align(Alignment.End),
                     onClick = { coroutineScope.launch { windowState.setFullscreen(false) } },
                 ) {
-                    Icon(Icons.Default.FullscreenExit, null)
+                    Icon(Icons.Rounded.FullscreenExit, null)
                 }
             }
 
@@ -192,7 +192,7 @@ private fun RefreshIndicator(
                         modifier = Modifier.size(17.dp)
                     )
                 } else {
-                    Icon(Icons.Default.Refresh, null)
+                    Icon(Icons.Rounded.Refresh, null)
                 }
             }
         }

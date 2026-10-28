@@ -15,7 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -121,7 +121,7 @@ private fun CompactTabDialog(
                     onClick = onDismissRequest,
                     modifier = Modifier.cursorForHand()
                 ) {
-                    Icon(Icons.Default.Close, stringResource(Res.string.dialog_cancel))
+                    Icon(Icons.Rounded.Close, stringResource(Res.string.dialog_cancel))
                 }
             }
             Text(

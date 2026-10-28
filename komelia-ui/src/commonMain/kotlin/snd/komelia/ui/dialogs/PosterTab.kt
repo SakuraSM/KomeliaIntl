@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -61,7 +60,7 @@ class PosterTab(private val state: PosterEditState) : DialogTab {
 
     override fun options() = TabItem(
         title = Res.string.edit_tab_poster,
-        icon = Icons.Default.Image,
+        icon = Icons.Rounded.Image,
     )
 
     @Composable
@@ -258,7 +257,7 @@ fun PosterEditContent(
                     .background(MaterialTheme.colorScheme.surfaceDim)
                     .height(100.dp)
                     .fillMaxWidth()
-                    .clip(RectangleShape)
+                    .clip(MaterialTheme.shapes.medium)
             )
             Text(
                 stringResource(Res.string.poster_edit_desc),

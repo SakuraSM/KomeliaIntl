@@ -41,7 +41,7 @@ Each `MainScreen` owns a serializable navigation identity. A new login gets a ne
 
 Risk points: probe races, stale active URL, destructive settings rewrites, and treating authentication failure as network unavailability.
 
-`ServerUrlResolver.resolution` distinguishes pending selection, a resolved route, and an unconfigured server. A configured initial address is not proof of readiness. Each selection has a generation; cancelled probes cannot publish over a newer configuration. `isCurrent` also checks the settings inputs before their collector runs.
+`ServerUrlResolver.resolution` distinguishes pending selection, a resolved route, and an unconfigured server. A configured initial address is not proof of readiness. Each selection has a generation; cancelled probes cannot publish over a newer configuration. `isCurrent` also checks the settings inputs before their collector runs. When LAN selection is unavailable or disabled and the settings are unchanged, repeated network notifications retain the primary route's generation so they cannot cancel an in-flight login.
 
 `LoginViewModel` owns one login task with a 15-second total deadline, including preparation and route selection. `OnlineLoginCoordinator` gives automatic network attempts six seconds each, with at most two attempts and a 300-millisecond retry delay. Connection failures, timeouts, and HTTP 502/503/504 can retry. Credentials are submitted once. Only a complete session from the current task and route can update authentication. Offline login bypasses route selection. The existing background authentication reload keeps its separate three-second policy.
 

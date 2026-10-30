@@ -19,6 +19,12 @@ Risk points: duplicate state owners, platform-specific behavior leaking into com
 
 Risk points: treating file-modification dates as reading dates, mixing another account's cache, depending on configured groups for history, stale progress after returning, and hiding custom filtered groups.
 
+## Reader mode hints
+
+Image/PDF mode hints compare the initialized reader type and direction with the last displayed signature in the device's image-reader settings. The signature uses stable enum names, without book, account, session or locale identifiers. Leaving a reader resets only its transient request token. The settings wrapper atomically claims a changed signature; unchanged configurations and disabled hints do not display another notification. Re-enabling clears the persisted signature so the next entry or configuration change can show one hint.
+
+V20 adds `readerModeHintsEnabled` and `lastReaderModeHintSignature`, with enabled/empty defaults for existing data and old browser JSON. Accepted preference writes finish when the settings screen closes; failed writes leave the saved value visible and report an error. Other application notifications and reading-preference saves are outside the hint filter.
+
 ## Optional series metadata
 
 1. Load the base Komga series or collection page through the existing authenticated API.
@@ -124,6 +130,10 @@ When that wrapper has reached a boundary, the gesture calls `nextResource` or `p
 The Komga EPUB reader's `BookSiblingState` owns previous and next lookups by current book and generation. Switching books immediately invalidates both directions. A failed lookup stays distinct from an empty boundary. Clicking the failed direction retries only that request and preserves the current reader and progress until navigation succeeds. Loading clicks, stale completions, self-references, and disposed requests cannot navigate.
 
 `KomgaEpubReaderState` gives each native document a fresh `EpubReaderSession`. Close and model disposal retire its bridge callbacks and navigate the document to `about:blank`; Android's WebView wrapper `close()` alone does not stop JavaScript. A retained screen creates a new session when its native view is recreated, even before its initialize effect runs. Book results check the session before changing native book identity. Queued final progress writes remain allowed. The JavaScript reader also clears navigation on `pagehide` and explicit close.
+
+Book details load chapters from the existing WebPub manifest. A selected href is a one-shot `EpubScreen` input consumed by the chosen reader. Komga receives an initial locator with the original fragment; TTU receives a transient initial chapter href. Its continuous reader uses chapter/anchor navigation for that request; ordinary bookmark restoration retains the existing character-count rules. An explicit entry remains anchored through initial wrapper measurement, then releases that anchor when reading moves away. The requested href belongs to that reader instance; explicit entries replace a retained implementation while ordinary re-entry keeps it. Selection does not itself persist progress. Normal reader progress writes retain their existing ownership. Detail expansion and chapter navigation are separate controls.
+
+Series details hide global phone navigation and retain one reading action. Wide layouts keep the volume list and a nested book detail together. Reading opens on the surrounding `AppTab` navigator so the reader fills the application while retaining the selected series and list state. A cached copy remains available when its remote file disappears; resume lookup skips missing remote-only volumes.
 
 ## Android LAN permission and Web API keys
 

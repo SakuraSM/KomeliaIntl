@@ -27,7 +27,7 @@ test('EPUB top chrome spans the viewport while bottom controls keep their floati
       return { top: measure('top'), bottom: measure('bottom'), viewport: innerWidth };
     });
     assert.deepEqual(geometry.top, { left: 0, width: geometry.viewport, radius: '0px' });
-    assert.deepEqual(geometry.bottom, { left: 12, width: geometry.viewport - 24, radius: '28px' });
+    assert.deepEqual(geometry.bottom, { left: 12, width: geometry.viewport - 24, radius: '20px' });
   } finally {
     await browser.close();
   }

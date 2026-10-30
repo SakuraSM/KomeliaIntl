@@ -48,12 +48,12 @@ internal fun komeliaLayoutSpec(
     val minimumTouchTarget = if (platform == PlatformType.MOBILE) 48.dp else 40.dp
     return when (windowWidth) {
         WindowSizeClass.COMPACT -> KomeliaLayoutSpec(
-            pageHorizontalPadding = 12.dp,
+            pageHorizontalPadding = 16.dp,
             pageVerticalPadding = 12.dp,
             topBarContentSpacing = 12.dp,
             gridSpacing = 12.dp,
             sectionSpacing = 16.dp,
-            itemSpacing = 12.dp,
+            itemSpacing = 8.dp,
             controlSpacing = 8.dp,
             cardContentPadding = 12.dp,
             dialogContentPadding = 16.dp,
@@ -68,7 +68,7 @@ internal fun komeliaLayoutSpec(
             topBarContentSpacing = 16.dp,
             gridSpacing = 16.dp,
             sectionSpacing = 20.dp,
-            itemSpacing = 12.dp,
+            itemSpacing = 8.dp,
             controlSpacing = 8.dp,
             cardContentPadding = 16.dp,
             dialogContentPadding = 20.dp,
@@ -114,10 +114,10 @@ internal fun detailCoverWidth(
     windowWidth: WindowSizeClass,
 ): Dp = when (windowWidth) {
     WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM ->
-        (availableWidth * 0.4f).coerceIn(136.dp, 168.dp)
+        (availableWidth * 0.27f).coerceIn(80.dp, 92.dp)
 
     WindowSizeClass.EXPANDED, WindowSizeClass.FULL ->
-        (availableWidth * 0.25f).coerceIn(220.dp, 260.dp)
+        (availableWidth * 0.2f).coerceIn(112.dp, 132.dp)
 }
 
 /** Mobile density scales with the breakpoint; other platforms keep adaptive card widths. */

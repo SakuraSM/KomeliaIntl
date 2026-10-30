@@ -1,0 +1,4 @@
+package: name='io.github.zhengningning.komelia.debug' versionCode='60' versionName='0.31.1-debug' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'
+application-label:'Komelia Test'
+application-label-zh-CN:'Komelia 测试版'
+launchable-activity: name='snd.komelia.MainActivity'  label='' icon=''

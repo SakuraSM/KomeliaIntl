@@ -2,6 +2,14 @@ type MessageValues = Record<string, string | number>;
 
 const zhCN: Record<string, string> = {
   'Theme': '主题',
+  'Light theme': '浅色',
+  'Paper theme': '纸色',
+  'Blue theme': '淡蓝',
+  'Gray theme': '深灰',
+  'Dark theme': '深色',
+  'Black theme': '纯黑',
+  'Add theme': '添加主题',
+  'Advanced': '高级设置',
   'View mode': '阅读模式',
   'Serif Font family': '衬线字体',
   'Sans Font family': '无衬线字体',

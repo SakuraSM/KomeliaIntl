@@ -5,6 +5,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import snd.komelia.AppNotification
@@ -34,8 +35,11 @@ class ImageReaderSettingsViewModel(
     private val coilDiskCache: DiskCache?,
     private val readerDiskCache: DiskCache?,
     colorCorrectionDependencies: DefaultColorCorrectionDependencies,
+    private val writeScope: CoroutineScope? = null,
 ) : ScreenModel {
-    val defaultColorCorrection = DefaultColorCorrectionState(colorCorrectionDependencies, screenModelScope)
+    private val settingsScope get() = writeScope ?: screenModelScope
+    private val hintPreference = ReaderModeHintPreference(settingsRepository, appNotifications, settingsScope)
+    val defaultColorCorrection = DefaultColorCorrectionState(colorCorrectionDependencies, settingsScope)
 
     val onnxRuntimeSettingsState = OnnxRuntimeSettingsState(
         onnxRuntimeInstaller = onnxRuntimeInstaller,
@@ -46,7 +50,7 @@ class ImageReaderSettingsViewModel(
         upscaler = upscaler,
 
         settingsRepository = settingsRepository,
-        coroutineScope = screenModelScope
+        coroutineScope = settingsScope
     )
 
     val upsamplingMode = MutableStateFlow(UpsamplingMode.NEAREST)
@@ -54,11 +58,14 @@ class ImageReaderSettingsViewModel(
     val linearLightDownsampling = MutableStateFlow(false)
     val loadThumbnailsPreview = MutableStateFlow(false)
     val volumeKeysNavigation = MutableStateFlow(false)
+    val readerModeHintsEnabled = hintPreference.enabled
+    val isSavingReaderModeHints = hintPreference.isSaving
     val availableUpsamplingModes = availableUpsamplingModes()
     val availableDownsamplingKernels = availableReduceKernels()
 
 
     suspend fun initialize() {
+        hintPreference.initialize()
         defaultColorCorrection.initialize()
 
         upsamplingMode.value = settingsRepository.getUpsamplingMode().first()
@@ -69,29 +76,31 @@ class ImageReaderSettingsViewModel(
         onnxRuntimeSettingsState.initialize()
     }
 
+    fun onReaderModeHintsChange(enabled: Boolean) = hintPreference.change(enabled)
+
     fun onUpsamplingModeChange(mode: UpsamplingMode) {
         upsamplingMode.value = mode
-        screenModelScope.launch { settingsRepository.putUpsamplingMode(mode) }
+        settingsScope.launch { settingsRepository.putUpsamplingMode(mode) }
     }
 
     fun onDownsamplingKernelChange(kernel: ReduceKernel) {
         downsamplingKernel.value = kernel
-        screenModelScope.launch { settingsRepository.putDownsamplingKernel(kernel) }
+        settingsScope.launch { settingsRepository.putDownsamplingKernel(kernel) }
     }
 
     fun onLinearLightDownsamplingChange(linear: Boolean) {
         linearLightDownsampling.value = linear
-        screenModelScope.launch { settingsRepository.putLinearLightDownsampling(linear) }
+        settingsScope.launch { settingsRepository.putLinearLightDownsampling(linear) }
     }
 
     fun onLoadThumbnailsPreviewChange(load: Boolean) {
         loadThumbnailsPreview.value = load
-        screenModelScope.launch { settingsRepository.putLoadThumbnailPreviews(load) }
+        settingsScope.launch { settingsRepository.putLoadThumbnailPreviews(load) }
     }
 
     fun onVolumeKeysNavigationChange(enable: Boolean) {
         volumeKeysNavigation.value = enable
-        screenModelScope.launch { settingsRepository.putVolumeKeysNavigation(enable) }
+        settingsScope.launch { settingsRepository.putVolumeKeysNavigation(enable) }
     }
 
     fun onClearImageCache() {

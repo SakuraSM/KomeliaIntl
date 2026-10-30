@@ -757,6 +757,8 @@
     "shortcuts": {
       "cycle_pagination": "切换栏数",
       "cycle_viewing_theme": "切换阅读主题",
+      "line_height_decrease": "减小行距",
+      "line_height_increase": "增大行距",
       "font_size_decrease": "减小字号",
       "font_size_increase": "增大字号",
       "menus": "菜单",

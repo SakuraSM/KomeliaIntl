@@ -8,6 +8,8 @@ import snd.komelia.ui.common.components.KomeliaDropdownMenu as DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import snd.komelia.ui.dialogs.oneshot.OneshotEditDialog
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -18,6 +20,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_add_to_readlist
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_read_button
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_read_button_incognito
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_analyze
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_confirm_body
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_delete_confirm_title
@@ -48,9 +52,13 @@ fun OneshotActionsMenu(
     actions: BookMenuActions,
     expanded: Boolean,
     onDismissRequest: () -> Unit,
+    onReadClick: ((Boolean) -> Unit)? = null,
 ) {
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
+    var showEditDialog by remember { mutableStateOf(false) }
+    if (showEditDialog) OneshotEditDialog(seriesId = series.id, series = series, book = book,
+        onDismissRequest = { showEditDialog = false })
     var showDeleteDownloadedDialog by remember { mutableStateOf(false) }
     if (showDeleteDownloadedDialog) {
         ConfirmationDialog(
@@ -119,7 +127,16 @@ fun OneshotActionsMenu(
         expanded = showDropdown.value,
         onDismissRequest = onDismissRequest
     ) {
+        if (onReadClick != null) {
+            DropdownMenuItem(text = { Text(stringResource(Res.string.book_read_button)) },
+                onClick = { onDismissRequest(); onReadClick(true) })
+            DropdownMenuItem(text = { Text(stringResource(Res.string.book_read_button_incognito)) },
+                onClick = { onDismissRequest(); onReadClick(false) })
+        }
         if (isAdmin && !isOffline) {
+            DropdownMenuItem(text = { Text(stringResource(Res.string.book_edit)) },
+                onClick = { showEditDialog = true; onDismissRequest() })
+
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.book_analyze)) },
                 onClick = {

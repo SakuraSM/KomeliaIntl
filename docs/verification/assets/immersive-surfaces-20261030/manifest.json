@@ -1,0 +1,190 @@
+{
+  "artifact": {
+    "artifact": "Komelia-Test-immersive-surfaces-20261030.apk",
+    "sha256": "a845bcbda259ccc3b95efc866c3a305ff6d8636449964b5a5f52788865b7a5fa",
+    "installedSha256": "a845bcbda259ccc3b95efc866c3a305ff6d8636449964b5a5f52788865b7a5fa",
+    "package": "io.github.zhengningning.komelia.debug",
+    "versionName": "0.31.1-debug",
+    "api": "37",
+    "avd": "Komelia_Regression_UI_20261028"
+  },
+  "beforeNativeArtifact": {
+    "name": "Komelia-Test-layout-polish-20261030.apk",
+    "sha256": "f653748fb7e43e02cd59e2a9fd3d4dc1a9bc8af844e4e4885114e8ff69b067e3"
+  },
+  "nativeConditions": {
+    "sizePhysical": [
+      1080,
+      2400
+    ],
+    "density": 420,
+    "fontScale": 1,
+    "locale": "en",
+    "surface": "LIQUID_GLASS"
+  },
+  "browserConditions": {
+    "widthCss": 390,
+    "heightCss": 844,
+    "surface": "glass",
+    "locale": "zh-CN",
+    "note": "Production settings component; the baseline serves the original settings template and CSS."
+  },
+  "files": [
+    {
+      "file": "after-komga-return.png",
+      "sha256": "d6f5ca1a67f5956e839757c0d49261c5a4f6a451fe7178f6406b8d8239e7ebdf"
+    },
+    {
+      "file": "after-komga-return.xml",
+      "sha256": "bc4420747f1f07294296e97b3b2979575705164486bb1cede6af7f8368397a39"
+    },
+    {
+      "file": "after-komga-settings-dark.png",
+      "sha256": "23cf6e24b1df60888ea167914d1a91fab99957ca501d4ab810819bf1dfc19ef4"
+    },
+    {
+      "file": "after-komga-settings-light.png",
+      "sha256": "e73d38d39983aef24ef6c0f82978ab406a34851151d6cd05f4c2ea1edad01904"
+    },
+    {
+      "file": "after-komga-settings-oled.png",
+      "sha256": "de3223abd77d90849e1db25ad0156fff5d6021c0f4c1a401103d88c6b946bbb3"
+    },
+    {
+      "file": "after-native-komga-font110.png",
+      "sha256": "9dc9a94c1f15f4213e759029ee6c13b43b8bc45d97495685aba2b86c56f3896c"
+    },
+    {
+      "file": "after-native-komga-font110.xml",
+      "sha256": "e9874a3a9f201e40954fe1b13902f2a674ec2a15262f0eb5535e98c609206573"
+    },
+    {
+      "file": "after-native-komga-settings-light.png",
+      "sha256": "0d4069900be9bed764624f087c28a53f24b88221654f203e5ccfd9a152aba90f"
+    },
+    {
+      "file": "after-native-komga-settings-light.xml",
+      "sha256": "1fc6617ae863ab81f868e55168cb8593ac41b157ca6f237cb868fb9e693eebd6"
+    },
+    {
+      "file": "after-native-ttu-settings-dark.png",
+      "sha256": "46797ed1f0a06142fa82b273b13450f64d3533efa71f62741edf31c7581c5d00"
+    },
+    {
+      "file": "after-native-ttu-settings-dark.xml",
+      "sha256": "6ffd08807808900b751eeccbdb12378a58ca8fd3a1547e0659281c35887742f2"
+    },
+    {
+      "file": "after-search-filter-light.png",
+      "sha256": "65d013db21b97c32a1470052ad9ac367664de0863a6fe8eac15818c557b89a48"
+    },
+    {
+      "file": "after-search-filter-light.xml",
+      "sha256": "b60dd1444dda3cd71a23f7be40960b3d56011dcfebbe36956fddfc0d6a557b8c"
+    },
+    {
+      "file": "after-settings-360-font130.png",
+      "sha256": "4dcc929323194ed3080ea3191a19157fa820911cd122022726a8ec10a3400f13"
+    },
+    {
+      "file": "apk-badging.txt",
+      "sha256": "953fced71cf601ea530548c349180384efaee5430fdde69c75c506e0fad92db6"
+    },
+    {
+      "file": "apk-signature.txt",
+      "sha256": "b0a1af67205efcd284e5bbae691ebf4a0d296b4fcae02cd28e7e0509d0e0efbc"
+    },
+    {
+      "file": "before-komga-settings-light.png",
+      "sha256": "1a5feb3bdc4c635dcc4de791b71570eedc578245d733e8c73657aeba77cfb3ef"
+    },
+    {
+      "file": "before-search-filter-light.png",
+      "sha256": "a54ade1e12c31f64460d2f2437e90539ad1381ba1feeb26a50b9ae9caf84721a"
+    },
+    {
+      "file": "before-search-filter-light.xml",
+      "sha256": "b60dd1444dda3cd71a23f7be40960b3d56011dcfebbe36956fddfc0d6a557b8c"
+    },
+    {
+      "file": "comparison.html",
+      "sha256": "2a62e9371ef0c6227b7f506aebf0b4d93c2b50227e111a30da472db3191feeb9"
+    },
+    {
+      "file": "identity.json",
+      "sha256": "142c18453c091b6a2b4c7bb1d20aef476d36374e72a31544b56b1fcef7e663e9"
+    },
+    {
+      "file": "overview.png",
+      "sha256": "f61aebe8254c24550ea461bab79fcf457714da5cee1cb453cf10ec09eaf0552b"
+    },
+    {
+      "file": "restored-final-home.png",
+      "sha256": "bd6f7fe77d7a81c246f186138ebfca86f951c937b4841f8c253b635d9d820a36"
+    },
+    {
+      "file": "restored-final-home.xml",
+      "sha256": "bc4420747f1f07294296e97b3b2979575705164486bb1cede6af7f8368397a39"
+    },
+    {
+      "file": "restored-reader-type.png",
+      "sha256": "eac60f2b264e05f602a7aa9337cc833a04ec562e4f5890a35c0551a40a4c3056"
+    },
+    {
+      "file": "restored-reader-type.xml",
+      "sha256": "f0ec88e667300243be22354dd3890472ffd7fdcc34a363e5209f4c23a671f3ea"
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Local search then filters",
+      "renderer": "Android",
+      "theme": "LIGHT",
+      "before": "before-search-filter-light.png",
+      "after": "after-search-filter-light.png",
+      "artifactSha256": "a845bcbda259ccc3b95efc866c3a305ff6d8636449964b5a5f52788865b7a5fa"
+    },
+    {
+      "name": "Komga settings",
+      "renderer": "Android WebView",
+      "theme": "LIGHT",
+      "after": "after-native-komga-settings-light.png",
+      "fontChange": "after-native-komga-font110.png",
+      "artifactSha256": "a845bcbda259ccc3b95efc866c3a305ff6d8636449964b5a5f52788865b7a5fa"
+    },
+    {
+      "name": "TTU settings",
+      "renderer": "Android WebView",
+      "theme": "DARK",
+      "after": "after-native-ttu-settings-dark.png",
+      "artifactSha256": "a845bcbda259ccc3b95efc866c3a305ff6d8636449964b5a5f52788865b7a5fa"
+    },
+    {
+      "name": "Komga production component",
+      "renderer": "Browser",
+      "theme": "LIGHT",
+      "before": "before-komga-settings-light.png",
+      "after": "after-komga-settings-light.png"
+    },
+    {
+      "name": "Komga production component",
+      "renderer": "Browser",
+      "theme": "DARK",
+      "after": "after-komga-settings-dark.png"
+    },
+    {
+      "name": "Komga production component",
+      "renderer": "Browser",
+      "theme": "DARKER",
+      "after": "after-komga-settings-oled.png"
+    },
+    {
+      "name": "Large font",
+      "renderer": "Browser",
+      "theme": "LIGHT",
+      "widthCss": 360,
+      "fontScale": 1.3,
+      "after": "after-settings-360-font130.png"
+    }
+  ]
+}

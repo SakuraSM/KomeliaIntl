@@ -55,11 +55,13 @@ class EpubReaderViewModel(
         super.onDispose()
     }
 
-    suspend fun initialize(navigator: Navigator) {
-        if (state.value is LoadState.Loading) return
+    suspend fun initialize(navigator: Navigator, initialChapterHref: String? = null) {
+        if (state.value is LoadState.Loading && initialChapterHref == null) return
         displaySettings.value = epubSettingsRepository.getDisplaySettings().first()
         val selectedType = epubSettingsRepository.getReaderType().first()
-        val reader = retainedReader.select(selectedType) { createReader(selectedType) }
+        val reader = retainedReader.select(selectedType, replaceExisting = initialChapterHref != null) {
+            createReader(selectedType, initialChapterHref)
+        }
         if ((state.value as? LoadState.Success)?.value !== reader) mutableState.value = LoadState.Loading
         try {
             reader.initialize(navigator)
@@ -76,7 +78,10 @@ class EpubReaderViewModel(
         }
     }
 
-    private suspend fun createReader(type: EpubReaderType): EpubReaderState = when (type) {
+    private suspend fun createReader(type: EpubReaderType, initialChapterHref: String?): EpubReaderState {
+        var pendingChapter = initialChapterHref
+        val consumeInitialChapter = { pendingChapter.also { pendingChapter = null } }
+        return when (type) {
         KOMGA_EPUB -> KomgaEpubReaderState(
             bookId = bookId,
             book = book,
@@ -93,6 +98,7 @@ class EpubReaderViewModel(
             platformType = platformType,
             coroutineScope = screenModelScope,
             bookSiblingsContext = bookSiblingsContext,
+            consumeInitialChapter = consumeInitialChapter,
         )
         TTSU_EPUB -> TtsuReaderState(
             bookId = bookId,
@@ -110,7 +116,9 @@ class EpubReaderViewModel(
             platformType = platformType,
             coroutineScope = screenModelScope,
             bookSiblingsContext = bookSiblingsContext,
+            consumeInitialChapter = consumeInitialChapter,
         )
+    }
     }
 
 }

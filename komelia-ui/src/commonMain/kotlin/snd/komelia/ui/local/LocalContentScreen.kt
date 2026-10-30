@@ -38,6 +38,9 @@ class LocalContentScreen : ReloadableScreen {
                     val books by vm.books.collectAsState()
                     LocalContent(
                         books = books,
+                        downloadsState = vm.downloadsState,
+                        onManageLocalFolders = { navigator.push(snd.komelia.ui.settings.local.LocalLibrarySettingsScreen()) },
+                        onManageDownloads = { navigator.push(snd.komelia.ui.settings.offline.OfflineSettingsScreen(initialTab = 1)) },
                         query = vm.query.collectAsState().value,
                         onQueryChange = { vm.query.value = it },
                         selectedSource = vm.source.collectAsState().value,

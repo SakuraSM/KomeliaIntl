@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,10 +23,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.ExpandMore
 import snd.komelia.ui.common.components.KomeliaDropdownMenu as DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
@@ -37,6 +40,12 @@ import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -51,7 +60,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_series_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_file_source
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_books_count
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_sibling_retry
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_actions
@@ -62,8 +76,6 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_unlin
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_penciller
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_author_writers
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_download_confirm
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_edit
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_genres
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_links
@@ -71,6 +83,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_publishe
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_tab_books
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_tab_collections
 import kotlin.math.max
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.komga.api.model.KomeliaSeries
@@ -82,7 +95,6 @@ import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomfIntegration
 import snd.komelia.ui.LocalKomfMangaBakaIntegration
 import snd.komelia.ui.LocalKomgaState
-import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.collection.SeriesCollectionsContent
@@ -101,20 +113,16 @@ import snd.komelia.ui.common.menus.SeriesActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.common.menus.bulk.BooksBulkActionsContent
 import snd.komelia.ui.common.menus.bulk.BottomBulkActionsPanel
-import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.dialogs.komf.identify.KomfIdentifyDialog
 import snd.komelia.ui.dialogs.komf.mangabaka.KomfMangaBakaLinkDialog
 import snd.komelia.ui.dialogs.komf.mangabaka.KomfMangaBakaUnlinkDialog
 import snd.komelia.ui.dialogs.komf.reset.KomfResetSeriesMetadataDialog
-import snd.komelia.ui.dialogs.permissions.DownloadNotificationRequestDialog
 import snd.komelia.ui.dialogs.series.edit.SeriesEditDialog
 import snd.komelia.ui.icons.AppIcons
 import snd.komelia.ui.icons.outlined.LinkedServices
 import snd.komelia.ui.library.SeriesScreenFilter
 import snd.komelia.ui.platform.VerticalScrollbarWithFullSpans
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
-import snd.komelia.ui.platform.WindowSizeClass.EXPANDED
-import snd.komelia.ui.platform.WindowSizeClass.FULL
 import snd.komelia.ui.platform.WindowSizeClass.MEDIUM
 import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.series.SeriesBooksState
@@ -146,6 +154,8 @@ fun SeriesContent(
 
     onDownload: () -> Unit,
     onBackPress: () -> Unit,
+    scrollState: androidx.compose.foundation.lazy.grid.LazyGridState = rememberLazyGridState(),
+    isMasterPane: Boolean = false,
 ) {
     val windowWidth = LocalWindowWidth.current
     val layout = LocalKomeliaLayout.current
@@ -158,7 +168,6 @@ fun SeriesContent(
         if (booksLoadState is LoadState.Success<BooksData>) booksLoadState.value
         else BooksData()
     }
-    val scrollState = rememberLazyGridState()
     val pageNavigationState = remember(series?.id) { SeriesPageNavigationState() }
     val isContentScrolled by remember(scrollState) {
         derivedStateOf {
@@ -171,7 +180,7 @@ fun SeriesContent(
             is LoadState.Success<BooksData> -> {
                 val loadedPage = booksLoadState.value.currentPage
                 if (pageNavigationState.isRequestedPage(loadedPage)) {
-                    scrollState.scrollToItem(SERIES_BOOKS_SECTION_INDEX)
+                    scrollState.scrollToItem(if (collectionsState.collections.isEmpty()) 1 else SERIES_BOOKS_SECTION_INDEX)
                     pageNavigationState.onPageScrollCompleted(loadedPage)
                 }
             }
@@ -182,9 +191,9 @@ fun SeriesContent(
     }
 
     PauseGlassWhileBusy(scrollState.isScrollInProgress)
+    val compact = windowWidth == COMPACT || windowWidth == MEDIUM
     Column(Modifier.fillMaxSize()) {
         KomeliaPageScaffold(modifier = Modifier.weight(1f), topBar = {
-            val compact = windowWidth == COMPACT || windowWidth == MEDIUM
             if (booksData.selectionMode) {
                 KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
                     BooksBulkActionsToolbar(
@@ -195,13 +204,9 @@ fun SeriesContent(
                         onBookSelect = booksState::onBookSelect
                     )
                 }
-            } else if (compact && !isContentScrolled) {
-                SeriesToolBar(series, seriesMenuActions, mangaBaka, onDownload, onBackPress,
-                    floating = true, showTitle = false)
             } else {
-                KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
-                    SeriesToolBar(series, seriesMenuActions, mangaBaka, onDownload, onBackPress)
-                }
+                SeriesToolBar(series, seriesMenuActions, mangaBaka, onDownload, onBackPress,
+                    showTitle = isContentScrolled || isMasterPane)
             }
         }) { topInset ->
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -209,10 +214,10 @@ fun SeriesContent(
                     state = scrollState,
                     columns = snd.komelia.ui.common.itemlist.posterGridCells(gridMinWidth),
                     horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-                    verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                    verticalArrangement = Arrangement.spacedBy(if (booksData.layout == BooksLayout.LIST) 0.dp else layout.gridSpacing),
                     contentPadding = PaddingValues(
-                        top = layout.topBarContentSpacing + topInset,
-                        bottom = layout.gridBottomPadding,
+                        top = (if (compact) 6.dp else layout.topBarContentSpacing) + topInset,
+                        bottom = layout.gridBottomPadding + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
                     ),
                     modifier = Modifier
                         .widthIn(max = layout.contentMaxWidth)
@@ -222,31 +227,20 @@ fun SeriesContent(
 
                     if (series != null && library != null) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
-                            if (mangaBaka != null) {
-                                MangaBakaSeriesContent(
-                                    series = series,
-                                    actions = seriesMenuActions,
-                                    library = library,
-                                    mangaBakaState = mangaBaka,
-                                    onLibraryClick = onLibraryClick
-                                )
-                            } else {
-                                Series(
-                                    series = series,
-                                    library = library,
-                                    onLibraryClick = onLibraryClick,
-                                    onFilterClick = onFilterClick,
-                                )
+                            val targetState = booksState.readingTarget.collectAsState().value
+                            SeriesReadingHeader(
+                                readingTarget = if (isMasterPane) LoadState.Success(null) else targetState,
+                                onRead = { onBookReadClick(it, true) },
+                                onRetry = booksState::reloadReadingTarget,
+                            ) {
+                                if (!isMasterPane) Series(series, library, onLibraryClick, onFilterClick)
+                                else Text(pluralStringResource(Res.plurals.series_books_count, series.booksCount, series.booksCount.toString()),
+                                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
-
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            TabRow(
-                                currentTab = currentTab,
-                                onTabChange = onTabChange,
-                                showCollectionsTab = collectionsState.collections.isNotEmpty() && !booksData.selectionMode
-                            )
-                        }
+                        val tabSelector: (@Composable () -> Unit)? = if (collectionsState.collections.isNotEmpty() && !booksData.selectionMode) {
+                            { SeriesTabSelector(currentTab, series.booksCount, collectionsState.collections.size, onTabChange) }
+                        } else null
 
                         when (currentTab) {
                             SeriesTab.BOOKS -> SeriesBooksContent(
@@ -262,19 +256,44 @@ fun SeriesContent(
                                 onBookSelect = booksState::onBookSelect,
                                 booksFilterState = booksState.filterState,
                                 bookContextMenuActions = bookMenuActions,
+                                isMasterPane = isMasterPane,
+                                tabSelector = tabSelector,
                             )
 
                             SeriesTab.COLLECTIONS -> item(span = { GridItemSpan(maxLineSpan) }) {
+                                Column {
+                                tabSelector?.invoke()
                                 SeriesCollectionsContent(
                                     collections = collectionsState.collections,
                                     onCollectionClick = onCollectionClick,
                                     onSeriesClick = onSeriesClick,
                                     cardWidth = collectionsState.cardWidth.collectAsState().value
                                 )
+                                }
                             }
                         }
                     }
 
+                    if (series != null && library != null) item(span = { GridItemSpan(maxLineSpan) }) {
+                        var expanded by rememberSaveable(series.id.value) { mutableStateOf(false) }
+                        Column {
+                            TextButton(onClick = { expanded = !expanded }, modifier = Modifier.fillMaxWidth()) {
+                                Text(stringResource(Res.string.reading_file_source))
+                            }
+                            if (expanded) {
+                                KomfSeriesActionsButton(series)
+                                if (mangaBaka != null) MangaBakaSeriesContent(series, seriesMenuActions, library, mangaBaka, onLibraryClick)
+                                else {
+                                    SeriesDescriptionRow(library, onLibraryClick, series.booksMetadata.releaseDate,
+                                        series.metadata.status, series.metadata.ageRating, series.metadata.language,
+                                        series.metadata.readingDirection, series.deleted || library.unavailable,
+                                        series.metadata.alternateTitles, onFilterClick, Modifier)
+                                    SeriesSummary(series.metadata.summary, series.booksMetadata.summary, series.booksMetadata.summaryNumber)
+                                    SeriesChipTags(series, onFilterClick)
+                                }
+                            }
+                        }
+                    }
                 }
 
                 val gridFullSpansCount = remember(currentTab, booksLoadState) {
@@ -345,7 +364,7 @@ fun SeriesToolBar(
 ) {
     val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = layout.pageHorizontalPadding),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -358,11 +377,11 @@ fun SeriesToolBar(
 
         if (series != null) {
             Text(
-                if (showTitle) mangaBaka?.titleState?.mainTitle?.title ?: series.metadata.title else "",
+                if (showTitle) mangaBaka?.titleState?.mainTitle?.title ?: series.metadata.title else stringResource(Res.string.reading_series_title),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f), textAlign = TextAlign.Center,
             )
 
             Box {
@@ -375,47 +394,12 @@ fun SeriesToolBar(
                     series = series,
                     actions = seriesMenuActions,
                     expanded = expandActions,
-                    showEditOption = false,
-                    showDownloadOption = false,
+                    showEditOption = true,
+                    showDownloadOption = true,
                     onDismissRequest = { expandActions = false },
                 )
             }
 
-            KomfSeriesActionsButton(series)
-
-            val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
-            val isOffline = LocalOfflineMode.current.collectAsState().value
-            var showEditDialog by remember { mutableStateOf(false) }
-            if (isAdmin && !isOffline) {
-                FloatingChromeIconButton(onClick = { showEditDialog = true }, floating = floating) {
-                    Icon(Icons.Rounded.Edit, contentDescription = stringResource(Res.string.series_edit))
-                }
-            }
-            var showDownloadConfirmationDialog by remember { mutableStateOf(false) }
-            val offlineAvailable = LocalOfflineAvailable.current
-            if (!isOffline && offlineAvailable) {
-                FloatingChromeIconButton(
-                    onClick = { showDownloadConfirmationDialog = true },
-                    floating = floating,
-                ) {
-                    Icon(Icons.Rounded.Download, contentDescription = stringResource(Res.string.series_download))
-                }
-            }
-            if (showDownloadConfirmationDialog) {
-                var permissionRequested by remember { mutableStateOf(false) }
-                DownloadNotificationRequestDialog { permissionRequested = true }
-
-                if (permissionRequested) {
-                    ConfirmationDialog(
-                        stringResource(Res.string.series_download_confirm, series.metadata.title),
-                        onDialogConfirm = onDownload,
-                        onDialogDismiss = { showDownloadConfirmationDialog = false }
-                    )
-                }
-            }
-
-            if (showEditDialog)
-                SeriesEditDialog(series = series, onDismissRequest = { showEditDialog = false })
 
         }
     }
@@ -568,56 +552,23 @@ fun Series(
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
     val width = LocalWindowWidth.current
-    val layout = LocalKomeliaLayout.current
-    val coverWidth = when (width) {
-        COMPACT, MEDIUM -> 116.dp
-        EXPANDED, FULL -> 220.dp
-    }
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-            verticalAlignment = Alignment.Top,
-        ) {
-            SeriesThumbnail(
-                seriesId = series.id,
-                modifier = Modifier
-                    .width(coverWidth)
-                    .aspectRatio(0.703f)
-                    .clip(MaterialTheme.shapes.medium)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
-                contentScale = ContentScale.Crop,
-            )
-
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(series.metadata.title, style = MaterialTheme.typography.headlineSmall,
-                    maxLines = 3, overflow = TextOverflow.Ellipsis)
-            SeriesDescriptionRow(
-                library = library,
-                onLibraryClick = onLibraryClick,
-                releaseDate = series.booksMetadata.releaseDate,
-                status = series.metadata.status,
-                ageRating = series.metadata.ageRating,
-                language = series.metadata.language,
-                readingDirection = series.metadata.readingDirection,
-                deleted = series.deleted || library.unavailable,
-                alternateTitles = series.metadata.alternateTitles,
-                onFilterClick = onFilterClick,
-                modifier = Modifier.fillMaxWidth(),
-            )
+    val coverWidth = if (width == COMPACT || width == MEDIUM) 76.dp else 112.dp
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
+        SeriesThumbnail(series.id, modifier = Modifier.width(coverWidth).aspectRatio(2f / 3f)
+            .clip(MaterialTheme.shapes.small), contentScale = ContentScale.Fit)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(series.metadata.title, style = MaterialTheme.typography.titleLarge)
+            val authors = remember(series.booksMetadata.authors) {
+                series.booksMetadata.authors.filter { it.role == "writer" }.map { it.name }.distinct().joinToString("、")
             }
+            if (authors.isNotBlank()) Text(authors, style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(pluralStringResource(Res.plurals.series_books_count, series.booksCount, series.booksCount.toString()),
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (series.metadata.summary.isNotBlank()) Text(series.metadata.summary,
+                maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-
-        SeriesSummary(
-            seriesSummary = series.metadata.summary,
-            bookSummary = series.booksMetadata.summary,
-            bookSummaryNumber = series.booksMetadata.summaryNumber,
-        )
-
-        SeriesChipTags(series, onFilterClick)
     }
 }
 
@@ -684,35 +635,20 @@ fun SeriesChipTags(
 }
 
 @Composable
-private fun TabRow(
-    currentTab: SeriesTab,
-    onTabChange: (SeriesTab) -> Unit,
-    showCollectionsTab: Boolean,
-) {
-    val chipColors = AppFilterChipDefaults.filterChipColors()
-    val layout = LocalKomeliaLayout.current
-    Column {
-        AnimatedVisibility(showCollectionsTab) {
-            Row(horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
-                Box(Modifier.clickable { onTabChange(SeriesTab.BOOKS) }) {
-
-                }
-                FilterChip(
-                    onClick = { onTabChange(SeriesTab.BOOKS) },
-                    selected = currentTab == SeriesTab.BOOKS,
-                    label = { Text(stringResource(Res.string.series_tab_books)) },
-                    colors = chipColors,
-                    border = null,
-                )
-                FilterChip(
-                    onClick = { onTabChange(SeriesTab.COLLECTIONS) },
-                    selected = currentTab == SeriesTab.COLLECTIONS,
-                    label = { Text(stringResource(Res.string.series_tab_collections)) },
-                    colors = chipColors,
-                    border = null,
-                )
+private fun SeriesTabSelector(currentTab: SeriesTab, booksCount: Int, collectionsCount: Int, onTabChange: (SeriesTab) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val booksLabel = stringResource(Res.string.series_tab_books)
+    val collectionsLabel = stringResource(Res.string.series_tab_collections)
+    Box {
+        TextButton(onClick = { expanded = true }, contentPadding = PaddingValues(0.dp), modifier = Modifier.heightIn(min = 48.dp)) {
+            Text(if (currentTab == SeriesTab.BOOKS) "$booksLabel · $booksCount" else "$collectionsLabel · $collectionsCount",
+                style = MaterialTheme.typography.titleMedium)
+            Icon(Icons.Rounded.ExpandMore, null, Modifier.size(18.dp))
+        }
+        snd.komelia.ui.common.components.KomeliaDropdownMenu(expanded, onDismissRequest = { expanded = false }) {
+            listOf(SeriesTab.BOOKS to booksLabel, SeriesTab.COLLECTIONS to collectionsLabel).forEach { (tab, label) ->
+                DropdownMenuItem(text = { Text(label) }, onClick = { onTabChange(tab); expanded = false })
             }
         }
-        HorizontalDivider()
     }
 }

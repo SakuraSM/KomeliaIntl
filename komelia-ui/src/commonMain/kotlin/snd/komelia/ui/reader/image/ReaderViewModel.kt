@@ -11,6 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
@@ -67,6 +68,23 @@ class ReaderViewModel(
         ReaderPageShareState(bookApi, it, appNotifications, screenModelScope)
     }
 
+    val modeHintPreference = snd.komelia.ui.settings.imagereader.ReaderModeHintPreference(readerSettingsRepository, appNotifications, screenModelScope)
+    private var modeChoiceGeneration = 0
+    val modeActions = snd.komelia.ui.reader.image.settings.ReaderModeActions(
+        selectType = { type -> modeChoiceGeneration++; readerState.onReaderTypeChange(type) },
+        selectPagedLayout = { layout ->
+            val generation = ++modeChoiceGeneration
+            screenModelScope.launch {
+                appNotifications.runCatchingToNotifications { readerSettingsRepository.putPagedReaderDisplayLayout(layout) }
+                    .onSuccess {
+                        if (generation == modeChoiceGeneration) {
+                            if (readerState.readerType.value == PAGED) pagedReaderState.onLayoutChange(layout)
+                            else readerState.onReaderTypeChange(PAGED)
+                        }
+                    }
+            }
+        },
+    )
     val screenScaleState = ScreenScaleState()
     private val pageChangeFlow = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1,

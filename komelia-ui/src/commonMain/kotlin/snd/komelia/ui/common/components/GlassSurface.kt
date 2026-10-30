@@ -134,7 +134,9 @@ fun KomeliaChromeSurface(
         contentColor = colors.onSurface,
         tonalElevation = if (glass) 0.dp else tonalElevation,
         shadowElevation = shadowElevation,
-        border = border,
+        border = border ?: if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) {
+            BorderStroke(1.dp, colors.onSurface.copy(alpha = KomeliaChromeStyle.outlineOpacity))
+        } else null,
     ) {
         val effect = if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) {
             Modifier.komeliaChrome(shape, baseColor, interactionSource)

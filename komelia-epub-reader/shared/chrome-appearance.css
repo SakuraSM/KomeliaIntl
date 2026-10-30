@@ -1,6 +1,6 @@
 /* Only marked application controls use the host material. Never select book content. */
 [data-komelia-popup] {
-  border-radius: 28px !important;
+  border-radius: 24px !important;
 }
 [data-komelia-chrome] :is(button, a, [role="option"], [role="tab"], .v-list-item):not(.komelia-reader-action) {
   border-radius: 12px;
@@ -13,26 +13,27 @@
   color: inherit !important;
 }
 :root[data-komelia-surface="glass"] [data-komelia-chrome] {
-  --komelia-chrome-color: #f4f7fc;
-  --komelia-chrome-background: rgb(0 0 0 / 60%);
-  --komelia-chrome-filter: blur(28px) saturate(1.1);
+  --komelia-chrome-color: #eef5ff;
+  --komelia-chrome-background: rgb(28 48 69 / 74%);
+  --komelia-chrome-filter: blur(24px) saturate(1.25);
   --komelia-highlight-shadow: transparent;
   --komelia-highlight-light: rgb(255 255 255 / 6.5%);
   color: var(--komelia-chrome-color) !important;
   background: var(--komelia-chrome-background) !important;
-  border: 0;
-  box-shadow: none;
+  border: 1px solid rgb(209 231 255 / 16%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
   backdrop-filter: var(--komelia-chrome-filter);
   -webkit-backdrop-filter: var(--komelia-chrome-filter);
 }
 :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] {
-  --komelia-chrome-color: #172330;
-  --komelia-chrome-background: rgb(250 252 255 / 60%);
+  --komelia-chrome-color: #13283e;
+  --komelia-chrome-background: rgb(242 248 255 / 80%);
   --komelia-highlight-shadow: transparent;
   --komelia-highlight-light: rgb(255 255 255 / 48%);
+  border-color: rgb(19 40 62 / 10%);
 }
 :root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-chrome] {
-  --komelia-chrome-background: rgb(0 0 0 / 60%);
+  --komelia-chrome-background: rgb(9 18 30 / 74%);
 }
 :root[data-komelia-reduced-motion="true"] [data-komelia-chrome],
 :root[data-komelia-reduced-motion="true"] [data-komelia-chrome-motion] {
@@ -64,7 +65,7 @@
 
 :root[data-komelia-surface="solid"] [data-komelia-chrome] {
   background: #1d2e42 !important;
-  color: #f4f7fc !important;
+  color: #eef5ff !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -107,7 +108,7 @@
   min-height: 48px;
   padding-inline: 12px;
   border-radius: 0;
-  color: #f4f7fc;
+  color: #eef5ff;
   background: #1d2e42;
 }
 .komelia-reader-title {
@@ -150,7 +151,7 @@
 :root[data-komelia-surface="glass"] [data-komelia-toolbar="bottom"] {
   inset-inline: 12px;
   width: calc(100% - 24px) !important;
-  border-radius: 28px;
+  border-radius: 20px;
 }
 :root[data-komelia-surface="glass"] [data-komelia-toolbar="top"] {
   top: env(safe-area-inset-top, 0px) !important;
@@ -158,3 +159,49 @@
 :root[data-komelia-surface="glass"] [data-komelia-toolbar="bottom"] {
   bottom: max(12px, env(safe-area-inset-bottom)) !important;
 }
+
+/* The surrounding application material is independent of the publication's reading theme. */
+[data-komelia-reader-settings] { border-radius: 24px 24px 0 0 !important; max-height: 82dvh; overflow: auto; overscroll-behavior: contain; }
+[data-komelia-reader-settings] :is(.v-list,.v-list-item,.v-card-text,.v-toolbar) { background: transparent !important; color: inherit !important; }
+[data-komelia-reader-settings] .v-list-subheader { min-height: 32px; font-size: 14px !important; opacity: 1; }
+[data-komelia-reader-settings] .v-list-item { padding-inline: 20px; min-height: 56px; }
+[data-komelia-reader-settings] .v-toolbar { min-height: 56px; }
+[data-komelia-chrome] [data-komelia-chrome] { background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border: 0; box-shadow: none; }
+:root[data-komelia-surface="glass"] [data-komelia-chrome] :is([aria-pressed="true"],.v-btn--active,.v-list-item--active) { background: #184a64 !important; color: #b6ebff !important; border: 1px solid #5ac9ee !important; box-shadow: none; }
+:root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] :is([aria-pressed="true"],.v-btn--active,.v-list-item--active) { background: #d4ebf7 !important; color: #075576 !important; }
+:root[data-komelia-surface][data-komelia-theme] [data-komelia-chrome] [data-komelia-theme-swatch] { background: var(--komelia-swatch-background) !important; color: var(--komelia-swatch-foreground) !important; border: 1px solid transparent !important; }
+:root[data-komelia-surface][data-komelia-theme] [data-komelia-chrome] [data-komelia-theme-swatch][aria-pressed="true"] { border: 2px solid #70d9ff !important; box-shadow: inset 0 0 0 1px #082839; }
+:root[data-komelia-surface="glass"] [data-komelia-chrome] :focus-visible { outline: 2px solid #70d9ff; outline-offset: 2px; }
+
+.komelia-reading-settings { display: flex; flex-direction: column; gap: 8px; }
+.komelia-reading-settings :is(input, select) { min-height: 48px; accent-color: #70d9ff; }
+.komelia-advanced-settings { border-top: 1px solid rgb(176 211 242 / 17%); }
+
+[data-komelia-chrome] { box-sizing: border-box; }
+:root[data-komelia-surface] [data-komelia-chrome] [data-komelia-chrome] { background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border: 0; box-shadow: none; }
+:root[data-komelia-surface="classic"] [data-komelia-reader-settings],
+:root[data-komelia-surface="classic"] [data-komelia-reader-contents] { background: #132234 !important; color: #eef5ff !important; }
+:root[data-komelia-surface="classic"][data-komelia-theme="LIGHT"] [data-komelia-reader-settings],
+:root[data-komelia-surface="classic"][data-komelia-theme="LIGHT"] [data-komelia-reader-contents] { background: #f8fbfe !important; color: #13283e !important; }
+[data-komelia-reader-contents] { border-radius: 24px 24px 0 0 !important; }
+@media (min-width: 840px) { [data-komelia-reader-contents] { border-radius: 24px !important; } }
+
+[data-komelia-reader-contents] :is(.v-list,.v-list-item,.v-list-group,.v-tabs-window,.v-card-text) { background: transparent !important; color: inherit !important; }
+:root[data-komelia-theme="LIGHT"] .komelia-reading-settings input[type="range"] { accent-color: #00638d; }
+:root[data-komelia-surface="glass"] [data-komelia-toolbar="top"] { border: 0; box-shadow: inset 0 -1px 0 rgb(209 231 255 / 20%); }
+
+:root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"]) [data-komelia-chrome] :is([data-komelia-toggle-option]:not([data-komelia-theme-swatch]):not([aria-pressed="true"]), [data-komelia-font-choice]) {
+  color: inherit !important;
+  background: transparent !important;
+  border: 1px solid rgb(176 211 242 / 40%);
+  box-shadow: none;
+}
+:root[data-komelia-surface="solid"] [data-komelia-chrome] [data-komelia-toggle-option][aria-pressed="true"]:not([data-komelia-theme-swatch]) { background: #184a64 !important; color: #b6ebff !important; }
+:root[data-komelia-surface="solid"][data-komelia-theme="LIGHT"] [data-komelia-chrome] [data-komelia-toggle-option][aria-pressed="true"]:not([data-komelia-theme-swatch]) { background: #d4ebf7 !important; color: #075576 !important; }
+
+/* Form panels need a stable reading surface even over a bright publication. */
+:root[data-komelia-surface="glass"] [data-komelia-popup] { --komelia-chrome-background: rgb(28 48 69 / 94%); }
+:root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-popup] { --komelia-chrome-background: rgb(242 248 255 / 94%); }
+:root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-popup] { --komelia-chrome-background: rgb(9 18 30 / 94%); }
+[data-komelia-reader-settings] .v-list-subheader { padding-inline: 20px; font-weight: 600; }
+[data-komelia-reader-settings] .komelia-settings-segments { background: rgb(var(--v-theme-on-surface), .05); }

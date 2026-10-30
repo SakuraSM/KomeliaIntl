@@ -1,7 +1,6 @@
 package snd.komelia.ui.reader.image.settings
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -146,6 +145,9 @@ fun SettingsSideMenuOverlay(
     onBackPress: () -> Unit,
     onShowHelpMenu: () -> Unit,
     pageShareAction: PageShareAction? = null,
+    modeHintPreference: snd.komelia.ui.settings.imagereader.ReaderModeHintPreference? = null,
+    volumeKeys: Boolean = false,
+    onVolumeKeysChange: ((Boolean) -> Unit)? = null,
 ) = KomeliaChromeContent {
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(
@@ -182,6 +184,7 @@ fun SettingsSideMenuOverlay(
             if (book != null) {
                 BookTitles(book)
             }
+            ReaderHintControls(modeHintPreference, volumeKeys, onVolumeKeysChange)
 
             HorizontalDivider(modifier = Modifier.padding(top = 10.dp))
             val zoomPercentage = remember(zoom) { (zoom * 100).roundToInt() }

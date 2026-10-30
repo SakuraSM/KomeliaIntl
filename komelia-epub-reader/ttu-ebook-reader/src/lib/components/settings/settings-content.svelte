@@ -53,6 +53,14 @@
   import {t} from '$lib/i18n';
 
   const optionsForToggle = getOptionsForToggle(t);
+  const BUILT_IN_THEME_LABELS: Record<string, string> = {
+    'light-theme': 'Light theme',
+    'ecru-theme': 'Paper theme',
+    'water-theme': 'Blue theme',
+    'gray-theme': 'Gray theme',
+    'dark-theme': 'Dark theme',
+    'black-theme': 'Black theme',
+  };
 
   let optionsForTheme = $derived.by(() => {
     let availableThemes = [...Array.from(availableThemesMap.entries()), ...Object.entries($customThemes$)]
@@ -60,10 +68,12 @@
 
     return availableThemes.map(({theme, option}) => ({
       id: theme,
-      text: 'ぁあ',
+      text: t(BUILT_IN_THEME_LABELS[theme] ?? theme),
       style: {
         color: option.fontColor,
-        'background-color': option.backgroundColor
+        'background-color': option.backgroundColor,
+        '--komelia-swatch-foreground': option.fontColor,
+        '--komelia-swatch-background': option.backgroundColor
       },
       thickBorders: true,
       showIcons: true
@@ -151,10 +161,59 @@
   })
 </script>
 
-<div class="grid grid-cols-1 items-center sm:grid-cols-2 sm:gap-6 lg:md:gap-8 lg:grid-cols-3">
+<div class="komelia-reading-settings">
+  <SettingsItemGroup title={t('Serif Font family')} inline>
+    <div class="font-row-controls">
+      <SettingsFontSelector bind:fontValue={$serifFontFamily$} defaultFont={defaultSerifFont} family="Serif"/>
+      <button
+          type="button"
+          aria-label={t('Open Custom Font Dialog')}
+          title={t('Open Custom Font Dialog')}
+          onclick={() =>
+              dialogManager.dialogs$.next([
+                {
+                  component: SettingsUserFontDialog,
+                  props: {
+                      currentFont: serifFontFamily$,
+                      defaultFont: defaultSerifFont
+                  }
+                }
+              ])}
+      >
+        <Fa icon={faFolderOpen}/>
+      </button>
+    </div>
+  </SettingsItemGroup>
+  <SettingsItemGroup title={t('Font size')}>
+    <div class="flex items-center gap-4">
+      <input type="range" min="1" max={Math.max(48, $fontSize$ || 16)} step="1"
+             aria-label={t('Font size')} class="min-h-12 flex-1" bind:value={$fontSize$}/>
+      <input type="number" min="1" step="1" aria-label={t('Font size')}
+             class="w-20 min-h-12 rounded-xl border bg-transparent p-2" bind:value={$fontSize$}/>
+    </div>
+  </SettingsItemGroup>
   <div class="lg:col-span-2">
     <SettingsItemGroup title={t('Theme')}>
+      <div slot="header" class="ml-auto">
+        <button
+            type="button"
+            class="komelia-theme-add rounded-md border border-gray-400"
+            aria-label={t('Add theme')}
+            onclick={() =>
+                  dialogManager.dialogs$.next([
+                    {
+                      component: SettingsCustomTheme,
+                      props: { existingThemes: optionsForTheme }
+                    }
+                  ])}
+        >
+          <Fa icon={faPlus}/>
+          {t('Add theme')}
+          <Ripple/>
+        </button>
+      </div>
       <ButtonToggleGroup
+          themeSwatches
           options={optionsForTheme}
           bind:selectedOptionId={$theme$}
           on:edit={({ detail }) =>
@@ -170,19 +229,7 @@
             $customThemes$ = { ...$customThemes$ };
           }}
       >
-        <button
-            class="m-1 rounded-md border-2 border-gray-400 p-2 text-lg"
-            onclick={() =>
-                  dialogManager.dialogs$.next([
-                    {
-                      component: SettingsCustomTheme,
-                      props: { existingThemes: optionsForTheme }
-                    }
-                  ])}
-        >
-          <Fa icon={faPlus} class="mx-2"/>
-          <Ripple/>
-        </button>
+
       </ButtonToggleGroup>
     </SettingsItemGroup>
   </div>
@@ -191,34 +238,13 @@
       <ButtonToggleGroup options={optionsForViewMode} bind:selectedOptionId={$viewMode$}/>
     </SettingsItemGroup>
   </div>
-  <SettingsItemGroup title={t('Serif Font family')}>
-    <div slot="header" class="flex items-center mx-2">
-      <div
-          tabindex="0"
-          role="button"
-          title={t('Open Custom Font Dialog')}
-          onclick={() =>
-              dialogManager.dialogs$.next([
-                {
-                  component: SettingsUserFontDialog,
-                  props: {
-                      currentFont: serifFontFamily$,
-                      defaultFont: defaultSerifFont
-                  }
-                }
-              ])}
-          onkeyup={dummyFn}
-      >
-        <Fa icon={faFolderOpen}/>
-      </div>
-    </div>
-    <SettingsFontSelector bind:fontValue={$serifFontFamily$} defaultFont={defaultSerifFont} family="Serif"/>
-  </SettingsItemGroup>
+  <details class="komelia-advanced-settings">
+    <summary class="min-h-12 cursor-pointer py-4">{t('Advanced')}</summary>
   <SettingsItemGroup title={t('Sans Font family')}>
     <div slot="header" class="flex items-center mx-2">
-      <div
-          tabindex="0"
-          role="button"
+      <button
+          type="button"
+          aria-label={t('Open Custom Font Dialog')}
           title={t('Open Custom Font Dialog')}
           onclick={() =>
               dialogManager.dialogs$.next([
@@ -230,19 +256,11 @@
                   }
                 }
               ])}
-          onkeyup={dummyFn}
       >
         <Fa icon={faFolderOpen}/>
-      </div>
+      </button>
     </div>
     <SettingsFontSelector bind:fontValue={$sansFontFamily$} defaultFont={defaultSansFont} family="Sans-Serif"/>
-  </SettingsItemGroup>
-  <SettingsItemGroup title={t('Font size')}>
-    <input type="number"
-           class={inputClasses}
-           step="1"
-           min="1"
-           bind:value={$fontSize$}/>
   </SettingsItemGroup>
   <SettingsItemGroup title={t('Line Height')}>
     <input
@@ -442,4 +460,12 @@
       <Fa icon={faSpinner} spin/>
     </div>
   {/if}
+  </details>
 </div>
+
+<style>
+  .font-row-controls { display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .font-row-controls > :global(div) { flex: 1; min-width: 0; }
+  .font-row-controls > button { flex: none; width: 48px; min-height: 48px; }
+  .komelia-theme-add { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; margin: 0; padding: 0 8px; font-size: 14px; }
+</style>

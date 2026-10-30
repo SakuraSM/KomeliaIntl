@@ -67,12 +67,12 @@ class LayoutTest {
     fun compactMobileLayoutUsesComfortableTouchTargetsAndDenseGutters() {
         val layout = komeliaLayoutSpec(PlatformType.MOBILE, WindowSizeClass.COMPACT)
 
-        assertEquals(12.dp, layout.pageHorizontalPadding)
+        assertEquals(16.dp, layout.pageHorizontalPadding)
         assertEquals(12.dp, layout.pageVerticalPadding)
         assertEquals(12.dp, layout.topBarContentSpacing)
         assertEquals(12.dp, layout.gridSpacing)
         assertEquals(16.dp, layout.sectionSpacing)
-        assertEquals(12.dp, layout.itemSpacing)
+        assertEquals(8.dp, layout.itemSpacing)
         assertEquals(8.dp, layout.controlSpacing)
         assertEquals(12.dp, layout.cardContentPadding)
         assertEquals(16.dp, layout.dialogContentPadding)
@@ -85,7 +85,7 @@ class LayoutTest {
         val expanded = komeliaLayoutSpec(PlatformType.DESKTOP, WindowSizeClass.EXPANDED)
         val full = komeliaLayoutSpec(PlatformType.DESKTOP, WindowSizeClass.FULL)
 
-        assertEquals(listOf(16.dp, 16.dp, 16.dp, 16.dp, 20.dp, 12.dp, 8.dp, 16.dp, 20.dp), medium.spacingValues())
+        assertEquals(listOf(16.dp, 16.dp, 16.dp, 16.dp, 20.dp, 8.dp, 8.dp, 16.dp, 20.dp), medium.spacingValues())
         assertEquals(listOf(24.dp, 20.dp, 16.dp, 16.dp, 24.dp, 12.dp, 8.dp, 16.dp, 24.dp), expanded.spacingValues())
         assertEquals(listOf(24.dp, 24.dp, 16.dp, 16.dp, 24.dp, 12.dp, 8.dp, 16.dp, 24.dp), full.spacingValues())
         assertEquals(48.dp, medium.minimumTouchTarget)
@@ -103,11 +103,11 @@ class LayoutTest {
 
     @Test
     fun detailCoverWidthBalancesCompactAndExpandedLayouts() {
-        assertEquals(136.dp, detailCoverWidth(336.dp, WindowSizeClass.COMPACT))
-        assertEquals(155.2.dp, detailCoverWidth(388.dp, WindowSizeClass.COMPACT))
-        assertEquals(168.dp, detailCoverWidth(568.dp, WindowSizeClass.MEDIUM))
-        assertEquals(220.dp, detailCoverWidth(792.dp, WindowSizeClass.EXPANDED))
-        assertEquals(260.dp, detailCoverWidth(1200.dp, WindowSizeClass.FULL))
+        assertEquals(90.72.dp, detailCoverWidth(336.dp, WindowSizeClass.COMPACT))
+        assertEquals(92.dp, detailCoverWidth(388.dp, WindowSizeClass.COMPACT))
+        assertEquals(92.dp, detailCoverWidth(568.dp, WindowSizeClass.MEDIUM))
+        assertEquals(132.dp, detailCoverWidth(792.dp, WindowSizeClass.EXPANDED))
+        assertEquals(132.dp, detailCoverWidth(1200.dp, WindowSizeClass.FULL))
     }
 
     @Test

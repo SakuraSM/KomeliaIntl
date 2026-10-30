@@ -182,6 +182,7 @@ fun BookInfoRow(
     modifier: Modifier = Modifier,
     book: KomeliaBook,
     onSeriesButtonClick: (() -> Unit)? = null,
+    showReadProgress: Boolean = true,
 ) {
 
     Column(
@@ -264,7 +265,7 @@ fun BookInfoRow(
                 val readProgress = book.readProgress
                 val pagesCount = book.media.pagesCount
                 if (readProgress != null) {
-                    if (!readProgress.completed && pagesCount > 0) {
+                    if (showReadProgress && !readProgress.completed && pagesCount > 0) {
                         val (percentage, pagesLeft) = remember(pagesCount, readProgress) {
                             val safePageCount = pagesCount.coerceAtLeast(1)
                             val currentPage = readProgress.page.coerceIn(0, safePageCount)

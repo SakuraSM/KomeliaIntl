@@ -159,6 +159,8 @@ class ImageReaderScreen(
 
         ReaderContent(
             lastModeHint = lastModeHint,
+            modeHintPreference = vm.modeHintPreference,
+            modeActions = vm.modeActions,
             commonReaderState = vm.readerState,
             pagedReaderState = vm.pagedReaderState,
             continuousReaderState = vm.continuousReaderState,
@@ -208,6 +210,7 @@ class ImageReaderScreen(
         lastModeHint: MutableState<String?>,
     ) {
         val action = exitController.requestExit(navigator.canPop, book != null)
+        // Reset only this session's event token; the last displayed configuration stays in settings.
         if (action != ReaderExitAction.Ignore) lastModeHint.value = null
         when (action) {
             ReaderExitAction.Pop -> navigator.pop()

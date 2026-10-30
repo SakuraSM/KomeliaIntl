@@ -8,13 +8,14 @@
 
   export let options: ToggleOption<any>[];
   export let selectedOptionId: any;
+  export let themeSwatches = false;
 
   const dispatch = createEventDispatcher<{
     edit: string;
     delete: string;
   }>();
 
-  function mapToStyleString(style: Record<string, any> | undefined) {
+  function mapToStyleString(style: Record<string, string> | undefined) {
     if (!style) return '';
 
     return Object.entries(style)
@@ -23,11 +24,16 @@
   }
 </script>
 
-<div class="-m-1 flex flex-wrap">
+<div class="-m-1 flex flex-wrap" class:theme-grid={themeSwatches}>
   {#each options as option}
     <div class="flex">
       <button
+          type="button"
           title={option.id}
+          data-komelia-toggle-option
+          data-komelia-theme-swatch={themeSwatches ? '' : undefined}
+          aria-label={option.text}
+          aria-pressed={option.id === selectedOptionId}
           class="m-1 rounded-md border-2 border-gray-400 p-2 text-black text-lg"
           class:border-4={option.thickBorders && option.id === selectedOptionId}
           class:border-blue-300={option.id === selectedOptionId}
@@ -55,3 +61,9 @@
 
   <slot/>
 </div>
+
+<style>
+  .theme-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+  .theme-grid > div { min-width: 0; }
+  .theme-grid [data-komelia-theme-swatch] { width: 100%; min-height: 48px; margin: 0; padding: 6px; border-width: 2px; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+</style>

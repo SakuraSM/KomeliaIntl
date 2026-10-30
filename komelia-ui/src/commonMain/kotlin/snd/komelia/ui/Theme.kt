@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import snd.komelia.settings.model.AppTheme
 
-private val SkyBlue = Color(0xFF69C9FF)
-private val DeepBlue = Color(0xFF00639A)
+private val SkyBlue = Color(0xFF70D9FF)
+private val DeepBlue = Color(0xFF00638D)
 private val ErrorLight = Color(0xFFBA1A1A)
 private val ErrorDark = Color(0xFFFFB4AB)
 
@@ -42,12 +42,12 @@ private val LightColors = lightColorScheme(
     onTertiary = Color.White,
     tertiaryContainer = Color(0xFFD0E8FA),
     onTertiaryContainer = Color(0xFF00324F),
-    background = Color(0xFFF5F8FC),
-    onBackground = Color(0xFF172330),
-    surface = Color(0xFFFAFCFF),
-    onSurface = Color(0xFF172330),
+    background = Color(0xFFEEF3F8),
+    onBackground = Color(0xFF13283E),
+    surface = Color(0xFFF8FBFE),
+    onSurface = Color(0xFF13283E),
     surfaceVariant = Color(0xFFEDF2F8),
-    onSurfaceVariant = Color(0xFF4D5E70),
+    onSurfaceVariant = Color(0xFF465D74),
     surfaceContainerLowest = Color.White,
     surfaceContainerLow = Color(0xFFF2F6FB),
     surfaceContainer = Color(0xFFEAF0F7),
@@ -65,7 +65,7 @@ private val LightColors = lightColorScheme(
 
 private val DarkColors = darkColorScheme(
     primary = SkyBlue,
-    onPrimary = Color(0xFF00324A),
+    onPrimary = Color(0xFF082839),
     primaryContainer = Color(0xFF203B53),
     onPrimaryContainer = Color(0xFFD5EEFF),
     secondary = Color(0xFFB6C5D6),
@@ -76,12 +76,12 @@ private val DarkColors = darkColorScheme(
     onTertiary = Color(0xFF00324A),
     tertiaryContainer = SkyBlue,
     onTertiaryContainer = Color(0xFF00324A),
-    background = Color(0xFF0D131C),
-    onBackground = Color(0xFFF4F7FC),
-    surface = Color(0xFF101923),
-    onSurface = Color(0xFFF4F7FC),
+    background = Color(0xFF09121E),
+    onBackground = Color(0xFFEEF5FF),
+    surface = Color(0xFF132234),
+    onSurface = Color(0xFFEEF5FF),
     surfaceVariant = Color(0xFF152131),
-    onSurfaceVariant = Color(0xFFADB8C9),
+    onSurfaceVariant = Color(0xFFB8C8DC),
     surfaceContainerLowest = Color(0xFF0E1823),
     surfaceContainerLow = Color(0xFF111D2A),
     surfaceContainer = Color(0xFF172536),
@@ -114,7 +114,7 @@ val KomeliaShapes = Shapes(
     small = RoundedCornerShape(12.dp),
     medium = RoundedCornerShape(16.dp),
     large = RoundedCornerShape(20.dp),
-    extraLarge = RoundedCornerShape(28.dp),
+    extraLarge = RoundedCornerShape(24.dp),
 )
 
 val KomeliaTypography = Typography(

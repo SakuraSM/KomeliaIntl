@@ -81,6 +81,7 @@ class TtsuReaderState(
     private val coroutineScope: CoroutineScope,
     private val bookSiblingsContext: BookSiblingsContext,
     private val chromeAppearance: StateFlow<EpubChromeAppearance> = MutableStateFlow(EpubChromeAppearance()),
+    private val consumeInitialChapter: () -> String? = { null },
 ) : EpubReaderState {
     override val state = MutableStateFlow<LoadState<Unit>>(LoadState.Uninitialized)
     override val book = MutableStateFlow(book)
@@ -165,7 +166,7 @@ class TtsuReaderState(
             val data = epubLoadTask.await()
             TtuBookData(
                 id = bookId.value.value,
-                title = requireNotNull(book.value?.seriesTitle),
+                title = requireNotNull(book.value?.metadata?.title),
                 styleSheet = data.stylesheet,
                 elementHtml = data.element.html(),
                 imageUrls = data.images.map { it.toString() },
@@ -287,6 +288,31 @@ class TtsuReaderState(
 
     private suspend fun getBookmark(): TtuBookmarkData {
         val data = epubLoadTask.await()
+        val initialChapter = consumeInitialChapter()
+        if (initialChapter != null) {
+            val resource = epubResourceName(initialChapter).substringBefore('#')
+            val index = data.manifest.readingOrder.indexOfFirst { link ->
+                link.href?.let { epubResourceName(it).substringBefore('#') } == resource
+            }
+            if (index >= 0) {
+                val link = data.manifest.readingOrder[index]
+                val chapterHref = requireNotNull(link.href)
+                val chapter = data.element.getElementById(chapterHref)
+                val precedingCharacters = data.manifest.readingOrder.take(index).sumOf { entry ->
+                    entry.href?.let { data.element.getElementById(it) }?.let(::charCountForElement) ?: 0L
+                }
+                val fragment = initialChapter.substringAfter('#', "")
+                val anchor = if (fragment.isBlank()) null else chapter?.getElementById(fragment)
+                val inChapter = if (chapter != null && anchor != null) charCountForElement(epubPrefixBeforeElement(chapter, anchor)) else 0L
+                val explored = precedingCharacters + inChapter
+                return TtuBookmarkData(bookId = bookId.value.value, scrollX = null, scrollY = null,
+                    exploredCharCount = explored,
+                    progress = if (data.characterCount > 0) explored.toDouble() / data.characterCount else 0.0,
+                    lastBookmarkModified = Clock.System.now().toEpochMilliseconds(), chapterIndex = index,
+                    chapterReference = chapterHref,
+                    initialChapterHref = chapterHref + if (fragment.isNotBlank()) "#$fragment" else "")
+            }
+        }
         val progress = bookApi.getReadiumProgression(bookId.value)
             ?: return TtuBookmarkData(
                 bookId = bookId.value.value,
@@ -711,5 +737,6 @@ class TtsuReaderState(
         val lastBookmarkModified: Long,
         val chapterIndex: Int,
         val chapterReference: String,
+        val initialChapterHref: String? = null,
     )
 }

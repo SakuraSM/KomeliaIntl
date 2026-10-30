@@ -28,7 +28,9 @@ fun KomeliaModalBottomSheet(
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val glassStyle = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
+    val appearance = LocalSurfaceAppearance.current
+    val glassStyle = appearance.style == AppSurfaceStyle.LIQUID_GLASS
+    val colors = MaterialTheme.colorScheme
     val materialHandle: @Composable (() -> Unit)? = dragHandle?.let { handle ->
         {
             Box(
@@ -48,7 +50,10 @@ fun KomeliaModalBottomSheet(
         shape = KomeliaChromeStyle.dialogShape,
         dragHandle = materialHandle,
         scrimColor = scrimColor,
-        containerColor = if (glassStyle) Color.Transparent else containerColor,
+        // Editing can pause capture before a new sheet has any backdrop frame. The native sheet
+        // still needs its own base; the glass effect can draw over it when sampling is available.
+        containerColor = if (glassStyle) glassTintColor(appearance.theme, colors) else containerColor,
+        contentColor = colors.onSurface,
     ) {
         // The native sheet translates its content after applying its outer modifier. Keep material
         // inside that translation so its clip and backdrop move with the actual sheet.

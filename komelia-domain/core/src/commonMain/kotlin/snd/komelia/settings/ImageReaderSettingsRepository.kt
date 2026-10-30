@@ -20,6 +20,12 @@ interface ImageReaderSettingsRepository {
     fun getReaderType(): Flow<ReaderType>
     suspend fun putReaderType(type: ReaderType)
 
+    fun getReaderModeHintsEnabled(): Flow<Boolean>
+    suspend fun putReaderModeHintsEnabled(enabled: Boolean)
+
+    /** Records a changed configuration before displaying it; false means disabled or already shown. */
+    suspend fun consumeReaderModeHint(signature: String): Boolean
+
     fun getStretchToFit(): Flow<Boolean>
     suspend fun putStretchToFit(stretch: Boolean)
 

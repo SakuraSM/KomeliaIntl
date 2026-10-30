@@ -14,6 +14,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_rea
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement.spacedBy
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -364,12 +366,6 @@ private fun LibraryToolBar(
         onSearchClick = { navigation.open(SearchScreen(null)) },
     ) {
         BrowseOptionsButton(active = viewModel.seriesTabState.filterState?.isChanged == true || selectedLibraryId != null || viewModel.currentTab != SERIES) { dismiss ->
-            if (showScopeSelector) {
-                LibraryScopeSelector(libraries, selectedLibraryId) { selected ->
-                    dismiss()
-                    onLibrarySelect(selected)
-                }
-            }
             val tabs = buildList {
                 add(LabeledEntry(SERIES, stringResource(Res.string.library_tab_series)))
                 if (viewModel.collectionsCount > 0 || viewModel.currentTab == COLLECTIONS) {
@@ -379,12 +375,20 @@ private fun LibraryToolBar(
                     add(LabeledEntry(READ_LISTS, stringResource(Res.string.library_tab_readlists)))
                 }
             }
-            DropdownChoiceMenu(
-                selectedOption = tabs.first { it.value == viewModel.currentTab },
-                options = tabs,
-                onOptionChange = { viewModel.selectTab(it.value) },
-                label = { Text(stringResource(Res.string.browse_content_type)) },
-            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (showScopeSelector) {
+                    Box(Modifier.weight(1f)) {
+                        LibraryScopeSelector(libraries, selectedLibraryId) { selected -> dismiss(); onLibrarySelect(selected) }
+                    }
+                }
+                DropdownChoiceMenu(
+                    modifier = Modifier.weight(1f),
+                    selectedOption = tabs.first { it.value == viewModel.currentTab },
+                    options = tabs,
+                    onOptionChange = { viewModel.selectTab(it.value) },
+                    label = { Text(stringResource(Res.string.browse_content_type)) },
+                )
+            }
             LibraryViewOptions(viewModel, dismiss)
         }
         if (library != null && !library.id.isLocalLibrary() && (isAdmin || isOffline)) {
@@ -404,27 +408,28 @@ private fun LibraryViewOptions(viewModel: LibraryViewModel, onDismiss: () -> Uni
     when (viewModel.currentTab) {
         SERIES -> {
             val state = viewModel.seriesTabState
-            Text(pluralStringResource(Res.plurals.series_list_series_count, state.totalSeriesCount, state.totalSeriesCount))
-            LibraryPageSizeOption(state.pageLoadSize.collectAsState().value, state::onPageSizeChange)
-            state.filterState?.let { SeriesFilterContent(it, onDismiss) }
+            LibraryPageSizeOption(state.pageLoadSize.collectAsState().value, state::onPageSizeChange,
+                pluralStringResource(Res.plurals.series_list_series_count, state.totalSeriesCount, state.totalSeriesCount))
+            state.filterState?.let { SeriesFilterContent(it, onDismiss, compact = true) }
         }
         COLLECTIONS -> {
             val state = viewModel.collectionsTabState
-            Text(pluralStringResource(Res.plurals.library_tab_collections_count, state.totalCollections, state.totalCollections))
-            LibraryPageSizeOption(state.pageSize, state::onPageSizeChange)
+            LibraryPageSizeOption(state.pageSize, state::onPageSizeChange,
+                pluralStringResource(Res.plurals.library_tab_collections_count, state.totalCollections, state.totalCollections))
         }
         READ_LISTS -> {
             val state = viewModel.readListsTabState
-            Text(pluralStringResource(Res.plurals.library_tab_readlists_count, state.totalReadLists, state.totalReadLists))
-            LibraryPageSizeOption(state.pageSize, state::onPageSizeChange)
+            LibraryPageSizeOption(state.pageSize, state::onPageSizeChange,
+                pluralStringResource(Res.plurals.library_tab_readlists_count, state.totalReadLists, state.totalReadLists))
         }
     }
 }
 
 @Composable
-private fun LibraryPageSizeOption(pageSize: Int, onChange: (Int) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(stringResource(Res.string.browse_page_size), modifier = Modifier.weight(1f))
+private fun LibraryPageSizeOption(pageSize: Int, onChange: (Int) -> Unit, summary: String) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(summary, Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(Res.string.browse_page_size), modifier = Modifier.padding(end = 8.dp))
         PageSizeSelectionDropdown(pageSize, onChange)
     }
 }
@@ -450,9 +455,9 @@ private fun LibraryScopeSelector(
     Box {
         OutlinedButton(
             onClick = { expanded = true },
-            modifier = Modifier.heightIn(min = layout.minimumTouchTarget),
+            modifier = Modifier.fillMaxWidth().heightIn(min = layout.minimumTouchTarget),
         ) {
-            Text(selectedName)
+            Text(selectedName, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Icon(Icons.Rounded.ExpandMore, contentDescription = null)
         }
 

@@ -1,6 +1,11 @@
 import {mount} from 'svelte';
+import {createClassComponent} from 'svelte/legacy';
 import BookReaderHeader from '../src/lib/components/book-reader/book-reader-header.svelte';
-import {viewMode$} from '../src/lib/data/store';
+import SettingsContent from '../src/lib/components/settings/settings-content.svelte';
+import ContinuousReader from '../src/lib/components/book-reader/book-reader-continuous/book-reader-continuous.svelte';
+import {sectionList$, sectionProgress$, getChapterData} from '../src/lib/components/book-reader/book-toc/book-toc';
+import {FuriganaStyle} from '../src/lib/data/furigana-style';
+import {viewMode$, availableSystemFonts$} from '../src/lib/data/store';
 import {ViewMode} from '../src/lib/data/view-mode';
 import {setLocale} from '../src/lib/i18n';
 import '../src/app.scss';
@@ -26,3 +31,43 @@ mount(BookReaderHeader, {
     settingsClick: action('settings'), closeBook: action('close'),
   },
 });
+
+if (parameters.has('settings')) {
+  availableSystemFonts$.next(['Noto Sans CJK JP', 'Synthetic serif']);
+  const panel = document.createElement('div');
+  panel.dataset.komeliaChrome = '';
+  panel.dataset.komeliaReaderSettings = '';
+  panel.style.cssText = 'position:absolute;top:60px;left:0;width:100%;padding:20px';
+  document.querySelector('#app')!.append(panel);
+  mount(SettingsContent, {target: panel});
+}
+
+if (parameters.has('initialChapter')) {
+  document.body.classList.add('reader-horizontal-mode');
+  const first = '<div id="chapter-one"><h1>First chapter</h1>' + '<p>Introduction text.</p>'.repeat(40) + '</div>';
+  const second = '<div id="chapter-two"><h1>Second chapter</h1>' + '<p>Chapter introduction.</p>'.repeat(8) +
+    '<h2 id="selected">Selected section</h2>' + '<p>Requested chapter text.</p>'.repeat(40) + '</div>';
+  const firstCount = new DOMParser().parseFromString(first, 'text/html').body.textContent!.replace(/\s/g, '').length;
+  sectionList$.next([
+    {reference:'chapter-one', startCharacter:0, characters:firstCount, charactersWeight:firstCount, label:'First chapter'},
+    {reference:'chapter-two', startCharacter:firstCount, characters:1000, charactersWeight:1000, label:'Second chapter'},
+  ]);
+  sectionProgress$.subscribe(progress => {
+    if (progress.size) document.querySelector('output')!.textContent = getChapterData([...progress.values()])[2];
+  });
+  const font = {displayName:'Test sans', familyName:'sans-serif'};
+  const reader = createClassComponent({component:ContinuousReader, target:document.querySelector('#app')!, props:{
+    htmlContent:first+second, width:360, height:800, verticalMode:false,
+    fontColor:'#222', backgroundColor:'#fff', hintFuriganaFontColor:'#555', hintFuriganaShadowColor:'transparent',
+    fontFamilyGroupOne:font, fontFamilyGroupTwo:font, fontSize:20, lineHeight:1.6,
+    hideSpoilerImage:false, hideFurigana:false, furiganaStyle:FuriganaStyle.Full,
+    secondDimensionMaxValue:0, firstDimensionMargin:20, autoPositionOnResize:true,
+    autoBookmark:false, autoBookmarkTime:3, loadingState:false, multiplier:1,
+    bookmarkData:Promise.resolve({bookId:'synthetic', exploredCharCount:firstCount, progress:.4,
+      lastBookmarkModified:0, chapterIndex:1, chapterReference:'chapter-two',
+      initialChapterHref:parameters.has('bookmarkOnly') ? undefined : 'chapter-two#selected'}),
+    exploredCharCount:0, bookCharCount:0, autoScroller:undefined, bookmarkManager:undefined, pageManager:undefined,
+    customReadingPoint:0, customReadingPointLeft:0, customReadingPointTop:0, customReadingPointScrollOffset:0,
+  }});
+  window.addEventListener('resize', () => reader.$set({width:innerWidth, height:innerHeight}));
+}

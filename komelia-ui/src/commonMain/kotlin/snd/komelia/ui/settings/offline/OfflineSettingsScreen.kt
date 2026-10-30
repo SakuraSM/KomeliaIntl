@@ -40,7 +40,7 @@ import snd.komelia.ui.settings.offline.users.OfflineUserSettingsContent
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.series.KomgaSeriesId
 
-class OfflineSettingsScreen : Screen {
+class OfflineSettingsScreen(private val initialTab: Int = 0) : Screen {
 
     @Composable
     override fun Content() {
@@ -55,7 +55,7 @@ class OfflineSettingsScreen : Screen {
         }
 
         SettingsScreenContainer(stringResource(Res.string.settings_offline_mode_title)) {
-            var selectedTab by rememberSaveable { mutableStateOf(0) }
+            var selectedTab by rememberSaveable { mutableStateOf(initialTab) }
 
             LaunchedEffect(selectedTab) {
                 if (selectedTab == 2) vm.initializeCache()

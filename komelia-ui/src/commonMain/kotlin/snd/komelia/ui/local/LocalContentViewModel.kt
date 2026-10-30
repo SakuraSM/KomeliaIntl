@@ -4,6 +4,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import kotlinx.coroutines.CoroutineScope
+import snd.komelia.ui.settings.offline.downloads.OfflineDownloadsState
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,8 +40,10 @@ class LocalContentViewModel(
     private val appNotifications: AppNotifications,
     private val taskEmitter: OfflineTaskEmitter?,
     cardWidthFlow: Flow<Dp>,
+    downloadsFactory: ((CoroutineScope) -> OfflineDownloadsState?)? = null,
 ) : StateScreenModel<LoadState<Unit>>(LoadState.Uninitialized) {
     val cardWidth = cardWidthFlow.stateIn(screenModelScope, Eagerly, defaultCardWidth.dp)
+    val downloadsState = downloadsFactory?.invoke(screenModelScope)
     val books = MutableStateFlow(emptyList<KomeliaBook>())
     val query = MutableStateFlow("")
     val source = MutableStateFlow(AvailableBookSource.ALL)

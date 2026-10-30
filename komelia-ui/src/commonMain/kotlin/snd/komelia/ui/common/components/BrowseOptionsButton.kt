@@ -1,17 +1,25 @@
 package snd.komelia.ui.common.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_done
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_filter_display
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_close_settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,6 +56,7 @@ internal fun BrowseOptionsButton(
     content: @Composable ColumnScope.(dismiss: () -> Unit) -> Unit,
 ) {
     val label = stringResource(Res.string.browse_options)
+    val colors = MaterialTheme.colorScheme
     val layout = LocalKomeliaLayout.current
     val mobile = LocalPlatform.current == PlatformType.MOBILE
     val anchorFocus = remember { FocusRequester() }
@@ -60,11 +69,26 @@ internal fun BrowseOptionsButton(
     val options: @Composable ColumnScope.() -> Unit = {
         Column(
             Modifier.fillMaxWidth().heightIn(max = 640.dp)
-                .verticalScroll(rememberScrollState()).padding(layout.dialogContentPadding),
+                .then(if (mobile) Modifier else Modifier.verticalScroll(rememberScrollState()))
+                .padding(if (mobile) 20.dp else layout.dialogContentPadding),
             verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
         ) {
-            Text(label, style = MaterialTheme.typography.titleLarge)
-            content(dismiss)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text(stringResource(Res.string.reading_filter_display), style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.weight(1f))
+                IconButton(onClick = dismiss) { Icon(Icons.Rounded.Close, stringResource(Res.string.navigation_close_settings)) }
+            }
+            if (mobile) {
+                Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
+                    content(dismiss)
+                }
+            } else content(dismiss)
+            if (mobile) Button(onClick = dismiss, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                shape = MaterialTheme.shapes.small, colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.primary, contentColor = colors.onPrimary)) {
+                Text(stringResource(Res.string.reading_done))
+            }
         }
     }
     Box {

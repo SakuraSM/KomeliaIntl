@@ -6,11 +6,28 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Text
+import org.jetbrains.compose.resources.painterResource
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komelia_icon
+import snd.komelia.ui.platform.WindowSizeClass
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -158,6 +175,11 @@ class MainScreen(
             // can briefly lag behind a tab selection and caused destination taps to be
             // interpreted as reselections, most visibly when returning to Home.
             val currentTab = tabNavigator.current as AppTab
+            val currentPage = if (activeDestination == currentTab.destination) {
+                activeNavigator?.lastItem ?: currentTab.initialScreens.last()
+            } else currentTab.initialScreens.last()
+            val showBottomNavigation = navigationPresentation(width) == NavigationPresentation.BottomBar &&
+                currentPage !is BookScreen && currentPage !is OneshotScreen && currentPage !is SeriesScreen
             fun selectDestination(destination: AppDestination, screen: Screen? = null) {
                 val targetTab = tabs.first { it.destination == destination }
                 val selectedDestination = (tabNavigator.current as AppTab).destination
@@ -223,14 +245,14 @@ class MainScreen(
                                 },
                                 bottomBar = {
                                     AnimatedVisibility(
-                                        visible = navigationPresentation(width) == NavigationPresentation.BottomBar,
+                                        visible = showBottomNavigation,
                                         enter = if (motion.isReducedMotion) EnterTransition.None else fadeIn(
                                             tween(
                                                 motion.duration(motion.containerDurationMillis),
                                                 easing = motion.standardEasing,
                                             ),
                                         ),
-                                        exit = if (motion.isReducedMotion) ExitTransition.None else fadeOut(
+                                        exit = if (motion.isReducedMotion || !showBottomNavigation) ExitTransition.None else fadeOut(
                                             tween(
                                                 motion.duration(motion.containerDurationMillis),
                                                 easing = motion.standardEasing,
@@ -242,7 +264,7 @@ class MainScreen(
                                 },
                             ) { contentPadding ->
                                 val floatingBar = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS &&
-                                    navigationPresentation(width) == NavigationPresentation.BottomBar
+                                    showBottomNavigation
                                 val bottomInset = if (floatingBar) contentPadding.calculateBottomPadding() else 0.dp
                                 val direction = LocalLayoutDirection.current
                                 val layout = LocalKomeliaLayout.current
@@ -429,10 +451,11 @@ internal fun AppBottomBar(
     val colors = MaterialTheme.colorScheme
     KomeliaChromeSurface(
         modifier = if (floating) Modifier.navigationBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp) else Modifier,
-        shape = RoundedCornerShape(if (floating) 40.dp else 0.dp),
+        shape = RoundedCornerShape(if (floating) 20.dp else 0.dp),
         shadowElevation = if (floating) 2.dp else 0.dp,
     ) {
         NavigationBar(
+            modifier = Modifier.height(68.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)),
             containerColor = Color.Transparent,
             tonalElevation = 0.dp,
             windowInsets = if (floating) WindowInsets(0.dp) else WindowInsets.navigationBars,
@@ -441,7 +464,10 @@ internal fun AppBottomBar(
                 destinationItems.forEach { item ->
                     val interactions = remember(item.destination) { MutableInteractionSource() }
                     NavigationBarItem(
-                        modifier = Modifier.komeliaHighlight(
+                        modifier = Modifier.background(
+                            if (selected == item.destination) colors.primaryContainer.copy(alpha = .9f) else Color.Transparent,
+                            KomeliaChromeStyle.navigationHighlightShape,
+                        ).komeliaHighlight(
                             selected == item.destination, KomeliaChromeStyle.navigationHighlightShape,
                             inset = KomeliaChromeStyle.navigationHighlightInset,
                             interactionSource = interactions,
@@ -452,8 +478,8 @@ internal fun AppBottomBar(
                         icon = { DestinationIcon(item, selected == item.destination) },
                         label = { NavigationDestinationLabel(stringResource(item.label), selected == item.destination) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = if (glass) colors.onSurface else colors.primary,
-                            selectedTextColor = if (glass) colors.onSurface else colors.primary,
+                            selectedIconColor = colors.primary,
+                            selectedTextColor = colors.primary,
                             indicatorColor = Color.Transparent,
                             unselectedIconColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
                             unselectedTextColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
@@ -475,11 +501,31 @@ internal fun AppNavigationRail(
     val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     val glass = LocalSurfaceAppearance.current.useGlass
     val colors = MaterialTheme.colorScheme
+    val navigationWidth = if (LocalWindowWidth.current == WindowSizeClass.FULL) 180.dp else 80.dp
     KomeliaChromeSurface(
-        modifier = (if (floating) Modifier.padding(8.dp) else Modifier).padding(top = LocalPageTopInset.current),
-        shape = RoundedCornerShape(if (floating) 28.dp else 0.dp),
+        modifier = Modifier.width(navigationWidth)
+            .then(if (floating) Modifier.padding(start = 12.dp, top = 12.dp, bottom = 12.dp) else Modifier)
+            .padding(top = LocalPageTopInset.current),
+        shape = RoundedCornerShape(if (floating) 20.dp else 0.dp),
     ) {
-        NavigationRail(
+        if (LocalWindowWidth.current == WindowSizeClass.FULL) {
+            Column(Modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = 12.dp, vertical = 24.dp).selectableGroup(),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
+                Image(painterResource(Res.drawable.komelia_icon), "Komelia", Modifier.padding(start = 12.dp).size(32.dp))
+                Spacer(Modifier.height(24.dp))
+                destinationItems.forEach { item ->
+                    val active = selected == item.destination
+                    Row(Modifier.fillMaxWidth().heightIn(min = 52.dp)
+                        .background(if (active) colors.primaryContainer else Color.Transparent, RoundedCornerShape(14.dp))
+                        .selectable(active, role = Role.Tab, onClick = { onSelect(item.destination, null) })
+                        .padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)) {
+                        Icon(item.icon, null, tint = if (active) colors.primary else colors.onSurfaceVariant)
+                        Text(stringResource(item.label), color = if (active) colors.primary else colors.onSurfaceVariant)
+                    }
+                }
+            }
+        } else NavigationRail(
             containerColor = Color.Transparent,
             windowInsets = WindowInsets.navigationBars,
         ) {
@@ -498,9 +544,9 @@ internal fun AppNavigationRail(
                         icon = { DestinationIcon(item, selected == item.destination) },
                         label = { NavigationDestinationLabel(stringResource(item.label), selected == item.destination) },
                         colors = NavigationRailItemDefaults.colors(
-                            selectedIconColor = if (glass) colors.onSurface else colors.primary,
-                            selectedTextColor = if (glass) colors.onSurface else colors.primary,
-                            indicatorColor = if (glass) Color.Transparent else colors.primary.copy(alpha = 0.1f),
+                            selectedIconColor = colors.primary,
+                            selectedTextColor = colors.primary,
+                            indicatorColor = colors.primaryContainer,
                             unselectedIconColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
                             unselectedTextColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
                         ),

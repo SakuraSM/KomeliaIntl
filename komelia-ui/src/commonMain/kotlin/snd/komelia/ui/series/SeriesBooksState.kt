@@ -1,6 +1,7 @@
 package snd.komelia.ui.series
 
 import androidx.compose.ui.unit.Dp
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
 import kotlinx.coroutines.delay
@@ -62,6 +63,20 @@ class SeriesBooksState(
 
     private val mutableState = MutableStateFlow<LoadState<BooksData>>(LoadState.Uninitialized)
     val state = mutableState.asStateFlow()
+    val readingTarget = MutableStateFlow<LoadState<KomeliaBook?>>(LoadState.Uninitialized)
+
+    fun reloadReadingTarget() {
+        screenModelScope.launch {
+            readingTarget.value = LoadState.Loading
+            try {
+                readingTarget.value = LoadState.Success(findSeriesReadingTarget(bookApi, series.filterNotNull().first().id))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                readingTarget.value = LoadState.Error(error)
+            }
+        }
+    }
 
 
     val filterState = BooksFilterState(
@@ -79,12 +94,16 @@ class SeriesBooksState(
 
         filterState.initialize()
         loadBookData(1)
+        reloadReadingTarget()
 
         screenModelScope.launch { startKomgaEventListener() }
         reloadJobsFlow.onEach {
             reloadEventsEnabled.first { it }
             val state = state.value
-            if (state is LoadState.Success) loadBookData(state.value.currentPage)
+            if (state is LoadState.Success) {
+                loadBookData(state.value.currentPage)
+                reloadReadingTarget()
+            }
             delay(1000)
         }.launchIn(screenModelScope)
 
@@ -94,6 +113,7 @@ class SeriesBooksState(
     }
 
     suspend fun reload() {
+        reloadReadingTarget()
         when (val currentState = state.value) {
             is LoadState.Success<BooksData> -> loadBookData(currentState.value.currentPage)
             else -> loadBookData(1)

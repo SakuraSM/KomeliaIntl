@@ -34,6 +34,9 @@ import sh.calvin.reorderable.ReorderableLazyGridState
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.common.cards.defaultCardWidth
+import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.DraggableImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
@@ -66,6 +69,10 @@ fun SeriesLazyCardGrid(
     beforeContent: @Composable () -> Unit = {},
 ) {
     val layout = LocalKomeliaLayout.current
+    val compactCoverWidth = if (LocalPlatform.current == PlatformType.MOBILE &&
+        LocalWindowWidth.current in listOf(WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM)) {
+        88.dp * (minSize.value / defaultCardWidth)
+    } else null
     val coroutineScope = rememberCoroutineScope()
     val reorderableLazyGridState = rememberReorderableLazyGridState(
         lazyGridState = gridState,
@@ -105,6 +112,7 @@ fun SeriesLazyCardGrid(
                         seriesMenuActions = seriesMenuActions,
                         isSelected = isSelected,
                         onSeriesSelect = onSeriesSelect?.let { { onSeriesSelect(series) } },
+                        coverWidth = compactCoverWidth,
                         modifier = Modifier.fillMaxSize()
                     )
                 }

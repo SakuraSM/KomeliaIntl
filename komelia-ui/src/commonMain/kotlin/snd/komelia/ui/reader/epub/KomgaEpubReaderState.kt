@@ -57,6 +57,7 @@ class KomgaEpubReaderState(
     private val coroutineScope: CoroutineScope,
     private val bookSiblingsContext: BookSiblingsContext,
     private val chromeAppearance: StateFlow<EpubChromeAppearance> = MutableStateFlow(EpubChromeAppearance()),
+    private val consumeInitialChapter: () -> String? = { null },
 ) : EpubReaderState {
     override val state = MutableStateFlow<LoadState<Unit>>(Uninitialized)
     override val book = MutableStateFlow(book)
@@ -147,7 +148,9 @@ class KomgaEpubReaderState(
             book
         }
         bindActive(webview, session, "bookGetProgression") { bookId: KomgaBookId ->
-            bookApi.getReadiumProgression(bookId)
+            val saved = bookApi.getReadiumProgression(bookId)
+            val chapter = consumeInitialChapter()
+            (if (chapter == null) saved else chapterStartProgression(chapter, saved))
                 ?.let { progressionToWebview(it) }
         }
 

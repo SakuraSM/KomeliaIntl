@@ -48,6 +48,17 @@ class RetainedEpubReaderTest {
         assertSame(reader, retained.select(TTSU_EPUB) { error("Previous reader is still usable") })
         assertEquals(0, reader.disposals)
     }
+
+    @Test fun anExplicitChapterEntryGetsANewReaderInsteadOfThePreviousEntryCallback() = runTest {
+        val retained = RetainedEpubReader()
+        val previous = FakeReader().apply { savedPosition = 42 }
+        val chapterEntry = FakeReader()
+        retained.select(TTSU_EPUB) { previous }
+        assertSame(chapterEntry, retained.select(TTSU_EPUB, replaceExisting = true) { chapterEntry })
+        assertEquals(1, previous.disposals)
+        assertEquals(42, previous.savedPosition)
+        assertSame(chapterEntry, retained.select(TTSU_EPUB) { error("Ordinary re-entry keeps the replacement") })
+    }
 }
 
 private class FakeReader : EpubReaderState {

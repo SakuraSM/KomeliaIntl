@@ -70,7 +70,7 @@ class BrowseHeaderLayoutTest {
         compose.waitForIdle()
         for (name in listOf("home", "library", "search")) {
             val bounds = compose.onNodeWithTag(name).getUnclippedBoundsInRoot()
-            assertEquals(80.dp, bounds.bottom - bounds.top, name)
+            assertEquals(112.dp, bounds.bottom - bounds.top, name)
         }
     }
 

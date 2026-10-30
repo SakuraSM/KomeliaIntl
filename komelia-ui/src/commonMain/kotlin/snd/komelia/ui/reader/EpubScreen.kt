@@ -37,6 +37,7 @@ class EpubScreen(
     private val markReadProgress: Boolean = true,
     @Transient
     private val book: KomeliaBook? = null,
+    private var initialChapterHref: String? = null,
 ) : Screen {
 
     override val key: ScreenKey = bookId.value
@@ -50,7 +51,7 @@ class EpubScreen(
                 bookId = bookId,
                 bookSiblingsContext = bookSiblingsContext,
                 book = book,
-                markReadProgress = markReadProgress
+                markReadProgress = markReadProgress,
             )
         }
         val appearance = LocalSurfaceAppearance.current
@@ -61,7 +62,8 @@ class EpubScreen(
             )
         }
         LaunchedEffect(bookId) {
-            vm.initialize(navigator)
+            vm.initialize(navigator, initialChapterHref)
+            initialChapterHref = null
             val state = vm.state.value
             if (state is LoadState.Success) {
                 val book = state.value.book.value

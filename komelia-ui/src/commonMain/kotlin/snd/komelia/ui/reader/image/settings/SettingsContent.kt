@@ -64,6 +64,8 @@ fun BoxScope.SettingsOverlay(
     ohShowHelpDialogChange: (Boolean) -> Unit,
     onSettingsDialogVisibilityChange: (Boolean) -> Unit,
     pageShareAction: PageShareAction? = null,
+    modeHintPreference: snd.komelia.ui.settings.imagereader.ReaderModeHintPreference? = null,
+    modeActions: ReaderModeActions? = null,
 ) {
     if (!show) return
     val windowWidth = LocalWindowWidth.current
@@ -87,8 +89,12 @@ fun BoxScope.SettingsOverlay(
     if ((windowWidth == COMPACT || windowWidth == MEDIUM) && platform != DESKTOP) {
         BottomSheetSettingsOverlay(
             book = book,
+            modeHintPreference = modeHintPreference,
+            volumeKeys = commonReaderState.volumeKeysNavigation.collectAsState().value,
+            onVolumeKeysChange = commonReaderState::onVolumeKeysNavigationChange,
+            onPagedModeChoice = modeActions?.selectPagedLayout,
             readerType = readerType,
-            onReaderTypeChange = commonReaderState::onReaderTypeChange,
+            onReaderTypeChange = modeActions?.selectType ?: { type -> commonReaderState.onReaderTypeChange(type) },
             isColorCorrectionsActive = isColorCorrectionsActive,
             onColorCorrectionClick = onColorCorrectionClick,
             availableUpsamplingModes = availableUpsamplingModes,
@@ -124,8 +130,11 @@ fun BoxScope.SettingsOverlay(
     } else {
         SettingsSideMenuOverlay(
             book = book,
+            modeHintPreference = modeHintPreference,
+            volumeKeys = commonReaderState.volumeKeysNavigation.collectAsState().value,
+            onVolumeKeysChange = commonReaderState::onVolumeKeysNavigationChange,
             readerType = readerType,
-            onReaderTypeChange = commonReaderState::onReaderTypeChange,
+            onReaderTypeChange = modeActions?.selectType ?: { type -> commonReaderState.onReaderTypeChange(type) },
             isColorCorrectionsActive = isColorCorrectionsActive,
             onColorCorrectionClick = onColorCorrectionClick,
             pageShareAction = pageShareAction,

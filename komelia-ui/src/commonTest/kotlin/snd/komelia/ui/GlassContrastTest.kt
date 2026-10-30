@@ -48,8 +48,8 @@ class GlassContrastTest {
         for (theme in AppTheme.entries) {
             val dark = bodyBackdrop(theme, 0f)
             val light = bodyBackdrop(theme, 1f)
-            assertTrue(abs(light.red - dark.red) >= .399f, "$theme chrome hides the backdrop")
-            assertTrue(abs(light.luminance() - dark.luminance()) > .12f,
+            assertTrue(abs(light.red - dark.red) >= .249f, "$theme chrome hides the backdrop")
+            assertTrue(abs(light.luminance() - dark.luminance()) > .06f,
                 "$theme chrome flattens the backdrop tones")
         }
     }
@@ -74,7 +74,7 @@ class GlassContrastTest {
 
     private fun bodyBackdrop(theme: AppTheme, source: Float): Color {
         val tint = glassTintColor(theme, Theme.valueOf(theme.name).colorScheme)
-        // Neutral-input model; runtime screenshots cover blur and highlight boundaries.
+        // The approved 74% frosted tint still transmits 26% of the backdrop; inspect native blur separately.
         fun channel(value: Float) = source * (1 - KomeliaChromeStyle.tintOpacity) + value * KomeliaChromeStyle.tintOpacity
         return Color(channel(tint.red), channel(tint.green), channel(tint.blue))
     }

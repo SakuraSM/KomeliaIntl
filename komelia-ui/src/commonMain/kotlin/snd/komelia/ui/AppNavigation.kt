@@ -83,6 +83,11 @@ internal fun <T> outermostNavigationTarget(
 internal fun Navigator.appRootNavigator(): Navigator =
     outermostNavigationTarget(this) { it.parent }
 
+/** Reading leaves every list/detail pane while retaining the selected destination stack. */
+internal fun Navigator.readerHostNavigator(): Navigator =
+    generateSequence(this) { it.parent }.firstOrNull { it.lastItem is AppTab } ?: appRootNavigator()
+
+
 fun destinationSelection(
     current: AppDestination,
     selected: AppDestination,

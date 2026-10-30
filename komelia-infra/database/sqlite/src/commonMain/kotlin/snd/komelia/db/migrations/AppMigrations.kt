@@ -26,6 +26,7 @@ class AppMigrations : MigrationResourcesProvider() {
         "V17__default_color_correction.sql",
         "V18__komf_mangabaka.sql",
         "V19__surface_style.sql",
+        "V20__reader_mode_hints.sql",
     )
 
     override suspend fun getMigration(name: String): ByteArray? {

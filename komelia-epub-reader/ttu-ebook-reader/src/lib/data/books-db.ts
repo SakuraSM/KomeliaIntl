@@ -36,4 +36,5 @@ export interface BookmarkData {
   lastBookmarkModified: number;
   chapterIndex: number;
   chapterReference: string;
+  initialChapterHref?: string;
 }

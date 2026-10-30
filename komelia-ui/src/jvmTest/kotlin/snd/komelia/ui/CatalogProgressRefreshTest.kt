@@ -91,6 +91,8 @@ class CatalogProgressRefreshTest {
             vm.initialize(); advanceUntilIdle()
             val data = assertIs<LoadState.Success<SeriesBooksState.BooksData>>(vm.booksState.state.value).value
             assertEquals(2, data.books.single().readProgress!!.page)
+            val target = assertIs<LoadState.Success<KomeliaBook?>>(vm.booksState.readingTarget.value).value
+            assertEquals(2, target?.readProgress?.page)
             assertEquals(subscriptions, events.subscriptionCount.value)
         } finally {
             ScreenModelStore.onDisposeNavigator(holder); httpClient.close(); Dispatchers.resetMain()

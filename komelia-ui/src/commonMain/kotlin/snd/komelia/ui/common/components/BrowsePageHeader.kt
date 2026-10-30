@@ -33,13 +33,14 @@ internal fun BrowsePageHeader(
 ) = KomeliaSafeTopBar {
     val layout = LocalKomeliaLayout.current
     Row(
-        Modifier.fillMaxWidth().heightIn(min = layout.minimumTouchTarget).padding(horizontal = layout.pageHorizontalPadding + 8.dp),
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         navigationIcon?.invoke()
         if (titleContent == null) {
-            Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f).padding(start = if (navigationIcon == null) 12.dp else 0.dp))
         } else {
             titleContent(Modifier.weight(1f))
         }

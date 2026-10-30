@@ -757,6 +757,8 @@
     "shortcuts": {
       "cycle_pagination": "Cycle column count",
       "cycle_viewing_theme": "Cycle viewing theme",
+      "line_height_decrease": "Decrease line height",
+      "line_height_increase": "Increase line height",
       "font_size_decrease": "Decrease font size",
       "font_size_increase": "Increase font size",
       "menus": "Menus",

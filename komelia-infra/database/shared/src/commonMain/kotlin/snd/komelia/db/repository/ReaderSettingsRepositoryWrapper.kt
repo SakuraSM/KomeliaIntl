@@ -33,6 +33,34 @@ class ReaderSettingsRepositoryWrapper(
         wrapper.transform { settings -> settings.copy(readerType = type) }
     }
 
+    override fun getReaderModeHintsEnabled(): Flow<Boolean> = wrapper.mapState { it.readerModeHintsEnabled }
+
+    override suspend fun putReaderModeHintsEnabled(enabled: Boolean) {
+        wrapper.transform { settings ->
+            settings.copy(
+                readerModeHintsEnabled = enabled,
+                lastReaderModeHintSignature = if (enabled && !settings.readerModeHintsEnabled) null
+                    else settings.lastReaderModeHintSignature,
+            )
+        }
+    }
+
+    override suspend fun consumeReaderModeHint(signature: String): Boolean {
+        val current = wrapper.state.value
+        if (!current.readerModeHintsEnabled || current.lastReaderModeHintSignature == signature) return false
+        var consumed = false
+        wrapper.transform { settings ->
+            if (!settings.readerModeHintsEnabled || settings.lastReaderModeHintSignature == signature) settings
+            else {
+                consumed = true
+                settings.copy(lastReaderModeHintSignature = signature)
+            }
+        }
+        // A setting change can arrive while the previous write is suspended.
+        val saved = wrapper.state.value
+        return consumed && saved.readerModeHintsEnabled && saved.lastReaderModeHintSignature == signature
+    }
+
     override fun getStretchToFit(): Flow<Boolean> {
         return wrapper.mapState { it.stretchToFit }
     }

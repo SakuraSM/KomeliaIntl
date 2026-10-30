@@ -1,6 +1,7 @@
 package snd.komelia.ui.common.cards
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
@@ -19,6 +20,27 @@ import kotlin.test.assertTrue
 
 class CoverCaptionFontScaleTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test fun singleAndTwoLineTitlesShareTheirTopAlignment() {
+        compose.setContent {
+            CompositionLocalProvider(LocalPlatform provides PlatformType.MOBILE) {
+                MaterialTheme {
+                    Row {
+                        Box(Modifier.width(111.dp)) {
+                            CoverCardCaption("Short title", CoverCaptionVariant.TitleOnly)
+                        }
+                        Box(Modifier.width(111.dp)) {
+                            CoverCardCaption("A longer title that uses two lines", CoverCaptionVariant.TitleOnly)
+                        }
+                    }
+                }
+            }
+        }
+        val short = compose.onNodeWithText("Short title").getUnclippedBoundsInRoot()
+        val wrapped = compose.onNodeWithText("A longer title that uses two lines").getUnclippedBoundsInRoot()
+        assertTrue(kotlin.math.abs(short.top.value - wrapped.top.value) <= 2f,
+            "Titles in one row must start together: short=$short, wrapped=$wrapped")
+    }
 
     @Test fun largeFontLeavesACompleteSupportingLineBelowTheLongTitle() {
         compose.setContent {

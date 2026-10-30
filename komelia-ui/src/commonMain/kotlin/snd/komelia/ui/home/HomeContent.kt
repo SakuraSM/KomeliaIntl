@@ -44,6 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_in_progress_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_all
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_group_items
@@ -355,7 +357,7 @@ private fun LazyGridScope.BookFilterEntry(
     if (featuredBook != null) {
         item(span = { GridItemSpan(maxLineSpan) }, key = "hero-${featuredBook.id.value}") {
             ContinueReadingHero(
-                ContinueReadingHeroContent(label, featuredBook),
+                ContinueReadingHeroContent(stringResource(Res.string.reading_in_progress_title), featuredBook),
                 ContinueReadingHeroActions(
                     onDetails = { onBookClick(featuredBook) },
                     onRead = { onBookReadClick(featuredBook, true) },
@@ -363,7 +365,8 @@ private fun LazyGridScope.BookFilterEntry(
                 ),
             )
         }
-    } else item(span = { GridItemSpan(maxLineSpan) }) {
+    }
+    if (books.any { it.id != featuredBook?.id }) item(span = { GridItemSpan(maxLineSpan) }) {
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -372,7 +375,7 @@ private fun LazyGridScope.BookFilterEntry(
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )
@@ -403,7 +406,7 @@ private fun LazyGridScope.SeriesFilterEntries(
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }

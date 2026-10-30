@@ -1,0 +1,308 @@
+{
+  "date": "2026-10-30",
+  "artifact": {
+    "package": "io.github.zhengningning.komelia.debug",
+    "versionName": "0.31.1-debug",
+    "artifact": "Komelia-Test-layout-polish-20261030.apk",
+    "artifactSha256": "f653748fb7e43e02cd59e2a9fd3d4dc1a9bc8af844e4e4885114e8ff69b067e3",
+    "installedSha256": "f653748fb7e43e02cd59e2a9fd3d4dc1a9bc8af844e4e4885114e8ff69b067e3",
+    "identical": true
+  },
+  "unit": "Android dp; reference CSS px at fontScale=1",
+  "steps": [
+    {
+      "number": 1,
+      "name": "首页",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "分组标题调整为 18sp。",
+      "image": "01-native.png",
+      "sha256": "4138eb976e6bb4672b7f6995e5dce1b72ede1da9fef7a8b2ee7b68d111340b62",
+      "sourceCapture": "01-home"
+    },
+    {
+      "number": 2,
+      "name": "书库",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "三列封面 88 × 132，单行和双行标题顶对齐。",
+      "image": "02-native.png",
+      "sha256": "0dca7a916a34f9f5eb1d0428ceaf8ab123e30d0791266dd935dd537d3e2a2e67",
+      "sourceCapture": "02-library"
+    },
+    {
+      "number": 3,
+      "name": "丛书卷册",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "书籍和合集共用工具栏，不再增加独立切换层。",
+      "image": "03-native.png",
+      "sha256": "79ddfbfe72af4f0808854a1d80a5eb76498515d4022ef518794b9f7b6e2a5475",
+      "sourceCapture": "03-series"
+    },
+    {
+      "number": 4,
+      "name": "文字书详情",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "完整长标题、目录和下载保留，阅读按钮居中。",
+      "image": "04-native.png",
+      "sha256": "db07b00c0c7dc2807c1cd02eb44a07ba516db6a34be79f1202d0e870c2a38f57",
+      "sourceCapture": "04-ebook"
+    },
+    {
+      "number": 5,
+      "name": "漫画详情",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "标题居中，简介内部间距 8，阅读条下留白 20。",
+      "image": "05-native.png",
+      "sha256": "47014304c6679d6c3d818cff5251890297d715505bad60bfbee2a43d8b2eeb1e",
+      "sourceCapture": "05-comic"
+    },
+    {
+      "number": 6,
+      "name": "本地与下载",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "本地目录采用图标、左对齐标题和右箭头行。",
+      "image": "06-native.png",
+      "sha256": "372eac5d6f15f0ce0700f7886fea336756a310b9f7a6b49145c4743836dc40bd",
+      "sourceCapture": "06-local"
+    },
+    {
+      "number": 7,
+      "name": "搜索查询",
+      "widthDp": 411.43,
+      "fontScale": 1,
+      "locale": "en",
+      "theme": "DARK",
+      "note": "英文输入 Field 后显示 Field Notes，清空恢复原结果。",
+      "image": "07-native.png",
+      "sha256": "b82a818980479895537bc0dc5566ae7e3e8b656a39b94484b309b13c13352b10",
+      "sourceCapture": "07-search-query"
+    },
+    {
+      "number": 8,
+      "name": "设置首页",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "共享顶栏外边距调整为 12，既有分组保留。",
+      "image": "08-native.png",
+      "sha256": "da07405b526fcf765641a832a6a62332494d21dfc7d9c13d224a99b5a158f40d",
+      "sourceCapture": "08-settings"
+    },
+    {
+      "number": 9,
+      "name": "筛选与显示",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "范围和类型同排，常用条件前置，完成固定可达。",
+      "image": "09-native.png",
+      "sha256": "62bb0b8ce9f3ebd2536a6777afe1cc4e40d36db81d32883f66428f067ea81cda",
+      "sourceCapture": "09-filters"
+    },
+    {
+      "number": 10,
+      "name": "EPUB 目录",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "目录及关闭入口保持，原生手柄区域保留。",
+      "image": "10-native.png",
+      "sha256": "ccae27ca38f8fa2971e10fa66af2287f46ea17d7f6b97d4f0818ed64cb2284b9",
+      "sourceCapture": "10-toc"
+    },
+    {
+      "number": 11,
+      "name": "文字阅读设置",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "字体同排，六个主题按三列排列，新增主题单独保留。",
+      "image": "11-native.png",
+      "sha256": "07d41ba6e98633e0afcdc5a59238efc77ba7a62a15460ee8e1ffc4e82eaea59f",
+      "sourceCapture": "11-text-settings"
+    },
+    {
+      "number": 12,
+      "name": "漫画与 PDF 设置",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "标题与正文左边距 20，三项模式均分整行。",
+      "image": "12-native.png",
+      "sha256": "26f47aed3da93f6945387fbf64e1aa29097762caa64487f9fef9187d4dc73584",
+      "sourceCapture": "12-image-settings"
+    },
+    {
+      "number": 13,
+      "name": "文字详情浅色",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "LIGHT",
+      "note": "复核浅色下长标题、次操作与阅读条。",
+      "image": "13-native.png",
+      "sha256": "8bb42cde746357a362a3f4ae1d0f441be1ef6701cec07b0a7528136939777c07",
+      "sourceCapture": "13-ebook-light"
+    },
+    {
+      "number": 14,
+      "name": "丛书浅色",
+      "widthDp": 390,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "LIGHT",
+      "note": "复核浅色下工具栏、卷册和阅读状态。",
+      "image": "14-native.png",
+      "sha256": "205a99dcc78bb1f00bca11c55d6429604f7e05ad8e99bf577446f9202b8e998e",
+      "sourceCapture": "14-series-light"
+    },
+    {
+      "number": 15,
+      "name": "834dp 平板",
+      "widthDp": 834,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "导航占宽 80；封面 112 × 168；浮条左右 24。",
+      "image": "15-native.png",
+      "sha256": "149402faedf97e422db48e6603447677d8d5a79325095d6087cc3e71efea1e09",
+      "sourceCapture": "15-tablet"
+    },
+    {
+      "number": 16,
+      "name": "1440dp 宽屏",
+      "widthDp": 1440,
+      "fontScale": 1,
+      "locale": "zh-CN",
+      "theme": "DARK",
+      "note": "导航占宽 180；封面 132 × 198；浮条左右 48。",
+      "image": "16-native.png",
+      "sha256": "56fac640846a40b88054529a0117eab1a86d7e0983d8612db1aa5ee182e019b7",
+      "sourceCapture": "16-wide"
+    }
+  ],
+  "extraEvidence": [
+    {
+      "image": "03-collections.png",
+      "sha256": "d4400b2001c5a8f85cba6b290153c02b4d0acf27ac5b742d8462720a99df7983"
+    },
+    {
+      "image": "04-book-menu.png",
+      "sha256": "2e89e17181980fb3a9131fc5069e56ed9d0cc42b142771da8a37c36086671e53"
+    },
+    {
+      "image": "04-readlist-dialog.png",
+      "sha256": "6fa4cb68fa27e927c66080bad7d88042e7c6ae557eabc8ea86ee868284b5f013"
+    },
+    {
+      "image": "05-incognito-return.png",
+      "sha256": "5b84cc2c5fbc7424ac9edbb0766da6ad0a0b8137f44cbab6b313dbb5dc44b0aa"
+    },
+    {
+      "image": "09-filters-advanced.png",
+      "sha256": "49170396b1d774d3a7888764e0eb4b56bb93019668debb6e01022f36e8ad21e2"
+    },
+    {
+      "image": "09-filters-scrolled.png",
+      "sha256": "7452b155cfeebd55c4d301816205ad44cf38220aa19abfb3264a30cca9e530cc"
+    },
+    {
+      "image": "09-filters-dismissed.png",
+      "sha256": "409d6af816a32f87ddcff39f407924ad44843702d9e32bdc9a045924b5ee6c6e"
+    },
+    {
+      "image": "12-incognito-controls.png",
+      "sha256": "800a1965d74567753f9ff61e716f387c2e79d6cbc5e209a42e24381f75b10482"
+    },
+    {
+      "image": "12-incognito-advanced.png",
+      "sha256": "b9db9873be4cd0f6bbfa8ef85d0439b965df1eda1de77ab3125d99b08201f799"
+    },
+    {
+      "image": "16-wide-reader.png",
+      "sha256": "96209efdd8bf702db25200996d979bbfced8e3c946bca19d5751b0458e66371b"
+    },
+    {
+      "image": "16-wide-reader-controls.png",
+      "sha256": "1a7312ea3353203e8ad9a15827d7a1cdba4ddadebbdf7dd46b71f4b40d9f7ae7"
+    },
+    {
+      "image": "16-wide-reader-return.png",
+      "sha256": "1c2a0c4252f1142fc07f572fda7e0a5adb6baf374b77d2c6758fd2f19eb9d380"
+    },
+    {
+      "image": "18-resized-phone-detail.png",
+      "sha256": "9df1555470429b518b75a98327e65ce6bba49845ad42604a67de3e0eea37d193"
+    },
+    {
+      "image": "17-narrow-font130.png",
+      "sha256": "5a3ea1427eb0ded4585b7c7e2cd5f793952a1620ff8021c9a2c095bf6a91ac85"
+    }
+  ],
+  "phoneSystemInsetsPhysical": {
+    "top": 139,
+    "bottom": 72
+  },
+  "narrowFontCheck": {
+    "widthDp": 360,
+    "fontScale": 1.3,
+    "theme": "LIGHT",
+    "image": "17-narrow-font130.png"
+  },
+  "supplementaryFiles": [
+    {
+      "file": "wasm-glass-final.png",
+      "sha256": "e431df7dcc8c2e357fe124be489db6c317070f1c47fb301372ca34180766668e"
+    },
+    {
+      "file": "overview.png",
+      "sha256": "fe20f96adbff04618649b5a9c710852b1fba56791b73b41d126c5e31e3ada285"
+    },
+    {
+      "file": "18-restored-home.png",
+      "sha256": "2cce63555e9e8aba52cc151700355efcbf50080d93e2b96ffbf67cccc1c4e2e3"
+    },
+    {
+      "file": "restored-environment.json",
+      "sha256": "dce95b3bd943fc6ea85de0f4cee68a52509d83a977c456e75fc15d74f46a77ff"
+    },
+    {
+      "file": "measurements.json",
+      "sha256": "a64e3ec62fa7c8159b947ca0bd157bf41b171e6af92767312b34d2c1cfc97565"
+    },
+    {
+      "file": "comparison.html",
+      "sha256": "25e7796df2237ae735c4e90b6e8a475984435ed086f705ecfc1b216c5b254e29"
+    },
+    {
+      "file": "apk-badging.txt",
+      "sha256": "953fced71cf601ea530548c349180384efaee5430fdde69c75c506e0fad92db6"
+    },
+    {
+      "file": "apk-signature.txt",
+      "sha256": "b0a1af67205efcd284e5bbae691ebf4a0d296b4fcae02cd28e7e0509d0e0efbc"
+    }
+  ]
+}

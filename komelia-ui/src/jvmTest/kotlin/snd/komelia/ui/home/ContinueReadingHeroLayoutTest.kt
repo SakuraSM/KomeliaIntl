@@ -8,8 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -33,9 +34,9 @@ import snd.komga.client.series.KomgaSeriesId
 class ContinueReadingHeroLayoutTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun largeFontPlacesTheActionBelowTheCompleteBookTitle() = assertControls(360, 1.5f, true)
-    @Test fun narrowPhonePlacesTheActionBelowTheTitle() = assertControls(320, 1f, true)
-    @Test fun regularPhoneKeepsTheActionBesideTheTitle() = assertControls(412, 1f, false)
+    @Test fun largeFontKeepsProgressAboveAFullWidthReadingAction() = assertControls(360, 1.5f, true)
+    @Test fun narrowPhoneKeepsAFullWidthReadingAction() = assertControls(320, 1f, true)
+    @Test fun regularPhoneUsesTheSameReadingActionHierarchy() = assertControls(412, 1f, false)
 
     private fun assertControls(width: Int, fontScale: Float, stacked: Boolean) {
         var readClicks = 0
@@ -51,17 +52,26 @@ class ContinueReadingHeroLayoutTest {
                 }
             }
         }
-        val title = compose.onNodeWithText("Synthetic series").getUnclippedBoundsInRoot()
-        val subtitle = compose.onNodeWithText("Chapter twelve").getUnclippedBoundsInRoot()
+        val progress = compose.onNode(hasText("50%", substring = true)).getUnclippedBoundsInRoot()
         val action = compose.onNode(hasClickAction()).getUnclippedBoundsInRoot()
-        if (stacked) {
-            assertTrue(action.top >= subtitle.bottom, "Reading action must not squeeze the book title: $action / $subtitle")
-            assertTrue(title.right - title.left >= 150.dp, "Title must retain useful width: $title")
-        } else {
-            assertTrue(action.left >= title.right, "Regular controls should remain side by side")
-        }
+        assertTrue(action.top >= progress.bottom, "Progress must remain above the reading action")
+        assertEquals(width.dp, (action.right - action.left))
+        assertTrue((action.bottom - action.top) >= 48.dp, "Reading action must retain its touch target")
         compose.onNode(hasClickAction()).performClick()
         assertEquals(1, readClicks)
+    }
+
+    @Test fun unknownProgressDoesNotRenderAnArbitraryPercentage() {
+        compose.setContent {
+            CompositionLocalProvider(LocalLibraries provides MutableStateFlow(emptyList())) {
+                MaterialTheme {
+                    val original = book("Unknown progress")
+                    HeroReadingControls(original.copy(media = original.media.copy(pagesCount = 0))) {}
+                }
+            }
+        }
+        compose.onAllNodes(androidx.compose.ui.test.SemanticsMatcher.keyIsDefined(androidx.compose.ui.semantics.SemanticsProperties.ProgressBarRangeInfo)).assertCountEquals(0)
+        compose.onAllNodes(hasText("%", substring = true)).assertCountEquals(0)
     }
 
     private fun book(id: String): KomeliaBook {

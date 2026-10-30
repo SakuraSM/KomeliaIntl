@@ -21,10 +21,17 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import snd.komelia.ui.common.components.KomeliaModalBottomSheet as ModalBottomSheet
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Tab
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.ExpandMore
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_image_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_image_advanced
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_close_settings
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -35,7 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -52,8 +58,6 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_la
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_offset_pages
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_reading_direction
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_paged_scale_type
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_settings_image_settings
-import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_settings_reading_mode
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_continuous
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_paged
@@ -79,7 +83,6 @@ import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.SwitchWithLabel
 import snd.komelia.ui.common.components.KomeliaChromeContent
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
-import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.reader.image.PageShareAction
 import snd.komelia.ui.reader.image.continuous.ContinuousReaderState
 import snd.komelia.ui.reader.image.paged.PagedReaderState
@@ -123,6 +126,10 @@ fun BottomSheetSettingsOverlay(
     onBackPress: () -> Unit,
     onSettingsDialogVisibilityChange: (Boolean) -> Unit,
     pageShareAction: PageShareAction? = null,
+    modeHintPreference: snd.komelia.ui.settings.imagereader.ReaderModeHintPreference? = null,
+    volumeKeys: Boolean = false,
+    onVolumeKeysChange: ((Boolean) -> Unit)? = null,
+    onPagedModeChoice: ((PageDisplayLayout) -> Unit)? = null,
 ) = KomeliaChromeContent {
 
     var showSettingsDialog by remember { mutableStateOf(false) }
@@ -150,37 +157,19 @@ fun BottomSheetSettingsOverlay(
                     onSettingsDialogVisibilityChange(false)
                 },
                 sheetState = sheetState,
-                dragHandle = {},
-                scrimColor = Color.Transparent,
+                scrimColor = Color.Black.copy(alpha = .35f),
                 containerColor = MaterialTheme.colorScheme.surface,
             ) {
-                var selectedTab by remember { mutableStateOf(0) }
-                SecondaryTabRow(
-                    selectedTabIndex = selectedTab,
-                ) {
-                    Tab(
-                        selected = selectedTab == 0,
-                        onClick = { selectedTab = 0 },
-                        modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
-                    ) {
-                        Text(stringResource(Res.string.reader_settings_reading_mode))
-                    }
-                    Tab(
-                        selected = selectedTab == 1,
-                        onClick = { selectedTab = 1 },
-                        modifier = Modifier.heightIn(min = 40.dp).cursorForHand(),
-                    ) {
-                        Text(stringResource(Res.string.reader_settings_image_settings))
+                var advanced by remember { mutableStateOf(false) }
+                Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(Res.string.reading_image_settings), style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f))
+                    IconButton(onClick = { showSettingsDialog = false; onSettingsDialogVisibilityChange(false) }) {
+                        Icon(Icons.Rounded.Close, stringResource(Res.string.navigation_close_settings))
                     }
                 }
                 val focusManager = LocalFocusManager.current
-                val width = LocalWindowWidth.current
-                val contentPadding = remember(width) {
-                    when (width) {
-                        COMPACT -> 10.dp
-                        else -> 20.dp
-                    }
-                }
+                val contentPadding = 20.dp
                 Column(
                     Modifier
                         .padding(contentPadding)
@@ -190,18 +179,17 @@ fun BottomSheetSettingsOverlay(
                         .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
                 ) {
 
-                    when (selectedTab) {
-                        0 -> {
-                            BottomSheetReadingModeSettings(
-                                readerType = readerType,
-                                onReaderTypeChange = onReaderTypeChange,
-                                pagedReaderState = pagedReaderState,
-                                continuousReaderState = continuousReaderState,
-                                panelsReaderState = panelsReaderState,
-                            )
-                        }
-
-                        1 -> BottomSheetImageSettings(
+                    CompactReaderModes(readerType, onReaderTypeChange, onPagedModeChoice,
+                        pagedReaderState, continuousReaderState, panelsReaderState)
+                    Spacer(Modifier.heightIn(min = 12.dp))
+                    ReaderHintControls(modeHintPreference, volumeKeys, onVolumeKeysChange)
+                    TextButton(onClick = { advanced = !advanced }, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(Res.string.reading_image_advanced), modifier = Modifier.weight(1f))
+                        Icon(Icons.Rounded.ExpandMore, null)
+                    }
+                    if (advanced) {
+                        BottomSheetReadingModeSettings(readerType, onReaderTypeChange, pagedReaderState, continuousReaderState, panelsReaderState)
+                        BottomSheetImageSettings(
                             readerType = readerType,
                             pagedReaderState = pagedReaderState,
                             continuousReaderState = continuousReaderState,

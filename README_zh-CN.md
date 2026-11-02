@@ -11,9 +11,11 @@ Komelia Intl 是 [Komelia](https://github.com/Snd-R/Komelia) 的 `SakuraSM/Komel
 
 ## 本仓库的重要改动
 
-### UI 优化
+### 阅读界面
 
-本仓库重新设计了一级导航、首页分组、书库筛选、搜索、设置和详情页，使其适配手机与宽屏。Light、Dark 和 OLED 主题共用间距、颜色、圆角与动效规则，界面同时支持 reduced motion 和键盘焦点。
+首页将封面、阅读进度和继续阅读放在一起。书库和本地页面提供常驻搜索与筛选，书籍详情保留一处主阅读操作。宽屏将书目列表或网格放在详情旁，缩放时保留所选书籍。
+
+界面支持经典与液态玻璃外观、浅色、深色和 OLED 主题、减少透明效果、减少动态效果及键盘焦点。图文与 EPUB 阅读控件采用应用外观，TTU 和 Komga EPUB 正文保留独立阅读主题。
 
 ### 远程与本地网络动态切换
 
@@ -67,11 +69,17 @@ Android 与桌面端无需登录 Komga 即可添加本地文件夹。Komelia 会
 
 [上游 Releases](https://github.com/Snd-R/Komelia/releases)、[Google Play 版本](https://play.google.com/store/apps/details?id=io.github.snd_r.komelia)、[F-Droid 版本](https://f-droid.org/packages/io.github.snd_r.komelia/)和 [AUR 版本](https://aur.archlinux.org/packages/komelia)均为上游 Komelia，不包含本仓库的改动。
 
-## Android 界面预览
+## 界面预览
 
-<img src="screenshots/app-overview-v0.18.13.png" alt="Komelia Android 首页、书库筛选、书籍详情和设置页面" width="100%">
+下图为 Android 开发版简体中文界面的实际运行图，使用合成测试书籍。
 
-拼图使用测试内容。资源文件名和来源域名已经打码，其中不包含账号、服务器地址或测试凭据。
+<img src="screenshots/app-overview-20261103.png" alt="当前 Android 首页、书库、书籍详情与本地下载界面" width="100%">
+
+TTU EPUB、漫画与 PDF、Komga EPUB 的阅读设置：
+
+<img src="screenshots/reader-overview-20261103.png" alt="Android 开发版的 TTU EPUB、漫画与 PDF、Komga EPUB 阅读设置" width="100%">
+
+[完整18页运行图](docs/verification/modern-ui-alignment-20261102-assets/screens/)还包含浅色主题与 Android 宽屏布局。构建与设备覆盖见[验证记录](docs/verification/modern-ui-alignment-20261102.md)。
 
 ## 从源码构建
 

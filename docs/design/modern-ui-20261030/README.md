@@ -1,7 +1,8 @@
 # Komelia 现代阅读界面完整视觉稿
 
-2026-10-30。沿用已确认三页，整理18张：16页主流程与两页阅读补充。设计前的应用代码检查点为 `68b2daf7`。2026-11-02 的原生与 EPUB 实现另见[对齐标尺](MEASUREMENTS.md)。
+2026-10-30。沿用已确认三页，整理18张：16页主流程与两页阅读补充。设计前的应用代码检查点为 `68b2daf7`。原生与EPUB实现已完成控件校准，2026-11-03更新的[对齐标尺](MEASUREMENTS.md)和[验证记录](../../verification/modern-ui-alignment-20261102.md)记录当前实现与运行边界。
 
+- [实现后的18页运行对照](../../verification/modern-ui-alignment-20261102-assets/index.html)
 - [逐页浏览](index.html)
 - [完整总览](overview.png)
 - [主页面总览](main-overview.png)

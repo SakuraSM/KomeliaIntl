@@ -60,6 +60,10 @@ import snd.komelia.ui.common.images.BookThumbnail
 import snd.komelia.ui.common.menus.BookActionsMenu
 import snd.komelia.ui.common.menus.BookMenuActions
 import snd.komelia.ui.common.readIsSupported
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_progress_percent
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.enum_unread
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.enum_in_progress
+import kotlin.math.roundToInt
 
 @Composable
 fun BookImageCard(
@@ -70,6 +74,9 @@ fun BookImageCard(
     isSelected: Boolean = false,
     onSelect: (() -> Unit)? = null,
     showSeriesTitle: Boolean = false,
+    isActive: Boolean = false,
+    showVolumeTitle: Boolean = false,
+    compactCaption: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val libraries = LocalLibraries.current
@@ -77,6 +84,8 @@ fun BookImageCard(
         libraries.value.firstOrNull { it.id == book.libraryId }?.unavailable ?: false
     }
     ItemCard(
+        isHighlighted = isActive,
+        coverAspectRatio = if (compactCaption) .635f else 2f / 3f,
         modifier = modifier,
         onClick = onBookClick,
         onLongClick = onSelect,
@@ -94,6 +103,7 @@ fun BookImageCard(
                         book = book,
                         libraryIsDeleted = libraryIsDeleted,
                         showTitle = false,
+                        showProgress = false,
                     ) {
                         BookThumbnail(
                             book.id,
@@ -105,14 +115,19 @@ fun BookImageCard(
             }
         },
         content = {
-            CoverCardCaption(
-                title = book.metadata.title,
-                variant = if (showSeriesTitle) {
-                    CoverCaptionVariant.TitleWithSupporting
-                } else {
-                    CoverCaptionVariant.TitleOnly
+            val progress = bookReadProgressFraction(book)
+            ReadingCoverCaption(
+                prominent = showVolumeTitle,
+                compact = compactCaption,
+                title = if (showVolumeTitle) book.seriesTitle.ifBlank { book.metadata.title } else book.metadata.title,
+                progress = progress,
+                status = when {
+                    book.readProgress == null -> stringResource(Res.string.enum_unread)
+                    progress == null -> stringResource(Res.string.enum_in_progress)
+                    else -> stringResource(Res.string.home_progress_percent, (progress * 100).roundToInt())
                 },
-                supportingText = if (showSeriesTitle && !book.oneshot) book.seriesTitle else null,
+                supportingText = if (showVolumeTitle && book.seriesTitle != book.metadata.title) book.metadata.title
+                    else if (showSeriesTitle && !book.oneshot) book.seriesTitle else null,
             )
         },
     )
@@ -149,6 +164,7 @@ private fun BookImageOverlay(
     libraryIsDeleted: Boolean,
     showTitle: Boolean = true,
     showSeriesTitle: Boolean = false,
+    showProgress: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val layout = LocalKomeliaLayout.current
@@ -194,12 +210,13 @@ private fun BookImageOverlay(
 
             val readProgress = book.readProgress
             val fraction = bookReadProgressFraction(book)
-            if (readProgress != null && !readProgress.completed && fraction != null) {
+            if (showProgress && readProgress != null && !readProgress.completed && fraction != null) {
                 LinearProgressIndicator(
                     progress = { fraction },
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
                     modifier = Modifier.height(4.dp).fillMaxWidth().background(Color.Black),
+                    gapSize = 0.dp,
                     drawStopIndicator = {}
                 )
             }
@@ -364,8 +381,9 @@ fun BookDetailedListCard(
     onSelect: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    isActive: Boolean = false,
 ) {
-    CompactBookRow(book, onClick, bookMenuActions, onBookReadClick, isSelected, onSelect, compact, modifier)
+    CompactBookRow(book, onClick, bookMenuActions, onBookReadClick, isSelected, onSelect, compact, modifier, isActive)
 }
 
 @Composable

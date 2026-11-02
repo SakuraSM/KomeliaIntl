@@ -20,16 +20,13 @@ internal fun SeriesReadingHeader(
     readingTarget: LoadState<KomeliaBook?>,
     onRead: (KomeliaBook) -> Unit,
     onRetry: () -> Unit,
-    header: @Composable () -> Unit,
+    header: @Composable (readingAction: @Composable () -> Unit) -> Unit,
 ) {
-    Column(Modifier.fillMaxWidth()) {
-        header()
+    header {
         val target = (readingTarget as? LoadState.Success)?.value
         if (target != null && readIsSupported(target)) {
-            Button(onClick = { onRead(target) }, modifier = Modifier.fillMaxWidth().padding(top = 16.dp).heightIn(min = 48.dp),
+            Button(onClick = { onRead(target) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 shape = MaterialTheme.shapes.small) {
-                Icon(Icons.AutoMirrored.Rounded.MenuBook, null)
-                Spacer(Modifier.width(8.dp))
                 Text(readingActionLabel(target))
             }
         } else if (readingTarget is LoadState.Error) {

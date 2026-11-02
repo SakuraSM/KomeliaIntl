@@ -11,6 +11,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
@@ -42,7 +46,7 @@ import kotlin.test.assertEquals
 class BrowseHeaderLayoutTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun titlesSearchAndFiltersRemainOneRowAtLargeFontScale() {
+    @Test fun persistentSearchHasItsOwnRowWithoutShrinkingTouchTargetsAtLargeFontScale() {
         compose.setContent {
             MaterialTheme {
                 CompositionLocalProvider(
@@ -59,7 +63,7 @@ class BrowseHeaderLayoutTest {
                             }
                         }
                         Box(Modifier.testTag("search")) {
-                            BrowseSearchHeader("Search", "", {}, searchVisible = true) {
+                            BrowseSearchHeader("Search", "", {}) {
                                 BrowseOptionsButton { Text("Search type") }
                             }
                         }
@@ -70,27 +74,25 @@ class BrowseHeaderLayoutTest {
         compose.waitForIdle()
         for (name in listOf("home", "library", "search")) {
             val bounds = compose.onNodeWithTag(name).getUnclippedBoundsInRoot()
-            assertEquals(112.dp, bounds.bottom - bounds.top, name)
+            assertEquals(if (name == "search") 156.dp else 88.dp, bounds.bottom - bounds.top, name)
         }
     }
 
-    @Test fun openingInlineSearchFocusesItsFieldAndClosingPreservesTheQuery() {
+    @Test fun persistentSearchAcceptsTypingAndEscapePreservesTheQuery() {
         val query = mutableStateOf("")
-        val searchLabel = runBlocking { getString(Res.string.navbar_search) }
-        val backLabel = runBlocking { getString(Res.string.navigation_back) }
         compose.setContent {
             MaterialTheme {
-                Box(Modifier.size(360.dp, 100.dp)) {
+                Box(Modifier.size(360.dp, 180.dp)) {
                     BrowseSearchHeader("Local", query.value, { query.value = it })
                 }
             }
         }
-        compose.onNodeWithContentDescription(searchLabel).performClick()
-        compose.onNode(hasSetTextAction()).assertIsFocused().performTextInput("sample")
-        compose.onNodeWithContentDescription(backLabel).performClick()
-        compose.onNodeWithText("Local · sample").assertExists()
-        compose.onNodeWithContentDescription(searchLabel).performClick()
-        compose.onNode(hasSetTextAction()).assertTextEquals("sample")
+        val field = compose.onNode(hasSetTextAction())
+        field.performClick().assertIsFocused().performTextInput("sample")
+        field.performKeyInput { pressKey(Key.Escape) }
+        field.assertIsNotFocused().assertTextEquals("sample")
+        compose.onNodeWithText("Local").assertExists()
+        field.performClick().assertIsFocused().assertTextEquals("sample")
     }
 
     @Test fun dismissingViewOptionsRestoresFocusToTheTitleRow() {

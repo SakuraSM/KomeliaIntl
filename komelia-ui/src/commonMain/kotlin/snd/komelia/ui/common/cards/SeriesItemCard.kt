@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.Dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_books_count
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_unavailable
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_books_progress
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.offline.local.isLocalLibrary
@@ -62,6 +63,7 @@ fun SeriesImageCard(
     seriesMenuActions: SeriesMenuActions? = null,
     modifier: Modifier = Modifier,
     coverWidth: Dp? = null,
+    coverAspectRatio: Float = 2f / 3f,
 ) {
     val libraries = LocalLibraries.current
     val libraryIsDeleted = remember {
@@ -70,6 +72,7 @@ fun SeriesImageCard(
     ItemCard(
         modifier = modifier,
         coverWidth = coverWidth,
+        coverAspectRatio = coverAspectRatio,
         onClick = onSeriesClick,
         onLongClick = onSeriesSelect,
         image = {
@@ -100,9 +103,10 @@ fun SeriesImageCard(
             }
         },
         content = {
-            CoverCardCaption(
+            ReadingCoverCaption(
                 title = series.metadata.title,
-                variant = CoverCaptionVariant.TitleOnly,
+                progress = if (series.booksCount > 0) series.booksReadCount.toFloat() / series.booksCount else null,
+                status = stringResource(Res.string.series_books_progress, series.booksReadCount, series.booksCount),
             )
         },
     )
@@ -265,18 +269,27 @@ private fun SeriesImageOverlay(
 fun SeriesDetailedListCard(
     series: KomeliaSeries,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    menu: SeriesMenuActions? = null,
 ) {
     Column(modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        Row(Modifier.heightIn(min = 88.dp).padding(vertical = 8.dp),
+        Row(Modifier.heightIn(min = 112.dp).padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            SeriesThumbnail(series.id, modifier = Modifier.width(42.dp).aspectRatio(2f / 3f)
+            SeriesThumbnail(series.id, modifier = Modifier.width(64.dp).aspectRatio(2f / 3f)
                 .clip(MaterialTheme.shapes.extraSmall), contentScale = ContentScale.Fit)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(series.metadata.title, style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Text(pluralStringResource(Res.plurals.series_books_count, series.booksCount, series.booksCount.toString()),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (menu != null) {
+                var expanded by remember(series.id) { mutableStateOf(false) }
+                Box {
+                    IconButton(onClick = { expanded = true }) { Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more)) }
+                    SeriesActionsMenu(series, menu, expanded, showEditOption = true, showDownloadOption = true,
+                        onDismissRequest = { expanded = false })
+                }
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

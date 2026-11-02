@@ -15,6 +15,7 @@ import snd.komelia.settings.model.AppTheme
 internal object KomeliaChromeStyle {
     val blurRadius = 24.dp
     const val tintOpacity = 0.74f
+    const val panelTintOpacity = 0.96f
     const val outlineOpacity = 0.10f
     val highlightLightRadius = 12.dp
     val highlightLightOffset = DpOffset(0.dp, (-2).dp)
@@ -27,13 +28,13 @@ internal object KomeliaChromeStyle {
     val dialogCornerRadius = 24.dp
     val dialogShape = RoundedCornerShape(dialogCornerRadius)
     val sheetHandleShape = RoundedCornerShape(topStart = dialogCornerRadius, topEnd = dialogCornerRadius)
-    val sheetBodyShape = RoundedCornerShape(bottomStart = dialogCornerRadius, bottomEnd = dialogCornerRadius)
+    val sheetBodyShape = RoundedCornerShape(0.dp)
 }
 
 internal fun glassTintColor(theme: AppTheme, colors: ColorScheme): Color =
     when (theme) {
         AppTheme.LIGHT -> Color(0xFFF2F8FF)
-        AppTheme.DARK -> Color(0xFF1C3045)
+        AppTheme.DARK -> Color(0xFF142538)
         AppTheme.DARKER -> Color(0xFF09121E)
     }
 

@@ -38,7 +38,7 @@ class KomeliaPageScaffoldTest {
             }
         }
         compose.waitForIdle()
-        assertEquals(44.dp, compose.onNodeWithTag("nested-control").getUnclippedBoundsInRoot().top)
+        assertEquals(32.dp, compose.onNodeWithTag("nested-control").getUnclippedBoundsInRoot().top)
     }
 
     @Test fun backgroundReachesTheTopWhileHeaderControlsAvoidTheCutout() {
@@ -58,8 +58,8 @@ class KomeliaPageScaffoldTest {
         }
         compose.waitForIdle()
         assertEquals(0.dp, compose.onNodeWithTag("edge-background").getUnclippedBoundsInRoot().top)
-        assertEquals(44.dp, compose.onNodeWithTag("safe-header").getUnclippedBoundsInRoot().top)
-        assertEquals(112.dp, compose.onNodeWithTag("safe-content").getUnclippedBoundsInRoot().top)
+        assertEquals(32.dp, compose.onNodeWithTag("safe-header").getUnclippedBoundsInRoot().top)
+        assertEquals(80.dp, compose.onNodeWithTag("safe-content").getUnclippedBoundsInRoot().top)
     }
 
     @Test fun readingActionsStayAtTheViewportBottomWhenContentScrolls() {

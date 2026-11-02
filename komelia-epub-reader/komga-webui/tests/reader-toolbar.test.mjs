@@ -19,7 +19,7 @@ test('Komga EPUB toolbar preserves touch targets, navigation and overflow action
     await settings.waitFor();
     const toolbar = page.locator('[data-komelia-toolbar="top"]');
     const bounds = await toolbar.boundingBox();
-    assert.equal(bounds.width, 360);
+    assert.equal(bounds.width, 336);
     assert.equal(bounds.height, 48);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 360);
     const size = await settings.boundingBox();

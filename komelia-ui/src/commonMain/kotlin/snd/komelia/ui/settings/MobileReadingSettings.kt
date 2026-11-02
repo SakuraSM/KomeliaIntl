@@ -20,6 +20,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.settings.model.AppSurfaceStyle
+import snd.komelia.ui.strings.AppStrings
 import snd.komelia.ui.appRootNavigator
 import snd.komelia.ui.common.components.BrowsePageHeader
 import snd.komelia.ui.common.components.KomeliaPageScaffold
@@ -68,24 +71,30 @@ internal fun MobileReadingSettingsHome(
     textReaderAvailable: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val appearance = LocalSurfaceAppearance.current
+    val appearanceSummary = stringResource(AppStrings.forAppTheme(appearance.theme)) + " · " + stringResource(
+        if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) Res.string.appearance_liquid_glass else Res.string.appearance_classic)
     Column(modifier.verticalScroll(rememberScrollState())
-        .padding(bottom = LocalNavigationBarInset.current + 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Column {
+        .padding(bottom = LocalNavigationBarInset.current + 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        ReadingSettingsGroup {
             SettingsGroupLabel(stringResource(Res.string.reading_settings_group))
             if (textReaderAvailable) ReadingSettingsRow(stringResource(Res.string.reading_text_settings), Icons.AutoMirrored.Rounded.MenuBook,
                 stringResource(Res.string.reading_text_settings_summary)) { onNavigation(EpubReaderSettingsScreen()) }
             ReadingSettingsRow(stringResource(Res.string.reading_image_settings), Icons.Rounded.Image,
                 stringResource(Res.string.reading_image_settings_summary)) { onNavigation(ImageReaderSettingsScreen()) }
-            ReadingSettingsRow(stringResource(Res.string.settings_navigation_appearance), Icons.Rounded.Palette) { onNavigation(AppSettingsScreen()) }
+            ReadingSettingsRow(stringResource(Res.string.settings_navigation_appearance), Icons.Rounded.Palette, appearanceSummary) { onNavigation(AppSettingsScreen()) }
         }
-        if (offlineAvailable) Column {
+        if (offlineAvailable) ReadingSettingsGroup {
             SettingsGroupLabel(stringResource(Res.string.reading_offline_group))
-            ReadingSettingsRow(stringResource(Res.string.settings_navigation_local_library), Icons.Rounded.Folder) { onNavigation(LocalLibrarySettingsScreen()) }
-            ReadingSettingsRow(stringResource(Res.string.reading_downloads_cache), Icons.Rounded.CloudDownload) { onNavigation(OfflineSettingsScreen()) }
+            ReadingSettingsRow(stringResource(Res.string.settings_navigation_local_library), Icons.Rounded.Folder,
+                stringResource(Res.string.reading_local_summary)) { onNavigation(LocalLibrarySettingsScreen()) }
+            ReadingSettingsRow(stringResource(Res.string.reading_downloads_cache), Icons.Rounded.CloudDownload,
+                stringResource(Res.string.reading_downloads_summary)) { onNavigation(OfflineSettingsScreen()) }
         }
-        Column {
+        ReadingSettingsGroup {
             SettingsGroupLabel(stringResource(Res.string.reading_library_group))
-            ReadingSettingsRow(stringResource(Res.string.reading_account_connections), Icons.Rounded.AccountCircle) { onNavigation(MobileSettingsSectionScreen(MobileSettingsSection.CONNECTIONS)) }
+            ReadingSettingsRow(stringResource(Res.string.reading_account_connections), Icons.Rounded.Link,
+                stringResource(Res.string.reading_account_summary)) { onNavigation(MobileSettingsSectionScreen(MobileSettingsSection.CONNECTIONS)) }
             ReadingSettingsRow(stringResource(Res.string.reading_advanced), Icons.Rounded.Settings,
                 stringResource(Res.string.reading_advanced_summary)) { onNavigation(MobileSettingsSectionScreen(MobileSettingsSection.ADVANCED)) }
         }
@@ -96,16 +105,27 @@ internal fun MobileReadingSettingsHome(
 @Composable
 private fun SettingsGroupLabel(text: String) {
     Text(text, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(vertical = 8.dp))
+        modifier = Modifier.padding(top = 8.dp, bottom = 11.dp))
+}
+
+@Composable
+private fun ReadingSettingsGroup(content: @Composable ColumnScope.() -> Unit) {
+    Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp).padding(top = 11.dp, bottom = 3.dp), content = content)
+    }
 }
 
 @Composable
 private fun ReadingSettingsRow(title: String, icon: ImageVector, description: String? = null, onClick: () -> Unit) {
     Column {
         Surface(onClick = onClick, color = androidx.compose.ui.graphics.Color.Transparent) {
-            Row(Modifier.fillMaxWidth().heightIn(min = 62.dp).padding(vertical = 10.dp),
+            Row(Modifier.fillMaxWidth().heightIn(min = 65.dp).padding(vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Icon(icon, null, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.primary)
+                Surface(shape = MaterialTheme.shapes.extraSmall, color = MaterialTheme.colorScheme.primary.copy(alpha = .12f)) {
+                    Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
+                        Icon(icon, null, Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary)
+                    }
+                }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(title, style = MaterialTheme.typography.titleSmall)
                     if (description != null) Text(description, style = MaterialTheme.typography.bodySmall,

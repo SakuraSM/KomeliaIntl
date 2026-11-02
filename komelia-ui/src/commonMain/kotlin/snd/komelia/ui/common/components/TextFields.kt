@@ -151,6 +151,7 @@ fun NoPaddingTextField(
     onTextChange: (String) -> Unit,
     shape: Shape = RoundedCornerShape(8.dp),
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
+    leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: @Composable () -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     modifier: Modifier = Modifier,
@@ -183,6 +184,7 @@ fun NoPaddingTextField(
             singleLine = true,
             visualTransformation = VisualTransformation.None,
             interactionSource = interactionSource,
+            leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
             contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
                 top = 0.dp,

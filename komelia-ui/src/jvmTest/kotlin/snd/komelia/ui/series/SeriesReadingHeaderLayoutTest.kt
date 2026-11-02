@@ -18,21 +18,24 @@ import kotlin.test.assertTrue
 class SeriesReadingHeaderLayoutTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun theReadingActionStaysBelowTheSeriesCoverAndTitle() {
+    @Test fun theReadingActionSharesTheCoverRowWithoutCoveringMetadata() {
         val book = homeReadingBook("resume")
         var selected: Any? = null
         compose.setContent {
             MaterialTheme {
                 Box(Modifier.width(360.dp)) {
-                    SeriesReadingHeader(LoadState.Success(book), { selected = it }, {}) {
-                        Box(Modifier.fillMaxWidth().height(114.dp).testTag("series-header"))
+                    SeriesReadingHeader(LoadState.Success(book), { selected = it }, {}) { readingAction ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Box(Modifier.width(128.dp).height(192.dp).testTag("series-header"))
+                            Column(Modifier.weight(1f)) { readingAction() }
+                        }
                     }
                 }
             }
         }
         val header = compose.onNodeWithTag("series-header").getUnclippedBoundsInRoot()
         val action = compose.onNode(hasClickAction()).getUnclippedBoundsInRoot()
-        assertTrue(action.top >= header.bottom, "The resume action must not cover series metadata")
+        assertTrue(action.left >= header.right + 16.dp, "The resume action must not cover the portrait cover")
         compose.onNode(hasClickAction()).performClick()
         assertSame(book, selected)
     }

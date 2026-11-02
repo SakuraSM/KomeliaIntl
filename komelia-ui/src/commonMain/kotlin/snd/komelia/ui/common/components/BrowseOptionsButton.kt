@@ -70,7 +70,8 @@ internal fun BrowseOptionsButton(
         Column(
             Modifier.fillMaxWidth().heightIn(max = 640.dp)
                 .then(if (mobile) Modifier else Modifier.verticalScroll(rememberScrollState()))
-                .padding(if (mobile) 20.dp else layout.dialogContentPadding),
+                .padding(horizontal = if (mobile) 20.dp else layout.dialogContentPadding)
+                .padding(top = if (mobile) 0.dp else layout.dialogContentPadding, bottom = if (mobile) 20.dp else layout.dialogContentPadding),
             verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {

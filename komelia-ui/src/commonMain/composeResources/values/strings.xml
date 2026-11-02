@@ -1506,7 +1506,7 @@
     <string name="settings_image_mode_hints">Mode and direction hints</string>
     <string name="settings_image_mode_hints_desc">Show only on first use or when the reading mode or direction changes.</string>
     <string name="reading_detail_title">Book details</string>
-    <string name="reading_series_title">Series details</string>
+    <string name="reading_series_title">Series</string>
     <string name="reading_start">Start reading</string>
     <string name="reading_again">Read again</string>
     <string name="reading_contents">Contents</string>
@@ -1540,4 +1540,20 @@
     <string name="reading_text_settings_help">Adjust font size, font, theme and page turning from the reading settings while a book is open.</string>
     <string name="browse_show_advanced_filters">Advanced filters</string>
     <string name="browse_hide_advanced_filters">Hide advanced filters</string>
+    <string name="browse_all_status">All status</string>
+    <string name="browse_grid">Grid view</string>
+    <string name="browse_list">List view</string>
+    <string name="browse_display_mode">Display</string>
+    <string name="browse_library_scope">Library scope</string>
+    <string name="browse_result_count">Results</string>
+    <string name="browse_advanced_filter_summary">Tags, authors, language, publisher and more</string>
+    <string name="browse_search_library">Search library</string>
+    <string name="series_books_progress">%1$d / %2$d read</string>
+    <string name="reading_local_summary">Manage local books and imports</string>
+    <string name="reading_downloads_summary">Manage downloads and storage</string>
+    <string name="reading_account_summary">Libraries and sign-in settings</string>
+    <string name="browse_app_controls">App controls</string>
+    <string name="reading_series_info">Series information</string>
+    <string name="home_filter_all_groups">All groups</string>
+    <string name="reading_recent_heading">Recently read</string>
 </resources>

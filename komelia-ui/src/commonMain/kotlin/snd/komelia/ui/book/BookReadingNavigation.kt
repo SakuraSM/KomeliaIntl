@@ -1,6 +1,10 @@
 package snd.komelia.ui.book
 
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
+import snd.komelia.ui.common.images.BookThumbnail
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -36,7 +40,7 @@ import snd.komga.client.book.WPLink
 class BookReadingNavigationState(private val api: KomgaBookApi, private val book: KomeliaBook, private val scope: CoroutineScope) {
     val state = MutableStateFlow<LoadState<Unit>>(LoadState.Uninitialized)
     val chapters = MutableStateFlow<List<WPLink>>(emptyList())
-    val adjacentBooks = MutableStateFlow<List<KomeliaBook>>(emptyList())
+    val adjacentBooks = MutableStateFlow(BookAdjacentBooks())
     fun load() {
         scope.launch {
             state.value = LoadState.Loading
@@ -45,7 +49,7 @@ class BookReadingNavigationState(private val api: KomgaBookApi, private val book
                 else if (!book.oneshot) adjacentBooks.value = coroutineScope {
                     val previous = async { api.getBookSiblingPrevious(book.id) }
                     val next = async { api.getBookSiblingNext(book.id) }
-                    listOfNotNull(previous.await(), next.await())
+                    BookAdjacentBooks(previous.await(), next.await())
                 }
                 state.value = LoadState.Success(Unit)
             } catch (cancelled: CancellationException) { throw cancelled }
@@ -53,6 +57,8 @@ class BookReadingNavigationState(private val api: KomgaBookApi, private val book
         }
     }
 }
+
+data class BookAdjacentBooks(val previous: KomeliaBook? = null, val next: KomeliaBook? = null)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,11 +90,15 @@ internal fun BookReadingNavigation(
         }
         chapters.take(3).forEach { ChapterRow(it, openChapter) }
     }
-    if (adjacent.isNotEmpty()) Column {
+    if (book.media.mediaType != "application/epub+zip" && !book.oneshot && loadState is LoadState.Success) Column {
         Text(stringResource(Res.string.reading_adjacent), style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(vertical = 12.dp))
-        adjacent.forEach { sibling ->
-            BookDetailedListCard(sibling, onClick = { navigator.push(bookScreen(sibling)) }, compact = true)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            AdjacentBookCard(adjacent.previous, stringResource(Res.string.reader_previous_book),
+                stringResource(Res.string.reader_no_previous_book), Modifier.weight(1f)) { navigator.push(bookScreen(it)) }
+            VerticalDivider(Modifier.height(88.dp), color = MaterialTheme.colorScheme.outlineVariant)
+            AdjacentBookCard(adjacent.next, stringResource(Res.string.reader_next_book),
+                stringResource(Res.string.reader_no_next_book), Modifier.weight(1f)) { navigator.push(bookScreen(it)) }
         }
     }
     if (showContents) KomeliaModalBottomSheet(onDismissRequest = { onShowContents(false) }) {
@@ -105,6 +115,23 @@ internal fun BookReadingNavigation(
             else if (loadState is LoadState.Error) TextButton(onClick = navigation::load) { Text(stringResource(Res.string.reader_sibling_retry)) }
             else if (chapters.isEmpty()) Text(stringResource(Res.string.reading_no_contents))
             chapters.forEach { ChapterBranch(it, openChapter) }
+        }
+    }
+}
+
+@Composable
+private fun AdjacentBookCard(book: KomeliaBook?, label: String, boundary: String, modifier: Modifier, onOpen: (KomeliaBook) -> Unit) {
+    Surface(onClick = { book?.let(onOpen) }, enabled = book != null,
+        color = androidx.compose.ui.graphics.Color.Transparent, shape = MaterialTheme.shapes.small, modifier = modifier) {
+        Row(Modifier.heightIn(min = 88.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (book != null) BookThumbnail(book.id, contentScale = ContentScale.Fit,
+                modifier = Modifier.width(44.dp).aspectRatio(2f / 3f).clip(MaterialTheme.shapes.extraSmall))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(book?.metadata?.title ?: boundary, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleSmall)
+            }
+            if (book != null) Icon(Icons.Rounded.ChevronRight, null, Modifier.size(18.dp))
         }
     }
 }

@@ -59,6 +59,10 @@ class LibrarySeriesTabState(
     val isInEditMode = MutableStateFlow(false)
     var selectedSeries by mutableStateOf<List<KomeliaSeries>>(emptyList())
         private set
+    var isList by mutableStateOf(false)
+        private set
+
+    fun onListChange(isList: Boolean) { this.isList = isList }
 
     val filterState: SeriesFilterState = SeriesFilterState(
         defaultSort = SeriesSort.TITLE_ASC,

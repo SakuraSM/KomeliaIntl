@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Komelia 现代阅读界面 · 18页视觉稿</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+<a class="skip" href="#gallery">跳到视觉稿</a>
+<main>
+<header><h1>Komelia 现代阅读界面</h1><p>18页视觉稿。沿用已确认的首页、书库与阅读设置，点击图片查看大图，使用方向键翻页。</p><p>这是静态设计与示例内容。目标逻辑尺寸和实际 PNG 像素分别记录。</p><nav class="links" aria-label="设计资料"><a href="README.md">页面索引</a><a href="overview.png">完整总览</a><a href="main-overview.png">主页面总览</a><a href="INTERACTIONS.md">交互对应</a><a href="DESIGN-SYSTEM.md">设计规则</a><a href="generation-record.json">生成记录</a></nav></header>
+<nav class="filters" aria-label="筛选视觉稿"><button type="button" data-filter="all" aria-pressed="true">全部</button><button type="button" data-filter="dark" aria-pressed="false">深色手机</button><button type="button" data-filter="light" aria-pressed="false">浅色</button><button type="button" data-filter="wide" aria-pressed="false">平板与桌面</button><button type="button" data-filter="reader" aria-pressed="false">阅读与浮层</button><span id="count" class="count" aria-live="polite"></span></nav>
+<section id="gallery" class="gallery" aria-label="视觉稿列表"></section>
+<footer>原始图片未拉伸。阅读进度、书籍与正文均为设计示例，静态稿不代表原生实现或验收结果。</footer>
+</main>
+<dialog id="viewer" aria-labelledby="viewer-title"><div class="viewer-bar"><h2 id="viewer-title" class="viewer-title"></h2><a id="original" target="_blank" rel="noopener">打开原图</a><button id="previous" type="button">上一页</button><button id="next" type="button">下一页</button><button id="close" type="button" autofocus>关闭</button></div><div class="viewer-body"><img id="viewer-image" alt=""></div></dialog>
+<script src="pages-data.js"></script><script src="gallery.js"></script>
+</body></html>

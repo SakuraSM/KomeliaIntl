@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -44,6 +46,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -73,6 +77,7 @@ import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.settings.model.BooksLayout
 import snd.komelia.settings.model.BooksLayout.GRID
 import snd.komelia.settings.model.BooksLayout.LIST
+import snd.komga.client.book.KomgaBookId
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.book.BooksFilterState
@@ -114,6 +119,8 @@ fun LazyGridScope.SeriesBooksContent(
     booksFilterState: BooksFilterState,
     bookContextMenuActions: BookMenuActions,
     isMasterPane: Boolean = false,
+    masterPaneGrid: Boolean = false,
+    activeBookId: KomgaBookId? = null,
     tabSelector: (@Composable () -> Unit)? = null,
 ) {
     if (booksLoadState is LoadState.Success<BooksData>) {
@@ -121,8 +128,8 @@ fun LazyGridScope.SeriesBooksContent(
         item(span = { GridItemSpan(maxLineSpan) }) {
             BooksToolBar(
                 series = series,
-                booksLayout = if (isMasterPane) LIST else booksState.layout,
-                showViewOptions = !isMasterPane,
+                booksLayout = if (isMasterPane && !masterPaneGrid) LIST else booksState.layout,
+                showViewOptions = !isMasterPane || masterPaneGrid,
                 tabSelector = tabSelector,
                 onBooksLayoutChange = onBooksLayoutChange,
                 booksPageSize = booksState.pageSize,
@@ -134,6 +141,13 @@ fun LazyGridScope.SeriesBooksContent(
                 onPageChange = onPageChange
             )
         }
+        if (masterPaneGrid && series != null) item(span = { GridItemSpan(maxLineSpan) }) {
+            Row(Modifier.fillMaxWidth().padding(top = 34.dp, bottom = 8.dp).heightIn(min = 28.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Text(series.metadata.title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f), maxLines = 1)
+                Text(booksState.books.size.toString(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
         BooksContent(
             books = booksState.books,
             onBookClick = onBookClick,
@@ -142,7 +156,9 @@ fun LazyGridScope.SeriesBooksContent(
             selectionMode = booksState.selectionMode,
             selectedBooks = booksState.selectedBooks,
             onBookSelect = onBookSelect,
-            layout = if (isMasterPane) LIST else booksState.layout,
+            layout = if (isMasterPane && !masterPaneGrid) LIST else booksState.layout,
+            activeBookId = activeBookId,
+            showVolumeTitles = masterPaneGrid
         )
 
         if (!booksState.selectionMode) {
@@ -193,6 +209,8 @@ private fun LazyGridScope.BooksContent(
     selectedBooks: List<KomeliaBook>,
     onBookSelect: (KomeliaBook) -> Unit,
     layout: BooksLayout,
+    activeBookId: KomgaBookId? = null,
+    showVolumeTitles: Boolean = false,
 ) {
     if (books.isEmpty()) {
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -202,6 +220,7 @@ private fun LazyGridScope.BooksContent(
         when (layout) {
             GRID -> {
                 BooksGrid(
+                    activeBookId = activeBookId, showVolumeTitles = showVolumeTitles,
                     books = books,
                     onBookClick = if (selectionMode) onBookSelect else onBookClick,
                     onBookReadClick = if (selectionMode) null else onBookReadClick,
@@ -213,6 +232,7 @@ private fun LazyGridScope.BooksContent(
             }
 
             LIST -> BooksList(
+                activeBookId = activeBookId,
                 books = books,
                 onBookClick = if (selectionMode) onBookSelect else onBookClick,
                 onBookReadClick = if (selectionMode) null else onBookReadClick,
@@ -242,7 +262,6 @@ private fun BooksToolBar(
 ) {
     var showFilters by remember { mutableStateOf(false) }
     var showSort by remember { mutableStateOf(false) }
-    var showView by remember { mutableStateOf(false) }
     val currentFilter = booksFilterState.state.collectAsState().value
     Row(Modifier.fillMaxWidth().padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.weight(1f)) {
@@ -265,21 +284,14 @@ private fun BooksToolBar(
             Icon(Icons.Rounded.FilterList, stringResource(Res.string.series_book_filters),
                 tint = if (booksFilterState.isChanged) MaterialTheme.colorScheme.primary else LocalContentColor.current)
         }
-        if (showViewOptions) Box {
-            IconButton(onClick = { showView = true }) {
-                Icon(if (booksLayout == LIST) Icons.AutoMirrored.Rounded.ViewList else Icons.Rounded.GridView,
-                    stringResource(Res.string.browse_content_type))
+        if (showViewOptions) {
+            IconButton(onClick = { onBooksLayoutChange(GRID) }, modifier = Modifier.semantics { selected = booksLayout == GRID }) {
+                Icon(Icons.Rounded.GridView, stringResource(Res.string.reading_grid_view), Modifier.size(20.dp),
+                    tint = if (booksLayout == GRID) MaterialTheme.colorScheme.primary else LocalContentColor.current)
             }
-            KomeliaDropdownMenu(expanded = showView, onDismissRequest = { showView = false }) {
-                listOf(LIST, GRID).forEach { target ->
-                    DropdownMenuItem(text = { Text(stringResource(if (target == LIST) Res.string.reading_list_view else Res.string.reading_grid_view)) },
-                        onClick = { onBooksLayoutChange(target); showView = false })
-                }
-                HorizontalDivider()
-                Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(Res.string.browse_page_size), style = MaterialTheme.typography.bodyMedium)
-                    PageSizeSelectionDropdown(booksPageSize, onBooksPageSizeChange)
-                }
+            IconButton(onClick = { onBooksLayoutChange(LIST) }, modifier = Modifier.semantics { selected = booksLayout == LIST }) {
+                Icon(Icons.AutoMirrored.Rounded.ViewList, stringResource(Res.string.reading_list_view), Modifier.size(20.dp),
+                    tint = if (booksLayout == LIST) MaterialTheme.colorScheme.primary else LocalContentColor.current)
             }
         }
     }
@@ -537,6 +549,8 @@ private fun TagsFilter(
 
 private fun LazyGridScope.BooksGrid(
     books: List<KomeliaBook>,
+    activeBookId: KomgaBookId? = null,
+    showVolumeTitles: Boolean = false,
     onBookClick: ((KomeliaBook) -> Unit)? = null,
     onBookReadClick: ((KomeliaBook, Boolean) -> Unit)? = null,
     bookMenuActions: BookMenuActions? = null,
@@ -548,13 +562,14 @@ private fun LazyGridScope.BooksGrid(
         Column {
             BookImageCard(
                 book = book,
+                isActive = activeBookId == book.id, showVolumeTitle = showVolumeTitles,
                 onBookClick = onBookClick?.let { { onBookClick(book) } },
                 onBookReadClick = onBookReadClick?.let { { onBookReadClick(book, it) } },
                 bookMenuActions = bookMenuActions,
                 isSelected = selectedBooks.any { it.id == book.id },
                 onSelect = onBookSelect?.let { { onBookSelect(book) } },
             )
-            Spacer(Modifier.height(15.dp))
+            if (!showVolumeTitles) Spacer(Modifier.height(15.dp))
         }
 
     }
@@ -562,6 +577,7 @@ private fun LazyGridScope.BooksGrid(
 
 fun LazyGridScope.BooksList(
     books: List<KomeliaBook>,
+    activeBookId: KomgaBookId? = null,
     bookMenuActions: BookMenuActions? = null,
     onBookClick: ((KomeliaBook) -> Unit)? = null,
     onBookReadClick: ((KomeliaBook, Boolean) -> Unit)? = null,
@@ -575,6 +591,7 @@ fun LazyGridScope.BooksList(
                 BookDetailedListCard(
                     book = book,
                     compact = true,
+                    isActive = activeBookId == book.id,
                     onClick = onBookClick?.let { { onBookClick(book) } },
                     onBookReadClick = onBookReadClick?.let { { onBookReadClick(book, it) } },
                     bookMenuActions = bookMenuActions,

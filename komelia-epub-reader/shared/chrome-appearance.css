@@ -165,7 +165,7 @@
 [data-komelia-reader-settings] :is(.v-list,.v-list-item,.v-card-text,.v-toolbar) { background: transparent !important; color: inherit !important; }
 [data-komelia-reader-settings] .v-list-subheader { min-height: 32px; font-size: 14px !important; opacity: 1; }
 [data-komelia-reader-settings] .v-list-item { padding-inline: 20px; min-height: 56px; }
-[data-komelia-reader-settings] .v-toolbar { min-height: 56px; }
+[data-komelia-reader-settings] .v-toolbar { min-height: 48px; }
 [data-komelia-chrome] [data-komelia-chrome] { background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border: 0; box-shadow: none; }
 :root[data-komelia-surface="glass"] [data-komelia-chrome] :is([aria-pressed="true"],.v-btn--active,.v-list-item--active) { background: #184a64 !important; color: #b6ebff !important; border: 1px solid #5ac9ee !important; box-shadow: none; }
 :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-chrome] :is([aria-pressed="true"],.v-btn--active,.v-list-item--active) { background: #d4ebf7 !important; color: #075576 !important; }
@@ -200,8 +200,44 @@
 :root[data-komelia-surface="solid"][data-komelia-theme="LIGHT"] [data-komelia-chrome] [data-komelia-toggle-option][aria-pressed="true"]:not([data-komelia-theme-swatch]) { background: #d4ebf7 !important; color: #075576 !important; }
 
 /* Form panels need a stable reading surface even over a bright publication. */
-:root[data-komelia-surface="glass"] [data-komelia-popup] { --komelia-chrome-background: rgb(28 48 69 / 94%); }
+:root[data-komelia-surface="glass"] [data-komelia-popup] { --komelia-chrome-background: rgb(20 37 56 / 96%); }
 :root[data-komelia-surface="glass"][data-komelia-theme="LIGHT"] [data-komelia-popup] { --komelia-chrome-background: rgb(242 248 255 / 94%); }
 :root[data-komelia-surface="glass"][data-komelia-theme="DARKER"] [data-komelia-popup] { --komelia-chrome-background: rgb(9 18 30 / 94%); }
 [data-komelia-reader-settings] .v-list-subheader { padding-inline: 20px; font-weight: 600; }
 [data-komelia-reader-settings] .komelia-settings-segments { background: rgb(var(--v-theme-on-surface), .05); }
+
+/* Geometry shared by the two independent EPUB implementations. */
+.komelia-sheet-handle { width: 34px; height: 4px; border-radius: 4px; margin: 10px auto 8px; background: #52738c; }
+.komelia-reading-settings { gap: 0; }
+.komelia-reading-settings > section.inline-row { min-height: 53px; padding-bottom: 4px; border-bottom: 1px solid rgb(176 211 242 / 17%); margin-bottom: 8px; }
+.komelia-reading-settings .theme-grid { gap: 8px 10px; }
+.komelia-reading-settings > .lg\:col-span-2 > section { padding-bottom: 8px; }
+.komelia-reading-settings > .lg\:col-span-2 > section > div:first-child { height: 37px; align-items: flex-end; }
+.komelia-reading-settings .font-row-controls [data-komelia-font-choice] { background: transparent !important; border: 0 !important; box-shadow: none !important; padding-inline: 0; font-weight: 400; justify-content: end; }
+.komelia-reading-settings .font-row-controls [data-komelia-font-choice] svg { transform: rotate(-90deg); }
+.komelia-reading-settings > .h-full { border-top: 1px solid rgb(176 211 242 / 17%); padding-block: 12px; }
+.komelia-reading-settings > .h-full section { padding: 0; min-height: 48px; }
+.komelia-reading-settings > .h-full [data-komelia-toggle-option] { margin: 0; width: 100%; min-height: 40px; font-size: 14px; }
+.komelia-reading-settings > .h-full section > div:last-child > div { flex-wrap: nowrap; margin: 0; border: 1px solid rgb(176 211 242 / 30%); border-radius: 12px; overflow: hidden; }
+.komelia-reading-settings > .h-full section > div:last-child > div > div { flex: 1; }
+.komelia-reading-settings .inline-row > div:first-child { flex: 0 0 68px; max-width: 40%; }
+.komelia-reading-settings > .h-full section > div:last-child > div { position: relative; border: 0; overflow: visible; }
+.komelia-reading-settings > .h-full section > div:last-child > div::before { content: ''; position: absolute; inset: 4px 0; border: 1px solid rgb(176 211 242 / 30%); border-radius: 12px; pointer-events: none; }
+.komelia-reading-settings > .h-full [data-komelia-toggle-option] { height: 48px; padding-block: 4px; border: 0 !important; background-clip: content-box !important; }
+[data-komelia-reader-settings] .komelia-settings-segments { position: relative; border: 0; overflow: visible; }
+/* Keep the outlined group and its selected fill on the same 40px painted track. */
+[data-komelia-reader-settings] .komelia-settings-segments { background: transparent; }
+:root[data-komelia-surface] [data-komelia-reader-settings] .komelia-settings-segments > .v-btn { border: 0 !important; }
+[data-komelia-reader-settings] .komelia-settings-segments::before { content: ''; position: absolute; inset: 4px 0; border: 1px solid rgb(var(--v-theme-on-surface), .25); border-radius: 12px; pointer-events: none; }
+[data-komelia-reader-settings] .komelia-settings-segments > .v-btn { height: 48px; padding-block: 4px; background-clip: content-box !important; }
+:root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"]) [data-komelia-reader-settings] :is([data-komelia-toggle-option],.v-btn)[aria-pressed="true"]:not([data-komelia-theme-swatch]),
+:root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"]) [data-komelia-reader-settings] .komelia-settings-segments > .v-btn--active { background: #70d9ff !important; color: #00324a !important; border-color: transparent !important; }
+:root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"])[data-komelia-theme="LIGHT"] [data-komelia-reader-settings] :is([data-komelia-toggle-option],.v-btn)[aria-pressed="true"]:not([data-komelia-theme-swatch]),
+:root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"])[data-komelia-theme="LIGHT"] [data-komelia-reader-settings] .komelia-settings-segments > .v-btn--active { background: #00638d !important; color: white !important; }
+:root[data-komelia-surface] [data-komelia-reader-settings] .komelia-reading-settings > .h-full [data-komelia-toggle-option][aria-pressed],
+:root[data-komelia-surface] [data-komelia-reader-settings] .komelia-settings-segments > .v-btn { background-clip: content-box !important; }
+:root[data-komelia-surface="glass"] [data-komelia-toolbar="top"] { top: env(safe-area-inset-top, 0px) !important; inset-inline: 12px; width: calc(100% - 24px); border-radius: 12px; }
+:root[data-komelia-surface="glass"] nav[data-komelia-toolbar="top"] { position: relative; top: auto !important; inset-inline: auto; margin: 0 12px 12px; }
+@media (max-width: 839px) {
+  .komelia-reader-title > span { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}

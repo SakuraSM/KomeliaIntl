@@ -6,13 +6,14 @@
   let {onExit}: Props = $props();
 </script>
 
+<div class="komelia-sheet-handle" aria-hidden="true"></div>
 <header class="komelia-settings-header">
-  <h2>{t('Settings')}</h2>
+  <h2>{t('Reader settings')}</h2>
   <button type="button" aria-label={t('Return')} onclick={onExit}><Fa icon={faXmark}/></button>
 </header>
 
 <style>
-  .komelia-settings-header { display: flex; align-items: center; justify-content: space-between; min-height: 56px; padding: 8px 12px 0 20px; }
-  h2 { font-size: 20px; font-weight: 600; }
+  .komelia-settings-header { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 14px 0 26px; }
+  h2 { font-size: 22px; font-weight: 600; }
   button { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; }
 </style>

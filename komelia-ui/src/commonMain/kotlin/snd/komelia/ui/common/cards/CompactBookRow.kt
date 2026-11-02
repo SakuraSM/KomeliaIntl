@@ -40,6 +40,7 @@ internal fun CompactBookRow(
     onSelect: (() -> Unit)?,
     compact: Boolean,
     modifier: Modifier,
+    isActive: Boolean = false,
 ) {
     val colors = MaterialTheme.colorScheme
     val progress = bookReadProgressFraction(book)
@@ -47,23 +48,19 @@ internal fun CompactBookRow(
     val isUnavailable = !snd.komelia.ui.common.bookContentIsAvailable(book, LocalLibraries.current.value.firstOrNull { it.id == book.libraryId }?.unavailable == true)
     val canRead = !isUnavailable && readIsSupported(book)
     Column(modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth().heightIn(min = if (compact) 72.dp else 88.dp)
-            .background(if (isSelected) colors.primary.copy(alpha = .12f) else Color.Transparent, MaterialTheme.shapes.small)
+        Row(Modifier.fillMaxWidth().heightIn(min = if (compact) 96.dp else 112.dp)
+            .background(if (isSelected || isActive) colors.primary.copy(alpha = .12f) else Color.Transparent, MaterialTheme.shapes.small)
             .combinedClickable(onClick = onClick ?: {}, onLongClick = onSelect)
             .padding(horizontal = if (isSelected) 8.dp else 0.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (compact) Text(book.metadata.number.ifBlank { book.number.toString() },
-                modifier = Modifier.width(24.dp), style = MaterialTheme.typography.labelMedium,
-                color = if (isReading) colors.primary else colors.onSurfaceVariant,
-                maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-            Box(Modifier.width(if (compact) 34.dp else 42.dp).aspectRatio(2f / 3f)
+            Box(Modifier.width(if (compact) 54.dp else 64.dp).aspectRatio(2f / 3f)
                 .clip(MaterialTheme.shapes.extraSmall).background(colors.surfaceContainerLow)) {
                 BookThumbnail(book.id, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
                 if (isSelected && onSelect != null) SelectionRadioButton(true, onSelect)
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(book.metadata.title, style = MaterialTheme.typography.bodyMedium,
-                    color = if (isReading || isSelected) colors.primary else colors.onSurface,
+                    color = if (isReading || isSelected || isActive) colors.primary else colors.onSurface,
                     maxLines = 2, overflow = TextOverflow.Ellipsis)
                 if (!compact) {
                     val context = book.seriesTitle.takeIf { it.isNotBlank() && it != book.metadata.title && !book.oneshot }
@@ -89,7 +86,7 @@ internal fun CompactBookRow(
                 var expanded by remember(book.id) { mutableStateOf(false) }
                 Box {
                     IconButton(onClick = { expanded = true }, modifier = Modifier.size(48.dp)) {
-                        Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more))
+                        Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more), Modifier.size(20.dp))
                     }
                     BookActionsMenu(book, menu, expanded, showEditOption = true, showDownloadOption = true,
                         onDismissRequest = { expanded = false }, onReadClick = if (canRead) onRead else null)

@@ -10,6 +10,10 @@ import androidx.compose.ui.unit.dp
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.ReadingDesign
+import snd.komelia.ui.KomeliaDesktopBrowseTypography
+import androidx.compose.material3.MaterialTheme
+import snd.komelia.ui.search.SearchScreen
 import snd.komelia.ui.komeliaLayoutSpec
 import snd.komelia.ui.DestinationContent
 import snd.komelia.ui.readerHostNavigator
@@ -105,7 +109,8 @@ class SeriesScreen(
                 else -> {
                     BoxWithConstraints(Modifier.fillMaxSize()) {
                         val canShowPane = maxWidth >= 680.dp
-                        val listWidth = if (maxWidth >= 1100.dp) 380.dp else (maxWidth * (0.8f / 2.1f)).coerceAtLeast(260.dp)
+                        val full = LocalWindowWidth.current == WindowSizeClass.FULL
+                        val listWidth = if (full) ReadingDesign.desktopMasterWidth else ReadingDesign.tabletMasterWidth
                         val platform = LocalPlatform.current
                         val inheritedWidth = LocalWindowWidth.current
                         LaunchedEffect(target?.id, paneClosed, canShowPane) {
@@ -146,6 +151,9 @@ class SeriesScreen(
                         onDownload = vm::onDownload,
                         scrollState = scrollState,
                         isMasterPane = canShowPane && selectedBookId != null,
+                        masterPaneGrid = canShowPane && full,
+                        activeBookId = selectedBookId?.let(::KomgaBookId),
+                        onSearchAll = { navigator.push(SearchScreen(it)) },
                         onBackPress = { onBackPress(navigator, vm.series.value?.libraryId) },
                     )
                         }
@@ -154,7 +162,9 @@ class SeriesScreen(
                             if (canShowPane) {
                             CompositionLocalProvider(LocalWindowWidth provides WindowSizeClass.COMPACT,
                                 LocalKomeliaLayout provides komeliaLayoutSpec(platform, WindowSizeClass.COMPACT)) {
-                                Box(Modifier.width(listWidth).fillMaxHeight()) { listContent() }
+                                Box(Modifier.width(listWidth).fillMaxHeight()) {
+                                    if (full) MaterialTheme(typography = KomeliaDesktopBrowseTypography) { listContent() } else listContent()
+                                }
                             }
                             VerticalDivider()
                             }

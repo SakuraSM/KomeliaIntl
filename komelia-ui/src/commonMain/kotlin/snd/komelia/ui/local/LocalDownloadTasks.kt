@@ -8,6 +8,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import snd.komelia.ui.common.images.BookThumbnail
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.*
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
@@ -41,7 +44,8 @@ private fun LocalDownloadTaskRow(entry: TaskEntry, state: OfflineDownloadsState,
     Column {
         Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Icon(Icons.Rounded.Download, null, Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary)
+            BookThumbnail(bookId, contentScale = ContentScale.Fit,
+                modifier = Modifier.width(56.dp).aspectRatio(2f / 3f).clip(MaterialTheme.shapes.extraSmall))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(entry.displayTitle ?: stringResource(Res.string.reading_download_tasks), style = MaterialTheme.typography.bodyMedium)
                 val statusLabel = stringResource(when (entry.status) {

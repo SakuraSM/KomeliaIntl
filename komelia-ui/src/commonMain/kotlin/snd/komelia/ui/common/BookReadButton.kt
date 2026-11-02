@@ -62,9 +62,10 @@ fun BookReadButton(
     containerColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
     contentColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
     label: String? = null,
+    showIcon: Boolean = true,
 ) {
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(10.dp),
         modifier = modifier.semantics { role = Role.Button }.pointerHoverIcon(PointerIcon.Hand),
         color = containerColor,
         contentColor = contentColor,
@@ -78,6 +79,7 @@ fun BookReadButton(
                 modifier = (if (label != null) Modifier.weight(1f) else Modifier).padding(horizontal = 5.dp).fillMaxHeight(),
                 onRead = onRead,
                 label = label,
+                showIcon = showIcon,
             )
             if (onIncognitoRead != null) {
                 VerticalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -96,6 +98,7 @@ private fun ReadButton(
     modifier: Modifier,
     onRead: () -> Unit,
     label: String?,
+    showIcon: Boolean,
 ) {
     Row(
         modifier = Modifier.clickable { onRead() }.then(modifier),
@@ -103,12 +106,12 @@ private fun ReadButton(
         horizontalArrangement = Arrangement.Center,
     ) {
         if (label == null) Spacer(Modifier.width(5.dp))
-        Icon(
+        if (showIcon) Icon(
             imageVector = Icons.AutoMirrored.Rounded.MenuBook,
             contentDescription = null,
             modifier = Modifier.size(if (label == null) 24.dp else 20.dp),
         )
-        Spacer(Modifier.width(if (label == null) 10.dp else 8.dp))
+        if (showIcon) Spacer(Modifier.width(if (label == null) 10.dp else 8.dp))
         Text(label ?: stringResource(Res.string.book_read_button),
             style = if (label == null) LocalTextStyle.current else MaterialTheme.typography.labelLarge)
     }

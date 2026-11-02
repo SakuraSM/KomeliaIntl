@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 const chromeStyles = await readFile(new URL('../../shared/chrome-appearance.css', import.meta.url), 'utf8');
 
-test('EPUB top chrome spans the viewport while bottom controls keep their floating shape', async () => {
+test('EPUB chrome uses the approved floating inset while keeping its touch targets', async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROME_BIN });
   try {
     const page = await browser.newPage({ viewport: { width: 360, height: 800 }, hasTouch: true, isMobile: true });
@@ -26,7 +26,7 @@ test('EPUB top chrome spans the viewport while bottom controls keep their floati
       };
       return { top: measure('top'), bottom: measure('bottom'), viewport: innerWidth };
     });
-    assert.deepEqual(geometry.top, { left: 0, width: geometry.viewport, radius: '0px' });
+    assert.deepEqual(geometry.top, { left: 12, width: geometry.viewport - 24, radius: '12px' });
     assert.deepEqual(geometry.bottom, { left: 12, width: geometry.viewport - 24, radius: '20px' });
   } finally {
     await browser.close();
@@ -44,7 +44,7 @@ test('TTU keeps narrow chrome on one row and preserves overflow actions and keyb
     const toolbar = page.getByRole('navigation', {name: 'Reader toolbar'});
     await toolbar.waitFor();
     const bounds = await toolbar.boundingBox();
-    assert.equal(bounds.width, 360);
+    assert.equal(bounds.width, 336);
     assert.equal(bounds.height, 48);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 360);
     for (const name of ['Close Book', 'Open Table of Contents', 'Reader settings', 'More options']) {

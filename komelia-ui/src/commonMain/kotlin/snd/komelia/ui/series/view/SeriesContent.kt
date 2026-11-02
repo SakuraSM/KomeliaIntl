@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.GridCells
+import snd.komelia.ui.common.components.BrowseSearchHeader
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_filters
+import snd.komga.client.book.KomgaBookId
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_search_library
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
@@ -62,6 +70,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_series_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_file_source
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_books_count
@@ -97,6 +106,8 @@ import snd.komelia.ui.LocalKomfMangaBakaIntegration
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.detailCoverWidth
+import snd.komelia.ui.ReadingDesign
 import snd.komelia.ui.collection.SeriesCollectionsContent
 import snd.komelia.ui.collection.SeriesCollectionsState
 import snd.komelia.ui.common.TagList
@@ -156,10 +167,15 @@ fun SeriesContent(
     onBackPress: () -> Unit,
     scrollState: androidx.compose.foundation.lazy.grid.LazyGridState = rememberLazyGridState(),
     isMasterPane: Boolean = false,
+    masterPaneGrid: Boolean = false,
+    activeBookId: KomgaBookId? = null,
+    onSearchAll: (String) -> Unit = {},
 ) {
     val windowWidth = LocalWindowWidth.current
     val layout = LocalKomeliaLayout.current
     val gridMinWidth = booksState.cardWidth.collectAsState().value
+    var masterQuery by rememberSaveable(series?.id?.value) { mutableStateOf("") }
+    var showMasterFilters by remember { mutableStateOf(false) }
     val width = LocalWindowWidth.current
     val booksLoadState = booksState.state.collectAsState().value
     val bookMenuActions = remember { booksState.bookMenuActions() }
@@ -204,6 +220,15 @@ fun SeriesContent(
                         onBookSelect = booksState::onBookSelect
                     )
                 }
+            } else if (masterPaneGrid) {
+                Column(Modifier.padding(top = 20.dp)) {
+                    BrowseSearchHeader(stringResource(Res.string.navbar_libraries), masterQuery, { masterQuery = it },
+                        placeholder = stringResource(Res.string.browse_search_library), onSubmit = onSearchAll,
+                        searchTopSpacing = 12.dp, titleInset = 32.dp, searchInsets = PaddingValues(start = 30.dp, end = 20.dp),
+                        titleStyle = MaterialTheme.typography.headlineLarge.copy(fontSize = 36.sp, lineHeight = 44.sp)) {
+                        IconButton(onClick = { showMasterFilters = true }) { Icon(Icons.Rounded.Tune, stringResource(Res.string.series_book_filters)) }
+                    }
+                }
             } else {
                 SeriesToolBar(series, seriesMenuActions, mangaBaka, onDownload, onBackPress,
                     showTitle = isContentScrolled || isMasterPane)
@@ -212,8 +237,9 @@ fun SeriesContent(
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                 LazyVerticalGrid(
                     state = scrollState,
-                    columns = snd.komelia.ui.common.itemlist.posterGridCells(gridMinWidth),
-                    horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+                    columns = if (masterPaneGrid && booksData.layout == BooksLayout.GRID) GridCells.FixedSize((gridMinWidth / 1.52f).coerceIn(112.dp, 200.dp))
+                        else snd.komelia.ui.common.itemlist.posterGridCells(gridMinWidth),
+                    horizontalArrangement = Arrangement.spacedBy(if (masterPaneGrid) 14.dp else layout.gridSpacing),
                     verticalArrangement = Arrangement.spacedBy(if (booksData.layout == BooksLayout.LIST) 0.dp else layout.gridSpacing),
                     contentPadding = PaddingValues(
                         top = (if (compact) 6.dp else layout.topBarContentSpacing) + topInset,
@@ -222,18 +248,18 @@ fun SeriesContent(
                     modifier = Modifier
                         .widthIn(max = layout.contentMaxWidth)
                         .fillMaxSize()
-                        .padding(horizontal = layout.pageHorizontalPadding),
+                        .padding(horizontal = if (masterPaneGrid) 32.dp else if (compact && !isMasterPane) ReadingDesign.homeInset else layout.pageHorizontalPadding),
                 ) {
 
                     if (series != null && library != null) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
+                        if (!masterPaneGrid) item(span = { GridItemSpan(maxLineSpan) }) {
                             val targetState = booksState.readingTarget.collectAsState().value
                             SeriesReadingHeader(
                                 readingTarget = if (isMasterPane) LoadState.Success(null) else targetState,
                                 onRead = { onBookReadClick(it, true) },
                                 onRetry = booksState::reloadReadingTarget,
-                            ) {
-                                if (!isMasterPane) Series(series, library, onLibraryClick, onFilterClick)
+                            ) { readingAction ->
+                                if (!isMasterPane) Series(series, library, onLibraryClick, onFilterClick, readingAction)
                                 else Text(pluralStringResource(Res.plurals.series_books_count, series.booksCount, series.booksCount.toString()),
                                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
@@ -257,6 +283,8 @@ fun SeriesContent(
                                 booksFilterState = booksState.filterState,
                                 bookContextMenuActions = bookMenuActions,
                                 isMasterPane = isMasterPane,
+                                masterPaneGrid = masterPaneGrid,
+                                activeBookId = activeBookId,
                                 tabSelector = tabSelector,
                             )
 
@@ -328,6 +356,7 @@ fun SeriesContent(
             }
         }
     }
+    if (showMasterFilters) BookFilterDialog(booksState.filterState, onDismiss = { showMasterFilters = false })
 }
 
 internal const val SERIES_BOOKS_SECTION_INDEX = 2
@@ -364,7 +393,7 @@ fun SeriesToolBar(
 ) {
     val layout = LocalKomeliaLayout.current
     Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 4.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -381,7 +410,7 @@ fun SeriesToolBar(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f), textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f), textAlign = TextAlign.Start,
             )
 
             Box {
@@ -550,14 +579,16 @@ fun Series(
     library: KomgaLibrary,
     onLibraryClick: (KomgaLibrary) -> Unit,
     onFilterClick: (SeriesScreenFilter) -> Unit,
+    readingAction: @Composable () -> Unit = {},
 ) {
     val width = LocalWindowWidth.current
-    val coverWidth = if (width == COMPACT || width == MEDIUM) 76.dp else 112.dp
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+    val coverWidth = detailCoverWidth(maxWidth, width)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
         SeriesThumbnail(series.id, modifier = Modifier.width(coverWidth).aspectRatio(2f / 3f)
-            .clip(MaterialTheme.shapes.small), contentScale = ContentScale.Fit)
+            .clip(ReadingDesign.coverShape), contentScale = ContentScale.Fit)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(series.metadata.title, style = MaterialTheme.typography.titleLarge)
+            Text(series.metadata.title, style = MaterialTheme.typography.headlineSmall)
             val authors = remember(series.booksMetadata.authors) {
                 series.booksMetadata.authors.filter { it.role == "writer" }.map { it.name }.distinct().joinToString("、")
             }
@@ -568,7 +599,10 @@ fun Series(
             if (series.metadata.summary.isNotBlank()) Text(series.metadata.summary,
                 maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.heightIn(min = 8.dp))
+            readingAction()
         }
+    }
     }
 }
 

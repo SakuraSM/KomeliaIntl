@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_offline_books
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_local_summary
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_local_library
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_books
@@ -120,16 +121,19 @@ internal fun LocalContent(
             }
             LazyColumn(
                 state = listState,
-                contentPadding = PaddingValues(top = 12.dp, bottom = layout.gridBottomPadding + snd.komelia.ui.common.components.LocalNavigationBarInset.current),
+                contentPadding = PaddingValues(top = 12.dp, bottom = layout.gridBottomPadding),
                 modifier = Modifier.fillMaxSize().padding(horizontal = layout.pageHorizontalPadding),
             ) {
                 item {
                     Surface(onClick = onManageLocalFolders, color = androidx.compose.ui.graphics.Color.Transparent) {
                         Row(Modifier.fillMaxWidth().heightIn(min = 64.dp),
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Icon(Icons.Rounded.Folder, null, Modifier.size(18.dp))
-                            Text(stringResource(Res.string.settings_navigation_local_library), Modifier.weight(1f),
-                                style = MaterialTheme.typography.titleSmall)
+                            Icon(Icons.Rounded.Folder, null, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.primary)
+                            Column(Modifier.weight(1f)) {
+                                Text(stringResource(Res.string.settings_navigation_local_library), style = MaterialTheme.typography.titleSmall)
+                                Text(stringResource(Res.string.reading_local_summary),
+                                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                             Icon(Icons.Rounded.ChevronRight, null, Modifier.size(18.dp))
                         }
                     }

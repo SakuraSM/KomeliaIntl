@@ -1,0 +1,240 @@
+{
+  "apkSha256": "a1eb8cde4ba1da9c803e397a95abeb318cb441690f34025c87d820442d1a17e7",
+  "host": "Android API37 dedicated emulator",
+  "screens": [
+    {
+      "name": "01-home",
+      "actual": "final-home",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "37872c77707a73fff60c798ac9b7fc906b43a3f61ce2ecc6d8aa77cb54692d4a"
+    },
+    {
+      "name": "02-library",
+      "actual": "final-library",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "899d21b668ea9d16175d4c88b211a934c503af2835634579b747fa25c318955b"
+    },
+    {
+      "name": "03-series",
+      "actual": "final-series",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "3dcaaa51a9f4e5295615ae503807b461bccfa86c6288ffb255b6dc1a54d9c27d"
+    },
+    {
+      "name": "04-ebook-detail",
+      "actual": "final-ebook-detail",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "1ed4530a99af8aa6910722a7df87bac4f692edf7205fff57bb27c17ac65fbd5b"
+    },
+    {
+      "name": "05-comic-detail",
+      "actual": "final-comic-detail",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "d5f29b0964cf81bbaa605a32f4835b554b804efb848db32e52c4b74f892af8e0"
+    },
+    {
+      "name": "06-local-downloads",
+      "actual": "final-local",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "2181731d73ac1f801be693f54131df7c71a04803da9bd6615d104b83ab63918a"
+    },
+    {
+      "name": "07-search",
+      "actual": "final-search",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "f651035edf74245493dcdc4b233d12881a4da1c2878d6f4cf50980961337d13a"
+    },
+    {
+      "name": "08-settings",
+      "actual": "final-settings",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "4859a82bf07e86c99150be5331a7a98255c45ef1a409fdbc35b3968a03fa8f30"
+    },
+    {
+      "name": "09-filters",
+      "actual": "final-filters",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "3177c90d3baa3688735a4e9ca308aff7400751f5a7ff46bde9f5df80f7d4ee33"
+    },
+    {
+      "name": "10-epub-contents",
+      "actual": "final-contents",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "63b979ce2b14ec3a15e041c2ad28cd6f8cab9c865be6d6c3c2c6e881337dc212"
+    },
+    {
+      "name": "11-text-reader-settings",
+      "actual": "final-ttu-settings",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "21bf967a810d1ae53ed44ae2592a2db6ed8e3b81d3363ec6381f52209dbfe8dc"
+    },
+    {
+      "name": "12-image-reader-settings",
+      "actual": "final-image-settings",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "d3699e545f68f98c6b4594aef5fa55109448cf4ad1e6b67a0f747d1f8be1d0a9"
+    },
+    {
+      "name": "13-ebook-light",
+      "actual": "final-ebook-light",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "12b83ed0c8e18250a10483c2f36494ea3534121e2e72bcbbf2e30acb2303bd36"
+    },
+    {
+      "name": "14-series-light",
+      "actual": "final-series-light",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "c718bd33e04d147bb65b5d4a0b8b5ecde8e985290d5ee17768bd3dac04f9d43b"
+    },
+    {
+      "name": "15-tablet",
+      "actual": "final-tablet",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 834,
+      "height": 1194,
+      "cutoutAdjustment": 46,
+      "rawPixels": [
+        1668,
+        2480
+      ],
+      "sha256": "8134483b76aa318e9ab1ca3c326522eb7d1e0438a83eb45bd7f52dcb30e86cdc"
+    },
+    {
+      "name": "16-desktop",
+      "actual": "final-wide",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 1440,
+      "height": 1024,
+      "cutoutAdjustment": 56,
+      "rawPixels": [
+        2880,
+        2160
+      ],
+      "sha256": "d9a15982e0a600927e8fcdf610a4e08723a97d501d066f2ae9bd34c8f6ec2c80"
+    },
+    {
+      "name": "17-komga-settings",
+      "actual": "final-komga-settings",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "e965f9a05a153e470e0436ce7b5930192836f5240b59ce462990b7df7895b3f6"
+    },
+    {
+      "name": "18-immersive-reading",
+      "actual": "final-immersive",
+      "note": "Style baseline APK · synthetic catalogue",
+      "width": 390,
+      "height": 844,
+      "cutoutAdjustment": 24,
+      "rawPixels": [
+        780,
+        1736
+      ],
+      "sha256": "d97b02088bd26af0de9ac8da21e64857120861c730ed5af90c6c7ba02f34caeb"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { faPlus, faSpinner} from '@fortawesome/free-solid-svg-icons';
+  import {faChevronRight, faMinus, faPlus, faSpinner} from '@fortawesome/free-solid-svg-icons';
   import ButtonToggleGroup from '$lib/components/button-toggle-group/button-toggle-group.svelte';
   import {getOptionsForToggle, type ToggleOption} from '$lib/components/button-toggle-group/toggle-option';
   import Ripple from '$lib/components/ripple.svelte';
@@ -162,34 +162,19 @@
 </script>
 
 <div class="komelia-reading-settings">
-  <SettingsItemGroup title={t('Serif Font family')} inline>
+  <SettingsItemGroup title={t('Font')} inline>
     <div class="font-row-controls">
       <SettingsFontSelector bind:fontValue={$serifFontFamily$} defaultFont={defaultSerifFont} family="Serif"/>
-      <button
-          type="button"
-          aria-label={t('Open Custom Font Dialog')}
-          title={t('Open Custom Font Dialog')}
-          onclick={() =>
-              dialogManager.dialogs$.next([
-                {
-                  component: SettingsUserFontDialog,
-                  props: {
-                      currentFont: serifFontFamily$,
-                      defaultFont: defaultSerifFont
-                  }
-                }
-              ])}
-      >
-        <Fa icon={faFolderOpen}/>
-      </button>
+
     </div>
   </SettingsItemGroup>
-  <SettingsItemGroup title={t('Font size')}>
-    <div class="flex items-center gap-4">
-      <input type="range" min="1" max={Math.max(48, $fontSize$ || 16)} step="1"
-             aria-label={t('Font size')} class="min-h-12 flex-1" bind:value={$fontSize$}/>
-      <input type="number" min="1" step="1" aria-label={t('Font size')}
-             class="w-20 min-h-12 rounded-xl border bg-transparent p-2" bind:value={$fontSize$}/>
+  <SettingsItemGroup title={t('Font size')} inline>
+    <div class="font-size-controls">
+      <button type="button" aria-label={t('Decrease font size')}
+              disabled={Number($fontSize$ || 16) <= 1} onclick={() => $fontSize$ = Math.max(1, Number($fontSize$ || 16) - 1)}><Fa icon={faMinus}/></button>
+      <input type="number" min="1" step="1" aria-label={t('Font size')} bind:value={$fontSize$}/>
+      <button type="button" aria-label={t('Increase font size')}
+              onclick={() => $fontSize$ = Number($fontSize$ || 16) + 1}><Fa icon={faPlus}/></button>
     </div>
   </SettingsItemGroup>
   <div class="lg:col-span-2">
@@ -234,12 +219,29 @@
     </SettingsItemGroup>
   </div>
   <div class="h-full">
-    <SettingsItemGroup title={t('View mode')}>
+    <SettingsItemGroup title={t('View mode')} inline>
       <ButtonToggleGroup options={optionsForViewMode} bind:selectedOptionId={$viewMode$}/>
     </SettingsItemGroup>
   </div>
   <details class="komelia-advanced-settings">
-    <summary class="min-h-12 cursor-pointer py-4">{t('Advanced')}</summary>
+    <summary class="typography-summary"><span><strong>{t('More typography settings')}</strong><small>{t('Line height, page margins and more')}</small></span><Fa icon={faChevronRight}/></summary>
+      <button
+          type="button"
+          aria-label={t('Open Custom Font Dialog')}
+          title={t('Open Custom Font Dialog')}
+          onclick={() =>
+              dialogManager.dialogs$.next([
+                {
+                  component: SettingsUserFontDialog,
+                  props: {
+                      currentFont: serifFontFamily$,
+                      defaultFont: defaultSerifFont
+                  }
+                }
+              ])}
+      >
+        <Fa icon={faFolderOpen}/>
+      </button>
   <SettingsItemGroup title={t('Sans Font family')}>
     <div slot="header" class="flex items-center mx-2">
       <button
@@ -466,6 +468,16 @@
 <style>
   .font-row-controls { display: flex; align-items: center; gap: 4px; min-width: 0; }
   .font-row-controls > :global(div) { flex: 1; min-width: 0; }
-  .font-row-controls > button { flex: none; width: 48px; min-height: 48px; }
-  .komelia-theme-add { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; margin: 0; padding: 0 8px; font-size: 14px; }
+  .font-size-controls { display: grid; grid-template-columns: 48px 44px 48px; gap: 4px; align-items: center; justify-content: end; }
+  .font-size-controls button { display: grid; place-items: center; position: relative; width: 48px; height: 48px; border: 0; background: transparent; }
+  .font-size-controls button::before { content: ''; position: absolute; inset: 4px; border: 1px solid rgb(176 211 242 / 35%); border-radius: 10px; pointer-events: none; }
+  .font-size-controls input { width: 44px; border: 0; background: transparent; text-align: center; font-size: 16px; appearance: textfield; }
+  .font-size-controls input::-webkit-inner-spin-button { appearance: none; }
+  .komelia-theme-add { display: flex; align-items: center; justify-content: center; position: relative; gap: 8px; min-height: 48px; margin: 0; padding: 8px 6px; font-size: 14px; border: 0; }
+  .komelia-theme-add::before { content: ''; position: absolute; inset: 8px 0; pointer-events: none; border: 1px solid rgb(176 211 242 / 40%); border-radius: 12px; }
+  .typography-summary { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 12px; padding-block: 12px; list-style: none; cursor: pointer; }
+  .typography-summary::-webkit-details-marker { display: none; }
+  .typography-summary strong { display: block; font-size: 14px; font-weight: 600; }
+  .typography-summary small { display: block; font-size: 12px; margin-top: 4px; opacity: .8; }
+  details[open] > .typography-summary :global(svg) { transform: rotate(90deg); }
 </style>

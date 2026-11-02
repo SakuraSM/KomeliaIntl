@@ -1,5 +1,7 @@
 package snd.komelia.ui.book
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,8 +47,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_file_source
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_summary
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_series_info
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_detail_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
@@ -59,6 +64,13 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.sync.model.DownloadEvent
 import snd.komelia.ui.LocalBookDownloadEvents
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.ReadingDesign
+import snd.komelia.offline.local.isLocalLibrary
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_source
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.automirrored.rounded.List
 import snd.komelia.ui.common.components.ExpandableText
 import snd.komelia.ui.common.components.FloatingChromeIconButton
 import snd.komelia.ui.common.components.KomeliaPageScaffold
@@ -109,7 +121,7 @@ fun BookScreenContent(
     val actionInset = when (windowWidth) {
         snd.komelia.ui.platform.WindowSizeClass.COMPACT, snd.komelia.ui.platform.WindowSizeClass.MEDIUM -> 0.dp
         snd.komelia.ui.platform.WindowSizeClass.EXPANDED -> 24.dp
-        snd.komelia.ui.platform.WindowSizeClass.FULL -> 48.dp
+        snd.komelia.ui.platform.WindowSizeClass.FULL -> 30.dp
     }
     val density = LocalDensity.current
     var readingBarHeight by remember { mutableStateOf(116.dp) }
@@ -133,30 +145,47 @@ fun BookScreenContent(
             Column(
                 Modifier.widthIn(max = layout.contentMaxWidth).fillMaxWidth()
                     .verticalScroll(scrollState)
-                    .padding(horizontal = if (windowWidth == snd.komelia.ui.platform.WindowSizeClass.FULL) 48.dp else layout.pageHorizontalPadding)
-                    .padding(top = topInset + if (actionInset == 0.dp) 6.dp else 12.dp,
+                    .padding(horizontal = if (windowWidth == snd.komelia.ui.platform.WindowSizeClass.FULL) 40.dp else ReadingDesign.homeInset)
+                    .padding(top = topInset + if (actionInset == 0.dp) 6.dp else if (windowWidth == snd.komelia.ui.platform.WindowSizeClass.FULL) 30.dp else 12.dp,
                         bottom = if (canRead) readingBarHeight + 16.dp else layout.gridBottomPadding),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 ReadingBookHeader(book, onParentSeries = if (book.oneshot) null else onParentSeriesPress,
                     unavailable = !contentIsAvailable, onDownload = onBookDownload, onContents = onContents ?: if (book.media.mediaType == "application/epub+zip") { { showContents = true } } else null)
+                val wideImage = actionInset > 0.dp && book.media.mediaType != "application/epub+zip"
+                if (!wideImage) HorizontalDivider(Modifier.padding(top = 10.dp), color = MaterialTheme.colorScheme.outlineVariant)
                 if (book.metadata.summary.isNotBlank()) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(stringResource(Res.string.reading_summary), style = MaterialTheme.typography.titleMedium)
+                    Column(Modifier.then(if (wideImage) Modifier.padding(top = 32.dp) else Modifier), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (!wideImage) Text(stringResource(Res.string.reading_summary), style = MaterialTheme.typography.titleMedium)
                         ExpandableText(book.metadata.summary, style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.fillMaxWidth())
                     }
                 }
-                BookReadingNavigation(book, readingContext, navigation, showContents, onShowContents = { showContents = it })
+                if (wideImage && !book.oneshot) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    TextButton(onClick = onParentSeriesPress, modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp),
+                        contentPadding = PaddingValues(0.dp), colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
+                        Icon(Icons.AutoMirrored.Rounded.List, null, Modifier.size(24.dp))
+                        Spacer(Modifier.width(16.dp))
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(stringResource(Res.string.reading_series_info), style = MaterialTheme.typography.titleMedium)
+                            Text(book.seriesTitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Icon(Icons.Rounded.ChevronRight, null, Modifier.size(20.dp))
+                    }
+                } else BookReadingNavigation(book, readingContext, navigation, showContents, onShowContents = { showContents = it })
                 readingNavigation()
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 TextButton(onClick = { showFileDetails = !showFileDetails },
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                     Text(stringResource(Res.string.reading_file_source), Modifier.weight(1f),
                         style = MaterialTheme.typography.titleMedium)
                     Icon(Icons.Rounded.ExpandMore, null)
                 }
+                Text(listOf(book.size, if (book.libraryId.isLocalLibrary() || book.downloaded) stringResource(Res.string.local_source) else library.name).joinToString(" · "),
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (showFileDetails) {
                     BookInfoRow(book = book, showReadProgress = false)
                     BookInfoColumn(publisher = publisher, genres = genres, authors = book.metadata.authors,
@@ -182,7 +211,8 @@ fun BookToolBar(
     onReadClick: ((Boolean) -> Unit)? = null,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = if (snd.komelia.ui.LocalWindowWidth.current == snd.komelia.ui.platform.WindowSizeClass.FULL) 24.dp else 0.dp)
+            .heightIn(min = 48.dp).padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FloatingChromeIconButton(onBackPress, floating) {
@@ -192,11 +222,12 @@ fun BookToolBar(
             )
         }
         Text(
-            if (showTitle) book.metadata.title else stringResource(Res.string.reading_detail_title),
+            if (showTitle) book.metadata.title else if (book.media.mediaType == "application/epub+zip") stringResource(Res.string.reading_detail_title)
+                else book.seriesTitle.ifBlank { book.metadata.title },
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.weight(1f), textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f), textAlign = if (book.media.mediaType == "application/epub+zip") TextAlign.Center else TextAlign.Start,
         )
         ToolbarBookActions(book, bookMenuActions, floating, onReadClick)
     }
@@ -233,6 +264,7 @@ private fun ToolbarBookActions(
 fun DownloadButton(
     book: KomeliaBook,
     onDownload: () -> Unit,
+    compact: Boolean = false,
 ) {
     var showDownloadConfirmation by remember { mutableStateOf(false) }
     val downloadEvents = LocalBookDownloadEvents.current
@@ -241,12 +273,7 @@ fun DownloadButton(
         downloadEvents?.filter { it.bookId == book.id }?.collect { downloadEvent = it }
     }
 
-    ElevatedButton(
-        enabled = downloadEvent == null,
-        onClick = { showDownloadConfirmation = true },
-        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-        elevation = null
-    ) {
+    val statusIcon: @Composable () -> Unit = {
         when (val event = downloadEvent) {
             is DownloadEvent.BookDownloadProgress -> {
                 Box(
@@ -272,9 +299,19 @@ fun DownloadButton(
                 Icon(Icons.Rounded.Download, null)
             }
         }
+    }
+    val downloadLabel = stringResource(Res.string.book_download)
+    if (compact) Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        OutlinedIconButton(enabled = downloadEvent == null, onClick = { showDownloadConfirmation = true },
+            shape = CircleShape, modifier = Modifier.size(48.dp).padding(2.dp)) {
+            Box(Modifier.semantics { contentDescription = downloadLabel }) { statusIcon() }
+        }
+        Text(stringResource(Res.string.book_download), style = MaterialTheme.typography.labelSmall)
+    } else ElevatedButton(enabled = downloadEvent == null, onClick = { showDownloadConfirmation = true },
+        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand), elevation = null) {
+        statusIcon()
         Spacer(Modifier.width(3.dp))
         Text(stringResource(Res.string.book_download))
-
     }
 
     if (showDownloadConfirmation) {

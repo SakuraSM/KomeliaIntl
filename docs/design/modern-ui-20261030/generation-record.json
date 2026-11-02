@@ -1,0 +1,456 @@
+{
+  "date": "2026-10-30",
+  "styleApprovedByUser": true,
+  "codeCheckpoint": "68b2daf784584a1126e4f4a37d018ca4528a5bed",
+  "totalScreens": 18,
+  "reusedApprovedScreens": 3,
+  "newScreens": 15,
+  "generator": "built-in image_gen",
+  "naturalImagesPreserved": true,
+  "images": [
+    {
+      "key": "01-home",
+      "title": "首页",
+      "width": 390,
+      "height": 844,
+      "approved": true,
+      "number": 1,
+      "file": "screens/01-home.png",
+      "prompt": "prompts/01-home.txt",
+      "theme": "DARK",
+      "group": "main",
+      "kind": "mobile",
+      "status": "approved-anchor",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "0f2dd4ebe60c388ad21c4415e030b760022e98d8702ec1f69766342d832542f4",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "01-home.txt"
+      ]
+    },
+    {
+      "key": "02-library",
+      "title": "书库",
+      "width": 390,
+      "height": 844,
+      "approved": true,
+      "number": 2,
+      "file": "screens/02-library.png",
+      "prompt": "prompts/02-library.txt",
+      "theme": "DARK",
+      "group": "main",
+      "kind": "mobile",
+      "status": "approved-anchor",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "5902354060d36ac16b3a02645fa4a5e2f16b56621404646b8ea757aa69ce7150",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "02-library.txt"
+      ]
+    },
+    {
+      "key": "03-series",
+      "title": "丛书卷册",
+      "width": 390,
+      "height": 844,
+      "number": 3,
+      "file": "screens/03-series.png",
+      "prompt": "prompts/03-series.txt",
+      "theme": "DARK",
+      "group": "main",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "c672aa6d66da210bc970462945d1336484d31e0ddcc5721c11d2d709d607cc0b",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "03-series.txt",
+        "03-series-revision.txt"
+      ]
+    },
+    {
+      "key": "04-ebook-detail",
+      "title": "文字书详情",
+      "width": 390,
+      "height": 844,
+      "number": 4,
+      "file": "screens/04-ebook-detail.png",
+      "prompt": "prompts/04-ebook-detail.txt",
+      "theme": "DARK",
+      "group": "main",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "42968c107bf25d822d4cb1bbe8858630ac7b3db80f6c0d463d4392af416fd2d0",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "04-ebook-detail.txt",
+        "04-ebook-detail-revision.txt",
+        "04-ebook-detail-revision2.txt"
+      ]
+    },
+    {
+      "key": "05-comic-detail",
+      "title": "漫画单册详情",
+      "width": 390,
+      "height": 844,
+      "number": 5,
+      "file": "screens/05-comic-detail.png",
+      "prompt": "prompts/05-comic-detail.txt",
+      "theme": "DARK",
+      "group": "main",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "e139f52389d6167dd902a714072b329103f49cc623812f8fe58070d1dfe163f4",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "05-comic-detail.txt",
+        "05-comic-detail-revision.txt"
+      ]
+    },
+    {
+      "key": "06-local-downloads",
+      "title": "本地与下载",
+      "width": 390,
+      "height": 844,
+      "number": 6,
+      "file": "screens/06-local-downloads.png",
+      "prompt": "prompts/06-local-downloads.txt",
+      "theme": "DARK",
+      "group": "main",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "fdabe6f403e1faa7019a08a438ef3ceb99a352c1a533478d3199801c5ce37f4d",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "06-local-downloads.txt"
+      ]
+    },
+    {
+      "key": "07-search",
+      "title": "搜索结果",
+      "width": 390,
+      "height": 844,
+      "number": 7,
+      "file": "screens/07-search.png",
+      "prompt": "prompts/07-search.txt",
+      "theme": "DARK",
+      "group": "main",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "7efb92a5dee80ed3962df2daefcc78a2857c8ce05137ac8312d24701ecdd3fc2",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "07-search.txt",
+        "07-search-revision.txt"
+      ]
+    },
+    {
+      "key": "08-settings",
+      "title": "设置首页",
+      "width": 390,
+      "height": 844,
+      "number": 8,
+      "file": "screens/08-settings.png",
+      "prompt": "prompts/08-settings.txt",
+      "theme": "DARK",
+      "group": "main",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "23a1b10333fe140c5f90579f87d4e352415c7b0be2fbe29780e93196e86749e2",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "08-settings.txt",
+        "08-settings-revision.txt"
+      ]
+    },
+    {
+      "key": "09-filters",
+      "title": "筛选与显示",
+      "width": 390,
+      "height": 844,
+      "number": 9,
+      "file": "screens/09-filters.png",
+      "prompt": "prompts/09-filters.txt",
+      "theme": "DARK",
+      "group": "reader",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "20a3c9f26b02c5ba764bb2a17e27050e348d8a2bbde188751ef7252de5b4d840",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "09-filters.txt",
+        "09-filters-revision.txt"
+      ]
+    },
+    {
+      "key": "10-epub-contents",
+      "title": "EPUB 目录",
+      "width": 390,
+      "height": 844,
+      "number": 10,
+      "file": "screens/10-epub-contents.png",
+      "prompt": "prompts/10-epub-contents.txt",
+      "theme": "DARK",
+      "group": "reader",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "b0ba50fa78efa352b33cd33c32ad750cc25e8d2e5f55434474e6f9a40298c3fd",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "10-epub-contents.txt",
+        "10-epub-contents-revision.txt"
+      ]
+    },
+    {
+      "key": "11-text-reader-settings",
+      "title": "文字阅读设置 · TTU",
+      "width": 390,
+      "height": 844,
+      "approved": true,
+      "number": 11,
+      "file": "screens/11-text-reader-settings.png",
+      "prompt": "prompts/11-text-reader-settings.txt",
+      "theme": "DARK",
+      "group": "reader",
+      "kind": "mobile",
+      "status": "approved-anchor",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "bc5e77ed73f380cf9167dbf8db1fcb257d8543e88b06a441821056439c927308",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "11-text-reader-settings.txt"
+      ]
+    },
+    {
+      "key": "12-image-reader-settings",
+      "title": "漫画与 PDF 设置",
+      "width": 390,
+      "height": 844,
+      "number": 12,
+      "file": "screens/12-image-reader-settings.png",
+      "prompt": "prompts/12-image-reader-settings.txt",
+      "theme": "DARK",
+      "group": "reader",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "777825e440d105a84b02a35c7df2748a9f04c17acaf671f24d50d03ca4745204",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "12-image-reader-settings.txt"
+      ]
+    },
+    {
+      "key": "13-ebook-light",
+      "title": "文字书详情 · 浅色",
+      "width": 390,
+      "height": 844,
+      "number": 13,
+      "file": "screens/13-ebook-light.png",
+      "prompt": "prompts/13-ebook-light.txt",
+      "theme": "LIGHT",
+      "group": "main",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "d3468174ecb644c3215a71c6cc551edb37c41c8dcebb6e52ce6d237a378c9933",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "13-ebook-light.txt",
+        "13-ebook-light-revision.txt"
+      ]
+    },
+    {
+      "key": "14-series-light",
+      "title": "丛书卷册 · 浅色",
+      "width": 390,
+      "height": 844,
+      "number": 14,
+      "file": "screens/14-series-light.png",
+      "prompt": "prompts/14-series-light.txt",
+      "theme": "LIGHT",
+      "group": "main",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "21ddb47079062504e013549ee3d019f4478b9a19f4da81e9e52594a8d5632a22",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "14-series-light.txt"
+      ]
+    },
+    {
+      "key": "15-tablet",
+      "title": "平板适配",
+      "width": 834,
+      "height": 1194,
+      "number": 15,
+      "file": "screens/15-tablet.png",
+      "prompt": "prompts/15-tablet.txt",
+      "theme": "DARK",
+      "group": "wide",
+      "kind": "tablet",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        1048,
+        1501
+      ],
+      "sha256": "fb0c8dec8d0d5bc83767c049887c6b9e7fe4eeaa33c1898a7c40505272e9867f",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "15-tablet.txt",
+        "15-tablet-revision.txt"
+      ]
+    },
+    {
+      "key": "16-desktop",
+      "title": "桌面适配",
+      "width": 1440,
+      "height": 1024,
+      "number": 16,
+      "file": "screens/16-desktop.png",
+      "prompt": "prompts/16-desktop.txt",
+      "theme": "DARK",
+      "group": "wide",
+      "kind": "desktop",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        1487,
+        1058
+      ],
+      "sha256": "1bed6cbccdfb0d252afe2db8a165cadfcb2cd8a17d66b4ac6665761ca3ce2edb",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "16-desktop.txt",
+        "16-desktop-revision.txt"
+      ]
+    },
+    {
+      "key": "17-komga-settings",
+      "title": "Komga EPUB 设置",
+      "width": 390,
+      "height": 844,
+      "number": 17,
+      "file": "screens/17-komga-settings.png",
+      "prompt": "prompts/17-komga-settings.txt",
+      "theme": "DARK",
+      "group": "reader",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "4326c00ba2c16f4162227a6a43e095b40dd7325bd49e7133414c7c34730e8a92",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "17-komga-settings.txt"
+      ]
+    },
+    {
+      "key": "18-immersive-reading",
+      "title": "纯阅读状态",
+      "width": 390,
+      "height": 844,
+      "number": 18,
+      "file": "screens/18-immersive-reading.png",
+      "prompt": "prompts/18-immersive-reading.txt",
+      "theme": "PAPER",
+      "group": "reader",
+      "kind": "mobile",
+      "status": "generated-reviewed",
+      "actualPixels": [
+        853,
+        1844
+      ],
+      "sha256": "8aaa5a92b063d112f0a5778122c527c0ac55f23b87150ec24c076eb85000f374",
+      "generator": "built-in image_gen",
+      "prompts": [
+        "18-immersive-reading.txt"
+      ],
+      "appTheme": "DARK"
+    }
+  ],
+  "reviewScope": [
+    "readable major hierarchy and labels",
+    "single primary reading action in details",
+    "complete overlay base",
+    "cover orientation",
+    "light/dark counterparts",
+    "compact/wide adaptation"
+  ],
+  "limits": [
+    "Generated images are visual references, not pixel-exact specifications",
+    "Mock text and counts are illustrative and must not be treated as actual reading data",
+    "Native interaction, accessibility, performance and progress acceptance are outside this design delivery"
+  ],
+  "overviews": [
+    {
+      "file": "overview.png",
+      "pixels": [
+        1800,
+        2776
+      ],
+      "sha256": "df92e9283036595c3008d78f3fc29646a816a5e035994b5f0343356babe78ad5",
+      "method": "HTML composition and browser screenshot; source PNG files unchanged"
+    },
+    {
+      "file": "main-overview.png",
+      "pixels": [
+        1600,
+        1862
+      ],
+      "sha256": "80fc9ca10377cd5a6521fcc36e5ee734f310039f30f75f7e3f4bb2a9b9e6a161",
+      "method": "HTML composition and browser screenshot; source PNG files unchanged"
+    }
+  ]
+}

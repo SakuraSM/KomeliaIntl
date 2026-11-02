@@ -443,6 +443,7 @@ class ViewModelFactory(
 
 
     fun getSearchViewModel() = SearchViewModel(
+        taskEmitter = dependencies.offlineDependencies?.taskEmitter,
         seriesApi = komgaApi.seriesApi,
         bookApi = komgaApi.bookApi,
         offlineSeriesApi = dependencies.offlineDependencies?.komgaApi?.seriesApi,

@@ -9,6 +9,7 @@ import zhCN from '../src/locales/zh-CN.json';
 
 const parameters = new URLSearchParams(location.search);
 const theme = parameters.get('theme') ?? 'LIGHT';
+const optionLabels = (parameters.get('locale') === 'zh-CN' ? zhCN : en).enums.epubreader;
 document.documentElement.dataset.komeliaSurface = parameters.get('surface') ?? 'glass';
 document.documentElement.dataset.komeliaTheme = theme;
 const state = reactive({
@@ -28,11 +29,11 @@ const app = createApp({
       theme: theme === 'LIGHT' ? 'light' : 'dark',
       fixedLayout: parameters.has('fixed-layout'),
       appearances: [
-        {text: 'Day', value: 'readium-default-on', color: 'white', class: 'black--text'},
-        {text: 'Sepia', value: 'readium-sepia-on', color: '#faf4e8', class: 'black--text'},
-        {text: 'Night', value: 'readium-night-on', color: 'black', class: 'white--text'},
+        {text: optionLabels.appearances.day, value: 'readium-default-on', color: 'white', class: 'black--text'},
+        {text: optionLabels.appearances.sepia, value: 'readium-sepia-on', color: '#faf4e8', class: 'black--text'},
+        {text: optionLabels.appearances.night, value: 'readium-night-on', color: 'black', class: 'white--text'},
       ],
-      columnCounts: [{text: 'Auto', value: 'auto'}, {text: 'Single', value: '1'}, {text: 'Double', value: '2'}],
+      columnCounts: [{text: optionLabels.column_count.auto, value: 'auto'}, {text: optionLabels.column_count.one, value: '1'}, {text: optionLabels.column_count.two, value: '2'}],
       readingDirs: [{title: 'Automatic', value: 'auto'}, {title: 'Left to right', value: 'ltr'}],
       ...state,
       'onUpdate:modelValue': (value: boolean) => { state.open = value; record('open', value); },

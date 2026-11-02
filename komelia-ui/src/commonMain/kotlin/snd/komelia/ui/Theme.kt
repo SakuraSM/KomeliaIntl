@@ -42,7 +42,7 @@ private val LightColors = lightColorScheme(
     onTertiary = Color.White,
     tertiaryContainer = Color(0xFFD0E8FA),
     onTertiaryContainer = Color(0xFF00324F),
-    background = Color(0xFFEEF3F8),
+    background = Color(0xFFF4F7FB),
     onBackground = Color(0xFF13283E),
     surface = Color(0xFFF8FBFE),
     onSurface = Color(0xFF13283E),
@@ -77,9 +77,9 @@ private val DarkColors = darkColorScheme(
     tertiaryContainer = SkyBlue,
     onTertiaryContainer = Color(0xFF00324A),
     background = Color(0xFF09121E),
-    onBackground = Color(0xFFEEF5FF),
-    surface = Color(0xFF132234),
-    onSurface = Color(0xFFEEF5FF),
+    onBackground = Color(0xFFEDF4FB),
+    surface = Color(0xFF142538),
+    onSurface = Color(0xFFEDF4FB),
     surfaceVariant = Color(0xFF152131),
     onSurfaceVariant = Color(0xFFB8C8DC),
     surfaceContainerLowest = Color(0xFF0E1823),
@@ -131,6 +131,31 @@ val KomeliaTypography = Typography(
     labelLarge = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
     labelMedium = TextStyle(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium),
     labelSmall = TextStyle(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium),
+)
+
+internal val KomeliaDesktopReadingTypography = KomeliaTypography.copy(
+    headlineMedium = TextStyle(fontSize = 30.sp, lineHeight = 38.sp, fontWeight = FontWeight.SemiBold),
+    titleLarge = TextStyle(fontSize = 24.sp, lineHeight = 32.sp, fontWeight = FontWeight.SemiBold),
+    titleMedium = TextStyle(fontSize = 22.sp, lineHeight = 32.sp, fontWeight = FontWeight.SemiBold),
+    titleSmall = TextStyle(fontSize = 18.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold),
+    bodyMedium = TextStyle(fontSize = 20.sp, lineHeight = 32.sp),
+    bodySmall = TextStyle(fontSize = 16.sp, lineHeight = 24.sp),
+    labelLarge = TextStyle(fontSize = 18.sp, lineHeight = 26.sp, fontWeight = FontWeight.Medium),
+    labelMedium = TextStyle(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Medium),
+)
+
+internal val KomeliaTabletReadingTypography = KomeliaDesktopReadingTypography.copy(
+    bodyMedium = TextStyle(fontSize = 18.sp, lineHeight = 28.sp),
+    bodySmall = TextStyle(fontSize = 14.sp, lineHeight = 22.sp),
+    titleMedium = TextStyle(fontSize = 18.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold),
+    labelMedium = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
+)
+
+internal val KomeliaDesktopBrowseTypography = KomeliaTypography.copy(
+    bodyLarge = TextStyle(fontSize = 20.sp, lineHeight = 28.sp),
+    bodySmall = TextStyle(fontSize = 16.sp, lineHeight = 24.sp),
+    titleMedium = TextStyle(fontSize = 18.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold),
+    labelMedium = TextStyle(fontSize = 18.sp, lineHeight = 24.sp, fontWeight = FontWeight.Medium),
 )
 
 object KomeliaSpacing {

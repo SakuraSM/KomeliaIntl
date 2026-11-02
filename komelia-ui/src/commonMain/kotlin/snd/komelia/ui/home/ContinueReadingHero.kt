@@ -1,15 +1,12 @@
 package snd.komelia.ui.home
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.MenuBook
-import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -18,16 +15,16 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.RoundedCornerShape
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalLibraries
+import snd.komelia.ui.ReadingDesign
 import snd.komelia.ui.book.ReadingProgressSummary
 import snd.komelia.ui.book.readingActionLabel
-import snd.komelia.ui.book.readingMediaLabel
-import snd.komelia.ui.common.components.GlassBackdropScope
-import snd.komelia.ui.common.components.glassBackdrop
-import snd.komelia.ui.common.components.KomeliaChromeSurface
 import snd.komelia.ui.common.images.BookThumbnail
 import snd.komelia.ui.common.menus.BookActionsMenu
 import snd.komelia.ui.common.menus.BookMenuActions
@@ -36,50 +33,41 @@ import snd.komelia.ui.common.readIsSupported
 internal data class ContinueReadingHeroContent(val title: String, val book: KomeliaBook)
 internal data class ContinueReadingHeroActions(val onDetails: () -> Unit, val onRead: () -> Unit, val menu: BookMenuActions)
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun ContinueReadingHero(content: ContinueReadingHeroContent, actions: ContinueReadingHeroActions) {
     val book = content.book
     val colors = MaterialTheme.colorScheme
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(content.title, style = MaterialTheme.typography.titleLarge)
-        HeroReadingSurface {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
+    var showMenu by remember(book.id) { mutableStateOf(false) }
+    Column(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(content.title, style = MaterialTheme.typography.headlineMedium)
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val coverWidth = (maxWidth * .3815f).coerceIn(112.dp, 176.dp)
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(22.dp)) {
+                Box {
                     BookThumbnail(book.id, contentScale = ContentScale.Fit,
-                        modifier = Modifier.width(80.dp).aspectRatio(2f / 3f)
-                            .clip(MaterialTheme.shapes.small)
-                            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                        modifier = Modifier.width(coverWidth).aspectRatio(2f / 3f)
+                            .clip(ReadingDesign.coverShape).background(colors.surfaceContainerLow)
                             .semantics { contentDescription = book.metadata.title }
-                            .clickable(role = Role.Button, onClick = actions.onDetails))
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(book.metadata.title, style = MaterialTheme.typography.titleLarge,
-                            maxLines = 3, overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.heightIn(min = 48.dp).clickable(role = Role.Button, onClick = actions.onDetails))
-                        if (book.seriesTitle.isNotBlank() && book.seriesTitle != book.metadata.title) Text(book.seriesTitle,
-                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        val authors = remember(book.metadata.authors) { book.metadata.authors.map { it.name }.distinct().joinToString("、") }
-                        if (authors.isNotBlank()) Text(authors, style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(readingMediaLabel(book), style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    HeroBookMenu(book, actions.menu)
+                            .combinedClickable(role = Role.Button, onClick = actions.onDetails,
+                                onLongClickLabel = stringResource(Res.string.actions_show_more), onLongClick = { showMenu = true }))
+                    BookActionsMenu(book, actions.menu, showMenu, showEditOption = true, showDownloadOption = true,
+                        onDismissRequest = { showMenu = false })
                 }
-                HeroReadingControls(book, colors.primary, colors.onPrimary, actions.onRead)
+                Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(book.seriesTitle.ifBlank { book.metadata.title }, style = MaterialTheme.typography.headlineSmall.copy(fontSize = 24.sp, lineHeight = 32.sp),
+                        maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.clickable(role = Role.Button, onClick = actions.onDetails))
+                    if (book.seriesTitle.isNotBlank() && book.seriesTitle != book.metadata.title) Text(book.metadata.title,
+                        style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    val authors = remember(book.metadata.authors) { book.metadata.authors.map { it.name }.distinct().joinToString("、") }
+                    if (authors.isNotBlank()) Text(authors, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Spacer(Modifier.weight(1f))
+                    HeroReadingControls(book, onRead = actions.onRead)
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun HeroBookMenu(book: KomeliaBook, menu: BookMenuActions) {
-    var expanded by remember(book.id) { mutableStateOf(false) }
-    Box {
-        IconButton(onClick = { expanded = true }, modifier = Modifier.size(48.dp)) {
-            Icon(Icons.Rounded.MoreHoriz, stringResource(Res.string.actions_show_more))
-        }
-        BookActionsMenu(book, menu, expanded, showEditOption = true, showDownloadOption = true,
-            onDismissRequest = { expanded = false })
     }
 }
 
@@ -89,27 +77,20 @@ internal fun HeroReadingControls(book: KomeliaBook,
     onAccent: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onPrimary,
     onRead: () -> Unit) {
     val libraryUnavailable = LocalLibraries.current.value.firstOrNull { it.id == book.libraryId }?.unavailable == true
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        ReadingProgressSummary(book, accent)
-        Button(onClick = onRead, enabled = snd.komelia.ui.common.bookContentIsAvailable(book, libraryUnavailable) && readIsSupported(book),
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onAccent)) {
-            Icon(Icons.AutoMirrored.Rounded.MenuBook, null, Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(readingActionLabel(book))
-        }
-    }
-}
-
-@Composable
-private fun HeroReadingSurface(content: @Composable () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    val shape = RoundedCornerShape(18.dp)
-    GlassBackdropScope {
-        Box(Modifier.fillMaxWidth()) {
-            Box(Modifier.matchParentSize().clip(shape).glassBackdrop().background(
-                androidx.compose.ui.graphics.Brush.linearGradient(listOf(colors.surfaceContainerHighest, colors.surfaceContainerLow))))
-            KomeliaChromeSurface(Modifier.fillMaxWidth(), shape = shape, content = content)
+    val enabled = snd.komelia.ui.common.bookContentIsAvailable(book, libraryUnavailable) && readIsSupported(book)
+    val shape = RoundedCornerShape(10.dp)
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        ReadingProgressSummary(book, accent, labelRowHeight = 25.dp)
+        Surface(onClick = onRead, enabled = enabled, color = androidx.compose.ui.graphics.Color.Transparent,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = shape) {
+            Box(contentAlignment = Alignment.BottomCenter) {
+                Surface(color = if (enabled) accent else accent.copy(alpha = .12f), contentColor = if (enabled) onAccent else onAccent.copy(alpha = .38f),
+                    shape = shape, modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp)) {
+                    Box(Modifier.padding(horizontal = 8.dp).heightIn(min = 36.dp), contentAlignment = Alignment.Center) {
+                        Text(readingActionLabel(book), style = MaterialTheme.typography.labelLarge, maxLines = 2)
+                    }
+                }
+            }
         }
     }
 }

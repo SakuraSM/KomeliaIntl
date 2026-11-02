@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
@@ -23,6 +24,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material3.Text
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ButtonDefaults.textButtonColors
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.ui.text.style.TextOverflow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_advanced_filter_summary
 import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -85,6 +91,7 @@ fun SeriesFilterContent(
     filterState: SeriesFilterState,
     onDismiss: () -> Unit,
     compact: Boolean = false,
+    displayOptions: @Composable () -> Unit = {},
 ) {
     val widthClass = LocalWindowWidth.current
 
@@ -111,7 +118,7 @@ fun SeriesFilterContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing)
     ) {
-        FlowRow(
+        if (!compact || showAdvanced) FlowRow(
             horizontalArrangement = Arrangement.spacedBy(spacing),
             verticalArrangement = Arrangement.Center,
         ) {
@@ -121,7 +128,7 @@ fun SeriesFilterContent(
                 delay(200)
                 filterState.onSearchTermChange(searchTerm)
             }
-            NoPaddingTextField(
+            if (!compact) NoPaddingTextField(
                 text = searchTerm,
                 placeholder = stringResource(Res.string.filter_search),
                 onTextChange = { searchTerm = it },
@@ -163,6 +170,7 @@ fun SeriesFilterContent(
             horizontalArrangement = Arrangement.spacedBy(spacing),
             verticalArrangement = Arrangement.spacedBy(spacing),
         ) {
+            SeriesFilterField(stringResource(Res.string.series_filter_sort), compact, filterItemModifier) { fieldModifier ->
             FilterDropdownChoice(
                 selectedOption = LabeledEntry(
                     currentFilter.sortOrder,
@@ -177,9 +185,11 @@ fun SeriesFilterContent(
                     )
                 },
                 onOptionChange = { filterState.onSortOrderChange(it.value) },
-                label = stringResource(Res.string.series_filter_sort),
-                modifier = filterItemModifier
+                label = if (compact) null else stringResource(Res.string.series_filter_sort),
+                modifier = fieldModifier
             )
+            }
+            SeriesFilterField(stringResource(Res.string.series_filter_read_status), compact, filterItemModifier) { fieldModifier ->
             FilterDropdownMultiChoice(
                 selectedOptions = currentFilter.readStatus
                     .map {
@@ -195,15 +205,24 @@ fun SeriesFilterContent(
                     )
                 },
                 onOptionSelect = { changed -> filterState.onReadStatusSelect(changed.value) },
-                label = stringResource(Res.string.series_filter_read_status),
-                modifier = filterItemModifier,
+                label = if (compact) null else stringResource(Res.string.series_filter_read_status),
+                modifier = fieldModifier,
             )
+            }
 
+            displayOptions()
             if (compact) {
-                TextButton(onClick = { showAdvanced = !showAdvanced }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                    Text(stringResource(if (showAdvanced) Res.string.browse_hide_advanced_filters else Res.string.browse_show_advanced_filters))
-                    Icon(if (showAdvanced) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                TextButton(onClick = { showAdvanced = !showAdvanced }, modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+                    contentPadding = PaddingValues(0.dp), colors = textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
+                    Text(stringResource(if (showAdvanced) Res.string.browse_hide_advanced_filters else Res.string.browse_show_advanced_filters),
+                        style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(Res.string.browse_advanced_filter_summary), Modifier.weight(1f).padding(horizontal = 12.dp),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Icon(if (showAdvanced) Icons.Rounded.ExpandLess else Icons.Rounded.ChevronRight, null)
                 }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             if (!compact || showAdvanced) {
             TagFiltersDropdownMenu(
@@ -364,4 +383,14 @@ fun SeriesFilterContent(
         }
 
     }
+}
+
+@Composable
+private fun SeriesFilterField(label: String, compact: Boolean, modifier: Modifier,
+    content: @Composable (Modifier) -> Unit) {
+    if (compact) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(label, Modifier.width(72.dp), style = MaterialTheme.typography.labelLarge)
+        content(Modifier.weight(1f))
+    } else content(modifier)
 }

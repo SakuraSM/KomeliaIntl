@@ -11,7 +11,7 @@ class ThemeTest {
     fun lightThemeUsesAccessibleContentPalette() {
         val colors = Theme.LIGHT.colorScheme
 
-        assertEquals(Color(0xFFEEF3F8), colors.background)
+        assertEquals(Color(0xFFF4F7FB), colors.background)
         assertEquals(Color(0xFF13283E), colors.onBackground)
         assertEquals(Color(0xFF00638D), colors.primary)
     }
@@ -21,7 +21,7 @@ class ThemeTest {
         val colors = Theme.DARK.colorScheme
 
         assertEquals(Color(0xFF09121E), colors.background)
-        assertEquals(Color(0xFF132234), colors.surface)
+        assertEquals(Color(0xFF142538), colors.surface)
         assertEquals(Color(0xFF70D9FF), colors.primary)
     }
 

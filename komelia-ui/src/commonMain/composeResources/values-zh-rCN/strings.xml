@@ -1508,7 +1508,7 @@
     <string name="settings_image_mode_hints">模式与方向提示</string>
     <string name="settings_image_mode_hints_desc">仅首次使用或阅读模式、方向变化时显示。</string>
     <string name="reading_detail_title">书籍详情</string>
-    <string name="reading_series_title">丛书详情</string>
+    <string name="reading_series_title">丛书</string>
     <string name="reading_start">开始阅读</string>
     <string name="reading_again">重新阅读</string>
     <string name="reading_contents">目录</string>
@@ -1542,4 +1542,20 @@
     <string name="reading_text_settings_help">打开书籍后，可在阅读设置中调整字号、字体、主题与翻页方式。</string>
     <string name="browse_show_advanced_filters">高级筛选</string>
     <string name="browse_hide_advanced_filters">收起高级筛选</string>
+    <string name="browse_all_status">全部状态</string>
+    <string name="browse_grid">网格视图</string>
+    <string name="browse_list">列表视图</string>
+    <string name="browse_display_mode">显示方式</string>
+    <string name="browse_library_scope">书库范围</string>
+    <string name="browse_result_count">作品数量</string>
+    <string name="browse_advanced_filter_summary">标签、作者、语言、出版年份等</string>
+    <string name="browse_search_library">搜索书库</string>
+    <string name="series_books_progress">已读 %1$d / %2$d 部</string>
+    <string name="reading_local_summary">管理本地书籍与导入</string>
+    <string name="reading_downloads_summary">管理下载内容与存储空间</string>
+    <string name="reading_account_summary">书库与登录设置</string>
+    <string name="browse_app_controls">应用工具</string>
+    <string name="reading_series_info">系列信息</string>
+    <string name="home_filter_all_groups">全部分组</string>
+    <string name="reading_recent_heading">最近阅读</string>
 </resources>

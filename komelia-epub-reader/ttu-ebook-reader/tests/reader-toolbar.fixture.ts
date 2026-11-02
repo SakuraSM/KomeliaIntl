@@ -1,7 +1,9 @@
 import {mount} from 'svelte';
 import {createClassComponent} from 'svelte/legacy';
 import BookReaderHeader from '../src/lib/components/book-reader/book-reader-header.svelte';
-import SettingsContent from '../src/lib/components/settings/settings-content.svelte';
+import ReaderSettingsPanel from '../src/lib/components/settings/reader-settings-panel.svelte';
+import ReaderNavigationDrawer from '../src/lib/components/reader/ReaderNavigationDrawer.svelte';
+import {nextChapter$} from '../src/lib/components/book-reader/book-toc/book-toc';
 import ContinuousReader from '../src/lib/components/book-reader/book-reader-continuous/book-reader-continuous.svelte';
 import {sectionList$, sectionProgress$, getChapterData} from '../src/lib/components/book-reader/book-toc/book-toc';
 import {FuriganaStyle} from '../src/lib/data/furigana-style';
@@ -17,6 +19,19 @@ document.documentElement.dataset.komeliaSurface = parameters.get('surface') ?? '
 document.documentElement.dataset.komeliaTheme = parameters.get('theme') ?? 'LIGHT';
 viewMode$.next(ViewMode.Paginated);
 const action = (name: string): (() => void) => () => { document.querySelector('output')!.textContent = name; };
+if (parameters.has('contents')) {
+  nextChapter$.subscribe(reference => { document.querySelector('output')!.setAttribute('data-chapter', reference); });
+  mount(ReaderNavigationDrawer, {target: document.querySelector('#app')!, props: {
+    sectionData: [
+      {reference: 'chapter-one', label: 'First chapter', startCharacter: 0, characters: 200, charactersWeight: 200, progress: 100},
+      {reference: 'chapter-two', label: 'Second chapter', startCharacter: 200, characters: 200, charactersWeight: 200, progress: 60},
+    ], verticalMode: false, exploredCharCount: 320, bookTitle: 'Synthetic publication',
+    searchQuery: '', searchResults: [], annotations: [], onClose: action('closed-contents'),
+    onSearchQueryInput: query => { document.querySelector('output')!.textContent = `query:${query}`; },
+    onPreviousSearchResult: action('previous-result'), onNextSearchResult: action('next-result'),
+    onSearchResultClick: action('search-result'), onAnnotationClick: action('annotation'), onAnnotationDelete: action('delete-annotation'),
+  }});
+}
 mount(BookReaderHeader, {
   target: document.querySelector('#app')!,
   props: {
@@ -34,12 +49,7 @@ mount(BookReaderHeader, {
 
 if (parameters.has('settings')) {
   availableSystemFonts$.next(['Noto Sans CJK JP', 'Synthetic serif']);
-  const panel = document.createElement('div');
-  panel.dataset.komeliaChrome = '';
-  panel.dataset.komeliaReaderSettings = '';
-  panel.style.cssText = 'position:absolute;top:60px;left:0;width:100%;padding:20px';
-  document.querySelector('#app')!.append(panel);
-  mount(SettingsContent, {target: panel});
+  mount(ReaderSettingsPanel, {target: document.querySelector('#app')!, props: {onExit: action('closeSettings')}});
 }
 
 if (parameters.has('initialChapter')) {

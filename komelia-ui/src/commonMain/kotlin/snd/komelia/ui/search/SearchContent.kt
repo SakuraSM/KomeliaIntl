@@ -1,5 +1,9 @@
 package snd.komelia.ui.search
 
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.enum_all
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +51,8 @@ import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.cards.BookDetailedListCard
 import snd.komelia.ui.common.cards.SeriesDetailedListCard
+import snd.komelia.ui.common.menus.BookMenuActions
+import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.platform.VerticalScrollbar
 import snd.komelia.ui.search.SearchViewModel.SearchResultsTab
@@ -70,12 +76,13 @@ fun SearchContent(
     onSeriesPageChange: (Int) -> Unit,
     onSeriesClick: (KomeliaSeries) -> Unit,
     showToolbar: Boolean = true,
+    showAll: Boolean = false,
+    onShowAll: () -> Unit = {},
+    seriesCoverage: SearchCoverage = coverage,
+    bookCoverage: SearchCoverage = coverage,
+    bookMenuActions: BookMenuActions? = null,
+    seriesMenuActions: SeriesMenuActions? = null,
 ) {
-    if (query.isNotBlank() && bookResults.isEmpty() && seriesResults.isEmpty()) {
-        EmptySearchResults()
-        return
-    }
-
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         val layout = LocalKomeliaLayout.current
         val widthModifier = Modifier
@@ -92,15 +99,21 @@ fun SearchContent(
             if (showToolbar) SearchToolBar(
                 searchType = searchType,
                 onSearchTypeChange = onSearchTypeChange,
-                hasSeries = seriesResults.isNotEmpty(),
-                hasBooks = bookResults.isNotEmpty(),
-                modifier = widthModifier
+                modifier = widthModifier,
+                showAll = showAll, onShowAll = onShowAll, seriesCount = seriesResults.size, bookCount = bookResults.size,
+                showCounts = seriesTotalPages <= 1 && bookTotalPages <= 1,
             )
 
-            if (coverage != SearchCoverage.COMPLETE) {
+            if (!showAll && coverage != SearchCoverage.COMPLETE) {
                 SearchCoverageBanner(coverage, widthModifier)
             }
 
+            val visibleResultsEmpty = if (showAll) seriesResults.isEmpty() && bookResults.isEmpty()
+                else if (searchType == SearchResultsTab.SERIES) seriesResults.isEmpty() else bookResults.isEmpty()
+            if (query.isNotBlank() && visibleResultsEmpty) {
+                EmptySearchResults()
+                return@Column
+            }
             LazyColumn(
                 state = scrollState,
                 verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
@@ -108,41 +121,19 @@ fun SearchContent(
                 contentPadding = PaddingValues(bottom = layout.pageVerticalPadding + LocalNavigationBarInset.current),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                when (searchType) {
-                    SearchResultsTab.SERIES -> {
-                        items(seriesResults) { series ->
-                            SeriesDetailedListCard(
-                                series = series,
-                                onClick = { onSeriesClick(series) },
-                                modifier = widthModifier
-                            )
-                        }
-                        item {
-                            Pagination(
-                                totalPages = seriesTotalPages,
-                                currentPage = seriesCurrentPage,
-                                onPageChange = onSeriesPageChange
-                            )
-                        }
+                if (showAll || searchType == SearchResultsTab.SERIES) {
+                    if (showAll && seriesCoverage != SearchCoverage.COMPLETE) item { SearchCoverageBanner(seriesCoverage, widthModifier) }
+                    items(seriesResults, key = { "series-${it.id.value}" }) { series ->
+                        SeriesDetailedListCard(series, onClick = { onSeriesClick(series) }, modifier = widthModifier, menu = seriesMenuActions)
                     }
-
-                    SearchResultsTab.BOOKS -> {
-                        items(bookResults) { book ->
-                            BookDetailedListCard(
-                                book = book,
-                                onClick = { onBookClick(book) },
-                                modifier = widthModifier
-                            )
-                        }
-                        item {
-                            Pagination(
-                                totalPages = bookTotalPages,
-                                currentPage = bookCurrentPage,
-                                onPageChange = onBookPageChange
-                            )
-                        }
-
+                    if (seriesTotalPages > 1) item { Pagination(seriesTotalPages, seriesCurrentPage, onSeriesPageChange) }
+                }
+                if (showAll || searchType == SearchResultsTab.BOOKS) {
+                    if (showAll && bookCoverage != SearchCoverage.COMPLETE) item { SearchCoverageBanner(bookCoverage, widthModifier) }
+                    items(bookResults, key = { "book-${it.id.value}" }) { book ->
+                        BookDetailedListCard(book, onClick = { onBookClick(book) }, modifier = widthModifier, bookMenuActions = bookMenuActions)
                     }
+                    if (bookTotalPages > 1) item { Pagination(bookTotalPages, bookCurrentPage, onBookPageChange) }
                 }
             }
         }
@@ -202,60 +193,32 @@ private fun EmptySearchResults() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchToolBar(
     searchType: SearchResultsTab,
     onSearchTypeChange: (SearchResultsTab) -> Unit,
-    hasSeries: Boolean,
-    hasBooks: Boolean,
-    modifier: Modifier
+    modifier: Modifier,
+    showAll: Boolean = false,
+    onShowAll: () -> Unit = {},
+    seriesCount: Int = 0,
+    bookCount: Int = 0,
+    showCounts: Boolean = true,
 ) {
-    if (!hasSeries && !hasBooks) return
-    if (LocalSurfaceAppearance.current.useGlass) {
-        Row(modifier.selectableGroup().padding(bottom = LocalKomeliaLayout.current.itemSpacing)) {
-            if (hasSeries) Tab(
-                selected = searchType == SearchResultsTab.SERIES,
-                onClick = { onSearchTypeChange(SearchResultsTab.SERIES) },
-                modifier = Modifier.weight(1f).heightIn(min = LocalKomeliaLayout.current.minimumTouchTarget)
-                    .komeliaHighlight(searchType == SearchResultsTab.SERIES),
-                selectedContentColor = MaterialTheme.colorScheme.onSurface,
-                unselectedContentColor = MaterialTheme.colorScheme.onSurface,
-                text = { Text(stringResource(Res.string.search_series_tab), style = MaterialTheme.typography.titleSmall) },
-            )
-            if (hasBooks) Tab(
-                selected = searchType == SearchResultsTab.BOOKS,
-                onClick = { onSearchTypeChange(SearchResultsTab.BOOKS) },
-                modifier = Modifier.weight(1f).heightIn(min = LocalKomeliaLayout.current.minimumTouchTarget)
-                    .komeliaHighlight(searchType == SearchResultsTab.BOOKS),
-                selectedContentColor = MaterialTheme.colorScheme.onSurface,
-                unselectedContentColor = MaterialTheme.colorScheme.onSurface,
-                text = { Text(stringResource(Res.string.search_books_tab), style = MaterialTheme.typography.titleSmall) },
-            )
-        }
-        return
+    Row(modifier.selectableGroup().padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        SearchResultTab(stringResource(Res.string.enum_all) + if (showCounts) " ${seriesCount + bookCount}" else "", showAll, Modifier.weight(1f), onShowAll)
+        SearchResultTab(stringResource(Res.string.search_series_tab) + if (showCounts) " $seriesCount" else "", !showAll && searchType == SearchResultsTab.SERIES,
+            Modifier.weight(1f)) { onSearchTypeChange(SearchResultsTab.SERIES) }
+        SearchResultTab(stringResource(Res.string.search_books_tab) + if (showCounts) " $bookCount" else "", !showAll && searchType == SearchResultsTab.BOOKS,
+            Modifier.weight(1f)) { onSearchTypeChange(SearchResultsTab.BOOKS) }
     }
-    SecondaryTabRow(
-        selectedTabIndex = if (searchType == SearchResultsTab.BOOKS && hasSeries && hasBooks) 1 else 0,
-        modifier = modifier.padding(bottom = LocalKomeliaLayout.current.itemSpacing),
-        containerColor = MaterialTheme.colorScheme.surface,
-        divider = {},
-    ) {
-        if (hasSeries) {
-            Tab(
-                selected = searchType == SearchResultsTab.SERIES,
-                onClick = { onSearchTypeChange(SearchResultsTab.SERIES) },
-                modifier = Modifier.heightIn(min = LocalKomeliaLayout.current.minimumTouchTarget),
-                text = { Text(stringResource(Res.string.search_series_tab), style = MaterialTheme.typography.titleSmall) },
-            )
-        }
-        if (hasBooks) {
-            Tab(
-                selected = searchType == SearchResultsTab.BOOKS,
-                onClick = { onSearchTypeChange(SearchResultsTab.BOOKS) },
-                modifier = Modifier.heightIn(min = LocalKomeliaLayout.current.minimumTouchTarget),
-                text = { Text(stringResource(Res.string.search_books_tab), style = MaterialTheme.typography.titleSmall) },
-            )
-        }
-    }
+}
+
+@Composable
+private fun SearchResultTab(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Tab(selected = selected, onClick = onClick,
+        modifier = modifier.heightIn(min = LocalKomeliaLayout.current.minimumTouchTarget)
+            .clip(MaterialTheme.shapes.small).background(if (selected) colors.primary else colors.surfaceContainerLow),
+        selectedContentColor = colors.onPrimary, unselectedContentColor = colors.onSurfaceVariant,
+        text = { Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) })
 }

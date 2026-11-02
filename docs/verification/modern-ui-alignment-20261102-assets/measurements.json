@@ -1,0 +1,121 @@
+{
+  "logicalPixels": true,
+  "tolerance": 2,
+  "count": 19,
+  "measurements": [
+    {
+      "anchor": "search.left",
+      "expected": 14.2,
+      "actual": 14.0,
+      "delta": 0.19999981
+    },
+    {
+      "anchor": "search.top",
+      "expected": 98.0,
+      "actual": 96.0,
+      "delta": 2.0
+    },
+    {
+      "anchor": "search.width",
+      "expected": 362.0,
+      "actual": 362.0,
+      "delta": 0.0
+    },
+    {
+      "anchor": "search.height",
+      "expected": 46.5,
+      "actual": 48.0,
+      "delta": 1.5
+    },
+    {
+      "anchor": "tablet.rail.width",
+      "expected": 90.75,
+      "actual": 92.0,
+      "delta": 1.25
+    },
+    {
+      "anchor": "desktop.rail.width",
+      "expected": 237.26,
+      "actual": 237.0,
+      "delta": 0.2599945
+    },
+    {
+      "anchor": "navigation.left",
+      "expected": 14.0,
+      "actual": 14.0,
+      "delta": 0.0
+    },
+    {
+      "anchor": "navigation.width",
+      "expected": 362.0,
+      "actual": 362.0,
+      "delta": 0.0
+    },
+    {
+      "anchor": "navigation.height",
+      "expected": 70.0,
+      "actual": 70.0,
+      "delta": 0.0
+    },
+    {
+      "anchor": "11-text-reader-settings.x",
+      "expected": 0,
+      "actual": 0,
+      "delta": 0
+    },
+    {
+      "anchor": "11-text-reader-settings.y",
+      "expected": 274,
+      "actual": 274,
+      "delta": 0
+    },
+    {
+      "anchor": "11-text-reader-settings.width",
+      "expected": 390,
+      "actual": 390,
+      "delta": 0
+    },
+    {
+      "anchor": "11-text-reader-settings.height",
+      "expected": 570,
+      "actual": 570,
+      "delta": 0
+    },
+    {
+      "anchor": "17-komga-settings.x",
+      "expected": 0,
+      "actual": 0,
+      "delta": 0
+    },
+    {
+      "anchor": "17-komga-settings.y",
+      "expected": 274,
+      "actual": 274,
+      "delta": 0
+    },
+    {
+      "anchor": "17-komga-settings.width",
+      "expected": 390,
+      "actual": 390,
+      "delta": 0
+    },
+    {
+      "anchor": "17-komga-settings.height",
+      "expected": 570,
+      "actual": 570,
+      "delta": 0
+    },
+    {
+      "anchor": "10-epub-contents.y",
+      "expected": 274,
+      "actual": 274,
+      "delta": 0
+    },
+    {
+      "anchor": "10-epub-contents.height",
+      "expected": 570,
+      "actual": 570,
+      "delta": 0
+    }
+  ]
+}

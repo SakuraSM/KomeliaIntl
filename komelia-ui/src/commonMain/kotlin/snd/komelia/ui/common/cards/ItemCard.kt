@@ -50,6 +50,7 @@ import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyGridState
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.ReadingDesign
 import snd.komelia.ui.common.components.OutlinedText
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.WindowSizeClass
@@ -65,6 +66,8 @@ fun ItemCard(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     coverWidth: Dp? = null,
+    coverAspectRatio: Float = 2f / 3f,
+    isHighlighted: Boolean = false,
     image: @Composable () -> Unit,
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
@@ -74,10 +77,12 @@ fun ItemCard(
             .then(if (onClick != null || onLongClick != null) Modifier.cursorForHand() else Modifier),
     ) {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-            Box((if (coverWidth == null) Modifier.fillMaxWidth() else Modifier.widthIn(max = coverWidth).fillMaxWidth()).aspectRatio(2f / 3f)
-                .clip(MaterialTheme.shapes.small)
+            Box((if (coverWidth == null) Modifier.fillMaxWidth() else Modifier.widthIn(max = coverWidth).fillMaxWidth()).aspectRatio(coverAspectRatio)
+                .clip(ReadingDesign.coverShape)
                 .background(containerColor)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.small)) { image() }
+                .border(if (isHighlighted) 2.dp else 0.5.dp,
+                    if (isHighlighted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                    ReadingDesign.coverShape)) { image() }
         }
         content()
     }

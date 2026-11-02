@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,7 +40,7 @@ fun KomeliaSafeTopBar(content: @Composable () -> Unit) {
     }
     val topInset = LocalPageTopInset.current
     Layout(modifier = Modifier.fillMaxWidth(), content = {
-        KomeliaChromeSurface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.background) {
+        Box(Modifier.background(MaterialTheme.colorScheme.background)) {
             CompositionLocalProvider(
                 LocalPageTopInset provides 0.dp,
                 LocalHeaderMaterialProvided provides true,
@@ -47,20 +48,18 @@ fun KomeliaSafeTopBar(content: @Composable () -> Unit) {
                 Layout(content = content) { measurables, constraints ->
                     val children = measurables.map { it.measure(constraints.copy(minHeight = 0)) }
                     val contentHeight = children.maxOfOrNull { it.height } ?: 0
-                    val height = if (contentHeight == 0) 0 else maxOf(56.dp.roundToPx(), contentHeight)
+                    val height = contentHeight
                     layout(constraints.maxWidth, height) { children.forEach { it.placeRelative(0, 0) } }
                 }
             }
         }
     }) { measurables, constraints ->
-        val sideMargin = 12.dp.roundToPx()
-        val verticalMargin = 12.dp.roundToPx()
         val safeTop = topInset.roundToPx()
         val header = measurables.single().measure(
-            constraints.offset(horizontal = -sideMargin * 2, vertical = -safeTop - verticalMargin * 2).copy(minHeight = 0),
+            constraints.offset(vertical = -safeTop).copy(minHeight = 0),
         )
-        val height = if (header.height == 0) 0 else header.height + safeTop + verticalMargin * 2
-        layout(constraints.maxWidth, height) { if (height > 0) header.placeRelative(sideMargin, safeTop + verticalMargin) }
+        val height = if (header.height == 0) 0 else header.height + safeTop
+        layout(constraints.maxWidth, height) { if (height > 0) header.placeRelative(0, safeTop) }
     }
 }
 

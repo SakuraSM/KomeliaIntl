@@ -31,6 +31,31 @@ class ModalSheetAppearanceTest {
     @get:Rule val compose = createComposeRule()
 
     @OptIn(ExperimentalMaterial3Api::class)
+    @Test fun brightPublicationsDoNotWashOutTheDarkSettingsPanel() {
+        compose.setContent {
+            MaterialTheme(colorScheme = Theme.DARK.colorScheme) {
+                CompositionLocalProvider(LocalSurfaceAppearance provides SurfaceAppearance(
+                    style = AppSurfaceStyle.LIQUID_GLASS, theme = AppTheme.DARK,
+                )) {
+                    GlassBackdropScope {
+                        Box(Modifier.fillMaxSize().glassBackdrop().background(Color.White))
+                        KomeliaModalBottomSheet(onDismissRequest = {},
+                            sheetState = rememberBottomSheetState(initialValue = SheetValue.Expanded,
+                                enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))) {
+                            repeat(3) { index -> Text("Dark option $index", Modifier.testTag("dark-$index").fillMaxWidth().height(48.dp)) }
+                        }
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val pixels = compose.onNodeWithTag("dark-1").captureToImage().toPixelMap()
+        val background = pixels[pixels.width - 8, pixels.height / 2]
+        assertTrue(background.alpha >= .98f && background.luminance() < .08f,
+            "A bright page must leave a dark, opaque settings surface: $background")
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
     @Test fun pausedCaptureKeepsTheLightSheetReadableWithoutABackdropFrame() {
         compose.setContent {
             MaterialTheme(colorScheme = Theme.LIGHT.colorScheme) {

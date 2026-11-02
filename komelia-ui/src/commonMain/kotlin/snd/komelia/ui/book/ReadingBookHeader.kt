@@ -12,12 +12,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.ReadingDesign
+import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.foundation.shape.CircleShape
 import snd.komelia.ui.common.images.BookThumbnail
 import snd.komelia.ui.detailCoverWidth
 import snd.komelia.ui.platform.WindowSizeClass
@@ -32,19 +36,24 @@ internal fun ReadingBookHeader(
 ) {
     val colors = MaterialTheme.colorScheme
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val coverWidth = detailCoverWidth(maxWidth, LocalWindowWidth.current)
         val windowWidth = LocalWindowWidth.current
         val wide = windowWidth == WindowSizeClass.EXPANDED || windowWidth == WindowSizeClass.FULL
-        Row(horizontalArrangement = Arrangement.spacedBy(if (wide) 20.dp else 16.dp), verticalAlignment = Alignment.Top) {
+        val isText = book.media.mediaType == "application/epub+zip"
+        val coverWidth = detailCoverWidth(maxWidth, windowWidth) + if (!wide && !isText) 12.dp else 0.dp
+        Row(horizontalArrangement = Arrangement.spacedBy(if (windowWidth == WindowSizeClass.FULL) 40.dp else if (wide) 20.dp else if (isText) 28.dp else 22.dp), verticalAlignment = Alignment.Top) {
             BookThumbnail(
                 book.id,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.width(coverWidth).aspectRatio(2f / 3f)
-                    .clip(MaterialTheme.shapes.small).background(colors.surfaceContainerLow),
+                    .clip(ReadingDesign.coverShape).background(colors.surfaceContainerLow),
             )
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(book.metadata.title, style = if (windowWidth == WindowSizeClass.FULL) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineSmall)
-                if (onParentSeries != null && book.seriesTitle.isNotBlank() && book.seriesTitle != book.metadata.title) {
+                Text(if (wide && !isText) book.seriesTitle.ifBlank { book.metadata.title } else book.metadata.title,
+                    style = if (wide && !isText) MaterialTheme.typography.headlineLarge.copy(fontSize = 40.sp, lineHeight = 48.sp)
+                    else if (windowWidth == WindowSizeClass.FULL) MaterialTheme.typography.headlineMedium
+                    else if (isText) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineSmall.copy(fontSize = 24.sp, lineHeight = 32.sp))
+                if (wide && !isText && book.seriesTitle != book.metadata.title) Text(book.metadata.title, style = MaterialTheme.typography.headlineSmall)
+                if (!wide && onParentSeries != null && book.seriesTitle.isNotBlank() && book.seriesTitle != book.metadata.title) {
                     TextButton(onClick = onParentSeries, contentPadding = PaddingValues(0.dp),
                         modifier = Modifier.heightIn(min = 48.dp)) {
                         Text(book.seriesTitle, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -53,11 +62,13 @@ internal fun ReadingBookHeader(
                 }
                 val authors = remember(book.metadata.authors) { book.metadata.authors.map { it.name }.distinct().joinToString("、") }
                 if (authors.isNotBlank()) Text(authors, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
-                Text(readingMediaLabel(book), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                if (!wide || !isText) Text(readingMediaLabel(book), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                if (windowWidth == WindowSizeClass.FULL && isText) Spacer(Modifier.height(44.dp))
+                if (book.media.mediaType == "application/epub+zip") ReadingProgressSummary(book)
                 if (unavailable || book.remoteFileUnavailable) Text(stringResource(
                     if (unavailable) Res.string.book_unavailable else Res.string.book_remote_unavailable),
                     style = MaterialTheme.typography.bodySmall, color = if (unavailable) colors.error else colors.onSurfaceVariant)
-                ReadingSecondaryActions(book, onDownload, onContents)
+                if (!wide || isText) ReadingSecondaryActions(book, onDownload, if (wide) null else onContents, compact = !wide)
             }
         }
     }
@@ -65,13 +76,18 @@ internal fun ReadingBookHeader(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ReadingSecondaryActions(book: KomeliaBook, onDownload: () -> Unit, onContents: (() -> Unit)?) {
+private fun ReadingSecondaryActions(book: KomeliaBook, onDownload: () -> Unit, onContents: (() -> Unit)?, compact: Boolean) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        if (onContents != null) TextButton(onClick = onContents, contentPadding = PaddingValues(horizontal = 4.dp)) {
-            Text(stringResource(Res.string.reading_contents))
+        if (onContents != null) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                OutlinedIconButton(onClick = onContents, shape = CircleShape, modifier = Modifier.size(48.dp).padding(2.dp)) {
+                    Icon(Icons.AutoMirrored.Rounded.List, stringResource(Res.string.reading_contents), Modifier.size(22.dp))
+                }
+                Text(stringResource(Res.string.reading_contents), style = MaterialTheme.typography.labelSmall)
+            }
         }
         if (LocalOfflineAvailable.current && !book.libraryId.isLocalLibrary() &&
-            (!book.downloaded || book.isLocalFileOutdated) && !book.deleted) DownloadButton(book, onDownload)
+            (!book.downloaded || book.isLocalFileOutdated) && !book.deleted) DownloadButton(book, onDownload, compact = compact)
     }
 }
 

@@ -24,6 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.settings.model.AppSurfaceStyle
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_image_settings
@@ -45,11 +49,13 @@ internal fun ImageReaderToolbar(
     pageShareAction: PageShareAction? = null,
 ) {
     val layout = LocalKomeliaLayout.current
+    val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     Row(
-        modifier = Modifier.fillMaxWidth()
-            .komeliaChrome(RoundedCornerShape(0.dp), MaterialTheme.colorScheme.surface)
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
-            .padding(horizontal = layout.pageHorizontalPadding),
+        modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+            .padding(start = if (floating) 12.dp else 0.dp, end = if (floating) 12.dp else 0.dp,
+                bottom = if (floating) 12.dp else 0.dp).fillMaxWidth()
+            .komeliaChrome(RoundedCornerShape(if (floating) 12.dp else 0.dp), MaterialTheme.colorScheme.surface)
+            .padding(horizontal = if (floating) 4.dp else layout.pageHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         KomeliaIconButton(
@@ -59,15 +65,15 @@ internal fun ImageReaderToolbar(
             modifier = Modifier.size(layout.minimumTouchTarget),
         )
         if (book != null) {
-            Column(Modifier.weight(1f).padding(horizontal = layout.controlSpacing)) {
+            Column(Modifier.weight(1f).padding(horizontal = layout.controlSpacing).semantics { contentDescription = book.metadata.title }) {
                 Text(
-                    book.seriesTitle,
+                    book.seriesTitle.ifBlank { book.metadata.title },
                     maxLines = 1,
                     style = if (LocalWindowWidth.current == COMPACT) MaterialTheme.typography.titleMedium
                     else MaterialTheme.typography.titleLarge,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text(
+                if (!floating || LocalWindowWidth.current != COMPACT) Text(
                     book.metadata.title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

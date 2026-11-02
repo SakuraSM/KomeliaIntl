@@ -36,7 +36,7 @@ fun SwitchWithLabel(
     val actualSupportingTextColor = if (enabled) supportingTextColor else LocalContentColor.current.copy(alpha = .4f)
     val colors = SwitchDefaults.colors(
         checkedTrackColor = MaterialTheme.colorScheme.primary,
-        checkedThumbColor = MaterialTheme.colorScheme.onPrimary
+        checkedThumbColor = Color.White
     )
     CompositionLocalProvider(LocalContentColor provides contentColor) {
         Row(

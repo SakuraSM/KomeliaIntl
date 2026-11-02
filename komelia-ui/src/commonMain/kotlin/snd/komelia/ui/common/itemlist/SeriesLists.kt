@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -40,6 +41,7 @@ import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.common.cards.DraggableImageCard
 import snd.komelia.ui.common.cards.SeriesImageCard
+import snd.komelia.ui.common.cards.SeriesDetailedListCard
 import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.common.menus.SeriesMenuActions
 import snd.komelia.ui.platform.PlatformType
@@ -67,16 +69,17 @@ fun SeriesLazyCardGrid(
     modifier: Modifier = Modifier,
 
     beforeContent: @Composable () -> Unit = {},
+    isList: Boolean = false,
+    hasBeforeContent: Boolean = true,
 ) {
     val layout = LocalKomeliaLayout.current
-    val compactCoverWidth = if (LocalPlatform.current == PlatformType.MOBILE &&
-        LocalWindowWidth.current in listOf(WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM)) {
-        88.dp * (minSize.value / defaultCardWidth)
-    } else null
+    val headerItems = if (hasBeforeContent) 1 else 0
+    val coverRatio = if (LocalPlatform.current == PlatformType.MOBILE &&
+        LocalWindowWidth.current in listOf(WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM)) .635f else 2f / 3f
     val coroutineScope = rememberCoroutineScope()
     val reorderableLazyGridState = rememberReorderableLazyGridState(
         lazyGridState = gridState,
-        onMove = { from, to -> onReorder(from.index - 1, to.index - 1) }
+        onMove = { from, to -> onReorder(from.index - headerItems, to.index - headerItems) }
     )
     LaunchedEffect(reorderableLazyGridState.isAnyItemDragging) {
         onReorderDragStateChange(reorderableLazyGridState.isAnyItemDragging)
@@ -86,20 +89,24 @@ fun SeriesLazyCardGrid(
     Box(modifier, contentAlignment = Alignment.TopCenter) {
         LazyVerticalGrid(
             state = gridState,
-            columns = posterGridCells(minSize),
+            columns = if (isList) GridCells.Fixed(1) else posterGridCells(minSize),
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-            verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
+            verticalArrangement = Arrangement.spacedBy(if (isList) 0.dp else layout.gridSpacing),
             contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
             modifier = Modifier
                 .widthIn(max = layout.contentMaxWidth)
                 .fillMaxSize()
                 .padding(horizontal = layout.pageHorizontalPadding)
         ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
+            if (hasBeforeContent) item(span = { GridItemSpan(maxLineSpan) }) {
                 beforeContent()
             }
 
             items(items = series, key = { it.id.value }) { series ->
+                if (isList && !reorderable && selectedSeries.isEmpty()) {
+                    SeriesDetailedListCard(series, onClick = { onSeriesClick(series) }, menu = seriesMenuActions)
+                    return@items
+                }
                 val isSelected = remember(selectedSeries) { selectedSeries.any { it.id == series.id } }
                 DraggableImageCard(
                     key = series.id.value,
@@ -107,12 +114,12 @@ fun SeriesLazyCardGrid(
                     reorderableState = reorderableLazyGridState
                 ) {
                     SeriesImageCard(
+                        coverAspectRatio = coverRatio,
                         series = series,
                         onSeriesClick = { onSeriesClick(series) },
                         seriesMenuActions = seriesMenuActions,
                         isSelected = isSelected,
                         onSeriesSelect = onSeriesSelect?.let { { onSeriesSelect(series) } },
-                        coverWidth = compactCoverWidth,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -132,7 +139,7 @@ fun SeriesLazyCardGrid(
             }
         }
 
-        VerticalScrollbarWithFullSpans(gridState, Modifier.align(Alignment.TopEnd), 2)
+        VerticalScrollbarWithFullSpans(gridState, Modifier.align(Alignment.TopEnd), headerItems + 1)
     }
 }
 

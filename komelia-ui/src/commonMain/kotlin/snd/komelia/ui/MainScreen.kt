@@ -6,6 +6,13 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.border
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.ui.unit.sp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_app_controls
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.selection.selectable
@@ -72,6 +79,7 @@ import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.unit.dp
@@ -114,6 +122,8 @@ import snd.komelia.ui.local.LocalContentScreen
 import snd.komelia.ui.oneshot.OneshotScreen
 import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformType.MOBILE
+import snd.komelia.ui.platform.PlatformTitleBar
+import snd.komelia.ui.platform.canIntegrateWithSystemBar
 import snd.komelia.ui.readlist.ReadListScreen
 import snd.komelia.ui.search.SearchScreen
 import snd.komelia.ui.series.SeriesScreen
@@ -148,6 +158,7 @@ class MainScreen(
         val width = LocalWindowWidth.current
         val motion = LocalKomeliaMotion.current
         val vm = rememberScreenModel { viewModelFactory.getNavigationViewModel() }
+        val isOffline by vm.isOffline.collectAsState()
         val sessionNavigators = rememberScreenModel("session-navigators") { SessionNavigators() }
         val tabs = remember(defaultScreen, platform) { createTabs(defaultScreen, platform == MOBILE) }
         val initialTab = tabs.first { it.destination == destinationFor(defaultScreen) }
@@ -167,6 +178,10 @@ class MainScreen(
                 return@TabNavigator
             }
 
+            var utilitiesVisible by remember { mutableStateOf(false) }
+            val compactUtilities = platform != MOBILE && !isOffline &&
+                LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS &&
+                navigationPresentation(width) == NavigationPresentation.Rail
             var activeNavigator by remember { mutableStateOf<Navigator?>(null) }
             var activeDestination by remember { mutableStateOf<AppDestination?>(null) }
             var pendingScreen by remember { mutableStateOf<Pair<AppDestination, Screen>?>(null) }
@@ -215,7 +230,7 @@ class MainScreen(
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         Column(Modifier.komeliaTopBarScroll(topBarScrollState)) {
-                            if (platform != MOBILE) {
+                            if (platform != MOBILE && (!compactUtilities || utilitiesVisible)) {
                                 AppBar(
                                     canNavigateBack = activeNavigator?.canPop == true,
                                     onNavigateBack = { activeNavigator?.pop() },
@@ -230,10 +245,12 @@ class MainScreen(
                                     onSeriesClick = { selectDestination(AppDestination.LIBRARY, seriesScreen(it)) },
                                     onRefreshClick = vm::onScreenReload,
                                     notificationsState = vm.notificationsState,
-                                    isOffline = vm.isOffline.collectAsState().value,
+                                    isOffline = isOffline,
                                     onOfflineModeChange = vm::goOnline,
                                     isContentScrolled = topBarScrollState.isContentScrolled,
                                 )
+                            } else if (compactUtilities && canIntegrateWithSystemBar()) {
+                                PlatformTitleBar()
                             }
 
                             Scaffold(
@@ -292,7 +309,8 @@ class MainScreen(
                                             ),
                                         ),
                                     ) {
-                                        AppNavigationRail(currentTab.destination, ::selectDestination)
+                                        AppNavigationRail(currentTab.destination, ::selectDestination,
+                                            onUtilitiesClick = if (platform != MOBILE && compactUtilities) ({ utilitiesVisible = !utilitiesVisible }) else null)
                                     }
 
                                     CompositionLocalProvider(
@@ -348,11 +366,13 @@ class MainScreen(
             }
 
             val keyEvents: SharedFlow<KeyEvent> = LocalKeyEvents.current
-            LaunchedEffect(tabNavigator, activeNavigator) {
+            LaunchedEffect(tabNavigator, activeNavigator, compactUtilities, utilitiesVisible) {
                 keyEvents.collect { event ->
                     if (event.type == KeyUp && event.key == Key.DirectionLeft && event.isAltPressed) {
                         if (activeNavigator?.canPop == true) activeNavigator?.pop()
                         else if (currentTab.destination != AppDestination.HOME) selectDestination(AppDestination.HOME)
+                    } else if (event.type == KeyUp && event.key == Key.F5 && compactUtilities && !utilitiesVisible) {
+                        vm.onScreenReload()
                     }
                 }
             }
@@ -409,8 +429,17 @@ private fun destinationFor(screen: Screen): AppDestination = when (screen) {
 @Composable
 internal fun DestinationContent(navigator: Navigator) {
     val screen = navigator.lastItem
+    val detailTypography = if (screen is BookScreen || screen is OneshotScreen) {
+        when (LocalWindowWidth.current) {
+            WindowSizeClass.FULL -> KomeliaDesktopReadingTypography
+            WindowSizeClass.EXPANDED -> KomeliaTabletReadingTypography
+            else -> MaterialTheme.typography
+        }
+    } else MaterialTheme.typography
+    MaterialTheme(typography = detailTypography) {
     SingleLayerPageTransition(targetKey = screen.key, enterOffset = 8.dp) {
         navigator.saveableState("screen", screen) { screen.Content() }
+    }
     }
 }
 
@@ -450,12 +479,13 @@ internal fun AppBottomBar(
     val glass = LocalSurfaceAppearance.current.useGlass
     val colors = MaterialTheme.colorScheme
     KomeliaChromeSurface(
-        modifier = if (floating) Modifier.navigationBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp) else Modifier,
+        modifier = (if (floating) Modifier.navigationBarsPadding().padding(horizontal = ReadingDesign.navigationInset)
+            .padding(top = 8.dp, bottom = 4.dp) else Modifier).testTag("primary-navigation"),
         shape = RoundedCornerShape(if (floating) 20.dp else 0.dp),
         shadowElevation = if (floating) 2.dp else 0.dp,
     ) {
         NavigationBar(
-            modifier = Modifier.height(68.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)),
+            modifier = Modifier.height(ReadingDesign.navigationHeight * LocalDensity.current.fontScale.coerceAtLeast(1f)),
             containerColor = Color.Transparent,
             tonalElevation = 0.dp,
             windowInsets = if (floating) WindowInsets(0.dp) else WindowInsets.navigationBars,
@@ -464,7 +494,7 @@ internal fun AppBottomBar(
                 destinationItems.forEach { item ->
                     val interactions = remember(item.destination) { MutableInteractionSource() }
                     NavigationBarItem(
-                        modifier = Modifier.background(
+                        modifier = Modifier.padding(horizontal = 3.dp).background(
                             if (selected == item.destination) colors.primaryContainer.copy(alpha = .9f) else Color.Transparent,
                             KomeliaChromeStyle.navigationHighlightShape,
                         ).komeliaHighlight(
@@ -493,72 +523,53 @@ internal fun AppBottomBar(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 internal fun AppNavigationRail(
     selected: AppDestination,
     onSelect: (AppDestination, Screen?) -> Unit,
+    onUtilitiesClick: (() -> Unit)? = null,
 ) {
-    val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
-    val glass = LocalSurfaceAppearance.current.useGlass
     val colors = MaterialTheme.colorScheme
-    val navigationWidth = if (LocalWindowWidth.current == WindowSizeClass.FULL) 180.dp else 80.dp
-    KomeliaChromeSurface(
-        modifier = Modifier.width(navigationWidth)
-            .then(if (floating) Modifier.padding(start = 12.dp, top = 12.dp, bottom = 12.dp) else Modifier)
-            .padding(top = LocalPageTopInset.current),
-        shape = RoundedCornerShape(if (floating) 20.dp else 0.dp),
-    ) {
-        if (LocalWindowWidth.current == WindowSizeClass.FULL) {
-            Column(Modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = 12.dp, vertical = 24.dp).selectableGroup(),
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
-                Image(painterResource(Res.drawable.komelia_icon), "Komelia", Modifier.padding(start = 12.dp).size(32.dp))
-                Spacer(Modifier.height(24.dp))
-                destinationItems.forEach { item ->
-                    val active = selected == item.destination
-                    Row(Modifier.fillMaxWidth().heightIn(min = 52.dp)
-                        .background(if (active) colors.primaryContainer else Color.Transparent, RoundedCornerShape(14.dp))
-                        .selectable(active, role = Role.Tab, onClick = { onSelect(item.destination, null) })
-                        .padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)) {
-                        Icon(item.icon, null, tint = if (active) colors.primary else colors.onSurfaceVariant)
-                        Text(stringResource(item.label), color = if (active) colors.primary else colors.onSurfaceVariant)
-                    }
+    val expanded = LocalWindowWidth.current == WindowSizeClass.FULL
+    val width = if (expanded) ReadingDesign.desktopNavigationWidth else ReadingDesign.tabletNavigationWidth
+    Surface(color = colors.background, modifier = Modifier.width(width).fillMaxHeight().testTag("primary-navigation-rail")) {
+        Column(Modifier.fillMaxSize().padding(top = LocalPageTopInset.current).verticalScroll(rememberScrollState())
+            .padding(horizontal = if (expanded) 18.dp else 6.dp).padding(top = if (expanded) 42.dp else 32.dp, bottom = 24.dp)
+            .selectableGroup(), horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(if (expanded) 2.dp else 0.dp)) {
+            if (onUtilitiesClick != null) {
+                TextButton(onClick = onUtilitiesClick, contentPadding = PaddingValues(0.dp), modifier = Modifier.fillMaxWidth().height(40.dp)) {
+                    Text("Komelia", style = MaterialTheme.typography.headlineMedium.copy(fontSize = if (expanded) 30.sp else 16.sp),
+                        modifier = Modifier.weight(1f))
+                    Icon(Icons.Rounded.ExpandMore, stringResource(Res.string.browse_app_controls), Modifier.size(18.dp))
                 }
-            }
-        } else NavigationRail(
-            containerColor = Color.Transparent,
-            windowInsets = WindowInsets.navigationBars,
-        ) {
-            CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                destinationItems.forEach { item ->
-                    val interactions = remember(item.destination) { MutableInteractionSource() }
-                    NavigationRailItem(
-                        modifier = Modifier.komeliaHighlight(
-                            selected == item.destination, KomeliaChromeStyle.navigationHighlightShape,
-                            inset = KomeliaChromeStyle.navigationHighlightInset,
-                            interactionSource = interactions,
-                        ),
-                        interactionSource = interactions,
-                        selected = selected == item.destination,
-                        onClick = { onSelect(item.destination, null) },
-                        icon = { DestinationIcon(item, selected == item.destination) },
-                        label = { NavigationDestinationLabel(stringResource(item.label), selected == item.destination) },
-                        colors = NavigationRailItemDefaults.colors(
-                            selectedIconColor = colors.primary,
-                            selectedTextColor = colors.primary,
-                            indicatorColor = colors.primaryContainer,
-                            unselectedIconColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
-                            unselectedTextColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
-                        ),
-                    )
+            } else Text("Komelia", style = if (expanded) MaterialTheme.typography.headlineMedium.copy(fontSize = 30.sp)
+                else MaterialTheme.typography.titleMedium,
+                modifier = if (expanded) Modifier.fillMaxWidth().padding(start = 14.dp) else Modifier)
+            Spacer(Modifier.height(if (expanded) 21.dp else 16.dp))
+            destinationItems.forEach { item ->
+                val active = selected == item.destination
+                val shape = RoundedCornerShape(if (expanded) 14.dp else 16.dp)
+                val itemModifier = Modifier.fillMaxWidth().heightIn(min = if (expanded) 62.dp else 84.dp)
+                    .background(if (active) colors.primaryContainer.copy(alpha = .65f) else Color.Transparent, shape)
+                    .border(.5.dp, if (active) colors.primary.copy(alpha = .6f) else Color.Transparent, shape)
+                    .selectable(active, role = Role.Tab, onClick = { onSelect(item.destination, null) })
+                if (expanded) Row(itemModifier.padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(24.dp)) {
+                    Icon(item.icon, null, Modifier.size(28.dp), tint = if (active) colors.primary else colors.onSurface)
+                    Text(stringResource(item.label), style = MaterialTheme.typography.titleLarge,
+                        color = if (active) colors.primary else colors.onSurface)
+                } else Column(itemModifier.padding(vertical = 18.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
+                    Icon(item.icon, null, Modifier.size(24.dp), tint = if (active) colors.primary else colors.onSurface)
+                    Text(stringResource(item.label), style = MaterialTheme.typography.labelMedium,
+                        color = if (active) colors.primary else colors.onSurface)
                 }
             }
         }
     }
-
 }
 
 @Composable
 private fun DestinationIcon(item: DestinationItem, isSelected: Boolean) {
-    Icon(if (isSelected) item.selectedIcon else item.icon, contentDescription = null)
+    Icon(if (isSelected) item.selectedIcon else item.icon, contentDescription = null, modifier = Modifier.size(22.dp))
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -168,9 +169,9 @@ fun SeriesFilterContent(
 
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(spacing),
-            verticalArrangement = Arrangement.spacedBy(spacing),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 0.dp else spacing),
         ) {
-            SeriesFilterField(stringResource(Res.string.series_filter_sort), compact, filterItemModifier) { fieldModifier ->
+            SeriesFilterField(stringResource(Res.string.series_filter_sort), compact, filterItemModifier, bottomSpacing = 4.dp) { fieldModifier ->
             FilterDropdownChoice(
                 selectedOption = LabeledEntry(
                     currentFilter.sortOrder,
@@ -186,10 +187,11 @@ fun SeriesFilterContent(
                 },
                 onOptionChange = { filterState.onSortOrderChange(it.value) },
                 label = if (compact) null else stringResource(Res.string.series_filter_sort),
-                modifier = fieldModifier
+                modifier = fieldModifier,
+                paintedHeight = if (compact) 38.dp else null,
             )
             }
-            SeriesFilterField(stringResource(Res.string.series_filter_read_status), compact, filterItemModifier) { fieldModifier ->
+            SeriesFilterField(stringResource(Res.string.series_filter_read_status), compact, filterItemModifier, bottomSpacing = 1.dp) { fieldModifier ->
             FilterDropdownMultiChoice(
                 selectedOptions = currentFilter.readStatus
                     .map {
@@ -207,14 +209,16 @@ fun SeriesFilterContent(
                 onOptionSelect = { changed -> filterState.onReadStatusSelect(changed.value) },
                 label = if (compact) null else stringResource(Res.string.series_filter_read_status),
                 modifier = fieldModifier,
+                paintedHeight = if (compact) 38.dp else null,
             )
             }
 
             displayOptions()
             if (compact) {
+                Column(Modifier.fillMaxWidth().padding(top = 14.dp)) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 TextButton(onClick = { showAdvanced = !showAdvanced }, modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
-                    contentPadding = PaddingValues(0.dp), colors = textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
+                    contentPadding = PaddingValues(start = 4.dp), colors = textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
                     Text(stringResource(if (showAdvanced) Res.string.browse_hide_advanced_filters else Res.string.browse_show_advanced_filters),
                         style = MaterialTheme.typography.labelLarge)
                     Text(stringResource(Res.string.browse_advanced_filter_summary), Modifier.weight(1f).padding(horizontal = 12.dp),
@@ -223,6 +227,7 @@ fun SeriesFilterContent(
                     Icon(if (showAdvanced) Icons.Rounded.ExpandLess else Icons.Rounded.ChevronRight, null)
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                }
             }
             if (!compact || showAdvanced) {
             TagFiltersDropdownMenu(
@@ -386,11 +391,11 @@ fun SeriesFilterContent(
 }
 
 @Composable
-private fun SeriesFilterField(label: String, compact: Boolean, modifier: Modifier,
+private fun SeriesFilterField(label: String, compact: Boolean, modifier: Modifier, bottomSpacing: androidx.compose.ui.unit.Dp,
     content: @Composable (Modifier) -> Unit) {
-    if (compact) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+    if (compact) Row(Modifier.fillMaxWidth().padding(bottom = bottomSpacing), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(label, Modifier.width(72.dp), style = MaterialTheme.typography.labelLarge)
-        content(Modifier.weight(1f))
+        Text(label, Modifier.width(72.dp).offset(y = (-7).dp), style = MaterialTheme.typography.labelLarge)
+        content(Modifier.weight(1f).offset(y = (-3).dp))
     } else content(modifier)
 }

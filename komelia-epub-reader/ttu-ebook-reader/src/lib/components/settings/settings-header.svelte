@@ -13,7 +13,7 @@
 </header>
 
 <style>
-  .komelia-settings-header { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 14px 0 26px; }
+  .komelia-settings-header { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 8px 0 26px; }
   h2 { font-size: 22px; font-weight: 600; }
   button { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; }
 </style>

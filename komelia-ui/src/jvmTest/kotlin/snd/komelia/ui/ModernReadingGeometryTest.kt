@@ -61,16 +61,24 @@ class ModernReadingGeometryTest {
                 LocalKomeliaLayout provides komeliaLayoutSpec(PlatformType.MOBILE, WindowSizeClass.COMPACT)) {
                 KomeliaTheme(AppTheme.DARK) {
                     // The design reserves 24px for the runtime-owned navigation safe area.
-                    Box(Modifier.size(390.dp, 844.dp).padding(bottom = 24.dp)) {
+                    Box(Modifier.requiredSize(390.dp, 844.dp).testTag("canvas").padding(bottom = 24.dp)) {
                         Box(Modifier.align(Alignment.BottomCenter)) { AppBottomBar(AppDestination.HOME) { _, _ -> } }
                     }
                 }
             }
         }
         val bounds = compose.onNodeWithTag("primary-navigation").getUnclippedBoundsInRoot()
-        near("navigation.left", 14f, bounds.left.value)
+        val canvas = compose.onNodeWithTag("canvas").getUnclippedBoundsInRoot()
+        near("navigation.left", 14f, (bounds.left-canvas.left).value)
+        near("navigation.top", 747f, (bounds.top-canvas.top).value)
         near("navigation.width", 362f, (bounds.right - bounds.left).value)
         near("navigation.height", 70f, (bounds.bottom - bounds.top).value)
+        listOf(AppDestination.HOME,AppDestination.LIBRARY,AppDestination.LOCAL,AppDestination.SEARCH,AppDestination.SETTINGS).forEachIndexed { index,destination ->
+            val tab=compose.onNodeWithTag("primary-tab-${destination.name.lowercase()}").getUnclippedBoundsInRoot()
+            near("navigation.$destination.x",17f+72.4f*index,(tab.left-canvas.left).value)
+            near("navigation.$destination.width",66.4f,(tab.right-tab.left).value)
+            near("navigation.$destination.height",70f,(tab.bottom-tab.top).value)
+        }
     }
 
     private fun near(anchor: String, expected: Float, measured: Float) {
@@ -95,11 +103,21 @@ class ModernReadingGeometryTest {
         }
         val tablet = compose.onNodeWithTag("primary-navigation-rail").getUnclippedBoundsInRoot()
         near("tablet.rail.width", 90.75f, (tablet.right - tablet.left).value)
+        var library = compose.onNodeWithTag("primary-rail-tab-library").getUnclippedBoundsInRoot()
+        near("tablet.library.x", 6f, library.left.value)
+        near("tablet.library.y", 156f, library.top.value)
+        near("tablet.library.width", 80f, (library.right-library.left).value)
+        near("tablet.library.height", 84f, (library.bottom-library.top).value)
         compose.onNodeWithText(localLabel).performClick()
         compose.runOnIdle { width.value = WindowSizeClass.FULL }
         compose.onNodeWithText(localLabel).assertIsSelected()
         val desktop = compose.onNodeWithTag("primary-navigation-rail").getUnclippedBoundsInRoot()
         near("desktop.rail.width", 237.26f, (desktop.right - desktop.left).value)
+        library = compose.onNodeWithTag("primary-rail-tab-library").getUnclippedBoundsInRoot()
+        near("desktop.library.x", 18f, library.left.value)
+        near("desktop.library.y", 170f, library.top.value)
+        near("desktop.library.width", 201f, (library.right-library.left).value)
+        near("desktop.library.height", 62f, (library.bottom-library.top).value)
         compose.runOnIdle { width.value = WindowSizeClass.EXPANDED }
         compose.onNodeWithText(localLabel).assertIsSelected()
     }

@@ -1,20 +1,18 @@
 {
-  "file": "Komelia-Test-modern-ui-aligned-20261102.apk",
-  "sha256": "b03c90da9e238144ed1e9a596cbd6d594b2876c377edd5d3fc480a00eedab0dc",
-  "identity": [
-    "package: name='io.github.zhengningning.komelia.debug' versionCode='60' versionName='0.31.1-debug' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
-    "targetSdkVersion:'37'",
-    "application-label:'Komelia Test'",
-    "application-label-zh-CN:'Komelia 测试版'"
-  ],
-  "signature": [
-    "Verifies",
-    "Verified using v1 scheme (JAR signing): false",
-    "Verified using v2 scheme (APK Signature Scheme v2): true",
-    "Verified using v3 scheme (APK Signature Scheme v3): false",
-    "Verified using v3.1 scheme (APK Signature Scheme v3.1): false",
-    "Verified using v4 scheme (APK Signature Scheme v4): false",
-    "Verified for SourceStamp: false",
-    "Number of signers: 1"
-  ]
+  "package": "io.github.zhengningning.komelia.debug",
+  "versionName": "0.31.1-debug",
+  "versionCode": 60,
+  "targetSdk": 37,
+  "labels": {
+    "en": "Komelia Test",
+    "zh-CN": "Komelia 测试版"
+  },
+  "signature": {
+    "verified": true,
+    "v2": true,
+    "signers": 1
+  },
+  "sha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+  "artifact": "Komelia-Test-modern-ui-aligned-20261102.apk",
+  "install": "Preserving-data install -r and cold start passed on dedicated API37 emulator"
 }

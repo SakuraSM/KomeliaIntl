@@ -125,7 +125,7 @@ fun LazyGridScope.SeriesBooksContent(
 ) {
     if (booksLoadState is LoadState.Success<BooksData>) {
         val booksState = booksLoadState.value
-        item(span = { GridItemSpan(maxLineSpan) }) {
+        if (!isMasterPane || masterPaneGrid) item(span = { GridItemSpan(maxLineSpan) }) {
             BooksToolBar(
                 series = series,
                 booksLayout = if (isMasterPane && !masterPaneGrid) LIST else booksState.layout,
@@ -592,6 +592,8 @@ fun LazyGridScope.BooksList(
                     book = book,
                     compact = true,
                     isActive = activeBookId == book.id,
+                    compactCoverSlotWidth = if (activeBookId != null) 64.dp else 80.dp,
+                    showTrailingAction = activeBookId == null,
                     onClick = onBookClick?.let { { onBookClick(book) } },
                     onBookReadClick = onBookReadClick?.let { { onBookReadClick(book, it) } },
                     bookMenuActions = bookMenuActions,

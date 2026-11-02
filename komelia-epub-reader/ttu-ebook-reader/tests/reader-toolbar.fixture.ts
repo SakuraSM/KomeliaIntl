@@ -10,8 +10,6 @@ import {FuriganaStyle} from '../src/lib/data/furigana-style';
 import {viewMode$, availableSystemFonts$} from '../src/lib/data/store';
 import {ViewMode} from '../src/lib/data/view-mode';
 import {setLocale} from '../src/lib/i18n';
-import '../src/app.scss';
-import '../../shared/chrome-appearance.css';
 
 const parameters = new URLSearchParams(location.search);
 setLocale(parameters.get('locale') ?? 'en');

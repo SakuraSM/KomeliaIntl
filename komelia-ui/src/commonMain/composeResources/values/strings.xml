@@ -1507,6 +1507,8 @@
     <string name="settings_image_mode_hints_desc">Show only on first use or when the reading mode or direction changes.</string>
     <string name="reading_detail_title">Book details</string>
     <string name="reading_series_title">Series</string>
+    <string name="reading_parent_series">Series: %1$s</string>
+    <string name="reading_book_number">Book %1$s</string>
     <string name="reading_start">Start reading</string>
     <string name="reading_again">Read again</string>
     <string name="reading_contents">Contents</string>

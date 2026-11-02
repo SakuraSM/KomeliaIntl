@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
@@ -36,20 +37,23 @@ internal fun BrowsePageHeader(
     prominent: Boolean = false,
     titleStyle: TextStyle? = null,
     horizontalInset: Dp? = null,
+    headerHeight: Dp? = null,
+    titleOffset: Dp? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) = KomeliaSafeTopBar {
     val layout = LocalKomeliaLayout.current
     Row(
-        Modifier.fillMaxWidth().heightIn(min = if (prominent) ReadingDesign.primaryHeaderHeight else 56.dp)
+        Modifier.fillMaxWidth().heightIn(min = headerHeight ?: if (prominent) ReadingDesign.primaryHeaderHeight else 56.dp)
             .padding(horizontal = horizontalInset ?: if (prominent) ReadingDesign.pageInset else 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         navigationIcon?.invoke()
         if (titleContent == null) {
-            Text(title, style = titleStyle ?: if (prominent) MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp) else MaterialTheme.typography.titleLarge,
+            Text(title, style = titleStyle ?: if (prominent) MaterialTheme.typography.headlineMedium.copy(fontSize = 32.sp) else MaterialTheme.typography.titleLarge,
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f).padding(start = if (!prominent && navigationIcon == null) 16.dp else 0.dp))
+                modifier = Modifier.weight(1f).padding(start = if (!prominent && navigationIcon == null) 16.dp else 0.dp)
+                    .offset(y = titleOffset ?: if (prominent && titleStyle == null) 3.dp else 0.dp))
         } else {
             titleContent(Modifier.weight(1f))
         }

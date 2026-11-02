@@ -1,0 +1,22 @@
+{
+  "width": 390,
+  "height": 844,
+  "physicalWidth": 780,
+  "physicalHeight": 1831,
+  "safeTop": 95,
+  "safeBottom": 48,
+  "density": 320,
+  "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+  "rawSha256": "f9ef0014d200fee7e69bc912abd1b2502b200194ad24c4ef39c0f95a2be035b1",
+  "rawPixels": [
+    780,
+    1831
+  ],
+  "sourceTopLogicalPx": 0,
+  "sourceCanvas": [
+    390,
+    844
+  ],
+  "sourceSha256": "8aaa5a92b063d112f0a5778122c527c0ac55f23b87150ec24c076eb85000f374",
+  "coverage": "完整阅读视口、隐藏顶栏与临时操作、真实出版物内容"
+}

@@ -18,6 +18,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -65,6 +68,8 @@ class SearchScreen(
                         title = stringResource(Res.string.navbar_search),
                         query = vm.query,
                         onQueryChange = { vm.query = it },
+                        titleStyle = MaterialTheme.typography.headlineMedium.copy(fontSize = 31.5.sp, lineHeight = 38.sp),
+                        titleOffset = 5.dp,
                     ) { SearchViewOptions(vm) }
                 } else {
                     BrowsePageHeader(stringResource(Res.string.navbar_search)) { SearchViewOptions(vm) }

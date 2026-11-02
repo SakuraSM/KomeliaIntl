@@ -63,8 +63,12 @@
         </div>
         <div class="settings-row margin-row">
           <span class="settings-label">{{ t('epubreader.settings.page_margins') }}</span>
+          <div class="margin-control">
+          <span>{{ t('epubreader.settings.margin_narrow') }}</span>
           <v-slider v-model="pageMargins" :aria-label="t('epubreader.settings.page_margins')"
                     min="0.5" max="4" step="0.25" color="primary" hide-details/>
+          <span>{{ t('epubreader.settings.margin_wide') }}</span>
+          </div>
         </div>
       </v-card-text>
     </v-card>
@@ -100,31 +104,41 @@ const {t} = useI18n()
 </script>
 
 <style scoped>
-.settings-header { padding-inline: 10px; }
+.settings-header { padding-inline: 10px 8px; }
 .settings-header :deep(.v-toolbar-title) { margin-inline-start: 16px; font-size: 22px; font-weight: 600; }
 .settings-body { padding: 0 26px max(18px, env(safe-area-inset-bottom)) !important; }
 .settings-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; min-height: 56px; gap: 8px 12px; padding-block: 4px; border-bottom: 1px solid rgb(var(--v-theme-on-surface), .13); }
 .stepper-row { min-height: 48px; padding-block: 0; }
-.tap-row { min-height: 72px; }
+.tap-row { min-height: 80px; }
 .settings-label.tap-label { flex-basis: 180px; }
 .tap-label small { display: block; font-size: 12px; font-weight: 400; line-height: 18px; margin-top: 2px; opacity: .8; }
-.settings-label { flex: 0 0 84px; font-size: 14px; font-weight: 600; }
+.settings-label { flex: 0 0 87px; font-size: 14px; font-weight: 600; }
 .settings-row :deep(.v-input) { flex: 1; min-width: 0; }
 .settings-row :deep(.v-switch .v-selection-control) { justify-content: end; }
-.komelia-settings-stepper { display: grid; grid-template-columns: 48px 64px 48px; justify-content: end; align-items: center; gap: 4px; text-align: center; }
+.komelia-settings-stepper { display: grid; grid-template-columns: 48px 60px 48px; justify-content: end; align-items: center; gap: 4px; text-align: center; margin-right: -8px; }
 .komelia-settings-stepper > :deep(.v-btn) { position: relative; min-width: 48px; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 10px; }
 .komelia-settings-stepper > :deep(.v-btn)::before { content: ''; position: absolute; inset: 4px; border: 1px solid rgb(var(--v-theme-on-surface), .25); border-radius: 10px; pointer-events: none; }
-.theme-section { padding-block: 12px; border-bottom: 1px solid rgb(var(--v-theme-on-surface), .13); }
-.theme-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.theme-section { padding-block: 13px 15px; border-bottom: 1px solid rgb(var(--v-theme-on-surface), .13); }
+.theme-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
 .komelia-settings-swatches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .theme-choice { display: flex; flex-direction: column; gap: 6px; text-align: center; min-width: 0; }
 .theme-choice > :deep(.v-btn) { position: relative; min-width: 48px; width: 100%; height: 56px; padding: 0; box-shadow: none; }
-.theme-sample { font: 28px/1.2 Georgia, serif; text-transform: none; letter-spacing: normal; }
+.theme-sample { font: 24px/1.2 Georgia, serif; text-transform: none; letter-spacing: normal; }
 .theme-name { font-size: 12px; line-height: 20px; }
 .theme-check { position: absolute; top: 4px; right: 4px; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: #70d9ff; color: #00324a; }
 .komelia-settings-segments { flex: 1 0 190px; height: 48px; min-height: 48px; gap: 0; border: 0; border-radius: 12px; }
-.komelia-settings-segments > :deep(.v-btn) { flex: 1 0 0; min-width: 48px; min-height: 48px; padding-inline: 8px; border-radius: 10px !important; text-transform: none; letter-spacing: normal; font-size: 14px; }
+.komelia-settings-segments > :deep(.v-btn) { flex: 1 0 0; min-width: 48px; min-height: 48px; padding-inline: 0; border-radius: 10px !important; text-transform: none; letter-spacing: normal; font-size: 14px; }
 .margin-row { border: 0; }
+.margin-control { display: flex; flex: 1; min-width: 0; align-items: center; gap: 4px; padding-top: 12px; }
+.margin-control > span { font-size: 12px; opacity: .7; }
+.margin-control :deep(.v-slider-track) { margin-inline-start: 4px; }
+.margin-control :deep(.v-slider-thumb__surface) { background: var(--komelia-slider-thumb, white) !important; }
+:global(:root[data-komelia-theme="LIGHT"]) .margin-control { --komelia-slider-thumb: #00638d; }
+.settings-row :deep(.v-switch__track) { width: 52px; height: 28px; border-radius: 14px; opacity: 1; }
+.settings-row :deep(.v-selection-control__wrapper) { width: 52px; }
+.settings-row :deep(.v-switch__thumb) { width: 24px; height: 24px; }
+.settings-row :deep(.v-selection-control--dirty .v-switch__thumb) { background: white; }
+@media (max-width: 839px) { [data-komelia-reader-settings] { height: 570px; min-height: min(570px, 82dvh); } }
 @media (max-width: 360px) { .settings-body { padding-inline: 20px; } .settings-label { flex-basis: 80px; } .komelia-settings-segments { flex-basis: 180px; } }
 @media (min-width: 840px) { .settings-body { padding-bottom: 24px; } }
 </style>

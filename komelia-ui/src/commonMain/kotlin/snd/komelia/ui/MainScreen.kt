@@ -30,6 +30,7 @@ import org.jetbrains.compose.resources.painterResource
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.komelia_icon
 import snd.komelia.ui.platform.WindowSizeClass
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -38,6 +39,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -484,11 +486,11 @@ internal fun AppBottomBar(
         shape = RoundedCornerShape(if (floating) 20.dp else 0.dp),
         shadowElevation = if (floating) 2.dp else 0.dp,
     ) {
-        NavigationBar(
-            modifier = Modifier.height(ReadingDesign.navigationHeight * LocalDensity.current.fontScale.coerceAtLeast(1f)),
-            containerColor = Color.Transparent,
-            tonalElevation = 0.dp,
-            windowInsets = if (floating) WindowInsets(0.dp) else WindowInsets.navigationBars,
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .height(ReadingDesign.navigationHeight * LocalDensity.current.fontScale.coerceAtLeast(1f))
+                .windowInsetsPadding(if (floating) WindowInsets(0.dp) else WindowInsets.navigationBars)
+                .selectableGroup(),
         ) {
             CompositionLocalProvider(LocalRippleConfiguration provides null) {
                 destinationItems.forEach { item ->
@@ -501,7 +503,7 @@ internal fun AppBottomBar(
                             selected == item.destination, KomeliaChromeStyle.navigationHighlightShape,
                             inset = KomeliaChromeStyle.navigationHighlightInset,
                             interactionSource = interactions,
-                        ),
+                        ).testTag("primary-tab-${item.destination.name.lowercase()}"),
                         interactionSource = interactions,
                         selected = selected == item.destination,
                         onClick = { onSelect(item.destination, null) },
@@ -536,29 +538,33 @@ internal fun AppNavigationRail(
             .padding(horizontal = if (expanded) 18.dp else 6.dp).padding(top = if (expanded) 42.dp else 32.dp, bottom = 24.dp)
             .selectableGroup(), horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(if (expanded) 2.dp else 0.dp)) {
+            Box(Modifier.fillMaxWidth().height(if (expanded) 46.dp else 26.dp).testTag("primary-navigation-brand"),
+                contentAlignment = if (expanded) Alignment.CenterStart else Alignment.Center) {
             if (onUtilitiesClick != null) {
-                TextButton(onClick = onUtilitiesClick, contentPadding = PaddingValues(0.dp), modifier = Modifier.fillMaxWidth().height(40.dp)) {
-                    Text("Komelia", style = MaterialTheme.typography.headlineMedium.copy(fontSize = if (expanded) 30.sp else 16.sp),
-                        modifier = Modifier.weight(1f))
+                TextButton(onClick = onUtilitiesClick, contentPadding = PaddingValues(0.dp), modifier = Modifier.fillMaxWidth().height(if (expanded) 46.dp else 26.dp)) {
+                    Text("Komelia", style = MaterialTheme.typography.headlineMedium.copy(fontSize = if (expanded) 32.sp else 16.sp, lineHeight = if (expanded) 34.sp else 24.sp),
+                        modifier = Modifier.weight(1f).then(if (expanded) Modifier.padding(start = 16.dp) else Modifier))
                     Icon(Icons.Rounded.ExpandMore, stringResource(Res.string.browse_app_controls), Modifier.size(18.dp))
                 }
-            } else Text("Komelia", style = if (expanded) MaterialTheme.typography.headlineMedium.copy(fontSize = 30.sp)
-                else MaterialTheme.typography.titleMedium,
-                modifier = if (expanded) Modifier.fillMaxWidth().padding(start = 14.dp) else Modifier)
-            Spacer(Modifier.height(if (expanded) 21.dp else 16.dp))
+            } else Text("Komelia", style = if (expanded) MaterialTheme.typography.headlineMedium.copy(fontSize = 32.sp)
+                else MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 26.sp),
+                modifier = if (expanded) Modifier.fillMaxWidth().padding(start = 16.dp) else Modifier)
+            }
+            Spacer(Modifier.height(14.dp))
             destinationItems.forEach { item ->
                 val active = selected == item.destination
                 val shape = RoundedCornerShape(if (expanded) 14.dp else 16.dp)
                 val itemModifier = Modifier.fillMaxWidth().heightIn(min = if (expanded) 62.dp else 84.dp)
-                    .background(if (active) colors.primaryContainer.copy(alpha = .65f) else Color.Transparent, shape)
+                    .background(if (active) colors.primaryContainer.copy(alpha = .9f) else Color.Transparent, shape)
                     .border(.5.dp, if (active) colors.primary.copy(alpha = .6f) else Color.Transparent, shape)
                     .selectable(active, role = Role.Tab, onClick = { onSelect(item.destination, null) })
+                    .testTag("primary-rail-tab-${item.destination.name.lowercase()}")
                 if (expanded) Row(itemModifier.padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(24.dp)) {
                     Icon(item.icon, null, Modifier.size(28.dp), tint = if (active) colors.primary else colors.onSurface)
                     Text(stringResource(item.label), style = MaterialTheme.typography.titleLarge,
                         color = if (active) colors.primary else colors.onSurface)
-                } else Column(itemModifier.padding(vertical = 18.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                } else Column(itemModifier.padding(vertical = 17.dp), horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
                     Icon(item.icon, null, Modifier.size(24.dp), tint = if (active) colors.primary else colors.onSurface)
                     Text(stringResource(item.label), style = MaterialTheme.typography.labelMedium,

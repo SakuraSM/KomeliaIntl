@@ -13,6 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -88,7 +93,8 @@ fun SearchContent(
         val widthModifier = Modifier
             .widthIn(max = layout.contentMaxWidth)
             .fillMaxWidth()
-            .padding(horizontal = layout.pageHorizontalPadding)
+            .padding(horizontal = 22.dp)
+        val toolbarWidthModifier = Modifier.widthIn(max = layout.contentMaxWidth).fillMaxWidth().padding(horizontal = 16.dp)
         val scrollState = rememberLazyListState()
         PauseGlassWhileBusy(scrollState.isScrollInProgress)
 
@@ -99,7 +105,7 @@ fun SearchContent(
             if (showToolbar) SearchToolBar(
                 searchType = searchType,
                 onSearchTypeChange = onSearchTypeChange,
-                modifier = widthModifier,
+                modifier = toolbarWidthModifier,
                 showAll = showAll, onShowAll = onShowAll, seriesCount = seriesResults.size, bookCount = bookResults.size,
                 showCounts = seriesTotalPages <= 1 && bookTotalPages <= 1,
             )
@@ -116,7 +122,7 @@ fun SearchContent(
             }
             LazyColumn(
                 state = scrollState,
-                verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),
+                verticalArrangement = Arrangement.spacedBy(0.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 contentPadding = PaddingValues(bottom = layout.pageVerticalPadding + LocalNavigationBarInset.current),
                 modifier = Modifier.fillMaxWidth()
@@ -124,14 +130,14 @@ fun SearchContent(
                 if (showAll || searchType == SearchResultsTab.SERIES) {
                     if (showAll && seriesCoverage != SearchCoverage.COMPLETE) item { SearchCoverageBanner(seriesCoverage, widthModifier) }
                     items(seriesResults, key = { "series-${it.id.value}" }) { series ->
-                        SeriesDetailedListCard(series, onClick = { onSeriesClick(series) }, modifier = widthModifier, menu = seriesMenuActions)
+                        SeriesDetailedListCard(series, onClick = { onSeriesClick(series) }, modifier = widthModifier, menu = seriesMenuActions, searchResult = true)
                     }
                     if (seriesTotalPages > 1) item { Pagination(seriesTotalPages, seriesCurrentPage, onSeriesPageChange) }
                 }
                 if (showAll || searchType == SearchResultsTab.BOOKS) {
                     if (showAll && bookCoverage != SearchCoverage.COMPLETE) item { SearchCoverageBanner(bookCoverage, widthModifier) }
                     items(bookResults, key = { "book-${it.id.value}" }) { book ->
-                        BookDetailedListCard(book, onClick = { onBookClick(book) }, modifier = widthModifier, bookMenuActions = bookMenuActions)
+                        BookDetailedListCard(book, onClick = { onBookClick(book) }, modifier = widthModifier, bookMenuActions = bookMenuActions, searchResult = true)
                     }
                     if (bookTotalPages > 1) item { Pagination(bookTotalPages, bookCurrentPage, onBookPageChange) }
                 }
@@ -204,21 +210,30 @@ fun SearchToolBar(
     bookCount: Int = 0,
     showCounts: Boolean = true,
 ) {
-    Row(modifier.selectableGroup().padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        SearchResultTab(stringResource(Res.string.enum_all) + if (showCounts) " ${seriesCount + bookCount}" else "", showAll, Modifier.weight(1f), onShowAll)
+    Row(modifier.selectableGroup().padding(vertical = 5.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        SearchResultTab(stringResource(Res.string.enum_all) + if (showCounts) " ${seriesCount + bookCount}" else "", showAll, Modifier.weight(1f), onShowAll, "all")
         SearchResultTab(stringResource(Res.string.search_series_tab) + if (showCounts) " $seriesCount" else "", !showAll && searchType == SearchResultsTab.SERIES,
-            Modifier.weight(1f)) { onSearchTypeChange(SearchResultsTab.SERIES) }
+            Modifier.weight(1f), { onSearchTypeChange(SearchResultsTab.SERIES) }, "series")
         SearchResultTab(stringResource(Res.string.search_books_tab) + if (showCounts) " $bookCount" else "", !showAll && searchType == SearchResultsTab.BOOKS,
-            Modifier.weight(1f)) { onSearchTypeChange(SearchResultsTab.BOOKS) }
+            Modifier.weight(1f), { onSearchTypeChange(SearchResultsTab.BOOKS) }, "books")
     }
 }
 
 @Composable
-private fun SearchResultTab(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun SearchResultTab(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit, id: String) {
     val colors = MaterialTheme.colorScheme
-    Tab(selected = selected, onClick = onClick,
-        modifier = modifier.heightIn(min = LocalKomeliaLayout.current.minimumTouchTarget)
-            .clip(MaterialTheme.shapes.small).background(if (selected) colors.primary else colors.surfaceContainerLow),
-        selectedContentColor = colors.onPrimary, unselectedContentColor = colors.onSurfaceVariant,
-        text = { Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) })
+    Surface(onClick = onClick, color = androidx.compose.ui.graphics.Color.Transparent,
+        modifier = modifier.heightIn(min = LocalKomeliaLayout.current.minimumTouchTarget).semantics {
+            this.selected = selected; role = androidx.compose.ui.semantics.Role.Tab
+        }) {
+        Box(contentAlignment = Alignment.Center) {
+            Surface(color = if (selected) colors.primary else colors.surfaceContainerLow,
+                contentColor = if (selected) colors.onPrimary else colors.onSurfaceVariant,
+                shape = MaterialTheme.shapes.small, modifier = Modifier.fillMaxWidth().height(34.dp).testTag("search-result-$id-paint")) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(label, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+    }
 }

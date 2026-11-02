@@ -468,12 +468,12 @@
 <style>
   .font-row-controls { display: flex; align-items: center; gap: 4px; min-width: 0; }
   .font-row-controls > :global(div) { flex: 1; min-width: 0; }
-  .font-size-controls { display: grid; grid-template-columns: 48px 44px 48px; gap: 4px; align-items: center; justify-content: end; }
+  .font-size-controls { display: grid; grid-template-columns: 48px 52px 48px; gap: 4px; align-items: center; justify-content: end; margin-right: -8px; }
   .font-size-controls button { display: grid; place-items: center; position: relative; width: 48px; height: 48px; border: 0; background: transparent; }
   .font-size-controls button::before { content: ''; position: absolute; inset: 4px; border: 1px solid rgb(176 211 242 / 35%); border-radius: 10px; pointer-events: none; }
-  .font-size-controls input { width: 44px; border: 0; background: transparent; text-align: center; font-size: 16px; appearance: textfield; }
+  .font-size-controls input { width: 52px; border: 0; background: transparent; text-align: center; font-size: 16px; appearance: textfield; }
   .font-size-controls input::-webkit-inner-spin-button { appearance: none; }
-  .komelia-theme-add { display: flex; align-items: center; justify-content: center; position: relative; gap: 8px; min-height: 48px; margin: 0; padding: 8px 6px; font-size: 14px; border: 0; }
+  .komelia-theme-add { display: flex; align-items: center; justify-content: center; position: relative; gap: 8px; min-height: 48px; margin: 0 -2px 0 0; padding: 14px 10px 8px; font-size: 12px; border: 0; }
   .komelia-theme-add::before { content: ''; position: absolute; inset: 8px 0; pointer-events: none; border: 1px solid rgb(176 211 242 / 40%); border-radius: 12px; }
   .typography-summary { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 12px; padding-block: 12px; list-style: none; cursor: pointer; }
   .typography-summary::-webkit-details-marker { display: none; }

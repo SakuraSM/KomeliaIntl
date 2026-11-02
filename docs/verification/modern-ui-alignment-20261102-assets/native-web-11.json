@@ -1,0 +1,196 @@
+{
+  "viewport": {
+    "width": 390,
+    "height": 820,
+    "dpr": 2
+  },
+  "font": "18",
+  "controls": {
+    "[data-komelia-reader-settings]": [
+      {
+        "x": 0,
+        "y": 250,
+        "width": 390,
+        "height": 570,
+        "padding": "0px",
+        "background": "rgba(20, 37, 56, 0.96)",
+        "ariaLabel": "设置",
+        "title": null,
+        "text": "阅读设置  字体  Noto Sans CJK JP   字号     阅读主题  添加主题    Aa     浅色 Aa     纸色 Aa     淡蓝 ",
+        "visibility": "visible",
+        "display": "block",
+        "selected": false
+      }
+    ],
+    "[data-komelia-reader-contents]": [],
+    ".komelia-settings-header": [
+      {
+        "x": 1,
+        "y": 267,
+        "width": 388,
+        "height": 48,
+        "padding": "0px 8px 0px 26px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "阅读设置",
+        "visibility": "visible",
+        "display": "flex",
+        "selected": false
+      }
+    ],
+    ".font-size-controls button": [
+      {
+        "x": 215,
+        "y": 372,
+        "width": 48,
+        "height": 48,
+        "padding": "0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": "减小字号",
+        "title": null,
+        "text": "",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": false
+      },
+      {
+        "x": 323,
+        "y": 372,
+        "width": 48,
+        "height": 48,
+        "padding": "0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": "增大字号",
+        "title": null,
+        "text": "",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": false
+      }
+    ],
+    ".theme-grid [data-komelia-theme-swatch]": [
+      {
+        "x": 27,
+        "y": 480,
+        "width": 104,
+        "height": 56,
+        "padding": "6px",
+        "background": "rgb(255, 255, 255)",
+        "ariaLabel": "浅色",
+        "title": "light-theme",
+        "text": "Aa",
+        "visibility": "visible",
+        "display": "block",
+        "selected": "false"
+      },
+      {
+        "x": 143,
+        "y": 480,
+        "width": 104,
+        "height": 56,
+        "padding": "6px",
+        "background": "rgb(247, 246, 235)",
+        "ariaLabel": "纸色",
+        "title": "ecru-theme",
+        "text": "Aa",
+        "visibility": "visible",
+        "display": "block",
+        "selected": "true"
+      },
+      {
+        "x": 259,
+        "y": 480,
+        "width": 104,
+        "height": 56,
+        "padding": "6px",
+        "background": "rgb(223, 236, 244)",
+        "ariaLabel": "淡蓝",
+        "title": "water-theme",
+        "text": "Aa",
+        "visibility": "visible",
+        "display": "block",
+        "selected": "false"
+      },
+      {
+        "x": 27,
+        "y": 568,
+        "width": 104,
+        "height": 56,
+        "padding": "6px",
+        "background": "rgb(35, 39, 42)",
+        "ariaLabel": "深灰",
+        "title": "gray-theme",
+        "text": "Aa",
+        "visibility": "visible",
+        "display": "block",
+        "selected": "false"
+      },
+      {
+        "x": 143,
+        "y": 568,
+        "width": 104,
+        "height": 56,
+        "padding": "6px",
+        "background": "rgb(18, 18, 18)",
+        "ariaLabel": "深色",
+        "title": "dark-theme",
+        "text": "Aa",
+        "visibility": "visible",
+        "display": "block",
+        "selected": "false"
+      },
+      {
+        "x": 259,
+        "y": 568,
+        "width": 104,
+        "height": 56,
+        "padding": "6px",
+        "background": "rgb(0, 0, 0)",
+        "ariaLabel": "纯黑",
+        "title": "black-theme",
+        "text": "Aa",
+        "visibility": "visible",
+        "display": "block",
+        "selected": "false"
+      }
+    ],
+    ".komelia-reading-settings>.h-full [data-komelia-toggle-option]": [
+      {
+        "x": 107,
+        "y": 669,
+        "width": 130,
+        "height": 48,
+        "padding": "5px 0px",
+        "background": "rgb(112, 217, 255)",
+        "ariaLabel": "连续滚动",
+        "title": "continuous",
+        "text": "连续滚动",
+        "visibility": "visible",
+        "display": "block",
+        "selected": "true"
+      },
+      {
+        "x": 237,
+        "y": 669,
+        "width": 130,
+        "height": 48,
+        "padding": "5px 0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": "分页阅读",
+        "title": "paginated",
+        "text": "分页阅读",
+        "visibility": "visible",
+        "display": "block",
+        "selected": "false"
+      }
+    ],
+    ".navigation-chapter": [],
+    ".settings-header": [],
+    ".komelia-settings-stepper .v-btn": [],
+    ".v-switch__track": [],
+    ".theme-choice .v-btn": [],
+    ".komelia-settings-segments .v-btn": [],
+    ".v-slider-track": []
+  }
+}

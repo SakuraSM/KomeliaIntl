@@ -8,6 +8,7 @@ import {test} from 'node:test';
 import {createServer} from 'vite';
 import {fileURLToPath} from 'node:url';
 import {saveVisualComparison} from '../../shared/tests/visual-compare.mjs';
+import {assertControlBounds, paintedBounds} from '../../shared/tests/control-geometry.mjs';
 
 const require = createRequire(import.meta.url);
 const {chromium} = require('playwright');
@@ -130,6 +131,20 @@ test('settings sheet matches the normalized 390px design within two pixels', asy
       name: node.getAttribute('aria-label') || node.textContent.trim(), width: node.getBoundingClientRect().width, height: node.getBoundingClientRect().height,
     })));
     assert.ok(controls.every(control => control.width >= 48 && control.height >= 48), JSON.stringify(controls));
+    const geometry = [];
+    assertControlBounds('17','tap-switch',await panel.locator('.v-switch__track').boundingBox(),
+      {x:310.4,y:414.2,width:52.1,height:27.9},geometry);
+    for (let index = 0; index < 3; index++) {
+      assertControlBounds('17',`theme-${index}`,await panel.locator('[data-komelia-theme-swatch]').nth(index).boundingBox(),
+        {x:27+116*index,y:507,width:104,height:56},geometry);
+    }
+    for (let index = 0; index < 5; index++) {
+      const isMode = index < 2, column = isMode ? index : index-2;
+      assertControlBounds('17',`segment-${index}`,await paintedBounds(panel.locator('.komelia-settings-segments .v-btn').nth(index)),
+        {x:126+(isMode?118.5:79)*column,y:isMode?613:671,width:isMode?119.3:79,height:34},geometry);
+    }
+    const track = await panel.locator('.v-slider-track').boundingBox();
+    assertControlBounds('17','margin-track',track,{x:154.1,y:798.2,height:4.6},geometry);
     if (process.env.KOMELIA_VISUAL_OUTPUT) {
       const {mkdir, writeFile} = await import('node:fs/promises');
       await mkdir(process.env.KOMELIA_VISUAL_OUTPUT, {recursive: true});
@@ -137,7 +152,7 @@ test('settings sheet matches the normalized 390px design within two pixels', asy
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       await page.waitForFunction(() => !document.getAnimations().some(animation => animation.playState === 'running'));
       await page.screenshot({path: join(process.env.KOMELIA_VISUAL_OUTPUT, '17-komga-settings.png')});
-      await writeFile(join(process.env.KOMELIA_VISUAL_OUTPUT, '17-komga-settings.json'), JSON.stringify({expected, measured: bounds, controls}, null, 2));
+      await writeFile(join(process.env.KOMELIA_VISUAL_OUTPUT, '17-komga-settings.json'), JSON.stringify({expected, measured: bounds, controls, geometry}, null, 2));
       await saveVisualComparison({page,
         referencePath: fileURLToPath(new URL('../../../docs/design/modern-ui-20261030/screens/17-komga-settings.png', import.meta.url)),
         implementationPath: join(process.env.KOMELIA_VISUAL_OUTPUT, '17-komga-settings.png'),

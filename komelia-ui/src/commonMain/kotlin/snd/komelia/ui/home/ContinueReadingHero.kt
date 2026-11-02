@@ -16,6 +16,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.shape.RoundedCornerShape
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.*
@@ -39,15 +41,16 @@ internal fun ContinueReadingHero(content: ContinueReadingHeroContent, actions: C
     val book = content.book
     val colors = MaterialTheme.colorScheme
     var showMenu by remember(book.id) { mutableStateOf(false) }
-    Column(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(content.title, style = MaterialTheme.typography.headlineMedium)
+    Column(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        Text(content.title, style = MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp),
+            modifier = Modifier.offset(y = (-7).dp).testTag("home-reading-heading"))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val coverWidth = (maxWidth * .3815f).coerceIn(112.dp, 176.dp)
             Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(22.dp)) {
                 Box {
                     BookThumbnail(book.id, contentScale = ContentScale.Fit,
                         modifier = Modifier.width(coverWidth).aspectRatio(2f / 3f)
-                            .clip(ReadingDesign.coverShape).background(colors.surfaceContainerLow)
+                            .clip(ReadingDesign.coverShape).background(colors.surfaceContainerLow).testTag("home-reading-cover")
                             .semantics { contentDescription = book.metadata.title }
                             .combinedClickable(role = Role.Button, onClick = actions.onDetails,
                                 onLongClickLabel = stringResource(Res.string.actions_show_more), onLongClick = { showMenu = true }))
@@ -85,7 +88,7 @@ internal fun HeroReadingControls(book: KomeliaBook,
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = shape) {
             Box(contentAlignment = Alignment.BottomCenter) {
                 Surface(color = if (enabled) accent else accent.copy(alpha = .12f), contentColor = if (enabled) onAccent else onAccent.copy(alpha = .38f),
-                    shape = shape, modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp)) {
+                    shape = shape, modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp).testTag("home-reading-action-paint")) {
                     Box(Modifier.padding(horizontal = 8.dp).heightIn(min = 36.dp), contentAlignment = Alignment.Center) {
                         Text(readingActionLabel(book), style = MaterialTheme.typography.labelLarge, maxLines = 2)
                     }

@@ -27,19 +27,26 @@ internal fun BrowseSearchHeader(
     searchTopSpacing: Dp = 0.dp,
     titleStyle: TextStyle? = null,
     titleInset: Dp? = null,
+    headerHeight: Dp? = null,
+    searchContentPadding: Dp = 10.dp,
+    searchPaintHeight: Dp? = null,
+    titleOffset: Dp? = null,
     searchInsets: PaddingValues = PaddingValues(horizontal = ReadingDesign.browseInset),
     titleActions: @Composable RowScope.() -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
 ) = KomeliaSafeTopBar {
     val focus = LocalFocusManager.current
     Column {
-        BrowsePageHeader(title = title, prominent = true, titleStyle = titleStyle, horizontalInset = titleInset, actions = titleActions)
+        BrowsePageHeader(title = title, prominent = true, titleStyle = titleStyle, horizontalInset = titleInset,
+            headerHeight = headerHeight, titleOffset = titleOffset, actions = titleActions)
         SearchTextField(
             query = query,
             onQueryChange = onQueryChange,
             onDone = { focus.clearFocus(); onSubmit(it) },
             onDismiss = { onQueryChange("") },
             placeholder = placeholder,
+            horizontalContentPadding = searchContentPadding,
+            paintedHeight = searchPaintHeight,
             modifier = Modifier.fillMaxWidth().padding(searchInsets)
                 .padding(top = searchTopSpacing, bottom = 4.dp),
             trailingContent = { Row(verticalAlignment = Alignment.CenterVertically, content = actions) },

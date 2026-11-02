@@ -12,6 +12,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -82,17 +87,26 @@ private fun BrowseChoice(label: String, modifier: Modifier, content: @Composable
 }
 
 @Composable
-internal fun LibraryLayoutOptions(state: LibrarySeriesTabState) {
+internal fun LibraryLayoutOptions(isList: Boolean, onListChange: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(Res.string.browse_display_mode), Modifier.width(72.dp), style = MaterialTheme.typography.labelLarge)
         listOf(false, true).forEach { list ->
-            FilterChip(selected = state.isList == list, onClick = { state.onListChange(list) },
-                label = { Text(stringResource(if (list) Res.string.browse_list else Res.string.browse_grid)) },
-                leadingIcon = { Icon(if (list) Icons.AutoMirrored.Rounded.ViewList else Icons.Rounded.GridView, null, Modifier.size(20.dp)) },
-                modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary, selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimary))
+            val selected = isList == list
+            Surface(onClick = { onListChange(list) }, color = Color.Transparent,
+                modifier = Modifier.weight(1f).height(48.dp).semantics { this.selected = selected; role = Role.RadioButton }) {
+                Box(contentAlignment = Alignment.BottomCenter) {
+                    Surface(color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerLow,
+                        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                        shape = MaterialTheme.shapes.small, border = if (selected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        modifier = Modifier.fillMaxWidth().height(43.dp).testTag(if (list) "library-list-choice-paint" else "library-grid-choice-paint")) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(if (list) Icons.AutoMirrored.Rounded.ViewList else Icons.Rounded.GridView, null, Modifier.size(20.dp))
+                            Text(stringResource(if (list) Res.string.reading_list_view else Res.string.reading_grid_view), style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                }
+            }
         }
     }
 }

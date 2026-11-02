@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -27,8 +28,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material.icons.rounded.ChevronRight
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_image_settings
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_image_advanced
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_close_settings
@@ -161,7 +164,7 @@ fun BottomSheetSettingsOverlay(
                 containerColor = MaterialTheme.colorScheme.surface,
             ) {
                 var advanced by remember { mutableStateOf(false) }
-                Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(Res.string.reading_image_settings), style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.weight(1f))
                     IconButton(onClick = { showSettingsDialog = false; onSettingsDialogVisibilityChange(false) }) {
@@ -169,10 +172,10 @@ fun BottomSheetSettingsOverlay(
                     }
                 }
                 val focusManager = LocalFocusManager.current
-                val contentPadding = 20.dp
+                val contentPadding = 22.5.dp
                 Column(
                     Modifier
-                        .padding(contentPadding)
+                        .padding(horizontal = contentPadding).padding(bottom = 27.dp)
                         .heightIn(max = maxHeight * 0.8f)
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
@@ -181,11 +184,15 @@ fun BottomSheetSettingsOverlay(
 
                     CompactReaderModes(readerType, onReaderTypeChange, onPagedModeChoice,
                         pagedReaderState, continuousReaderState, panelsReaderState)
-                    Spacer(Modifier.heightIn(min = 12.dp))
-                    ReaderHintControls(modeHintPreference, volumeKeys, onVolumeKeysChange)
-                    TextButton(onClick = { advanced = !advanced }, modifier = Modifier.fillMaxWidth()) {
+                    Spacer(Modifier.heightIn(min = 4.dp))
+                    ReaderHintControls(modeHintPreference, volumeKeys, onVolumeKeysChange, compact = true)
+                    Spacer(Modifier.heightIn(min = 8.dp))
+                    TextButton(onClick = { advanced = !advanced }, modifier = Modifier.fillMaxWidth(),
+                        colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
+                        Icon(Icons.Rounded.Image, null, Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
                         Text(stringResource(Res.string.reading_image_advanced), modifier = Modifier.weight(1f))
-                        Icon(Icons.Rounded.ExpandMore, null)
+                        Icon(if (advanced) Icons.Rounded.ExpandMore else Icons.Rounded.ChevronRight, null)
                     }
                     if (advanced) {
                         BottomSheetReadingModeSettings(readerType, onReaderTypeChange, pagedReaderState, continuousReaderState, panelsReaderState)

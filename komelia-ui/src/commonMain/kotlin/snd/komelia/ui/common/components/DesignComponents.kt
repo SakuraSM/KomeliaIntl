@@ -66,9 +66,9 @@ internal fun FloatingChromeIconButton(
         val interactions = remember { MutableInteractionSource() }
         KomeliaChromeSurface(shape = RoundedCornerShape(50),
             interactionSource = interactions) {
-            IconButton(onClick = onClick, interactionSource = interactions, content = content)
+            IconButton(onClick = onClick, modifier = Modifier.size(48.dp), interactionSource = interactions, content = content)
         }
-    } else IconButton(onClick = onClick, content = content)
+    } else IconButton(onClick = onClick, modifier = Modifier.size(48.dp), content = content)
 }
 
 @Composable
@@ -80,6 +80,7 @@ fun KomeliaIconButton(
     style: KomeliaIconButtonStyle = KomeliaIconButtonStyle.Standard,
     size: KomeliaIconButtonSize = KomeliaIconButtonSize.Compact,
     enabled: Boolean = true,
+    iconModifier: Modifier = Modifier,
 ) {
     val colors = when (style) {
         KomeliaIconButtonStyle.Standard -> IconButtonDefaults.iconButtonColors()
@@ -98,7 +99,7 @@ fun KomeliaIconButton(
         colors = colors,
         shape = MaterialTheme.shapes.medium,
     ) {
-        Icon(imageVector = imageVector, contentDescription = contentDescription, modifier = Modifier.size(size.iconSize))
+        Icon(imageVector = imageVector, contentDescription = contentDescription, modifier = Modifier.size(size.iconSize).then(iconModifier))
     }
 }
 

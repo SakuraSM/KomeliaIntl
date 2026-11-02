@@ -2,11 +2,13 @@ package snd.komelia.ui.common
 
 import snd.komelia.ui.common.components.KomeliaExposedDropdownMenu
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -34,6 +36,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
@@ -63,15 +68,22 @@ fun BookReadButton(
     contentColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
     label: String? = null,
     showIcon: Boolean = true,
+    paintedHeight: Dp? = null,
+    labelStyle: TextStyle? = null,
+    leadingIconSize: Dp = 20.dp,
+    iconSpacing: Dp = 8.dp,
 ) {
     Surface(
         shape = RoundedCornerShape(10.dp),
         modifier = modifier.semantics { role = Role.Button }.pointerHoverIcon(PointerIcon.Hand),
-        color = containerColor,
+        color = if (paintedHeight == null) containerColor else Color.Transparent,
         contentColor = contentColor,
     ) {
+        Box(contentAlignment = Alignment.Center) {
+        if (paintedHeight != null) Box(Modifier.fillMaxWidth().height(paintedHeight)
+            .background(containerColor, RoundedCornerShape(10.dp)).testTag("reading-primary-paint"))
         Row(
-            Modifier.height(LocalKomeliaLayout.current.minimumTouchTarget),
+            Modifier.height(maxOf(LocalKomeliaLayout.current.minimumTouchTarget, paintedHeight ?: 0.dp)),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -80,6 +92,9 @@ fun BookReadButton(
                 onRead = onRead,
                 label = label,
                 showIcon = showIcon,
+                labelStyle = labelStyle,
+                leadingIconSize = leadingIconSize,
+                iconSpacing = iconSpacing,
             )
             if (onIncognitoRead != null) {
                 VerticalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -90,6 +105,7 @@ fun BookReadButton(
                 )
             }
         }
+        }
     }
 }
 
@@ -99,6 +115,9 @@ private fun ReadButton(
     onRead: () -> Unit,
     label: String?,
     showIcon: Boolean,
+    labelStyle: TextStyle?,
+    leadingIconSize: Dp,
+    iconSpacing: Dp,
 ) {
     Row(
         modifier = Modifier.clickable { onRead() }.then(modifier),
@@ -109,11 +128,11 @@ private fun ReadButton(
         if (showIcon) Icon(
             imageVector = Icons.AutoMirrored.Rounded.MenuBook,
             contentDescription = null,
-            modifier = Modifier.size(if (label == null) 24.dp else 20.dp),
+            modifier = Modifier.size(if (label == null) 24.dp else leadingIconSize),
         )
-        if (showIcon) Spacer(Modifier.width(if (label == null) 10.dp else 8.dp))
+        if (showIcon) Spacer(Modifier.width(if (label == null) 10.dp else iconSpacing))
         Text(label ?: stringResource(Res.string.book_read_button),
-            style = if (label == null) LocalTextStyle.current else MaterialTheme.typography.labelLarge)
+            style = labelStyle ?: if (label == null) LocalTextStyle.current else MaterialTheme.typography.labelLarge)
     }
 }
 

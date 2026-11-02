@@ -75,7 +75,7 @@ class ReadingLayoutGeometryTest {
         val action = compose.onAllNodes(hasClickAction())[0]
         val bounds = action.getUnclippedBoundsInRoot()
         assertEquals(195.dp, (bounds.left + bounds.right) / 2)
-        assertEquals(342.dp, bounds.right - bounds.left)
+        assertEquals(344.dp, bounds.right - bounds.left)
         action.performClick()
         compose.runOnIdle { assertEquals(true, markProgress) }
     }

@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_downloaded_outdated_status
@@ -85,7 +86,7 @@ fun BookImageCard(
     }
     ItemCard(
         isHighlighted = isActive,
-        coverAspectRatio = if (compactCaption) .635f else 2f / 3f,
+        coverAspectRatio = if (compactCaption) .635f else if (showVolumeTitle) .66f else 2f / 3f,
         modifier = modifier,
         onClick = onBookClick,
         onLongClick = onSelect,
@@ -382,8 +383,12 @@ fun BookDetailedListCard(
     modifier: Modifier = Modifier,
     compact: Boolean = false,
     isActive: Boolean = false,
+    compactCoverSlotWidth: Dp = 80.dp,
+    searchResult: Boolean = false,
+    showTrailingAction: Boolean = true,
 ) {
-    CompactBookRow(book, onClick, bookMenuActions, onBookReadClick, isSelected, onSelect, compact, modifier, isActive)
+    CompactBookRow(book, onClick, bookMenuActions, onBookReadClick, isSelected, onSelect, compact, modifier,
+        isActive, compactCoverSlotWidth, searchResult, showTrailingAction)
 }
 
 @Composable

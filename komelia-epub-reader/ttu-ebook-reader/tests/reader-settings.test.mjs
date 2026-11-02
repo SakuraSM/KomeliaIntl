@@ -1,16 +1,17 @@
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {test} from 'node:test';
-import {createServer} from 'vite';
-import {startReaderToolbarServer} from '../../shared/tests/reader-toolbar-server.mjs';
+import {build, createServer} from 'vite';
+import {startReaderToolbarServer, startBuiltReaderToolbarServer} from '../../shared/tests/reader-toolbar-server.mjs';
 import {fileURLToPath} from 'node:url';
 import {saveVisualComparison} from '../../shared/tests/visual-compare.mjs';
+import {assertControlBounds, paintedBounds} from '../../shared/tests/control-geometry.mjs';
 
 const {chromium} = createRequire(import.meta.url)('playwright');
 
 
 test('actual reader settings keep theme samples and view choices readable under dark glass', async () => {
-  const server = await startReaderToolbarServer(createServer);
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
   const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
   try {
     const page = await browser.newPage({viewport: {width: 360, height: 800}, hasTouch: true, isMobile: true});
@@ -37,7 +38,7 @@ test('actual reader settings keep theme samples and view choices readable under 
 });
 
 test('continuous chapter entry selects the requested chapter rather than the preceding bookmark boundary', async () => {
-  const server = await startReaderToolbarServer(createServer);
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
   const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
   try {
     const page = await browser.newPage({viewport:{width:360,height:800}, hasTouch:true, isMobile:true});
@@ -71,7 +72,7 @@ test('continuous chapter entry selects the requested chapter rather than the pre
 });
 
 test('reader settings keep font controls in one row and theme samples in balanced columns', async () => {
-  const server = await startReaderToolbarServer(createServer);
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
   const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
   try {
     const page = await browser.newPage({viewport: {width: 390, height: 844}});
@@ -109,7 +110,7 @@ test('reader settings keep font controls in one row and theme samples in balance
 });
 
 test('settings sheet matches the normalized phone design without overlapping touch targets', async () => {
-  const server = await startReaderToolbarServer(createServer);
+  const server = await startBuiltReaderToolbarServer(build, createServer);
   const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
   try {
     const page = await browser.newPage({viewport: {width: 390, height: 844}, hasTouch: true, isMobile: true});
@@ -120,24 +121,38 @@ test('settings sheet matches the normalized phone design without overlapping tou
     const expected = {x: 0, y: 274, width: 390, height: 570};
     console.log('VISUAL_MEASUREMENT ' + JSON.stringify({screen: '11-text-reader-settings', expected, measured: bounds}));
     for (const key of Object.keys(expected)) assert.ok(Math.abs(bounds[key] - expected[key]) <= 2, `${key}: ${JSON.stringify(bounds)}`);
-    const add = await panel.getByRole('button', {name: '添加主题', exact: true}).boundingBox();
-    const increase = await panel.getByRole('button', {name: '增大字号', exact: true}).boundingBox();
+    const geometry = [];
+    for (const [index, x] of [219.5,327].entries()) {
+      const hit = await panel.locator('.font-size-controls button').nth(index).boundingBox();
+      assertControlBounds('11', `font-step-${index}`, {x:hit.x+4,y:hit.y+4,width:hit.width-8,height:hit.height-8},
+        {x,y:400.5,width:39,height:38}, geometry);
+    }
+    for (let index = 0; index < 6; index++) {
+      assertControlBounds('11', `theme-${index}`, await panel.locator('[data-komelia-theme-swatch]').nth(index).boundingBox(),
+        {x:27+116*(index%3),y:504+88*Math.floor(index/3),width:104,height:56}, geometry);
+    }
+    for (let index = 0; index < 2; index++) {
+      assertControlBounds('11', `mode-${index}`, await paintedBounds(panel.locator('.komelia-reading-settings > .h-full [data-komelia-toggle-option]').nth(index)),
+        {x:107+130*index,y:698,width:130.8,height:38}, geometry);
+    }
+    const add = await panel.locator('.komelia-theme-add').boundingBox();
+    const increase = await panel.locator('.font-size-controls button').last().boundingBox();
     assert.ok(add.y >= increase.y + increase.height, JSON.stringify({add, increase}));
     assert.ok(add.height >= 48 && increase.height >= 48);
     if (process.env.KOMELIA_VISUAL_OUTPUT) {
       const {mkdir, writeFile} = await import('node:fs/promises');
       const {join} = await import('node:path');
       await mkdir(process.env.KOMELIA_VISUAL_OUTPUT, {recursive: true});
-      await panel.getByRole('button', {name: '纸色', exact: true}).click();
-      await panel.getByRole('button', {name: '连续滚动', exact: true}).click();
+      await panel.locator('[data-komelia-theme-swatch][title="ecru-theme"]').click();
+      await panel.locator('.komelia-reading-settings > .h-full [data-komelia-toggle-option]').first().click();
       await panel.getByRole('spinbutton').first().fill('18');
       await panel.getByRole('spinbutton').first().press('Tab');
-      await panel.getByRole('heading', {name: '阅读设置', exact: true}).click();
+      await panel.locator('.komelia-settings-header h2').click();
       await page.mouse.move(0, 0);
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       await page.waitForFunction(() => !document.getAnimations().some(animation => animation.playState === 'running'));
       await page.screenshot({path: join(process.env.KOMELIA_VISUAL_OUTPUT, '11-text-reader-settings.png')});
-      await writeFile(join(process.env.KOMELIA_VISUAL_OUTPUT, '11-text-reader-settings.json'), JSON.stringify({expected, measured: bounds, add, increase}, null, 2));
+      await writeFile(join(process.env.KOMELIA_VISUAL_OUTPUT, '11-text-reader-settings.json'), JSON.stringify({expected, measured: bounds, add, increase, geometry}, null, 2));
       await saveVisualComparison({page,
         referencePath: fileURLToPath(new URL('../../../docs/design/modern-ui-20261030/screens/11-text-reader-settings.png', import.meta.url)),
         implementationPath: join(process.env.KOMELIA_VISUAL_OUTPUT, '11-text-reader-settings.png'),

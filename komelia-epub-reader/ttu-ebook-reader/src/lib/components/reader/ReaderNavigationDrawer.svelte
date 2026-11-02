@@ -180,20 +180,20 @@
   .komelia-navigation-scrim { position: fixed; inset: 0; z-index: 55; background: rgb(3 9 17 / 40%); border: 0; touch-action: none; }
   .komelia-navigation-sheet { position: fixed; inset-inline: 0; bottom: 0; z-index: 60; height: min(75dvh, 570px); width: 100%; max-width: 600px; margin-inline: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom, 0px); }
   @media (min-width: 840px) { .komelia-navigation-sheet { inset-inline: auto 16px; top: 16px; bottom: 16px; height: calc(100dvh - 32px); width: 380px; } }
-  .navigation-header { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding-inline: 26px 14px; }
+  .navigation-header { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding-inline: 26px 8px; }
   .navigation-header h2 { font-size: 22px; font-weight: 600; }
   .navigation-header > button { display: grid; place-items: center; width: 48px; height: 48px; }
   .navigation-mode { position: relative; display: inline-flex; align-items: center; }
-  .navigation-mode select { appearance: none; background: transparent; border: 0; min-height: 48px; max-width: 260px; padding-right: 24px; font: inherit; }
+  .navigation-mode select { appearance: none; background: transparent; border: 0; min-height: 48px; max-width: 260px; padding: 0 24px 0 0; font: inherit; }
   .navigation-mode option { color: #13283e; background: #f4f7fb; }
   .navigation-mode :global(svg) { pointer-events: none; position: absolute; right: 0; width: 12px; height: 12px; opacity: .7; }
-  .navigation-summary { display: flex; gap: 8px; align-items: center; margin-top: -8px; padding: 0 26px 12px; font-size: 12px; line-height: 18px; }
+  .navigation-summary { display: flex; gap: 8px; align-items: center; margin-top: -8px; padding: 0 26px 10px; font-size: 12px; line-height: 18px; }
   .navigation-summary > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .navigation-summary > span:last-child { flex: none; }
   .navigation-body { padding: 0 26px; }
   .navigation-chapters > li { border-bottom: 1px solid rgb(176 211 242 / 17%); }
-  .navigation-chapter { display: flex; width: 100%; min-height: 48px; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 10px; border-radius: 10px; text-align: left; }
-  .navigation-chapter[aria-current="location"] { color: #70d9ff !important; background: #18384c !important; border-left: 3px solid #70d9ff !important; }
+  .navigation-chapter { display: flex; width: calc(100% + 24px); margin-inline: -12px; min-height: 48px; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; border-radius: 10px; text-align: left; }
+  .navigation-chapter[aria-current="location"] { color: #70d9ff !important; background: #18384c !important; border-left: 3px solid #70d9ff !important; padding-left: 9px; }
   .navigation-chapter :global(svg) { flex: none; width: 16px; height: 16px; }
   :global([data-komelia-theme="LIGHT"]) .navigation-chapter[aria-current="location"] { color: #00638d !important; background: #dceef7 !important; }
 </style>

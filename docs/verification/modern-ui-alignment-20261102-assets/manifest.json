@@ -1,240 +1,497 @@
 {
-  "apkSha256": "a1eb8cde4ba1da9c803e397a95abeb318cb441690f34025c87d820442d1a17e7",
-  "host": "Android API37 dedicated emulator",
-  "screens": [
+  "schemaVersion": 2,
+  "createdAt": "2026-11-02T15:48:29.871106+00:00",
+  "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+  "device": "Dedicated API37 emulator",
+  "density": 320,
+  "fontScale": 1,
+  "criterion": "Control positions, sizes and spacing on normalized app-owned canvases; real publication data retained",
+  "pages": [
     {
-      "name": "01-home",
-      "actual": "final-home",
-      "note": "Style baseline APK · synthetic catalogue",
+      "id": "01-home",
+      "title": "首页",
+      "raw": "screens/01-home.png",
+      "comparison": "comparisons/01-home.png",
+      "frame": "screens/01-home.frame.json",
       "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
+      "height": 796,
+      "physicalWidth": 780,
+      "physicalHeight": 1735,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "ac8cab3904fce8e4102cb432d4fcb3e3fbcabb6dfeacd12925c6933477ea0add",
       "rawPixels": [
         780,
-        1736
+        1735
       ],
-      "sha256": "37872c77707a73fff60c798ac9b7fc906b43a3f61ce2ecc6d8aa77cb54692d4a"
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "0f2dd4ebe60c388ad21c4415e030b760022e98d8702ec1f69766342d832542f4",
+      "coverage": "标题与范围入口、续读封面与信息列、进度和主阅读操作、近期网格、底部导航"
     },
     {
-      "name": "02-library",
-      "actual": "final-library",
-      "note": "Style baseline APK · synthetic catalogue",
+      "id": "02-library",
+      "title": "书库",
+      "raw": "screens/02-library.png",
+      "comparison": "comparisons/02-library.png",
+      "frame": "screens/02-library.frame.json",
       "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
+      "height": 796,
+      "physicalWidth": 780,
+      "physicalHeight": 1735,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "da9d4a7ad35535f7bdf60e692a77e5c0dc0bc26d01f1eab52723b5b1a11b01b5",
       "rawPixels": [
         780,
-        1736
+        1735
       ],
-      "sha256": "899d21b668ea9d16175d4c88b211a934c503af2835634579b747fa25c318955b"
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "5902354060d36ac16b3a02645fa4a5e2f16b56621404646b8ea757aa69ce7150",
+      "coverage": "标题与范围、搜索、状态与排序、数量与显示方式、三列封面槽、底部导航"
     },
     {
-      "name": "03-series",
-      "actual": "final-series",
-      "note": "Style baseline APK · synthetic catalogue",
+      "id": "03-series",
+      "title": "丛书卷册",
+      "raw": "screens/03-series.png",
+      "comparison": "comparisons/03-series.png",
+      "frame": "screens/03-series.frame.json",
       "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
+      "height": 796,
+      "physicalWidth": 780,
+      "physicalHeight": 1735,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "3b760d8e4a83a96fd63007931d7bafddf7b41cef1a16f4817028883b49bfb241",
       "rawPixels": [
         780,
-        1736
+        1735
       ],
-      "sha256": "3dcaaa51a9f4e5295615ae503807b461bccfa86c6288ffb255b6dc1a54d9c27d"
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "c672aa6d66da210bc970462945d1336484d31e0ddcc5721c11d2d709d607cc0b",
+      "coverage": "返回与菜单、封面与信息列、底部对齐的续读操作、卷册工具栏与列表"
     },
     {
-      "name": "04-ebook-detail",
-      "actual": "final-ebook-detail",
-      "note": "Style baseline APK · synthetic catalogue",
+      "id": "04-ebook-detail",
+      "title": "文字书详情",
+      "raw": "screens/04-ebook-detail.png",
+      "comparison": "comparisons/04-ebook-detail.png",
+      "frame": "screens/04-ebook-detail.frame.json",
       "width": 390,
       "height": 844,
-      "cutoutAdjustment": 24,
+      "physicalWidth": 780,
+      "physicalHeight": 1831,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "5b54a97b2af2a926a9b42b695c5731c176857eba7b06b3991b2539abb6980b25",
       "rawPixels": [
         780,
-        1736
+        1831
       ],
-      "sha256": "1ed4530a99af8aa6910722a7df87bac4f692edf7205fff57bb27c17ac65fbd5b"
+      "sourceTopLogicalPx": 0,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "42968c107bf25d822d4cb1bbe8858630ac7b3db80f6c0d463d4392af416fd2d0",
+      "coverage": "标题栏、封面与元数据列、系列入口、目录与下载、真实目录、页底进度与主操作"
     },
     {
-      "name": "05-comic-detail",
-      "actual": "final-comic-detail",
-      "note": "Style baseline APK · synthetic catalogue",
+      "id": "05-comic-detail",
+      "title": "漫画详情",
+      "raw": "screens/05-comic-detail.png",
+      "comparison": "comparisons/05-comic-detail.png",
+      "frame": "screens/05-comic-detail.frame.json",
+      "width": 390,
+      "height": 796,
+      "physicalWidth": 780,
+      "physicalHeight": 1735,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "7c0cfc26c26a445aa0cb2cdfdf5fd7a0be1d6273f11c64900b3139fbc5a6427b",
+      "rawPixels": [
+        780,
+        1735
+      ],
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "e139f52389d6167dd902a714072b329103f49cc623812f8fe58070d1dfe163f4",
+      "coverage": "标题栏与丛书入口、封面与下载、真实摘要和相邻边界、阅读条"
+    },
+    {
+      "id": "06-local-downloads",
+      "title": "本地与下载",
+      "raw": "screens/06-local-downloads.png",
+      "comparison": "comparisons/06-local-downloads.png",
+      "frame": "screens/06-local-downloads.frame.json",
+      "width": 390,
+      "height": 804,
+      "physicalWidth": 780,
+      "physicalHeight": 1751,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "472484971c332c462dfd4cdd69e8ffd812f99ab52a7ac01259f8f00d63d53220",
+      "rawPixels": [
+        780,
+        1751
+      ],
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "fdabe6f403e1faa7019a08a438ef3ceb99a352c1a533478d3199801c5ce37f4d",
+      "coverage": "紧凑标题与搜索、目录图标和文字列、离线书籍、实际下载任务、底部导航"
+    },
+    {
+      "id": "07-search",
+      "title": "搜索",
+      "raw": "screens/07-search.png",
+      "comparison": "comparisons/07-search.png",
+      "frame": "screens/07-search.frame.json",
+      "width": 390,
+      "height": 810,
+      "physicalWidth": 780,
+      "physicalHeight": 1763,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "ae4d44197dd10322ea19abb6583da0a93e5a06a9ea0b24d135de3ae9159c0537",
+      "rawPixels": [
+        780,
+        1763
+      ],
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "7efb92a5dee80ed3962df2daefcc78a2857c8ce05137ac8312d24701ecdd3fc2",
+      "coverage": "标题与查询、三类结果标签、结果封面与文字列、菜单和底部导航"
+    },
+    {
+      "id": "08-settings",
+      "title": "设置",
+      "raw": "screens/08-settings.png",
+      "comparison": "comparisons/08-settings.png",
+      "frame": "screens/08-settings.frame.json",
+      "width": 390,
+      "height": 796,
+      "physicalWidth": 780,
+      "physicalHeight": 1735,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "a5fe52aea676304736144fa19135e674ac0d1939a781be61df82c8c321514aa1",
+      "rawPixels": [
+        780,
+        1735
+      ],
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "23a1b10333fe140c5f90579f87d4e352415c7b0be2fbe29780e93196e86749e2",
+      "coverage": "标题、三组设置、七行入口的图标/标题/描述/尾部入口、底部导航"
+    },
+    {
+      "id": "09-filters",
+      "title": "筛选与显示",
+      "raw": "screens/09-filters.png",
+      "comparison": "comparisons/09-filters.png",
+      "frame": "screens/09-filters.frame.json",
+      "width": 390,
+      "height": 796,
+      "physicalWidth": 780,
+      "physicalHeight": 1735,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "9467366716cea5a3a14f28ffc40e6dfa59afdc161b47472247cb5f2d39f20204",
+      "rawPixels": [
+        780,
+        1735
+      ],
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "20a3c9f26b02c5ba764bb2a17e27050e348d8a2bbde188751ef7252de5b4d840",
+      "coverage": "外框与关闭、范围和类型、数量与页数、排序和阅读状态、网格/列表、高级项与完成"
+    },
+    {
+      "id": "10-epub-contents",
+      "title": "EPUB 目录",
+      "raw": "screens/10-epub-contents.png",
+      "comparison": "comparisons/10-epub-contents.png",
+      "frame": "screens/10-epub-contents.frame.json",
+      "width": 390,
+      "height": 820,
+      "physicalWidth": 780,
+      "physicalHeight": 1783,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "3a70be07ec3409a6aafb002c4f0f7ea8426ade323f379c1b202229c4058d0094",
+      "rawPixels": [
+        780,
+        1783
+      ],
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "b0ba50fa78efa352b33cd33c32ad750cc25e8d2e5f55434474e6f9a40298c3fd",
+      "coverage": "外框、导航类型与关闭、实际书名与章节数、章节行和当前位置标记"
+    },
+    {
+      "id": "11-text-reader-settings",
+      "title": "TTU 阅读设置",
+      "raw": "screens/11-text-reader-settings.png",
+      "comparison": "comparisons/11-text-reader-settings.png",
+      "frame": "screens/11-text-reader-settings.frame.json",
+      "width": 390,
+      "height": 820,
+      "physicalWidth": 780,
+      "physicalHeight": 1783,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "fa6df9e8d5340a9c286bdea1402788f3892a2011496a14ddff2b158002e61cc2",
+      "rawPixels": [
+        780,
+        1783
+      ],
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "bc5e77ed73f380cf9167dbf8db1fcb257d8543e88b06a441821056439c927308",
+      "coverage": "外框与关闭、字体和字号、添加主题、六主题网格、阅读模式、排版入口"
+    },
+    {
+      "id": "12-image-reader-settings",
+      "title": "漫画与 PDF 设置",
+      "raw": "screens/12-image-reader-settings.png",
+      "comparison": "comparisons/12-image-reader-settings.png",
+      "frame": "screens/12-image-reader-settings.frame.json",
+      "width": 390,
+      "height": 820,
+      "physicalWidth": 780,
+      "physicalHeight": 1783,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "8fe0e56fd49aee7e99a444dfdc558748564dc1dd634e240ce802dba855b6052a",
+      "rawPixels": [
+        780,
+        1783
+      ],
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "777825e440d105a84b02a35c7df2748a9f04c17acaf671f24d50d03ca4745204",
+      "coverage": "双行顶栏与实际页码、阅读模式与方向、提示与音量开关、图像处理入口"
+    },
+    {
+      "id": "13-ebook-light",
+      "title": "文字书详情·浅色",
+      "raw": "screens/13-ebook-light.png",
+      "comparison": "comparisons/13-ebook-light.png",
+      "frame": "screens/13-ebook-light.frame.json",
       "width": 390,
       "height": 844,
-      "cutoutAdjustment": 24,
+      "physicalWidth": 780,
+      "physicalHeight": 1831,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "74572abf16e569f80e1a33c11523682699cbc48ca9b92dd99847ed1aa611d786",
       "rawPixels": [
         780,
-        1736
+        1831
       ],
-      "sha256": "d5f29b0964cf81bbaa605a32f4835b554b804efb848db32e52c4b74f892af8e0"
+      "sourceTopLogicalPx": 0,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "d3468174ecb644c3215a71c6cc551edb37c41c8dcebb6e52ce6d237a378c9933",
+      "coverage": "复用文字详情的全部控件与间距，使用浅色语义色"
     },
     {
-      "name": "06-local-downloads",
-      "actual": "final-local",
-      "note": "Style baseline APK · synthetic catalogue",
+      "id": "14-series-light",
+      "title": "丛书·浅色",
+      "raw": "screens/14-series-light.png",
+      "comparison": "comparisons/14-series-light.png",
+      "frame": "screens/14-series-light.frame.json",
       "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
+      "height": 796,
+      "physicalWidth": 780,
+      "physicalHeight": 1735,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "857c992c3ef3099a449e3dbd82922f4d331bf06a2756854deb3ab30254c03607",
       "rawPixels": [
         780,
-        1736
+        1735
       ],
-      "sha256": "2181731d73ac1f801be693f54131df7c71a04803da9bd6615d104b83ab63918a"
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "21ddb47079062504e013549ee3d019f4478b9a19f4da81e9e52594a8d5632a22",
+      "coverage": "复用丛书的全部控件与间距，使用浅色语义色"
     },
     {
-      "name": "07-search",
-      "actual": "final-search",
-      "note": "Style baseline APK · synthetic catalogue",
-      "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
-      "rawPixels": [
-        780,
-        1736
-      ],
-      "sha256": "f651035edf74245493dcdc4b233d12881a4da1c2878d6f4cf50980961337d13a"
-    },
-    {
-      "name": "08-settings",
-      "actual": "final-settings",
-      "note": "Style baseline APK · synthetic catalogue",
-      "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
-      "rawPixels": [
-        780,
-        1736
-      ],
-      "sha256": "4859a82bf07e86c99150be5331a7a98255c45ef1a409fdbc35b3968a03fa8f30"
-    },
-    {
-      "name": "09-filters",
-      "actual": "final-filters",
-      "note": "Style baseline APK · synthetic catalogue",
-      "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
-      "rawPixels": [
-        780,
-        1736
-      ],
-      "sha256": "3177c90d3baa3688735a4e9ca308aff7400751f5a7ff46bde9f5df80f7d4ee33"
-    },
-    {
-      "name": "10-epub-contents",
-      "actual": "final-contents",
-      "note": "Style baseline APK · synthetic catalogue",
-      "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
-      "rawPixels": [
-        780,
-        1736
-      ],
-      "sha256": "63b979ce2b14ec3a15e041c2ad28cd6f8cab9c865be6d6c3c2c6e881337dc212"
-    },
-    {
-      "name": "11-text-reader-settings",
-      "actual": "final-ttu-settings",
-      "note": "Style baseline APK · synthetic catalogue",
-      "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
-      "rawPixels": [
-        780,
-        1736
-      ],
-      "sha256": "21bf967a810d1ae53ed44ae2592a2db6ed8e3b81d3363ec6381f52209dbfe8dc"
-    },
-    {
-      "name": "12-image-reader-settings",
-      "actual": "final-image-settings",
-      "note": "Style baseline APK · synthetic catalogue",
-      "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
-      "rawPixels": [
-        780,
-        1736
-      ],
-      "sha256": "d3699e545f68f98c6b4594aef5fa55109448cf4ad1e6b67a0f747d1f8be1d0a9"
-    },
-    {
-      "name": "13-ebook-light",
-      "actual": "final-ebook-light",
-      "note": "Style baseline APK · synthetic catalogue",
-      "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
-      "rawPixels": [
-        780,
-        1736
-      ],
-      "sha256": "12b83ed0c8e18250a10483c2f36494ea3534121e2e72bcbbf2e30acb2303bd36"
-    },
-    {
-      "name": "14-series-light",
-      "actual": "final-series-light",
-      "note": "Style baseline APK · synthetic catalogue",
-      "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
-      "rawPixels": [
-        780,
-        1736
-      ],
-      "sha256": "c718bd33e04d147bb65b5d4a0b8b5ecde8e985290d5ee17768bd3dac04f9d43b"
-    },
-    {
-      "name": "15-tablet",
-      "actual": "final-tablet",
-      "note": "Style baseline APK · synthetic catalogue",
+      "id": "15-tablet",
+      "title": "平板",
+      "raw": "screens/15-tablet.png",
+      "comparison": "comparisons/15-tablet.png",
+      "frame": "screens/15-tablet.frame.json",
       "width": 834,
       "height": 1194,
-      "cutoutAdjustment": 46,
+      "physicalWidth": 1668,
+      "physicalHeight": 2595,
+      "safeTop": 143,
+      "safeBottom": 64,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "d42598bfeb8b3e03d72cf5aafe24921b61f8cda1db4cb7c8d343ca79df17f6ae",
       "rawPixels": [
         1668,
-        2480
+        2595
       ],
-      "sha256": "8134483b76aa318e9ab1ca3c326522eb7d1e0438a83eb45bd7f52dcb30e86cdc"
+      "sourceTopLogicalPx": 0,
+      "sourceCanvas": [
+        834,
+        1194
+      ],
+      "sourceSha256": "fb0c8dec8d0d5bc83767c049887c6b9e7fe4eeaa33c1898a7c40505272e9867f",
+      "coverage": "92dp 侧栏、260dp 列表、选中书籍、详情与52dp主阅读操作，宽窄转换"
     },
     {
-      "name": "16-desktop",
-      "actual": "final-wide",
-      "note": "Style baseline APK · synthetic catalogue",
+      "id": "16-desktop",
+      "title": "桌面宽度",
+      "raw": "screens/16-desktop.png",
+      "comparison": "comparisons/16-desktop.png",
+      "frame": "screens/16-desktop.frame.json",
       "width": 1440,
       "height": 1024,
-      "cutoutAdjustment": 56,
+      "physicalWidth": 2880,
+      "physicalHeight": 2235,
+      "safeTop": 123,
+      "safeBottom": 64,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "b34618b4508b88fa13ca23a77a6c726aa78fb019cac554f08617485ba1aaf13a",
       "rawPixels": [
         2880,
-        2160
+        2235
       ],
-      "sha256": "d9a15982e0a600927e8fcdf610a4e08723a97d501d066f2ae9bd34c8f6ec2c80"
+      "sourceTopLogicalPx": 0,
+      "sourceCanvas": [
+        1440,
+        1024
+      ],
+      "sourceSha256": "1bed6cbccdfb0d252afe2db8a165cadfcb2cd8a17d66b4ac6665761ca3ce2edb",
+      "coverage": "237dp 侧栏、422dp 书目栏、网格和详情、并排进度与阅读操作"
     },
     {
-      "name": "17-komga-settings",
-      "actual": "final-komga-settings",
-      "note": "Style baseline APK · synthetic catalogue",
+      "id": "17-komga-settings",
+      "title": "Komga 阅读设置",
+      "raw": "screens/17-komga-settings.png",
+      "comparison": "comparisons/17-komga-settings.png",
+      "frame": "screens/17-komga-settings.frame.json",
       "width": 390,
-      "height": 844,
-      "cutoutAdjustment": 24,
+      "height": 820,
+      "physicalWidth": 780,
+      "physicalHeight": 1783,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "b40b42ebf0e62b8c7befd99c22cec5ee64c9b8da5a1e3ccaaf86861cfc6555fe",
       "rawPixels": [
         780,
-        1736
+        1783
       ],
-      "sha256": "e965f9a05a153e470e0436ce7b5930192836f5240b59ce462990b7df7895b3f6"
+      "sourceTopLogicalPx": 24,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "4326c00ba2c16f4162227a6a43e095b40dd7325bd49e7133414c7c34730e8a92",
+      "coverage": "外框、字号、点击翻页、三主题、阅读模式、列数、行距、页边距"
     },
     {
-      "name": "18-immersive-reading",
-      "actual": "final-immersive",
-      "note": "Style baseline APK · synthetic catalogue",
+      "id": "18-immersive-reading",
+      "title": "纯阅读",
+      "raw": "screens/18-immersive-reading.png",
+      "comparison": "comparisons/18-immersive-reading.png",
+      "frame": "screens/18-immersive-reading.frame.json",
       "width": 390,
       "height": 844,
-      "cutoutAdjustment": 24,
+      "physicalWidth": 780,
+      "physicalHeight": 1831,
+      "safeTop": 95,
+      "safeBottom": 48,
+      "density": 320,
+      "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+      "rawSha256": "f9ef0014d200fee7e69bc912abd1b2502b200194ad24c4ef39c0f95a2be035b1",
       "rawPixels": [
         780,
-        1736
+        1831
       ],
-      "sha256": "d97b02088bd26af0de9ac8da21e64857120861c730ed5af90c6c7ba02f34caeb"
+      "sourceTopLogicalPx": 0,
+      "sourceCanvas": [
+        390,
+        844
+      ],
+      "sourceSha256": "8aaa5a92b063d112f0a5778122c527c0ac55f23b87150ec24c076eb85000f374",
+      "coverage": "完整阅读视口、隐藏顶栏与临时操作、真实出版物内容"
     }
   ]
 }

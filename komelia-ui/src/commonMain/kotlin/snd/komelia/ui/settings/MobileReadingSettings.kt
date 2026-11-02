@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -104,14 +105,14 @@ internal fun MobileReadingSettingsHome(
 
 @Composable
 private fun SettingsGroupLabel(text: String) {
-    Text(text, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 8.dp, bottom = 11.dp))
+    Text(text, style = MaterialTheme.typography.labelLarge.copy(fontSize = 15.sp), color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 8.dp, bottom = 9.dp))
 }
 
 @Composable
 private fun ReadingSettingsGroup(content: @Composable ColumnScope.() -> Unit) {
     Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp).padding(top = 11.dp, bottom = 3.dp), content = content)
+        Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp).padding(top = 6.dp, bottom = 8.5.dp), content = content)
     }
 }
 
@@ -120,14 +121,14 @@ private fun ReadingSettingsRow(title: String, icon: ImageVector, description: St
     Column {
         Surface(onClick = onClick, color = androidx.compose.ui.graphics.Color.Transparent) {
             Row(Modifier.fillMaxWidth().heightIn(min = 65.dp).padding(vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Surface(shape = MaterialTheme.shapes.extraSmall, color = MaterialTheme.colorScheme.primary.copy(alpha = .12f)) {
                     Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
                         Icon(icon, null, Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary)
                     }
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text(title, style = MaterialTheme.typography.titleSmall)
+                    Text(title, style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp))
                     if (description != null) Text(description, style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }

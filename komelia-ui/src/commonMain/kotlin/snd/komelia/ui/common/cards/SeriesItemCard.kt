@@ -37,6 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_series_title
 import androidx.compose.ui.unit.Dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_books_count
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
@@ -271,21 +273,26 @@ fun SeriesDetailedListCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     menu: SeriesMenuActions? = null,
+    searchResult: Boolean = false,
 ) {
     Column(modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        Row(Modifier.heightIn(min = 112.dp).padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            SeriesThumbnail(series.id, modifier = Modifier.width(64.dp).aspectRatio(2f / 3f)
+        Row(Modifier.heightIn(min = if (searchResult) 132.dp else 112.dp).padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = if (searchResult) Alignment.Top else Alignment.CenterVertically) {
+            SeriesThumbnail(series.id, modifier = Modifier.width(if (searchResult) 76.dp else 64.dp).aspectRatio(2f / 3f)
                 .clip(MaterialTheme.shapes.extraSmall), contentScale = ContentScale.Fit)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(series.metadata.title, style = MaterialTheme.typography.bodyMedium,
+            Column(Modifier.weight(1f).then(if (searchResult) Modifier.padding(top = 7.dp) else Modifier), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (searchResult) Text(stringResource(Res.string.reading_series_title), style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(series.metadata.title, style = if (searchResult) MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 26.sp) else MaterialTheme.typography.bodyMedium,
                     maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text(pluralStringResource(Res.plurals.series_books_count, series.booksCount, series.booksCount.toString()),
+                val countLabel = pluralStringResource(Res.plurals.series_books_count, series.booksCount, series.booksCount.toString())
+                val authors = if (searchResult) series.booksMetadata.authors.map { it.name }.distinct().joinToString("、") else ""
+                Text(listOf(authors, countLabel).filter { it.isNotBlank() }.joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (menu != null) {
                 var expanded by remember(series.id) { mutableStateOf(false) }
-                Box {
+                Box(Modifier.align(Alignment.CenterVertically)) {
                     IconButton(onClick = { expanded = true }) { Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more)) }
                     SeriesActionsMenu(series, menu, expanded, showEditOption = true, showDownloadOption = true,
                         onDismissRequest = { expanded = false })

@@ -34,7 +34,7 @@ test('EPUB chrome uses the approved floating inset while keeping its touch targe
 });
 
 test('TTU keeps narrow chrome on one row and preserves overflow actions and keyboard focus', async () => {
-  const server = await startReaderToolbarServer(createServer);
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
   const browser = await chromium.launch({ executablePath: process.env.CHROME_BIN });
   try {
     const page = await browser.newPage({ viewport: { width: 360, height: 800 }, hasTouch: true, isMobile: true });

@@ -748,6 +748,8 @@
       "layout_scroll": "Scroll",
       "tap_to_turn": "Tap to turn pages",
       "tap_to_turn_hint": "Tap either side of the screen to turn pages",
+      "margin_narrow": "Narrow",
+      "margin_wide": "Wide",
       "navigation_mode": "Navigation mode",
       "navigation_options": {
         "both": "Both",

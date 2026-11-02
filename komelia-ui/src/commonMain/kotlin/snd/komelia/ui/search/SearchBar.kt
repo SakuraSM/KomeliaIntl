@@ -286,6 +286,8 @@ fun SearchTextField(
     modifier: Modifier = Modifier,
     placeholder: String = stringResource(Res.string.search_search_input_placeholder),
     trailingContent: (@Composable () -> Unit)? = null,
+    horizontalContentPadding: androidx.compose.ui.unit.Dp = 10.dp,
+    paintedHeight: androidx.compose.ui.unit.Dp? = null,
 ) {
     val focusManager = LocalFocusManager.current
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -304,6 +306,8 @@ fun SearchTextField(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
         interactionSource = interactionSource,
+        horizontalContentPadding = horizontalContentPadding,
+        paintedHeight = paintedHeight,
         modifier = modifier
             .semantics { contentDescription = placeholder }
             .heightIn(min = layout.minimumTouchTarget)

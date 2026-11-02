@@ -6,12 +6,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.asPaddingValues
@@ -26,6 +30,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_fil
 import snd.komga.client.book.KomgaBookId
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_libraries
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_search_library
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_page_size
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -196,7 +201,7 @@ fun SeriesContent(
             is LoadState.Success<BooksData> -> {
                 val loadedPage = booksLoadState.value.currentPage
                 if (pageNavigationState.isRequestedPage(loadedPage)) {
-                    scrollState.scrollToItem(if (collectionsState.collections.isEmpty()) 1 else SERIES_BOOKS_SECTION_INDEX)
+                    scrollState.scrollToItem(if (isMasterPane && !masterPaneGrid) 0 else if (collectionsState.collections.isEmpty()) 1 else SERIES_BOOKS_SECTION_INDEX)
                     pageNavigationState.onPageScrollCompleted(loadedPage)
                 }
             }
@@ -224,11 +229,14 @@ fun SeriesContent(
                 Column(Modifier.padding(top = 20.dp)) {
                     BrowseSearchHeader(stringResource(Res.string.navbar_libraries), masterQuery, { masterQuery = it },
                         placeholder = stringResource(Res.string.browse_search_library), onSubmit = onSearchAll,
-                        searchTopSpacing = 12.dp, titleInset = 32.dp, searchInsets = PaddingValues(start = 30.dp, end = 20.dp),
-                        titleStyle = MaterialTheme.typography.headlineLarge.copy(fontSize = 36.sp, lineHeight = 44.sp)) {
+                        searchTopSpacing = 16.dp, searchContentPadding = 20.dp, titleInset = 32.dp, searchInsets = PaddingValues(start = 30.dp, end = 20.dp),
+                        titleStyle = MaterialTheme.typography.headlineLarge.copy(fontSize = 44.sp, lineHeight = 52.sp)) {
                         IconButton(onClick = { showMasterFilters = true }) { Icon(Icons.Rounded.Tune, stringResource(Res.string.series_book_filters)) }
                     }
                 }
+            } else if (isMasterPane) {
+                SeriesMasterToolbar(series, seriesMenuActions,
+                    onBack = { onBackPress() }, onViewOptions = { showMasterFilters = true })
             } else {
                 SeriesToolBar(series, seriesMenuActions, mangaBaka, onDownload, onBackPress,
                     showTitle = isContentScrolled || isMasterPane)
@@ -237,23 +245,24 @@ fun SeriesContent(
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                 LazyVerticalGrid(
                     state = scrollState,
-                    columns = if (masterPaneGrid && booksData.layout == BooksLayout.GRID) GridCells.FixedSize((gridMinWidth / 1.52f).coerceIn(112.dp, 200.dp))
+                    columns = if (masterPaneGrid && booksData.layout == BooksLayout.GRID) GridCells.FixedSize((gridMinWidth / 1.48f).coerceIn(112.dp, 200.dp))
                         else snd.komelia.ui.common.itemlist.posterGridCells(gridMinWidth),
-                    horizontalArrangement = Arrangement.spacedBy(if (masterPaneGrid) 14.dp else layout.gridSpacing),
+                    horizontalArrangement = Arrangement.spacedBy(if (masterPaneGrid) 10.dp else layout.gridSpacing),
                     verticalArrangement = Arrangement.spacedBy(if (booksData.layout == BooksLayout.LIST) 0.dp else layout.gridSpacing),
                     contentPadding = PaddingValues(
-                        top = (if (compact) 6.dp else layout.topBarContentSpacing) + topInset,
+                        top = (if (compact && !isMasterPane) 2.dp else if (compact) 6.dp else layout.topBarContentSpacing) + topInset,
                         bottom = layout.gridBottomPadding + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
                     ),
                     modifier = Modifier
                         .widthIn(max = layout.contentMaxWidth)
                         .fillMaxSize()
-                        .padding(horizontal = if (masterPaneGrid) 32.dp else if (compact && !isMasterPane) ReadingDesign.homeInset else layout.pageHorizontalPadding),
+                        .padding(horizontal = if (masterPaneGrid) 28.dp else if (compact && !isMasterPane) ReadingDesign.homeInset else layout.pageHorizontalPadding),
                 ) {
 
                     if (series != null && library != null) {
-                        if (!masterPaneGrid) item(span = { GridItemSpan(maxLineSpan) }) {
+                        if (!masterPaneGrid && !isMasterPane) item(span = { GridItemSpan(maxLineSpan) }) {
                             val targetState = booksState.readingTarget.collectAsState().value
+                            Box(Modifier.padding(bottom = if (compact) 12.dp else 0.dp)) {
                             SeriesReadingHeader(
                                 readingTarget = if (isMasterPane) LoadState.Success(null) else targetState,
                                 onRead = { onBookReadClick(it, true) },
@@ -262,6 +271,7 @@ fun SeriesContent(
                                 if (!isMasterPane) Series(series, library, onLibraryClick, onFilterClick, readingAction)
                                 else Text(pluralStringResource(Res.plurals.series_books_count, series.booksCount, series.booksCount.toString()),
                                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                             }
                         }
                         val tabSelector: (@Composable () -> Unit)? = if (collectionsState.collections.isNotEmpty() && !booksData.selectionMode) {
@@ -356,7 +366,12 @@ fun SeriesContent(
             }
         }
     }
-    if (showMasterFilters) BookFilterDialog(booksState.filterState, onDismiss = { showMasterFilters = false })
+    if (showMasterFilters) BookFilterDialog(booksState.filterState, onDismiss = { showMasterFilters = false }, extraControls = {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(Res.string.browse_page_size), Modifier.weight(1f))
+            snd.komelia.ui.common.components.PageSizeSelectionDropdown(booksData.pageSize, booksState::onBookPageSizeChange)
+        }
+    })
 }
 
 internal const val SERIES_BOOKS_SECTION_INDEX = 2
@@ -392,6 +407,7 @@ fun SeriesToolBar(
     showTitle: Boolean = true,
 ) {
     val layout = LocalKomeliaLayout.current
+    val compactToolbar = LocalWindowWidth.current in listOf(COMPACT, MEDIUM)
     Row(
         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -401,6 +417,7 @@ fun SeriesToolBar(
             Icon(
                 Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = stringResource(Res.string.navigation_back),
+                modifier = if (compactToolbar) Modifier.size(20.dp).offset(y = (-3).dp) else Modifier,
             )
         }
 
@@ -409,14 +426,15 @@ fun SeriesToolBar(
                 if (showTitle) mangaBaka?.titleState?.mainTitle?.title ?: series.metadata.title else stringResource(Res.string.reading_series_title),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f), textAlign = TextAlign.Start,
+                style = if (compactToolbar) MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp) else MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f).then(if (compactToolbar) Modifier.offset(x = (-6).dp, y = (-3).dp) else Modifier), textAlign = TextAlign.Start,
             )
 
             Box {
                 var expandActions by remember { mutableStateOf(false) }
                 FloatingChromeIconButton(onClick = { expandActions = true }, floating = floating) {
-                    Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
+                    Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more),
+                        modifier = if (compactToolbar) Modifier.size(20.dp).offset(x = 4.dp, y = (-3).dp) else Modifier)
                 }
 
                 SeriesActionsMenu(
@@ -583,11 +601,12 @@ fun Series(
 ) {
     val width = LocalWindowWidth.current
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-    val coverWidth = detailCoverWidth(maxWidth, width)
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
-        SeriesThumbnail(series.id, modifier = Modifier.width(coverWidth).aspectRatio(2f / 3f)
+    val compact = width == COMPACT || width == MEDIUM
+    val coverWidth = detailCoverWidth(maxWidth, width) + if (compact) 3.5.dp else 0.dp
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.Top) {
+        SeriesThumbnail(series.id, modifier = Modifier.width(coverWidth).aspectRatio(if (compact) .685f else 2f / 3f)
             .clip(ReadingDesign.coverShape), contentScale = ContentScale.Fit)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(series.metadata.title, style = MaterialTheme.typography.headlineSmall)
             val authors = remember(series.booksMetadata.authors) {
                 series.booksMetadata.authors.filter { it.role == "writer" }.map { it.name }.distinct().joinToString("、")
@@ -599,7 +618,7 @@ fun Series(
             if (series.metadata.summary.isNotBlank()) Text(series.metadata.summary,
                 maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.heightIn(min = 8.dp))
+            Spacer(Modifier.weight(1f).heightIn(min = 8.dp))
             readingAction()
         }
     }

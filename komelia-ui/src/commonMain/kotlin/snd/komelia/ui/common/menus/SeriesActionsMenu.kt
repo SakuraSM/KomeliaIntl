@@ -58,6 +58,7 @@ fun SeriesActionsMenu(
     showEditOption: Boolean,
     showDownloadOption: Boolean,
     onDismissRequest: () -> Unit,
+    extraContent: @Composable () -> Unit = {},
 ) {
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
@@ -120,6 +121,7 @@ fun SeriesActionsMenu(
         expanded = showDropdown.value,
         onDismissRequest = onDismissRequest
     ) {
+        extraContent()
         if (isAdmin && !isOffline) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.series_analyze)) },

@@ -748,6 +748,8 @@
       "layout_scroll": "滚动",
       "tap_to_turn": "点按翻页",
       "tap_to_turn_hint": "点击屏幕左右两侧翻页",
+      "margin_narrow": "窄",
+      "margin_wide": "宽",
       "navigation_mode": "导航模式",
       "navigation_options": {
         "both": "全部",

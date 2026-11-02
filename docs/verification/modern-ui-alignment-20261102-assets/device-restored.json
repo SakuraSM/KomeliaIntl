@@ -1,0 +1,25 @@
+{
+  "size": "Physical size: 1080x2400",
+  "density": "Physical density: 420",
+  "fontScale": "1.0",
+  "showImeWithHardKeyboard": "0",
+  "api": "37",
+  "preferences": {
+    "surface": "LIQUID_GLASS",
+    "theme": "DARK",
+    "language": "SYSTEM",
+    "reduceTransparency": false,
+    "reader": "TTU",
+    "ttuFontSize": 20,
+    "ttuTheme": "Light",
+    "komgaLayout": "Scroll",
+    "komgaTheme": "Day",
+    "bookLayout": "GRID"
+  },
+  "evidence": [
+    "appearance-values-restored-final.png",
+    "native-web-restored-ttu.json",
+    "restored-book-grid-final.png",
+    "master-view-options-restored.png"
+  ]
+}

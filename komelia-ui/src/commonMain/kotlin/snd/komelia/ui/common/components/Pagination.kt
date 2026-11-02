@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.style.TextOverflow
@@ -278,7 +279,9 @@ private fun PageNumberButton(
 @Composable
 fun PageSizeSelectionDropdown(
     currentSize: Int,
-    onPageSizeChange: (Int) -> Unit
+    onPageSizeChange: (Int) -> Unit,
+    minWidth: androidx.compose.ui.unit.Dp = 70.dp,
+    endPadding: androidx.compose.ui.unit.Dp = 10.dp,
 ) {
     DropdownChoiceMenu(
         selectedOption = intEntry(currentSize),
@@ -293,8 +296,9 @@ fun PageSizeSelectionDropdown(
         contentPadding = PaddingValues(5.dp),
         inputFieldColor = MaterialTheme.colorScheme.surface,
         inputFieldModifier = Modifier
-            .widthIn(min = 70.dp)
+            .widthIn(min = minWidth)
             .clip(RoundedCornerShape(8.dp))
-            .padding(end = 10.dp)
+            .padding(end = endPadding)
+            .testTag("page-size-selection")
     )
 }

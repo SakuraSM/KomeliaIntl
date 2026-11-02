@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.onSizeChanged
@@ -52,6 +54,7 @@ import androidx.compose.ui.semantics.semantics
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_file_source
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_summary
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_series_info
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_series_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_detail_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
@@ -120,7 +123,7 @@ fun BookScreenContent(
     val windowWidth = snd.komelia.ui.LocalWindowWidth.current
     val actionInset = when (windowWidth) {
         snd.komelia.ui.platform.WindowSizeClass.COMPACT, snd.komelia.ui.platform.WindowSizeClass.MEDIUM -> 0.dp
-        snd.komelia.ui.platform.WindowSizeClass.EXPANDED -> 24.dp
+        snd.komelia.ui.platform.WindowSizeClass.EXPANDED -> 27.dp
         snd.komelia.ui.platform.WindowSizeClass.FULL -> 30.dp
     }
     val density = LocalDensity.current
@@ -134,7 +137,8 @@ fun BookScreenContent(
     PauseGlassWhileBusy(scrollState.isScrollInProgress)
     KomeliaPageScaffold(
         topBar = { customToolbar?.invoke(isContentScrolled, onRead)
-            ?: BookToolBar(book, bookMenuActions, onBackPress, showTitle = isContentScrolled, onReadClick = onRead) },
+            ?: BookToolBar(book, bookMenuActions, onBackPress, showTitle = isContentScrolled, onReadClick = onRead,
+                onParentSeriesClick = onParentSeriesPress) },
         bottomBar = {
             if (canRead) ReadingActionFooter(book, onBookReadPress,
                 Modifier.padding(bottom = LocalNavigationBarInset.current)
@@ -145,8 +149,11 @@ fun BookScreenContent(
             Column(
                 Modifier.widthIn(max = layout.contentMaxWidth).fillMaxWidth()
                     .verticalScroll(scrollState)
-                    .padding(horizontal = if (windowWidth == snd.komelia.ui.platform.WindowSizeClass.FULL) 40.dp else ReadingDesign.homeInset)
-                    .padding(top = topInset + if (actionInset == 0.dp) 6.dp else if (windowWidth == snd.komelia.ui.platform.WindowSizeClass.FULL) 30.dp else 12.dp,
+                    .padding(horizontal = if (windowWidth == snd.komelia.ui.platform.WindowSizeClass.FULL) 40.dp
+                        else if (actionInset == 0.dp && book.media.mediaType == "application/epub+zip") 20.dp else ReadingDesign.homeInset)
+                    .padding(top = topInset + if (actionInset == 0.dp) {
+                        if (book.media.mediaType == "application/epub+zip") 12.dp else 6.dp
+                    } else if (windowWidth == snd.komelia.ui.platform.WindowSizeClass.FULL) 20.dp else 58.dp,
                         bottom = if (canRead) readingBarHeight + 16.dp else layout.gridBottomPadding),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -155,7 +162,7 @@ fun BookScreenContent(
                 val wideImage = actionInset > 0.dp && book.media.mediaType != "application/epub+zip"
                 if (!wideImage) HorizontalDivider(Modifier.padding(top = 10.dp), color = MaterialTheme.colorScheme.outlineVariant)
                 if (book.metadata.summary.isNotBlank()) {
-                    Column(Modifier.then(if (wideImage) Modifier.padding(top = 32.dp) else Modifier), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(Modifier.then(if (wideImage) Modifier.padding(top = 24.dp) else Modifier), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (!wideImage) Text(stringResource(Res.string.reading_summary), style = MaterialTheme.typography.titleMedium)
                         ExpandableText(book.metadata.summary, style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.fillMaxWidth())
@@ -209,7 +216,11 @@ fun BookToolBar(
     floating: Boolean = false,
     showTitle: Boolean = true,
     onReadClick: ((Boolean) -> Unit)? = null,
+    onParentSeriesClick: (() -> Unit)? = null,
 ) {
+    val compactToolbar = snd.komelia.ui.LocalWindowWidth.current in listOf(
+        snd.komelia.ui.platform.WindowSizeClass.COMPACT, snd.komelia.ui.platform.WindowSizeClass.MEDIUM)
+    val textBook = book.media.mediaType == "application/epub+zip"
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = if (snd.komelia.ui.LocalWindowWidth.current == snd.komelia.ui.platform.WindowSizeClass.FULL) 24.dp else 0.dp)
             .heightIn(min = 48.dp).padding(horizontal = 4.dp),
@@ -219,6 +230,8 @@ fun BookToolBar(
             Icon(
                 Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = stringResource(Res.string.navigation_back),
+                modifier = if (compactToolbar) Modifier.size(20.dp).offset(x = if (textBook) (-6).dp else 4.dp, y = (-4).dp)
+                    .testTag("detail-toolbar-back-paint") else Modifier,
             )
         }
         Text(
@@ -227,8 +240,16 @@ fun BookToolBar(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.weight(1f), textAlign = if (book.media.mediaType == "application/epub+zip") TextAlign.Center else TextAlign.Start,
+            modifier = Modifier.weight(1f).then(if (compactToolbar) Modifier.offset(x = if (textBook) 0.dp else (-6).dp, y = (-4).dp) else Modifier),
+            textAlign = if (textBook) TextAlign.Center else TextAlign.Start,
         )
+        if (onParentSeriesClick != null && !book.oneshot && book.media.mediaType != "application/epub+zip" &&
+            snd.komelia.ui.LocalWindowWidth.current in listOf(snd.komelia.ui.platform.WindowSizeClass.COMPACT, snd.komelia.ui.platform.WindowSizeClass.MEDIUM)) {
+            FloatingChromeIconButton(onParentSeriesClick, floating) {
+                Icon(Icons.AutoMirrored.Rounded.List, stringResource(Res.string.reading_series_title),
+                    Modifier.size(20.dp).offset(x = 4.dp, y = (-4).dp))
+            }
+        }
         ToolbarBookActions(book, bookMenuActions, floating, onReadClick)
     }
 }
@@ -240,11 +261,15 @@ private fun ToolbarBookActions(
     floating: Boolean,
     onReadClick: ((Boolean) -> Unit)?,
 ) {
+    val compact = snd.komelia.ui.LocalWindowWidth.current in listOf(
+        snd.komelia.ui.platform.WindowSizeClass.COMPACT, snd.komelia.ui.platform.WindowSizeClass.MEDIUM)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Box {
             var expandActions by remember { mutableStateOf(false) }
             FloatingChromeIconButton(onClick = { expandActions = true }, floating = floating) {
-                Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more))
+                Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more),
+                    modifier = if (compact) Modifier.size(20.dp).offset(x = 4.dp, y = (-4).dp)
+                        .testTag("detail-toolbar-more-paint") else Modifier)
             }
             BookActionsMenu(
                 book = book,

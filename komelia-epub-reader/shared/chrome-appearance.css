@@ -173,8 +173,8 @@
 :root[data-komelia-surface][data-komelia-theme] [data-komelia-chrome] [data-komelia-theme-swatch][aria-pressed="true"] { border: 2px solid #70d9ff !important; box-shadow: inset 0 0 0 1px #082839; }
 :root[data-komelia-surface="glass"] [data-komelia-chrome] :focus-visible { outline: 2px solid #70d9ff; outline-offset: 2px; }
 
-.komelia-reading-settings { display: flex; flex-direction: column; gap: 8px; }
-.komelia-reading-settings :is(input, select) { min-height: 48px; accent-color: #70d9ff; }
+[data-komelia-reader-settings] .komelia-reading-settings { display: flex; flex-direction: column; gap: 8px; }
+[data-komelia-reader-settings] .komelia-reading-settings :is(input, select) { min-height: 48px; accent-color: #70d9ff; }
 .komelia-advanced-settings { border-top: 1px solid rgb(176 211 242 / 17%); }
 
 [data-komelia-chrome] { box-sizing: border-box; }
@@ -207,35 +207,38 @@
 [data-komelia-reader-settings] .komelia-settings-segments { background: rgb(var(--v-theme-on-surface), .05); }
 
 /* Geometry shared by the two independent EPUB implementations. */
-.komelia-sheet-handle { width: 34px; height: 4px; border-radius: 4px; margin: 10px auto 8px; background: #52738c; }
-.komelia-reading-settings { gap: 0; }
-.komelia-reading-settings > section.inline-row { min-height: 53px; padding-bottom: 4px; border-bottom: 1px solid rgb(176 211 242 / 17%); margin-bottom: 8px; }
-.komelia-reading-settings .theme-grid { gap: 8px 10px; }
-.komelia-reading-settings > .lg\:col-span-2 > section { padding-bottom: 8px; }
-.komelia-reading-settings > .lg\:col-span-2 > section > div:first-child { height: 37px; align-items: flex-end; }
-.komelia-reading-settings .font-row-controls [data-komelia-font-choice] { background: transparent !important; border: 0 !important; box-shadow: none !important; padding-inline: 0; font-weight: 400; justify-content: end; }
-.komelia-reading-settings .font-row-controls [data-komelia-font-choice] svg { transform: rotate(-90deg); }
-.komelia-reading-settings > .h-full { border-top: 1px solid rgb(176 211 242 / 17%); padding-block: 12px; }
-.komelia-reading-settings > .h-full section { padding: 0; min-height: 48px; }
-.komelia-reading-settings > .h-full [data-komelia-toggle-option] { margin: 0; width: 100%; min-height: 40px; font-size: 14px; }
-.komelia-reading-settings > .h-full section > div:last-child > div { flex-wrap: nowrap; margin: 0; border: 1px solid rgb(176 211 242 / 30%); border-radius: 12px; overflow: hidden; }
-.komelia-reading-settings > .h-full section > div:last-child > div > div { flex: 1; }
-.komelia-reading-settings .inline-row > div:first-child { flex: 0 0 68px; max-width: 40%; }
-.komelia-reading-settings > .h-full section > div:last-child > div { position: relative; border: 0; overflow: visible; }
-.komelia-reading-settings > .h-full section > div:last-child > div::before { content: ''; position: absolute; inset: 4px 0; border: 1px solid rgb(176 211 242 / 30%); border-radius: 12px; pointer-events: none; }
-.komelia-reading-settings > .h-full [data-komelia-toggle-option] { height: 48px; padding-block: 4px; border: 0 !important; background-clip: content-box !important; }
+.komelia-sheet-handle { width: 34px; height: 4px; border-radius: 4px; margin: 10px auto 2px; background: #52738c; }
+[data-komelia-reader-settings] .komelia-reading-settings { gap: 0; }
+[data-komelia-reader-settings] .komelia-reading-settings > section.inline-row { min-height: 53px; padding-bottom: 4px; border-bottom: 1px solid rgb(176 211 242 / 17%); margin-bottom: 8px; }
+[data-komelia-reader-settings] .komelia-reading-settings .theme-grid { gap: 8px 12px; }
+[data-komelia-reader-settings] .komelia-reading-settings > section.inline-row:first-child { margin-bottom: 4px; }
+[data-komelia-reader-settings] .komelia-reading-settings > .lg\:col-span-2 > section { padding-bottom: 8px; }
+[data-komelia-reader-settings] .komelia-reading-settings > .lg\:col-span-2 > section > div:first-child { height: 47px; align-items: flex-end; }
+[data-komelia-reader-settings] .komelia-reading-settings .font-row-controls [data-komelia-font-choice] { background: transparent !important; border: 0 !important; box-shadow: none !important; padding-inline: 0; font-weight: 400; justify-content: end; }
+[data-komelia-reader-settings] .komelia-reading-settings .font-row-controls [data-komelia-font-choice] svg { transform: rotate(-90deg); }
+[data-komelia-reader-settings] .komelia-reading-settings > .h-full { border-top: 1px solid rgb(176 211 242 / 17%); padding-block: 12px; }
+[data-komelia-reader-settings] .komelia-reading-settings > .h-full section { padding: 0; min-height: 48px; }
+[data-komelia-reader-settings] .komelia-reading-settings > .h-full [data-komelia-toggle-option] { margin: 0; width: 100%; min-height: 40px; font-size: 14px; }
+[data-komelia-reader-settings] .komelia-reading-settings > .h-full section > div:last-child > div { flex-wrap: nowrap; margin: 0; border: 1px solid rgb(176 211 242 / 30%); border-radius: 12px; overflow: hidden; }
+[data-komelia-reader-settings] .komelia-reading-settings > .h-full section > div:last-child > div > div { flex: 1; }
+[data-komelia-reader-settings] .komelia-reading-settings > .h-full section > div:last-child { margin-right: -4px; }
+[data-komelia-reader-settings] .komelia-reading-settings .inline-row > div:first-child { flex: 0 0 68px; max-width: 40%; }
+[data-komelia-reader-settings] .komelia-reading-settings > .h-full section > div:last-child > div { position: relative; border: 0; overflow: visible; }
+[data-komelia-reader-settings] .komelia-reading-settings > .h-full section > div:last-child > div::before { content: ''; position: absolute; inset: 5px 0; border: 1px solid rgb(176 211 242 / 30%); border-radius: 12px; pointer-events: none; }
+[data-komelia-reader-settings] .komelia-reading-settings > .h-full [data-komelia-toggle-option] { height: 48px; padding-block: 4px; border: 0 !important; background-clip: content-box !important; }
 [data-komelia-reader-settings] .komelia-settings-segments { position: relative; border: 0; overflow: visible; }
 /* Keep the outlined group and its selected fill on the same 40px painted track. */
 [data-komelia-reader-settings] .komelia-settings-segments { background: transparent; }
 :root[data-komelia-surface] [data-komelia-reader-settings] .komelia-settings-segments > .v-btn { border: 0 !important; }
-[data-komelia-reader-settings] .komelia-settings-segments::before { content: ''; position: absolute; inset: 4px 0; border: 1px solid rgb(var(--v-theme-on-surface), .25); border-radius: 12px; pointer-events: none; }
-[data-komelia-reader-settings] .komelia-settings-segments > .v-btn { height: 48px; padding-block: 4px; background-clip: content-box !important; }
+[data-komelia-reader-settings] .komelia-settings-segments::before { content: ''; position: absolute; inset: 5px 0 9px; border: 1px solid rgb(var(--v-theme-on-surface), .25); border-radius: 12px; pointer-events: none; }
+[data-komelia-reader-settings] .komelia-settings-segments > .v-btn { height: 48px; padding: 5px 0 9px; background-clip: content-box !important; }
 :root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"]) [data-komelia-reader-settings] :is([data-komelia-toggle-option],.v-btn)[aria-pressed="true"]:not([data-komelia-theme-swatch]),
 :root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"]) [data-komelia-reader-settings] .komelia-settings-segments > .v-btn--active { background: #70d9ff !important; color: #00324a !important; border-color: transparent !important; }
 :root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"])[data-komelia-theme="LIGHT"] [data-komelia-reader-settings] :is([data-komelia-toggle-option],.v-btn)[aria-pressed="true"]:not([data-komelia-theme-swatch]),
 :root:is([data-komelia-surface="glass"], [data-komelia-surface="solid"])[data-komelia-theme="LIGHT"] [data-komelia-reader-settings] .komelia-settings-segments > .v-btn--active { background: #00638d !important; color: white !important; }
 :root[data-komelia-surface] [data-komelia-reader-settings] .komelia-reading-settings > .h-full [data-komelia-toggle-option][aria-pressed],
 :root[data-komelia-surface] [data-komelia-reader-settings] .komelia-settings-segments > .v-btn { background-clip: content-box !important; }
+:root[data-komelia-surface] [data-komelia-reader-settings] .komelia-reading-settings > .h-full [data-komelia-toggle-option][aria-pressed] { border: 0 !important; padding: 5px 0; }
 :root[data-komelia-surface="glass"] [data-komelia-toolbar="top"] { top: env(safe-area-inset-top, 0px) !important; inset-inline: 12px; width: calc(100% - 24px); border-radius: 12px; }
 :root[data-komelia-surface="glass"] nav[data-komelia-toolbar="top"] { position: relative; top: auto !important; inset-inline: auto; margin: 0 12px 12px; }
 @media (max-width: 839px) {

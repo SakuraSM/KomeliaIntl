@@ -394,7 +394,8 @@ private fun LibraryToolBar(
             }
         },
     ) {
-        BrowseOptionsButton(active = viewModel.seriesTabState.filterState?.isChanged == true || selectedLibraryId != null || viewModel.currentTab != SERIES) { dismiss ->
+        BrowseOptionsButton(active = viewModel.seriesTabState.filterState?.isChanged == true || selectedLibraryId != null || viewModel.currentTab != SERIES,
+            sheetContentHeight = 492.dp) { dismiss ->
             val tabs = buildList {
                 add(LabeledEntry(SERIES, stringResource(Res.string.library_tab_series)))
                 if (viewModel.collectionsCount > 0 || viewModel.currentTab == COLLECTIONS) {
@@ -404,17 +405,17 @@ private fun LibraryToolBar(
                     add(LabeledEntry(READ_LISTS, stringResource(Res.string.library_tab_readlists)))
                 }
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().height(40.dp), horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (showScopeSelector) {
-                    Row(Modifier.weight(1.05f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(stringResource(Res.string.browse_library_scope), Modifier.width(48.dp), style = MaterialTheme.typography.labelMedium)
+                    Row(Modifier.weight(1.08f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(Res.string.browse_library_scope), Modifier.width(57.dp), style = MaterialTheme.typography.labelMedium)
                         Box(Modifier.weight(1f)) {
                             LibraryScopeSelector(libraries, selectedLibraryId, formField = true) { selected -> dismiss(); onLibrarySelect(selected) }
                         }
                     }
                 }
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.browse_content_type), Modifier.width(48.dp), style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(Res.string.browse_content_type), Modifier.width(61.dp), style = MaterialTheme.typography.labelMedium)
                 DropdownChoiceMenu(
                     modifier = Modifier.weight(1f),
                     selectedOption = tabs.first { it.value == viewModel.currentTab },
@@ -445,8 +446,10 @@ private fun LibraryViewOptions(viewModel: LibraryViewModel, onDismiss: () -> Uni
             val state = viewModel.seriesTabState
             LibraryPageSizeOption(state.pageLoadSize.collectAsState().value, state::onPageSizeChange,
                 pluralStringResource(Res.plurals.series_list_series_count, state.totalSeriesCount, state.totalSeriesCount))
+            androidx.compose.material3.HorizontalDivider(Modifier.padding(top = 6.dp, bottom = 7.dp), color = MaterialTheme.colorScheme.outlineVariant)
             state.filterState?.let {
-                SeriesFilterContent(it, onDismiss, compact = true, displayOptions = { LibraryLayoutOptions(state) })
+                SeriesFilterContent(it, onDismiss, compact = true,
+                    displayOptions = { LibraryLayoutOptions(isList = state.isList, onListChange = state::onListChange) })
             }
         }
         COLLECTIONS -> {
@@ -464,11 +467,11 @@ private fun LibraryViewOptions(viewModel: LibraryViewModel, onDismiss: () -> Uni
 
 @Composable
 private fun LibraryPageSizeOption(pageSize: Int, onChange: (Int) -> Unit, summary: String) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().height(40.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(Res.string.browse_result_count), Modifier.width(56.dp), style = MaterialTheme.typography.labelMedium)
         Text(summary, Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
         Text(stringResource(Res.string.browse_page_size), modifier = Modifier.padding(end = 8.dp), style = MaterialTheme.typography.labelMedium)
-        PageSizeSelectionDropdown(pageSize, onChange)
+        PageSizeSelectionDropdown(pageSize, onChange, minWidth = 86.dp, endPadding = 0.dp)
     }
 }
 
@@ -493,10 +496,11 @@ private fun LibraryScopeSelector(
     }
 
     Box {
-        if (compact) Surface(onClick = { expanded = true }, color = androidx.compose.ui.graphics.Color.Transparent,
-            modifier = Modifier.width((100.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)).coerceAtMost(148.dp)).height(48.dp)) {
-            Box {
-                Surface(Modifier.fillMaxWidth().padding(top = 14.dp).height(32.dp), shape = RoundedCornerShape(16.dp),
+        if (compact || formField) Surface(onClick = { expanded = true }, color = androidx.compose.ui.graphics.Color.Transparent,
+            modifier = (if (formField) Modifier.fillMaxWidth() else Modifier.width((100.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)).coerceAtMost(148.dp)))
+                .height(48.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                Surface(Modifier.fillMaxWidth().then(if (formField) Modifier else Modifier.padding(top = 12.dp)).height(32.dp), shape = RoundedCornerShape(if (formField) 8.dp else 16.dp),
                     border = BorderStroke(.5.dp, MaterialTheme.colorScheme.outlineVariant), color = MaterialTheme.colorScheme.surfaceContainerLow) {
                     Row(Modifier.padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(selectedName, Modifier.weight(1f), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)

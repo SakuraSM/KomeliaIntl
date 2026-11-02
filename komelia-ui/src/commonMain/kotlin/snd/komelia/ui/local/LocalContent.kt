@@ -34,7 +34,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.platform.testTag
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_offline_books
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_local_summary
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_local_library
@@ -101,6 +103,9 @@ internal fun LocalContent(
             query = query,
             onQueryChange = onQueryChange,
             placeholder = stringResource(Res.string.local_content_search),
+            headerHeight = 48.dp,
+            titleStyle = MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp),
+            searchPaintHeight = 44.dp,
         ) {
             BrowseOptionsButton(active = selectedSource != AvailableBookSource.ALL || selectedSort != LocalHomeBookSort.RECENTLY_ADDED) {
                 LocalViewOptions(
@@ -121,14 +126,14 @@ internal fun LocalContent(
             }
             LazyColumn(
                 state = listState,
-                contentPadding = PaddingValues(top = 12.dp, bottom = layout.gridBottomPadding),
-                modifier = Modifier.fillMaxSize().padding(horizontal = layout.pageHorizontalPadding),
+                contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
+                modifier = Modifier.fillMaxSize().padding(horizontal = 22.dp),
             ) {
                 item {
                     Surface(onClick = onManageLocalFolders, color = androidx.compose.ui.graphics.Color.Transparent) {
                         Row(Modifier.fillMaxWidth().heightIn(min = 64.dp),
-                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Icon(Icons.Rounded.Folder, null, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.primary)
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                            Icon(Icons.Rounded.Folder, null, Modifier.size(32.dp).testTag("local-directory-icon"), tint = MaterialTheme.colorScheme.primary)
                             Column(Modifier.weight(1f)) {
                                 Text(stringResource(Res.string.settings_navigation_local_library), style = MaterialTheme.typography.titleSmall)
                                 Text(stringResource(Res.string.reading_local_summary),
@@ -138,8 +143,8 @@ internal fun LocalContent(
                         }
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    Text(stringResource(Res.string.reading_offline_books), style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(vertical = 12.dp))
+                    Text(stringResource(Res.string.reading_offline_books), style = MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp, lineHeight = 28.sp),
+                        modifier = Modifier.padding(top = 16.dp))
                     if (!loading && books.isEmpty()) LocalEmptyContent(query.isNotBlank(), selectedSource)
                 }
                 items(books.size, key = { books[it].id.value }) { index ->

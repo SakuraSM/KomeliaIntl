@@ -70,7 +70,7 @@
   .theme-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
   .theme-grid > div { min-width: 0; flex-direction: column; gap: 6px; }
   .theme-grid [data-komelia-theme-swatch] { width: 100%; position: relative; height: 56px; min-height: 56px; margin: 0; padding: 6px; border-width: 2px; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
-  .theme-sample { font: 28px/1.2 Georgia, serif; }
+  .theme-sample { font: 24px/1.2 Georgia, serif; }
   .theme-name { text-align: center; font-size: 12px; line-height: 18px; }
   .theme-selected { position: absolute; display: grid; place-items: center; top: 4px; right: 4px; width: 16px; height: 16px; border-radius: 50%; background: #70d9ff; color: #00324a; font-size: 10px; }
 </style>

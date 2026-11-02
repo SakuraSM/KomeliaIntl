@@ -1,44 +1,57 @@
-# 现代阅读界面对齐验证
+# 全页控件对齐验证
 
-18页视觉方向已落实到共享Compose与两套EPUB界面。本次交付为本地可审阅实现与测试包。参考、尺寸与容差见[对齐标尺](../design/modern-ui-20261030/MEASUREMENTS.md)，样式基线运行图见[18页并排对照](modern-ui-alignment-20261102-assets/index.html)。
+更新：2026-11-03。
 
-按用户确认的口径，验收对象为全页控件的位置、尺寸和间距，保留真实书籍内容；字形和图片不作整图像素比较。全页控件的2px验收仍未完成。当前证据只证明19项关键几何量最大偏差为2px，不能据此声称所有页面的控件都在2px以内。设计核对结果见[design-qa](../../design-qa.md)。
+18页按确认的控件口径完成一轮完整校准，保留真实书籍、封面、目录和阅读进度。[逐页对照](modern-ui-alignment-20261102-assets/index.html)包含同一安装包的18张原始运行图。[413项实测](modern-ui-alignment-20261102-assets/measurements.json)覆盖Compose布局、浏览器DOM和Android WebView，最大偏差2个逻辑像素。
 
-## 改动与入口
+[对齐标尺](../design/modern-ui-20261030/MEASUREMENTS.md)定义画布、父容器和安全边界。[设计核对](../../design-qa.md)记录已处理的差异。真实内容换行、缺失摘要与可用能力引起的顺延，按相邻控件和所属容器检查。
 
-- `ReadingDesign`、`Theme`与共享chrome负责颜色、布局、导航和浮层。原生面板使用96%底色覆盖，亮书页不再把深色设置洗灰；缺失或暂停采样时保留实体底板。
-- 首页续读区并排，近期阅读为三列短预览，新增内容为列表。书库将范围、搜索、状态、排序及网格/列表放在同一层；筛选面板采用横向表单，重置保留在高级筛选中。
-- 全局搜索合并系列与书籍，也支持单独分类、实际菜单及分页。详情保留唯一固定阅读操作；相邻书籍保留前后方向。宽屏列表、网格与详情共享选中项，收回手机后恢复手机字号。
-- TTU设置与目录使用真实组件，保留六主题、字体管理、搜索和标记。Komga设置沿用八个模型与父级写入路径。阅读主题、出版物内容、存储值和进度协议保持原有契约。
+## 改动范围
+
+共享Compose统一导航、搜索、详情、列表、设置和阅读操作条。底栏五项等分，侧栏位置不再依赖字体测量。详情使用一处主阅读操作，紧凑绘制区域保留48dp触控；平板列表保留排序、筛选和每页数量入口。
+
+图文设置对齐模式、方向、开关和高级项。顶栏显示真实系列与卷名，页码胶囊读取已有页组、分镜或连续页状态，只显示当前位置。分镜入口仍受实际能力控制。
+
+两套EPUB保留各自主题和排版模型。TTU补齐生产构建的CSS顺序检查，修正原生包中主题间距和阅读模式宽度偏移。设置面板保持96%底色覆盖，白书页上的深色控件保持清晰。
+
+本次未改变接口、数据库、存储枚举、Android身份与签名要求，也未增加进度写入路径。英文和简体中文资源同步。
 
 ## 自动检查
 
-`node scripts/regression.mjs run premerge`的8个自动检查均已执行通过：guard、harness、runner、core、offline、epub、ttu和build。逐次原始记录位于本地`build/verification/visual-alignment-20261102/regression-final/`。
+完整入口为`node scripts/regression.mjs run premerge`。最终指纹、原始命令日志和JUnit汇总位于本地忽略目录`build/verification/visual-alignment-20261102/regression-final/`。
 
-| 检查 | 结果与范围 |
+| 检查 | 执行结果 |
 |---|---|
-| core，含`:komelia-ui:allTests` | 577项，0失败、0错误、0跳过 |
-| offline | 102项，0失败、0错误、1跳过；`OriginalArchiveAcceptanceTest`未获得可选原始档案fixture |
-| Komga `npm test` | 29项通过；覆盖回调、主题对比度、目录、手势事件与键盘 |
-| TTU `npm run check` | svelte-check与tsc通过，0错误、0警告 |
-| TTU `npm run test:browser` | 8项通过；覆盖真实设置、目录切换、保存回调、Escape和窄屏 |
-| `./gradlew androidDebug desktopJar komfWebUI` | 三个平台构建通过，包含两套EPUB构建及资源同步 |
-| 几何与背景回归 | 19项实际布局/DOM量均在2px内；另检查亮书页上的深色面板、暂停采样、宽屏按钮主色及大字号标题 |
+| guard、harness、runner | 通过 |
+| core，含`:komelia-ui:allTests` | 593项，0失败、0错误、0跳过 |
+| offline | 102项，0失败、0错误、1跳过；缺少可选原始档案fixture |
+| Komga `npm test` | 29项通过 |
+| TTU `npm run check` | 0错误、0警告 |
+| TTU `npm run test:browser` | 8项通过，含生产构建的设置几何 |
+| `androidDebug desktopJar komfWebUI` | 构建通过，包含两套EPUB构建与资源同步 |
+| 聚焦布局、触控与工具栏 | 23项通过，413项坐标和尺寸在2px内 |
+| 对照页 | 18页、36张对照图片，窄屏无页面溢出，图片与脚本检查通过 |
 
-[实测JSON](modern-ui-alignment-20261102-assets/measurements.json)记录每项参考、实际值与偏差。Compose使用density1；浏览器组件使用390×844、DPR1。两套设置外框均实测为x0、y274、宽390、高570。原生运行图与浏览器组件的系统区域不同，分别记录。
+几何JSON保留每项参考、实际值和偏差。绘制区域、点击范围和文字实际行边界分别检查；不把整张图片的内容差异当作控件位移。
 
-预合并profile的29个人工条目仍为pending，整体`accepted`为false；自动命令通过不等于完整验收。通用DFA单文件检查因未安装ESLint而阻塞，未额外改动工具链；Vue使用项目的vue-tsc构建与浏览器回归。
+预合并profile的29个人工条目保持`pending`，整体`accepted`为`false`。可选原始档案用例跳过。通用DFA单文件lint因本机缺少ESLint而阻塞，使用项目的vue-tsc、Svelte检查和浏览器回归验证受影响的前端。
 
-## 原生复核与恢复
+## 原生复核
 
-使用专用API37模拟器与合成书库，对18个页面/状态逐页取图，截图对应样式基线APK（a1eb8cde）。最终测试包补齐书库列表的原有菜单，另见[列表菜单运行图](modern-ui-alignment-20261102-assets/list-menu.png)；两组制品身份分别记录。观察了网格/列表切换、高级筛选开关、查询跨导航保留、详情与阅读返回、宽屏选择保留、两套阅读设置、TTU目录及主题/字号恢复。额外检查了浅色、深色、OLED、英文与360宽度130%字号；窄屏长导航标签按现有规则缩略，保留完整语义标签。
+专用API37模拟器使用合成书库，density320、fontScale1。截图逐次记录物理尺寸、切口与导航区域，按实际应用区域展示。18张图均关联同一APK SHA-256；[清单](modern-ui-alignment-20261102-assets/manifest.json)保留每张图的原始像素与摘要。
 
-截图保留原始物理像素，展示时才归一化。手机780×1736、density320；平板1668×2480；1440逻辑宽度使用Android宽屏。后者不能替代原生Desktop安装与窗口验收。目录层级、封面缺失、章节数与进度均来自实际测试模型，不填入概念稿中的示例数字。
+复核路径包括五个主导航、书籍和丛书返回、宽窄转换保留选中书籍、实际查询、阅读设置与目录、主题和字号恢复。正文、缺失封面、目录数量、相邻书籍边界和下载状态均使用实际测试模型。
 
-结束时已恢复1080×2400、density420、fontScale1.0、硬键盘显示输入法选项0、拼音键盘、应用语言SYSTEM、主题DARK、液态玻璃、未减少透明效果、书籍GRID布局、TTU阅读器及20号浅色阅读主题；Komga恢复滚动与日间。真机、TalkBack、PDF系统返回手势、API35完整流程与长期性能仍待独立验收。
+宽屏菜单中的每页数量实际执行20→50→20并恢复。补查360dp、130%字号、英文、Darker与减少透明效果，以及412、600、840和1280dp设置布局。合成PDF实际显示第2页，冷启动后恢复到2/3；这些观察保留在补充图中。
+
+结束时恢复1080×2400、density420、fontScale1、硬键盘显示输入法选项0、语言SYSTEM、主题DARK、液态玻璃、减少透明效果关闭、书籍GRID布局、TTU阅读器20号浅色主题和Komga滚动/日间。[恢复记录](modern-ui-alignment-20261102-assets/device-restored.json)关联实际观察。
+
+12的测试书不提供分镜。该行省略后，标题和模式组随内容高度排列，方向、提示、音量与高级入口按共同父容器和底边核对。14使用与03相同的共享布局。16由Android宽屏核对共享几何，不能代替原生Desktop窗口验收。
+
+真机、TalkBack、API35完整流程、原生Desktop窗口、PDF系统手势与长期性能继续单列验收。运行观察不把这些条目标为通过。
 
 ## 测试包
 
-应用名称为`Komelia Test / Komelia 测试版`，包名`io.github.zhengningning.komelia.debug`，版本`0.31.1-debug`（60），target SDK37。最终APK已通过aapt2身份检查、v2签名验证、覆盖安装与冷启动，保留原有测试数据。
+文件为本地`build/artifacts/Komelia-Test-modern-ui-aligned-20261102.apk`。名称`Komelia Test / Komelia 测试版`，包名`io.github.zhengningning.komelia.debug`，版本`0.31.1-debug`（60），target SDK37。aapt2身份、v2签名、保留数据覆盖安装及冷启动均通过，[制品身份](modern-ui-alignment-20261102-assets/apk-identity.json)记录检查结果。
 
-文件为`Komelia-Test-modern-ui-aligned-20261102.apk`，位于本地忽略的`build/artifacts/`目录。SHA-256为`b03c90da9e238144ed1e9a596cbd6d594b2876c377edd5d3fc480a00eedab0dc`。完整身份与签名结果见[制品记录](modern-ui-alignment-20261102-assets/apk-identity.json)。
+SHA-256：`5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d`。本地工作树保留供真机验证；外部发布不在本次操作范围。

@@ -10,7 +10,7 @@ import {assertControlBounds, paintedBounds} from '../../shared/tests/control-geo
 const {chromium} = createRequire(import.meta.url)('playwright');
 
 
-test('actual reader settings keep theme samples and view choices readable under dark glass', async () => {
+test('reader settings keep theme samples, view choices, and font names readable', async () => {
   const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
   const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
   try {
@@ -31,6 +31,11 @@ test('actual reader settings keep theme samples and view choices readable under 
     const unselected = await paginated.evaluate(node => getComputedStyle(node).backgroundColor);
     assert.notEqual(unselected, 'rgb(255, 255, 255)');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 360);
+
+    await page.goto(`${server.url}?settings&surface=classic&theme=DARK`);
+    const fontName = panel.locator('.font-row-controls .font-name');
+    assert.equal(await fontName.evaluate(node => getComputedStyle(node).color),
+      await panel.evaluate(node => getComputedStyle(node).color));
   } finally {
     await browser.close();
     await server.close();

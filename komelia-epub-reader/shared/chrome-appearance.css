@@ -214,7 +214,7 @@
 [data-komelia-reader-settings] .komelia-reading-settings > section.inline-row:first-child { margin-bottom: 4px; }
 [data-komelia-reader-settings] .komelia-reading-settings > .lg\:col-span-2 > section { padding-bottom: 8px; }
 [data-komelia-reader-settings] .komelia-reading-settings > .lg\:col-span-2 > section > div:first-child { height: 47px; align-items: flex-end; }
-[data-komelia-reader-settings] .komelia-reading-settings .font-row-controls [data-komelia-font-choice] { background: transparent !important; border: 0 !important; box-shadow: none !important; padding-inline: 0; font-weight: 400; justify-content: end; }
+[data-komelia-reader-settings] .komelia-reading-settings .font-row-controls [data-komelia-font-choice] { color: inherit; background: transparent !important; border: 0 !important; box-shadow: none !important; padding-inline: 0; font-weight: 400; justify-content: end; }
 [data-komelia-reader-settings] .komelia-reading-settings .font-row-controls [data-komelia-font-choice] svg { transform: rotate(-90deg); }
 [data-komelia-reader-settings] .komelia-reading-settings > .h-full { border-top: 1px solid rgb(176 211 242 / 17%); padding-block: 12px; }
 [data-komelia-reader-settings] .komelia-reading-settings > .h-full section { padding: 0; min-height: 48px; }

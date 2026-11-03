@@ -67,6 +67,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.password_hide
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.password_show
@@ -151,11 +156,14 @@ fun NoPaddingTextField(
     onTextChange: (String) -> Unit,
     shape: Shape = RoundedCornerShape(8.dp),
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
+    leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: @Composable () -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    horizontalContentPadding: Dp = 16.dp,
+    paintedHeight: Dp? = null,
 ) {
     val isFocused = interactionSource.collectIsFocusedAsState()
     val textColor =
@@ -183,19 +191,25 @@ fun NoPaddingTextField(
             singleLine = true,
             visualTransformation = VisualTransformation.None,
             interactionSource = interactionSource,
+            leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
             contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
+                start = horizontalContentPadding,
+                end = horizontalContentPadding,
                 top = 0.dp,
                 bottom = 0.dp
             ),
             container = {
+                Box(contentAlignment = Alignment.Center) {
                 OutlinedTextFieldDefaults.Container(
                     enabled = true,
                     isError = false,
                     interactionSource = interactionSource,
                     colors = colors,
-                    shape = shape
+                    shape = shape,
+                    modifier = if (paintedHeight == null) Modifier.fillMaxSize() else Modifier.fillMaxWidth().height(paintedHeight)
                 )
+                }
             }
         )
     }

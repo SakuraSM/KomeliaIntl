@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
@@ -283,6 +285,9 @@ fun SearchTextField(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     modifier: Modifier = Modifier,
     placeholder: String = stringResource(Res.string.search_search_input_placeholder),
+    trailingContent: (@Composable () -> Unit)? = null,
+    horizontalContentPadding: androidx.compose.ui.unit.Dp = 10.dp,
+    paintedHeight: androidx.compose.ui.unit.Dp? = null,
 ) {
     val focusManager = LocalFocusManager.current
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -292,14 +297,17 @@ fun SearchTextField(
         text = query,
         placeholder = placeholder,
         onTextChange = onQueryChange,
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-            unfocusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedPlaceholderColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
         interactionSource = interactionSource,
+        horizontalContentPadding = horizontalContentPadding,
+        paintedHeight = paintedHeight,
         modifier = modifier
             .semantics { contentDescription = placeholder }
             .heightIn(min = layout.minimumTouchTarget)
@@ -320,7 +328,9 @@ fun SearchTextField(
                     else -> false
                 }
             },
+        leadingIcon = { Icon(Icons.Rounded.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
         trailingIcon = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
             if (query.isNotBlank()) {
                 IconButton(onClick = {
                     focusManager.clearFocus()
@@ -332,16 +342,15 @@ fun SearchTextField(
                         tint = MaterialTheme.colorScheme.secondary,
                     )
                 }
-            } else {
-                Icon(
-                    Icons.Rounded.Search, null,
-                    modifier = Modifier.cursorForHand()
-                )
+            }
+            trailingContent?.invoke()
             }
         },
 
         keyboardActions = KeyboardActions(
             onDone = { onDone(query) },
-        )
+            onSearch = { onDone(query) },
+        ),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
     )
 }

@@ -493,7 +493,7 @@ class PagedReaderState(
         val pages = readerState.booksState.value?.currentBookPages ?: return
         pageSpreads.value = buildSpreadMap(pages, layout)
 
-        val currentPage = currentSpread.value.pages.first().metadata
+        val currentPage = currentSpread.value.pages.firstOrNull()?.metadata ?: return
         loadPage(spreadIndexOf(currentPage))
     }
 

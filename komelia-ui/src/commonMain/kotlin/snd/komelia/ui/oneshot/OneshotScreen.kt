@@ -19,6 +19,7 @@ import snd.komelia.ui.BookSiblingsContext
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalReloadEvents
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.readerHostNavigator
 import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.collection.CollectionScreen
@@ -98,7 +99,7 @@ class OneshotScreen(
                     library = library,
                     onLibraryClick = { navigator.push(LibraryScreen(it.id)) },
                     onBookReadClick = { markReadProgress ->
-                        navigator.parent?.push(
+                        navigator.readerHostNavigator().push(
                             readerScreen(
                                 book = book,
                                 markReadProgress = markReadProgress,
@@ -107,6 +108,7 @@ class OneshotScreen(
                         )
                     },
                     oneshotMenuActions = vm.bookMenuActions,
+                    readingContext = bookSiblingsContext,
                     collections = vm.collectionsState.collections,
                     onCollectionClick = { collection -> navigator.push(CollectionScreen(collection.id)) },
                     onSeriesClick = { navigator.push(seriesScreen(it)) },

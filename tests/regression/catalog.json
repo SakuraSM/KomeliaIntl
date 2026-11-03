@@ -147,11 +147,11 @@
       "issues": [74],
       "mode": "manual",
       "preconditions": ["API35、API37；最终debug APK；书籍已停在非首页"],
-      "steps": ["首次打开阅读器，等待首次提示消失；横竖屏往返10轮；主动切换模式和方向；重复选择相同值；退出并重开"],
-      "expected": ["首次打开与实际模式/方向变化各提示一次；旋转、重组、重复选择不提示；重开新会话允许首次提示；页码保持；重复选择仍保存默认偏好"],
+      "steps": ["首次打开阅读器，等待首次提示消失；横竖屏往返10轮；主动切换模式和方向；重复选择相同值；退出重开、换书、重启应用；关闭模式与方向提示并立即退出设置，再进入阅读与切换方向；重新开启后再次进入"],
+      "expected": ["首次就绪和实际模式/方向变化各提示一次；同一配置跨书籍、会话和应用重启不重复；旋转、重组、语言变化、重复选择不提示；关闭后全部模式提示停用，重新开启后下一次进入或配置变化提示一次；页码保持；提示去重不阻止默认阅读偏好保存；其他通知不受影响"],
       "profiles": ["core", "reader", "premerge", "release"],
       "evidence": ["APK SHA256与设备/API", "旋转截图及实际方向", "提示出现/未出现证据", "前后页码"],
-      "automatedTests": ["ReaderModeHintEffectTest"]
+      "automatedTests": ["ReaderModeHintEffectTest", "ReaderModeHintSettingsIntegrationTest", "ReaderModeHintBrowserStorageTest", "ReaderModeHintPreferenceTest"]
     },
     {
       "id": "CONTINUOUS-01",
@@ -883,6 +883,32 @@
       "profiles": ["core", "premerge", "release"],
       "evidence": ["最终 APK SHA256与源码指纹", "各主入口、选项面板、查询和分页结果", "手机/平板、语言、字号与输入方式"],
       "automatedTests": ["BrowseHeaderLayoutTest", "BrowsePageHeaderTest", "DestinationResponseTest"]
+    },
+    {
+      "id": "READING-LAYOUT-01",
+      "title": "紧凑阅读页面与主从布局",
+      "area": "ui",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": ["最终 debug APK；受控书库含 EPUB、漫画、PDF、长标题与缺失卷册"],
+      "steps": ["检查首页、书库、书籍与单册详情、本地、搜索和设置；详情隐藏主导航，只保留一个阅读主操作；在丛书中切换列表与网格、筛选和分页；从宽屏详情进入阅读、返回并缩窄，再返回列表；检查 360dp、130% 字号、840dp、桌面宽度、浅色、深色、OLED、中英文"],
+      "expected": ["封面保持完整比例，头部和续读操作不重叠；缺失的远程卷册不抢占可读卷册的续读入口，已缓存副本仍可读；返回保留来源筛选与滚动位置；宽屏目录与详情并排，阅读进入独立页面；原有管理与批量入口保留"],
+      "profiles": ["core", "reader", "premerge", "release"],
+      "evidence": ["最终 APK SHA256与源码指纹", "页面、浮层、宽窄切换与大字号截图", "筛选、分页、返回与下载任务操作结果"],
+      "automatedTests": ["SeriesReadingHeaderLayoutTest", "SeriesReadingTargetTest", "ReaderHostNavigationTest", "BookAvailabilityTest", "ContinueReadingHeroLayoutTest", "KomeliaPageScaffoldTest"]
+    },
+    {
+      "id": "EPUB-CHAPTER-01",
+      "title": "从书籍详情进入指定 EPUB 章节",
+      "area": "reader",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": ["最终 debug APK；EPUB 2/3 含嵌套目录与片段定位；分别选择 Komga 和 TTU"],
+      "steps": ["在详情展开目录节点，再选择章节标题；检查目标正文和当前位置；关闭阅读后重进；打开设置与目录，检查主题样例、选中态、Escape/Back、键盘焦点和阅读位置"],
+      "expected": ["展开按钮只展开；章节标题进入对应资源及片段；选择章节本身不提前写入服务端进度，阅读后的保存保持原有规则；设置和目录使用应用材质，正文保留独立主题；选项可读且可操作"],
+      "profiles": ["reader", "premerge", "release"],
+      "evidence": ["章节 href、正文、返回与重进结果", "两种 EPUB 实现的原生画面", "设置和目录的键盘、字号与主题记录"],
+      "automatedTests": ["EpubChapterNavigationTest", "ttu-ebook-reader/tests/reader-settings.test.mjs"]
     }
   ]
 }

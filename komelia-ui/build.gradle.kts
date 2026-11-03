@@ -117,6 +117,7 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(compose.desktop.uiTestJUnit4)
+            implementation(projects.komeliaInfra.database.shared)
         }
 
         jvmMain.dependencies {

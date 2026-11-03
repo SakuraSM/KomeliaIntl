@@ -11,9 +11,11 @@ Komga-backed features need a reachable Komga server and account. Android and des
 
 ## Core changes in this fork
 
-### UI redesign
+### Reading interface
 
-The fork reworks navigation, Home groups, Library filters, search, Settings, and detail pages for phones and wide screens. Light, Dark, and OLED themes share the same spacing, color, shape, and motion rules. The UI also supports reduced motion and keyboard focus.
+Home puts the cover, reading progress, and Continue reading action together. Library and local pages provide persistent search and filters, and book details keep one primary reading action. Wide windows show a book list or grid beside the selected book and retain that selection when resized.
+
+The app supports Classic and Liquid Glass appearances, Light, Dark, and OLED themes, reduced transparency, reduced motion, and keyboard focus. Image, PDF, and EPUB reader controls share the app's appearance. TTU and Komga EPUB keep independent publication themes.
 
 ### Automatic remote and LAN switching
 
@@ -67,11 +69,17 @@ The standalone Android build uses the package ID `io.github.zhengningning.komeli
 
 The [upstream Releases](https://github.com/Snd-R/Komelia/releases), [Google Play package](https://play.google.com/store/apps/details?id=io.github.snd_r.komelia), [F-Droid package](https://f-droid.org/packages/io.github.snd_r.komelia/), and [AUR package](https://aur.archlinux.org/packages/komelia) contain upstream Komelia, not this fork's changes.
 
-## Android UI preview
+## Interface preview
 
-<img src="screenshots/app-overview-v0.18.13.png" alt="Komelia Android Home, Library filters, book details, and Settings" width="100%">
+These captures show the Simplified Chinese UI in the Android development build, using synthetic test books.
 
-The montage uses test content. The resource filename and source domain are redacted. It contains no account, server address, or test credentials.
+<img src="screenshots/app-overview-20261103.png" alt="Current Android Home, Library, book details, and local downloads" width="100%">
+
+Reader settings for TTU EPUB, comics/PDF, and Komga EPUB:
+
+<img src="screenshots/reader-overview-20261103.png" alt="TTU EPUB, comics and PDF, and Komga EPUB reader settings in the Android development build" width="100%">
+
+The [18 runtime screenshots](docs/verification/modern-ui-alignment-20261102-assets/screens/) also include light themes and Android wide layouts. See the [verification record](docs/verification/modern-ui-alignment-20261102.md) for build and device coverage.
 
 ## Build from source
 

@@ -3,6 +3,11 @@ package snd.komelia.ui.common.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
@@ -20,6 +25,9 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun SwitchWithLabel(
@@ -30,13 +38,15 @@ fun SwitchWithLabel(
     supportingTextColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp)
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    compactVisual: Boolean = false,
+    indicatorOffsetY: Dp = 0.dp,
 ) {
     val contentColor = if (enabled) LocalContentColor.current else LocalContentColor.current.copy(alpha = .4f)
     val actualSupportingTextColor = if (enabled) supportingTextColor else LocalContentColor.current.copy(alpha = .4f)
     val colors = SwitchDefaults.colors(
         checkedTrackColor = MaterialTheme.colorScheme.primary,
-        checkedThumbColor = MaterialTheme.colorScheme.onPrimary
+        checkedThumbColor = Color.White
     )
     CompositionLocalProvider(LocalContentColor provides contentColor) {
         Row(
@@ -56,11 +66,19 @@ fun SwitchWithLabel(
                     ProvideTextStyle(MaterialTheme.typography.bodyMedium) { supportingText() }
                 }
             }
-            Switch(
+            if (compactVisual) Box(Modifier.size(52.dp,48.dp).offset(x=3.dp,y=indicatorOffsetY),contentAlignment=Alignment.Center) {
+                Box(Modifier.size(44.dp,24.dp).background(
+                    if (checked) MaterialTheme.colorScheme.primary.copy(alpha=if(enabled)1f else .4f)
+                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha=if(enabled).5f else .2f),
+                    RoundedCornerShape(12.dp)).testTag("reader-switch-track")) {
+                    Box(Modifier.align(Alignment.CenterStart).offset(x=if(checked)22.dp else 2.dp).size(20.dp)
+                        .background(Color.White.copy(alpha=if(enabled)1f else .4f),CircleShape).testTag("reader-switch-thumb"))
+                }
+            } else Switch(
                 checked = checked,
                 onCheckedChange = null,
                 enabled = enabled,
-                colors = colors
+                colors = colors,
             )
         }
 

@@ -12,7 +12,15 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_books_ta
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -48,6 +56,9 @@ class SearchScreen(
         }
         LaunchedEffect(initialQuery) { vm.initialize(initialQuery) }
 
+        val bookActions = remember(vm) { vm.bookMenuActions() }
+        val seriesActions = remember(vm) { vm.seriesMenuActions() }
+        var showAll by rememberSaveable { mutableStateOf(true) }
         val navigator = LocalNavigator.currentOrThrow
 
         ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
@@ -57,7 +68,8 @@ class SearchScreen(
                         title = stringResource(Res.string.navbar_search),
                         query = vm.query,
                         onQueryChange = { vm.query = it },
-                        searchVisible = true,
+                        titleStyle = MaterialTheme.typography.headlineMedium.copy(fontSize = 31.5.sp, lineHeight = 38.sp),
+                        titleOffset = 5.dp,
                     ) { SearchViewOptions(vm) }
                 } else {
                     BrowsePageHeader(stringResource(Res.string.navbar_search)) { SearchViewOptions(vm) }
@@ -78,9 +90,13 @@ class SearchScreen(
 
                             SearchContent(
                                 query = vm.query,
+                                bookMenuActions = bookActions,
+                                seriesMenuActions = seriesActions,
                                 searchType = vm.currentTab,
                                 coverage = vm.currentCoverage,
-                                onSearchTypeChange = vm::onSearchTypeChange,
+                                onSearchTypeChange = { showAll = false; vm.onSearchTypeChange(it) },
+                                showAll = showAll, onShowAll = { showAll = true },
+                                seriesCoverage = vm.seriesCoverage, bookCoverage = vm.bookCoverage,
 
                                 seriesResults = vm.seriesResults,
                                 seriesCurrentPage = vm.seriesCurrentPage,
@@ -93,7 +109,7 @@ class SearchScreen(
                                 bookTotalPages = vm.bookTotalPages,
                                 onBookPageChange = vm::onBookPageChange,
                                 onBookClick = { navigator.push(bookScreen(it)) },
-                                showToolbar = false,
+                                showToolbar = true,
                             )
 
                         }

@@ -108,6 +108,9 @@ import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.ui.platform.cursorForHand
+import snd.komelia.ui.settings.MobileSettingsSection
+import snd.komelia.ui.settings.MobileSettingsScreen
+import snd.komelia.ui.settings.MobileReadingSettingsHome
 import snd.komelia.ui.settings.about.AboutSettingsScreen
 import snd.komelia.ui.settings.account.AccountSettingsScreen
 import snd.komelia.ui.settings.analysis.MediaAnalysisScreen
@@ -133,7 +136,7 @@ import snd.komga.client.user.KomgaUser
 import snd.webview.webviewIsAvailable
 
 @Composable
-fun SettingsNavigationMenu(
+internal fun SettingsNavigationMenu(
     hasMediaErrors: Boolean,
     komfEnabled: Boolean,
     updatesEnabled: Boolean,
@@ -145,6 +148,7 @@ fun SettingsNavigationMenu(
     contentColor: Color,
     modifier: Modifier = Modifier,
     header: @Composable () -> Unit = {},
+    mobileSection: MobileSettingsSection? = null,
 ) {
     val isAdmin = remember(user) { user?.roleAdmin() ?: true }
     val offlineAvailable = LocalOfflineAvailable.current
@@ -233,6 +237,16 @@ fun SettingsNavigationMenu(
         )
     }
 
+    if (LocalPlatform.current == MOBILE && currentScreen is MobileSettingsScreen && mobileSection == null) {
+        MobileReadingSettingsHome(onNavigation, offlineAvailable, webviewIsAvailable(), modifier)
+        return
+    }
+    val displayedAppEntries = when (mobileSection) {
+        MobileSettingsSection.CONNECTIONS -> appEntries.filter { it.screen is NetworkSettingsScreen }
+        MobileSettingsSection.ADVANCED -> appEntries.filter { it.screen is HomeGroupsSettingsScreen }
+        MobileSettingsSection.ABOUT -> appEntries.filter { it.screen is AppUpdatesScreen || it.screen is AboutSettingsScreen }
+        null -> appEntries
+    }
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()).padding(bottom = LocalNavigationBarInset.current),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -240,12 +254,13 @@ fun SettingsNavigationMenu(
         header()
         SettingsNavigationSection(
             title = stringResource(Res.string.settings_navigation_app_settings),
-            entries = appEntries,
+            entries = displayedAppEntries,
             contentColor = contentColor,
             onNavigation = onNavigation,
         )
 
         if (!isOffline) {
+            if (mobileSection == null || mobileSection == MobileSettingsSection.CONNECTIONS) {
             SettingsNavigationSection(
                 title = stringResource(Res.string.settings_navigation_user_settings),
                 entries = listOf(
@@ -265,7 +280,8 @@ fun SettingsNavigationMenu(
                 contentColor = contentColor,
                 onNavigation = onNavigation,
             )
-            if (isAdmin) {
+            }
+            if (isAdmin && (mobileSection == null || mobileSection == MobileSettingsSection.ADVANCED)) {
                 SettingsNavigationSection(
                     title = stringResource(Res.string.settings_navigation_server_settings),
                     entries = listOf(
@@ -294,7 +310,7 @@ fun SettingsNavigationMenu(
             if (isAdmin) {
                 val komfEntries = buildList {
                     add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_connection), Icons.Rounded.Link, KomfSettingsScreen(), currentScreen is KomfSettingsScreen))
-                    if (komfEnabled) {
+                    if ((mobileSection == null || mobileSection == MobileSettingsSection.ADVANCED) && komfEnabled) {
                         add(NavigationEntry(stringResource(Res.string.mangabaka_navigation), Icons.Rounded.Extension, KomfMangaBakaSettingsScreen(), currentScreen is KomfMangaBakaSettingsScreen))
                         add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_processing), Icons.Rounded.Tune, KomfProcessingSettingsScreen(KOMGA), currentScreen is KomfProcessingSettingsScreen))
                         add(NavigationEntry(stringResource(Res.string.settings_navigation_komf_providers), Icons.Rounded.Extension, KomfProvidersSettingsScreen(), currentScreen is KomfProvidersSettingsScreen))
@@ -311,6 +327,7 @@ fun SettingsNavigationMenu(
             }
         }
 
+        if (mobileSection == null || mobileSection == MobileSettingsSection.CONNECTIONS) {
         Surface(
             shape = RoundedCornerShape(16.dp),
             color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -323,6 +340,7 @@ fun SettingsNavigationMenu(
                 isSelected = false,
                 color = contentColor,
             )
+        }
         }
         if (showLogoutConfirmation) {
             ConfirmationDialog(

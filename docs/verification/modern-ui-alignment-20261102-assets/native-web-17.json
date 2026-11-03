@@ -1,0 +1,268 @@
+{
+  "viewport": {
+    "width": 390,
+    "height": 820,
+    "dpr": 2
+  },
+  "controls": {
+    "[data-komelia-reader-settings]": [
+      {
+        "x": 0,
+        "y": 250,
+        "width": 390,
+        "height": 570,
+        "padding": "0px",
+        "background": "rgba(20, 37, 56, 0.96)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "阅读设置字体大小100%点按翻页 点击屏幕左右两侧翻页阅读主题Aa日间Aa护眼Aa夜间阅读模式滚动分页栏数自动单栏双栏行间距100%页面边距窄1.00宽",
+        "visibility": "visible",
+        "display": "flex",
+        "selected": false
+      }
+    ],
+    "[data-komelia-reader-contents]": [
+      {
+        "x": -340,
+        "y": 0,
+        "width": 340,
+        "height": 820,
+        "padding": "0px",
+        "background": "rgba(20, 37, 56, 0.96)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "A short introductionThe reading journey",
+        "visibility": "visible",
+        "display": "flex",
+        "selected": false
+      }
+    ],
+    ".komelia-settings-header": [],
+    ".font-size-controls button": [],
+    ".theme-grid [data-komelia-theme-swatch]": [],
+    ".komelia-reading-settings>.h-full [data-komelia-toggle-option]": [],
+    ".navigation-chapter": [],
+    ".settings-header": [
+      {
+        "x": 1,
+        "y": 267,
+        "width": 388,
+        "height": 48,
+        "padding": "0px 8px 0px 10px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "阅读设置",
+        "visibility": "visible",
+        "display": "flex",
+        "selected": false
+      }
+    ],
+    ".komelia-settings-stepper .v-btn": [
+      {
+        "x": 207,
+        "y": 315,
+        "width": 48,
+        "height": 48,
+        "padding": "0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": "减小字号",
+        "title": null,
+        "text": "",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": false
+      },
+      {
+        "x": 323,
+        "y": 315,
+        "width": 48,
+        "height": 48,
+        "padding": "0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": "增大字号",
+        "title": null,
+        "text": "",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": false
+      },
+      {
+        "x": 207,
+        "y": 694,
+        "width": 48,
+        "height": 48,
+        "padding": "0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": "减小行距",
+        "title": null,
+        "text": "",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": false
+      },
+      {
+        "x": 323,
+        "y": 694,
+        "width": 48,
+        "height": 48,
+        "padding": "0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": "增大行距",
+        "title": null,
+        "text": "",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": false
+      }
+    ],
+    ".v-switch__track": [
+      {
+        "x": 311,
+        "y": 389.5,
+        "width": 52,
+        "height": 28,
+        "padding": "0px 5px",
+        "background": "rgb(112, 217, 255)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "",
+        "visibility": "visible",
+        "display": "flex",
+        "selected": false
+      }
+    ],
+    ".theme-choice .v-btn": [
+      {
+        "x": 27,
+        "y": 482,
+        "width": 104,
+        "height": 56,
+        "padding": "0px",
+        "background": "rgb(255, 255, 255)",
+        "ariaLabel": "日间",
+        "title": null,
+        "text": "Aa",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": "false"
+      },
+      {
+        "x": 143,
+        "y": 482,
+        "width": 104,
+        "height": 56,
+        "padding": "0px",
+        "background": "rgb(250, 244, 232)",
+        "ariaLabel": "护眼",
+        "title": null,
+        "text": "Aa",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": "true"
+      },
+      {
+        "x": 259,
+        "y": 482,
+        "width": 104,
+        "height": 56,
+        "padding": "0px",
+        "background": "rgb(0, 0, 0)",
+        "ariaLabel": "夜间",
+        "title": null,
+        "text": "Aa",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": "false"
+      }
+    ],
+    ".komelia-settings-segments .v-btn": [
+      {
+        "x": 126,
+        "y": 584,
+        "width": 118.5,
+        "height": 48,
+        "padding": "5px 0px 9px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "滚动",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": false
+      },
+      {
+        "x": 244.5,
+        "y": 584,
+        "width": 118.5,
+        "height": 48,
+        "padding": "5px 0px 9px",
+        "background": "rgb(112, 217, 255)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "分页",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": true
+      },
+      {
+        "x": 126,
+        "y": 641,
+        "width": 79,
+        "height": 48,
+        "padding": "5px 0px 9px",
+        "background": "rgb(112, 217, 255)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "自动",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": true
+      },
+      {
+        "x": 205,
+        "y": 641,
+        "width": 79,
+        "height": 48,
+        "padding": "5px 0px 9px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "单栏",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": false
+      },
+      {
+        "x": 284,
+        "y": 641,
+        "width": 79,
+        "height": 48,
+        "padding": "5px 0px 9px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "双栏",
+        "visibility": "visible",
+        "display": "grid",
+        "selected": false
+      }
+    ],
+    ".v-slider-track": [
+      {
+        "x": 154.5,
+        "y": 774,
+        "width": 184,
+        "height": 6,
+        "padding": "0px",
+        "background": "rgba(0, 0, 0, 0)",
+        "ariaLabel": null,
+        "title": null,
+        "text": "",
+        "visibility": "visible",
+        "display": "flex",
+        "selected": false
+      }
+    ]
+  }
+}

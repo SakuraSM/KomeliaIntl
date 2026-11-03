@@ -1,0 +1,22 @@
+{
+  "width": 390,
+  "height": 796,
+  "physicalWidth": 780,
+  "physicalHeight": 1735,
+  "safeTop": 95,
+  "safeBottom": 48,
+  "density": 320,
+  "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+  "rawSha256": "857c992c3ef3099a449e3dbd82922f4d331bf06a2756854deb3ab30254c03607",
+  "rawPixels": [
+    780,
+    1735
+  ],
+  "sourceTopLogicalPx": 24,
+  "sourceCanvas": [
+    390,
+    844
+  ],
+  "sourceSha256": "21ddb47079062504e013549ee3d019f4478b9a19f4da81e9e52594a8d5632a22",
+  "coverage": "复用丛书的全部控件与间距，使用浅色语义色"
+}

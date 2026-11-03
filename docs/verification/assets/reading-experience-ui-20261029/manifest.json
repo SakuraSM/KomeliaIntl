@@ -1,0 +1,19 @@
+{
+  "apkSha256": "a1b7c4620e2b6ab65137bfb6d5d742032e6390e3b52e2134e6eaa9bae417ea4b",
+  "environment": "API 35, Komelia_Regression_UI_20261028, synthetic library",
+  "screens": {
+    "chapter.png": "3f00839eb3a91b11199e67b469f7686927935059062e76a94cd4ccc71b3e68f5",
+    "comic.png": "d7197d23e36f6fc371511404982938ee422965ff81337ff366d46de5be0aaf8c",
+    "ebook.png": "61d3401bc40449feffa44ff5133a12e60eca022154ab550b05ff86b1fa9beb23",
+    "home.png": "2bd7b74aa6902d8a6bfecb6634a4466d2c7dc4fefbc7421b123c6d07abad2477",
+    "local.png": "d49aec5263f42439254b6658c9b2e0286fe89d88c50e76d42e376e1f560a1583",
+    "narrow-detail.png": "e8e10500f48e43290d75e93d57f0be0946ebffc233d1c0937c33fe53e9714fec",
+    "narrow-list.png": "dc54a0a745cb8ac269f38a378a51c7f0831cb319a06c125632de296d9c8dc85a",
+    "overview.png": "2484f801121e05988036411864eb37c0b14afb2e5e062bf357aa88c28ee6faa0",
+    "search.png": "e5d512bab961e9c38c1162dd4156b960ed4d9d01c8041d6b4ef5746c0135710c",
+    "series.png": "ae51c54344a4217aa4aa1e2109bc94487e677f446eff43cb9cd909d8086ad7a8",
+    "settings.png": "1bfc66533085aedd007c7ddf5b8f31deff62c457b103ab09f05ac807e2c31acb",
+    "wide.png": "61a248001a1be275d506aa79c50cfa503c8d32380569c3195fb759078c8efe61"
+  },
+  "overview": "Contact sheet assembled from native screenshots."
+}

@@ -1,0 +1,9 @@
+{
+  "artifact": "Komelia-Test-immersive-surfaces-20261030.apk",
+  "sha256": "a845bcbda259ccc3b95efc866c3a305ff6d8636449964b5a5f52788865b7a5fa",
+  "installedSha256": "a845bcbda259ccc3b95efc866c3a305ff6d8636449964b5a5f52788865b7a5fa",
+  "package": "io.github.zhengningning.komelia.debug",
+  "versionName": "0.31.1-debug",
+  "api": "37",
+  "avd": "Komelia_Regression_UI_20261028"
+}

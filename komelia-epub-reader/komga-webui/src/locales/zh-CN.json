@@ -109,7 +109,7 @@
       "double_no_cover": "双页（不含封面）",
       "single": "单页"
     },
-    "reader_settings": "阅读器设置",
+    "reader_settings": "阅读设置",
     "scale_type": {
       "continuous_original": "原始大小",
       "continuous_width": "适应宽度",
@@ -740,11 +740,16 @@
     "loading_book": "正在准备书籍…",
     "page_of": "第 {page} 页，共 {count} 页",
     "settings": {
+      "font_size": "字体大小",
+      "line_height": "行间距",
       "column_count": "栏数",
-      "layout": "布局",
+      "layout": "阅读模式",
       "layout_paginated": "分页",
       "layout_scroll": "滚动",
       "tap_to_turn": "点按翻页",
+      "tap_to_turn_hint": "点击屏幕左右两侧翻页",
+      "margin_narrow": "窄",
+      "margin_wide": "宽",
       "navigation_mode": "导航模式",
       "navigation_options": {
         "both": "全部",
@@ -757,6 +762,8 @@
     "shortcuts": {
       "cycle_pagination": "切换栏数",
       "cycle_viewing_theme": "切换阅读主题",
+      "line_height_decrease": "减小行距",
+      "line_height_increase": "增大行距",
       "font_size_decrease": "减小字号",
       "font_size_increase": "增大字号",
       "menus": "菜单",

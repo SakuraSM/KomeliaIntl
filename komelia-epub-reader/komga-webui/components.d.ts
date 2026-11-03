@@ -14,6 +14,7 @@ declare module 'vue' {
     EpubReader: typeof import('./src/components/EpubReader.vue')['default']
     EpubReaderToolbar: typeof import('./src/components/EpubReaderToolbar.vue')['default']
     IconFormatLineSpacingDown: typeof import('./src/components/IconFormatLineSpacingDown.vue')['default']
+    ReaderSettingsSheet: typeof import('./src/components/ReaderSettingsSheet.vue')['default']
     SettingsSelect: typeof import('./src/components/SettingsSelect.vue')['default']
     SettingsSwitch: typeof import('./src/components/SettingsSwitch.vue')['default']
     ShortcutHelpDialog: typeof import('./src/components/ShortcutHelpDialog.vue')['default']

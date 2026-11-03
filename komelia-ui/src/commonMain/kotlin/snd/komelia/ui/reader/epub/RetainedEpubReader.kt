@@ -7,8 +7,8 @@ internal class RetainedEpubReader {
     private var reader: EpubReaderState? = null
     private var selectedType: EpubReaderType? = null
 
-    suspend fun select(type: EpubReaderType, create: suspend () -> EpubReaderState): EpubReaderState {
-        if (selectedType == type) reader?.let { return it }
+    suspend fun select(type: EpubReaderType, replaceExisting: Boolean = false, create: suspend () -> EpubReaderState): EpubReaderState {
+        if (selectedType == type && !replaceExisting) reader?.let { return it }
         val replacement = create()
         reader?.dispose()
         reader = replacement

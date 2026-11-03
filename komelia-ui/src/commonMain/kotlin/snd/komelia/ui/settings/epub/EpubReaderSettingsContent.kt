@@ -7,6 +7,11 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.TextButton
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_text_settings_help
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_advanced
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -43,6 +48,20 @@ fun EpubReaderSettingsContent(
     onDisplaySettingsChange: (EpubDisplaySettings) -> Unit,
 ) {
     SettingsSection {
+        Text(stringResource(Res.string.reading_text_settings_help))
+        if (LocalPlatform.current == PlatformType.MOBILE) {
+            SwitchWithLabel(
+                checked = displaySettings.immersiveMode,
+                onCheckedChange = { onDisplaySettingsChange(displaySettings.copy(immersiveMode = it)) },
+                label = { Text(stringResource(Res.string.settings_epub_immersive)) },
+                supportingText = { Text(stringResource(Res.string.settings_epub_immersive_desc)) },
+            )
+
+        }
+
+        var advanced by rememberSaveable { mutableStateOf(false) }
+        TextButton(onClick = { advanced = !advanced }) { Text(stringResource(Res.string.reading_advanced)) }
+        if (advanced) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             DropdownChoiceMenu(
                 selectedOption = LabeledEntry(
@@ -67,13 +86,6 @@ fun EpubReaderSettingsContent(
             }
         }
 
-        if (LocalPlatform.current == PlatformType.MOBILE) {
-            SwitchWithLabel(
-                checked = displaySettings.immersiveMode,
-                onCheckedChange = { onDisplaySettingsChange(displaySettings.copy(immersiveMode = it)) },
-                label = { Text(stringResource(Res.string.settings_epub_immersive)) },
-                supportingText = { Text(stringResource(Res.string.settings_epub_immersive_desc)) },
-            )
             DropdownChoiceMenu(
                 selectedOption = LabeledEntry(displaySettings.topSpacingDp, stringResource(Res.string.settings_epub_spacing_value, displaySettings.topSpacingDp)),
                 options = listOf(0, 8, 16, 24, 32, 48).map { LabeledEntry(it, stringResource(Res.string.settings_epub_spacing_value, it)) },
@@ -81,11 +93,10 @@ fun EpubReaderSettingsContent(
                 label = { Text(stringResource(Res.string.settings_epub_top_spacing)) },
                 inputFieldModifier = Modifier.fillMaxWidth(),
             )
-        }
-
         when (readerType) {
             TTSU_EPUB -> Text(stringResource(Res.string.settings_epub_reader_type_ttsu_desc))
             KOMGA_EPUB -> Text(stringResource(Res.string.settings_epub_reader_type_komga_desc))
+        }
         }
     }
 }

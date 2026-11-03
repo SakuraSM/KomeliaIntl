@@ -28,6 +28,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.ReadingDesign
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.appRootNavigator
 import snd.komelia.ui.common.components.BrowsePageHeader
@@ -55,6 +56,7 @@ class MobileSettingsScreen(
             KomeliaPageScaffold(topBar = {
                 BrowsePageHeader(
                     title = stringResource(Res.string.settings_mobile_title),
+                    prominent = topLevel,
                     navigationIcon = if (topLevel) null else {
                         {
                             IconButton(onClick = { currentNavigator.pop() }) {
@@ -65,7 +67,7 @@ class MobileSettingsScreen(
                 )
 
             }) { topInset ->
-                Box(Modifier.fillMaxSize().padding(top = topInset + layout.controlSpacing)) {
+                Box(Modifier.fillMaxSize().padding(top = topInset + 2.dp)) {
                     SettingsNavigationMenu(
                         header = {
                             if (topLevel) Column(
@@ -88,7 +90,7 @@ class MobileSettingsScreen(
                         contentColor = MaterialTheme.colorScheme.surface,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = layout.pageHorizontalPadding)
+                            .padding(horizontal = ReadingDesign.browseInset)
                     )
                 }
             }

@@ -182,6 +182,12 @@ class ViewModelFactory(
         appNotifications = dependencies.appNotifications,
         taskEmitter = dependencies.offlineDependencies?.taskEmitter,
         cardWidthFlow = getGridCardWidth(),
+        downloadsFactory = { scope -> dependencies.offlineDependencies?.let { offline ->
+            snd.komelia.ui.settings.offline.downloads.OfflineDownloadsState(
+                downloadEvents = offline.bookDownloadEvents, platformContext = dependencies.coilContext,
+                taskEmitter = offline.taskEmitter, tasksRepository = offline.repositories.tasksRepository,
+                settingsRepository = offline.repositories.offlineSettingsRepository, coroutineScope = scope)
+        } },
     )
 
     fun getFilterEditViewModel(homeFilters: List<HomeFilterData>?): FilterEditViewModel {
@@ -437,6 +443,7 @@ class ViewModelFactory(
 
 
     fun getSearchViewModel() = SearchViewModel(
+        taskEmitter = dependencies.offlineDependencies?.taskEmitter,
         seriesApi = komgaApi.seriesApi,
         bookApi = komgaApi.bookApi,
         offlineSeriesApi = dependencies.offlineDependencies?.komgaApi?.seriesApi,
@@ -698,11 +705,14 @@ class ViewModelFactory(
         )
     }
 
+    fun getBookReadingNavigationState(book: KomeliaBook, scope: kotlinx.coroutines.CoroutineScope) =
+        snd.komelia.ui.book.BookReadingNavigationState(komgaApiFor(book).bookApi, book, scope)
+
     fun getEpubReaderViewModel(
         bookId: KomgaBookId,
         bookSiblingsContext: BookSiblingsContext,
         book: KomeliaBook? = null,
-        markReadProgress: Boolean = true
+        markReadProgress: Boolean = true,
     ): EpubReaderViewModel {
         val selectedApi = komgaApiFor(book)
         return EpubReaderViewModel(

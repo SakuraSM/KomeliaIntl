@@ -32,6 +32,8 @@ class ExposedImageReaderSettingsRepository(database: Database) : ExposedReposito
                     ImageReaderSettings(
                         defaultColorCorrection = it[ImageReaderSettingsTable.defaultColorCorrection],
                         readerType = ReaderType.valueOf(it[ImageReaderSettingsTable.readerType]),
+                        readerModeHintsEnabled = it[ImageReaderSettingsTable.readerModeHintsEnabled],
+                        lastReaderModeHintSignature = it[ImageReaderSettingsTable.lastReaderModeHintSignature],
                         stretchToFit = it[ImageReaderSettingsTable.stretchToFit],
                         pagedScaleType = LayoutScaleType.valueOf(it[ImageReaderSettingsTable.pagedScaleType]),
                         pagedReadingDirection = PagedReadingDirection.valueOf(it[ImageReaderSettingsTable.pagedReadingDirection]),
@@ -66,6 +68,8 @@ class ExposedImageReaderSettingsRepository(database: Database) : ExposedReposito
                 it[bookId] = defaultBookId
                 it[defaultColorCorrection] = settings.defaultColorCorrection
                 it[readerType] = settings.readerType.name
+                it[readerModeHintsEnabled] = settings.readerModeHintsEnabled
+                it[lastReaderModeHintSignature] = settings.lastReaderModeHintSignature
                 it[stretchToFit] = settings.stretchToFit
                 it[pagedScaleType] = settings.pagedScaleType.name
                 it[pagedReadingDirection] = settings.pagedReadingDirection.name

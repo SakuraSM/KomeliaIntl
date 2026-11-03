@@ -24,19 +24,20 @@ class ImageReaderSettingsScreen : Screen {
         val scope = rememberCoroutineScope()
 
         SettingsScreenContainer(stringResource(Res.string.settings_image_title)) {
-            SettingsSection {
-                DefaultColorCorrectionSettings(vm.defaultColorCorrection) {
-                    scope.launch { vm.defaultColorCorrection.initialize() }
-                }
-            }
             ImageReaderSettingsContent(
                 loadThumbnailPreviews = vm.loadThumbnailsPreview.collectAsState().value,
                 onLoadThumbnailPreviewsChange = vm::onLoadThumbnailsPreviewChange,
                 volumeKeysNavigation = vm.volumeKeysNavigation.collectAsState().value,
                 onVolumeKeysNavigationChange = vm::onVolumeKeysNavigationChange,
+                readerModeHintsEnabled = vm.readerModeHintsEnabled.collectAsState().value,
+                isSavingReaderModeHints = vm.isSavingReaderModeHints.collectAsState().value,
+                onReaderModeHintsChange = vm::onReaderModeHintsChange,
 
                 onCacheClear = vm::onClearImageCache,
                 onnxRuntimeSettingsState = vm.onnxRuntimeSettingsState,
+                advancedContent = { SettingsSection { DefaultColorCorrectionSettings(vm.defaultColorCorrection) {
+                    scope.launch { vm.defaultColorCorrection.initialize() }
+                } } },
             )
         }
     }

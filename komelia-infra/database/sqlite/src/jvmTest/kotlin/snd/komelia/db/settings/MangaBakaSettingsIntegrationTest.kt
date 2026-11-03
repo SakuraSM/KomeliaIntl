@@ -4,7 +4,6 @@ import java.sql.DriverManager
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.flywaydb.core.Flyway
-import org.jetbrains.exposed.v1.jdbc.Database
 import snd.komelia.db.AppSettings
 import snd.komelia.db.ImageReaderSettings
 import snd.komelia.db.KomeliaDatabase
@@ -29,9 +28,8 @@ class MangaBakaSettingsIntegrationTest {
         val checksums = migrationChecksums(url)
         val preferences = AppSettings(appLanguage = AppLanguage.ZH_CN, appTheme = AppTheme.DARKER)
         val reader = ImageReaderSettings(cropBorders = true, panelPrerenderCount = 2)
-        val oldDatabase = Database.connect(url, driver = "org.sqlite.JDBC")
         saveVersion17AppSettings(url, preferences)
-        ExposedImageReaderSettingsRepository(oldDatabase).save(reader)
+        saveVersion17ImageReaderSettings(url, reader)
         DriverManager.getConnection(url).use { connection ->
             connection.createStatement().use { statement ->
                 statement.executeUpdate("INSERT INTO KomfSettings (version, enabled, remote_url) VALUES (1, 1, 'https://metadata.invalid')")

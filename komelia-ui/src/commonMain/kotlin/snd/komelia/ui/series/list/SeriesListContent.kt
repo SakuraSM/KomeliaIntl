@@ -83,6 +83,7 @@ fun SeriesListContent(
 
     minSize: Dp,
     showToolbar: Boolean = true,
+    isList: Boolean = false,
 ) {
     Column {
         if (editMode) {
@@ -95,6 +96,8 @@ fun SeriesListContent(
         }
 
         SeriesLazyCardGrid(
+            hasBeforeContent = showToolbar && !editMode,
+            isList = isList,
             series = series,
             onSeriesClick = if (editMode) onSeriesSelect else onSeriesClick,
             seriesMenuActions = if (editMode) null else seriesActions,

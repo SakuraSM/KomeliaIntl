@@ -1,0 +1,301 @@
+{
+  "date": "2026-10-29",
+  "direction": "Existing dark frosted glass main, cool-white counterparts, compact technology aesthetic",
+  "status": "Visual proposal; application layout not implemented",
+  "workflow": {
+    "assets": "Built-in image_gen for fictional covers and a glass material reference",
+    "screens": "Deterministic HTML/CSS components rendered in Ego Chromium with CDP Page.captureScreenshot",
+    "sizing": "Device viewport set to logical dimensions; integer deviceScaleFactor; no image resizing or stretching",
+    "sources": [
+      "preview/index.html",
+      "preview/styles.css",
+      "preview/components.js",
+      "preview/pages.js",
+      "preview/sheets.js",
+      "preview/app.js"
+    ]
+  },
+  "imageGenAssets": [
+    {
+      "output": "assets/reading-boundaries-cover.png",
+      "sourceGeneration": "exec-e8601f87-1b60-4d04-b6a3-b182a79a3c74.png",
+      "prompt": "prompts/reading-boundaries-cover.txt"
+    },
+    {
+      "output": "assets/glass-material-reference.png",
+      "sourceGeneration": "exec-a3db537e-8aed-47f5-89ea-f85663579bce.png",
+      "prompt": "prompts/glass-material-reference.txt"
+    },
+    {
+      "output": "assets/rainy-tokyo-cover.png",
+      "origin": "Existing generated fictional cover from this design task"
+    },
+    {
+      "output": "assets/komelia-icon.png",
+      "origin": "Repository komelia-ui Compose resource"
+    }
+  ],
+  "screens": [
+    {
+      "id": "01",
+      "title": "首页",
+      "screen": "home",
+      "output": "screens/01-home.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "8083103ba4b348b7045ed469ae0f0a4a892ccfe37605a6a84720dcd33bb2ef73"
+    },
+    {
+      "id": "02",
+      "title": "书库 / 丛书总览",
+      "screen": "library",
+      "output": "screens/02-library.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "72c9494536b673fef7906730ff37b56f79287acb8a34b95257a6e294cb12feac"
+    },
+    {
+      "id": "03",
+      "title": "丛书卷册",
+      "screen": "series",
+      "output": "screens/03-series-detail.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "574faf4d2e736601d07ec31c2d58b2e822968e7859cb6a6040a382fdeeddf3d5"
+    },
+    {
+      "id": "04",
+      "title": "文字书详情",
+      "screen": "ebook",
+      "output": "screens/04-ebook-detail.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "7bc5a30883a35b224ff0539e87dcdbd51b9c7cbb38dac8ee8907ffbaf77022b1"
+    },
+    {
+      "id": "05",
+      "title": "漫画单册详情",
+      "screen": "comic",
+      "output": "screens/05-comic-detail.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "5e98d149c0712086c15e2b6e9e9c6b8242cb451af5488458f43ffb7f4870a11e"
+    },
+    {
+      "id": "06",
+      "title": "本地与下载",
+      "screen": "local",
+      "output": "screens/06-local.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "98c72703f16f444a8441276f76899442ecaf9c013355927eb7eed8bf6aa22982"
+    },
+    {
+      "id": "07",
+      "title": "搜索",
+      "screen": "search",
+      "output": "screens/07-search.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "58186e5043c69cd04889608869e29e9d2b46439f9e6de590a35aa41c90a79f31"
+    },
+    {
+      "id": "08",
+      "title": "设置",
+      "screen": "settings",
+      "output": "screens/08-settings.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "f395189849da5b278ffc760a6097cdc66496f4f9559cf1c161c5c794080d18e6"
+    },
+    {
+      "id": "09",
+      "title": "筛选面板",
+      "screen": "filter",
+      "output": "screens/09-filter.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "44935f4203b4474c6b9b030d4c498882fadf088454c3d569368ce1807b2f467e"
+    },
+    {
+      "id": "10",
+      "title": "EPUB 目录",
+      "screen": "toc",
+      "output": "screens/10-toc.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "d5d5ebca78e6540e467353647e76afb5de4dfee07662d6eae71d28931004b791"
+    },
+    {
+      "id": "11",
+      "title": "文字阅读设置",
+      "screen": "text-settings",
+      "output": "screens/11-text-settings.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "e893c5a7e68c906c9a1c64504fb8d9447e88f89cc13dd0f585020ed669eb8702"
+    },
+    {
+      "id": "12",
+      "title": "漫画 / PDF 设置",
+      "screen": "image-settings",
+      "output": "screens/12-image-settings.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "3185669f27bbf686c5fdd5f6819cf48d7240b077e24290694ea56922f4a9fa30"
+    },
+    {
+      "id": "13",
+      "title": "文字书 · 冷白",
+      "screen": "ebook-light",
+      "output": "screens/13-ebook-light.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "3e1f49f756c510783ee8fe2ea4d43dfe44a4064b90597a8c3d9493b54d8f4034"
+    },
+    {
+      "id": "14",
+      "title": "丛书 · 冷白",
+      "screen": "series-light",
+      "output": "screens/14-series-light.png",
+      "logicalSize": [
+        390,
+        844
+      ],
+      "pixelSize": [
+        1170,
+        2532
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "229f4be3499b1709fcb46a169caaa3107a40138ce818bdd239aa954babb3452b"
+    },
+    {
+      "id": "15",
+      "title": "平板",
+      "screen": "tablet",
+      "output": "screens/15-tablet.png",
+      "logicalSize": [
+        834,
+        1194
+      ],
+      "pixelSize": [
+        2502,
+        3582
+      ],
+      "deviceScaleFactor": 3,
+      "sha256": "4c511e5119375044d9b946c54303fd2bd2c70e9937ec48f53a21ffa18c6a59c3"
+    },
+    {
+      "id": "16",
+      "title": "桌面",
+      "screen": "desktop",
+      "output": "screens/16-desktop.png",
+      "logicalSize": [
+        1440,
+        1024
+      ],
+      "pixelSize": [
+        2880,
+        2048
+      ],
+      "deviceScaleFactor": 2,
+      "sha256": "ae700a42361ce98714aaf2f4f091c00cc68978469d14eed9c281af9f82c9cf10"
+    }
+  ],
+  "quality": {
+    "reviewed": "All 16 images visually inspected, with a corrected cold-white text inheritance defect and compact cover typography",
+    "layout": "360 logical width and 130% type scale: no measured horizontal overflow",
+    "runtime": "These visuals do not establish native Compose accessibility, gestures or performance"
+  }
+}

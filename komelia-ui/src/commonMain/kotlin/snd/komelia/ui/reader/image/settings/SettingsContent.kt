@@ -2,6 +2,11 @@ package snd.komelia.ui.reader.image.settings
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.HorizontalDivider
@@ -18,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.LayoutDirection.Ltr
 import androidx.compose.ui.unit.LayoutDirection.Rtl
 import androidx.compose.ui.unit.dp
@@ -48,6 +54,8 @@ import snd.komelia.ui.reader.image.continuous.ContinuousReaderState
 import snd.komelia.ui.reader.image.paged.PagedReaderState
 import snd.komelia.ui.reader.image.panels.PanelsReaderState
 import snd.komelia.ui.settings.imagereader.onnxruntime.OnnxRuntimeSettingsState
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.settings.model.AppSurfaceStyle
 
 @Composable
 fun BoxScope.SettingsOverlay(
@@ -64,6 +72,8 @@ fun BoxScope.SettingsOverlay(
     ohShowHelpDialogChange: (Boolean) -> Unit,
     onSettingsDialogVisibilityChange: (Boolean) -> Unit,
     pageShareAction: PageShareAction? = null,
+    modeHintPreference: snd.komelia.ui.settings.imagereader.ReaderModeHintPreference? = null,
+    modeActions: ReaderModeActions? = null,
 ) {
     if (!show) return
     val windowWidth = LocalWindowWidth.current
@@ -87,8 +97,12 @@ fun BoxScope.SettingsOverlay(
     if ((windowWidth == COMPACT || windowWidth == MEDIUM) && platform != DESKTOP) {
         BottomSheetSettingsOverlay(
             book = book,
+            modeHintPreference = modeHintPreference,
+            volumeKeys = commonReaderState.volumeKeysNavigation.collectAsState().value,
+            onVolumeKeysChange = commonReaderState::onVolumeKeysNavigationChange,
+            onPagedModeChoice = modeActions?.selectPagedLayout,
             readerType = readerType,
-            onReaderTypeChange = commonReaderState::onReaderTypeChange,
+            onReaderTypeChange = modeActions?.selectType ?: { type -> commonReaderState.onReaderTypeChange(type) },
             isColorCorrectionsActive = isColorCorrectionsActive,
             onColorCorrectionClick = onColorCorrectionClick,
             availableUpsamplingModes = availableUpsamplingModes,
@@ -124,8 +138,11 @@ fun BoxScope.SettingsOverlay(
     } else {
         SettingsSideMenuOverlay(
             book = book,
+            modeHintPreference = modeHintPreference,
+            volumeKeys = commonReaderState.volumeKeysNavigation.collectAsState().value,
+            onVolumeKeysChange = commonReaderState::onVolumeKeysNavigationChange,
             readerType = readerType,
-            onReaderTypeChange = commonReaderState::onReaderTypeChange,
+            onReaderTypeChange = modeActions?.selectType ?: { type -> commonReaderState.onReaderTypeChange(type) },
             isColorCorrectionsActive = isColorCorrectionsActive,
             onColorCorrectionClick = onColorCorrectionClick,
             pageShareAction = pageShareAction,
@@ -163,6 +180,11 @@ fun BoxScope.SettingsOverlay(
             onShowHelpMenu = { ohShowHelpDialogChange(true) },
         )
     }
+    val showBadge = (windowWidth == COMPACT || windowWidth == MEDIUM) && platform != DESKTOP &&
+        LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
+    val badgeModifier = Modifier.align(Alignment.TopEnd)
+        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+        .padding(top=58.dp*LocalDensity.current.fontScale.coerceAtLeast(1f),end=12.dp)
     when (readerType) {
         PAGED -> {
             val readingDirection = pagedReaderState.readingDirection.collectAsState().value
@@ -172,14 +194,20 @@ fun BoxScope.SettingsOverlay(
                     PagedReadingDirection.RIGHT_TO_LEFT -> Rtl
                 }
             }
+            val spreads = pagedReaderState.pageSpreads.collectAsState().value
+            val spreadIndex = pagedReaderState.currentSpreadIndex.collectAsState().value
             PageSpreadProgressSlider(
-                pageSpreads = pagedReaderState.pageSpreads.collectAsState().value,
-                currentSpreadIndex = pagedReaderState.currentSpreadIndex.collectAsState().value,
+                pageSpreads = spreads,
+                currentSpreadIndex = spreadIndex,
                 onPageNumberChange = pagedReaderState::onPageChange,
                 show = show,
                 layoutDirection = layoutDirection,
                 modifier = Modifier.align(Alignment.BottomStart)
             )
+            if (showBadge) {
+                val spread = spreads.getOrNull(spreadIndex).orEmpty().let { if(layoutDirection==Rtl)it.reversed()else it }
+                ImageReaderProgressBadge(spread.map { it.pageNumber }.joinToString("-"),spreads.sumOf { it.size },badgeModifier)
+            }
         }
 
         PANELS -> {
@@ -201,6 +229,7 @@ fun BoxScope.SettingsOverlay(
                 layoutDirection = layoutDirection,
                 modifier = Modifier.align(Alignment.BottomStart)
             )
+            if (showBadge) ImageReaderProgressBadge(pages.getOrNull(currentIndex.page)?.pageNumber?.toString(),pages.size,badgeModifier)
 
         }
 
@@ -214,14 +243,17 @@ fun BoxScope.SettingsOverlay(
                 }
             }
 
+            val pages = continuousReaderState.currentBookPages.collectAsState(emptyList()).value
+            val pageIndex = continuousReaderState.currentBookPageIndex.collectAsState(0).value
             ProgressSlider(
-                pages = continuousReaderState.currentBookPages.collectAsState(emptyList()).value,
-                currentPageIndex = continuousReaderState.currentBookPageIndex.collectAsState(0).value,
+                pages = pages,
+                currentPageIndex = pageIndex,
                 onPageNumberChange = { coroutineScope.launch { continuousReaderState.scrollToBookPage(it + 1) } },
                 show = show,
                 layoutDirection = layoutDirection,
                 modifier = Modifier.align(Alignment.BottomStart)
             )
+            if (showBadge) ImageReaderProgressBadge(pages.getOrNull(pageIndex)?.pageNumber?.toString(),pages.size,badgeModifier)
 
         }
     }

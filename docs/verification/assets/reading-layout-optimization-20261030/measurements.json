@@ -1,0 +1,163 @@
+{
+  "unit": "logical dp / CSS px; font size uses sp",
+  "tolerance": "about ±2 logical px for visible geometry",
+  "scale": 3,
+  "artifactSha256": "f653748fb7e43e02cd59e2a9fd3d4dc1a9bc8af844e4e4885114e8ff69b067e3",
+  "findings": [
+    {
+      "id": "M01",
+      "area": "共享顶栏",
+      "metric": "安全区后的顶栏上外边距",
+      "expected": "12",
+      "step": 1,
+      "before": "8",
+      "after": "12",
+      "evidence": "顶栏可见上边界 y175，系统区结束 y139，差 36 物理像素。",
+      "deltaAfter": "0"
+    },
+    {
+      "id": "M02",
+      "area": "详情顶栏",
+      "metric": "书籍详情标题墨迹中心 x",
+      "expected": "195",
+      "step": 5,
+      "before": "108.2",
+      "after": "195.17",
+      "evidence": "标题亮色墨迹 x492 到 678，中心换算为 195.17dp。",
+      "deltaAfter": "+0.17"
+    },
+    {
+      "id": "M03",
+      "area": "书库封面",
+      "metric": "封面容器宽 × 高",
+      "expected": "88 × 132",
+      "step": 2,
+      "before": "111.3 × 158.3",
+      "after": "88 × 132",
+      "evidence": "封面边界 x83 到 347，y415 到 811。",
+      "deltaAfter": "0 × 0"
+    },
+    {
+      "id": "M04",
+      "area": "书库标题",
+      "metric": "同一排单行相对双行标题的顶部差",
+      "expected": "0",
+      "step": 2,
+      "before": "9",
+      "after": "0",
+      "evidence": "同排三项标题的原生文本框均从 y829 开始。",
+      "deltaAfter": "0"
+    },
+    {
+      "id": "M05",
+      "area": "丛书头部",
+      "metric": "合集切换层额外高度",
+      "expected": "0",
+      "step": 3,
+      "before": "49",
+      "after": "0",
+      "evidence": "切换入口与排序、筛选、显示共用一行；合集已实际切换。",
+      "deltaAfter": "0"
+    },
+    {
+      "id": "M06",
+      "area": "漫画详情",
+      "metric": "简介标题盒到正文盒的间距",
+      "expected": "8",
+      "step": 5,
+      "before": "16",
+      "after": "8.0",
+      "evidence": "原生标题框底 y1060，正文框顶 y1084。",
+      "deltaAfter": "0"
+    },
+    {
+      "id": "M07",
+      "area": "阅读主操作",
+      "metric": "主点击区域中线 x",
+      "expected": "195",
+      "step": 5,
+      "before": "170.5",
+      "after": "195.0",
+      "evidence": "主操作点击盒 x48 到 1122，宽 358dp；无痕入口移至更多。",
+      "deltaAfter": "0"
+    },
+    {
+      "id": "M08",
+      "area": "图片设置",
+      "metric": "正文左边距",
+      "expected": "20",
+      "step": 12,
+      "before": "10",
+      "after": "20",
+      "evidence": "标题与阅读模式均从 x60 开始。",
+      "deltaAfter": "0"
+    },
+    {
+      "id": "M09",
+      "area": "图片模式",
+      "metric": "三项模式的单项宽度",
+      "expected": "110.7",
+      "step": 12,
+      "before": "60",
+      "after": "111.33",
+      "evidence": "三个点击盒为 x72..406、418..752、764..1098，均高 144 物理像素。",
+      "deltaAfter": "+0.63"
+    },
+    {
+      "id": "M10",
+      "area": "平板侧栏",
+      "metric": "导航侧栏整体占宽",
+      "expected": "80",
+      "step": 15,
+      "before": "96",
+      "after": "80",
+      "evidence": "侧栏整体边界 x0 到 240，包含外边距。",
+      "deltaAfter": "0"
+    },
+    {
+      "id": "M11",
+      "area": "展开侧栏",
+      "metric": "1440px 导航侧栏整体占宽",
+      "expected": "180",
+      "step": 16,
+      "before": "196",
+      "after": "180",
+      "evidence": "侧栏整体边界 x0 到 540，包含外边距。",
+      "deltaAfter": "0"
+    },
+    {
+      "id": "M12",
+      "area": "宽屏封面",
+      "metric": "1440px 详情封面宽 × 高",
+      "expected": "132 × 198",
+      "step": 16,
+      "before": "152 × 228",
+      "after": "132 × 198",
+      "evidence": "1440dp 封面边界 x1827..2223、y445..1039；平板仍为 112 × 168。",
+      "deltaAfter": "0 × 0"
+    },
+    {
+      "id": "M13",
+      "area": "宽屏阅读条",
+      "metric": "相对右详情栏的水平外边距",
+      "expected": "平板 24；宽屏 48",
+      "step": 16,
+      "before": "0；0",
+      "after": "24 / 48",
+      "evidence": "834dp 右栏 x1105，浮条 x1177；1440dp 右栏 x1683，浮条 x1827。右侧分别留 72、144 物理像素。",
+      "deltaAfter": "0 / 0"
+    },
+    {
+      "id": "M14",
+      "area": "首页分组标题",
+      "metric": "最近阅读分组标题的字体尺寸",
+      "expected": "18",
+      "step": 1,
+      "before": "22",
+      "after": "18sp",
+      "evidence": "局部 TextStyle 明确为 18sp；截图确认标题，Android 文本框高度不当作字号。",
+      "deltaAfter": "0sp"
+    }
+  ],
+  "scope": "Measured boxes, visible boundaries and declared font size; no global raster or font-ink equivalence claim."
+}

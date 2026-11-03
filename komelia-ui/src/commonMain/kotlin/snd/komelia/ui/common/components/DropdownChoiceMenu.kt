@@ -16,6 +16,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -59,6 +61,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -110,6 +113,7 @@ fun <T> DropdownChoiceMenu(
     inputFieldColor: Color = MaterialTheme.colorScheme.surfaceVariant,
     contentPadding: PaddingValues = PaddingValues(10.dp),
     enabled: Boolean = true,
+    paintedHeight: Dp? = null,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val anchorFocus = rememberMenuAnchorFocus(isExpanded)
@@ -138,7 +142,8 @@ fun <T> DropdownChoiceMenu(
             label = label,
             trailingIcon = { Icon(if (isExpanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null, Modifier.padding(end = 8.dp)) },
             color = inputFieldColor,
-            contentPadding = contentPadding
+            contentPadding = contentPadding,
+            paintedHeight = paintedHeight,
         )
 
         val scrollState = rememberScrollState()
@@ -177,7 +182,8 @@ fun <T> DropdownMultiChoiceMenu(
     label: @Composable (() -> Unit)? = null,
     placeholder: String? = null,
     inputFieldColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-    contentPadding: PaddingValues = PaddingValues(10.dp)
+    contentPadding: PaddingValues = PaddingValues(10.dp),
+    paintedHeight: Dp? = null,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val anchorFocus = rememberMenuAnchorFocus(isExpanded)
@@ -211,7 +217,8 @@ fun <T> DropdownMultiChoiceMenu(
             label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
             color = inputFieldColor,
-            contentPadding = contentPadding
+            contentPadding = contentPadding,
+            paintedHeight = paintedHeight,
         )
 
         val scrollState = rememberScrollState()
@@ -242,24 +249,27 @@ private fun InputField(
     label: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit),
     color: Color,
-    contentPadding: PaddingValues = PaddingValues(10.dp)
+    contentPadding: PaddingValues = PaddingValues(10.dp),
+    paintedHeight: Dp? = null,
 ) {
     val focused by interactionSource.collectIsFocusedAsState()
     val shape = MaterialTheme.shapes.small
+    val fieldBorder = BorderStroke(if (focused) 2.dp else 1.dp,
+        if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
     Surface(
         shadowElevation = 0.dp,
         shape = shape,
-        border = BorderStroke(if (focused) 2.dp else 1.dp,
-            if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
-        color = color,
+        border = if (paintedHeight == null) fieldBorder else null,
+        color = if (paintedHeight == null) color else Color.Transparent,
         modifier = Modifier
             .clip(shape)
             .cursorForHand()
             .indication(interactionSource, LocalIndication.current)
             .hoverable(interactionSource)
             .then(modifier)
+            .then(if (paintedHeight != null) Modifier.heightIn(min = 48.dp) else Modifier)
     ) {
-        Row(
+        val field: @Composable () -> Unit = { Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.horizontalScroll(rememberScrollState())
         ) {
@@ -276,6 +286,9 @@ private fun InputField(
 
             Spacer(Modifier.weight(1f))
             trailingIcon()
+        } }
+        if (paintedHeight == null) field() else Box {
+            Surface(Modifier.fillMaxWidth().height(paintedHeight).testTag("compact-dropdown-paint"), color = color, shape = shape, border = fieldBorder) { field() }
         }
     }
 }
@@ -379,7 +392,8 @@ fun <T> FilterDropdownChoice(
     options: List<LabeledEntry<T>>,
     onOptionChange: (LabeledEntry<T>) -> Unit,
     label: String?,
-    modifier: Modifier
+    modifier: Modifier,
+    paintedHeight: Dp? = null,
 ) {
     DropdownChoiceMenu(
         selectedOption = selectedOption,
@@ -389,7 +403,8 @@ fun <T> FilterDropdownChoice(
         label = label?.let { { Text(it) } },
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
         modifier = modifier.clip(RoundedCornerShape(5.dp)),
-        inputFieldModifier = Modifier.fillMaxWidth()
+        inputFieldModifier = Modifier.fillMaxWidth(),
+        paintedHeight = paintedHeight,
     )
 }
 
@@ -400,7 +415,8 @@ fun <T> FilterDropdownMultiChoice(
     onOptionSelect: (LabeledEntry<T>) -> Unit,
     label: String? = null,
     placeholder: String? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    paintedHeight: Dp? = null,
 ) {
     DropdownMultiChoiceMenu(
         selectedOptions = selectedOptions,
@@ -411,7 +427,8 @@ fun <T> FilterDropdownMultiChoice(
         placeholder = placeholder,
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
         modifier = modifier.clip(RoundedCornerShape(5.dp)),
-        inputFieldModifier = Modifier.fillMaxWidth()
+        inputFieldModifier = Modifier.fillMaxWidth(),
+        paintedHeight = paintedHeight,
     )
 }
 

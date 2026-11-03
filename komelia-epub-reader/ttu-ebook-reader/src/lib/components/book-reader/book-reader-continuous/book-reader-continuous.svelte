@@ -136,6 +136,8 @@
   let scrollWhenReady: boolean;
 
   let prevIntendedCharCount = 0;
+  let initialChapterTarget: HTMLElement | undefined;
+  let initialChapterAdjustment = 0;
 
   let isResizeScroll = false;
 
@@ -337,6 +339,13 @@
     if (!targetElement) {
       const normalizedChapterId = chapterId.split('#')[0];
       targetElement = document.getElementById(normalizedChapterId);
+      const fragment = chapterId.slice(normalizedChapterId.length + 1);
+      if (targetElement && fragment) {
+        let anchorId = fragment;
+        try { anchorId = decodeURIComponent(fragment); } catch { /* Keep a malformed fragment literal. */ }
+        const anchor = Array.from(targetElement.querySelectorAll<HTMLElement>('[id]')).find(node => node.id === anchorId);
+        if (anchor) return anchor;
+      }
     }
 
     if (!targetElement) {
@@ -350,9 +359,8 @@
       : targetElement;
   }
 
-  function scrollToChapterElement(targetElement: HTMLElement) {
+  function scrollToChapterElement(targetElement: HTMLElement, adjustment = getScrollAdjustmentOffset()) {
     const rect = targetElement.getBoundingClientRect();
-    const adjustment = getScrollAdjustmentOffset();
 
     willNavigate = true;
 
@@ -395,15 +403,19 @@
   combineLatest([width$, height$])
     .pipe(
       filter(() => autoPositionOnResize),
-      skip(1),
       map(([w, h]) => (verticalMode ? h : w)),
       distinctUntilChanged(),
+      skip(1),
       debounceTime(10),
       observeOn(animationFrameScheduler),
       takeUntil(destroy$)
     )
     .subscribe(() => {
       if (!calculator || !pageManagerConcrete) return;
+      if (initialChapterTarget?.isConnected) {
+        scrollToChapterElement(initialChapterTarget, initialChapterAdjustment);
+        return;
+      }
 
       const scrollPos =
         calculator.getScrollPosByCharCount(prevIntendedCharCount) +
@@ -470,7 +482,14 @@
           }
 
           prevIntendedCharCount = data.exploredCharCount || 0;
-          bookmarkManager.scrollToBookmark(data, customReadingPointScrollOffset);
+          const initialChapter = data.initialChapterHref && resolveChapterTarget(data.initialChapterHref);
+          delete data.initialChapterHref;
+          if (initialChapter) {
+            initialChapterTarget = initialChapter;
+            initialChapterAdjustment = getScrollAdjustmentOffset();
+            scrollToChapterElement(initialChapter, initialChapterAdjustment);
+          }
+          else bookmarkManager.scrollToBookmark(data, customReadingPointScrollOffset);
         })
         .finally(() => {
           if (autoBookmark) {
@@ -573,6 +592,12 @@
   }
 
   function onScroll() {
+    if (initialChapterTarget) {
+      const rect = initialChapterTarget.getBoundingClientRect();
+      const position = verticalMode ? window.innerWidth - rect.right : rect.top;
+      const expected = (firstDimensionMargin || 0) + customReadingPointScrollOffset + initialChapterAdjustment;
+      if (!initialChapterTarget.isConnected || Math.abs(position - expected) > 1) initialChapterTarget = undefined;
+    }
     requestAnimationFrame(() => {
       if (!calculator) return;
 

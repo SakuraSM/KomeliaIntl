@@ -19,6 +19,9 @@ import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaSeriesApi
 import snd.komelia.komga.api.model.KomeliaBook
+import snd.komelia.ui.common.menus.BookMenuActions
+import snd.komelia.ui.common.menus.SeriesMenuActions
+import snd.komelia.offline.tasks.OfflineTaskEmitter
 import snd.komelia.offline.local.LocalLibraryManager
 import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LoadState
@@ -44,6 +47,7 @@ class SearchViewModel(
     private val offlineBookApi: KomgaBookApi?,
     private val localLibraryManager: LocalLibraryManager?,
     private val appNotifications: AppNotifications,
+    private val taskEmitter: OfflineTaskEmitter? = null,
 ) : StateScreenModel<LoadState<Unit>>(LoadState.Uninitialized) {
 
     var seriesResults by mutableStateOf<List<KomeliaSeries>>(emptyList())
@@ -93,6 +97,11 @@ class SearchViewModel(
     fun reload() {
         screenModelScope.launch { loadSearchResults() }
     }
+
+    fun bookMenuActions(): BookMenuActions = BookMenuActions(bookApi, appNotifications, screenModelScope, taskEmitter,
+        localLibraryManager, onReadProgressChanged = { reload() })
+
+    fun seriesMenuActions(): SeriesMenuActions = SeriesMenuActions(seriesApi, appNotifications, taskEmitter, screenModelScope)
 
     private suspend fun loadSearchResults() {
         mutableState.value = LoadState.Loading

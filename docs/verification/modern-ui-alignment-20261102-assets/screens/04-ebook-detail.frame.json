@@ -1,0 +1,22 @@
+{
+  "width": 390,
+  "height": 844,
+  "physicalWidth": 780,
+  "physicalHeight": 1831,
+  "safeTop": 95,
+  "safeBottom": 48,
+  "density": 320,
+  "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+  "rawSha256": "5b54a97b2af2a926a9b42b695c5731c176857eba7b06b3991b2539abb6980b25",
+  "rawPixels": [
+    780,
+    1831
+  ],
+  "sourceTopLogicalPx": 0,
+  "sourceCanvas": [
+    390,
+    844
+  ],
+  "sourceSha256": "42968c107bf25d822d4cb1bbe8858630ac7b3db80f6c0d463d4392af416fd2d0",
+  "coverage": "标题栏、封面与元数据列、系列入口、目录与下载、真实目录、页底进度与主操作"
+}

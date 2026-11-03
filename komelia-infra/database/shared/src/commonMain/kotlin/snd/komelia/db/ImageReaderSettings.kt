@@ -18,6 +18,8 @@ import snd.komelia.settings.model.ReaderType.PAGED
 data class ImageReaderSettings(
     val defaultColorCorrection: DefaultColorCorrection? = null,
     val readerType: ReaderType = PAGED,
+    val readerModeHintsEnabled: Boolean = true,
+    val lastReaderModeHintSignature: String? = null,
     val stretchToFit: Boolean = true,
     val pagedScaleType: LayoutScaleType = LayoutScaleType.SCREEN,
     val pagedReadingDirection: PagedReadingDirection = PagedReadingDirection.LEFT_TO_RIGHT,

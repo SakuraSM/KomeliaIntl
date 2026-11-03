@@ -8,28 +8,38 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_source
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_sort
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.platform.testTag
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_offline_books
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_local_summary
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_local_library
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_books
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_local_sort_file_modified
@@ -52,7 +62,6 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.local.AvailableBookSource
 import snd.komelia.ui.LocalKomeliaLayout
-import snd.komelia.ui.common.cards.BookImageCard
 import snd.komelia.ui.common.components.KomeliaPageScaffold
 import snd.komelia.ui.common.components.Pagination
 import snd.komelia.ui.common.components.PauseGlassWhileBusy
@@ -76,11 +85,14 @@ internal fun LocalContent(
     loading: Boolean,
     onBookClick: (KomeliaBook) -> Unit,
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
+    downloadsState: snd.komelia.ui.settings.offline.downloads.OfflineDownloadsState? = null,
+    onManageLocalFolders: () -> Unit = {},
+    onManageDownloads: () -> Unit = {},
 ) {
     val layout = LocalKomeliaLayout.current
-    val gridState = rememberLazyGridState()
+    val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    PauseGlassWhileBusy(gridState.isScrollInProgress)
+    PauseGlassWhileBusy(listState.isScrollInProgress)
     KomeliaPageScaffold(topBar = {
         BrowseSearchHeader(
             title = stringResource(when (selectedSource) {
@@ -91,13 +103,16 @@ internal fun LocalContent(
             query = query,
             onQueryChange = onQueryChange,
             placeholder = stringResource(Res.string.local_content_search),
+            headerHeight = 48.dp,
+            titleStyle = MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp),
+            searchPaintHeight = 44.dp,
         ) {
             BrowseOptionsButton(active = selectedSource != AvailableBookSource.ALL || selectedSort != LocalHomeBookSort.RECENTLY_ADDED) {
                 LocalViewOptions(
                     selectedSource = selectedSource,
                     onSourceChange = {
                         onSourceChange(it)
-                        scope.launch { gridState.scrollToItem(0) }
+                        scope.launch { listState.scrollToItem(0) }
                     },
                     selectedSort = selectedSort,
                     onSortChange = onSortChange,
@@ -109,36 +124,37 @@ internal fun LocalContent(
             if (loading) {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
             }
-            if (!loading && books.isEmpty()) {
-                LocalEmptyContent(hasQuery = query.isNotBlank(), selectedSource = selectedSource)
-                return@Column
-            }
-            LazyVerticalGrid(
-                columns = snd.komelia.ui.common.itemlist.posterGridCells(cardWidth),
-                state = gridState,
-                horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-                verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-                contentPadding = PaddingValues(
-                    top = layout.topBarContentSpacing,
-                    bottom = layout.gridBottomPadding + layout.sectionSpacing,
-                ),
-                modifier = Modifier
-                    .widthIn(max = layout.contentMaxWidth)
-                    .fillMaxSize()
-                    .padding(horizontal = layout.pageHorizontalPadding),
+            LazyColumn(
+                state = listState,
+                contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
+                modifier = Modifier.fillMaxSize().padding(horizontal = 22.dp),
             ) {
-                items(books, key = { it.id.value }) { book ->
-                    BookImageCard(
-                        book = book,
-                        onBookClick = { onBookClick(book) },
-                        onBookReadClick = { onBookReadClick(book, it) },
-                        bookMenuActions = bookMenuActions,
-                        showSeriesTitle = true,
-                        modifier = Modifier.fillMaxSize(),
-                    )
+                item {
+                    Surface(onClick = onManageLocalFolders, color = androidx.compose.ui.graphics.Color.Transparent) {
+                        Row(Modifier.fillMaxWidth().heightIn(min = 64.dp),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                            Icon(Icons.Rounded.Folder, null, Modifier.size(32.dp).testTag("local-directory-icon"), tint = MaterialTheme.colorScheme.primary)
+                            Column(Modifier.weight(1f)) {
+                                Text(stringResource(Res.string.settings_navigation_local_library), style = MaterialTheme.typography.titleSmall)
+                                Text(stringResource(Res.string.reading_local_summary),
+                                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Icon(Icons.Rounded.ChevronRight, null, Modifier.size(18.dp))
+                        }
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    Text(stringResource(Res.string.reading_offline_books), style = MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp, lineHeight = 28.sp),
+                        modifier = Modifier.padding(top = 16.dp))
+                    if (!loading && books.isEmpty()) LocalEmptyContent(query.isNotBlank(), selectedSource)
                 }
+                items(books.size, key = { books[it].id.value }) { index ->
+                    val book = books[index]
+                    snd.komelia.ui.common.cards.BookDetailedListCard(book, onClick = { onBookClick(book) },
+                        bookMenuActions = bookMenuActions, onBookReadClick = { onBookReadClick(book, it) })
+                }
+                if (downloadsState != null) item { LocalDownloadTasks(downloadsState, onManageDownloads) }
                 if (totalPages > 1) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
+                    item {
                         Pagination(totalPages, currentPage, onPageChange)
                     }
                 }

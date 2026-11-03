@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_source
@@ -49,6 +50,7 @@ import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyGridState
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.ReadingDesign
 import snd.komelia.ui.common.components.OutlinedText
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.WindowSizeClass
@@ -63,6 +65,9 @@ fun ItemCard(
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLowest,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    coverWidth: Dp? = null,
+    coverAspectRatio: Float = 2f / 3f,
+    isHighlighted: Boolean = false,
     image: @Composable () -> Unit,
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
@@ -71,10 +76,14 @@ fun ItemCard(
             .combinedClickable(onClick = onClick ?: {}, onLongClick = onLongClick)
             .then(if (onClick != null || onLongClick != null) Modifier.cursorForHand() else Modifier),
     ) {
-        Box(Modifier.aspectRatio(0.703f)
-            .clip(MaterialTheme.shapes.small)
-            .background(containerColor)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.small)) { image() }
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+            Box((if (coverWidth == null) Modifier.fillMaxWidth() else Modifier.widthIn(max = coverWidth).fillMaxWidth()).aspectRatio(coverAspectRatio)
+                .clip(ReadingDesign.coverShape)
+                .background(containerColor)
+                .border(if (isHighlighted) 2.dp else 0.5.dp,
+                    if (isHighlighted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                    ReadingDesign.coverShape)) { image() }
+        }
         content()
     }
 }
@@ -174,7 +183,7 @@ fun CoverCardCaption(
             .fillMaxWidth()
             .height(captionHeight)
             .padding(horizontal = 1.dp, vertical = 6.dp),
-        contentAlignment = Alignment.CenterStart,
+        contentAlignment = Alignment.TopStart,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(

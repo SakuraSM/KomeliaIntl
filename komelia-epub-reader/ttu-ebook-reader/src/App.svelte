@@ -2,19 +2,22 @@
   import {serifFontFamily$, loadExternalSettings, userFonts$} from '$lib/data/store';
   import {type Dialog, dialogManager} from '$lib/data/dialog-manager';
   import {isMobile, isMobile$} from '$lib/functions/utils';
-  import SettingsContent from "$lib/components/settings/settings-content.svelte";
-  import SettingsHeader from "$lib/components/settings/settings-header.svelte";
+  import ReaderSettingsPanel from "$lib/components/settings/reader-settings-panel.svelte";
   import Reader from "$lib/components/Reader.svelte";
   import {pxScreen} from "$lib/css-classes";
   import {faSpinner} from "@fortawesome/free-solid-svg-icons";
   import {loadFont} from "$lib/data/fonts";
   import Fa from "svelte-fa";
   import {logger} from "$lib/data/logger";
-  import {tick} from 'svelte';
+  import {tick, onDestroy} from 'svelte';
+  import {skipKeyDownListener$} from '$lib/data/store';
   import {setLocale, t} from '$lib/i18n';
   import {externalFunctions} from '$lib/external';
+  import {focusableDialogElements, trapDialogFocus} from '$lib/functions/dialog-focus';
 
   let showSettings = $state(false)
+  let settingsContainer: HTMLElement | undefined = $state();
+  let settingsTrigger: HTMLElement | null = null;
 
   let dialogs: Dialog[] = $state([]);
   let clickOnCloseDisabled = $state(false);
@@ -46,18 +49,7 @@
     return error instanceof Error ? error.message : String(error);
   }
 
-  function getFocusableDialogElements(): HTMLElement[] {
-    if (!dialogContainer) return [];
-    const selector = [
-      'a[href]',
-      'button:not([disabled])',
-      'textarea:not([disabled])',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])',
-    ].join(',');
-    return Array.from(dialogContainer.querySelectorAll<HTMLElement>(selector));
-  }
+  function getFocusableDialogElements(): HTMLElement[] { return focusableDialogElements(dialogContainer); }
 
   function handleDialogKeydown(event: KeyboardEvent): void {
     if (!dialogs.length) return;
@@ -98,15 +90,42 @@
     });
   });
 
-  dialogManager.dialogs$.subscribe((d) => {
+
+  function closeSettings(): void {
+    showSettings = false;
+    settingsTrigger?.focus();
+    settingsTrigger = null;
+  }
+
+  function handleSettingsKeydown(event: KeyboardEvent): void {
+    if (event.defaultPrevented || dialogs.length) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      closeSettings();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    trapDialogFocus(settingsContainer, event);
+  }
+
+  $effect(() => {
+    skipKeyDownListener$.next(showSettings || dialogs.length > 0);
+    if (!showSettings) return;
+    settingsTrigger ??= document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    void tick().then(() => { if (showSettings) settingsContainer?.focus({preventScroll: true}); });
+  });
+
+  const dialogSubscription = dialogManager.dialogs$.subscribe((d) => {
     clickOnCloseDisabled = d[0]?.disableCloseOnClick ?? false;
     zIndex = d[0]?.zIndex ?? '';
     dialogs = d;
   });
+  onDestroy(() => dialogSubscription.unsubscribe());
 
 </script>
 
-<svelte:window onkeydown={handleDialogKeydown}/>
+<svelte:window onkeydown={(event) => showSettings && !dialogs.length ? handleSettingsKeydown(event) : handleDialogKeydown(event)}/>
 
 {#if dialogs.length > 0}
   <div class="writing-horizontal-tb fixed inset-0 z-50 h-full w-full" style:z-index={zIndex}>
@@ -144,20 +163,11 @@
     <Fa icon={faSpinner} spin/>
   </div>
 {:then _}
+  <div class="h-full" inert={showSettings}>
+    <Reader onSettingsClick={() => showSettings = true}/>
+  </div>
   {#if showSettings}
-    <div class="elevation-4 fixed inset-x-0 top-0 z-10">
-      <SettingsHeader onExit={() => showSettings = false}/>
-    </div>
-
-    <div class="{pxScreen} h-full pt-16 xl:pt-14">
-      <div class="max-w-5xl">
-        <SettingsContent/>
-      </div>
-    </div>
-  {:else}
-    <Reader
-        onSettingsClick={() => showSettings=true}
-    />
+    <ReaderSettingsPanel bind:element={settingsContainer} onExit={closeSettings}/>
   {/if}
 
   <span style={`font-family: "${$serifFontFamily$.familyName}"`}></span>

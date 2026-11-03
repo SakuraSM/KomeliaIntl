@@ -134,7 +134,9 @@ fun KomeliaChromeSurface(
         contentColor = colors.onSurface,
         tonalElevation = if (glass) 0.dp else tonalElevation,
         shadowElevation = shadowElevation,
-        border = border,
+        border = border ?: if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) {
+            BorderStroke(1.dp, colors.onSurface.copy(alpha = KomeliaChromeStyle.outlineOpacity))
+        } else null,
     ) {
         val effect = if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) {
             Modifier.komeliaChrome(shape, baseColor, interactionSource)
@@ -149,6 +151,7 @@ fun Modifier.komeliaChrome(
     shape: RoundedCornerShape,
     color: Color = MaterialTheme.colorScheme.surface,
     interactionSource: InteractionSource? = null,
+    tintOpacity: Float = KomeliaChromeStyle.tintOpacity,
 ): Modifier {
     val appearance = LocalSurfaceAppearance.current
     val state = LocalGlassBackdrop.current
@@ -159,13 +162,13 @@ fun Modifier.komeliaChrome(
         val solid = if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) baseColor.copy(alpha = 1f) else baseColor
         return background(solid, shape)
     }
-    val material = remember(appearance.theme, baseColor, shape) {
+    val material = remember(appearance.theme, baseColor, shape, tintOpacity) {
         // Override the library's optical edge and white-point defaults for uniform frosted chrome.
         GlassStyle.regular.then {
             shape(shape)
             optics(blurRadius = KomeliaChromeStyle.blurRadius, refractionStrength = 0f, refractionDetailIntensity = 0f)
             backgroundColor(baseColor)
-            tint(baseColor.copy(alpha = KomeliaChromeStyle.tintOpacity))
+            tint(baseColor.copy(alpha = tintOpacity))
             specularIntensity(0f)
             edgeShadow(Color.Transparent)
             // Do not blend the sharp source back into the last pixel band of frosted shapes.

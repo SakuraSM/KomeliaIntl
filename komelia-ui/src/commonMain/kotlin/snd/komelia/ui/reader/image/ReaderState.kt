@@ -77,6 +77,9 @@ class ReaderState(
     internal fun requestModeHint() {
         modeHintRequest.value = kotlin.uuid.Uuid.random().toString()
     }
+
+    internal suspend fun consumeModeHint(signature: String): Boolean =
+        readerSettingsRepository.consumeReaderModeHint(signature)
     val imageStretchToFit = MutableStateFlow(true)
     val cropBorders = MutableStateFlow(false)
     val readProgressPage = MutableStateFlow(1)
@@ -245,6 +248,13 @@ class ReaderState(
         this.readerType.value = type
         if (notify && changed) requestModeHint()
         stateScope.launch { readerSettingsRepository.putReaderType(type) }
+    }
+
+    fun onVolumeKeysNavigationChange(enabled: Boolean) {
+        stateScope.launch {
+            appNotifications.runCatchingToNotifications { readerSettingsRepository.putVolumeKeysNavigation(enabled) }
+                .onSuccess { volumeKeysNavigation.value = enabled }
+        }
     }
 
     fun onStretchToFitChange(stretch: Boolean) {

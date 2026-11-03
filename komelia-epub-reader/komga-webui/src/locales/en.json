@@ -740,11 +740,16 @@
     "loading_book": "Preparing your book…",
     "page_of": "Page {page} of {count}",
     "settings": {
+      "font_size": "Font size",
+      "line_height": "Line height",
       "column_count": "Column count",
-      "layout": "Layout",
+      "layout": "Reading mode",
       "layout_paginated": "Paginated",
       "layout_scroll": "Scroll",
       "tap_to_turn": "Tap to turn pages",
+      "tap_to_turn_hint": "Tap either side of the screen to turn pages",
+      "margin_narrow": "Narrow",
+      "margin_wide": "Wide",
       "navigation_mode": "Navigation mode",
       "navigation_options": {
         "both": "Both",
@@ -757,6 +762,8 @@
     "shortcuts": {
       "cycle_pagination": "Cycle column count",
       "cycle_viewing_theme": "Cycle viewing theme",
+      "line_height_decrease": "Decrease line height",
+      "line_height_increase": "Increase line height",
       "font_size_decrease": "Decrease font size",
       "font_size_increase": "Increase font size",
       "menus": "Menus",

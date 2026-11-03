@@ -49,7 +49,7 @@ class BrowsePageHeaderTest {
             val bounds = compose.onNodeWithTag(title).getUnclippedBoundsInRoot()
             bounds.bottom - bounds.top
         }
-        assertEquals(List(titles.size) { 80.dp }, heights)
+        assertEquals(List(titles.size) { 88.dp }, heights)
     }
 
     @Test fun glassToolbarChoiceRetainsSelectionAndClickSemantics() {

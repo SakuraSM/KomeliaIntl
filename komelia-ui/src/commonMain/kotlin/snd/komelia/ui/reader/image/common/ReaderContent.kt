@@ -76,6 +76,8 @@ fun ReaderContent(
     onColorCorrectionClick: () -> Unit,
     onExit: () -> Unit,
     pageShareAction: PageShareAction? = null,
+    modeHintPreference: snd.komelia.ui.settings.imagereader.ReaderModeHintPreference? = null,
+    modeActions: snd.komelia.ui.reader.image.settings.ReaderModeActions? = null,
 ) {
     var showHelpDialog by remember { mutableStateOf(false) }
     var showSettingsMenu by remember { mutableStateOf(false) }
@@ -203,6 +205,8 @@ fun ReaderContent(
                 ohShowHelpDialogChange = { showHelpDialog = it },
                 onSettingsDialogVisibilityChange = { settingsDialogOpen = it },
                 pageShareAction = pageShareAction,
+                modeHintPreference = modeHintPreference,
+                modeActions = modeActions,
             )
 
             EInkFlashOverlay(
@@ -280,42 +284,32 @@ private fun ReaderTypeNotification(
     val readerType = commonReaderState.readerType.collectAsState().value
     val initializedType = commonReaderState.initializedReaderType.collectAsState().value
     val requestId = commonReaderState.modeHintRequest.collectAsState().value
-    ReaderModeHintEffect(initializedType == readerType, requestId, lastModeHint) {
-        val str = when (commonReaderState.readerType.value) {
-            PAGED -> buildString {
-                append(getString(environment, Res.string.reader_type_paged))
-                append("\n")
-                append(
-                    getString(
-                        environment,
-                        AppStrings.forReadingDirection(pagedReaderState.readingDirection.value)
-                    )
-                )
-            }
-
-            PANELS -> buildString {
-                append(getString(environment, Res.string.reader_type_panels))
-                append("\n")
-                append(
-                    getString(
-                        environment,
-                        AppStrings.forReadingDirection(panelsReaderState!!.readingDirection.value)
-                    )
-                )
-            }
-
-            CONTINUOUS -> buildString {
-                append(getString(environment, Res.string.reader_type_continuous))
-                append("\n")
-                append(
-                    getString(
-                        environment,
-                        AppStrings.forReadingDirection(continuousReaderState.readingDirection.value)
-                    )
-                )
-            }
+    val direction = when (readerType) {
+        PAGED -> pagedReaderState.readingDirection.collectAsState().value.let {
+            it.name to AppStrings.forReadingDirection(it)
         }
-
-        notifications.add(AppNotification.Normal(str))
+        CONTINUOUS -> continuousReaderState.readingDirection.collectAsState().value.let {
+            it.name to AppStrings.forReadingDirection(it)
+        }
+        PANELS -> panelsReaderState?.readingDirection?.collectAsState()?.value?.let {
+            it.name to AppStrings.forReadingDirection(it)
+        }
+    }
+    ReaderModeHintEffect(
+        ready = initializedType == readerType,
+        requestId = requestId,
+        signature = direction?.first?.let { readerModeHintSignature(readerType, it) },
+        lastHint = lastModeHint,
+        consumeHint = commonReaderState::consumeModeHint,
+        onFailure = notifications::addErrorNotification,
+    ) {
+        val typeLabel = when (readerType) {
+            PAGED -> Res.string.reader_type_paged
+            PANELS -> Res.string.reader_type_panels
+            CONTINUOUS -> Res.string.reader_type_continuous
+        }
+        val directionLabel = direction?.second ?: return@ReaderModeHintEffect
+        val message = getString(environment, typeLabel) + "\n" + getString(environment, directionLabel)
+        notifications.add(AppNotification.Normal(message))
     }
 }

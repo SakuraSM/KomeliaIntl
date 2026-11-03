@@ -1,6 +1,7 @@
 package snd.komelia.ui.library
 
 import snd.komelia.ui.common.components.BrowseOptionsButton
+import snd.komelia.ui.common.components.BrowseSearchHeader
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
@@ -8,12 +9,16 @@ import snd.komelia.ui.series.view.SeriesFilterContent
 import org.jetbrains.compose.resources.pluralStringResource
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_content_type
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_page_size
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_library_scope
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_result_count
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_list_series_count
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_collections_count
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_readlists_count
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement.spacedBy
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,8 +26,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_search_library
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -85,6 +97,8 @@ import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalReloadEvents
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.ReadingDesign
+import androidx.compose.runtime.CompositionLocalProvider
 import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.collection.CollectionScreen
 import snd.komelia.ui.common.components.LocalPageTopInset
@@ -229,7 +243,11 @@ class LibraryScreen(
 
             else -> {
                 val loading = state is Loading || state is Uninitialized
+                Column {
+                LibraryBrowseControls(seriesTabState)
+                CompositionLocalProvider(LocalKomeliaLayout provides LocalKomeliaLayout.current.copy(pageHorizontalPadding = ReadingDesign.browseInset)) {
                 SeriesListContent(
+                    isList = seriesTabState.isList,
                     series = seriesTabState.series,
                     seriesActions = seriesTabState.seriesMenuActions(),
                     seriesTotalCount = seriesTabState.totalSeriesCount,
@@ -252,6 +270,8 @@ class LibraryScreen(
                     minSize = seriesTabState.cardWidth.collectAsState().value,
                     showToolbar = false,
                 )
+                }
+                }
             }
         }
     }
@@ -359,17 +379,23 @@ private fun LibraryToolBar(
     }
     val title = listOfNotNull(contentTitle, selectedLibraryName).joinToString(" · ")
         .ifEmpty { stringResource(Res.string.navbar_libraries) }
-    BrowsePageHeader(
+    val filterState = viewModel.seriesTabState.filterState
+    val filter by filterState.state.collectAsState()
+    var otherQuery by remember(viewModel.currentTab) { mutableStateOf("") }
+    BrowseSearchHeader(
         title = title,
-        onSearchClick = { navigation.open(SearchScreen(null)) },
-    ) {
-        BrowseOptionsButton(active = viewModel.seriesTabState.filterState?.isChanged == true || selectedLibraryId != null || viewModel.currentTab != SERIES) { dismiss ->
-            if (showScopeSelector) {
-                LibraryScopeSelector(libraries, selectedLibraryId) { selected ->
-                    dismiss()
-                    onLibrarySelect(selected)
-                }
+        placeholder = stringResource(Res.string.browse_search_library),
+        query = if (viewModel.currentTab == SERIES) filter.searchTerm else otherQuery,
+        onQueryChange = { if (viewModel.currentTab == SERIES) filterState.onSearchTermChange(it) else otherQuery = it },
+        onSubmit = { if (viewModel.currentTab != SERIES) navigation.open(SearchScreen(it)) },
+        titleActions = {
+            if (showScopeSelector) Box(Modifier.widthIn(max = 148.dp)) {
+                LibraryScopeSelector(libraries, selectedLibraryId, compact = true, onSelect = onLibrarySelect)
             }
+        },
+    ) {
+        BrowseOptionsButton(active = viewModel.seriesTabState.filterState?.isChanged == true || selectedLibraryId != null || viewModel.currentTab != SERIES,
+            sheetContentHeight = 492.dp) { dismiss ->
             val tabs = buildList {
                 add(LabeledEntry(SERIES, stringResource(Res.string.library_tab_series)))
                 if (viewModel.collectionsCount > 0 || viewModel.currentTab == COLLECTIONS) {
@@ -379,12 +405,26 @@ private fun LibraryToolBar(
                     add(LabeledEntry(READ_LISTS, stringResource(Res.string.library_tab_readlists)))
                 }
             }
-            DropdownChoiceMenu(
-                selectedOption = tabs.first { it.value == viewModel.currentTab },
-                options = tabs,
-                onOptionChange = { viewModel.selectTab(it.value) },
-                label = { Text(stringResource(Res.string.browse_content_type)) },
-            )
+            Row(Modifier.fillMaxWidth().height(40.dp), horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (showScopeSelector) {
+                    Row(Modifier.weight(1.08f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(Res.string.browse_library_scope), Modifier.width(57.dp), style = MaterialTheme.typography.labelMedium)
+                        Box(Modifier.weight(1f)) {
+                            LibraryScopeSelector(libraries, selectedLibraryId, formField = true) { selected -> dismiss(); onLibrarySelect(selected) }
+                        }
+                    }
+                }
+                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.browse_content_type), Modifier.width(61.dp), style = MaterialTheme.typography.labelMedium)
+                DropdownChoiceMenu(
+                    modifier = Modifier.weight(1f),
+                    selectedOption = tabs.first { it.value == viewModel.currentTab },
+                    options = tabs,
+                    onOptionChange = { viewModel.selectTab(it.value) },
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(4.dp),
+                )
+                }
+            }
             LibraryViewOptions(viewModel, dismiss)
         }
         if (library != null && !library.id.isLocalLibrary() && (isAdmin || isOffline)) {
@@ -404,28 +444,34 @@ private fun LibraryViewOptions(viewModel: LibraryViewModel, onDismiss: () -> Uni
     when (viewModel.currentTab) {
         SERIES -> {
             val state = viewModel.seriesTabState
-            Text(pluralStringResource(Res.plurals.series_list_series_count, state.totalSeriesCount, state.totalSeriesCount))
-            LibraryPageSizeOption(state.pageLoadSize.collectAsState().value, state::onPageSizeChange)
-            state.filterState?.let { SeriesFilterContent(it, onDismiss) }
+            LibraryPageSizeOption(state.pageLoadSize.collectAsState().value, state::onPageSizeChange,
+                pluralStringResource(Res.plurals.series_list_series_count, state.totalSeriesCount, state.totalSeriesCount))
+            androidx.compose.material3.HorizontalDivider(Modifier.padding(top = 6.dp, bottom = 7.dp), color = MaterialTheme.colorScheme.outlineVariant)
+            state.filterState?.let {
+                SeriesFilterContent(it, onDismiss, compact = true,
+                    displayOptions = { LibraryLayoutOptions(isList = state.isList, onListChange = state::onListChange) })
+            }
         }
         COLLECTIONS -> {
             val state = viewModel.collectionsTabState
-            Text(pluralStringResource(Res.plurals.library_tab_collections_count, state.totalCollections, state.totalCollections))
-            LibraryPageSizeOption(state.pageSize, state::onPageSizeChange)
+            LibraryPageSizeOption(state.pageSize, state::onPageSizeChange,
+                pluralStringResource(Res.plurals.library_tab_collections_count, state.totalCollections, state.totalCollections))
         }
         READ_LISTS -> {
             val state = viewModel.readListsTabState
-            Text(pluralStringResource(Res.plurals.library_tab_readlists_count, state.totalReadLists, state.totalReadLists))
-            LibraryPageSizeOption(state.pageSize, state::onPageSizeChange)
+            LibraryPageSizeOption(state.pageSize, state::onPageSizeChange,
+                pluralStringResource(Res.plurals.library_tab_readlists_count, state.totalReadLists, state.totalReadLists))
         }
     }
 }
 
 @Composable
-private fun LibraryPageSizeOption(pageSize: Int, onChange: (Int) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(stringResource(Res.string.browse_page_size), modifier = Modifier.weight(1f))
-        PageSizeSelectionDropdown(pageSize, onChange)
+private fun LibraryPageSizeOption(pageSize: Int, onChange: (Int) -> Unit, summary: String) {
+    Row(Modifier.fillMaxWidth().height(40.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(Res.string.browse_result_count), Modifier.width(56.dp), style = MaterialTheme.typography.labelMedium)
+        Text(summary, Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(Res.string.browse_page_size), modifier = Modifier.padding(end = 8.dp), style = MaterialTheme.typography.labelMedium)
+        PageSizeSelectionDropdown(pageSize, onChange, minWidth = 86.dp, endPadding = 0.dp)
     }
 }
 
@@ -434,6 +480,8 @@ private fun LibraryPageSizeOption(pageSize: Int, onChange: (Int) -> Unit) {
 private fun LibraryScopeSelector(
     libraries: List<LibraryScopeItem>,
     selectedLibraryId: KomgaLibraryId?,
+    compact: Boolean = false,
+    formField: Boolean = false,
     onSelect: (KomgaLibraryId?) -> Unit,
 ) {
     val platform = LocalPlatform.current
@@ -448,12 +496,27 @@ private fun LibraryScopeSelector(
     }
 
     Box {
-        OutlinedButton(
+        if (compact || formField) Surface(onClick = { expanded = true }, color = androidx.compose.ui.graphics.Color.Transparent,
+            modifier = (if (formField) Modifier.fillMaxWidth() else Modifier.width((100.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)).coerceAtMost(148.dp)))
+                .height(48.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                Surface(Modifier.fillMaxWidth().then(if (formField) Modifier else Modifier.padding(top = 12.dp)).height(32.dp), shape = RoundedCornerShape(if (formField) 8.dp else 16.dp),
+                    border = BorderStroke(.5.dp, MaterialTheme.colorScheme.outlineVariant), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+                    Row(Modifier.padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(selectedName, Modifier.weight(1f), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Icon(Icons.Rounded.ExpandMore, null, Modifier.size(20.dp))
+                    }
+                }
+            }
+        } else OutlinedButton(
             onClick = { expanded = true },
-            modifier = Modifier.heightIn(min = layout.minimumTouchTarget),
+            modifier = Modifier.fillMaxWidth().heightIn(min = layout.minimumTouchTarget),
+            shape = if (formField) RoundedCornerShape(8.dp) else MaterialTheme.shapes.extraLarge,
+            contentPadding = if (formField) androidx.compose.foundation.layout.PaddingValues(6.dp) else androidx.compose.material3.ButtonDefaults.ContentPadding,
         ) {
-            Text(selectedName)
-            Icon(Icons.Rounded.ExpandMore, contentDescription = null)
+            Text(selectedName, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                style = if (formField) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+            Icon(Icons.Rounded.ExpandMore, contentDescription = null, modifier = Modifier.size(if (formField) 18.dp else 24.dp))
         }
 
         if (platform == MOBILE) {

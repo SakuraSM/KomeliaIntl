@@ -14,6 +14,7 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.BookSiblingsContext
 import snd.komelia.ui.LocalReloadEvents
 import snd.komelia.ui.LocalViewModelFactory
+import snd.komelia.ui.readerHostNavigator
 import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.library.LibraryScreen
 import snd.komelia.ui.oneshot.OneshotScreen
@@ -47,7 +48,8 @@ class BookScreen(
 ) : ReloadableScreen {
     constructor(book: KomeliaBook, bookSiblingsContext: BookSiblingsContext) : this(book.id, bookSiblingsContext, book)
 
-    override val key: ScreenKey = bookId.toString()
+    // Reader models must survive disposal of a hidden book-detail navigator.
+    override val key: ScreenKey = "book-detail:${bookId.value}"
 
     @Composable
     override fun Content() {
@@ -66,6 +68,7 @@ class BookScreen(
             onDispose { vm.stopKomgaEventHandler() }
         }
 
+        val closePane = LocalBookDetailPaneClose.current
         val book = vm.book.collectAsState().value
 
         ScreenPullToRefreshBox(
@@ -77,7 +80,7 @@ class BookScreen(
                 book = book,
                 bookMenuActions = vm.bookMenuActions,
                 onBookReadPress = { markReadProgress ->
-                    navigator.parent?.push(
+                    navigator.readerHostNavigator().push(
                         if (book != null) readerScreen(
                             book = book,
                             bookSiblingsContext = bookSiblingsContext,
@@ -103,15 +106,17 @@ class BookScreen(
                         )
                     )
                 },
-                onParentSeriesPress = { book?.seriesId?.let { seriesId -> navigator.push(SeriesScreen(seriesId)) } },
+                onParentSeriesPress = { if (closePane != null) closePane()
+                    else book?.seriesId?.let { seriesId -> navigator.push(SeriesScreen(seriesId)) } },
                 onFilterClick = { filter ->
                     navigator.push(LibraryScreen(requireNotNull(book?.libraryId), filter))
                 },
-                onBackPress = { onBackPress(navigator, book?.seriesId) },
+                onBackPress = { closePane?.invoke() ?: onBackPress(navigator, book?.seriesId) },
                 cardWidth = vm.cardWidth.collectAsState().value,
+                readingContext = bookSiblingsContext,
             )
 
-            BackPressHandler { onBackPress(navigator, book?.seriesId) }
+            BackPressHandler { closePane?.invoke() ?: onBackPress(navigator, book?.seriesId) }
         }
     }
 

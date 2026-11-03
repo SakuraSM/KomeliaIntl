@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -16,7 +19,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material3.Text
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ButtonDefaults.textButtonColors
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.ui.text.style.TextOverflow
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_advanced_filter_summary
 import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +45,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_show_advanced_filters
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_hide_advanced_filters
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.filter_search
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_filter_age_rating
@@ -76,6 +91,8 @@ import snd.komga.client.series.KomgaSeriesStatus
 fun SeriesFilterContent(
     filterState: SeriesFilterState,
     onDismiss: () -> Unit,
+    compact: Boolean = false,
+    displayOptions: @Composable () -> Unit = {},
 ) {
     val widthClass = LocalWindowWidth.current
 
@@ -95,13 +112,14 @@ fun SeriesFilterContent(
     val controlHeight = if (widthClass == COMPACT) 48.dp else 40.dp
     val filterItemModifier = if (widthClass == COMPACT) Modifier.fillMaxWidth() else Modifier.width(width)
     val currentFilter = filterState.state.collectAsState().value
+    var showAdvanced by remember { mutableStateOf(!compact || filterState.isChanged) }
 
     Column(
         modifier = Modifier.widthIn(max = 1400.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing)
     ) {
-        FlowRow(
+        if (!compact || showAdvanced) FlowRow(
             horizontalArrangement = Arrangement.spacedBy(spacing),
             verticalArrangement = Arrangement.Center,
         ) {
@@ -111,15 +129,11 @@ fun SeriesFilterContent(
                 delay(200)
                 filterState.onSearchTermChange(searchTerm)
             }
-            NoPaddingTextField(
+            if (!compact) NoPaddingTextField(
                 text = searchTerm,
                 placeholder = stringResource(Res.string.filter_search),
                 onTextChange = { searchTerm = it },
-                modifier = if (widthClass == COMPACT) {
-                    Modifier.fillMaxWidth().height(controlHeight)
-                } else {
-                    Modifier.weight(1f).height(controlHeight).widthIn(min = 340.dp)
-                },
+                modifier = Modifier.weight(1f).height(controlHeight).widthIn(min = if (widthClass == COMPACT) 160.dp else 340.dp),
             )
 
             Row(
@@ -141,7 +155,7 @@ fun SeriesFilterContent(
                     )
                 }
 
-                OutlinedButton(
+                if (!compact) OutlinedButton(
                     onClick = onDismiss,
                     modifier = Modifier.height(controlHeight).cursorForHand()
                 ) {
@@ -155,8 +169,9 @@ fun SeriesFilterContent(
 
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(spacing),
-            verticalArrangement = Arrangement.spacedBy(spacing),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 0.dp else spacing),
         ) {
+            SeriesFilterField(stringResource(Res.string.series_filter_sort), compact, filterItemModifier, bottomSpacing = 4.dp) { fieldModifier ->
             FilterDropdownChoice(
                 selectedOption = LabeledEntry(
                     currentFilter.sortOrder,
@@ -171,9 +186,50 @@ fun SeriesFilterContent(
                     )
                 },
                 onOptionChange = { filterState.onSortOrderChange(it.value) },
-                label = stringResource(Res.string.series_filter_sort),
-                modifier = filterItemModifier
+                label = if (compact) null else stringResource(Res.string.series_filter_sort),
+                modifier = fieldModifier,
+                paintedHeight = if (compact) 38.dp else null,
             )
+            }
+            SeriesFilterField(stringResource(Res.string.series_filter_read_status), compact, filterItemModifier, bottomSpacing = 1.dp) { fieldModifier ->
+            FilterDropdownMultiChoice(
+                selectedOptions = currentFilter.readStatus
+                    .map {
+                        LabeledEntry(
+                            it,
+                            stringResource(AppStrings.forSeriesReadStatus(it))
+                        )
+                    },
+                options = KomgaReadStatus.entries.map {
+                    LabeledEntry(
+                        it,
+                        stringResource(AppStrings.forSeriesReadStatus(it))
+                    )
+                },
+                onOptionSelect = { changed -> filterState.onReadStatusSelect(changed.value) },
+                label = if (compact) null else stringResource(Res.string.series_filter_read_status),
+                modifier = fieldModifier,
+                paintedHeight = if (compact) 38.dp else null,
+            )
+            }
+
+            displayOptions()
+            if (compact) {
+                Column(Modifier.fillMaxWidth().padding(top = 14.dp)) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                TextButton(onClick = { showAdvanced = !showAdvanced }, modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+                    contentPadding = PaddingValues(start = 4.dp), colors = textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
+                    Text(stringResource(if (showAdvanced) Res.string.browse_hide_advanced_filters else Res.string.browse_show_advanced_filters),
+                        style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(Res.string.browse_advanced_filter_summary), Modifier.weight(1f).padding(horizontal = 12.dp),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Icon(if (showAdvanced) Icons.Rounded.ExpandLess else Icons.Rounded.ChevronRight, null)
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                }
+            }
+            if (!compact || showAdvanced) {
             TagFiltersDropdownMenu(
                 allTags = filterState.tagOptions,
                 includeTags = currentFilter.includeTags,
@@ -199,25 +255,6 @@ fun SeriesFilterContent(
                     .clip(RoundedCornerShape(5.dp)),
                 inputFieldModifier = Modifier.fillMaxWidth()
             )
-            FilterDropdownMultiChoice(
-                selectedOptions = currentFilter.readStatus
-                    .map {
-                        LabeledEntry(
-                            it,
-                            stringResource(AppStrings.forSeriesReadStatus(it))
-                        )
-                    },
-                options = KomgaReadStatus.entries.map {
-                    LabeledEntry(
-                        it,
-                        stringResource(AppStrings.forSeriesReadStatus(it))
-                    )
-                },
-                onOptionSelect = { changed -> filterState.onReadStatusSelect(changed.value) },
-                label = stringResource(Res.string.series_filter_read_status),
-                modifier = filterItemModifier,
-            )
-
             FilterDropdownMultiChoice(
                 selectedOptions = currentFilter.publicationStatus
                     .map {
@@ -347,7 +384,18 @@ fun SeriesFilterContent(
                     )
                 }
             }
+            }
         }
 
     }
+}
+
+@Composable
+private fun SeriesFilterField(label: String, compact: Boolean, modifier: Modifier, bottomSpacing: androidx.compose.ui.unit.Dp,
+    content: @Composable (Modifier) -> Unit) {
+    if (compact) Row(Modifier.fillMaxWidth().padding(bottom = bottomSpacing), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(label, Modifier.width(72.dp).offset(y = (-7).dp), style = MaterialTheme.typography.labelLarge)
+        content(Modifier.weight(1f).offset(y = (-3).dp))
+    } else content(modifier)
 }

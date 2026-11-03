@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,14 +22,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import snd.komelia.ui.LocalKomeliaMotion
 
 private val LocalHeaderMaterialProvided = staticCompositionLocalOf { false }
 
-/** Paints one header material through the status area and consumes its safe inset once. */
+/** Consumes the cutout once and keeps an absent toolbar at zero height. */
 @Composable
 fun KomeliaSafeTopBar(content: @Composable () -> Unit) {
     if (LocalHeaderMaterialProvided.current) {
@@ -36,14 +39,27 @@ fun KomeliaSafeTopBar(content: @Composable () -> Unit) {
         return
     }
     val topInset = LocalPageTopInset.current
-    KomeliaChromeSurface(color = MaterialTheme.colorScheme.background) {
-        Box(Modifier.fillMaxWidth().padding(top = topInset)) {
+    Layout(modifier = Modifier.fillMaxWidth(), content = {
+        Box(Modifier.background(MaterialTheme.colorScheme.background)) {
             CompositionLocalProvider(
                 LocalPageTopInset provides 0.dp,
                 LocalHeaderMaterialProvided provides true,
-                content = content,
-            )
+            ) {
+                Layout(content = content) { measurables, constraints ->
+                    val children = measurables.map { it.measure(constraints.copy(minHeight = 0)) }
+                    val contentHeight = children.maxOfOrNull { it.height } ?: 0
+                    val height = contentHeight
+                    layout(constraints.maxWidth, height) { children.forEach { it.placeRelative(0, 0) } }
+                }
+            }
         }
+    }) { measurables, constraints ->
+        val safeTop = topInset.roundToPx()
+        val header = measurables.single().measure(
+            constraints.offset(vertical = -safeTop).copy(minHeight = 0),
+        )
+        val height = if (header.height == 0) 0 else header.height + safeTop
+        layout(constraints.maxWidth, height) { if (height > 0) header.placeRelative(0, safeTop) }
     }
 }
 

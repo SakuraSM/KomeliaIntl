@@ -1,0 +1,22 @@
+{
+  "width": 390,
+  "height": 796,
+  "physicalWidth": 780,
+  "physicalHeight": 1735,
+  "safeTop": 95,
+  "safeBottom": 48,
+  "density": 320,
+  "apkSha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+  "rawSha256": "a5fe52aea676304736144fa19135e674ac0d1939a781be61df82c8c321514aa1",
+  "rawPixels": [
+    780,
+    1735
+  ],
+  "sourceTopLogicalPx": 24,
+  "sourceCanvas": [
+    390,
+    844
+  ],
+  "sourceSha256": "23a1b10333fe140c5f90579f87d4e352415c7b0be2fbe29780e93196e86749e2",
+  "coverage": "标题、三组设置、七行入口的图标/标题/描述/尾部入口、底部导航"
+}

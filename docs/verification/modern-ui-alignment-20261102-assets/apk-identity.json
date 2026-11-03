@@ -1,0 +1,18 @@
+{
+  "package": "io.github.zhengningning.komelia.debug",
+  "versionName": "0.31.1-debug",
+  "versionCode": 60,
+  "targetSdk": 37,
+  "labels": {
+    "en": "Komelia Test",
+    "zh-CN": "Komelia 测试版"
+  },
+  "signature": {
+    "verified": true,
+    "v2": true,
+    "signers": 1
+  },
+  "sha256": "5547a96031c2791e50ea317060a0d1f021fdffc70f18b37996ab92059f17e23d",
+  "artifact": "Komelia-Test-modern-ui-aligned-20261102.apk",
+  "install": "Preserving-data install -r and cold start passed on dedicated API37 emulator"
+}

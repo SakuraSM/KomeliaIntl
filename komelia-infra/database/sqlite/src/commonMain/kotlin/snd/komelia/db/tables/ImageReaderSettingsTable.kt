@@ -10,6 +10,8 @@ object ImageReaderSettingsTable : Table("ImageReaderSettings") {
     val defaultColorCorrection = json<DefaultColorCorrection>("default_color_correction", JsonDbDefault).nullable()
 
     val readerType = text("reader_type")
+    val readerModeHintsEnabled = bool("reader_mode_hints_enabled")
+    val lastReaderModeHintSignature = text("last_reader_mode_hint_signature").nullable()
     val stretchToFit = bool("stretch_to_fit")
 
     val pagedScaleType = text("paged_scale_type")

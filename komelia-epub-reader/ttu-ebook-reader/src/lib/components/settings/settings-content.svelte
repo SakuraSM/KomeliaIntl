@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { faPlus, faSpinner} from '@fortawesome/free-solid-svg-icons';
+  import {faChevronRight, faMinus, faPlus, faSpinner} from '@fortawesome/free-solid-svg-icons';
   import ButtonToggleGroup from '$lib/components/button-toggle-group/button-toggle-group.svelte';
   import {getOptionsForToggle, type ToggleOption} from '$lib/components/button-toggle-group/toggle-option';
   import Ripple from '$lib/components/ripple.svelte';
@@ -53,6 +53,14 @@
   import {t} from '$lib/i18n';
 
   const optionsForToggle = getOptionsForToggle(t);
+  const BUILT_IN_THEME_LABELS: Record<string, string> = {
+    'light-theme': 'Light theme',
+    'ecru-theme': 'Paper theme',
+    'water-theme': 'Blue theme',
+    'gray-theme': 'Gray theme',
+    'dark-theme': 'Dark theme',
+    'black-theme': 'Black theme',
+  };
 
   let optionsForTheme = $derived.by(() => {
     let availableThemes = [...Array.from(availableThemesMap.entries()), ...Object.entries($customThemes$)]
@@ -60,10 +68,12 @@
 
     return availableThemes.map(({theme, option}) => ({
       id: theme,
-      text: 'ぁあ',
+      text: t(BUILT_IN_THEME_LABELS[theme] ?? theme),
       style: {
         color: option.fontColor,
-        'background-color': option.backgroundColor
+        'background-color': option.backgroundColor,
+        '--komelia-swatch-foreground': option.fontColor,
+        '--komelia-swatch-background': option.backgroundColor
       },
       thickBorders: true,
       showIcons: true
@@ -151,10 +161,44 @@
   })
 </script>
 
-<div class="grid grid-cols-1 items-center sm:grid-cols-2 sm:gap-6 lg:md:gap-8 lg:grid-cols-3">
+<div class="komelia-reading-settings">
+  <SettingsItemGroup title={t('Font')} inline>
+    <div class="font-row-controls">
+      <SettingsFontSelector bind:fontValue={$serifFontFamily$} defaultFont={defaultSerifFont} family="Serif"/>
+
+    </div>
+  </SettingsItemGroup>
+  <SettingsItemGroup title={t('Font size')} inline>
+    <div class="font-size-controls">
+      <button type="button" aria-label={t('Decrease font size')}
+              disabled={Number($fontSize$ || 16) <= 1} onclick={() => $fontSize$ = Math.max(1, Number($fontSize$ || 16) - 1)}><Fa icon={faMinus}/></button>
+      <input type="number" min="1" step="1" aria-label={t('Font size')} bind:value={$fontSize$}/>
+      <button type="button" aria-label={t('Increase font size')}
+              onclick={() => $fontSize$ = Number($fontSize$ || 16) + 1}><Fa icon={faPlus}/></button>
+    </div>
+  </SettingsItemGroup>
   <div class="lg:col-span-2">
     <SettingsItemGroup title={t('Theme')}>
+      <div slot="header" class="ml-auto">
+        <button
+            type="button"
+            class="komelia-theme-add rounded-md border border-gray-400"
+            aria-label={t('Add theme')}
+            onclick={() =>
+                  dialogManager.dialogs$.next([
+                    {
+                      component: SettingsCustomTheme,
+                      props: { existingThemes: optionsForTheme }
+                    }
+                  ])}
+        >
+          <Fa icon={faPlus}/>
+          {t('Add theme')}
+          <Ripple/>
+        </button>
+      </div>
       <ButtonToggleGroup
+          themeSwatches
           options={optionsForTheme}
           bind:selectedOptionId={$theme$}
           on:edit={({ detail }) =>
@@ -170,32 +214,20 @@
             $customThemes$ = { ...$customThemes$ };
           }}
       >
-        <button
-            class="m-1 rounded-md border-2 border-gray-400 p-2 text-lg"
-            onclick={() =>
-                  dialogManager.dialogs$.next([
-                    {
-                      component: SettingsCustomTheme,
-                      props: { existingThemes: optionsForTheme }
-                    }
-                  ])}
-        >
-          <Fa icon={faPlus} class="mx-2"/>
-          <Ripple/>
-        </button>
+
       </ButtonToggleGroup>
     </SettingsItemGroup>
   </div>
   <div class="h-full">
-    <SettingsItemGroup title={t('View mode')}>
+    <SettingsItemGroup title={t('View mode')} inline>
       <ButtonToggleGroup options={optionsForViewMode} bind:selectedOptionId={$viewMode$}/>
     </SettingsItemGroup>
   </div>
-  <SettingsItemGroup title={t('Serif Font family')}>
-    <div slot="header" class="flex items-center mx-2">
-      <div
-          tabindex="0"
-          role="button"
+  <details class="komelia-advanced-settings">
+    <summary class="typography-summary"><span><strong>{t('More typography settings')}</strong><small>{t('Line height, page margins and more')}</small></span><Fa icon={faChevronRight}/></summary>
+      <button
+          type="button"
+          aria-label={t('Open Custom Font Dialog')}
           title={t('Open Custom Font Dialog')}
           onclick={() =>
               dialogManager.dialogs$.next([
@@ -207,18 +239,14 @@
                   }
                 }
               ])}
-          onkeyup={dummyFn}
       >
         <Fa icon={faFolderOpen}/>
-      </div>
-    </div>
-    <SettingsFontSelector bind:fontValue={$serifFontFamily$} defaultFont={defaultSerifFont} family="Serif"/>
-  </SettingsItemGroup>
+      </button>
   <SettingsItemGroup title={t('Sans Font family')}>
     <div slot="header" class="flex items-center mx-2">
-      <div
-          tabindex="0"
-          role="button"
+      <button
+          type="button"
+          aria-label={t('Open Custom Font Dialog')}
           title={t('Open Custom Font Dialog')}
           onclick={() =>
               dialogManager.dialogs$.next([
@@ -230,19 +258,11 @@
                   }
                 }
               ])}
-          onkeyup={dummyFn}
       >
         <Fa icon={faFolderOpen}/>
-      </div>
+      </button>
     </div>
     <SettingsFontSelector bind:fontValue={$sansFontFamily$} defaultFont={defaultSansFont} family="Sans-Serif"/>
-  </SettingsItemGroup>
-  <SettingsItemGroup title={t('Font size')}>
-    <input type="number"
-           class={inputClasses}
-           step="1"
-           min="1"
-           bind:value={$fontSize$}/>
   </SettingsItemGroup>
   <SettingsItemGroup title={t('Line Height')}>
     <input
@@ -442,4 +462,22 @@
       <Fa icon={faSpinner} spin/>
     </div>
   {/if}
+  </details>
 </div>
+
+<style>
+  .font-row-controls { display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .font-row-controls > :global(div) { flex: 1; min-width: 0; }
+  .font-size-controls { display: grid; grid-template-columns: 48px 52px 48px; gap: 4px; align-items: center; justify-content: end; margin-right: -8px; }
+  .font-size-controls button { display: grid; place-items: center; position: relative; width: 48px; height: 48px; border: 0; background: transparent; }
+  .font-size-controls button::before { content: ''; position: absolute; inset: 4px; border: 1px solid rgb(176 211 242 / 35%); border-radius: 10px; pointer-events: none; }
+  .font-size-controls input { width: 52px; border: 0; background: transparent; text-align: center; font-size: 16px; appearance: textfield; }
+  .font-size-controls input::-webkit-inner-spin-button { appearance: none; }
+  .komelia-theme-add { display: flex; align-items: center; justify-content: center; position: relative; gap: 8px; min-height: 48px; margin: 0 -2px 0 0; padding: 14px 10px 8px; font-size: 12px; border: 0; }
+  .komelia-theme-add::before { content: ''; position: absolute; inset: 8px 0; pointer-events: none; border: 1px solid rgb(176 211 242 / 40%); border-radius: 12px; }
+  .typography-summary { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 12px; padding-block: 12px; list-style: none; cursor: pointer; }
+  .typography-summary::-webkit-details-marker { display: none; }
+  .typography-summary strong { display: block; font-size: 14px; font-weight: 600; }
+  .typography-summary small { display: block; font-size: 12px; margin-top: 4px; opacity: .8; }
+  details[open] > .typography-summary :global(svg) { transform: rotate(90deg); }
+</style>

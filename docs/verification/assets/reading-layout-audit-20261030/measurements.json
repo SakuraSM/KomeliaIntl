@@ -1,0 +1,330 @@
+{
+  "date": "2026-10-30",
+  "unit": "logical px; Android dp and reference CSS px at fontScale=1",
+  "measurementTolerance": "about ±2 logical px for visible geometry; one logical px equals 3 physical screenshot pixels",
+  "phoneLogicalWidth": 390,
+  "nativeSystemInsetsPhysical": {
+    "top": 139,
+    "bottom": 72
+  },
+  "findings": [
+    {
+      "id": "M01",
+      "area": "共享顶栏",
+      "metric": "安全区后的顶栏上外边距",
+      "expected": "12",
+      "actual": "8",
+      "delta": "−4",
+      "fix": "上外边距统一为 12；56px 顶栏高度保持。",
+      "step": 1,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/common/components/KomeliaTopBarSurface.kt:57"
+    },
+    {
+      "id": "M02",
+      "area": "详情顶栏",
+      "metric": "书籍详情标题墨迹中心 x",
+      "expected": "195",
+      "actual": "108.2",
+      "delta": "−86.8",
+      "fix": "详情标题独立居中。返回和更多点击盒起点分别为 28、314，稿件为 17、325，各向内偏 11px。",
+      "step": 5,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/book/BookScreenContent.kt:174"
+    },
+    {
+      "id": "M03",
+      "area": "书库封面",
+      "metric": "封面容器宽 × 高",
+      "expected": "88 × 132",
+      "actual": "111.3 × 158.3",
+      "delta": "+23.3 × +26.3",
+      "fix": "保持三列与 12px 列间距，在列中居中放置 88 × 132 封面。当前容器比例为 0.703，需同步校准到 2:3，继续使用 Fit。",
+      "step": 2,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/common/cards/ItemCard.kt:61"
+    },
+    {
+      "id": "M04",
+      "area": "书库标题",
+      "metric": "同一排单行相对双行标题的顶部差",
+      "expected": "0",
+      "actual": "9",
+      "delta": "+9",
+      "fix": "保留固定标题区和两行空间，把文本改为顶部对齐。",
+      "step": 2,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/common/cards/ItemCard.kt:177"
+    },
+    {
+      "id": "M05",
+      "area": "丛书头部",
+      "metric": "合集切换层额外高度",
+      "expected": "0",
+      "actual": "49",
+      "delta": "+49",
+      "fix": "把合集入口并入已有工具区或更多菜单。保留合集能力和原有语义。",
+      "step": 3,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/series/view/SeriesContent.kt:640"
+    },
+    {
+      "id": "M06",
+      "area": "漫画详情",
+      "metric": "简介标题盒到正文盒的间距",
+      "expected": "8",
+      "actual": "16",
+      "delta": "+8",
+      "fix": "简介组成一个内部间距 8px 的分组，组间仍用 16px。",
+      "step": 5,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/book/BookScreenContent.kt:131"
+    },
+    {
+      "id": "M07",
+      "area": "阅读主操作",
+      "metric": "主点击区域中线 x",
+      "expected": "195",
+      "actual": "170.5",
+      "delta": "−24.5",
+      "fix": "单独安排下拉入口，主阅读图文按整条中线对齐。保留无痕阅读。正文容器下留白为 14，稿件约 20，另差 −6。",
+      "step": 5,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/common/BookReadButton.kt:82"
+    },
+    {
+      "id": "M08",
+      "area": "图片设置",
+      "metric": "正文左边距",
+      "expected": "20",
+      "actual": "10",
+      "delta": "−10",
+      "fix": "正文与标题统一到 20px。当前标题起点 16，正文起点 10，相差 6px。CSS 的 1px 边框使实际参考起点为 21，不计额外一项。",
+      "step": 12,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/reader/image/settings/BottomSheetSettingsOverlay.kt:181"
+    },
+    {
+      "id": "M09",
+      "area": "图片模式",
+      "metric": "三项模式的单项宽度",
+      "expected": "110.7",
+      "actual": "60",
+      "delta": "−50.7",
+      "fix": "三项均分可用宽度，保持 48px 高和当前方向设置。存在第四种模式时自适应排列。",
+      "step": 12,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/reader/image/settings/CompactReaderModes.kt:33"
+    },
+    {
+      "id": "M10",
+      "area": "平板侧栏",
+      "metric": "导航侧栏整体占宽",
+      "expected": "80",
+      "actual": "96",
+      "delta": "+16",
+      "fix": "把外边距计入总宽。当前是原生 80px 栏加两侧各 8px。",
+      "step": 15,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/MainScreen.kt:505"
+    },
+    {
+      "id": "M11",
+      "area": "展开侧栏",
+      "metric": "1440px 导航侧栏整体占宽",
+      "expected": "180",
+      "actual": "196",
+      "delta": "+16",
+      "fix": "整体占宽限制为 180。卷册栏的 380px 已一致；右详情从 x577 开始，稿件 x560，含 1px 分割线共偏 17px。",
+      "step": 16,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/MainScreen.kt:509"
+    },
+    {
+      "id": "M12",
+      "area": "宽屏封面",
+      "metric": "1440px 详情封面宽 × 高",
+      "expected": "132 × 198",
+      "actual": "152 × 228",
+      "delta": "+20 × +30",
+      "fix": "宽屏封面收敛至 132 × 198。834px 的 112 × 168 已与稿件一致。",
+      "step": 16,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/Layout.kt:119"
+    },
+    {
+      "id": "M13",
+      "area": "宽屏阅读条",
+      "metric": "相对右详情栏的水平外边距",
+      "expected": "平板 24；宽屏 48",
+      "actual": "0；0",
+      "delta": "−24；−48",
+      "fix": "平板左右各 24、宽屏左右各 48，采用独立圆角浮条。手机的贴底形式保持。",
+      "step": 16,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/book/BookScreenContent.kt:119"
+    },
+    {
+      "id": "M14",
+      "area": "首页分组标题",
+      "metric": "最近阅读分组标题的字体尺寸",
+      "expected": "18",
+      "actual": "22",
+      "delta": "+4",
+      "fix": "最近阅读使用 18px 局部分组标题，避免套用 headlineSmall。正在阅读目前为 20px，与目标差 2px，单独保留观察。",
+      "step": 1,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/home/HomeContent.kt:377"
+    }
+  ],
+  "structuralProposals": [
+    {
+      "id": "S01",
+      "area": "长标题详情次操作",
+      "observed": "390px 时目录、下载在第一行，书单在第二行，操作区为两行 48px。",
+      "proposal": "将次操作放在封面与书名下方的通栏，或把书单收进已有更多菜单。130% 字号允许再换行，避免靠缩小字体处理。",
+      "step": 4,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/book/ReadingBookHeader.kt:91"
+    },
+    {
+      "id": "S02",
+      "area": "本地目录入口",
+      "observed": "当前为页面上方独立居中按钮。",
+      "proposal": "沿用设置页的图标、左对齐标题与右箭头行。稿件与当前文案不同，不计算文字中心差值。",
+      "step": 6,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/local/LocalContent.kt"
+    },
+    {
+      "id": "S03",
+      "area": "TTU 字体与主题",
+      "observed": "字体标签和选择器分成两行；6 个主题及新增按钮形成 5+2 排列。",
+      "proposal": "字体改为一行摘要入口。保留全部主题与新增能力，用固定格宽排列或把新增作为独立入口。",
+      "step": 11,
+      "source": "komelia-epub-reader/ttu-ebook-reader/src/lib/components/settings/settings-content.svelte:177"
+    },
+    {
+      "id": "S04",
+      "area": "书库筛选层级",
+      "observed": "书库范围、结果类型和数量占据上部，排序与阅读状态使用整行下拉，首屏看不到完成按钮。",
+      "proposal": "归并范围、类型和数量。常用排序、阅读状态前置，作者等条件收进高级区，完成按钮固定可达。继续保留即时生效和关闭浮层的原有语义。",
+      "step": 9,
+      "source": "komelia-ui/src/commonMain/kotlin/snd/komelia/ui/common/components/BrowseOptionsButton.kt:68"
+    }
+  ],
+  "steps": [
+    {
+      "number": 1,
+      "name": "首页",
+      "health": "需微调",
+      "note": "完整封面与单一续读入口保留。分组标题和底栏选中背景超出稿件尺寸。",
+      "native": "01-native.png",
+      "reference": "01-reference.png"
+    },
+    {
+      "number": 2,
+      "name": "书库",
+      "health": "需调整",
+      "note": "三列和列间距一致。封面偏大，单行与双行标题的顶部不齐。",
+      "native": "02-native.png",
+      "reference": "02-reference.png"
+    },
+    {
+      "number": 3,
+      "name": "丛书卷册",
+      "health": "需调整",
+      "note": "卷号、缺失状态和进度可见。合集切换增加一层，压缩首屏卷册空间。",
+      "native": "03-native.png",
+      "reference": "03-reference.png"
+    },
+    {
+      "number": 4,
+      "name": "文字书详情",
+      "health": "需调整",
+      "note": "完整长标题和目录可见。次操作换成两行，阅读条的主点击区域偏左。",
+      "native": "04-native.png",
+      "reference": "04-reference.png"
+    },
+    {
+      "number": 5,
+      "name": "漫画详情",
+      "health": "需调整",
+      "note": "完整封面、真实页数和单一阅读条保留。顶栏对齐和简介间距有偏差。",
+      "native": "05-native.png",
+      "reference": "05-reference.png"
+    },
+    {
+      "number": 6,
+      "name": "本地与下载",
+      "health": "可用，需整理",
+      "note": "离线书籍和已完成任务可见。本地目录采用独立居中按钮，未沿用稿件的行式入口。",
+      "native": "06-native.png",
+      "reference": "06-reference.png"
+    },
+    {
+      "number": 7,
+      "name": "搜索入口",
+      "health": "布局可用，输入待复核",
+      "note": "空查询的系列浏览、输入框和筛选入口已捕获。ADB 输入未形成可确认的查询状态，不计搜索功能通过。",
+      "native": "07-native.png",
+      "reference": "07-reference.png"
+    },
+    {
+      "number": 8,
+      "name": "设置首页",
+      "health": "基本对齐",
+      "note": "分组、图标、文字起点和行高接近目标。底部条目需滚动；未把首屏未显示当作丢失。",
+      "native": "08-native.png",
+      "reference": "08-reference.png"
+    },
+    {
+      "number": 9,
+      "name": "筛选与显示",
+      "health": "可用，需整理",
+      "note": "书库范围、结果类型、数量、排序和阅读状态可达。常用条件仍为多层下拉，更多元数据需纵向滚动。",
+      "native": "09-native.png",
+      "reference": "09-reference.png"
+    },
+    {
+      "number": 10,
+      "name": "EPUB 目录",
+      "health": "可用，顶部偏松",
+      "note": "两章均可见，关闭入口可达。手柄与标题区偏松；少章节的自适应高度不计错误。",
+      "native": "10-native.png",
+      "reference": "10-reference.png"
+    },
+    {
+      "number": 11,
+      "name": "文字阅读设置",
+      "health": "需调整",
+      "note": "TTU 字体、字号、主题和模式均可见。主题及新增按钮为 5+2 排列；字体区占两行。",
+      "native": "11-native.png",
+      "reference": "11-reference.png"
+    },
+    {
+      "number": 12,
+      "name": "漫画与 PDF 设置",
+      "health": "需调整",
+      "note": "模式、方向和提示开关可见。标题与正文左边线不一致，模式选项没有均分整行。",
+      "native": "12-native.png",
+      "reference": "12-reference.png"
+    },
+    {
+      "number": 13,
+      "name": "文字详情浅色",
+      "health": "同详情偏差",
+      "note": "长标题与固定阅读条均可见。深色中的顶栏和次操作问题仍存在。",
+      "native": "13-native.png",
+      "reference": "13-reference.png"
+    },
+    {
+      "number": 14,
+      "name": "丛书浅色",
+      "health": "同卷册偏差",
+      "note": "卷号与状态可辨。仍有额外切换层；颜色变化没有消除布局差异。",
+      "native": "14-native.png",
+      "reference": "14-reference.png"
+    },
+    {
+      "number": 15,
+      "name": "834px 平板布局",
+      "health": "需调整",
+      "note": "左侧卷册与右侧详情已并排。右栏起点接近稿件，侧栏占宽和底部条外边距有差异。",
+      "native": "15-native.png",
+      "reference": "15-reference.png"
+    },
+    {
+      "number": 16,
+      "name": "1440px 宽屏布局",
+      "health": "需调整",
+      "note": "展开侧栏与并排详情可见。封面偏大，右栏起点和阅读条外边距超差。此为 Android 宽屏，不代替桌面运行。",
+      "native": "16-native.png",
+      "reference": "16-reference.png"
+    }
+  ]
+}

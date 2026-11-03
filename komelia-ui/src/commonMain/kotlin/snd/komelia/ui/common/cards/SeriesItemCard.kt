@@ -1,7 +1,6 @@
 package snd.komelia.ui.common.cards
 
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -10,6 +9,9 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,8 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -36,8 +37,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_series_title
+import androidx.compose.ui.unit.Dp
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_books_count
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_unavailable
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_books_progress
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LocalKomeliaLayout
@@ -47,7 +54,6 @@ import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.images.SeriesThumbnail
 import snd.komelia.ui.common.menus.SeriesActionsMenu
 import snd.komelia.ui.common.menus.SeriesMenuActions
-import snd.komelia.ui.platform.cursorForHand
 import snd.komelia.ui.series.mangabaka.state.MangaBakaTitlesState
 
 @Composable
@@ -58,6 +64,8 @@ fun SeriesImageCard(
     onSeriesSelect: (() -> Unit)? = null,
     seriesMenuActions: SeriesMenuActions? = null,
     modifier: Modifier = Modifier,
+    coverWidth: Dp? = null,
+    coverAspectRatio: Float = 2f / 3f,
 ) {
     val libraries = LocalLibraries.current
     val libraryIsDeleted = remember {
@@ -65,6 +73,8 @@ fun SeriesImageCard(
     }
     ItemCard(
         modifier = modifier,
+        coverWidth = coverWidth,
+        coverAspectRatio = coverAspectRatio,
         onClick = onSeriesClick,
         onLongClick = onSeriesSelect,
         image = {
@@ -83,7 +93,7 @@ fun SeriesImageCard(
                         SeriesThumbnail(
                             series.id,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Fit
                         )
                     }
                 }
@@ -95,9 +105,10 @@ fun SeriesImageCard(
             }
         },
         content = {
-            CoverCardCaption(
+            ReadingCoverCaption(
                 title = series.metadata.title,
-                variant = CoverCaptionVariant.TitleOnly,
+                progress = if (series.booksCount > 0) series.booksReadCount.toFloat() / series.booksCount else null,
+                status = stringResource(Res.string.series_books_progress, series.booksReadCount, series.booksCount),
             )
         },
     )
@@ -121,7 +132,7 @@ fun SeriesSimpleImageCard(
                 SeriesThumbnail(
                     series.id,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Fit
                 )
             }
         }
@@ -260,52 +271,34 @@ private fun SeriesImageOverlay(
 fun SeriesDetailedListCard(
     series: KomeliaSeries,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    menu: SeriesMenuActions? = null,
+    searchResult: Boolean = false,
 ) {
-    Card(
-        modifier
-            .cursorForHand()
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-    ) {
-        DetailedListCardLayout(
-            cover = {
-                SeriesImageOverlay(series = series, libraryIsDeleted = false, showTitle = false) {
-                    SeriesThumbnail(series.id, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+    Column(modifier.fillMaxWidth().clickable(onClick = onClick)) {
+        Row(Modifier.heightIn(min = if (searchResult) 132.dp else 112.dp).padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = if (searchResult) Alignment.Top else Alignment.CenterVertically) {
+            SeriesThumbnail(series.id, modifier = Modifier.width(if (searchResult) 76.dp else 64.dp).aspectRatio(2f / 3f)
+                .clip(MaterialTheme.shapes.extraSmall), contentScale = ContentScale.Fit)
+            Column(Modifier.weight(1f).then(if (searchResult) Modifier.padding(top = 7.dp) else Modifier), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (searchResult) Text(stringResource(Res.string.reading_series_title), style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(series.metadata.title, style = if (searchResult) MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 26.sp) else MaterialTheme.typography.bodyMedium,
+                    maxLines = 2, overflow = TextOverflow.Ellipsis)
+                val countLabel = pluralStringResource(Res.plurals.series_books_count, series.booksCount, series.booksCount.toString())
+                val authors = if (searchResult) series.booksMetadata.authors.map { it.name }.distinct().joinToString("、") else ""
+                Text(listOf(authors, countLabel).filter { it.isNotBlank() }.joinToString(" · "),
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (menu != null) {
+                var expanded by remember(series.id) { mutableStateOf(false) }
+                Box(Modifier.align(Alignment.CenterVertically)) {
+                    IconButton(onClick = { expanded = true }) { Icon(Icons.Rounded.MoreVert, stringResource(Res.string.actions_show_more)) }
+                    SeriesActionsMenu(series, menu, expanded, showEditOption = true, showDownloadOption = true,
+                        onDismissRequest = { expanded = false })
                 }
-            },
-            content = { SeriesDetails(series) },
-        )
-    }
-}
-
-@Composable
-private fun SeriesDetails(series: KomeliaSeries) {
-    val layout = LocalKomeliaLayout.current
-    Column {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(layout.controlSpacing),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                series.metadata.title,
-                style = MaterialTheme.typography.titleSmall,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
+            }
         }
-        if (series.metadata.genres.isNotEmpty()) MetadataTagFlow(
-            values = series.metadata.genres,
-            width = LocalWindowWidth.current,
-            modifier = Modifier.padding(vertical = 8.dp),
-        )
-        if (series.metadata.summary.isNotBlank()) Text(
-            series.metadata.summary, maxLines = 3, style = MaterialTheme.typography.bodyMedium,
-            overflow = TextOverflow.Ellipsis,
-        )
-
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }

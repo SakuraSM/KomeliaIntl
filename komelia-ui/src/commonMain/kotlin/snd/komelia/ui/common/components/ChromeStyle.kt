@@ -13,24 +13,30 @@ import snd.komelia.settings.model.AppTheme
 
 /** Shared rendering tokens; no application preference or persisted value is introduced. */
 internal object KomeliaChromeStyle {
-    val blurRadius = 28.dp
-    const val tintOpacity = 0.6f
+    val blurRadius = 24.dp
+    const val tintOpacity = 0.74f
+    const val panelTintOpacity = 0.96f
+    const val outlineOpacity = 0.10f
     val highlightLightRadius = 12.dp
     val highlightLightOffset = DpOffset(0.dp, (-2).dp)
     val navigationHighlightInset = 6.dp
-    val navigationHighlightShape = RoundedCornerShape(20.dp)
+    val navigationHighlightShape = RoundedCornerShape(14.dp)
     val navigationMarkerWidth = 18.dp
     val navigationMarkerHeight = 3.dp
     val navigationMarkerSpacing = 3.dp
     val menuShape = RoundedCornerShape(20.dp)
-    val dialogCornerRadius = 28.dp
+    val dialogCornerRadius = 24.dp
     val dialogShape = RoundedCornerShape(dialogCornerRadius)
     val sheetHandleShape = RoundedCornerShape(topStart = dialogCornerRadius, topEnd = dialogCornerRadius)
-    val sheetBodyShape = RoundedCornerShape(bottomStart = dialogCornerRadius, bottomEnd = dialogCornerRadius)
+    val sheetBodyShape = RoundedCornerShape(0.dp)
 }
 
 internal fun glassTintColor(theme: AppTheme, colors: ColorScheme): Color =
-    if (theme == AppTheme.LIGHT) colors.surface else Color.Black
+    when (theme) {
+        AppTheme.LIGHT -> Color(0xFFF2F8FF)
+        AppTheme.DARK -> Color(0xFF142538)
+        AppTheme.DARKER -> Color(0xFF09121E)
+    }
 
 internal data class ChromeHighlightShadows(val shadowOpacity: Float, val lightOpacity: Float)
 

@@ -1,0 +1,3338 @@
+{
+  "criterion": "Control positions, sizes and spacing on normalized app-owned canvases; real publication data retained",
+  "toleranceLogicalPx": 2,
+  "fieldCount": 413,
+  "maxDeviation": 2.0,
+  "focusedSuites": [
+    {
+      "suite": "FullPageControlGeometryTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "suite": "ModernReadingGeometryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "suite": "book.ReadingLayoutGeometryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "suite": "reader.image.settings.ImageReaderToolbarTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0
+    }
+  ],
+  "measurements": [
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "grid-paint.x",
+      "reference": 103.8,
+      "measured": 102.0,
+      "deviation": 1.8
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "grid-paint.y",
+      "reference": 5.0,
+      "measured": 5.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "grid-paint.width",
+      "reference": 129.8,
+      "measured": 129.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "grid-paint.height",
+      "reference": 43.0,
+      "measured": 43.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "list-paint.x",
+      "reference": 239.0,
+      "measured": 239.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "list-paint.y",
+      "reference": 5.0,
+      "measured": 5.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "list-paint.width",
+      "reference": 129.8,
+      "measured": 129.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "list-paint.height",
+      "reference": 43.0,
+      "measured": 43.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "reading-action-paint.x",
+      "reference": 20.1,
+      "measured": 20.0,
+      "deviation": 0.1
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "reading-action-paint.y",
+      "reference": 773.5,
+      "measured": 773.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "reading-action-paint.width",
+      "reference": 350.2,
+      "measured": 350.0,
+      "deviation": 0.2
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "reading-action-paint.height",
+      "reference": 47.6,
+      "measured": 48.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "progress.y",
+      "reference": 747.4,
+      "measured": 747.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "progress.height",
+      "reference": 6.4,
+      "measured": 6.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "13",
+      "control": "reading-action-paint.x",
+      "reference": 20.1,
+      "measured": 20.0,
+      "deviation": 0.1
+    },
+    {
+      "kind": "Compose",
+      "page": "13",
+      "control": "reading-action-paint.y",
+      "reference": 773.5,
+      "measured": 773.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "13",
+      "control": "reading-action-paint.width",
+      "reference": 350.2,
+      "measured": 350.0,
+      "deviation": 0.2
+    },
+    {
+      "kind": "Compose",
+      "page": "13",
+      "control": "reading-action-paint.height",
+      "reference": 47.6,
+      "measured": 48.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "13",
+      "control": "progress.y",
+      "reference": 747.4,
+      "measured": 747.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "13",
+      "control": "progress.height",
+      "reference": 6.4,
+      "measured": 6.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "reading-action-paint.x",
+      "reference": 22.9,
+      "measured": 23.0,
+      "deviation": 0.1
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "reading-action-paint.y",
+      "reference": 744.0,
+      "measured": 744.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "reading-action-paint.width",
+      "reference": 344.3,
+      "measured": 344.0,
+      "deviation": 0.3
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "reading-action-paint.height",
+      "reference": 41.7,
+      "measured": 42.0,
+      "deviation": 0.3
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "progress.y",
+      "reference": 721.1,
+      "measured": 720.0,
+      "deviation": 1.1
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "progress.height",
+      "reference": 6.9,
+      "measured": 7.0,
+      "deviation": 0.1
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "reading-action-paint.x",
+      "reference": 41.1,
+      "measured": 41.0,
+      "deviation": 0.1
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "reading-action-paint.y",
+      "reference": 1072.3,
+      "measured": 1072.0,
+      "deviation": 0.3
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "reading-action-paint.width",
+      "reference": 398.7,
+      "measured": 400.0,
+      "deviation": 1.3
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "reading-action-paint.height",
+      "reference": 52.5,
+      "measured": 52.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "progress.y",
+      "reference": 1044.5,
+      "measured": 1044.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "progress.height",
+      "reference": 9.5,
+      "measured": 10.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "reading-action-paint.x",
+      "reference": 453.7,
+      "measured": 453.0,
+      "deviation": 0.7
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "reading-action-paint.y",
+      "reference": 911.7,
+      "measured": 911.0,
+      "deviation": 0.7
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "reading-action-paint.width",
+      "reference": 269.2,
+      "measured": 270.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "reading-action-paint.height",
+      "reference": 61.0,
+      "measured": 62.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "progress.y",
+      "reference": 935.9,
+      "measured": 936.0,
+      "deviation": 0.1
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "progress.height",
+      "reference": 11.6,
+      "measured": 12.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "search.x",
+      "reference": 14.2,
+      "measured": 14.0,
+      "deviation": 0.2
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "search.y",
+      "reference": 72.0,
+      "measured": 72.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "search.width",
+      "reference": 362.0,
+      "measured": 362.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "search.height",
+      "reference": 48.0,
+      "measured": 48.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "directory-icon.x",
+      "reference": 22.0,
+      "measured": 22.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "directory-icon.width",
+      "reference": 32.0,
+      "measured": 32.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "directory-text.x",
+      "reference": 74.5,
+      "measured": 74.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "toolbar-back.x",
+      "reference": 12.0,
+      "measured": 12.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "toolbar-back.y",
+      "reference": 10.0,
+      "measured": 10.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "toolbar-back.width",
+      "reference": 20.0,
+      "measured": 20.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "toolbar-back.height",
+      "reference": 20.0,
+      "measured": 20.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "toolbar-more.x",
+      "reference": 356.0,
+      "measured": 356.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "toolbar-more.y",
+      "reference": 10.0,
+      "measured": 10.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "toolbar-more.width",
+      "reference": 20.0,
+      "measured": 20.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "toolbar-more.height",
+      "reference": 20.0,
+      "measured": 20.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "toolbar-back.x",
+      "reference": 22.0,
+      "measured": 22.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "toolbar-back.y",
+      "reference": 10.0,
+      "measured": 10.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "toolbar-back.width",
+      "reference": 20.0,
+      "measured": 20.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "toolbar-back.height",
+      "reference": 20.0,
+      "measured": 20.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "toolbar-more.x",
+      "reference": 356.0,
+      "measured": 356.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "toolbar-more.y",
+      "reference": 10.0,
+      "measured": 10.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "toolbar-more.width",
+      "reference": 20.0,
+      "measured": 20.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "toolbar-more.height",
+      "reference": 20.0,
+      "measured": 20.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "filter-field.x",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "filter-field.y",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "filter-field.width",
+      "reference": 264.0,
+      "measured": 264.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "filter-field.height",
+      "reference": 38.0,
+      "measured": 38.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "switch-track.x",
+      "reference": 322.5,
+      "measured": 322.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "switch-track.y",
+      "reference": 12.0,
+      "measured": 12.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "switch-track.width",
+      "reference": 44.0,
+      "measured": 44.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "switch-track.height",
+      "reference": 24.0,
+      "measured": 24.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "switch-thumb.x",
+      "reference": 324.5,
+      "measured": 324.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "switch-thumb.y",
+      "reference": 14.0,
+      "measured": 14.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "switch-thumb.width",
+      "reference": 20.0,
+      "measured": 20.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "switch-thumb.height",
+      "reference": 20.0,
+      "measured": 20.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "switch-thumb.x",
+      "reference": 344.5,
+      "measured": 344.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-0.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-1.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-1.pitch",
+      "reference": 66.0,
+      "measured": 66.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-2.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-2.pitch",
+      "reference": 66.0,
+      "measured": 66.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-3.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-4.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-4.pitch",
+      "reference": 66.0,
+      "measured": 66.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-5.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-6.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/DARK",
+      "control": "row-6.pitch",
+      "reference": 66.0,
+      "measured": 66.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-0.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-1.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-1.pitch",
+      "reference": 66.0,
+      "measured": 66.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-2.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-2.pitch",
+      "reference": 66.0,
+      "measured": 66.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-3.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-4.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-4.pitch",
+      "reference": 66.0,
+      "measured": 66.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-5.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-6.title.x",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "08/LIGHT",
+      "control": "row-6.pitch",
+      "reference": 66.0,
+      "measured": 66.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "catalog-cover.x",
+      "reference": 22.0,
+      "measured": 22.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "catalog-cover.y",
+      "reference": 8.0,
+      "measured": 8.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "catalog-cover.width",
+      "reference": 64.0,
+      "measured": 64.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "catalog-cover.height",
+      "reference": 96.0,
+      "measured": 96.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "06",
+      "control": "catalog-metadata.x",
+      "reference": 106.0,
+      "measured": 106.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "03/14",
+      "control": "catalog-cover.x",
+      "reference": 30.0,
+      "measured": 30.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "03/14",
+      "control": "catalog-cover.y",
+      "reference": 8.0,
+      "measured": 8.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "03/14",
+      "control": "catalog-cover.width",
+      "reference": 64.0,
+      "measured": 64.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "03/14",
+      "control": "catalog-cover.height",
+      "reference": 81.0,
+      "measured": 81.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "03/14",
+      "control": "catalog-metadata.x",
+      "reference": 114.0,
+      "measured": 114.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "catalog-cover.x",
+      "reference": 22.0,
+      "measured": 22.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "catalog-cover.y",
+      "reference": 8.0,
+      "measured": 8.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "catalog-cover.width",
+      "reference": 64.0,
+      "measured": 64.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "catalog-cover.height",
+      "reference": 81.0,
+      "measured": 81.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "catalog-metadata.x",
+      "reference": 98.0,
+      "measured": 98.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "catalog-cover.x",
+      "reference": 22.0,
+      "measured": 22.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "catalog-cover.y",
+      "reference": 8.0,
+      "measured": 8.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "catalog-cover.width",
+      "reference": 76.0,
+      "measured": 76.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "catalog-cover.height",
+      "reference": 114.0,
+      "measured": 114.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "catalog-metadata.x",
+      "reference": 118.0,
+      "measured": 118.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "single-paint.x",
+      "reference": 22.5,
+      "measured": 23.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "single-paint.y",
+      "reference": 3.0,
+      "measured": 3.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "single-paint.width",
+      "reference": 115.0,
+      "measured": 114.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "single-paint.height",
+      "reference": 58.0,
+      "measured": 58.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "double-paint.x",
+      "reference": 137.5,
+      "measured": 137.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "double-paint.y",
+      "reference": 3.0,
+      "measured": 3.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "double-paint.width",
+      "reference": 115.0,
+      "measured": 115.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "double-paint.height",
+      "reference": 58.0,
+      "measured": 58.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "continuous-paint.x",
+      "reference": 252.5,
+      "measured": 252.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "continuous-paint.y",
+      "reference": 3.0,
+      "measured": 3.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "continuous-paint.width",
+      "reference": 115.0,
+      "measured": 115.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "continuous-paint.height",
+      "reference": 58.0,
+      "measured": 58.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "LEFT_TO_RIGHT-paint.x",
+      "reference": 22.5,
+      "measured": 23.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "LEFT_TO_RIGHT-paint.y",
+      "reference": 167.5,
+      "measured": 168.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "LEFT_TO_RIGHT-paint.width",
+      "reference": 168.5,
+      "measured": 168.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "LEFT_TO_RIGHT-paint.height",
+      "reference": 43.0,
+      "measured": 43.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "RIGHT_TO_LEFT-paint.x",
+      "reference": 199.0,
+      "measured": 199.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "RIGHT_TO_LEFT-paint.y",
+      "reference": 167.5,
+      "measured": 168.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "RIGHT_TO_LEFT-paint.width",
+      "reference": 168.5,
+      "measured": 168.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "RIGHT_TO_LEFT-paint.height",
+      "reference": 43.0,
+      "measured": 43.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01",
+      "control": "hero-action.x",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01",
+      "control": "hero-action.y",
+      "reference": 48.0,
+      "measured": 48.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01",
+      "control": "hero-action.width",
+      "reference": 191.1,
+      "measured": 192.0,
+      "deviation": 0.9
+    },
+    {
+      "kind": "Compose",
+      "page": "01",
+      "control": "hero-action.height",
+      "reference": 36.6,
+      "measured": 36.0,
+      "deviation": 0.6
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "page-size.x",
+      "reference": 282.0,
+      "measured": 282.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "page-size.y",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "page-size.width",
+      "reference": 86.0,
+      "measured": 86.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "09",
+      "control": "page-size.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "toolbar-frame.x",
+      "reference": 12.0,
+      "measured": 12.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "toolbar-frame.y",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "toolbar-frame.width",
+      "reference": 366.0,
+      "measured": 366.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "toolbar-frame.height",
+      "reference": 44.0,
+      "measured": 44.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "page-badge.x",
+      "reference": 312.0,
+      "measured": 311.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "page-badge.y",
+      "reference": 58.0,
+      "measured": 58.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "page-badge.width",
+      "reference": 66.0,
+      "measured": 67.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "page-badge.height",
+      "reference": 26.0,
+      "measured": 26.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "badge-text.center-x",
+      "reference": 345.0,
+      "measured": 344.5,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "12",
+      "control": "badge-text.top",
+      "reference": 61.0,
+      "measured": 63.0,
+      "deviation": 2.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "cover.x",
+      "reference": 22.0,
+      "measured": 22.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "cover.y",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "cover.width",
+      "reference": 131.0,
+      "measured": 131.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "cover.height",
+      "reference": 196.5,
+      "measured": 197.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "04",
+      "control": "metadata.x",
+      "reference": 169.0,
+      "measured": 169.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "cover.x",
+      "reference": 22.0,
+      "measured": 22.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "cover.y",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "cover.width",
+      "reference": 143.5,
+      "measured": 143.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "cover.height",
+      "reference": 215.3,
+      "measured": 215.0,
+      "deviation": 0.3
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "metadata.x",
+      "reference": 187.5,
+      "measured": 187.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "05",
+      "control": "metadata.y",
+      "reference": 8.0,
+      "measured": 8.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "all-tab.x",
+      "reference": 16.5,
+      "measured": 16.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "all-tab.y",
+      "reference": 12.2,
+      "measured": 12.0,
+      "deviation": 0.2
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "all-tab.width",
+      "reference": 114.8,
+      "measured": 114.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "all-tab.height",
+      "reference": 33.4,
+      "measured": 34.0,
+      "deviation": 0.6
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "series-tab.x",
+      "reference": 138.5,
+      "measured": 138.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "series-tab.y",
+      "reference": 12.2,
+      "measured": 12.0,
+      "deviation": 0.2
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "series-tab.width",
+      "reference": 114.8,
+      "measured": 114.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "series-tab.height",
+      "reference": 33.4,
+      "measured": 34.0,
+      "deviation": 0.6
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "books-tab.x",
+      "reference": 260.5,
+      "measured": 260.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "books-tab.y",
+      "reference": 12.2,
+      "measured": 12.0,
+      "deviation": 0.2
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "books-tab.width",
+      "reference": 114.8,
+      "measured": 114.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Compose",
+      "page": "07",
+      "control": "books-tab.height",
+      "reference": 33.4,
+      "measured": 34.0,
+      "deviation": 0.6
+    },
+    {
+      "kind": "Compose",
+      "page": "02",
+      "control": "search.left",
+      "reference": 14.2,
+      "measured": 14.0,
+      "deviation": 0.2
+    },
+    {
+      "kind": "Compose",
+      "page": "02",
+      "control": "search.top",
+      "reference": 98.0,
+      "measured": 96.0,
+      "deviation": 2.0
+    },
+    {
+      "kind": "Compose",
+      "page": "02",
+      "control": "search.width",
+      "reference": 362.0,
+      "measured": 362.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "02",
+      "control": "search.height",
+      "reference": 46.5,
+      "measured": 48.0,
+      "deviation": 1.5
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "tablet.rail.width",
+      "reference": 90.75,
+      "measured": 92.0,
+      "deviation": 1.25
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "tablet.library.x",
+      "reference": 6.0,
+      "measured": 6.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "tablet.library.y",
+      "reference": 156.0,
+      "measured": 156.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "tablet.library.width",
+      "reference": 80.0,
+      "measured": 80.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "15",
+      "control": "tablet.library.height",
+      "reference": 84.0,
+      "measured": 84.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "desktop.rail.width",
+      "reference": 237.26,
+      "measured": 237.0,
+      "deviation": 0.26
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "desktop.library.x",
+      "reference": 18.0,
+      "measured": 18.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "desktop.library.y",
+      "reference": 170.0,
+      "measured": 170.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "desktop.library.width",
+      "reference": 201.0,
+      "measured": 201.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "16",
+      "control": "desktop.library.height",
+      "reference": 62.0,
+      "measured": 62.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.left",
+      "reference": 14.0,
+      "measured": 14.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.top",
+      "reference": 747.0,
+      "measured": 746.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.width",
+      "reference": 362.0,
+      "measured": 362.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.height",
+      "reference": 70.0,
+      "measured": 70.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.HOME.x",
+      "reference": 17.0,
+      "measured": 17.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.HOME.width",
+      "reference": 66.4,
+      "measured": 67.0,
+      "deviation": 0.6
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.HOME.height",
+      "reference": 70.0,
+      "measured": 70.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.LIBRARY.x",
+      "reference": 89.4,
+      "measured": 90.0,
+      "deviation": 0.6
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.LIBRARY.width",
+      "reference": 66.4,
+      "measured": 67.0,
+      "deviation": 0.6
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.LIBRARY.height",
+      "reference": 70.0,
+      "measured": 70.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.LOCAL.x",
+      "reference": 161.8,
+      "measured": 163.0,
+      "deviation": 1.2
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.LOCAL.width",
+      "reference": 66.4,
+      "measured": 66.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.LOCAL.height",
+      "reference": 70.0,
+      "measured": 70.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.SEARCH.x",
+      "reference": 234.2,
+      "measured": 235.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.SEARCH.width",
+      "reference": 66.4,
+      "measured": 66.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.SEARCH.height",
+      "reference": 70.0,
+      "measured": 70.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.SETTINGS.x",
+      "reference": 306.6,
+      "measured": 307.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.SETTINGS.width",
+      "reference": 66.4,
+      "measured": 66.0,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Compose",
+      "page": "01/02/06/07/08",
+      "control": "navigation.SETTINGS.height",
+      "reference": 70.0,
+      "measured": 70.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "sheet.y",
+      "reference": 274.0,
+      "measured": 274.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "sheet.height",
+      "reference": 570.0,
+      "measured": 570.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "chapter-0.x",
+      "reference": 14.0,
+      "measured": 15.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "chapter-0.y",
+      "reference": 359.0,
+      "measured": 359.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "chapter-0.width",
+      "reference": 362.0,
+      "measured": 360.0,
+      "deviation": 2.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "chapter-0.height",
+      "reference": 48.0,
+      "measured": 48.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "chapter-1.x",
+      "reference": 14.0,
+      "measured": 15.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "chapter-1.y",
+      "reference": 408.0,
+      "measured": 408.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "chapter-1.width",
+      "reference": 362.0,
+      "measured": 360.0,
+      "deviation": 2.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "chapter-1.height",
+      "reference": 48.0,
+      "measured": 48.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "navigation-type.x",
+      "reference": 27.0,
+      "measured": 27.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "navigation-type.y",
+      "reference": 291.0,
+      "measured": 291.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "10",
+      "control": "navigation-type.height",
+      "reference": 48.0,
+      "measured": 48.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "sheet.x",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "sheet.y",
+      "reference": 274.0,
+      "measured": 274.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "sheet.width",
+      "reference": 390.0,
+      "measured": 390.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "sheet.height",
+      "reference": 570.0,
+      "measured": 570.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "font-step-0.x",
+      "reference": 219.5,
+      "measured": 219.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "font-step-0.y",
+      "reference": 400.5,
+      "measured": 400.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "font-step-0.width",
+      "reference": 39.0,
+      "measured": 40.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "font-step-0.height",
+      "reference": 38.0,
+      "measured": 40.0,
+      "deviation": 2.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "font-step-1.x",
+      "reference": 327.0,
+      "measured": 327.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "font-step-1.y",
+      "reference": 400.5,
+      "measured": 400.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "font-step-1.width",
+      "reference": 39.0,
+      "measured": 40.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "font-step-1.height",
+      "reference": 38.0,
+      "measured": 40.0,
+      "deviation": 2.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-0.x",
+      "reference": 27.0,
+      "measured": 27.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-0.y",
+      "reference": 504.0,
+      "measured": 504.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-0.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-0.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-1.x",
+      "reference": 143.0,
+      "measured": 143.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-1.y",
+      "reference": 504.0,
+      "measured": 504.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-1.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-1.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-2.x",
+      "reference": 259.0,
+      "measured": 259.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-2.y",
+      "reference": 504.0,
+      "measured": 504.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-2.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-2.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-3.x",
+      "reference": 27.0,
+      "measured": 27.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-3.y",
+      "reference": 592.0,
+      "measured": 592.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-3.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-3.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-4.x",
+      "reference": 143.0,
+      "measured": 143.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-4.y",
+      "reference": 592.0,
+      "measured": 592.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-4.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-4.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-5.x",
+      "reference": 259.0,
+      "measured": 259.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-5.y",
+      "reference": 592.0,
+      "measured": 592.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-5.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "theme-5.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "mode-0.x",
+      "reference": 107.0,
+      "measured": 107.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "mode-0.y",
+      "reference": 698.0,
+      "measured": 698.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "mode-0.width",
+      "reference": 130.8,
+      "measured": 130.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "mode-0.height",
+      "reference": 38.0,
+      "measured": 38.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "mode-1.x",
+      "reference": 237.0,
+      "measured": 237.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "mode-1.y",
+      "reference": 698.0,
+      "measured": 698.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "mode-1.width",
+      "reference": 130.8,
+      "measured": 130.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "11",
+      "control": "mode-1.height",
+      "reference": 38.0,
+      "measured": 38.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "sheet.x",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "sheet.y",
+      "reference": 274.0,
+      "measured": 274.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "sheet.width",
+      "reference": 390.0,
+      "measured": 390.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "sheet.height",
+      "reference": 570.0,
+      "measured": 570.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "tap-switch.x",
+      "reference": 310.4,
+      "measured": 311.0,
+      "deviation": 0.6
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "tap-switch.y",
+      "reference": 414.2,
+      "measured": 413.5,
+      "deviation": 0.7
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "tap-switch.width",
+      "reference": 52.1,
+      "measured": 52.0,
+      "deviation": 0.1
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "tap-switch.height",
+      "reference": 27.9,
+      "measured": 28.0,
+      "deviation": 0.1
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-0.x",
+      "reference": 27.0,
+      "measured": 27.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-0.y",
+      "reference": 507.0,
+      "measured": 506.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-0.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-0.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-1.x",
+      "reference": 143.0,
+      "measured": 143.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-1.y",
+      "reference": 507.0,
+      "measured": 506.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-1.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-1.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-2.x",
+      "reference": 259.0,
+      "measured": 259.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-2.y",
+      "reference": 507.0,
+      "measured": 506.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-2.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "theme-2.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-0.x",
+      "reference": 126.0,
+      "measured": 126.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-0.y",
+      "reference": 613.0,
+      "measured": 613.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-0.width",
+      "reference": 119.3,
+      "measured": 118.5,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-0.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-1.x",
+      "reference": 244.5,
+      "measured": 244.5,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-1.y",
+      "reference": 613.0,
+      "measured": 613.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-1.width",
+      "reference": 119.3,
+      "measured": 118.5,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-1.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-2.x",
+      "reference": 126.0,
+      "measured": 126.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-2.y",
+      "reference": 671.0,
+      "measured": 670.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-2.width",
+      "reference": 79.0,
+      "measured": 79.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-2.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-3.x",
+      "reference": 205.0,
+      "measured": 205.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-3.y",
+      "reference": 671.0,
+      "measured": 670.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-3.width",
+      "reference": 79.0,
+      "measured": 79.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-3.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-4.x",
+      "reference": 284.0,
+      "measured": 284.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-4.y",
+      "reference": 671.0,
+      "measured": 670.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-4.width",
+      "reference": 79.0,
+      "measured": 79.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "segment-4.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "margin-track.x",
+      "reference": 154.1,
+      "measured": 154.5,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "margin-track.y",
+      "reference": 798.2,
+      "measured": 798.0,
+      "deviation": 0.2
+    },
+    {
+      "kind": "Browser DOM",
+      "page": "17",
+      "control": "margin-track.height",
+      "reference": 4.6,
+      "measured": 6.0,
+      "deviation": 1.4
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "sheet.x",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "sheet.y",
+      "reference": 250.0,
+      "measured": 250.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "sheet.width",
+      "reference": 390.0,
+      "measured": 390.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "sheet.height",
+      "reference": 570.0,
+      "measured": 570.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "font-step-0.x",
+      "reference": 219.5,
+      "measured": 219.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "font-step-0.y",
+      "reference": 376.5,
+      "measured": 376.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "font-step-0.width",
+      "reference": 39.0,
+      "measured": 40.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "font-step-0.height",
+      "reference": 38.0,
+      "measured": 40.0,
+      "deviation": 2.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "font-step-1.x",
+      "reference": 327.0,
+      "measured": 327.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "font-step-1.y",
+      "reference": 376.5,
+      "measured": 376.0,
+      "deviation": 0.5
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "font-step-1.width",
+      "reference": 39.0,
+      "measured": 40.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "font-step-1.height",
+      "reference": 38.0,
+      "measured": 40.0,
+      "deviation": 2.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-0.x",
+      "reference": 27.0,
+      "measured": 27.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-0.y",
+      "reference": 480.0,
+      "measured": 480.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-0.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-0.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-1.x",
+      "reference": 143.0,
+      "measured": 143.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-1.y",
+      "reference": 480.0,
+      "measured": 480.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-1.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-1.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-2.x",
+      "reference": 259.0,
+      "measured": 259.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-2.y",
+      "reference": 480.0,
+      "measured": 480.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-2.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-2.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-3.x",
+      "reference": 27.0,
+      "measured": 27.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-3.y",
+      "reference": 568.0,
+      "measured": 568.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-3.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-3.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-4.x",
+      "reference": 143.0,
+      "measured": 143.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-4.y",
+      "reference": 568.0,
+      "measured": 568.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-4.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-4.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-5.x",
+      "reference": 259.0,
+      "measured": 259.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-5.y",
+      "reference": 568.0,
+      "measured": 568.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-5.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "theme-5.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "mode-0.x",
+      "reference": 107.0,
+      "measured": 107.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "mode-0.y",
+      "reference": 674.0,
+      "measured": 674.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "mode-0.width",
+      "reference": 130.8,
+      "measured": 130.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "mode-0.height",
+      "reference": 38.0,
+      "measured": 38.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "mode-1.x",
+      "reference": 237.0,
+      "measured": 237.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "mode-1.y",
+      "reference": 674.0,
+      "measured": 674.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "mode-1.width",
+      "reference": 130.8,
+      "measured": 130.0,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "11",
+      "control": "mode-1.height",
+      "reference": 38.0,
+      "measured": 38.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "sheet.x",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "sheet.y",
+      "reference": 250.0,
+      "measured": 250.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "sheet.width",
+      "reference": 390.0,
+      "measured": 390.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "sheet.height",
+      "reference": 570.0,
+      "measured": 570.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "tap-switch.x",
+      "reference": 310.4,
+      "measured": 311.0,
+      "deviation": 0.6
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "tap-switch.y",
+      "reference": 390.2,
+      "measured": 389.5,
+      "deviation": 0.7
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "tap-switch.width",
+      "reference": 52.1,
+      "measured": 52.0,
+      "deviation": 0.1
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "tap-switch.height",
+      "reference": 27.9,
+      "measured": 28.0,
+      "deviation": 0.1
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-0.x",
+      "reference": 27.0,
+      "measured": 27.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-0.y",
+      "reference": 483.0,
+      "measured": 482.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-0.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-0.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-1.x",
+      "reference": 143.0,
+      "measured": 143.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-1.y",
+      "reference": 483.0,
+      "measured": 482.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-1.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-1.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-2.x",
+      "reference": 259.0,
+      "measured": 259.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-2.y",
+      "reference": 483.0,
+      "measured": 482.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-2.width",
+      "reference": 104.0,
+      "measured": 104.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "theme-2.height",
+      "reference": 56.0,
+      "measured": 56.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-0.x",
+      "reference": 126.0,
+      "measured": 126.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-0.y",
+      "reference": 589.0,
+      "measured": 589.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-0.width",
+      "reference": 119.3,
+      "measured": 118.5,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-0.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-1.x",
+      "reference": 244.5,
+      "measured": 244.5,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-1.y",
+      "reference": 589.0,
+      "measured": 589.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-1.width",
+      "reference": 119.3,
+      "measured": 118.5,
+      "deviation": 0.8
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-1.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-2.x",
+      "reference": 126.0,
+      "measured": 126.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-2.y",
+      "reference": 647.0,
+      "measured": 646.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-2.width",
+      "reference": 79.0,
+      "measured": 79.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-2.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-3.x",
+      "reference": 205.0,
+      "measured": 205.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-3.y",
+      "reference": 647.0,
+      "measured": 646.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-3.width",
+      "reference": 79.0,
+      "measured": 79.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-3.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-4.x",
+      "reference": 284.0,
+      "measured": 284.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-4.y",
+      "reference": 647.0,
+      "measured": 646.0,
+      "deviation": 1.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-4.width",
+      "reference": 79.0,
+      "measured": 79.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "segment-4.height",
+      "reference": 34.0,
+      "measured": 34.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "margin-track.x",
+      "reference": 154.1,
+      "measured": 154.5,
+      "deviation": 0.4
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "margin-track.y",
+      "reference": 774.2,
+      "measured": 774.0,
+      "deviation": 0.2
+    },
+    {
+      "kind": "Native WebView DOM",
+      "page": "17",
+      "control": "margin-track.height",
+      "reference": 4.6,
+      "measured": 6.0,
+      "deviation": 1.4
+    },
+    {
+      "kind": "Native WebView",
+      "page": "10",
+      "control": "reader-viewport.x",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "10",
+      "control": "reader-viewport.y",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "10",
+      "control": "reader-viewport.width",
+      "reference": 390.0,
+      "measured": 390.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "10",
+      "control": "reader-viewport.height",
+      "reference": 820.0,
+      "measured": 820.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "11",
+      "control": "reader-viewport.x",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "11",
+      "control": "reader-viewport.y",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "11",
+      "control": "reader-viewport.width",
+      "reference": 390.0,
+      "measured": 390.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "11",
+      "control": "reader-viewport.height",
+      "reference": 820.0,
+      "measured": 820.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "17",
+      "control": "reader-viewport.x",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "17",
+      "control": "reader-viewport.y",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "17",
+      "control": "reader-viewport.width",
+      "reference": 390.0,
+      "measured": 390.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "17",
+      "control": "reader-viewport.height",
+      "reference": 820.0,
+      "measured": 820.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "18",
+      "control": "reader-viewport.x",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "18",
+      "control": "reader-viewport.y",
+      "reference": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "18",
+      "control": "reader-viewport.width",
+      "reference": 390.0,
+      "measured": 390.0,
+      "deviation": 0.0
+    },
+    {
+      "kind": "Native WebView",
+      "page": "18",
+      "control": "reader-viewport.height",
+      "reference": 844.0,
+      "measured": 844.0,
+      "deviation": 0.0
+    }
+  ]
+}

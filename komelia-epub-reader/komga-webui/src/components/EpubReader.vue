@@ -69,7 +69,7 @@
     </v-slide-y-reverse-transition>
 
     <v-navigation-drawer
-        data-komelia-chrome
+        data-komelia-chrome data-komelia-popup data-komelia-reader-contents
         v-model="showToc"
         temporary
         :width="smAndUp ? 500 : width - 50"
@@ -144,138 +144,22 @@
       </v-row>
     </v-container>
 
-    <v-bottom-sheet
-        style="max-width:500px;"
+    <reader-settings-sheet
         v-model="showSettings"
-        :close-on-content-click="false"
-        :opacity="0"
-        @keydown.esc.stop=""
-        scrollable
-    >
-      <v-card>
-        <v-toolbar data-komelia-chrome dark color="primary">
-          <v-btn icon dark :aria-label="t('bookreader.shortcuts.close')" @click="showSettings = false">
-            <v-icon :icon="mdiClose"/>
-          </v-btn>
-          <v-toolbar-title>{{ t('bookreader.reader_settings') }}</v-toolbar-title>
-        </v-toolbar>
-
-        <v-card-text class="pa-0">
-          <v-list class="full-height full-width">
-            <v-list-subheader class="font-weight-black text-h6">{{
-                t('bookreader.settings.general')
-              }}
-            </v-list-subheader>
-            <v-list-item v-if="fixedLayout">
-              <settings-select
-                  :items="readingDirs"
-                  v-model="readingDirection"
-                  :label="t('bookreader.settings.reading_mode')"
-              />
-            </v-list-item>
-
-            <v-list-item>
-              <v-switch
-                  v-model="navigationClick"
-                  :label="t('epubreader.settings.tap_to_turn')"
-                  color="primary"
-                  hide-details
-              />
-            </v-list-item>
-
-            <v-list-subheader class="font-weight-black text-h6">{{
-                t('bookreader.settings.display')
-              }}
-            </v-list-subheader>
-
-            <v-list-item>
-              <v-row>
-                <v-col align-self="center">
-                  <span>{{ t('epubreader.settings.viewing_theme') }}</span>
-                </v-col>
-                <v-col align-self="center">
-                  <v-btn
-                      v-for="(a, i) in appearances"
-                      :key="i"
-                      :value="a.value"
-                      :color="a.color"
-                      :class="a.class"
-                      class="mx-1"
-                      @click="appearance = a.value"
-                  >
-                    <v-icon :icon="mdiCheck" v-if="appearance === a.value"/>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-list-item>
-
-            <v-list-item v-if="!fixedLayout">
-              <v-row>
-                <v-col align-self="center">
-                  <span>{{ t('epubreader.settings.layout') }}</span>
-                </v-col>
-
-                <v-col align-self="center">
-                  <v-btn-toggle mandatory v-model="verticalScroll">
-                    <v-btn :value="true">{{ t('epubreader.settings.layout_scroll') }}</v-btn>
-                    <v-btn :value="false">{{ t('epubreader.settings.layout_paginated') }}</v-btn>
-                  </v-btn-toggle>
-                </v-col>
-              </v-row>
-
-            </v-list-item>
-
-            <v-list-item v-if="!verticalScroll">
-              <v-row>
-                <v-col align-self="center">
-                  <span>{{ t('epubreader.settings.column_count') }}</span>
-                </v-col>
-
-                <v-col align-self="center">
-                  <v-btn-toggle mandatory v-model="columnCount">
-                    <v-btn v-for="(c, i) in columnCounts" :key="i" :value="c.value">{{ c.text }}</v-btn>
-                  </v-btn-toggle>
-                </v-col>
-              </v-row>
-            </v-list-item>
-
-            <v-list-item class="d-flex justify-center">
-              <v-btn depressed @click="fontSize-=10">
-                <v-icon :icon="mdiFormatTitle" small/>
-              </v-btn>
-              <span class="caption mx-8" style="width: 2rem">{{ fontSize }}%</span>
-              <v-btn depressed @click="fontSize+=10">
-                <v-icon :icon="mdiFormatTitle"/>
-              </v-btn>
-            </v-list-item>
-
-            <v-list-item class="d-flex justify-center">
-              <v-btn depressed @click="lineHeight-=.1">
-                <v-icon>
-                  <IconFormatLineSpacingDown/>
-                </v-icon>
-              </v-btn>
-              <span class="caption mx-8" style="width: 2rem">{{ Math.round(lineHeight * 100) }}%</span>
-              <v-btn depressed @click="lineHeight+=.1">
-                <v-icon :icon="mdiFormatLetterSpacing"/>
-              </v-btn>
-            </v-list-item>
-
-            <v-list-item>
-              <v-slider
-                  v-model="pageMargins"
-                  :label="t('epubreader.settings.page_margins')"
-                  min="0.5"
-                  max="4"
-                  step="0.25"
-                  show-ticks="always"
-                  tick-size="3"
-              />
-            </v-list-item>
-          </v-list>
-        </v-card-text>
-      </v-card>
-    </v-bottom-sheet>
+        v-model:font-size="fontSize"
+        v-model:line-height="lineHeight"
+        v-model:appearance="appearance"
+        v-model:vertical-scroll="verticalScroll"
+        v-model:column-count="columnCount"
+        v-model:reading-direction="readingDirection"
+        v-model:navigation-click="navigationClick"
+        v-model:page-margins="pageMargins"
+        :theme="chromeTheme"
+        :fixed-layout="fixedLayout"
+        :appearances="appearances"
+        :reading-dirs="readingDirs"
+        :column-counts="columnCounts"
+    />
 
     <v-snackbar
         v-model="notification.enabled"
@@ -308,22 +192,17 @@ import TocList from '@/components/TocList.vue'
 import EpubReaderToolbar from '@/components/EpubReaderToolbar.vue'
 import {flattenToc} from '@/functions/toc'
 import ShortcutHelpDialog from '@/components/ShortcutHelpDialog.vue'
-import SettingsSelect from '@/components/SettingsSelect.vue'
+import ReaderSettingsSheet from '@/components/ReaderSettingsSheet.vue'
 import {navigateChapterAtScrollBoundary, setupChapterScrollNavigation} from '@/functions/chapterScrollNavigation'
 import {BookSiblingState, BookSiblings, SiblingStatus} from '@/functions/bookSiblingState'
 import {createR2Progression, r2ProgressionToReadingPosition} from '@/functions/readium'
 import {useDisplay, useRtl} from "vuetify";
 import {EpubReaderSettings} from "@/types/epub-reader-settings";
 import {externalFunctions} from "@/main";
-import IconFormatLineSpacingDown from "@/components/IconFormatLineSpacingDown.vue";
 import {
-  mdiCheck,
   mdiChevronLeft,
   mdiChevronRight,
-  mdiClose,
   mdiEiffelTower,
-  mdiFormatLetterSpacing,
-  mdiFormatTitle,
   mdiNumeric,
   mdiRedo,
   mdiTableOfContents,
@@ -360,9 +239,13 @@ const showToolbars = ref(false)
 const showToc = ref(false)
 const showHelp = ref(false)
 const isOverflowMenuOpen = ref(false)
-watch([showToolbars, showSettings, showToc], states => {
+const chromeTheme = ref<'light' | 'dark'>('dark')
+watch([showToolbars, showSettings, showToc], async states => {
   if (!states[0]) isOverflowMenuOpen.value = false
-  if (states.some(Boolean)) void refreshChromeAppearance()
+  if (states.some(Boolean)) {
+    const appearance = await refreshChromeAppearance()
+    chromeTheme.value = appearance.theme === 'LIGHT' ? 'light' : 'dark'
+  }
 })
 const readerLoading = ref(true)
 let readerLoadGeneration = 0
@@ -645,8 +528,8 @@ const verticalScroll = computed({
   },
 })
 const columnCount = computed({
-  get(): boolean {
-    return settings.columnCount as any
+  get(): string {
+    return settings.columnCount
   },
   set(value: string): void {
     if (columnCounts.value.map(x => x.value).includes(value)) {
@@ -657,9 +540,8 @@ const columnCount = computed({
   },
 })
 const readingDirection = computed({
-  get(): boolean {
-    let direction = settings.direction
-    return direction as any
+  get(): string {
+    return settings.direction
   },
   set(value: string): void {
     if (readingDirs.value.map(x => x.value).includes(value)) {

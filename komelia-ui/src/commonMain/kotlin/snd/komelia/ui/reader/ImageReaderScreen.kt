@@ -86,7 +86,7 @@ class ImageReaderScreen(
     private val markReadProgress: Boolean = true,
 ) : Screen {
 
-    override val key: ScreenKey = bookId.value
+    override val key: ScreenKey = "image-reader:${bookId.value}:${if (markReadProgress) "tracked" else "incognito"}"
 
     @Composable
     override fun Content() {

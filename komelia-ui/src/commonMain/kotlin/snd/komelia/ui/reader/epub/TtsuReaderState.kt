@@ -93,6 +93,7 @@ class TtsuReaderState(
     private val epubLoadTask = CompletableDeferred<TtuEpubData>()
     private var epubLoadJob: Job? = null
     private var webviewLoadJob: Job? = null
+    private var exitSession = TtuExitSession()
     private val availableSystemFonts = MutableStateFlow<List<String>>(emptyList())
     private val selectedFontFile = MutableStateFlow<PlatformFile?>(null)
     private val navigator = MutableStateFlow<Navigator?>(null)
@@ -125,16 +126,20 @@ class TtsuReaderState(
     }
 
     override fun onWebviewCreated(webview: KomeliaWebview) {
+        exitSession.retire()
+        val session = TtuExitSession()
+        exitSession = session
         this.webview.value = webview
         webviewLoadJob?.cancel()
-        webviewLoadJob = coroutineScope.launch { loadEpub(webview) }
+        webviewLoadJob = coroutineScope.launch { loadEpub(webview, session) }
     }
 
     override fun onBackButtonPress() {
-        closeWebview()
+        if (!exitSession.requestExit()) closeWebview()
     }
 
     override fun closeWebview() {
+        if (!exitSession.retire()) return
         webview.value?.close()
         if (platformType == PlatformType.MOBILE) windowState.setFullscreen(false)
 
@@ -149,6 +154,7 @@ class TtsuReaderState(
     }
 
     override fun dispose() {
+        exitSession.retire()
         webviewLoadJob?.cancel()
         epubLoadJob?.cancel()
         if (!epubLoadTask.isCompleted) epubLoadTask.cancel()
@@ -159,7 +165,8 @@ class TtsuReaderState(
     }
 
     @OptIn(ExperimentalResourceApi::class)
-    private suspend fun loadEpub(webview: KomeliaWebview) {
+    private suspend fun loadEpub(webview: KomeliaWebview, session: TtuExitSession) {
+        webview.bind<Unit, Boolean>("waitForReaderExit") { session.awaitRequest() }
         webview.bind<Unit, String>("getCurrentBookId") { bookId.value.value }
         webview.bind<Unit, String?>("getLocale") { localeTag }
         webview.bind<Unit, TtuBookData>("getBookData") {
@@ -192,7 +199,7 @@ class TtsuReaderState(
         }
         webview.bind<Unit, TtuBookmarkData>("getBookmark") { getBookmark() }
 
-        webview.bind<TtuBookmarkData, Unit>("putBookmark") { putBookmark(it) }
+        webview.bind<TtuBookmarkData, Unit>("putBookmark") { if (markReadProgress) putBookmark(it) }
 
         webview.bind<Unit, Unit>("closeBook") { closeWebview() }
 

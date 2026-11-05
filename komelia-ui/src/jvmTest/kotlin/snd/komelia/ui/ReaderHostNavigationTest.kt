@@ -17,8 +17,10 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import snd.komelia.ui.book.BookScreen
 import snd.komelia.ui.reader.EpubScreen
+import snd.komelia.ui.reader.ImageReaderScreen
 import snd.komga.client.book.KomgaBookId
 
 class ReaderHostNavigationTest {
@@ -85,6 +87,18 @@ class ReaderHostNavigationTest {
             host.pop()
         }
         compose.runOnIdle { assertSame(tab, host.lastItem) }
+    }
+
+    @Test fun normalAndIncognitoReadersHaveSeparateScreenModels() {
+        val bookId = KomgaBookId("synthetic-book")
+        val context = BookSiblingsContext.Series
+        val regularEpub = EpubScreen(bookId, context, markReadProgress = true)
+        val incognitoEpub = EpubScreen(bookId, context, markReadProgress = false)
+        val regularImage = ImageReaderScreen(bookId, bookSiblingsContext = context, markReadProgress = true)
+        val incognitoImage = ImageReaderScreen(bookId, bookSiblingsContext = context, markReadProgress = false)
+
+        assertNotEquals(regularEpub.key, incognitoEpub.key)
+        assertNotEquals(regularImage.key, incognitoImage.key)
     }
 
     private class ModelFixture(override val key: String, val tag: String, val disposed: MutableList<String>) : Screen {

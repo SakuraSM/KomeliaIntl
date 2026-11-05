@@ -40,7 +40,7 @@ class EpubScreen(
     private var initialChapterHref: String? = null,
 ) : Screen {
 
-    override val key: ScreenKey = bookId.value
+    override val key: ScreenKey = "epub-reader:${bookId.value}:${if (markReadProgress) "tracked" else "incognito"}"
 
     @Composable
     override fun Content() {
@@ -82,7 +82,7 @@ class EpubScreen(
                         val book = state.value.book.collectAsState().value
                         TitleBarContent(
                             title = book?.metadata?.title ?: "",
-                            onExit = { state.value.closeWebview() }
+                            onExit = { state.value.onBackButtonPress() }
                         )
                     }
                 }

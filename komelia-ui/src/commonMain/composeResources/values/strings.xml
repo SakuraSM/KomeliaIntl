@@ -349,6 +349,11 @@
     <string name="series_tab_books">Books</string>
     <string name="series_tab_collections">Collections</string>
     <string name="series_no_books">No books</string>
+    <string name="series_no_books_matching_filters">No books match these filters</string>
+    <string name="library_no_series">No series available</string>
+    <string name="library_no_series_body">Add books to a library to see them here.</string>
+    <string name="library_no_series_matching_filters">No series match these filters</string>
+    <string name="library_no_series_matching_filters_body">Adjust the filters and try again.</string>
     <string name="series_book_selection_mode">Click on items to select or deselect them</string>
     <plurals name="series_books_count">
         <item quantity="one">%1$s book</item>

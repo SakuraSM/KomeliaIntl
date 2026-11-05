@@ -70,6 +70,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_fil
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_filters
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_book_selection_mode
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_no_books
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_no_books_matching_filters
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
@@ -150,6 +151,7 @@ fun LazyGridScope.SeriesBooksContent(
         }
         BooksContent(
             books = booksState.books,
+            booksFilterState = booksFilterState,
             onBookClick = onBookClick,
             onBookReadClick = onBookReadClick,
             bookMenuActions = bookContextMenuActions,
@@ -201,6 +203,7 @@ private fun LoadIndicator() {
 
 private fun LazyGridScope.BooksContent(
     books: List<KomeliaBook>,
+    booksFilterState: BooksFilterState,
     onBookClick: (KomeliaBook) -> Unit,
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
     bookMenuActions: BookMenuActions,
@@ -214,7 +217,13 @@ private fun LazyGridScope.BooksContent(
 ) {
     if (books.isEmpty()) {
         item(span = { GridItemSpan(maxLineSpan) }) {
-            Text(stringResource(Res.string.series_no_books), modifier = Modifier.fillMaxWidth())
+            val filter by booksFilterState.state.collectAsState()
+            val hasFilters = filter.readStatus.isNotEmpty() || filter.includeTags.isNotEmpty() ||
+                filter.excludeTags.isNotEmpty() || filter.authors.isNotEmpty()
+            Text(
+                stringResource(if (hasFilters) Res.string.series_no_books_matching_filters else Res.string.series_no_books),
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     } else
         when (layout) {

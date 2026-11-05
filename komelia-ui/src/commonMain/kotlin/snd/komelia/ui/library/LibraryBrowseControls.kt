@@ -17,6 +17,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -31,37 +32,67 @@ import snd.komga.client.book.KomgaReadStatus
 @Composable
 internal fun LibraryBrowseControls(state: LibrarySeriesTabState) {
     val filter by state.filterState.state.collectAsState()
-    val colors = MaterialTheme.colorScheme
     val selectedStatuses = filter.readStatus.map { stringResource(AppStrings.forSeriesReadStatus(it)) }
-    Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = ReadingDesign.browseInset),
-        verticalAlignment = Alignment.CenterVertically) {
-        BrowseChoice(
-            label = if (filter.readStatus.isEmpty()) stringResource(Res.string.browse_all_status)
-                else selectedStatuses.joinToString(" · "),
-            modifier = Modifier.weight(1f),
-        ) { dismiss ->
-            DropdownMenuItem(text = { Text(stringResource(Res.string.browse_all_status)) }, onClick = {
-                filter.readStatus.forEach(state.filterState::onReadStatusSelect)
-                dismiss()
-            })
-            KomgaReadStatus.entries.forEach { status ->
-                DropdownMenuItem(
-                    text = { Text(stringResource(AppStrings.forSeriesReadStatus(status))) },
-                    trailingIcon = if (status in filter.readStatus) ({ Icon(Icons.Rounded.Check, null) }) else null,
-                    onClick = { state.filterState.onReadStatusSelect(status) },
-                )
+    val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val wrapControls = maxWidth < 360.dp * fontScale
+        Column {
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = ReadingDesign.browseInset),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                BrowseChoice(
+                    label = if (filter.readStatus.isEmpty()) stringResource(Res.string.browse_all_status)
+                        else selectedStatuses.joinToString(" · "),
+                    modifier = Modifier.weight(1f),
+                ) { dismiss ->
+                    DropdownMenuItem(text = { Text(stringResource(Res.string.browse_all_status)) }, onClick = {
+                        filter.readStatus.forEach(state.filterState::onReadStatusSelect)
+                        dismiss()
+                    })
+                    KomgaReadStatus.entries.forEach { status ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(AppStrings.forSeriesReadStatus(status))) },
+                            trailingIcon = if (status in filter.readStatus) ({ Icon(Icons.Rounded.Check, null) }) else null,
+                            onClick = { state.filterState.onReadStatusSelect(status) },
+                        )
+                    }
+                }
+                BrowseChoice(stringResource(AppStrings.forSeriesSort(filter.sortOrder)), Modifier.weight(if (wrapControls) 1.6f else 1.1f)) { dismiss ->
+                    LibrarySeriesTabState.SeriesSort.entries.forEach { sort ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(AppStrings.forSeriesSort(sort))) },
+                            trailingIcon = if (sort == filter.sortOrder) ({ Icon(Icons.Rounded.Check, null) }) else null,
+                            onClick = {
+                                state.filterState.onSortOrderChange(sort)
+                                dismiss()
+                            },
+                        )
+                    }
+                }
+                if (!wrapControls) LibraryCountAndDisplayControls(state)
+            }
+            if (wrapControls) {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = ReadingDesign.browseInset),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    LibraryCountAndDisplayControls(state)
+                }
             }
         }
-        BrowseChoice(stringResource(AppStrings.forSeriesSort(filter.sortOrder)), Modifier.weight(1.1f)) { dismiss ->
-            LibrarySeriesTabState.SeriesSort.entries.forEach { sort ->
-                DropdownMenuItem(text = { Text(stringResource(AppStrings.forSeriesSort(sort))) },
-                    trailingIcon = if (sort == filter.sortOrder) ({ Icon(Icons.Rounded.Check, null) }) else null,
-                    onClick = { state.filterState.onSortOrderChange(sort); dismiss() })
-            }
-        }
+    }
+}
+
+@Composable
+private fun LibraryCountAndDisplayControls(state: LibrarySeriesTabState) {
+    val colors = MaterialTheme.colorScheme
+    val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Text(pluralStringResource(Res.plurals.series_list_series_count, state.totalSeriesCount, state.totalSeriesCount),
             style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant,
-            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 60.dp))
+            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 60.dp * fontScale))
         IconButton(onClick = { state.onListChange(false) }, Modifier.size(48.dp).semantics { selected = !state.isList }) {
             Icon(Icons.Rounded.GridView, stringResource(Res.string.browse_grid), Modifier.size(20.dp),
                 tint = if (!state.isList) colors.primary else colors.onSurfaceVariant)

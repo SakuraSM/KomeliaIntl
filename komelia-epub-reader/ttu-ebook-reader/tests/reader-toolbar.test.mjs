@@ -9,6 +9,41 @@ const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 const chromeStyles = await readFile(new URL('../../shared/chrome-appearance.css', import.meta.url), 'utf8');
 
+test('reader edge controls reveal on pointer or keyboard focus without covering text at rest', async () => {
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-edge.fixture.ts');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport: {width: 1280, height: 800}});
+    await page.goto(`${server.url}?surface=glass`);
+    const previous = page.locator('button[data-komelia-chrome][aria-label="Previous page"]');
+    const next = page.locator('button[data-komelia-chrome][aria-label="Next page"]');
+    await previous.waitFor({state: 'attached'});
+    assert.equal(await previous.evaluate(node => getComputedStyle(node).opacity), '0');
+    assert.equal(await next.evaluate(node => getComputedStyle(node).opacity), '0');
+    await previous.hover();
+    await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('button[data-komelia-chrome][aria-label="Previous page"]')).opacity) > 0.99);
+    await previous.click();
+    assert.equal(await page.locator('output').textContent(), 'previous');
+    await page.mouse.move(640, 100);
+    await page.keyboard.press('Tab');
+    await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('button[data-komelia-chrome][aria-label="Next page"]')).opacity) > 0.99);
+    await page.keyboard.press('Enter');
+    assert.equal(await page.locator('output').textContent(), 'next');
+
+    const touch = await browser.newPage({viewport: {width: 1280, height: 800}, hasTouch: true, isMobile: true});
+    await touch.goto(`${server.url}?footer&surface=glass`);
+    const touchEdge = touch.locator('button[data-komelia-chrome][aria-label="Previous page"]');
+    await touchEdge.waitFor({state: 'attached'});
+    assert.equal(await touchEdge.evaluate(node => getComputedStyle(node).display), 'none');
+    const footerPrevious = touch.locator('#ttu-page-footer button[aria-label="Previous page"]');
+    await footerPrevious.click();
+    assert.equal(await touch.locator('output').textContent(), 'previous');
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});
+
 test('EPUB chrome uses the approved floating inset while keeping its touch targets', async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROME_BIN });
   try {

@@ -39,6 +39,8 @@ Risk points: optional service failures replacing useful catalog content, local I
 
 Each `MainScreen` owns a serializable navigation identity. A new login gets a new identity; Activity recreation retains the current one. `SessionNavigators` retains destination navigators while a reader hides their composition and disposes their screen models when the owning main-screen session ends. Unconditionally disposing nested navigators on composition removal would also destroy the reader's return stack.
 
+`MainScreenViewModel` applies early deletion events after the active navigator is available. A series-deletion event leaves the current series or one-shot screen only when its ID matches the deleted series.
+
 1. Load the primary remote URL and optional LAN URL from settings.
 2. When automatic switching is enabled, probe the LAN endpoint without replacing the primary configuration.
 3. Use LAN while reachable; otherwise use the primary remote endpoint.

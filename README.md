@@ -45,17 +45,19 @@ Android and desktop can add a local folder without signing in to Komga. Komelia 
 
 I maintain this repository independently. I track upstream Komelia and aim to ship an iteration about once a week. The schedule may shift based on upstream changes, test results, and available time. Thanks for using Komelia Intl.
 
-## Supported targets
+## Build targets
 
 The source tree contains these build targets. A GitHub Release can contain only the platforms built for that version, so use its **Assets** list as the source of truth.
+
+macOS launch currently fails because the native image decoder and WebView require platform support.
 
 | Target | Gradle task | Typical package |
 |---|---|---|
 | Android | `androidRelease` | APK |
 | Windows x86_64 | `desktopMsi` | MSI |
 | Linux x86_64 | `desktopDeb` | DEB |
-| macOS | `desktopDmg` | DMG |
-| Desktop on the current OS | `desktopJar` | JAR |
+| macOS (build target only) | `desktopDmg` | DMG |
+| Desktop on Windows or Linux | `desktopJar` | JAR |
 | Browser, WebAssembly | `komfWebUI` | Static web files |
 | Komf extension for Chrome | `komfExtensionChrome` | ZIP |
 | Komf extension for Firefox | `komfExtensionFirefox` | ZIP |

@@ -45,17 +45,19 @@ Android 与桌面端无需登录 Komga 即可添加本地文件夹。Komelia 会
 
 本项目由我个人独立维护。我会持续跟进并同步上游 Komelia 的改动，以约一周一个迭代为目标。迭代时间会根据上游改动规模、测试结果和个人时间调整。感谢使用 Komelia Intl。
 
-## 支持的平台
+## 构建目标
 
 源码包含下列构建目标。每个 GitHub Release 只会附带该版本实际构建的平台，请以 Release 页的 **Assets** 列表为准。
+
+macOS 原生解码器和 WebView 仍需适配，当前应用在 macOS 上无法启动。
 
 | 平台 | Gradle 任务 | 常见产物 |
 |---|---|---|
 | Android | `androidRelease` | APK |
 | Windows x86_64 | `desktopMsi` | MSI |
 | Linux x86_64 | `desktopDeb` | DEB |
-| macOS | `desktopDmg` | DMG |
-| 当前操作系统的桌面端 | `desktopJar` | JAR |
+| macOS（仅有构建目标） | `desktopDmg` | DMG |
+| Windows 或 Linux 桌面端 | `desktopJar` | JAR |
 | 浏览器、WebAssembly | `komfWebUI` | 静态网页文件 |
 | Chrome 版 Komf 扩展 | `komfExtensionChrome` | ZIP |
 | Firefox 版 Komf 扩展 | `komfExtensionFirefox` | ZIP |

@@ -74,7 +74,7 @@ Risk points: partial files, cancellation, record/file divergence, missing error 
 5. Image/PDF pages and EPUB resources are served through the existing offline reader APIs. Local EPUB manifest links are resolved to the internal book-resource route before reaching either EPUB reader.
 6. Startup scanning and Android WorkManager discover later changes according to the stored scan interval.
 
-The Local screen reloads its current page when revisited, so reading progress reflects changes made in a reader without starting a folder scan.
+The Local screen reloads its current page when revisited, so reading progress reflects changes made in a reader without starting a folder scan. Search and filter changes start a new load without waiting for an obsolete database read; only the latest matching result updates the list.
 
 Risk points: revoked folder permissions, unstable IDs after moving files, archive path encoding, relative EPUB resources, duplicate scans, unsupported desktop PDF extraction, and accidentally treating local source files as app-owned cache.
 

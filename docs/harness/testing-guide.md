@@ -135,7 +135,7 @@ For chapter navigation, run `LocalFirstBookApiTest`, `ReaderSiblingTest`, `Reade
 
 For Android provider compatibility, run `SafChannelTest` and `AndroidArchiveAccessTest` on a dedicated emulator. These cover seekable and pipe-backed providers, bounded temporary copies, cache eviction, corrupt archives, permissions, free-space limits, and cancellation cleanup. Also import and open a CBZ and EPUB through the real folder picker. Preserve existing app data during package installation.
 
-`LocalContentProgressRefreshTest` checks that returning to Local reloads reading progress without resetting its page or duplicating filter listeners. Repeat the return flow on Android using a local book.
+`LocalContentProgressRefreshTest` checks progress refresh on return, listener lifecycle, search during initial load, delayed results and errors, and a non-cancellable old read. Repeat the return and search flows on Android using local books.
 
 For local-series navigation, SQLite `LocalLibraryManagerIntegrationTest` checks local single-book and multi-book series with a non-root server user selected, including pagination, read-status filtering, current-user progress and exclusion of other servers' downloads. `OneshotEmptySeriesTest` checks empty results, request failures, manual retry and series-event reload. Repeat a local series-card click on Android with the same selected user; opening a book directly or testing only root misses this path.
 

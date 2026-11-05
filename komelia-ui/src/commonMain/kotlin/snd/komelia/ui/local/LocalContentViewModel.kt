@@ -4,9 +4,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import snd.komelia.ui.settings.offline.downloads.OfflineDownloadsState
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.Eagerly
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -50,40 +53,48 @@ class LocalContentViewModel(
     val sort = MutableStateFlow(LocalHomeBookSort.RECENTLY_ADDED)
     val currentPage = MutableStateFlow(1)
     val totalPages = MutableStateFlow(1)
+    private var listenersStarted = false
+    private var latestRequest = 0L
     private val sourceRefresh = LocalContentRefreshCoordinator(
         scanSources = { localLibraryManager?.scanAll() },
         reloadIndex = { loadPage(currentPage.value) },
     )
 
     suspend fun initialize() {
-        if (state.value !is LoadState.Uninitialized) {
-            loadPage(currentPage.value)
-            return
-        }
-        loadPage(1)
-        screenModelScope.launch {
-            combine(query.debounce(350), source, sort) { query, source, sort ->
-                LocalContentQuery(query.trim(), source, sort)
-            }
-                .distinctUntilChanged()
-                .drop(1)
-                .collect { loadPage(1) }
-        }
-        localLibraryManager?.let { manager ->
+        val page = if (state.value is LoadState.Uninitialized) 1 else currentPage.value
+        val initialQuery = currentQuery()
+        if (!listenersStarted) {
+            listenersStarted = true
             screenModelScope.launch {
-                manager.scanState
-                    .drop(1)
-                    .collect { scanState ->
-                        if (
-                            !sourceRefresh.isRefreshing &&
-                            scanState.scanningLibraryId == null &&
-                            scanState.error == null
-                        ) {
-                            loadPage(1)
-                        }
+                var filterJob: Job? = null
+                combine(query.debounce(350), source, sort) { query, source, sort ->
+                    LocalContentQuery(query.trim(), source, sort)
+                }
+                    .distinctUntilChanged()
+                    .dropWhile { it == initialQuery }
+                    .collect { filter ->
+                        // Database reads can be non-cancellable; do not wait for the old job to finish.
+                        filterJob?.cancel()
+                        filterJob = screenModelScope.launch { loadPage(1, filter) }
                     }
             }
+            localLibraryManager?.let { manager ->
+                screenModelScope.launch {
+                    manager.scanState
+                        .drop(1)
+                        .collect { scanState ->
+                            if (
+                                !sourceRefresh.isRefreshing &&
+                                scanState.scanningLibraryId == null &&
+                                scanState.error == null
+                            ) {
+                                loadPage(1)
+                            }
+                        }
+                }
+            }
         }
+        loadPage(page, initialQuery)
     }
 
     fun reload() {
@@ -116,25 +127,34 @@ class LocalContentViewModel(
         sort.value = value
     }
 
-    private suspend fun loadPage(page: Int) {
+    private fun currentQuery() = LocalContentQuery(query.value.trim(), source.value, sort.value)
+
+    private suspend fun loadPage(page: Int, filter: LocalContentQuery = currentQuery()) {
+        val request = ++latestRequest
         mutableState.value = LoadState.Loading
-        val result = appNotifications.runCatchingToNotifications {
-            availableBooksRepository?.getBooks(
-                source = source.value,
-                query = query.value,
-                pageRequest = sort.value.pageRequest().copy(
+        try {
+            val loadedPage = availableBooksRepository?.getBooks(
+                source = filter.source,
+                query = filter.query,
+                pageRequest = filter.sort.pageRequest().copy(
                     pageIndex = (page - 1).coerceAtLeast(0),
                     size = LOCAL_CONTENT_PAGE_SIZE,
                     unpaged = false,
                 ),
             )
-        }
-        result.onSuccess { loadedPage ->
+            if (request != latestRequest || filter != currentQuery()) return
             books.value = loadedPage?.content.orEmpty()
             currentPage.value = loadedPage?.number?.plus(1) ?: 1
             totalPages.value = loadedPage?.totalPages?.coerceAtLeast(1) ?: 1
             mutableState.value = LoadState.Success(Unit)
-        }.onFailure { mutableState.value = LoadState.Error(it) }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Throwable) {
+            if (request == latestRequest && filter == currentQuery()) {
+                mutableState.value = LoadState.Error(error)
+                appNotifications.addErrorNotification(error)
+            }
+        }
     }
 
     fun bookMenuActions() = BookMenuActions(

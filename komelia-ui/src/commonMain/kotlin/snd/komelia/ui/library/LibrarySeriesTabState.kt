@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.BufferOverflow
@@ -53,6 +54,8 @@ class LibrarySeriesTabState(
         private set
     var totalSeriesCount by mutableStateOf(0)
         private set
+    internal var loadedFilter by mutableStateOf<SeriesFilter?>(null)
+        private set
     var currentSeriesPage by mutableStateOf(1)
         private set
 
@@ -73,6 +76,7 @@ class LibrarySeriesTabState(
 
     private val reloadEventsEnabled = MutableStateFlow(true)
     private val reloadJobsFlow = MutableSharedFlow<Unit>(1, 0, BufferOverflow.DROP_OLDEST)
+    private var latestRequest = 0L
 
     fun initialize(filter: SeriesScreenFilter? = null) {
         if (state.value !is LoadState.Uninitialized) return
@@ -142,19 +146,30 @@ class LibrarySeriesTabState(
     }
 
     private suspend fun loadSeriesPage(page: Int) {
-        notifications.runCatchingToNotifications {
-            val loadStateDelay = delayLoadState()
+        val request = ++latestRequest
+        val filter = filterState.state.value
+        val loadStateDelay = delayLoadState(request, filter)
+        try {
             currentSeriesPage = page
-            val seriesPage = getAllSeries(page, filterState.state.value)
-
-            loadStateDelay.cancel()
+            val seriesPage = getAllSeries(page, filter)
+            if (request != latestRequest || filter != filterState.state.value) return
 
             currentSeriesPage = seriesPage.number + 1
             totalSeriesPages = seriesPage.totalPages
             totalSeriesCount = seriesPage.totalElements
             series = seriesPage.content
+            loadedFilter = filter
             mutableState.value = LoadState.Success(Unit)
-        }.onFailure { mutableState.value = LoadState.Error(it) }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Throwable) {
+            if (request == latestRequest && filter == filterState.state.value) {
+                mutableState.value = LoadState.Error(error)
+                notifications.addErrorNotification(error)
+            }
+        } finally {
+            loadStateDelay.cancel()
+        }
     }
 
     private suspend fun getAllSeries(
@@ -177,10 +192,12 @@ class LibrarySeriesTabState(
         )
     }
 
-    private fun delayLoadState(): Deferred<Unit> {
+    private fun delayLoadState(request: Long, filter: SeriesFilter): Deferred<Unit> {
         return screenModelScope.async {
             delay(200)
-            if (state.value !is LoadState.Error) mutableState.value = LoadState.Loading
+            if (request == latestRequest && filter == filterState.state.value && state.value !is LoadState.Error) {
+                mutableState.value = LoadState.Loading
+            }
         }
     }
 

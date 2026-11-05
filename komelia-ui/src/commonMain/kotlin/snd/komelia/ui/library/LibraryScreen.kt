@@ -250,9 +250,9 @@ class LibraryScreen(
             )
 
             else -> {
-                val loading = state is Loading || state is Uninitialized
                 val editMode by seriesTabState.isInEditMode.collectAsState()
                 val filter by seriesTabState.filterState.state.collectAsState()
+                val loading = state is Loading || state is Uninitialized || filter != seriesTabState.loadedFilter
                 Column {
                     LibraryBrowseControls(seriesTabState)
                     CompositionLocalProvider(LocalKomeliaLayout provides LocalKomeliaLayout.current.copy(pageHorizontalPadding = ReadingDesign.browseInset)) {

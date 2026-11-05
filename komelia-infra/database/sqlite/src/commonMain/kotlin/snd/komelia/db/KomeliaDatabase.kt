@@ -11,6 +11,8 @@ import org.sqlite.SQLiteDataSource
 import snd.komelia.db.migrations.AppMigrations
 import snd.komelia.db.migrations.MigrationResourcesProvider
 import snd.komelia.db.migrations.OfflineMigrations
+import java.sql.Connection
+import java.sql.SQLException
 import javax.sql.DataSource
 
 
@@ -63,7 +65,7 @@ class KomeliaDatabase(databaseDir: String) {
         flywayMigrate(offlineWriteDatasource, OfflineMigrations())
 
         app = Database.connect(appDatasource)
-        offline = Database.connect(offlineWriteDatasource)
+        offline = Database.connect(SqliteTransactionDataSource(offlineWriteDatasource))
         offlineReadOnly = Database.connect(
             datasource = offlineReadOnlyDatasource,
             databaseConfig = DatabaseConfig { defaultReadOnly = true }
@@ -80,5 +82,25 @@ class KomeliaDatabase(databaseDir: String) {
                 .resourceProvider(resourcesProvider)
                 .javaMigrationClassProvider(resourcesProvider)
         ).migrate()
+    }
+}
+
+private class SqliteTransactionDataSource(private val pool: HikariDataSource) : DataSource by pool {
+    override fun getConnection(): Connection = protect(pool.connection)
+
+    override fun getConnection(username: String?, password: String?): Connection =
+        protect(pool.getConnection(username, password))
+
+    private fun protect(connection: Connection): Connection = object : Connection by connection {
+        override fun setAutoCommit(autoCommit: Boolean) {
+            try {
+                connection.autoCommit = autoCommit
+            } catch (error: SQLException) {
+                // SQLite JDBC changes its auto-commit flag before BEGIN can fail.
+                // A failed BEGIN therefore leaves this pooled connection unusable.
+                if (!autoCommit) pool.evictConnection(connection)
+                throw error
+            }
+        }
     }
 }

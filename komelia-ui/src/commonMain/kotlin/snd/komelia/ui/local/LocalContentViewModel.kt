@@ -56,7 +56,10 @@ class LocalContentViewModel(
     )
 
     suspend fun initialize() {
-        if (state.value !is LoadState.Uninitialized) return
+        if (state.value !is LoadState.Uninitialized) {
+            loadPage(currentPage.value)
+            return
+        }
         loadPage(1)
         screenModelScope.launch {
             combine(query.debounce(350), source, sort) { query, source, sort ->

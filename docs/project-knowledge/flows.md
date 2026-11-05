@@ -74,6 +74,8 @@ Risk points: partial files, cancellation, record/file divergence, missing error 
 5. Image/PDF pages and EPUB resources are served through the existing offline reader APIs. Local EPUB manifest links are resolved to the internal book-resource route before reaching either EPUB reader.
 6. Startup scanning and Android WorkManager discover later changes according to the stored scan interval.
 
+The Local screen reloads its current page when revisited, so reading progress reflects changes made in a reader without starting a folder scan.
+
 Risk points: revoked folder permissions, unstable IDs after moving files, archive path encoding, relative EPUB resources, duplicate scans, unsupported desktop PDF extraction, and accidentally treating local source files as app-owned cache.
 
 Android and desktop comic import and reading share `ComicArchiveService` through the JVM shared source set. Filename extensions discover candidates, including 7z and CB7; signatures select ZIP, RAR or 7z. A renamed archive retains its real media type and source identity. EPUB remains ZIP-only and keeps its publication validation; PDF uses its existing platform path.

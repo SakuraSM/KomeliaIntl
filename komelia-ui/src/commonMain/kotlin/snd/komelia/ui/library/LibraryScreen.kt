@@ -22,6 +22,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_no_resul
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_no_results_title
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.text.style.TextOverflow
@@ -380,7 +381,7 @@ internal fun LibrarySeriesEmptyState(
 ) {
     if (hasResults || editing) return
     if (loading) {
-        LoadingMaxSizeIndicator()
+        LoadingMaxSizeIndicator(Modifier.imePadding())
         return
     }
 
@@ -402,7 +403,10 @@ internal fun LibrarySeriesEmptyState(
         hasFilters -> Res.string.library_no_series_matching_filters_body
         else -> Res.string.library_no_series_body
     }
-    Box(Modifier.fillMaxSize().padding(horizontal = LocalKomeliaLayout.current.pageHorizontalPadding), contentAlignment = Alignment.Center) {
+    Box(
+        Modifier.fillMaxSize().imePadding().padding(horizontal = LocalKomeliaLayout.current.pageHorizontalPadding),
+        contentAlignment = Alignment.Center,
+    ) {
         EmptyState(title = stringResource(title), description = stringResource(body))
     }
 }

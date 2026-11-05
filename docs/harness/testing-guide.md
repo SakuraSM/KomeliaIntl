@@ -215,6 +215,8 @@ Run `HomeFeaturedBookTest`, `RecentlyReadBooksTest` and `ReadingOverviewFilterTe
 
 Run `PopupSemanticsBrowserTest` against the actual Wasm browser viewport after changing shared overlay material. Its first-party case opens glass menus and dialogs, repeats dismissal and checks that the main accessibility tree still updates in glass and opaque fallback modes. On Android, inspect dialog, menu and sheet backgrounds over illustrated content; verify Back/Escape, focus, text entry, both EPUB readers and both UI languages separately. Browser semantics and emulator captures do not complete physical-device or TalkBack acceptance.
 
+`LibrarySeriesEmptyStateTest` distinguishes empty libraries, filters and searches. On Android, check the search empty-state title and description above the open keyboard at 360dp and 130% font scale.
+
 `BrowseHeaderLayoutTest` checks one-row title/search/filter layouts at 360dp and 130% font scale, inline search focus, query retention and focus restoration after view options close. Run `BROWSE-HEADER-01` on the final APK: switch library scope and content type, change page size and filters, then exercise local source/sort/search and global search result type. Check compact and tablet widths without losing any of the existing controls.
 
 `DestinationResponseTest` holds the Compose clock after selection and requires the target destination and detail screen on the next frame. Rapid choices must retain the newest target. Compare complete, prewarmed device repetitions before making a frame-time claim; emulator GPU overflow buckets and ADB-generated scroll statistics are not physical-device measurements.

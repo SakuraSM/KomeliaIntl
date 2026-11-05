@@ -621,7 +621,7 @@ internal fun LibraryScopeSelector(
 }
 
 @Composable
-private fun LibrarySupportingPane(
+internal fun LibrarySupportingPane(
     libraries: List<LibraryScopeItem>,
     selectedLibraryId: KomgaLibraryId?,
     onSelect: (KomgaLibraryId?) -> Unit,
@@ -639,24 +639,27 @@ private fun LibrarySupportingPane(
             .padding(top = LocalPageTopInset.current),
         color = MaterialTheme.colorScheme.surface,
     ) {
-        Text(
-            stringResource(Res.string.navbar_libraries),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(
-                start = layout.pageHorizontalPadding,
-                end = layout.pageHorizontalPadding,
-                top = layout.pageVerticalPadding,
-            ),
-        )
-        LibraryScopeItems(
-            libraries = libraries,
-            selectedLibraryId = selectedLibraryId,
-            onSelect = onSelect,
-            onAddLibrary = { showLibraryAddDialog = true },
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(layout.pageHorizontalPadding),
-        )
+        Column(Modifier.fillMaxSize()) {
+            Text(
+                stringResource(Res.string.navbar_libraries),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(
+                    start = layout.pageHorizontalPadding,
+                    end = layout.pageHorizontalPadding,
+                    top = layout.pageVerticalPadding,
+                ),
+            )
+            LibraryScopeItems(
+                libraries = libraries,
+                selectedLibraryId = selectedLibraryId,
+                onSelect = onSelect,
+                onAddLibrary = { showLibraryAddDialog = true },
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(layout.pageHorizontalPadding),
+            )
+        }
     }
 }
 

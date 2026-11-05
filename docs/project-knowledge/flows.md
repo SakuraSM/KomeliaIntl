@@ -41,7 +41,7 @@ Each `MainScreen` owns a serializable navigation identity. A new login gets a ne
 
 `MainScreenViewModel` applies early deletion events after the active navigator is available. A series-deletion event leaves the current series or one-shot screen only when its ID matches the deleted series.
 
-The library series list applies only the latest request for the current filter. A late response or failure from an older refresh cannot replace newer search results or display an obsolete error.
+The library series list cancels an older filter request when the filter changes and applies only the latest request for the current filter. A late response or failure from an older refresh cannot replace newer search results or display an obsolete error.
 
 1. Load the primary remote URL and optional LAN URL from settings.
 2. When automatic switching is enabled, probe the LAN endpoint without replacing the primary configuration.

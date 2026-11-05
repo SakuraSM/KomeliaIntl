@@ -23,6 +23,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 import kotlin.time.Instant
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaSeriesApi
@@ -42,6 +43,54 @@ class LibrarySeriesRequestOrderTest {
     @Test fun lateRefreshCannotReplaceNewSearchResults() = verifyLateRefresh(fails = false)
 
     @Test fun lateRefreshFailureCannotReplaceNewSearchResults() = verifyLateRefresh(fails = true)
+
+    @Test fun newerSearchDoesNotWaitForAnOlderSearch() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val delayed = CompletableDeferred<Page<KomeliaSeries>>()
+        var oldSearchStarted = false
+        val api = object : KomgaSeriesApi by stub({ error("Unexpected series API call: $it") }) {
+            override suspend fun getSeriesList(
+                conditionBuilder: SeriesConditionBuilder,
+                fulltextSearch: String?,
+                pageRequest: KomgaPageRequest?,
+            ): Page<KomeliaSeries> = when (fulltextSearch) {
+                "old" -> {
+                    oldSearchStarted = true
+                    delayed.await()
+                }
+                "needle" -> page(series("matching"))
+                else -> page(series("initial"))
+            }
+        }
+        val holder = "library-new-search-${java.util.UUID.randomUUID()}"
+        val model = ScreenModelStore.getOrPut(holder, null) {
+            LibrarySeriesTabState(
+                seriesApi = api,
+                referentialApi = stub { emptyList<String>() },
+                notifications = AppNotifications(),
+                komgaEvents = MutableSharedFlow(),
+                settingsRepository = stub { flowOf(50) },
+                library = MutableStateFlow(null),
+                taskEmitter = null,
+                cardWidth = MutableStateFlow(120.dp),
+            )
+        }
+        try {
+            model.initialize()
+            advanceUntilIdle()
+            model.filterState.onSearchTermChange("old")
+            runCurrent()
+            assertTrue(oldSearchStarted)
+            model.filterState.onSearchTermChange("needle")
+            runCurrent()
+            assertEquals("matching", model.series.single().id.value)
+            assertEquals("needle", model.loadedFilter?.searchTerm)
+        } finally {
+            delayed.cancel()
+            ScreenModelStore.onDisposeNavigator(holder)
+            Dispatchers.resetMain()
+        }
+    }
 
     @Test fun currentRequestFailureStillShowsAnError() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))

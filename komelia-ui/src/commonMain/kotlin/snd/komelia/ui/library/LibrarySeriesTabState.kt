@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -104,8 +105,9 @@ class LibrarySeriesTabState(
             delay(1000)
         }.launchIn(screenModelScope)
 
-        filterState.state.drop(1).onEach { loadSeriesPage(1) }
-            .launchIn(screenModelScope)
+        screenModelScope.launch {
+            filterState.state.drop(1).collectLatest { loadSeriesPage(1) }
+        }
     }
 
     fun reload() {

@@ -96,6 +96,11 @@ initializer, then decodes and resizes a synthetic PNG and checks every RGBA pixe
 both `system-webview` and `bundled` modes in separate processes; Windows runs `bundled` mode.
 The same probe constructs a lookup-table operation and checks PNG/JPEG thumbnail decoding.
 The lookup-table graph reproduces GLib sorting-symbol failures missed by a single-input resize.
+`DesktopWebviewSmoke` runs against the installed jars and loads a synthetic page through the
+native request interceptor. It checks navigation, Unicode responses, rejected native calls,
+and book-resource loading. Linux runs it under Xvfb and Windows uses its desktop session.
+`desktop-compatibility.yml` builds the Linux and Windows native libraries and installers, then
+runs these probes without publishing a Release.
 The Linux native build checks all GLib symbols required by VIPS and the JNI libraries against
 the system compilation baseline before packaging.
 

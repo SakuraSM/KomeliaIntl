@@ -173,7 +173,7 @@ jobs:
             komelia-infra/database/sqlite/src/androidMain/jniLibs/arm64-v8a > runtime-evidence/abis.log 2>&1
           abi_status=$?
           instrumentation_failed=0
-          for test_case in decodesJpegWithPackagedImageLibraries nativeErrorsAllowRetryAndIdentityInference; do
+          for test_case in decodesJpegWithPackagedImageLibraries decodesPngWithPackagedImageLibraries nativeErrorsAllowRetryAndIdentityInference; do
             "$adb" -s emulator-5554 shell am instrument -w -r \
               -e class "snd.komelia.AndroidOnnxRuntimeRecoveryTest#$test_case" \
               io.github.zhengningning.komelia.debug.test/androidx.test.runner.AndroidJUnitRunner \

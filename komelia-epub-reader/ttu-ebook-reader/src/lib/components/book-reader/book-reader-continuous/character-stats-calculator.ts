@@ -11,6 +11,9 @@ import {getCharacterCount} from '$lib/functions/get-character-count';
 import {getNodeBoundingRect} from '$lib/functions/range-util';
 import {getParagraphNodes} from '$lib/components/book-reader/get-paragraph-nodes';
 
+// Browsers may round a restored scroll offset below the measured text boundary.
+const SCROLL_ROUNDING_TOLERANCE_PX = 1;
+
 export class CharacterStatsCalculator {
   readonly charCount: number;
 
@@ -96,7 +99,7 @@ export class CharacterStatsCalculator {
   }
 
   getCharCountByScrollPos(scrollPos: number) {
-    const index = binarySearchNoNegative(this.paragraphPos, scrollPos);
+    const index = binarySearchNoNegative(this.paragraphPos, scrollPos + SCROLL_ROUNDING_TOLERANCE_PX);
     return this.paragraphPosToAccCharCount.get(this.paragraphPos[index]) || 0;
   }
 

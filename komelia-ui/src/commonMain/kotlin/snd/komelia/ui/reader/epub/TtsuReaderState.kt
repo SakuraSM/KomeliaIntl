@@ -187,16 +187,8 @@ class TtsuReaderState(
         }
 
         webview.bind<Unit, EpubChromeAppearance>("getChromeAppearance") { chromeAppearance.value }
-        webview.bind<Unit, TtsuReaderSettings>("getSettings") {
-            val settings = epubSettingsRepository.getTtsuReaderSettings()
-            backgroundColor.value = ttsuReaderBackground(settings)
-            if (!markReadProgress) settings.copy(autoBookmark = false)
-            else settings
-        }
-        webview.bind<TtsuReaderSettings, Unit>("putSettings") {
-            backgroundColor.value = ttsuReaderBackground(it)
-            epubSettingsRepository.putTtsuReaderSettings(it)
-        }
+        webview.bind<Unit, TtsuReaderSettings>("getSettings") { getReaderSettings() }
+        webview.bind<TtsuReaderSettings, Unit>("putSettings") { putReaderSettings(it) }
         webview.bind<Unit, TtuBookmarkData>("getBookmark") { getBookmark() }
 
         webview.bind<TtuBookmarkData, Unit>("putBookmark") { if (markReadProgress) putBookmark(it) }
@@ -291,6 +283,17 @@ class TtsuReaderState(
 
         webview.navigate("http://komelia/ttsu.html")
         webview.start()
+    }
+
+    internal suspend fun getReaderSettings(): TtsuReaderSettings {
+        val settings = epubSettingsRepository.getTtsuReaderSettings()
+        backgroundColor.value = ttsuReaderBackground(settings)
+        return settings
+    }
+
+    internal suspend fun putReaderSettings(settings: TtsuReaderSettings) {
+        backgroundColor.value = ttsuReaderBackground(settings)
+        epubSettingsRepository.putTtsuReaderSettings(settings)
     }
 
     private suspend fun getBookmark(): TtuBookmarkData {

@@ -2,6 +2,8 @@ package snd.komelia.offline.local
 
 import java.nio.file.Files
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
 import java.awt.Color
 import javax.imageio.ImageIO
 import kotlinx.coroutines.runBlocking
@@ -75,7 +77,10 @@ class DesktopLocalPdfTest {
                 for ((name, dimensions) in fixtures) {
                     val page = PDPage(PDRectangle(64f, 64f))
                     document.addPage(page)
-                    val jpeg2000 = Files.readAllBytes(root.resolve("third_party/libvips/test/test-suite/images/$name"))
+                    val source = Files.readAllBytes(root.resolve("third_party/libvips/test/test-suite/images/$name"))
+                    val jpeg2000 = if (name.endsWith(".j2k")) {
+                        jp2Rgb8(source, dimensions.first, dimensions.second)
+                    } else source
                     val image = PDImageXObject(document, ByteArrayInputStream(jpeg2000), COSName.JPX_DECODE, dimensions.first, dimensions.second, 8, PDDeviceRGB.INSTANCE)
                     PDPageContentStream(document, page).use { it.drawImage(image, 0f, 0f, 64f, 64f) }
                 }
@@ -94,6 +99,37 @@ class DesktopLocalPdfTest {
         } finally {
             file.delete()
         }
+    }
+
+    private fun jp2Rgb8(codestream: ByteArray, width: Int, height: Int): ByteArray {
+        // ISO 32000-2 section 7.4.9 requires a complete JPX/JP2 structure, not a bare codestream.
+        // Wrap the known 8-bit RGB fixture without changing its compressed image data.
+        val output = ByteArrayOutputStream()
+        DataOutputStream(output).use { stream ->
+            stream.writeInt(12)
+            stream.writeBytes("jP  ")
+            stream.writeInt(0x0d0a870a)
+            stream.writeInt(20)
+            stream.writeBytes("ftypjp2 ")
+            stream.writeInt(0)
+            stream.writeBytes("jp2 ")
+            stream.writeInt(45)
+            stream.writeBytes("jp2h")
+            stream.writeInt(22)
+            stream.writeBytes("ihdr")
+            stream.writeInt(height)
+            stream.writeInt(width)
+            stream.writeShort(3)
+            stream.write(byteArrayOf(7, 7, 0, 0))
+            stream.writeInt(15)
+            stream.writeBytes("colr")
+            stream.write(byteArrayOf(1, 0, 0))
+            stream.writeInt(16) // Enumerated sRGB colour space.
+            stream.writeInt(codestream.size + 8)
+            stream.writeBytes("jp2c")
+            stream.write(codestream)
+        }
+        return output.toByteArray()
     }
 
     @Test fun rendersPdfWithJbig2Images() {

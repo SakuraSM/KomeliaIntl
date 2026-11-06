@@ -20,5 +20,5 @@ cp "$root/third_party/libpng/scripts/pnglibconf.h.prebuilt" "$include_dir/pnglib
 libs="$root/komelia-infra/jni/src/androidMain/jniLibs/$abi"
 "${ANDROID_NDK_HOME:?ANDROID_NDK_HOME required}/toolchains/llvm/prebuilt/$host/bin/$target-clang" \
   -shared -fPIC -Wall -Wextra -Werror -I "$include_dir" -I "$root/third_party/libpng" \
-  "$root/scripts/android-png-direct-probe.c" "$libs/libpng.so" \
+  "$root/scripts/android-png-direct-probe.c" "$libs/libpng.so" "$libs/libz.so" \
   -Wl,-rpath-link,"$libs" -Wl,-z,max-page-size="$page_size" -Wl,--no-undefined -o "$output"

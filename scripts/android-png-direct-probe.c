@@ -2,6 +2,7 @@
 #include <png.h>
 #include <stdlib.h>
 #include <string.h>
+#include <zlib.h>
 
 JNIEXPORT jbyteArray JNICALL
 Java_snd_komelia_AndroidOnnxRuntimeRecoveryTest_decodePngDirect(
@@ -30,6 +31,28 @@ failure:
 done:
     free(pixels);
     png_image_free(&image);
+    (*env)->ReleaseByteArrayElements(env, input, encoded, JNI_ABORT);
+    return result;
+}
+
+JNIEXPORT jbyteArray JNICALL
+Java_snd_komelia_AndroidOnnxRuntimeRecoveryTest_inflateZlibDirect(
+    JNIEnv *env, jclass type, jbyteArray input, jint capacity) {
+    (void)type;
+    jbyte *encoded = (*env)->GetByteArrayElements(env, input, NULL);
+    if (encoded == NULL) return NULL;
+    unsigned char *output = malloc((size_t)capacity);
+    uLongf size = (uLongf)capacity;
+    jbyteArray result = NULL;
+    if (output == NULL || uncompress(output, &size, (const Bytef *)encoded,
+            (uLong)(*env)->GetArrayLength(env, input)) != Z_OK) {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"),
+            "direct zlib probe failed");
+    } else {
+        result = (*env)->NewByteArray(env, (jsize)size);
+        if (result != NULL) (*env)->SetByteArrayRegion(env, result, 0, (jsize)size, (const jbyte *)output);
+    }
+    free(output);
     (*env)->ReleaseByteArrayElements(env, input, encoded, JNI_ABORT);
     return result;
 }

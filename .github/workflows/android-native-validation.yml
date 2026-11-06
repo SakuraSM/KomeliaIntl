@@ -1,0 +1,173 @@
+name: Validate Android native packages
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/android-native-validation.yml'
+      - 'komelia-infra/jni/src/androidMain/jniLibs/**'
+      - 'komelia-infra/database/sqlite/src/androidMain/jniLibs/**'
+      - 'komelia-infra/onnxruntime/native/**'
+      - 'komelia-infra/image-decoder/vips/native/**'
+      - 'komelia-app/androidApp/src/androidTest/**'
+      - 'scripts/CheckAndroidNativeAbis.java'
+      - 'scripts/check-android-native-abis.test.mjs'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  build-native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: armv7a
+            abi: armeabi-v7a
+            copy-task: android-armv7a_copyJniLibs
+          - arch: x86
+            abi: x86
+            copy-task: android-x86_copyJniLibs
+          - arch: x86_64
+            abi: x86_64
+            copy-task: android-x86_64_copyJniLibs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build native dependencies
+        env:
+          NATIVE_ARCH: ${{ matrix.arch }}
+          NATIVE_ABI: ${{ matrix.abi }}
+          SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          COPY_TASK: ${{ matrix.copy-task }}
+        run: |
+          mkdir -p native-evidence
+          printf '%s\n' "$SOURCE_HEAD" > "native-evidence/$NATIVE_ABI-source.txt"
+          docker build --tag komelia-build-android --file cmake/android.Dockerfile cmake
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --env npm_config_cache=/tmp/komelia-npm-cache \
+            --volume "$GITHUB_WORKSPACE:/build" komelia-build-android "$NATIVE_ARCH"
+          ./gradlew --no-configuration-cache "$COPY_TASK"
+          native="komelia-infra/jni/src/androidMain/jniLibs/$NATIVE_ABI"
+          sqlite="komelia-infra/database/sqlite/src/androidMain/jniLibs/$NATIVE_ABI"
+          test -f "$native/libkomelia_onnxruntime.so"
+          test -f "$native/libkomelia_vips.so"
+          test -f "$sqlite/libsqlitejdbc.so"
+          sha256sum "$native"/*.so "$sqlite"/*.so > "native-evidence/$NATIVE_ABI.sha256"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-native-${{ matrix.arch }}
+          path: |
+            komelia-infra/jni/src/androidMain/jniLibs/${{ matrix.abi }}/*.so
+            komelia-infra/database/sqlite/src/androidMain/jniLibs/${{ matrix.abi }}/*.so
+            native-evidence
+          if-no-files-found: warn
+
+  x86-runtime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test the package validator
+        run: node --test scripts/check-android-native-abis.test.mjs
+      - name: Build the app and native recovery test
+        run: |
+          gradle=(./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx4g -Pkotlin.compiler.execution.strategy=in-process --max-workers=2 --no-parallel)
+          "${gradle[@]}" buildEpubReaders
+          "${gradle[@]}" --no-configuration-cache :komelia-app:androidApp:assembleDebug :komelia-app:androidApp:assembleDebugAndroidTest
+      - name: Run the installed package on x86_64
+        run: |
+          mkdir -p runtime-evidence
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/komelia-avds"
+          export ANDROID_USER_HOME="$RUNNER_TEMP/komelia-android"
+          mkdir -p "$ANDROID_AVD_HOME" "$ANDROID_USER_HOME"
+          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          avdmanager="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
+          adb="$ANDROID_HOME/platform-tools/adb"
+          emulator="$ANDROID_HOME/emulator/emulator"
+          image='system-images;android-35;google_apis;x86_64'
+          "$sdkmanager" 'emulator' "$image"
+          printf 'no\n' | "$avdmanager" create avd -n Komelia_Regression_AndroidCI -k "$image"
+          acceleration=off
+          if [[ -c /dev/kvm ]]; then
+            sudo setfacl -m "u:$(id -u):rw" /dev/kvm
+            acceleration=on
+          fi
+          "$emulator" -version > runtime-evidence/emulator-version.txt 2>&1
+          "$emulator" -avd Komelia_Regression_AndroidCI -port 5554 -no-window -no-audio \
+            -no-snapshot -no-boot-anim -gpu swiftshader_indirect -accel "$acceleration" \
+            > runtime-evidence/emulator.log 2>&1 &
+          emulator_pid=$!
+          cleanup() { kill "$emulator_pid" 2>/dev/null || true; wait "$emulator_pid" 2>/dev/null || true; }
+          trap cleanup EXIT
+          for ((attempt = 0; attempt < 180; attempt++)); do
+            kill -0 "$emulator_pid" || { tail -50 runtime-evidence/emulator.log; exit 1; }
+            booted=$("$adb" -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
+            if [[ "$booted" == 1 ]]; then break; fi
+            sleep 3
+          done
+          test "${booted:-}" = 1
+          "$adb" -s emulator-5554 shell getprop ro.product.cpu.abilist > runtime-evidence/device-abis.txt
+          grep -q x86_64 runtime-evidence/device-abis.txt
+          apk=komelia-app/androidApp/build/outputs/apk/debug/androidApp-debug.apk
+          test_apk=komelia-app/androidApp/build/outputs/apk/androidTest/debug/androidApp-debug-androidTest.apk
+          sha256sum "$apk" "$test_apk" > runtime-evidence/sha256.txt
+          "$adb" -s emulator-5554 install -r "$apk"
+          "$adb" -s emulator-5554 install -r "$test_apk"
+          set +e
+          java scripts/CheckAndroidNativeAbis.java "$apk" \
+            komelia-infra/jni/src/androidMain/jniLibs/arm64-v8a \
+            komelia-infra/database/sqlite/src/androidMain/jniLibs/arm64-v8a > runtime-evidence/abis.log 2>&1
+          abi_status=$?
+          "$adb" -s emulator-5554 shell am instrument -w -r \
+            -e class snd.komelia.AndroidOnnxRuntimeRecoveryTest \
+            io.github.zhengningning.komelia.debug.test/androidx.test.runner.AndroidJUnitRunner \
+            > runtime-evidence/instrumentation.log 2>&1
+          instrumentation_status=$?
+          set -e
+          cat runtime-evidence/instrumentation.log
+          test "$instrumentation_status" = 0
+          grep -q 'OK (1 test)' runtime-evidence/instrumentation.log
+          test "$abi_status" = 0
+          "$adb" -s emulator-5554 shell input keyevent KEYCODE_WAKEUP
+          "$adb" -s emulator-5554 shell wm dismiss-keyguard
+          "$adb" -s emulator-5554 shell am start -n io.github.zhengningning.komelia.debug/snd.komelia.MainActivity
+          ready=false
+          for ((attempt = 0; attempt < 30; attempt++)); do
+            if "$adb" -s emulator-5554 shell uiautomator dump /sdcard/komelia-ci.xml && \
+                "$adb" -s emulator-5554 pull /sdcard/komelia-ci.xml runtime-evidence/window.xml && \
+                grep -q '<hierarchy' runtime-evidence/window.xml; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" = true
+          "$adb" -s emulator-5554 exec-out screencap -p > runtime-evidence/window.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-x86-runtime
+          path: runtime-evidence
+          if-no-files-found: warn

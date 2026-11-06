@@ -1,5 +1,7 @@
 package snd.komelia.ui.common
 
+import io.ktor.http.Url
+
 private const val HTTP_SCHEME = "http://"
 private const val HTTPS_SCHEME = "https://"
 private const val MIN_SERVER_PORT = 1
@@ -10,9 +12,9 @@ fun validateServerUrl(serverUrl: String): ServerUrlValidationError? {
     if (authority.isBlank()) return ServerUrlValidationError.INVALID_URL
     if (!authority.hasHost()) return ServerUrlValidationError.INVALID_URL
 
-    val port = authority.getExplicitPort() ?: return null
-    return if (port in MIN_SERVER_PORT..MAX_SERVER_PORT) null
-    else ServerUrlValidationError.INVALID_PORT
+    val port = authority.getExplicitPort()
+    if (port != null && port !in MIN_SERVER_PORT..MAX_SERVER_PORT) return ServerUrlValidationError.INVALID_PORT
+    return if (runCatching { Url(serverUrl) }.isSuccess) null else ServerUrlValidationError.INVALID_URL
 }
 
 enum class ServerUrlValidationError {

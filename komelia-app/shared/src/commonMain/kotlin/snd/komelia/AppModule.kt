@@ -120,14 +120,15 @@ abstract class AppModule {
         val komfEnabled = appRepositories.komfSettingsRepository.getKomfEnabled()
         val mangaBakaEnabled = appRepositories.komfSettingsRepository.getMangaBakaEnabled()
 
+        val parsedBaseUrl = baseUrl.map { runCatching { Url(it) }.getOrNull() }.stateIn(initScope)
         val cookiesStorage = RememberMePersistingCookieStore(
-            baseUrl.map { Url(it) }.stateIn(initScope),
+            parsedBaseUrl,
             knownServerUrls,
             appRepositories.secretsRepository
         )
         cookiesStorage.loadRememberMeCookie()
         val apiKeyStore = ApiKeyStore(
-            baseUrl.map { Url(it) }.stateIn(initScope),
+            parsedBaseUrl,
             appRepositories.secretsRepository
         )
         apiKeyStore.loadStoredApiKey()

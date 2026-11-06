@@ -12,6 +12,7 @@ on:
       - 'komelia-app/androidApp/src/androidTest/**'
       - 'scripts/CheckAndroidNativeAbis.java'
       - 'scripts/check-android-native-abis.test.mjs'
+      - 'scripts/test-zlib-arm-auxv.sh'
       - 'cmake/**'
       - 'CMakeLists.txt'
 
@@ -48,6 +49,8 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
+      - name: Test zlib ARM platform fallback
+        run: bash scripts/test-zlib-arm-auxv.sh
       - name: Build native dependencies
         env:
           NATIVE_ARCH: ${{ matrix.arch }}

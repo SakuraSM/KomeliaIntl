@@ -898,6 +898,19 @@
       "automatedTests": ["SeriesReadingHeaderLayoutTest", "SeriesReadingTargetTest", "ReaderHostNavigationTest", "BookAvailabilityTest", "ContinueReadingHeroLayoutTest", "KomeliaPageScaffoldTest"]
     },
     {
+      "id": "MAC-01",
+      "title": "macOS 安装包与阅读器",
+      "area": "reader",
+      "issues": [],
+      "mode": "manual",
+      "preconditions": ["分别准备 Apple Silicon 和 Intel 安装包；合成漫画、PDF 与含图片和样式表的 EPUB"],
+      "steps": ["从 DMG 复制并启动应用；导入本地书库；打开漫画、PDF 和两种 EPUB 阅读器；翻页、切换章节、关闭并重进；验证图片、样式、进度和 CPU 模型推理"],
+      "expected": ["应用完成初始化；原生依赖不要求本机安装 Homebrew；正文和图片正常显示；阅读进度可恢复；模型加载失败后可重试"],
+      "profiles": ["premerge", "release"],
+      "evidence": ["架构、系统版本和 DMG SHA256", "启动日志和合成书籍的实际阅读结果", "签名及公证状态"],
+      "automatedTests": ["MacWebviewIntegrationTest", "MacResourceUrlMapperTest", "DesktopLocalPdfTest", "DesktopNativeSmoke", "DesktopOnnxSmoke"]
+    },
+    {
       "id": "EPUB-CHAPTER-01",
       "title": "从书籍详情进入指定 EPUB 章节",
       "area": "reader",

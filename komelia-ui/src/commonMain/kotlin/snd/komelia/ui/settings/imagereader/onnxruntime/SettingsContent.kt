@@ -85,9 +85,11 @@ fun OnnxRuntimeSettingsContent(
     if (!isOnnxRuntimeInstalled() || loadError != null) {
         if (platform == PlatformType.DESKTOP) {
             Text(onnxruntimeString, style = MaterialTheme.typography.titleLarge)
-            FilledTonalButton(
-                onClick = { showOrtInstallDialog = true },
-            ) { Text(stringResource(Res.string.settings_image_onnxruntime_download)) }
+            if (canUpdateOnnxRuntime()) {
+                FilledTonalButton(
+                    onClick = { showOrtInstallDialog = true },
+                ) { Text(stringResource(Res.string.settings_image_onnxruntime_download)) }
+            }
 
             if (loadError != null)
                 Text(
@@ -104,19 +106,21 @@ fun OnnxRuntimeSettingsContent(
                 currentDeviceId = deviceId,
                 onDeviceIdChange = onDeviceIdChange
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                FilledTonalButton(
-                    onClick = { showOrtInstallDialog = true },
-                    modifier = Modifier.cursorForHand()
-                ) { Text(stringResource(Res.string.settings_image_onnxruntime_update), maxLines = 1) }
+            if (canUpdateOnnxRuntime()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    FilledTonalButton(
+                        onClick = { showOrtInstallDialog = true },
+                        modifier = Modifier.cursorForHand()
+                    ) { Text(stringResource(Res.string.settings_image_onnxruntime_update), maxLines = 1) }
 
-                Text(
-                    stringResource(Res.string.settings_image_onnxruntime_update_desc),
-                    style = MaterialTheme.typography.labelLarge
-                )
+                    Text(
+                        stringResource(Res.string.settings_image_onnxruntime_update_desc),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
             }
 
             Text(

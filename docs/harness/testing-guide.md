@@ -99,6 +99,14 @@ The lookup-table graph reproduces GLib sorting-symbol failures missed by a singl
 The Linux native build checks all GLib symbols required by VIPS and the JNI libraries against
 the system compilation baseline before packaging.
 
+On macOS, run `scripts/macos/build-native.sh` before the JVM tests and packaging. Run
+`:komelia-infra:webview:jvmTest`, `:komelia-domain:offline:jvmTest`, `desktopJar`, and
+`desktopDmg`, then run `scripts/macos/verify-installer.sh <dmg> <evidence-directory>`.
+Run `DesktopNativeSmoke` and
+`DesktopOnnxSmoke` against the built desktop JAR. Verify both EPUB readers with images and
+stylesheet resources, plus comic and PDF reading and progress. Record Apple Silicon and Intel
+results separately. A locally built, ad-hoc-signed DMG is not evidence of notarized distribution.
+
 `LoginContentLayoutTest` measures the real login form at desktop and phone widths. Keep the
 maximum width before `fillMaxWidth` so an incoming full-width constraint cannot defeat it.
 

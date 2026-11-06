@@ -27,7 +27,8 @@ object WebviewSharedLibraries {
         when (DesktopPlatform.Current) {
             Linux -> loadLinuxLibs()
             Windows -> SharedLibrariesLoader.loadLibrary("libkomelia_webview")
-            MacOS, Unknown -> error("Unsupported OS")
+            MacOS -> Unit // WKWebView is loaded by the desktop WebView component.
+            Unknown -> error("Unsupported OS")
         }
 
         isAvailable = true

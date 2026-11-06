@@ -188,9 +188,11 @@
   .navigation-mode option { color: #13283e; background: #f4f7fb; }
   .navigation-mode :global(svg) { pointer-events: none; position: absolute; right: 0; width: 12px; height: 12px; opacity: .7; }
   .navigation-summary { display: flex; gap: 8px; align-items: center; margin-top: -8px; padding: 0 26px 10px; font-size: 12px; line-height: 18px; }
+  @supports (-webkit-touch-callout: none) { .navigation-summary { margin-top: 0; } }
   .navigation-summary > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .navigation-summary > span:last-child { flex: none; }
   .navigation-body { padding: 0 26px; }
+  .navigation-chapters { overflow-x: hidden; }
   .navigation-chapters > li { border-bottom: 1px solid rgb(176 211 242 / 17%); }
   .navigation-chapter { display: flex; width: calc(100% + 24px); margin-inline: -12px; min-height: 48px; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; border-radius: 10px; text-align: left; }
   .navigation-chapter[aria-current="location"] { color: #70d9ff !important; background: #18384c !important; border-left: 3px solid #70d9ff !important; padding-left: 9px; }

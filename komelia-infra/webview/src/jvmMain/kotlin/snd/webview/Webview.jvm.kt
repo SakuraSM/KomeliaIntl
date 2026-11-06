@@ -27,7 +27,8 @@ val logger = KotlinLogging.logger {}
 
 actual class KomeliaWebview private constructor(
     ptr: NativePointer,
-) : AutoCloseable, Managed(ptr, WebViewFinalizer(ptr)) {
+    private val macBackend: MacWebviewBackend? = null,
+) : AutoCloseable, Managed(ptr, macBackend?.let { backend -> Runnable { backend.close() } } ?: WebViewFinalizer(ptr)) {
     val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     val json = Json {
         encodeDefaults = true
@@ -44,6 +45,10 @@ actual class KomeliaWebview private constructor(
 
     actual fun start() {
         if (isRunning) return
+        if (macBackend != null) {
+            isRunning = true
+            return
+        }
 
         val future = CompletableFuture<Unit>()
         mainLoopExecutor.execute {
@@ -59,7 +64,7 @@ actual class KomeliaWebview private constructor(
         name: String,
         function: JsCallback<JsArgs, Result>
     ) {
-        bind(name) { id, jsRequest ->
+        registerBinding(name) { id, jsRequest ->
             coroutineScope.launch {
                 runCatching {
                     val argsClass = typeOf<JsArgs>().classifier as KClass<*>
@@ -78,11 +83,11 @@ actual class KomeliaWebview private constructor(
                     if (resultClass == Unit::class) {
                         val jsonString = json.encodeToString(CallbackResponse(""))
                         val base64 = base64.encode(jsonString.encodeToByteArray())
-                        bindReturn(id, base64)
+                        returnBindingResult(id, base64)
                     } else {
                         val jsonString = json.encodeToString<CallbackResponse<Result>>(CallbackResponse(result))
                         val base64 = base64.encode(jsonString.encodeToByteArray())
-                        bindReturn(id, base64)
+                        returnBindingResult(id, base64)
                     }
                 }.onFailure { error ->
                     logger.error(error) { "Encountered error during execution of bind function \"$name\"; js params: $jsRequest" }
@@ -90,7 +95,7 @@ actual class KomeliaWebview private constructor(
                         val message = json.encodeToString<CallbackResponse<String>>(
                             CallbackResponse(error.message ?: error.stackTraceToString())
                         )
-                        bindReject(id, message)
+                        rejectBindingResult(id, message)
                     }
                 }
             }
@@ -98,6 +103,10 @@ actual class KomeliaWebview private constructor(
     }
 
     actual fun registerRequestInterceptor(handler: RequestInterceptor) {
+        macBackend?.let {
+            it.registerRequestInterceptor(handler)
+            return
+        }
         setRequestInterceptor { uri ->
             coroutineScope.async {
                 handler.run(
@@ -113,15 +122,53 @@ actual class KomeliaWebview private constructor(
 
     private external fun setRequestInterceptor(handler: RequestInterceptorCallback)
 
-    actual external fun navigate(uri: String)
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("navigateManaged")
+    actual fun navigate(uri: String) {
+        if (isClosed) return
+        macBackend?.navigate(uri) ?: navigateNative(uri)
+    }
 
-    external fun updateSize(width: Int, height: Int)
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("navigate")
+    private external fun navigateNative(uri: String)
 
-    external fun bind(name: String, callback: WebviewCallback)
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("updateSizeManaged")
+    fun updateSize(width: Int, height: Int) {
+        if (macBackend == null) updateSizeNative(width, height)
+    }
 
-    external fun bindReturn(id: String, result: String)
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("updateSize")
+    private external fun updateSizeNative(width: Int, height: Int)
 
-    external fun bindReject(id: String, message: String)
+    @PublishedApi
+    internal fun registerBinding(name: String, callback: WebviewCallback) {
+        macBackend?.bind(name, callback) ?: bindNative(name, callback)
+    }
+
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("bind")
+    private external fun bindNative(name: String, callback: WebviewCallback)
+
+    @PublishedApi
+    internal fun returnBindingResult(id: String, result: String) {
+        macBackend?.resolve(id, result) ?: bindReturnNative(id, result)
+    }
+
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("bindReturn")
+    private external fun bindReturnNative(id: String, result: String)
+
+    @PublishedApi
+    internal fun rejectBindingResult(id: String, message: String) {
+        macBackend?.reject(id, message) ?: bindRejectNative(id, message)
+    }
+
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("bindReject")
+    private external fun bindRejectNative(id: String, message: String)
 
     private external fun runMainLoop(startCallback: Runnable)
 
@@ -134,6 +181,8 @@ actual class KomeliaWebview private constructor(
                 onLoad(KomeliaWebview(ptr))
             })
         }
+
+        internal fun macWebview(backend: MacWebviewBackend): KomeliaWebview = KomeliaWebview(0, backend)
 
         @JvmStatic
         private external fun create(window: Component): NativePointer

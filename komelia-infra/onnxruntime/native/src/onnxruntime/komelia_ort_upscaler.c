@@ -631,6 +631,7 @@ VipsImage *komelia_ort_upscale(
             KOMELIA_ORT_ERROR_INFERENCE,
             "model path is not initialized"
         );
+        pthread_mutex_unlock(&upscaler->mutex);
         return nullptr;
     }
 
@@ -645,6 +646,7 @@ VipsImage *komelia_ort_upscale(
         );
         if (session_init_error != nullptr) {
             g_propagate_error(error, session_init_error);
+            pthread_mutex_unlock(&upscaler->mutex);
             return nullptr;
         }
         upscaler->session = session;

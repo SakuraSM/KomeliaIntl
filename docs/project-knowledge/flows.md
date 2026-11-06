@@ -76,9 +76,9 @@ Risk points: partial files, cancellation, record/file divergence, missing error 
 
 The Local screen reloads its current page when revisited, so reading progress reflects changes made in a reader without starting a folder scan. Search and filter changes start a new load without waiting for an obsolete database read; only the latest matching result updates the list.
 
-Risk points: revoked folder permissions, unstable IDs after moving files, archive path encoding, relative EPUB resources, duplicate scans, unsupported desktop PDF extraction, and accidentally treating local source files as app-owned cache.
+Risk points: revoked folder permissions, unstable IDs after moving files, archive path encoding, relative EPUB resources, duplicate scans, PDF rendering and accidentally treating local source files as app-owned cache.
 
-Android and desktop comic import and reading share `ComicArchiveService` through the JVM shared source set. Filename extensions discover candidates, including 7z and CB7; signatures select ZIP, RAR or 7z. A renamed archive retains its real media type and source identity. EPUB remains ZIP-only and keeps its publication validation; PDF uses its existing platform path.
+Android and desktop comic import and reading share `ComicArchiveService` through the JVM shared source set. Filename extensions discover candidates, including 7z and CB7; signatures select ZIP, RAR or 7z. A renamed archive retains its real media type and source identity. EPUB remains ZIP-only and keeps its publication validation. Android renders PDF pages with `PdfRenderer`; desktop uses `DesktopPdfExtractor`, with Core Graphics on macOS and PDFBox on Windows/Linux. Rendered dimensions are bounded to 4096 pixels.
 
 `AndroidArchiveSourceAccess` provides direct seekable access or a bounded temporary copy for non-seekable providers. EPUB's `AndroidZipArchiveOpener` uses the same access layer. `ArchiveScratchSpace` counts provider copies and 7z caches together: 1 GiB per file, 2 GiB total, with 128 MiB of storage reserved. Permission and parser failures do not trigger alternative parsers.
 

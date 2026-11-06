@@ -75,6 +75,8 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.pdfbox)
+            implementation(libs.jbig2.imageio)
             implementation(projects.komeliaInfra.jni)
         }
     }

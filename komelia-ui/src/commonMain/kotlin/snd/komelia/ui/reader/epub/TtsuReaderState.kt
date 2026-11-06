@@ -539,9 +539,12 @@ class TtsuReaderState(
         val combinedDirtyStyleString = manifest.resources
             .filter { it.type == "text/css" }
             .mapNotNull { res ->
-                res.href?.let { proxyResourceRequest(bookApi, it, serverUrl).data.decodeToString() }
+                res.href?.let { href ->
+                    val css = proxyResourceRequest(bookApi, href, serverUrl).data.decodeToString()
+                    resolveStylesheetUrls(css, href)
+                }
             }
-            .fold("") { acc, css -> acc + css }
+            .joinToString("\n")
 
         return TtuEpubData(
             element = result,

@@ -9,6 +9,7 @@ import kotlinx.coroutines.runInterruptible
 import snd.komelia.offline.mediacontainer.desktopComicArchives
 import snd.komelia.offline.mediacontainer.desktopComicArchiveCacheDirectory
 import snd.komelia.offline.mediacontainer.fileArchiveSource
+import snd.komelia.offline.mediacontainer.DesktopPdfExtractor
 import org.apache.commons.compress.archivers.zip.ZipFile
 import java.io.File
 import kotlin.io.path.fileSize
@@ -30,8 +31,7 @@ private class DesktopLocalLibraryPlatform : LocalLibraryPlatform {
             .filter {
                 caller.ensureActive()
                 !it.startsWith(cachePath) && it.isRegularFile() && !it.toRealPath().startsWith(cachePath) &&
-                    isSupportedLocalBook(it.name) &&
-                    !it.name.endsWith(".pdf", ignoreCase = true)
+                    isSupportedLocalBook(it.name)
             }
             .map { path ->
                 LocalLibraryFile(
@@ -71,7 +71,7 @@ private class DesktopLocalLibraryPlatform : LocalLibraryPlatform {
                     },
                 )
             }
-            "pdf" -> error("Local PDF import is not available on desktop yet")
+            "pdf" -> runInterruptible(Dispatchers.IO) { DesktopPdfExtractor().inspect(file.file) }
             else -> error("Unsupported local book: ${file.displayName}")
         }
     }

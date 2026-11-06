@@ -42,6 +42,12 @@ object OnnxRuntimeSharedLibraries {
     fun load() {
         if (!initialized.compareAndSet(false, true)) return
         try {
+            if (DesktopPlatform.Current == DesktopPlatform.MacOS) {
+                SharedLibrariesLoader.loadMacLibrary("komelia_onnxruntime")
+                executionProvider = CPU
+                isAvailable = true
+                return
+            }
             if (DesktopPlatform.Current == DesktopPlatform.Windows) {
                 SharedLibrariesLoader.loadLibrary("libgomp-1")
             }

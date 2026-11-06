@@ -51,7 +51,7 @@ I maintain this repository independently. I track upstream Komelia and aim to sh
 
 The source tree contains these build targets. A GitHub Release can contain only the platforms built for that version, so use its **Assets** list as the source of truth.
 
-The macOS source build includes native image decoding, WebView, and CPU-based ONNX Runtime. Apple Silicon has been exercised locally; the Intel build still needs runtime verification. Locally built DMGs use an ad-hoc signature and are not notarized.
+The macOS source build includes native image decoding, WebView, and CPU-based ONNX Runtime. Apple Silicon has been exercised locally. Intel native integration tests, DMG packaging, and installed-app startup passed in [CI](https://github.com/SakuraSM/KomeliaIntl/actions/runs/42195533442/job/127817757906). Locally built DMGs use an ad-hoc signature and are not notarized.
 
 | Target | Gradle task | Typical package |
 |---|---|---|
@@ -59,7 +59,7 @@ The macOS source build includes native image decoding, WebView, and CPU-based ON
 | Windows x86_64 | `desktopMsi` | MSI |
 | Linux x86_64 | `desktopDeb` | DEB |
 | macOS Apple Silicon | `desktopDmg` | DMG |
-| macOS Intel (runtime verification pending) | `desktopDmg` | DMG |
+| macOS Intel | `desktopDmg` | DMG |
 | Desktop on Windows, Linux, or macOS | `desktopJar` | JAR |
 | Browser, WebAssembly | `komfWebUI` | Static web files |
 | Komf extension for Chrome | `komfExtensionChrome` | ZIP |

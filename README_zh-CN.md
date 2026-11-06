@@ -51,7 +51,7 @@ Windows 和 Linux 上的 PDF 若包含 JPEG 2000 图片，需要兼容的 ImageI
 
 源码包含下列构建目标。每个 GitHub Release 只会附带该版本实际构建的平台，请以 Release 页的 **Assets** 列表为准。
 
-macOS 源码构建已接入原生图片解码、WebView 和 CPU 版 ONNX Runtime。Apple Silicon 已完成本机运行验证；Intel 构建仍待运行验证。本地构建的 DMG 使用临时签名，尚未公证。
+macOS 源码构建已接入原生图片解码、WebView 和 CPU 版 ONNX Runtime。Apple Silicon 已完成本机运行验证。Intel 的原生集成测试、DMG 打包和安装后启动已通过 [CI 验证](https://github.com/SakuraSM/KomeliaIntl/actions/runs/42195533442/job/127817757906)。本地构建的 DMG 使用临时签名，尚未公证。
 
 | 平台 | Gradle 任务 | 常见产物 |
 |---|---|---|
@@ -59,7 +59,7 @@ macOS 源码构建已接入原生图片解码、WebView 和 CPU 版 ONNX Runtime
 | Windows x86_64 | `desktopMsi` | MSI |
 | Linux x86_64 | `desktopDeb` | DEB |
 | macOS Apple Silicon | `desktopDmg` | DMG |
-| macOS Intel（待运行验证） | `desktopDmg` | DMG |
+| macOS Intel | `desktopDmg` | DMG |
 | Windows、Linux 或 macOS 桌面端 | `desktopJar` | JAR |
 | 浏览器、WebAssembly | `komfWebUI` | 静态网页文件 |
 | Chrome 版 Komf 扩展 | `komfExtensionChrome` | ZIP |

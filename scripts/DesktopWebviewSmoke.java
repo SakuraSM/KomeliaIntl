@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import kotlin.Unit;
+import snd.komelia.DesktopAppModuleKt;
 import snd.webview.KomeliaWebview;
 import snd.webview.ResourceLoadResult;
 import snd.webview.WebviewPanel;
@@ -33,6 +34,8 @@ public final class DesktopWebviewSmoke {
     }
 
     private static void verify() throws Exception {
+        // Match application startup: Windows WebView depends on the bundled GLib libraries.
+        if (System.getProperty("os.name").startsWith("Windows")) DesktopAppModuleKt.loadVipsLibraries();
         WebviewSharedLibraries.INSTANCE.load();
         var created = new CompletableFuture<KomeliaWebview>();
         var reported = new CompletableFuture<String>();

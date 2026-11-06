@@ -55,7 +55,7 @@ jobs:
         run: |
           package=$(find komelia-app/desktopApp/build/compose/binaries -name '*.deb' -print -quit)
           test -n "$package"
-          scripts/verify-linux-installer.sh "$package" "$PWD/runtime-evidence"
+          bash scripts/verify-linux-installer.sh "$package" "$PWD/runtime-evidence"
           shasum -a 256 "$package" > runtime-evidence/sha256.txt
       - uses: actions/upload-artifact@v4
         if: always()

@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-native-${{ github.event.pull_request.number || github.ref }}
+  group: android-native-probe-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -113,6 +113,14 @@ jobs:
           gradle=(./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx4g -Pkotlin.compiler.execution.strategy=in-process --max-workers=2 --no-parallel)
           "${gradle[@]}" buildEpubReaders
           "${gradle[@]}" --no-configuration-cache :komelia-app:androidApp:assembleDebug :komelia-app:androidApp:assembleDebugAndroidTest
+      - name: Build direct PNG diagnostic
+        if: matrix.abi == 'armeabi-v7a'
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.1.12297006"
+          if [[ ! -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang" ]]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'ndk;27.1.12297006'
+          fi
+          bash scripts/build-android-png-direct-probe.sh armeabi-v7a "$RUNNER_TEMP/libkomelia-png-probe.so"
       - name: Install emulator runtime libraries
         run: |
           sudo apt-get update -qq
@@ -163,6 +171,7 @@ jobs:
           apk=komelia-app/androidApp/build/outputs/apk/debug/androidApp-debug.apk
           test_apk=komelia-app/androidApp/build/outputs/apk/androidTest/debug/androidApp-debug-androidTest.apk
           sha256sum "$apk" "$test_apk" > runtime-evidence/sha256.txt
+          python3 scripts/print-android-native-offsets.py "$apk" "$EXPECTED_ABI" > runtime-evidence/apk-native-offsets.txt
           "$adb" -s emulator-5554 install -r --abi "$EXPECTED_ABI" "$apk"
           "$adb" -s emulator-5554 install -r "$test_apk"
           "$adb" -s emulator-5554 shell dumpsys package io.github.zhengningning.komelia.debug > runtime-evidence/package.txt
@@ -184,6 +193,23 @@ jobs:
               instrumentation_failed=1
             fi
           done
+          if [[ "$EXPECTED_ABI" == armeabi-v7a ]]; then
+            "$adb" -s emulator-5554 push "$RUNNER_TEMP/libkomelia-png-probe.so" /data/local/tmp/libkomelia-png-probe.so
+            probe_push_status=$?
+            "$adb" -s emulator-5554 shell \
+              "run-as io.github.zhengningning.komelia.debug sh -c 'mkdir -p files && rm -f files/libkomelia-png-probe.so && cat /data/local/tmp/libkomelia-png-probe.so > files/libkomelia-png-probe.so && chmod 444 files/libkomelia-png-probe.so'"
+            probe_copy_status=$?
+            "$adb" -s emulator-5554 shell am instrument -w -r \
+              -e class 'snd.komelia.AndroidOnnxRuntimeRecoveryTest#decodesPngDirectlyWithPackagedLibrary' \
+              io.github.zhengningning.komelia.debug.test/androidx.test.runner.AndroidJUnitRunner \
+              > runtime-evidence/decodesPngDirectlyWithPackagedLibrary.log 2>&1
+            probe_status=$?
+            cat runtime-evidence/decodesPngDirectlyWithPackagedLibrary.log
+            if [[ "$probe_push_status" != 0 || "$probe_copy_status" != 0 || "$probe_status" != 0 ]] || \
+                ! grep -q 'OK (1 test)' runtime-evidence/decodesPngDirectlyWithPackagedLibrary.log; then
+              instrumentation_failed=1
+            fi
+          fi
           set -e
           test "$abi_status" = 0
           "$adb" -s emulator-5554 shell input keyevent KEYCODE_WAKEUP

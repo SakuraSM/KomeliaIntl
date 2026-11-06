@@ -1,6 +1,7 @@
 package snd.komelia;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -33,6 +34,37 @@ public final class AndroidOnnxRuntimeRecoveryTest {
     @Test public void decodesPngWithPackagedImageLibraries() {
         assertDecodedImage(Bitmap.CompressFormat.PNG, 0);
     }
+
+    @Test public void decodesPngDirectlyWithPackagedLibrary() {
+        var bitmap = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
+        byte[] encoded;
+        try {
+            bitmap.eraseColor(0xff3366cc);
+            var bytes = new ByteArrayOutputStream();
+            assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes));
+            encoded = bytes.toByteArray();
+        } finally {
+            bitmap.recycle();
+        }
+        var control = BitmapFactory.decodeByteArray(encoded, 0, encoded.length);
+        assertEquals(0xff3366cc, control.getPixel(0, 0));
+        control.recycle();
+        System.loadLibrary("z");
+        System.loadLibrary("png");
+        System.load(new java.io.File(
+            InstrumentationRegistry.getInstrumentation().getTargetContext().getFilesDir(),
+            "libkomelia-png-probe.so").getAbsolutePath());
+        byte[] pixels = decodePngDirect(encoded);
+        assertEquals(16 * 16 * 4, pixels.length);
+        for (int offset = 0; offset < pixels.length; offset += 4) {
+            assertEquals(0x33, pixels[offset] & 255);
+            assertEquals(0x66, pixels[offset + 1] & 255);
+            assertEquals(0xcc, pixels[offset + 2] & 255);
+            assertEquals(0xff, pixels[offset + 3] & 255);
+        }
+    }
+
+    private static native byte[] decodePngDirect(byte[] encoded);
 
     private static void assertDecodedImage(Bitmap.CompressFormat format, int tolerance) {
         VipsSharedLibrariesLoader.INSTANCE.load();

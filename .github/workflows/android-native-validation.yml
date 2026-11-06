@@ -79,6 +79,14 @@ jobs:
           if-no-files-found: warn
 
   x86-runtime:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - abi: x86_64
+            api: 35
+          - abi: x86
+            api: 30
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -105,7 +113,10 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             libpulse0 libx11-6 libpng16-16t64 libdrm2 libxi6 libxext6 libdbus-1-3 libxkbfile1
-      - name: Run the installed package on x86_64
+      - name: Run the installed package
+        env:
+          EXPECTED_ABI: ${{ matrix.abi }}
+          IMAGE_API: ${{ matrix.api }}
         run: |
           mkdir -p runtime-evidence
           export ANDROID_AVD_HOME="$RUNNER_TEMP/komelia-avds"
@@ -115,7 +126,7 @@ jobs:
           avdmanager="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
           adb="$ANDROID_HOME/platform-tools/adb"
           emulator="$ANDROID_HOME/emulator/emulator"
-          image='system-images;android-35;google_apis;x86_64'
+          image="system-images;android-${IMAGE_API};google_apis;${EXPECTED_ABI}"
           "$sdkmanager" 'emulator' "$image"
           printf 'no\n' | "$avdmanager" create avd -n Komelia_Regression_AndroidCI -k "$image"
           acceleration=off
@@ -137,15 +148,15 @@ jobs:
             sleep 3
           done
           test "${booted:-}" = 1
-          "$adb" -s emulator-5554 shell getprop ro.product.cpu.abilist > runtime-evidence/device-abis.txt
-          grep -q x86_64 runtime-evidence/device-abis.txt
+          "$adb" -s emulator-5554 shell getprop ro.product.cpu.abilist | tr -d '\r' > runtime-evidence/device-abis.txt
+          grep -Eq "(^|,)${EXPECTED_ABI}(,|$)" runtime-evidence/device-abis.txt
           apk=komelia-app/androidApp/build/outputs/apk/debug/androidApp-debug.apk
           test_apk=komelia-app/androidApp/build/outputs/apk/androidTest/debug/androidApp-debug-androidTest.apk
           sha256sum "$apk" "$test_apk" > runtime-evidence/sha256.txt
           "$adb" -s emulator-5554 install -r "$apk"
           "$adb" -s emulator-5554 install -r "$test_apk"
           "$adb" -s emulator-5554 shell dumpsys package io.github.zhengningning.komelia.debug > runtime-evidence/package.txt
-          grep -Eq 'primaryCpuAbi=x86_64([[:space:]]|$)' runtime-evidence/package.txt
+          grep -Eq "primaryCpuAbi=${EXPECTED_ABI}([[:space:]]|$)" runtime-evidence/package.txt
           set +e
           java scripts/CheckAndroidNativeAbis.java "$apk" \
             komelia-infra/jni/src/androidMain/jniLibs/arm64-v8a \
@@ -180,6 +191,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: android-x86-runtime
+          name: android-${{ matrix.abi }}-runtime
           path: runtime-evidence
           if-no-files-found: warn

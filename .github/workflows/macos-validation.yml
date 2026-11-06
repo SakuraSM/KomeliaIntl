@@ -41,10 +41,12 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Install native build dependencies
         run: brew install cmake meson ninja pkgconf glib jpeg-turbo libexif jpeg-xl highway libpng libtiff webp little-cms2 cgif libomp dav1d libde265
-      - name: Build native libraries and application
-        run: |
-          scripts/macos/build-native.sh
-          ./gradlew :komelia-infra:webview:jvmTest :komelia-domain:offline:jvmTest desktopJar desktopDmg
+      - name: Build native libraries
+        run: scripts/macos/build-native.sh
+      - name: Test native integrations
+        run: ./gradlew :komelia-infra:webview:jvmTest :komelia-domain:offline:jvmTest
+      - name: Package application
+        run: ./gradlew desktopJar desktopDmg
       - name: Verify native decoding and CPU inference
         run: |
           jar=$(find komelia-app/desktopApp/build/compose/jars -name '*release.jar' -print -quit)
@@ -65,4 +67,6 @@ jobs:
           path: |
             komelia-app/desktopApp/build/compose/binaries/main-release/dmg/*.dmg
             runtime-evidence
+            komelia-domain/offline/build/test-results
+            komelia-infra/webview/build/test-results
           if-no-files-found: warn

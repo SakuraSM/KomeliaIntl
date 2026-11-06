@@ -84,7 +84,12 @@ class DesktopLocalPdfTest {
             for (page in 1..fixtures.size) {
                 val rendered = ImageIO.read(ByteArrayInputStream(DesktopPdfExtractor().getPageBytes(io.github.vinceglb.filekit.PlatformFile(file), page, 64, 64)))
                 val colors = (0 until 64 step 4).flatMap { y -> (0 until 64 step 4).map { x -> rendered.getRGB(x, y) } }.distinct()
-                assertTrue(colors.size > 3, "Embedded JPEG 2000 image on page $page did not render")
+                if (colors.size <= 3) {
+                    val evidence = java.io.File("build/test-results/pdf-rendering").apply { mkdirs() }
+                    file.copyTo(evidence.resolve("jpeg2000.pdf"), overwrite = true)
+                    ImageIO.write(rendered, "png", evidence.resolve("page-$page.png"))
+                }
+                assertTrue(colors.size > 3, "Embedded ${fixtures[page - 1].first} on page $page did not render: ${colors.size} colors")
             }
         } finally {
             file.delete()

@@ -7,6 +7,26 @@ import {assertControlBounds} from '../../shared/tests/control-geometry.mjs';
 
 const {chromium} = createRequire(import.meta.url)('playwright');
 
+test('desktop contents keeps the focused selector above its summary', async () => {
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport: {width: 1280, height: 800}});
+    await page.goto(`${server.url}?contents&theme=DARK`);
+    const drawer = page.locator('[data-komelia-reader-contents]');
+    await drawer.waitFor();
+    await page.waitForFunction(() => !document.querySelector('[data-komelia-reader-contents]')?.getAnimations({subtree: true}).some(a => a.playState === 'running'));
+    await drawer.getByRole('combobox').focus();
+    const selector = await drawer.getByRole('combobox').boundingBox();
+    const summary = await drawer.locator('.navigation-summary').boundingBox();
+    assert.ok(summary.y >= selector.y + selector.height, JSON.stringify({selector, summary}));
+    assert.equal(await drawer.locator('.navigation-chapters').evaluate(el => getComputedStyle(el).overflowX), 'hidden');
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});
+
 test('compact contents keeps chapter navigation, search, marks and Escape available', async () => {
   const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
   const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});

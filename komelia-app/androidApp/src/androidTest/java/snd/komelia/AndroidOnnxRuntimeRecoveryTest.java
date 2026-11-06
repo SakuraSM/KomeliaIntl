@@ -25,6 +25,30 @@ import snd.komelia.onnxruntime.OnnxRuntimeSharedLibraries;
 public final class AndroidOnnxRuntimeRecoveryTest {
     private static final String IDENTITY_MODEL = "CAg6iAEKGQoFaW5wdXQSBm91dHB1dCIISWRlbnRpdHkSEnN5bnRoZXRpY19pZGVudGl0eVoqCgVpbnB1dBIhCh8IARIbCgIIAQoCCAMKCBIGaGVpZ2h0CgcSBXdpZHRoYisKBm91dHB1dBIhCh8IARIbCgIIAQoCCAMKCBIGaGVpZ2h0CgcSBXdpZHRoQgQKABAR";
 
+    @Test public void decodesJpegWithPackagedImageLibraries() {
+        VipsSharedLibrariesLoader.INSTANCE.load();
+        var bitmap = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
+        byte[] jpeg;
+        try {
+            bitmap.eraseColor(0xff3366cc);
+            var bytes = new ByteArrayOutputStream();
+            assertTrue(bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes));
+            jpeg = bytes.toByteArray();
+        } finally {
+            bitmap.recycle();
+        }
+        try (var image = VipsImage.decode(jpeg, null)) {
+            assertEquals(16, image.getWidth());
+            assertEquals(16, image.getHeight());
+            assertTrue("RGB output is required", image.getBands() >= 3);
+            byte[] pixels = image.getBytes();
+            assertEquals(16 * 16 * image.getBands(), pixels.length);
+            assertTrue(Math.abs((pixels[0] & 255) - 0x33) <= 3);
+            assertTrue(Math.abs((pixels[1] & 255) - 0x66) <= 3);
+            assertTrue(Math.abs((pixels[2] & 255) - 0xcc) <= 3);
+        }
+    }
+
     @Test public void nativeErrorsAllowRetryAndIdentityInference() throws Exception {
         Path directory = Files.createTempDirectory(
             InstrumentationRegistry.getInstrumentation().getTargetContext().getCacheDir().toPath(), "onnx-package-");

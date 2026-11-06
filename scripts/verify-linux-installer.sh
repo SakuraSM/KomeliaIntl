@@ -23,6 +23,8 @@ for mode in system-webview bundled; do
 done
 dbus-run-session -- bash -euo pipefail -c '
     printf "%s" "komelia-ci" | gnome-keyring-daemon --unlock --components=secrets
+    xvfb-run -a java "-Dcompose.application.resources.dir=$4/resources" -cp "$4/*" \
+        "$1/DesktopWebviewSmoke.java" > "$3/webview.log" 2>&1
     SKIKO_RENDER_API=SOFTWARE xvfb-run -a --server-args="-screen 0 1440x1000x24" \
         bash "$1/desktop-smoke-linux.sh" "$2" "$3"
-' bash "$script_dir" "$launcher" "$evidence"
+' bash "$script_dir" "$launcher" "$evidence" "$app_lib"

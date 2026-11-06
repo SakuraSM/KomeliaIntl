@@ -163,7 +163,8 @@ actual class KomeliaWebview private constructor(
 
     @PublishedApi
     internal fun rejectBindingResult(id: String, message: String) {
-        macBackend?.reject(id, message) ?: bindRejectNative(id, message)
+        // The patched Windows/Linux bridge decodes both success and error results from Base64.
+        macBackend?.reject(id, message) ?: bindRejectNative(id, base64.encode(message.encodeToByteArray()))
     }
 
     @Suppress("INAPPLICABLE_JVM_NAME")

@@ -18,6 +18,9 @@ $appLibrary = Join-Path $env:ProgramFiles 'Komelia\app'
 & java "-Dcompose.application.resources.dir=$appLibrary\resources" -cp "$appLibrary\*" `
     (Join-Path $PSScriptRoot 'DesktopNativeSmoke.java') bundled *> (Join-Path $Evidence 'native-bundled.log')
 if ($LASTEXITCODE -ne 0) { throw 'The installed native image decoder failed its smoke test.' }
+& java "-Dcompose.application.resources.dir=$appLibrary\resources" -cp "$appLibrary\*" `
+    (Join-Path $PSScriptRoot 'DesktopWebviewSmoke.java') *> (Join-Path $Evidence 'webview.log')
+if ($LASTEXITCODE -ne 0) { throw 'The installed native WebView failed its smoke test.' }
 
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Windows.Forms

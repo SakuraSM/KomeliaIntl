@@ -159,7 +159,7 @@ private fun SinglePageLayout(
     }
 }
 
-private fun pagedReaderOnKeyEvents(
+internal fun pagedReaderOnKeyEvents(
     event: KeyEvent,
     readingDirection: PagedReadingDirection,
     onReadingDirectionChange: (PagedReadingDirection) -> Unit,
@@ -183,8 +183,7 @@ private fun pagedReaderOnKeyEvents(
     var consumed = true
     when (event.key) {
         Key.DirectionLeft -> {
-            previousPage()
-            if (event.isAltPressed) consumed = false
+            if (event.isAltPressed) consumed = false else previousPage()
         }
 
         Key.DirectionRight -> nextPage()

@@ -37,6 +37,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType.Companion.KeyDown
 import androidx.compose.ui.input.key.KeyEventType.Companion.KeyUp
 import androidx.compose.ui.input.key.isAltPressed
@@ -116,40 +117,7 @@ fun BoxScope.ContinuousReaderContent(
         isSettingsMenuOpen = showSettingsMenu,
         onSettingsMenuToggle = { onShowSettingsMenuChange(!showSettingsMenu) },
         modifier = Modifier.onKeyEvent { event ->
-            var consumed = true
-
-            when (event.type) {
-                KeyDown -> {
-                    consumed = when (event.key) {
-                        Key.DirectionLeft -> keysState.onLeftKeyDown()
-                        Key.DirectionRight -> keysState.onRightKeyDown()
-                        Key.DirectionDown -> keysState.onDownKeyDown()
-                        Key.DirectionUp -> keysState.onUpKeyDown()
-                        Key.VolumeUp -> keysState.onVolumeUpKeyDown()
-                        Key.VolumeDown -> keysState.onVolumeDownKeyDown()
-                        else -> false
-                    }
-                }
-
-                KeyUp -> {
-                    consumed = when (event.key) {
-                        Key.MoveHome -> keysState.onScrollToFirstPage()
-                        Key.MoveEnd -> keysState.onScrollToLastPage()
-                        Key.V -> keysState.onReadingDirectionChange(TOP_TO_BOTTOM)
-                        Key.L -> keysState.onReadingDirectionChange(LEFT_TO_RIGHT)
-                        Key.R -> keysState.onReadingDirectionChange(RIGHT_TO_LEFT)
-                        Key.DirectionDown -> keysState.onDownKeyUp()
-                        Key.DirectionUp -> keysState.onUpKeyUp()
-                        Key.DirectionRight -> keysState.onRightKeyUp()
-                        Key.DirectionLeft -> keysState.onLeftKeyUp(event.isAltPressed)
-                        Key.VolumeUp -> keysState.onVolumeUpKeyUp()
-                        Key.VolumeDown -> keysState.onVolumeDownKeyUp()
-                        else -> false
-                    }
-                }
-            }
-
-            consumed
+            continuousReaderOnKeyEvents(event, keysState)
         }
     ) {
         ScalableContainer(continuousReaderState.screenScaleState) {
@@ -157,6 +125,34 @@ fun BoxScope.ContinuousReaderContent(
         }
     }
 }
+
+internal fun continuousReaderOnKeyEvents(event: KeyEvent, keysState: KeyMapState): Boolean =
+    when (event.type) {
+        KeyDown -> when (event.key) {
+            Key.DirectionLeft -> event.isAltPressed || keysState.onLeftKeyDown()
+            Key.DirectionRight -> keysState.onRightKeyDown()
+            Key.DirectionDown -> keysState.onDownKeyDown()
+            Key.DirectionUp -> keysState.onUpKeyDown()
+            Key.VolumeUp -> keysState.onVolumeUpKeyDown()
+            Key.VolumeDown -> keysState.onVolumeDownKeyDown()
+            else -> false
+        }
+        KeyUp -> when (event.key) {
+            Key.MoveHome -> keysState.onScrollToFirstPage()
+            Key.MoveEnd -> keysState.onScrollToLastPage()
+            Key.V -> keysState.onReadingDirectionChange(TOP_TO_BOTTOM)
+            Key.L -> keysState.onReadingDirectionChange(LEFT_TO_RIGHT)
+            Key.R -> keysState.onReadingDirectionChange(RIGHT_TO_LEFT)
+            Key.DirectionDown -> keysState.onDownKeyUp()
+            Key.DirectionUp -> keysState.onUpKeyUp()
+            Key.DirectionRight -> keysState.onRightKeyUp()
+            Key.DirectionLeft -> keysState.onLeftKeyUp(event.isAltPressed)
+            Key.VolumeUp -> keysState.onVolumeUpKeyUp()
+            Key.VolumeDown -> keysState.onVolumeDownKeyUp()
+            else -> false
+        }
+        else -> true
+    }
 
 @Composable
 private fun ReaderPages(state: ContinuousReaderState) {

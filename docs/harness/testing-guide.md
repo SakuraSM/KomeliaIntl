@@ -115,6 +115,10 @@ results separately. A locally built, ad-hoc-signed DMG is not evidence of notari
 `LoginContentLayoutTest` measures the real login form at desktop and phone widths. Keep the
 maximum width before `fillMaxWidth` so an incoming full-width constraint cannot defeat it.
 
+`ReaderBackShortcutTest` dispatches Alt+Left through the paged, panel, and continuous reader
+key handlers. Returning must preserve the current page or scroll position, and plain Left
+must still navigate. Repeat the shortcut from a non-first page and reopen the book on desktop.
+
 Windows verification enumerates visible windows owned by the launched application process tree.
 `Process.MainWindowHandle` alone can miss a window owned by a child process or another native
 window. On failure, retain the scoped process/window inventory and a runner screenshot so a

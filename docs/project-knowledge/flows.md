@@ -55,6 +55,8 @@ Risk points: probe races, stale active URL, destructive settings rewrites, and t
 
 `LoginViewModel` owns one login task with a 15-second total deadline, including preparation and route selection. `OnlineLoginCoordinator` gives automatic network attempts six seconds each, with at most two attempts and a 300-millisecond retry delay. Connection failures, timeouts, and HTTP 502/503/504 can retry. Credentials are submitted once. Only a complete session from the current task and route can update authentication. Offline login bypasses route selection. The existing background authentication reload keeps its separate three-second policy.
 
+Login and LAN settings validate addresses with the connection URL parser before saving them. If an older stored address cannot be parsed, credential initialization has no active URL and the login form remains available for correction; it must not select another server's API key or persist an authentication cookie against a fallback address.
+
 ## Offline download and reading
 
 1. A user requests a download for a supported book/media type.

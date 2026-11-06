@@ -144,6 +144,8 @@ jobs:
           sha256sum "$apk" "$test_apk" > runtime-evidence/sha256.txt
           "$adb" -s emulator-5554 install -r "$apk"
           "$adb" -s emulator-5554 install -r "$test_apk"
+          "$adb" -s emulator-5554 shell dumpsys package io.github.zhengningning.komelia.debug > runtime-evidence/package.txt
+          grep -Eq 'primaryCpuAbi=x86_64([[:space:]]|$)' runtime-evidence/package.txt
           set +e
           java scripts/CheckAndroidNativeAbis.java "$apk" \
             komelia-infra/jni/src/androidMain/jniLibs/arm64-v8a \

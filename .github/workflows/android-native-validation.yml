@@ -84,8 +84,13 @@ jobs:
       matrix:
         include:
           - abi: x86_64
+            image_abi: x86_64
             api: 35
           - abi: x86
+            image_abi: x86
+            api: 30
+          - abi: armeabi-v7a
+            image_abi: x86
             api: 30
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -116,6 +121,7 @@ jobs:
       - name: Run the installed package
         env:
           EXPECTED_ABI: ${{ matrix.abi }}
+          IMAGE_ABI: ${{ matrix.image_abi }}
           IMAGE_API: ${{ matrix.api }}
         run: |
           mkdir -p runtime-evidence
@@ -126,7 +132,7 @@ jobs:
           avdmanager="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
           adb="$ANDROID_HOME/platform-tools/adb"
           emulator="$ANDROID_HOME/emulator/emulator"
-          image="system-images;android-${IMAGE_API};google_apis;${EXPECTED_ABI}"
+          image="system-images;android-${IMAGE_API};google_apis;${IMAGE_ABI}"
           "$sdkmanager" 'emulator' "$image"
           printf 'no\n' | "$avdmanager" create avd -n Komelia_Regression_AndroidCI -k "$image"
           acceleration=off
@@ -153,7 +159,7 @@ jobs:
           apk=komelia-app/androidApp/build/outputs/apk/debug/androidApp-debug.apk
           test_apk=komelia-app/androidApp/build/outputs/apk/androidTest/debug/androidApp-debug-androidTest.apk
           sha256sum "$apk" "$test_apk" > runtime-evidence/sha256.txt
-          "$adb" -s emulator-5554 install -r "$apk"
+          "$adb" -s emulator-5554 install -r --abi "$EXPECTED_ABI" "$apk"
           "$adb" -s emulator-5554 install -r "$test_apk"
           "$adb" -s emulator-5554 shell dumpsys package io.github.zhengningning.komelia.debug > runtime-evidence/package.txt
           grep -Eq "primaryCpuAbi=${EXPECTED_ABI}([[:space:]]|$)" runtime-evidence/package.txt

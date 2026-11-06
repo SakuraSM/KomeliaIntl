@@ -174,9 +174,7 @@ class MainScreen(
             val rootNavigator = LocalNavigator.currentOrThrow
             val rootScreen = rootNavigator.lastItem
             if (rootScreen !is AppTab) {
-                rootNavigator.saveableState(immersiveScreenSaveableStateKey(rootScreen.key), rootScreen) {
-                    rootScreen.Content()
-                }
+                ImmersiveScreen(rootNavigator, rootScreen)
                 return@TabNavigator
             }
 

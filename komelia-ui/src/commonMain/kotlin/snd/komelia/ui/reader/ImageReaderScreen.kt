@@ -43,6 +43,7 @@ import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.canIntegrateWithSystemBar
 import snd.komelia.ui.reader.image.ReaderViewModel
+import snd.komelia.ui.newReaderSessionId
 import snd.komelia.ui.reader.image.PageShareAction
 import snd.komelia.ui.reader.image.common.ReaderContent
 import snd.komga.client.book.KomgaBookId
@@ -86,7 +87,13 @@ class ImageReaderScreen(
     private val markReadProgress: Boolean = true,
 ) : Screen {
 
-    override val key: ScreenKey = "image-reader:${bookId.value}:${if (markReadProgress) "tracked" else "incognito"}"
+    private var sessionId: String? = newReaderSessionId()
+    override val key: ScreenKey
+        get() = "image-reader:${bookId.value}:${if (markReadProgress) "tracked" else "incognito"}:${sessionId ?: newReaderSessionId().also { sessionId = it }}"
+
+    private companion object {
+        private const val serialVersionUID = -4560914891045483052L
+    }
 
     @Composable
     override fun Content() {

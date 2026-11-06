@@ -187,8 +187,8 @@
   .navigation-mode select { appearance: none; background: transparent; border: 0; min-height: 48px; max-width: 260px; padding: 0 24px 0 0; font: inherit; }
   .navigation-mode option { color: #13283e; background: #f4f7fb; }
   .navigation-mode :global(svg) { pointer-events: none; position: absolute; right: 0; width: 12px; height: 12px; opacity: .7; }
-  .navigation-summary { display: flex; gap: 8px; align-items: center; margin-top: -8px; padding: 0 26px 10px; font-size: 12px; line-height: 18px; }
-  @media (min-width: 840px) { .navigation-summary { margin-top: 0; } }
+  .navigation-summary { display: flex; gap: 8px; align-items: center; margin-top: 4px; padding: 0 26px; font-size: 12px; line-height: 18px; }
+  @media (min-width: 840px) { .navigation-summary { padding-bottom: 6px; } }
   .navigation-summary > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .navigation-summary > span:last-child { flex: none; }
   .navigation-body { padding: 0 26px; }

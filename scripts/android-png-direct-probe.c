@@ -1,8 +1,24 @@
 #include <jni.h>
+#include <errno.h>
 #include <png.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/auxv.h>
 #include <zlib.h>
+
+JNIEXPORT jstring JNICALL
+Java_snd_komelia_AndroidOnnxRuntimeRecoveryTest_nativeAuxv(JNIEnv *env, jclass type) {
+    (void)type;
+    errno = 0;
+    const char *platform = (const char *)getauxval(AT_PLATFORM);
+    int platform_errno = errno;
+    unsigned long hwcap = getauxval(AT_HWCAP);
+    char message[256];
+    snprintf(message, sizeof(message), "AT_PLATFORM=%s errno=%d HWCAP=%#lx",
+        platform == NULL ? "<null>" : platform, platform_errno, hwcap);
+    return (*env)->NewStringUTF(env, message);
+}
 
 JNIEXPORT jbyteArray JNICALL
 Java_snd_komelia_AndroidOnnxRuntimeRecoveryTest_decodePngDirect(

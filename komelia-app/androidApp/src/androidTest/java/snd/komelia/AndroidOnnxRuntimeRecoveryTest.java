@@ -114,10 +114,12 @@ public final class AndroidOnnxRuntimeRecoveryTest {
         System.load(new java.io.File(
             InstrumentationRegistry.getInstrumentation().getTargetContext().getFilesDir(),
             "libkomelia-png-probe.so").getAbsolutePath());
+        Log.i("KomeliaNativeProbe", "direct zlib " + nativeAuxv());
         assertArrayEquals(Arrays.copyOf(control, length), inflateZlibDirect(compressed, control.length));
     }
 
     private static native byte[] inflateZlibDirect(byte[] encoded, int capacity);
+    private static native String nativeAuxv();
 
     private static void assertDecodedImage(Bitmap.CompressFormat format, int tolerance) {
         VipsSharedLibrariesLoader.INSTANCE.load();

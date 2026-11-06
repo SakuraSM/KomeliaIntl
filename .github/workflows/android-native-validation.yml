@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-native-auxv-${{ github.event.pull_request.number || github.ref }}
+  group: android-native-reader-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:

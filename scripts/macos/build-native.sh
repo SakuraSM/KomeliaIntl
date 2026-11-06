@@ -6,7 +6,7 @@ cd "$root"
 [[ $(uname -s) == Darwin ]] || { echo 'Run this script on macOS.' >&2; exit 1; }
 case $(uname -m) in
   arm64) arch=arm64; ort_version=1.25.0; ort_arch=aarch64; ort_sha=a8c2da0adfd603305e809368716bef3bb6118e840871eb4982f53ba6cfc54e6c ;;
-  x86_64) arch=x64; ort_version=1.22.0; ort_arch=x64; ort_sha=41bb3b51b6a2e489cd39f538d5a1c74e4333845ab1ccad63e752b6f19ebeee45 ;;
+  x86_64) arch=x64; ort_version=1.23.2; ort_arch=x64; ort_sha=e0ab4a1af57d2da09097202f2dfd691e390c82e81183314788ccde4cf7c3cc38 ;;
   *) echo 'Unsupported macOS architecture.' >&2; exit 1 ;;
 esac
 for command in brew cmake pkg-config meson ninja git patch curl unzip python3 codesign; do

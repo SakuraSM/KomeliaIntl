@@ -52,9 +52,10 @@ jobs:
           jar=$(find komelia-app/desktopApp/build/compose/jars -name '*release.jar' -print -quit)
           test -n "$jar"
           mkdir -p "$RUNNER_TEMP/komelia-home" "$RUNNER_TEMP/komelia-tmp" "$RUNNER_TEMP/komelia-probes"
-          javac -cp "$jar" -d "$RUNNER_TEMP/komelia-probes" scripts/DesktopNativeSmoke.java scripts/DesktopOnnxSmoke.java
+          javac -cp "$jar" -d "$RUNNER_TEMP/komelia-probes" scripts/DesktopNativeSmoke.java scripts/DesktopOnnxSmoke.java scripts/DesktopOnnxExitSmoke.java
           java -Duser.home="$RUNNER_TEMP/komelia-home" -Djava.io.tmpdir="$RUNNER_TEMP/komelia-tmp" -cp "$jar:$RUNNER_TEMP/komelia-probes" DesktopNativeSmoke bundled
           java -Duser.home="$RUNNER_TEMP/komelia-home" -Djava.io.tmpdir="$RUNNER_TEMP/komelia-tmp" -cp "$jar:$RUNNER_TEMP/komelia-probes" DesktopOnnxSmoke
+          java -Duser.home="$RUNNER_TEMP/komelia-home" -Djava.io.tmpdir="$RUNNER_TEMP/komelia-tmp" -cp "$jar:$RUNNER_TEMP/komelia-probes" DesktopOnnxExitSmoke "$RUNNER_TEMP/komelia-tmp"
       - name: Launch the installer
         run: |
           dmg=$(find komelia-app/desktopApp/build/compose/binaries -name '*.dmg' -print -quit)

@@ -42,4 +42,29 @@ window=$(swift "$(dirname "$0")/find-window.swift" "$pid") || { echo 'No visible
 screencapture -x -l "$window" "$evidence/window.png" || { echo 'Could not capture the application window.' >&2; exit 1; }
 test -s "$evidence/window.png"
 shasum -a 256 "$installer" > "$evidence/sha256.txt"
-echo 'macOS installer initialized and displayed a window.'
+swift - "$pid" <<'SWIFT'
+import AppKit
+guard CommandLine.arguments.count == 2,
+      let pid = Int32(CommandLine.arguments[1]),
+      let app = NSRunningApplication(processIdentifier: pid),
+      app.terminate() else { exit(1) }
+SWIFT
+for ((i = 0; i < 30; i++)); do
+  if ! kill -0 "$pid" 2>/dev/null; then break; fi
+  sleep 1
+done
+if kill -0 "$pid" 2>/dev/null; then
+  echo 'Application did not exit after the quit request.' >&2
+  exit 1
+fi
+set +e
+wait "$pid"
+app_exit=$?
+set -e
+pid=''
+printf '%s\n' "$app_exit" > "$evidence/exit-code.txt"
+if [[ "$app_exit" != 0 ]]; then
+  echo "Application exited with status $app_exit." >&2
+  exit 1
+fi
+echo 'macOS installer initialized, displayed a window and exited cleanly.'

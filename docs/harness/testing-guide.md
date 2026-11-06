@@ -109,8 +109,8 @@ the system compilation baseline before packaging.
 On macOS, run `scripts/macos/build-native.sh` before the JVM tests and packaging. Run
 `:komelia-infra:webview:jvmTest`, `:komelia-domain:offline:jvmTest`, `desktopJar`, and
 `desktopDmg`, then run `scripts/macos/verify-installer.sh <dmg> <evidence-directory>`.
-Run `DesktopNativeSmoke` and
-`DesktopOnnxSmoke` against the built desktop JAR. Verify both EPUB readers with images and
+Run `DesktopNativeSmoke`, `DesktopOnnxSmoke` and `DesktopOnnxExitSmoke` against the built desktop JAR.
+The installer check also requests a normal application exit and requires status zero. Verify both EPUB readers with images and
 stylesheet resources, plus comic and PDF reading and progress. Record Apple Silicon and Intel
 results separately. A locally built, ad-hoc-signed DMG is not evidence of notarized distribution.
 

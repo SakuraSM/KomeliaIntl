@@ -145,7 +145,11 @@ jobs:
             -no-snapshot -no-boot-anim -gpu swiftshader_indirect -accel "$acceleration" \
             > runtime-evidence/emulator.log 2>&1 &
           emulator_pid=$!
-          cleanup() { kill "$emulator_pid" 2>/dev/null || true; wait "$emulator_pid" 2>/dev/null || true; }
+          cleanup() {
+            timeout 20 "$adb" -s emulator-5554 logcat -d -b all > runtime-evidence/logcat.txt 2>&1 || true
+            kill "$emulator_pid" 2>/dev/null || true
+            wait "$emulator_pid" 2>/dev/null || true
+          }
           trap cleanup EXIT
           for ((attempt = 0; attempt < 180; attempt++)); do
             kill -0 "$emulator_pid" || { tail -50 runtime-evidence/emulator.log; exit 1; }
@@ -168,15 +172,19 @@ jobs:
             komelia-infra/jni/src/androidMain/jniLibs/arm64-v8a \
             komelia-infra/database/sqlite/src/androidMain/jniLibs/arm64-v8a > runtime-evidence/abis.log 2>&1
           abi_status=$?
-          "$adb" -s emulator-5554 shell am instrument -w -r \
-            -e class snd.komelia.AndroidOnnxRuntimeRecoveryTest \
-            io.github.zhengningning.komelia.debug.test/androidx.test.runner.AndroidJUnitRunner \
-            > runtime-evidence/instrumentation.log 2>&1
-          instrumentation_status=$?
+          instrumentation_failed=0
+          for test_case in decodesJpegWithPackagedImageLibraries nativeErrorsAllowRetryAndIdentityInference; do
+            "$adb" -s emulator-5554 shell am instrument -w -r \
+              -e class "snd.komelia.AndroidOnnxRuntimeRecoveryTest#$test_case" \
+              io.github.zhengningning.komelia.debug.test/androidx.test.runner.AndroidJUnitRunner \
+              > "runtime-evidence/$test_case.log" 2>&1
+            instrumentation_status=$?
+            cat "runtime-evidence/$test_case.log"
+            if [[ "$instrumentation_status" != 0 ]] || ! grep -q 'OK (1 test)' "runtime-evidence/$test_case.log"; then
+              instrumentation_failed=1
+            fi
+          done
           set -e
-          cat runtime-evidence/instrumentation.log
-          test "$instrumentation_status" = 0
-          grep -q 'OK (2 tests)' runtime-evidence/instrumentation.log
           test "$abi_status" = 0
           "$adb" -s emulator-5554 shell input keyevent KEYCODE_WAKEUP
           "$adb" -s emulator-5554 shell wm dismiss-keyguard
@@ -194,6 +202,7 @@ jobs:
           done
           test "$ready" = true
           "$adb" -s emulator-5554 exec-out screencap -p > runtime-evidence/window.png
+          test "$instrumentation_failed" = 0
       - uses: actions/upload-artifact@v4
         if: always()
         with:

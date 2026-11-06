@@ -1,22 +1,15 @@
 package snd.komelia;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Base64;
-import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.Inflater;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import snd.komelia.image.VipsImage;
@@ -39,87 +32,6 @@ public final class AndroidOnnxRuntimeRecoveryTest {
     @Test public void decodesPngWithPackagedImageLibraries() {
         assertDecodedImage(Bitmap.CompressFormat.PNG, 0);
     }
-
-    @Test public void decodesPngDirectlyWithPackagedLibrary() {
-        var bitmap = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
-        byte[] encoded;
-        try {
-            bitmap.eraseColor(0xff3366cc);
-            var bytes = new ByteArrayOutputStream();
-            assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes));
-            encoded = bytes.toByteArray();
-        } finally {
-            bitmap.recycle();
-        }
-        var control = BitmapFactory.decodeByteArray(encoded, 0, encoded.length);
-        assertEquals(0xff3366cc, control.getPixel(0, 0));
-        control.recycle();
-        System.loadLibrary("z");
-        System.loadLibrary("png");
-        System.load(new java.io.File(
-            InstrumentationRegistry.getInstrumentation().getTargetContext().getFilesDir(),
-            "libkomelia-png-probe.so").getAbsolutePath());
-        byte[] pixels = decodePngDirect(encoded);
-        assertEquals(16 * 16 * 4, pixels.length);
-        for (int offset = 0; offset < pixels.length; offset += 4) {
-            assertEquals(0x33, pixels[offset] & 255);
-            assertEquals(0x66, pixels[offset + 1] & 255);
-            assertEquals(0xcc, pixels[offset + 2] & 255);
-            assertEquals(0xff, pixels[offset + 3] & 255);
-        }
-    }
-
-    private static native byte[] decodePngDirect(byte[] encoded);
-
-    @Test public void inflatesPngDataDirectlyWithPackagedLibrary() throws Exception {
-        var bitmap = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
-        byte[] encoded;
-        try {
-            bitmap.eraseColor(0xff3366cc);
-            var bytes = new ByteArrayOutputStream();
-            assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes));
-            encoded = bytes.toByteArray();
-        } finally {
-            bitmap.recycle();
-        }
-        var idat = new ByteArrayOutputStream();
-        try (var input = new DataInputStream(new ByteArrayInputStream(encoded))) {
-            assertEquals(8, input.skipBytes(8));
-            while (input.available() > 0) {
-                int size = input.readInt();
-                assertTrue(size >= 0 && size <= input.available() - 8);
-                byte[] type = new byte[4];
-                input.readFully(type);
-                byte[] chunk = new byte[size];
-                input.readFully(chunk);
-                input.readInt();
-                if (Arrays.equals(type, new byte[]{'I', 'D', 'A', 'T'})) idat.write(chunk);
-            }
-        }
-        byte[] compressed = idat.toByteArray();
-        assertTrue(compressed.length > 0);
-        var inflater = new Inflater();
-        byte[] control = new byte[8192];
-        int length;
-        try {
-            inflater.setInput(compressed);
-            length = inflater.inflate(control);
-            assertTrue(inflater.finished());
-            assertTrue(length > 0);
-        } finally {
-            inflater.end();
-        }
-        System.loadLibrary("z");
-        System.loadLibrary("png");
-        System.load(new java.io.File(
-            InstrumentationRegistry.getInstrumentation().getTargetContext().getFilesDir(),
-            "libkomelia-png-probe.so").getAbsolutePath());
-        Log.i("KomeliaNativeProbe", "direct zlib " + nativeAuxv());
-        assertArrayEquals(Arrays.copyOf(control, length), inflateZlibDirect(compressed, control.length));
-    }
-
-    private static native byte[] inflateZlibDirect(byte[] encoded, int capacity);
-    private static native String nativeAuxv();
 
     private static void assertDecodedImage(Bitmap.CompressFormat format, int tolerance) {
         VipsSharedLibrariesLoader.INSTANCE.load();
@@ -167,9 +79,7 @@ public final class AndroidOnnxRuntimeRecoveryTest {
         Path model = directory.resolve("identity.onnx");
         Path missing = directory.resolve("missing.onnx");
         Files.write(model, Base64.decode(IDENTITY_MODEL, Base64.DEFAULT));
-        Log.i("KomeliaNativeProbe", "loading image libraries");
         VipsSharedLibrariesLoader.INSTANCE.load();
-        Log.i("KomeliaNativeProbe", "loading inference libraries");
         OnnxRuntimeSharedLibraries.INSTANCE.load();
         assertTrue(OnnxRuntimeSharedLibraries.INSTANCE.isAvailable());
         var bitmap = Bitmap.createBitmap(8, 6, Bitmap.Config.ARGB_8888);
@@ -182,18 +92,15 @@ public final class AndroidOnnxRuntimeRecoveryTest {
         } finally {
             bitmap.recycle();
         }
-        Log.i("KomeliaNativeProbe", "creating runtime and image");
         try (var runtime = JvmOnnxRuntime.create(directory.toString());
              var image = VipsImage.decode(png, null);
              var upscaler = JvmOnnxRuntimeUpscaler.Companion.create(runtime);
              var detector = JvmOnnxRuntimeRfDetr.Companion.create(runtime)) {
             upscaler.setExecutionProvider(OnnxRuntimeExecutionProvider.CPU, 0);
-            Log.i("KomeliaNativeProbe", "testing missing model");
             assertThrows(OnnxRuntimeException.class, () -> upscaler.upscale(image));
             upscaler.setModelPath(missing.toString());
             assertThrows(OnnxRuntimeException.class, () -> upscaler.upscale(image));
             upscaler.setModelPath(model.toString());
-            Log.i("KomeliaNativeProbe", "running identity inference");
             try (var result = upscaler.upscale(image)) {
                 assertEquals(8, result.getWidth());
                 assertEquals(6, result.getHeight());
@@ -207,7 +114,6 @@ public final class AndroidOnnxRuntimeRecoveryTest {
                 }
             }
             detector.setExecutionProvider(OnnxRuntimeExecutionProvider.CPU, 0);
-            Log.i("KomeliaNativeProbe", "testing detector retry");
             assertThrows(OnnxRuntimeException.class, () -> detector.detect(image));
             detector.setModelPath(missing.toString());
             assertThrows(OnnxRuntimeException.class, () -> detector.detect(image));

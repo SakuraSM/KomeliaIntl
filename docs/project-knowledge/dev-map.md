@@ -55,6 +55,7 @@ The settings flag is stored by `KomfSettingsRepository`; fork migration V18 adds
 - `scripts/macos/build-native.sh` builds macOS image, PDF and CPU ONNX libraries from the pinned sources, then stages their dependency closure for desktop packaging. `macos-validation.yml` builds both architectures without publishing a Release. The macOS EPUB WebView routes resources through a per-reader loopback endpoint.
 - `.github/workflows/release-desktop.yml` builds and starts Linux/Windows installers before uploading them to a draft Release.
 - `.github/workflows/desktop-compatibility.yml` validates Linux/Windows native builds and installed-package WebView/media probes on pull requests without publishing.
+- `.github/workflows/android-native-validation.yml` builds the remaining Android native architectures and checks the installed x86_64 package; `scripts/CheckAndroidNativeAbis.java` checks the packaged library set and ELF architecture.
 
 Linux startup loads system WebKit first. When that succeeds, `DesktopAppModule` tells
 `VipsSharedLibraries` to reuse the loaded system GLib family. Loading bundled GObject or GIO

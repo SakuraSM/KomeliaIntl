@@ -1328,6 +1328,7 @@
     <div use:clickOutside={() => { tocIsOpen$.next(false); }}>
       <ReaderNavigationDrawer
           bookTitle={$rawBookData$?.title ?? ''}
+          toc={$rawBookData$?.toc}
           sectionData={$sectionData$}
           verticalMode={$verticalMode$}
           {exploredCharCount}

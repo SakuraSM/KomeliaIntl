@@ -56,6 +56,8 @@ npm run build
 
 For local EPUB navigation, run offline `LocalEpubNavigationTest`, `ProgressMarkProgressionActionTest` and SQLite `LocalLibraryManagerIntegrationTest`. Cover EPUB 2/3 nested TOCs, position endpoints, absolute resource URL progress and reindexing an unchanged legacy book without losing locked metadata or saved progress. The package `npm test` covers slow swipes, post-touch momentum, short-chapter non-skipping, pinch/cancel, expiry and cleanup. Repeat the actual touch flow on Android; event-model tests are not device input proof.
 
+For TTU contents and fragment changes, run `TtuNavigationTest` and the TTU `npm run test:browser` suite with Playwright and a Chrome executable available. Exercise nested EPUB 2 and 3 entries in continuous and paginated readers on a device or emulator; include reopening the book and navigation within the same resource.
+
 ## UI and interaction matrix
 
 When rendering or interaction changes, cover the relevant subset:

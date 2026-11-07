@@ -70,6 +70,11 @@ test('continuous chapter entry selects the requested chapter rather than the pre
     assert.ok((await page.locator('#selected').boundingBox()).y < -100, 'Reading must not snap back to the initial chapter after a user scroll');
     await page.goto(`${server.url}?initialChapter&bookmarkOnly`);
     await page.waitForFunction(() => window.scrollY > 100 && document.querySelector('output')?.textContent === 'chapter-one', undefined, {timeout:5000});
+    await page.evaluate(() => window.navigateTestChapter('chapter-two#selected'));
+    await page.waitForFunction(() => {
+      const bounds = document.querySelector('#selected').getBoundingClientRect();
+      return bounds.top >= 0 && bounds.top < 150;
+    }, undefined, {timeout:5000});
   } finally {
     await browser.close();
     await server.close();

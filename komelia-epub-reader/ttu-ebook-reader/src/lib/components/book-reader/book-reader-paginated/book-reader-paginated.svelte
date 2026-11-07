@@ -26,6 +26,7 @@
     map,
     skip,
     Subject,
+    type Subscription,
     switchMap,
     take,
     takeUntil,
@@ -34,6 +35,7 @@
   import Fa from 'svelte-fa';
   import {swipe, type SwipePointerEventDetail} from 'svelte-gestures';
   import type {BookmarkManager, PageManager} from '../types';
+  import {getParagraphNodes} from '../get-paragraph-nodes';
   import {BookmarkManagerPaginated} from './bookmark-manager-paginated';
   import {PageManagerPaginated} from './page-manager-paginated';
   import {SectionCharacterStatsCalculator} from './section-character-stats-calculator';
@@ -159,6 +161,7 @@
   const gap = 40;
 
   const destroy$ = new Subject<void>();
+  let pendingChapterNavigation: Subscription | undefined;
 
   $: bookmarkData.then((data) => {
     useExploredCharCount = false;
@@ -620,19 +623,62 @@
     }
   }
 
-  nextChapter$.pipe(takeUntil(destroy$)).subscribe((chapterId) => {
-    const normalizedChapterId = chapterId.split('#')[0];
-    const nextSectionIndex = sections.findIndex(
-      (section) => section.id === chapterId ||
-        section.id === normalizedChapterId ||
-        section.querySelector(`[id="${chapterId}"]`) ||
-        section.querySelector(`[id="${normalizedChapterId}"]`)
-    );
+  function findElementById(root: Element | undefined, id: string): Element | undefined {
+    if (!root || !id) return undefined;
+    if (root.id === id) return root;
+    return Array.from(root.querySelectorAll('[id]')).find(element => element.id === id);
+  }
 
-    if (nextSectionIndex > -1) {
-      sectionIndex$.next(nextSectionIndex);
-      concretePageManager?.scrollTo(0, true);
+  function decodeAnchorId(value: string): string {
+    try { return decodeURIComponent(value); } catch { return value; }
+  }
+
+  nextChapter$.pipe(takeUntil(destroy$)).subscribe((chapterId) => {
+    pendingChapterNavigation?.unsubscribe();
+    const resource = chapterId.split('#')[0];
+    let anchorId = chapterId.includes('#') ? decodeAnchorId(chapterId.slice(resource.length + 1)) : '';
+    let nextSectionIndex = sections.findIndex(section => section.id === resource);
+    if (nextSectionIndex < 0 && !anchorId) {
+      anchorId = decodeAnchorId(chapterId);
+      nextSectionIndex = sections.findIndex(section => !!findElementById(section, anchorId));
     }
+    if (nextSectionIndex < 0 || !concretePageManager) return;
+
+    const section = sections[nextSectionIndex];
+    const sourceAnchor = findElementById(section, anchorId);
+    if (!sourceAnchor || sourceAnchor === section) {
+      if (sectionIndex$.getValue() !== nextSectionIndex) sectionIndex$.next(nextSectionIndex);
+      concretePageManager.scrollTo(0, true);
+      return;
+    }
+
+    const navigateToAnchor = (readyCalculator: SectionCharacterStatsCalculator) => {
+      const anchor = findElementById(contentEl, anchorId);
+      if (!anchor || !contentEl || !concretePageManager) return;
+      const textNodes = getParagraphNodes(contentEl);
+      const targetNode = textNodes.find(node => node === anchor ||
+        !!(anchor.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)) ?? textNodes[textNodes.length - 1];
+      if (!targetNode) {
+        concretePageManager.scrollTo(0, true);
+        return;
+      }
+      const range = document.createRange();
+      range.selectNode(targetNode);
+      const characterCount = readyCalculator.calcExploredCharCount(range);
+      const position = readyCalculator.getScrollPosByCharCount(characterCount);
+      if (position >= 0) concretePageManager.scrollTo(position, true);
+    };
+
+    if (sectionIndex$.getValue() === nextSectionIndex && calculator && findElementById(contentEl, anchorId)) {
+      navigateToAnchor(calculator);
+      return;
+    }
+    pendingChapterNavigation = sectionReady$.pipe(
+      filter(() => sectionIndex$.getValue() === nextSectionIndex && !!findElementById(contentEl, anchorId)),
+      take(1),
+      takeUntil(destroy$),
+    ).subscribe(navigateToAnchor);
+    if (sectionIndex$.getValue() !== nextSectionIndex) sectionIndex$.next(nextSectionIndex);
   });
 </script>
 

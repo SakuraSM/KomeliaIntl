@@ -11,7 +11,12 @@ import {viewMode$, availableSystemFonts$} from '../src/lib/data/store';
 import {ViewMode} from '../src/lib/data/view-mode';
 import {setLocale} from '../src/lib/i18n';
 
+declare global {
+  interface Window { navigateTestChapter: (reference: string) => void }
+}
+
 const parameters = new URLSearchParams(location.search);
+const longChapterRepetitions = 30;
 setLocale(parameters.get('locale') ?? 'en');
 document.documentElement.dataset.komeliaSurface = parameters.get('surface') ?? 'glass';
 document.documentElement.dataset.komeliaTheme = parameters.get('theme') ?? 'LIGHT';
@@ -24,6 +29,21 @@ if (parameters.has('contents')) {
       {reference: 'chapter-one', label: 'First chapter', startCharacter: 0, characters: 200, charactersWeight: 200, progress: 100},
       {reference: 'chapter-two', label: 'Second chapter', startCharacter: 200, characters: 200, charactersWeight: 200, progress: 60},
     ], verticalMode: false, exploredCharCount: 320, bookTitle: 'Synthetic publication',
+    ...(parameters.has('nestedContents') ? {toc: [
+      {title: 'Parent chapter', reference: 'chapter-one', children: [
+        {title: 'Nested fragment', reference: 'chapter-two#selected', children: []},
+        {title: 'Section group', reference: null, children: [
+          {title: 'Deep fragment', reference: 'chapter-two#deep', children: []},
+        ]},
+      ]},
+      {title: 'Second chapter', reference: 'chapter-two', children: []},
+    ]} : parameters.has('longContents') ? {toc: [
+      {title: 'LongChapter'.repeat(longChapterRepetitions), reference: 'chapter-one', children: [
+        {title: 'Nested fragment', reference: 'chapter-two#selected', children: []},
+      ]},
+    ]} : parameters.has('invalidContents') ? {toc: [
+      {title: 'Unavailable section', reference: null, children: []},
+    ]} : {}),
     searchQuery: '', searchResults: [], annotations: [], onClose: action('closed-contents'),
     onSearchQueryInput: query => { document.querySelector('output')!.textContent = `query:${query}`; },
     onPreviousSearchResult: action('previous-result'), onNextSearchResult: action('next-result'),
@@ -51,6 +71,7 @@ if (parameters.has('settings')) {
 }
 
 if (parameters.has('initialChapter')) {
+  window.navigateTestChapter = reference => nextChapter$.next(reference);
   document.body.classList.add('reader-horizontal-mode');
   const first = '<div id="chapter-one"><h1>First chapter</h1>' + '<p>Introduction text.</p>'.repeat(40) + '</div>';
   const second = '<div id="chapter-two"><h1>Second chapter</h1>' + '<p>Chapter introduction.</p>'.repeat(8) +

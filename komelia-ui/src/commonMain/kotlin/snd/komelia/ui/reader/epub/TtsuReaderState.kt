@@ -181,6 +181,7 @@ class TtsuReaderState(
                 hasThumb = false,
                 characters = data.characterCount,
                 sections = data.sections,
+                toc = ttuNavigationEntries(data.manifest.toc, data.manifest.readingOrder),
                 lastBookModified = Clock.System.now().toEpochMilliseconds(),
                 lastBookOpen = Clock.System.now().toEpochMilliseconds()
             )
@@ -736,6 +737,7 @@ class TtsuReaderState(
         val hasThumb: Boolean,
         val characters: Long,
         val sections: List<TtuSection>?,
+        val toc: List<TtuTocEntry>,
         val lastBookModified: Long,
         val lastBookOpen: Long
     )

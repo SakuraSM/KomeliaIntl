@@ -178,6 +178,8 @@ const zhCN: Record<string, string> = {
   'Close navigation': '关闭导航',
   '{count} chapters': '{count} 个章节',
   'Chapter {number}': '章节 {number}',
+  'Expand {chapter}': '展开 {chapter}',
+  'Collapse {chapter}': '收起 {chapter}',
   '{count} highlights': '{count} 条高亮',
   'No highlights yet': '还没有高亮标记',
   'Position {position}': '位置 {position}',

@@ -10,6 +10,8 @@ on:
       - 'komelia-infra/onnxruntime/native/**'
       - 'komelia-infra/image-decoder/vips/native/**'
       - 'komelia-app/androidApp/src/androidTest/**'
+      - 'komelia-ui/src/commonMain/kotlin/snd/komelia/ui/login/**'
+      - 'komelia-ui/src/commonMain/kotlin/snd/komelia/ui/MainView.kt'
       - 'scripts/CheckAndroidNativeAbis.java'
       - 'scripts/check-android-native-abis.test.mjs'
       - 'scripts/test-zlib-arm-auxv.sh'
@@ -206,6 +208,15 @@ jobs:
           test "$ready" = true
           "$adb" -s emulator-5554 exec-out screencap -p > runtime-evidence/window.png
           test "$instrumentation_failed" = 0
+          if [[ "$EXPECTED_ABI" == x86_64 ]]; then
+            "$adb" -s emulator-5554 shell am force-stop io.github.zhengningning.komelia.debug
+            "$adb" -s emulator-5554 shell am instrument -w -r \
+              -e class snd.komelia.AndroidWarmRelaunchTest \
+              io.github.zhengningning.komelia.debug.test/androidx.test.runner.AndroidJUnitRunner \
+              > runtime-evidence/warm-relaunch.log 2>&1
+            cat runtime-evidence/warm-relaunch.log
+            grep -q 'OK (1 test)' runtime-evidence/warm-relaunch.log
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

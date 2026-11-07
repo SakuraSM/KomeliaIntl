@@ -78,6 +78,8 @@ When the user will validate on a physical device, follow [Android device validat
 
 For Android JNI, decoder or ONNX changes, validate the final APK or AAB with `java scripts/CheckAndroidNativeAbis.java <package> komelia-infra/jni/src/androidMain/jniLibs/arm64-v8a komelia-infra/database/sqlite/src/androidMain/jniLibs/arm64-v8a`. The checker compares the library set and ELF architecture for ARM64, ARMv7, x86 and x86_64. Run `node --test scripts/check-android-native-abis.test.mjs` for the checker itself. Install the final APK on the affected architecture and run `AndroidOnnxRuntimeRecoveryTest` for JPEG and PNG decoding, native model-load failures, retry and CPU inference. The Android native validation workflow builds ARMv7, x86 and x86_64 dependencies and runs this package test on x86 (API 30), translated ARMv7 (API 30) and x86_64 (API 35) emulators, checking the selected ABI. `bash scripts/test-zlib-arm-auxv.sh` exercises the zlib ARM platform check with missing and valid platform values using the pinned source and build patch. Static package checks and translated execution do not replace physical-device acceptance.
 
+For login or application lifecycle changes, run `AndroidWarmRelaunchTest` on a dedicated Android emulator. It finishes and recreates the activity while the process remains alive and checks that the authenticated session reaches the main navigation. The Android validation workflow also runs it on the x86_64 API 35 emulator.
+
 ## Evidence record
 
 In the pull request or handoff, list each executed command and manual scenario with its result. If a required check is blocked, include the reason and the closest substitute; do not silently omit it. Installed and launched packages are stronger evidence than artifact presence alone.

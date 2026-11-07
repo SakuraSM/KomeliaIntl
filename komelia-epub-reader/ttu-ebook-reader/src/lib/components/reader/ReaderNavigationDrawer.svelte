@@ -15,6 +15,7 @@
   import {t} from '$lib/i18n';
   import {tick, onMount} from 'svelte';
   import {focusableDialogElements, trapDialogFocus} from '$lib/functions/dialog-focus';
+  import {findCurrentTocPath} from '$lib/functions/reader-toc-location';
   import {prefersReducedChromeMotion} from '../../../../../shared/chrome-appearance.mjs';
 
   type DrawerTab = 'toc' | 'search' | 'marks';
@@ -66,11 +67,13 @@
   let chapters = $derived(sectionData.filter((section) => !section.parentChapter));
   let hasNavigableToc = $derived(hasTocTarget(toc));
   let currentChapterIndex = $derived(sectionData.length ? getChapterData(sectionData)[1] : -1);
-  let currentReference = $derived(chapters[currentChapterIndex]?.reference);
-  let currentTocPath = $derived(currentReference ? findTocPath(toc, currentReference) : undefined);
+  let currentTocPath: string | undefined = $state();
 
   let drawer: HTMLElement | undefined = $state();
   onMount(() => {
+    currentTocPath = findCurrentTocPath({entries: toc, sections: sectionData, verticalMode, document});
+    const pathParts = currentTocPath?.split('.') ?? [];
+    expandedEntries = pathParts.slice(0, -1).map((_, index) => pathParts.slice(0, index + 1).join('.'));
     const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     void tick().then(() => focusableDialogElements(drawer)[0]?.focus());
     return () => trigger?.focus();
@@ -84,19 +87,6 @@
   function goToChapter(chapter: SectionWithProgress) {
     nextChapter$.next(chapter.reference);
     onClose();
-  }
-
-  function findTocPath(entries: TocEntry[], reference: string): string | undefined {
-    function find(nodes: TocEntry[], prefix: string): string | undefined {
-      for (const [index, node] of nodes.entries()) {
-        const path = `${prefix}${index}`;
-        if (node.reference === reference) return path;
-        const childPath = find(node.children ?? [], `${path}.`);
-        if (childPath) return childPath;
-      }
-      return undefined;
-    }
-    return find(entries, '');
   }
 
   function hasTocTarget(entries: TocEntry[]): boolean {

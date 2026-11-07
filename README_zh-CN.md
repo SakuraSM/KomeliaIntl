@@ -27,7 +27,9 @@ Komelia Intl 是 [Komelia](https://github.com/Snd-R/Komelia) 的 `SakuraSM/Komel
 
 ### 本地文件夹书库
 
-Android 与桌面端无需登录 Komga 即可添加本地文件夹。Komelia 会递归索引受支持的文件，按父目录生成系列，重启后继续保留目录权限，并在应用启动或定时扫描时发现新增与删除的书籍。Android 支持 CBZ/ZIP、CBR/RAR、EPUB 和 PDF；桌面端当前支持 CBZ/ZIP、CBR/RAR 和 EPUB。书籍仍保存在原目录，从 Komelia 移除本地书库不会删除源文件。浏览器/Wasm 版本暂不提供持久化文件夹书库。
+Android 与桌面端无需登录 Komga 即可添加本地文件夹。Komelia 会递归索引受支持的文件，按父目录生成系列，重启后继续保留目录权限，并在应用启动或定时扫描时发现新增与删除的书籍。两端均支持 CBZ/ZIP、CBR/RAR、EPUB 和 PDF。书籍仍保存在原目录，从 Komelia 移除本地书库不会删除源文件。浏览器/Wasm 版本暂不提供持久化文件夹书库。
+
+Windows 和 Linux 上的 PDF 若包含 JPEG 2000 图片，需要兼容的 ImageIO 解码器；当前安装包未内置该解码器。macOS 使用系统 PDF 渲染器。
 
 ## 其他改动
 
@@ -45,17 +47,20 @@ Android 与桌面端无需登录 Komga 即可添加本地文件夹。Komelia 会
 
 本项目由我个人独立维护。我会持续跟进并同步上游 Komelia 的改动，以约一周一个迭代为目标。迭代时间会根据上游改动规模、测试结果和个人时间调整。感谢使用 Komelia Intl。
 
-## 支持的平台
+## 构建目标
 
 源码包含下列构建目标。每个 GitHub Release 只会附带该版本实际构建的平台，请以 Release 页的 **Assets** 列表为准。
+
+macOS 源码构建已接入原生图片解码、WebView 和 CPU 版 ONNX Runtime。Apple Silicon 已完成本机运行验证。Intel 的原生集成测试、DMG 打包和安装后启动已通过 [CI 验证](https://github.com/SakuraSM/KomeliaIntl/actions/runs/42195533442/job/127817757906)。本地构建的 DMG 使用临时签名，尚未公证。
 
 | 平台 | Gradle 任务 | 常见产物 |
 |---|---|---|
 | Android | `androidRelease` | APK |
 | Windows x86_64 | `desktopMsi` | MSI |
 | Linux x86_64 | `desktopDeb` | DEB |
-| macOS | `desktopDmg` | DMG |
-| 当前操作系统的桌面端 | `desktopJar` | JAR |
+| macOS Apple Silicon | `desktopDmg` | DMG |
+| macOS Intel | `desktopDmg` | DMG |
+| Windows、Linux 或 macOS 桌面端 | `desktopJar` | JAR |
 | 浏览器、WebAssembly | `komfWebUI` | 静态网页文件 |
 | Chrome 版 Komf 扩展 | `komfExtensionChrome` | ZIP |
 | Firefox 版 Komf 扩展 | `komfExtensionFirefox` | ZIP |
@@ -81,9 +86,13 @@ TTU EPUB、漫画与 PDF、Komga EPUB 的阅读设置：
 
 [完整18页运行图](docs/verification/modern-ui-alignment-20261102-assets/screens/)还包含浅色主题与 Android 宽屏布局。构建与设备覆盖见[验证记录](docs/verification/modern-ui-alignment-20261102.md)。
 
+macOS 本地书库，使用合成测试书籍：
+
+<img src="screenshots/macos-local-library-20261106.png" alt="macOS 本地书库中的合成漫画、EPUB 和 PDF 书籍" width="100%">
+
 ## 从源码构建
 
-Release 工作流使用 JDK 21 和 Node.js 24；本地 `.node-version` 当前声明 Node.js 20。在仓库统一版本前，请以 [Harness 评分表](docs/harness/scorecard.md)记录的工具链差异为准。Android 和桌面安装包还需要对应平台的原生图片库与 WebView 库。`cmake/` 目录提供了部分目标平台的 Docker 构建文件。
+Release 工作流使用 JDK 21 和 Node.js 24；本地 `.node-version` 当前声明 Node.js 20。在仓库统一版本前，请以 [Harness 评分表](docs/harness/scorecard.md)记录的工具链差异为准。Android 和桌面安装包还需要对应平台的原生图片库与 WebView 库。`cmake/` 目录提供 Linux 和 Windows 依赖的 Docker 构建文件。
 
 克隆本仓库并初始化子模块：
 
@@ -110,6 +119,14 @@ git submodule update --init --recursive
 ./gradlew androidDebug
 ./gradlew desktopJar
 ./gradlew komfWebUI
+```
+
+在 macOS 上，请先安装并构建原生依赖，再运行 `desktopJar` 或 `desktopDmg`。打包时使用适合生成安装包的 JDK，例如 Temurin 21：
+
+```shell
+brew install cmake meson ninja pkgconf glib jpeg-turbo libexif jpeg-xl highway libpng libtiff webp little-cms2 cgif libomp dav1d libde265
+scripts/macos/build-native.sh
+./gradlew desktopDmg
 ```
 
 产物位于对应模块的 `build/` 目录。发布安装包和原生依赖的完整命令请参考[桌面端 Release 工作流](.github/workflows/release-desktop.yml)和[工程 Harness](docs/harness/README.md)。

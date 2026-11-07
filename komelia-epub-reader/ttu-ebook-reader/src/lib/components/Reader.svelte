@@ -1,5 +1,6 @@
 <script lang="ts">
   import { refreshChromeAppearance, prefersReducedChromeMotion } from "../../../../shared/chrome-appearance.mjs";
+  import {nativeExitErrorMessage, watchNativeExit} from '$lib/components/reader/native-exit';
   import {
     debounceTime,
     EMPTY,
@@ -148,6 +149,7 @@
   let bookmarkManager: BookmarkManager | undefined = $state();
   let pageManager: PageManager | undefined = $state();
   let bookmarkData: Promise<BookmarkData | undefined> = $state(Promise.resolve(undefined));
+  let previousBookmarkWrite: Promise<undefined> = Promise.resolve(undefined);
   let customReadingPointTop = $state(-2);
   let customReadingPointLeft = $state(-2);
   let customReadingPoint = $state($verticalMode$
@@ -435,6 +437,11 @@
     // settings = await SettingsStore.getSettingsStore();
     document.addEventListener('ttu-action', handleAction, false)
     document.addEventListener('pointerdown', handleDocumentPointerDown, true);
+    return watchNativeExit({
+      waitForRequest: () => externalFunctions.waitForReaderExit(),
+      leave: leaveReader,
+      onError: error => logger.error(error),
+    });
   });
 
   function handleAction({detail}: any) {
@@ -776,7 +783,11 @@
       data = bookmarkManager.formatBookmarkData(bookId, currentSectionIndex, currentSection.reference, customReadingPointScrollOffset);
     }
 
-    await externalFunctions.putBookmark(data);
+    // Keep a slower earlier bookmark from overwriting the exit position.
+    const save = (): Promise<undefined> => externalFunctions.putBookmark(data);
+    const write = previousBookmarkWrite.then(save, save);
+    previousBookmarkWrite = write;
+    await write;
 
     bookmarkData = Promise.resolve(data);
   }
@@ -940,9 +951,40 @@
     ]);
   }
 
-  async function leaveReader() {
-    let message;
+  let isLeaving = false;
 
+  function showCloseError(error: unknown) {
+    logger.error(nativeExitErrorMessage(error, t('Error')));
+    dialogManager.dialogs$.next([
+      {
+        component: MessageDialog,
+        props: {
+          title: t('Error'),
+          message: t('Could not close the book. Try again.'),
+          onRetry: () => { void closeReaderWithoutSaving(); }
+        },
+        disableCloseOnClick: true
+      }
+    ]);
+  }
+
+  async function closeReaderWithoutSaving() {
+    if (isLeaving) return;
+    isLeaving = true;
+    dialogManager.dialogs$.next([]);
+    try {
+      await externalFunctions.closeBook();
+    } catch (error: unknown) {
+      showCloseError(error);
+    } finally {
+      isLeaving = false;
+    }
+  }
+
+  async function leaveReader() {
+    if (isLeaving) return;
+    isLeaving = true;
+    let savingPosition = false;
     try {
       await tick();
 
@@ -974,31 +1016,39 @@
       openActionBackdrop();
 
       if (!$manualBookmark$) {
+        savingPosition = true;
         await bookmarkPage();
+        savingPosition = false;
       }
 
       dialogManager.dialogs$.next([]);
-
-    } catch (error: any) {
-      message = error.message;
-    }
-
-    if (message) {
-      logger.error(message);
-
+      await externalFunctions.closeBook();
+    } catch (error: unknown) {
+      if (!savingPosition) {
+        showCloseError(error);
+        return;
+      }
+      logger.error(nativeExitErrorMessage(error, t('Error')));
       dialogManager.dialogs$.next([
         {
           component: MessageDialog,
           props: {
             title: t('Error'),
-            message
+            message: t('Could not save your reading position. Try again.'),
+            onRetry: () => {
+              dialogManager.dialogs$.next([]);
+              void leaveReader();
+            },
+            onExitWithoutSaving: () => {
+              void closeReaderWithoutSaving();
+            }
           },
           disableCloseOnClick: true
         }
       ]);
+    } finally {
+      isLeaving = false;
     }
-
-    await externalFunctions.closeBook()
   }
 
   function handleSetCustomReadingPoint() {
@@ -1278,6 +1328,7 @@
     <div use:clickOutside={() => { tocIsOpen$.next(false); }}>
       <ReaderNavigationDrawer
           bookTitle={$rawBookData$?.title ?? ''}
+          toc={$rawBookData$?.toc}
           sectionData={$sectionData$}
           verticalMode={$verticalMode$}
           {exploredCharCount}

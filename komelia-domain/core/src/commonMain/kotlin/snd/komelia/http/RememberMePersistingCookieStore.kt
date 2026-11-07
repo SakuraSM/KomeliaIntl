@@ -9,7 +9,7 @@ private const val rememberMeCookie = "komga-remember-me"
 private const val sessionCookie = "KOMGA-SESSION"
 
 class RememberMePersistingCookieStore(
-    private val komgaUrl: StateFlow<Url>,
+    private val komgaUrl: StateFlow<Url?>,
     private val knownKomgaUrls: StateFlow<List<Url>>,
     private val secretsRepository: SecretsRepository,
 ) : CookiesStorage {
@@ -32,7 +32,9 @@ class RememberMePersistingCookieStore(
      * see [io.ktor.client.plugins.cookies.HttpCookies.captureHeaderCookies]
      */
     override suspend fun addCookie(requestUrl: Url, cookie: Cookie) {
-        if ((cookie.name == rememberMeCookie || cookie.name == sessionCookie) && cookie.path != komgaUrl.value.encodedPath.ifBlank { "/" }) {
+        val currentUrl = komgaUrl.value
+        if ((cookie.name == rememberMeCookie || cookie.name == sessionCookie) &&
+            (currentUrl == null || cookie.path != currentUrl.encodedPath.ifBlank { "/" })) {
             return
         }
 
@@ -42,9 +44,10 @@ class RememberMePersistingCookieStore(
         if (
             (cookie.name == rememberMeCookie)
             && cookie.value.isNotBlank()
+            && currentUrl != null
             && isKnownKomgaUrl(requestUrl)
         ) {
-            secretsRepository.setCookie(komgaUrl.value.toString(), renderSetCookieHeader(cookie))
+            secretsRepository.setCookie(currentUrl.toString(), renderSetCookieHeader(cookie))
         }
 
     }

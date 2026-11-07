@@ -94,6 +94,7 @@ class OnnxRuntimeSettingsState(
 
 expect fun isOnnxRuntimeSupported(): Boolean
 expect fun isOnnxRuntimeInstalled(): Boolean
+expect fun canUpdateOnnxRuntime(): Boolean
 expect fun onnxRuntimeLoadError(): String?
 expect fun supportedOnnxRuntimeExecutionProviders(): List<OnnxRuntimeExecutionProvider>
 expect val ortExecutionProvider: OnnxRuntimeExecutionProvider?

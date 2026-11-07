@@ -37,7 +37,11 @@ Risk points: optional service failures replacing useful catalog content, local I
 
 ## Remote and LAN selection
 
-Each `MainScreen` owns a serializable navigation identity. A new login gets a new identity; Activity recreation retains the current one. `SessionNavigators` retains destination navigators while a reader hides their composition and disposes their screen models when the owning main-screen session ends. Unconditionally disposing nested navigators on composition removal would also destroy the reader's return stack.
+Each `MainScreen` owns a serializable navigation identity. A new login gets a new identity; Activity recreation retains the current one. `SessionNavigators` retains destination navigators while a reader hides their composition and disposes their screen models when the owning main-screen session ends. Immersive screens are disposed when removed from the tab navigator, while screens still in its stack survive overlays. Each reader opening has a distinct serializable session key, so an immediate reopen cannot reuse the previous reader model. Unconditionally disposing nested navigators on composition removal would also destroy the reader's return stack.
+
+`MainScreenViewModel` applies early deletion events after the active navigator is available. A series-deletion event leaves the current series or one-shot screen only when its ID matches the deleted series.
+
+The library series list cancels an older filter request when the filter changes and applies only the latest request for the current filter. A late response or failure from an older refresh cannot replace newer search results or display an obsolete error.
 
 1. Load the primary remote URL and optional LAN URL from settings.
 2. When automatic switching is enabled, probe the LAN endpoint without replacing the primary configuration.
@@ -50,6 +54,8 @@ Risk points: probe races, stale active URL, destructive settings rewrites, and t
 `ServerUrlResolver.resolution` distinguishes pending selection, a resolved route, and an unconfigured server. A configured initial address is not proof of readiness. Each selection has a generation; cancelled probes cannot publish over a newer configuration. `isCurrent` also checks the settings inputs before their collector runs. When LAN selection is unavailable or disabled and the settings are unchanged, repeated network notifications retain the primary route's generation so they cannot cancel an in-flight login.
 
 `LoginViewModel` owns one login task with a 15-second total deadline, including preparation and route selection. `OnlineLoginCoordinator` gives automatic network attempts six seconds each, with at most two attempts and a 300-millisecond retry delay. Connection failures, timeouts, and HTTP 502/503/504 can retry. Credentials are submitted once. Only a complete session from the current task and route can update authentication. Offline login bypasses route selection. The existing background authentication reload keeps its separate three-second policy.
+
+Login and LAN settings validate addresses with the connection URL parser before saving them. If an older stored address cannot be parsed, credential initialization has no active URL and the login form remains available for correction; it must not select another server's API key or persist an authentication cookie against a fallback address.
 
 ## Offline download and reading
 
@@ -70,9 +76,11 @@ Risk points: partial files, cancellation, record/file divergence, missing error 
 5. Image/PDF pages and EPUB resources are served through the existing offline reader APIs. Local EPUB manifest links are resolved to the internal book-resource route before reaching either EPUB reader.
 6. Startup scanning and Android WorkManager discover later changes according to the stored scan interval.
 
-Risk points: revoked folder permissions, unstable IDs after moving files, archive path encoding, relative EPUB resources, duplicate scans, unsupported desktop PDF extraction, and accidentally treating local source files as app-owned cache.
+The Local screen reloads its current page when revisited, so reading progress reflects changes made in a reader without starting a folder scan. Search and filter changes start a new load without waiting for an obsolete database read; only the latest matching result updates the list.
 
-Android and desktop comic import and reading share `ComicArchiveService` through the JVM shared source set. Filename extensions discover candidates, including 7z and CB7; signatures select ZIP, RAR or 7z. A renamed archive retains its real media type and source identity. EPUB remains ZIP-only and keeps its publication validation; PDF uses its existing platform path.
+Risk points: revoked folder permissions, unstable IDs after moving files, archive path encoding, relative EPUB resources, duplicate scans, PDF rendering and accidentally treating local source files as app-owned cache.
+
+Android and desktop comic import and reading share `ComicArchiveService` through the JVM shared source set. Filename extensions discover candidates, including 7z and CB7; signatures select ZIP, RAR or 7z. A renamed archive retains its real media type and source identity. EPUB remains ZIP-only and keeps its publication validation. Android renders PDF pages with `PdfRenderer`; desktop uses `DesktopPdfExtractor`, with Core Graphics on macOS and PDFBox on Windows/Linux. Rendered dimensions are bounded to 4096 pixels.
 
 `AndroidArchiveSourceAccess` provides direct seekable access or a bounded temporary copy for non-seekable providers. EPUB's `AndroidZipArchiveOpener` uses the same access layer. `ArchiveScratchSpace` counts provider copies and 7z caches together: 1 GiB per file, 2 GiB total, with 128 MiB of storage reserved. Permission and parser failures do not trigger alternative parsers.
 
@@ -92,7 +100,7 @@ Global changes invalidate the active correction lookup table and notify the imag
 
 Each color-editor entry owns a new serializable screen identity. Closing saves before popping and disposes the editor model explicitly, so another book or a reopened editor cannot reuse stale policy or preview state. Disposal cancels preview work before releasing its original native image.
 
-Image readers reload the current book through the selected content API at entry. A book passed by navigation is a display snapshot and cannot supply the authoritative saved progress. TTU continuous mode keeps scrolling on the document used by its bookmark calculator and window scroll listeners; horizontal clipping must not introduce a second scroll container on `#app`.
+Image readers reload the current book through the selected content API at entry. A book passed by navigation is a display snapshot and cannot supply the authoritative saved progress. TTU continuous mode keeps scrolling on the document used by its bookmark calculator and window scroll listeners; horizontal clipping must not introduce a second scroll container on `#app`. Its character-position lookup allows one CSS pixel of scroll-rounding tolerance so reopening at a paragraph boundary does not repeatedly move the bookmark backward.
 
 Android image readers expose current-page sharing through the optional domain `PageShareService`. The action captures the current book and one-based page before fetching original encoded bytes through the selected content API. It does not export the rendered viewport, crop, color correction or a double-page spread. Other platforms omit the action. Android validates the image header, stores one temporary image in the dedicated cache directory, and grants read-only access to that file through `PageShareFileProvider`. Failed launches remove their temporary file; completed launches retain it for receivers, with owned files older than 24 hours cleaned on later shares. Opening the system chooser does not send the image.
 
@@ -132,6 +140,10 @@ The Komga EPUB reader's `BookSiblingState` owns previous and next lookups by cur
 `KomgaEpubReaderState` gives each native document a fresh `EpubReaderSession`. Close and model disposal retire its bridge callbacks and navigate the document to `about:blank`; Android's WebView wrapper `close()` alone does not stop JavaScript. A retained screen creates a new session when its native view is recreated, even before its initialize effect runs. Book results check the session before changing native book identity. Queued final progress writes remain allowed. The JavaScript reader also clears navigation on `pagehide` and explicit close.
 
 Book details load chapters from the existing WebPub manifest. A selected href is a one-shot `EpubScreen` input consumed by the chosen reader. Komga receives an initial locator with the original fragment; TTU receives a transient initial chapter href. Its continuous reader uses chapter/anchor navigation for that request; ordinary bookmark restoration retains the existing character-count rules. An explicit entry remains anchored through initial wrapper measurement, then releases that anchor when reading moves away. The requested href belongs to that reader instance; explicit entries replace a retained implementation while ordinary re-entry keeps it. Selection does not itself persist progress. Normal reader progress writes retain their existing ownership. Detail expansion and chapter navigation are separate controls.
+
+TTU passes the manifest's nested table of contents to its navigation drawer separately from the reading-order sections used for progress. It maps each usable link to the corresponding reading resource while retaining its fragment; a missing usable table falls back to the reading-order chapters. The drawer estimates the current fragment from the rendered reading position and expands its ancestors without changing stored progress. In paginated mode a fragment jump waits for the target section to render before locating the anchor. A newer jump cancels the pending one.
+
+TTU reveals its desktop edge page controls on pointer hover or keyboard focus. Touch devices use the reader toolbar for those actions, leaving publication text unobstructed while the toolbar is hidden. System Back and the desktop title-bar exit ask TTU to save before closing. Bookmark writes stay ordered, and a failed save keeps the reader open with retry and explicit exit options. Manual bookmarks retain their existing behavior. Incognito reading does not persist progress, and normal and incognito sessions use separate screen models.
 
 Series details hide global phone navigation and retain one reading action. Wide layouts keep the volume list and a nested book detail together. Reading opens on the surrounding `AppTab` navigator so the reader fills the application while retaining the selected series and list state. A cached copy remains available when its remote file disappears; resume lookup skips missing remote-only volumes.
 

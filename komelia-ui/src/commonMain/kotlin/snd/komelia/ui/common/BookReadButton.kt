@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -72,6 +73,7 @@ fun BookReadButton(
     labelStyle: TextStyle? = null,
     leadingIconSize: Dp = 20.dp,
     iconSpacing: Dp = 8.dp,
+    labelAutoSize: TextAutoSize? = null,
 ) {
     Surface(
         shape = RoundedCornerShape(10.dp),
@@ -95,6 +97,7 @@ fun BookReadButton(
                 labelStyle = labelStyle,
                 leadingIconSize = leadingIconSize,
                 iconSpacing = iconSpacing,
+                labelAutoSize = labelAutoSize,
             )
             if (onIncognitoRead != null) {
                 VerticalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -118,6 +121,7 @@ private fun ReadButton(
     labelStyle: TextStyle?,
     leadingIconSize: Dp,
     iconSpacing: Dp,
+    labelAutoSize: TextAutoSize?,
 ) {
     Row(
         modifier = Modifier.clickable { onRead() }.then(modifier),
@@ -132,7 +136,9 @@ private fun ReadButton(
         )
         if (showIcon) Spacer(Modifier.width(if (label == null) 10.dp else iconSpacing))
         Text(label ?: stringResource(Res.string.book_read_button),
-            style = labelStyle ?: if (label == null) LocalTextStyle.current else MaterialTheme.typography.labelLarge)
+            style = labelStyle ?: if (label == null) LocalTextStyle.current else MaterialTheme.typography.labelLarge,
+            autoSize = labelAutoSize,
+            maxLines = if (labelAutoSize == null) Int.MAX_VALUE else 1)
     }
 }
 

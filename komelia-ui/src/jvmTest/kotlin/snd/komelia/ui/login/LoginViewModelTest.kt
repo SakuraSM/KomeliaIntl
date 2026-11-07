@@ -40,6 +40,32 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginViewModelTest {
+    @Test fun malformedMultiColonAddressIsRejectedBeforeLoginIsSaved() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val fixture = Fixture { USER }
+        try {
+            fixture.vm.onUrlChange("http://localhost:256a10.0.2.2:18764")
+            fixture.vm.loginWithCredentials()
+            runCurrent()
+            assertEquals(LoginServerUrlError.INVALID_URL, fixture.vm.serverUrlError)
+            assertEquals(0, fixture.userCalls)
+        } finally { fixture.vm.onDispose(); Dispatchers.resetMain() }
+    }
+
+    @Test fun storedMalformedAddressReturnsToEditableLoginWithoutNetwork() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val invalidUrl = "http://localhost:256a10.0.2.2:18764"
+        val fixture = Fixture(primaryUrl = invalidUrl) { USER }
+        try {
+            fixture.vm.initialize()
+            runCurrent()
+            assertIs<LoadState.Error>(fixture.vm.state.value)
+            assertEquals(invalidUrl, fixture.vm.url)
+            assertEquals(LoginServerUrlError.INVALID_URL, fixture.vm.serverUrlError)
+            assertEquals(0, fixture.userCalls)
+        } finally { fixture.vm.onDispose(); Dispatchers.resetMain() }
+    }
+
     @Test fun cancellationWhenLoadingIsPublishedCannotStartAnUnownedRequest() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val fixture = Fixture { USER }

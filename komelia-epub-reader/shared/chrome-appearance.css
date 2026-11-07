@@ -198,6 +198,9 @@
 }
 :root[data-komelia-surface="solid"] [data-komelia-chrome] [data-komelia-toggle-option][aria-pressed="true"]:not([data-komelia-theme-swatch]) { background: #184a64 !important; color: #b6ebff !important; }
 :root[data-komelia-surface="solid"][data-komelia-theme="LIGHT"] [data-komelia-chrome] [data-komelia-toggle-option][aria-pressed="true"]:not([data-komelia-theme-swatch]) { background: #d4ebf7 !important; color: #075576 !important; }
+:root[data-komelia-surface="classic"] [data-komelia-reader-settings] [data-komelia-toggle-option]:not([data-komelia-theme-swatch]) { background: transparent !important; color: inherit !important; }
+:root[data-komelia-surface="classic"] [data-komelia-reader-settings] [data-komelia-toggle-option][aria-pressed="true"]:not([data-komelia-theme-swatch]) { background: #70d9ff !important; color: #00324a !important; }
+:root[data-komelia-surface="classic"][data-komelia-theme="LIGHT"] [data-komelia-reader-settings] [data-komelia-toggle-option][aria-pressed="true"]:not([data-komelia-theme-swatch]) { background: #00638d !important; color: white !important; }
 
 /* Form panels need a stable reading surface even over a bright publication. */
 :root[data-komelia-surface="glass"] [data-komelia-popup] { --komelia-chrome-background: rgb(20 37 56 / 96%); }

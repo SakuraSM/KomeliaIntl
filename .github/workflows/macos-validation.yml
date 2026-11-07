@@ -1,0 +1,73 @@
+name: Validate macOS packages
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/macos-validation.yml'
+      - 'scripts/macos/**'
+      - 'scripts/Desktop*Smoke.java'
+      - 'komelia-*/**'
+      - 'gradle/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            architecture: arm64
+          - runner: macos-15-intel
+            architecture: x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install native build dependencies
+        run: brew install cmake meson ninja pkgconf glib jpeg-turbo libexif jpeg-xl highway libpng libtiff webp little-cms2 cgif libomp dav1d libde265
+      - name: Build native libraries
+        run: scripts/macos/build-native.sh
+      - name: Test native integrations
+        run: ./gradlew :komelia-infra:webview:jvmTest :komelia-domain:offline:jvmTest
+      - name: Package application
+        run: ./gradlew desktopJar desktopDmg
+      - name: Verify native decoding and CPU inference
+        run: |
+          jar=$(find komelia-app/desktopApp/build/compose/jars -name '*release.jar' -print -quit)
+          test -n "$jar"
+          mkdir -p "$RUNNER_TEMP/komelia-home" "$RUNNER_TEMP/komelia-tmp" "$RUNNER_TEMP/komelia-probes"
+          javac -cp "$jar" -d "$RUNNER_TEMP/komelia-probes" scripts/DesktopNativeSmoke.java scripts/DesktopOnnxSmoke.java scripts/DesktopOnnxExitSmoke.java
+          java -Duser.home="$RUNNER_TEMP/komelia-home" -Djava.io.tmpdir="$RUNNER_TEMP/komelia-tmp" -cp "$jar:$RUNNER_TEMP/komelia-probes" DesktopNativeSmoke bundled
+          java -Duser.home="$RUNNER_TEMP/komelia-home" -Djava.io.tmpdir="$RUNNER_TEMP/komelia-tmp" -cp "$jar:$RUNNER_TEMP/komelia-probes" DesktopOnnxSmoke
+          java -Duser.home="$RUNNER_TEMP/komelia-home" -Djava.io.tmpdir="$RUNNER_TEMP/komelia-tmp" -cp "$jar:$RUNNER_TEMP/komelia-probes" DesktopOnnxExitSmoke "$RUNNER_TEMP/komelia-tmp"
+      - name: Launch the installer
+        run: |
+          dmg=$(find komelia-app/desktopApp/build/compose/binaries -name '*.dmg' -print -quit)
+          test -n "$dmg"
+          scripts/macos/verify-installer.sh "$dmg" "$PWD/runtime-evidence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macos-${{ matrix.architecture }}-validation
+          path: |
+            komelia-app/desktopApp/build/compose/binaries/main-release/dmg/*.dmg
+            runtime-evidence
+            komelia-domain/offline/build/test-results
+            komelia-infra/webview/build/test-results
+          if-no-files-found: warn

@@ -466,6 +466,11 @@ KomeliaRfDetrResults *komelia_ort_rfdetr(
 ) {
     pthread_mutex_lock(&rf_detr->mutex);
 
+    if (rf_detr->model_path == nullptr) {
+        g_set_error_literal(error, KOMELIA_ORT_ERROR, KOMELIA_ORT_ERROR_INFERENCE, "model path is not initialized");
+        pthread_mutex_unlock(&rf_detr->mutex);
+        return nullptr;
+    }
     if (rf_detr->session == nullptr) {
         GError *session_init_error = nullptr;
         SessionData *session = komelia_ort_create_session(
@@ -477,6 +482,7 @@ KomeliaRfDetrResults *komelia_ort_rfdetr(
         );
         if (session_init_error != nullptr) {
             g_propagate_error(error, session_init_error);
+            pthread_mutex_unlock(&rf_detr->mutex);
             return nullptr;
         }
         rf_detr->session = session;

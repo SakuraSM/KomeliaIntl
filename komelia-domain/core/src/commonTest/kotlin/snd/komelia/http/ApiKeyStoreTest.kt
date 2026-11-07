@@ -9,6 +9,22 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class ApiKeyStoreTest {
+    @Test fun invalidCurrentServerNeverUsesOrLoadsAnotherServersKey() = runTest {
+        val server = Url("https://a.example")
+        val url = MutableStateFlow<Url?>(server)
+        val secrets = MemorySecrets()
+        val store = ApiKeyStore(url, secrets)
+        store.setApiKey(server.toString(), "key-a")
+        assertEquals("key-a", store.apiKey)
+        url.value = null
+        assertNull(store.apiKey)
+        val readsBefore = secrets.apiKeyReads
+        store.loadStoredApiKey()
+        assertEquals(readsBefore, secrets.apiKeyReads)
+        url.value = server
+        assertEquals("key-a", store.apiKey)
+    }
+
     @Test fun switchingServersNeverReusesAnotherServersKey() = runTest {
         val url = MutableStateFlow(Url("https://a.example"))
         val store = ApiKeyStore(url, MemorySecrets())
@@ -38,10 +54,11 @@ class ApiKeyStoreTest {
 
     private class MemorySecrets : SecretsRepository {
         private val keys = mutableMapOf<String, String>()
+        var apiKeyReads = 0
         override suspend fun getCookie(url: String): String? = null
         override suspend fun setCookie(url: String, cookie: String) {}
         override suspend fun deleteCookie(url: String) {}
-        override suspend fun getApiKey(url: String) = keys[url]
+        override suspend fun getApiKey(url: String): String? { apiKeyReads++; return keys[url] }
         override suspend fun setApiKey(url: String, apiKey: String) { keys[url] = apiKey }
         override suspend fun deleteApiKey(url: String) { keys.remove(url) }
     }

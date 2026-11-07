@@ -14,8 +14,15 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_result_c
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.series_list_series_count
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_collections_count
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_tab_readlists_count
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_no_series
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_no_series_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_no_series_matching_filters
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.library_no_series_matching_filters_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_no_results_body
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_no_results_title
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.text.style.TextOverflow
@@ -104,6 +111,7 @@ import snd.komelia.ui.collection.CollectionScreen
 import snd.komelia.ui.common.components.LocalPageTopInset
 import snd.komelia.ui.common.components.BrowsePageHeader
 import snd.komelia.ui.common.components.ErrorContent
+import snd.komelia.ui.common.components.EmptyState
 import snd.komelia.ui.common.components.KomeliaPageScaffold
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.common.components.komeliaTopBarScroll
@@ -122,6 +130,7 @@ import snd.komelia.ui.platform.WindowSizeClass.FULL
 import snd.komelia.ui.readlist.ReadListScreen
 import snd.komelia.ui.search.SearchScreen
 import snd.komelia.ui.series.list.SeriesListContent
+import snd.komelia.ui.series.SeriesFilter
 import snd.komelia.ui.series.seriesScreen
 import snd.komga.client.common.KomgaAuthor
 import snd.komga.client.library.KomgaLibraryId
@@ -242,35 +251,41 @@ class LibraryScreen(
             )
 
             else -> {
-                val loading = state is Loading || state is Uninitialized
+                val editMode by seriesTabState.isInEditMode.collectAsState()
+                val filter by seriesTabState.filterState.state.collectAsState()
+                val loading = state is Loading || state is Uninitialized || filter != seriesTabState.loadedFilter
                 Column {
-                LibraryBrowseControls(seriesTabState)
-                CompositionLocalProvider(LocalKomeliaLayout provides LocalKomeliaLayout.current.copy(pageHorizontalPadding = ReadingDesign.browseInset)) {
-                SeriesListContent(
-                    isList = seriesTabState.isList,
-                    series = seriesTabState.series,
-                    seriesActions = seriesTabState.seriesMenuActions(),
-                    seriesTotalCount = seriesTabState.totalSeriesCount,
-                    onSeriesClick = { navigator.push(seriesScreen(it)) },
-
-                    editMode = seriesTabState.isInEditMode.collectAsState().value,
-                    onEditModeChange = seriesTabState::onEditModeChange,
-                    selectedSeries = seriesTabState.selectedSeries,
-                    onSeriesSelect = seriesTabState::onSeriesSelect,
-
-                    isLoading = loading,
-                    filterState = seriesTabState.filterState,
-
-                    currentPage = seriesTabState.currentSeriesPage,
-                    totalPages = seriesTabState.totalSeriesPages,
-                    pageSize = seriesTabState.pageLoadSize.collectAsState().value,
-                    onPageSizeChange = seriesTabState::onPageSizeChange,
-                    onPageChange = seriesTabState::onPageChange,
-
-                    minSize = seriesTabState.cardWidth.collectAsState().value,
-                    showToolbar = false,
-                )
-                }
+                    LibraryBrowseControls(seriesTabState)
+                    CompositionLocalProvider(LocalKomeliaLayout provides LocalKomeliaLayout.current.copy(pageHorizontalPadding = ReadingDesign.browseInset)) {
+                        Box(Modifier.weight(1f)) {
+                            SeriesListContent(
+                                isList = seriesTabState.isList,
+                                series = seriesTabState.series,
+                                seriesActions = seriesTabState.seriesMenuActions(),
+                                seriesTotalCount = seriesTabState.totalSeriesCount,
+                                onSeriesClick = { navigator.push(seriesScreen(it)) },
+                                editMode = editMode,
+                                onEditModeChange = seriesTabState::onEditModeChange,
+                                selectedSeries = seriesTabState.selectedSeries,
+                                onSeriesSelect = seriesTabState::onSeriesSelect,
+                                isLoading = loading,
+                                filterState = seriesTabState.filterState,
+                                currentPage = seriesTabState.currentSeriesPage,
+                                totalPages = seriesTabState.totalSeriesPages,
+                                pageSize = seriesTabState.pageLoadSize.collectAsState().value,
+                                onPageSizeChange = seriesTabState::onPageSizeChange,
+                                onPageChange = seriesTabState::onPageChange,
+                                minSize = seriesTabState.cardWidth.collectAsState().value,
+                                showToolbar = false,
+                            )
+                            LibrarySeriesEmptyState(
+                                loading = loading,
+                                hasResults = seriesTabState.series.isNotEmpty() || seriesTabState.totalSeriesCount > 0,
+                                editing = editMode,
+                                filter = filter,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -356,6 +371,45 @@ class LibraryScreen(
 }
 
 internal fun resolveRestoredLibraryTab(tab: LibraryTab?): LibraryTab = tab ?: SERIES
+
+@Composable
+internal fun LibrarySeriesEmptyState(
+    loading: Boolean,
+    hasResults: Boolean,
+    editing: Boolean,
+    filter: SeriesFilter,
+) {
+    if (hasResults || editing) return
+    if (loading) {
+        LoadingMaxSizeIndicator(Modifier.imePadding())
+        return
+    }
+
+    val default = SeriesFilter.DEFAULT
+    val hasFilters = filter.copy(
+        isChanged = false,
+        searchTerm = "",
+        sortOrder = default.sortOrder,
+        inclusionMode = default.inclusionMode,
+        exclusionMode = default.exclusionMode,
+    ) != default
+    val title = when {
+        filter.searchTerm.isNotBlank() -> Res.string.search_no_results_title
+        hasFilters -> Res.string.library_no_series_matching_filters
+        else -> Res.string.library_no_series
+    }
+    val body = when {
+        filter.searchTerm.isNotBlank() -> Res.string.search_no_results_body
+        hasFilters -> Res.string.library_no_series_matching_filters_body
+        else -> Res.string.library_no_series_body
+    }
+    Box(
+        Modifier.fillMaxSize().imePadding().padding(horizontal = LocalKomeliaLayout.current.pageHorizontalPadding),
+        contentAlignment = Alignment.Center,
+    ) {
+        EmptyState(title = stringResource(title), description = stringResource(body))
+    }
+}
 
 @Composable
 private fun LibraryToolBar(
@@ -477,7 +531,7 @@ private fun LibraryPageSizeOption(pageSize: Int, onChange: (Int) -> Unit, summar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LibraryScopeSelector(
+internal fun LibraryScopeSelector(
     libraries: List<LibraryScopeItem>,
     selectedLibraryId: KomgaLibraryId?,
     compact: Boolean = false,
@@ -497,7 +551,7 @@ private fun LibraryScopeSelector(
 
     Box {
         if (compact || formField) Surface(onClick = { expanded = true }, color = androidx.compose.ui.graphics.Color.Transparent,
-            modifier = (if (formField) Modifier.fillMaxWidth() else Modifier.width((100.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)).coerceAtMost(148.dp)))
+            modifier = (if (formField) Modifier.fillMaxWidth() else Modifier.width((132.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)).coerceAtMost(148.dp)))
                 .height(48.dp)) {
             Box(contentAlignment = Alignment.Center) {
                 Surface(Modifier.fillMaxWidth().then(if (formField) Modifier else Modifier.padding(top = 12.dp)).height(32.dp), shape = RoundedCornerShape(if (formField) 8.dp else 16.dp),
@@ -571,7 +625,7 @@ private fun LibraryScopeSelector(
 }
 
 @Composable
-private fun LibrarySupportingPane(
+internal fun LibrarySupportingPane(
     libraries: List<LibraryScopeItem>,
     selectedLibraryId: KomgaLibraryId?,
     onSelect: (KomgaLibraryId?) -> Unit,
@@ -589,24 +643,27 @@ private fun LibrarySupportingPane(
             .padding(top = LocalPageTopInset.current),
         color = MaterialTheme.colorScheme.surface,
     ) {
-        Text(
-            stringResource(Res.string.navbar_libraries),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(
-                start = layout.pageHorizontalPadding,
-                end = layout.pageHorizontalPadding,
-                top = layout.pageVerticalPadding,
-            ),
-        )
-        LibraryScopeItems(
-            libraries = libraries,
-            selectedLibraryId = selectedLibraryId,
-            onSelect = onSelect,
-            onAddLibrary = { showLibraryAddDialog = true },
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(layout.pageHorizontalPadding),
-        )
+        Column(Modifier.fillMaxSize()) {
+            Text(
+                stringResource(Res.string.navbar_libraries),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(
+                    start = layout.pageHorizontalPadding,
+                    end = layout.pageHorizontalPadding,
+                    top = layout.pageVerticalPadding,
+                ),
+            )
+            LibraryScopeItems(
+                libraries = libraries,
+                selectedLibraryId = selectedLibraryId,
+                onSelect = onSelect,
+                onAddLibrary = { showLibraryAddDialog = true },
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(layout.pageHorizontalPadding),
+            )
+        }
     }
 }
 

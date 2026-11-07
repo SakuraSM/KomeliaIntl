@@ -41,18 +41,21 @@ class MainScreenViewModel(
         ?.stateIn(screenModelScope, SharingStarted.Eagerly, false)
         ?: MutableStateFlow(false)
     private val navigatorFlow = MutableStateFlow<Navigator?>(null)
+    private val pendingNavigationEvents = mutableListOf<KomgaEvent>()
     private val navigator
         get() = navigatorFlow.value ?: error("main screen navigator is not initialized")
+    val komgaTaskQueueStatus = MutableStateFlow<TaskQueueStatus?>(null)
 
     fun initialize(navigator: Navigator) {
         this.navigatorFlow.value = navigator
+        val pending = pendingNavigationEvents.toList()
+        pendingNavigationEvents.clear()
+        pending.forEach(::handleNavigationEvent)
     }
 
     init {
         screenModelScope.launch { startEventListener() }
     }
-
-    val komgaTaskQueueStatus = MutableStateFlow<TaskQueueStatus?>(null)
 
     fun onScreenReload() {
         screenReloadFlow.tryEmit(Unit)
@@ -72,13 +75,25 @@ class MainScreenViewModel(
         komgaEvents.collect { event ->
             when (event) {
                 is TaskQueueStatus -> komgaTaskQueueStatus.value = event
-                is BookDeleted -> onBookDeletedEvent(event)
-                is SeriesDeleted -> onSeriesDeleted(event)
-                is LibraryDeleted -> onLibraryDeleted(event)
-                is CollectionDeleted -> onCollectionDeleted(event)
-                is ReadListDeleted -> onReadListDeleted(event)
+                is BookDeleted, is SeriesDeleted, is LibraryDeleted,
+                is CollectionDeleted, is ReadListDeleted -> handleNavigationEvent(event)
                 else -> {}
             }
+        }
+    }
+
+    private fun handleNavigationEvent(event: KomgaEvent) {
+        if (navigatorFlow.value == null) {
+            pendingNavigationEvents.add(event)
+            return
+        }
+        when (event) {
+            is BookDeleted -> onBookDeletedEvent(event)
+            is SeriesDeleted -> onSeriesDeleted(event)
+            is LibraryDeleted -> onLibraryDeleted(event)
+            is CollectionDeleted -> onCollectionDeleted(event)
+            is ReadListDeleted -> onReadListDeleted(event)
+            else -> {}
         }
     }
 
@@ -90,9 +105,10 @@ class MainScreenViewModel(
 
     private fun onSeriesDeleted(event: SeriesDeleted) {
         val lastScreen = navigator.lastItem
-        when {
-            lastScreen is SeriesScreen || lastScreen is OneshotScreen && lastScreen.seriesId == event.seriesId ->
-                navigator.replaceAll(LibraryScreen(event.libraryId))
+        if ((lastScreen is SeriesScreen && lastScreen.seriesId == event.seriesId) ||
+            (lastScreen is OneshotScreen && lastScreen.seriesId == event.seriesId)
+        ) {
+            navigator.replaceAll(LibraryScreen(event.libraryId))
         }
     }
 

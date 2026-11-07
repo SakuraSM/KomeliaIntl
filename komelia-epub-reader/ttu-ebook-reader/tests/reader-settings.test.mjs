@@ -9,6 +9,30 @@ import {assertControlBounds, paintedBounds} from '../../shared/tests/control-geo
 
 const {chromium} = createRequire(import.meta.url)('playwright');
 
+for (const theme of ['DARK', 'LIGHT']) {
+test(`classic ${theme.toLowerCase()} settings distinguish the selected reading mode`, async () => {
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport: {width: 390, height: 844}});
+    await page.goto(`${server.url}?settings&surface=classic&theme=${theme}`);
+    const panel = page.locator('[data-komelia-reader-settings]');
+    const continuous = panel.getByRole('button', {name: 'Continuous', exact: true});
+    const paginated = panel.getByRole('button', {name: 'Paginated', exact: true});
+    await continuous.click();
+    assert.equal(await continuous.getAttribute('aria-pressed'), 'true');
+    assert.equal(await paginated.getAttribute('aria-pressed'), 'false');
+    const selectedBackground = await continuous.evaluate(node => getComputedStyle(node).backgroundColor);
+    const unselectedBackground = await paginated.evaluate(node => getComputedStyle(node).backgroundColor);
+    assert.equal(unselectedBackground, 'rgba(0, 0, 0, 0)');
+    assert.notEqual(selectedBackground, unselectedBackground);
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});
+}
+
 
 test('reader settings keep theme samples, view choices, and font names readable', async () => {
   const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
@@ -70,6 +94,11 @@ test('continuous chapter entry selects the requested chapter rather than the pre
     assert.ok((await page.locator('#selected').boundingBox()).y < -100, 'Reading must not snap back to the initial chapter after a user scroll');
     await page.goto(`${server.url}?initialChapter&bookmarkOnly`);
     await page.waitForFunction(() => window.scrollY > 100 && document.querySelector('output')?.textContent === 'chapter-one', undefined, {timeout:5000});
+    await page.evaluate(() => window.navigateTestChapter('chapter-two#selected'));
+    await page.waitForFunction(() => {
+      const bounds = document.querySelector('#selected').getBoundingClientRect();
+      return bounds.top >= 0 && bounds.top < 150;
+    }, undefined, {timeout:5000});
   } finally {
     await browser.close();
     await server.close();

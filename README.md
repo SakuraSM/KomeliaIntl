@@ -27,7 +27,9 @@ On supported native targets, you can download books, browse the local cache by s
 
 ### Local folder libraries
 
-Android and desktop can add a local folder without signing in to Komga. Komelia indexes supported files recursively, groups books by their parent folder, keeps the folder permission across restarts, and detects additions and removals on startup or during the scheduled scan. Android supports CBZ/ZIP, CBR/RAR, EPUB, and PDF; desktop currently supports CBZ/ZIP, CBR/RAR, and EPUB. Source files stay in place and are never deleted by removing a local library from Komelia. Browser/Wasm builds do not provide persistent folder libraries.
+Android and desktop can add a local folder without signing in to Komga. Komelia indexes supported files recursively, groups books by their parent folder, keeps the folder permission across restarts, and detects additions and removals on startup or during the scheduled scan. Both support CBZ/ZIP, CBR/RAR, EPUB, and PDF. Source files stay in place and are never deleted by removing a local library from Komelia. Browser/Wasm builds do not provide persistent folder libraries.
+
+On Windows and Linux, PDF pages containing JPEG 2000 images require a compatible ImageIO decoder, which is not bundled. macOS uses the system PDF renderer.
 
 ## Other changes
 
@@ -45,17 +47,20 @@ Android and desktop can add a local folder without signing in to Komga. Komelia 
 
 I maintain this repository independently. I track upstream Komelia and aim to ship an iteration about once a week. The schedule may shift based on upstream changes, test results, and available time. Thanks for using Komelia Intl.
 
-## Supported targets
+## Build targets
 
 The source tree contains these build targets. A GitHub Release can contain only the platforms built for that version, so use its **Assets** list as the source of truth.
+
+The macOS source build includes native image decoding, WebView, and CPU-based ONNX Runtime. Apple Silicon has been exercised locally. Intel native integration tests, DMG packaging, and installed-app startup passed in [CI](https://github.com/SakuraSM/KomeliaIntl/actions/runs/42195533442/job/127817757906). Locally built DMGs use an ad-hoc signature and are not notarized.
 
 | Target | Gradle task | Typical package |
 |---|---|---|
 | Android | `androidRelease` | APK |
 | Windows x86_64 | `desktopMsi` | MSI |
 | Linux x86_64 | `desktopDeb` | DEB |
-| macOS | `desktopDmg` | DMG |
-| Desktop on the current OS | `desktopJar` | JAR |
+| macOS Apple Silicon | `desktopDmg` | DMG |
+| macOS Intel | `desktopDmg` | DMG |
+| Desktop on Windows, Linux, or macOS | `desktopJar` | JAR |
 | Browser, WebAssembly | `komfWebUI` | Static web files |
 | Komf extension for Chrome | `komfExtensionChrome` | ZIP |
 | Komf extension for Firefox | `komfExtensionFirefox` | ZIP |
@@ -81,9 +86,13 @@ Reader settings for TTU EPUB, comics/PDF, and Komga EPUB:
 
 The [18 runtime screenshots](docs/verification/modern-ui-alignment-20261102-assets/screens/) also include light themes and Android wide layouts. See the [verification record](docs/verification/modern-ui-alignment-20261102.md) for build and device coverage.
 
+macOS local library with synthetic test books:
+
+<img src="screenshots/macos-local-library-20261106.png" alt="macOS local library with synthetic comics, EPUB, and PDF books" width="100%">
+
 ## Build from source
 
-Release workflows use JDK 21 and Node.js 24. The local `.node-version` currently declares Node.js 20; the [Harness scorecard](docs/harness/scorecard.md) records this toolchain split until the repository adopts one declaration. Android and desktop packages also need the platform's native image and WebView libraries. The files under `cmake/` build those dependencies with Docker for supported targets.
+Release workflows use JDK 21 and Node.js 24. The local `.node-version` currently declares Node.js 20; the [Harness scorecard](docs/harness/scorecard.md) records this toolchain split until the repository adopts one declaration. Android and desktop packages also need the platform's native image and WebView libraries. The files under `cmake/` build Linux and Windows dependencies with Docker.
 
 Clone this fork with its submodules:
 
@@ -110,6 +119,14 @@ Use the root build aliases for common targets:
 ./gradlew androidDebug
 ./gradlew desktopJar
 ./gradlew komfWebUI
+```
+
+On macOS, install the native build dependencies and prepare them before running `desktopJar` or `desktopDmg`. Use a JDK distribution suitable for packaging, such as Temurin 21:
+
+```shell
+brew install cmake meson ninja pkgconf glib jpeg-turbo libexif jpeg-xl highway libpng libtiff webp little-cms2 cgif libomp dav1d libde265
+scripts/macos/build-native.sh
+./gradlew desktopDmg
 ```
 
 The outputs are under the corresponding module's `build/` directory. For release packaging and native dependency commands, follow [the desktop Release workflow](.github/workflows/release-desktop.yml) and [the engineering harness](docs/harness/README.md).

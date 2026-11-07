@@ -9,17 +9,20 @@
     type SectionWithProgress
   } from '$lib/components/book-reader/book-toc/book-toc';
   import type {ReaderAnnotation} from '$lib/data/reader-annotation';
+  import type {TocEntry} from '$lib/data/books-db';
   import type {ReaderSearchResult} from '$lib/functions/reader-interactions';
   import ReaderSearchPanel from '$lib/components/reader/ReaderSearchPanel.svelte';
   import {t} from '$lib/i18n';
   import {tick, onMount} from 'svelte';
   import {focusableDialogElements, trapDialogFocus} from '$lib/functions/dialog-focus';
+  import {findCurrentTocPath} from '$lib/functions/reader-toc-location';
   import {prefersReducedChromeMotion} from '../../../../../shared/chrome-appearance.mjs';
 
   type DrawerTab = 'toc' | 'search' | 'marks';
 
   interface Props {
     sectionData: SectionWithProgress[];
+    toc?: TocEntry[];
     verticalMode: boolean;
     exploredCharCount: number;
     fontColor?: string;
@@ -40,6 +43,7 @@
 
   let {
     sectionData,
+    toc = [],
     verticalMode,
     fontColor,
     backgroundColor,
@@ -58,12 +62,18 @@
   }: Props = $props();
 
   let activeTab: DrawerTab = $state('toc');
+  let expandedEntries: string[] = $state([]);
 
   let chapters = $derived(sectionData.filter((section) => !section.parentChapter));
+  let hasNavigableToc = $derived(hasTocTarget(toc));
   let currentChapterIndex = $derived(sectionData.length ? getChapterData(sectionData)[1] : -1);
+  let currentTocPath: string | undefined = $state();
 
   let drawer: HTMLElement | undefined = $state();
   onMount(() => {
+    currentTocPath = findCurrentTocPath({entries: toc, sections: sectionData, verticalMode, document});
+    const pathParts = currentTocPath?.split('.') ?? [];
+    expandedEntries = pathParts.slice(0, -1).map((_, index) => pathParts.slice(0, index + 1).join('.'));
     const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     void tick().then(() => focusableDialogElements(drawer)[0]?.focus());
     return () => trigger?.focus();
@@ -79,6 +89,20 @@
     onClose();
   }
 
+  function hasTocTarget(entries: TocEntry[]): boolean {
+    return entries.some(entry => !!entry.reference || hasTocTarget(entry.children ?? []));
+  }
+
+  function toggleEntry(path: string): void {
+    expandedEntries = expandedEntries.includes(path)
+      ? expandedEntries.filter(entry => entry !== path)
+      : [...expandedEntries, path];
+  }
+
+  function goToTocEntry(reference: string): void {
+    nextChapter$.next(reference);
+    onClose();
+  }
 
 </script>
 
@@ -109,13 +133,16 @@
     <button type="button" aria-label={t('Close navigation')} onclick={onClose}><Fa icon={faXmark}/></button>
   </header>
   <div class="navigation-summary" title={t(verticalMode ? 'Vertical' : 'Horizontal')}>
-    <span>{bookTitle}</span><span>· {t('{count} chapters', {count: chapters.length})}</span>
+    <span>{bookTitle}</span><span>· {t('{count} chapters', {count: hasNavigableToc ? toc.length : chapters.length})}</span>
   </div>
 
   <div class="navigation-body min-h-0 flex-1 overflow-hidden">
     {#if activeTab === 'toc'}
       <section class="flex h-full flex-col gap-3" aria-label={t('Table of Contents')}>
         <ol class="navigation-chapters min-h-0 flex-1 overflow-auto pb-8">
+          {#if hasNavigableToc}
+            {@render tocRows(toc, '')}
+          {:else}
           {#each chapters as chapter, index (chapter.reference)}
             <li>
               <button
@@ -131,6 +158,7 @@
               </button>
             </li>
           {/each}
+          {/if}
         </ol>
       </section>
     {:else if activeTab === 'search'}
@@ -176,6 +204,40 @@
   </div>
 </aside>
 
+{#snippet tocRows(entries: TocEntry[], prefix: string)}
+  {#each entries as entry, index (`${prefix}${index}`)}
+    {@const path = `${prefix}${index}`}
+    {@const label = entry.title || entry.reference || t('Chapter {number}', {number: index + 1})}
+    {@const reference = entry.reference}
+    {@const isExpanded = expandedEntries.includes(path)}
+    <li>
+      <div class="navigation-row">
+        {#if reference}
+          <button type="button" class="navigation-chapter"
+              aria-current={path === currentTocPath ? 'location' : undefined}
+              onclick={() => goToTocEntry(reference)}>
+            <span class="block text-sm font-medium">{label}</span>
+            {#if !entry.children?.length}<Fa icon={faChevronRight}/>{/if}
+            {#if path === currentTocPath}<span class="sr-only">{t('Current chapter')}</span>{/if}
+          </button>
+        {:else}
+          <span class="navigation-chapter text-sm font-medium">{label}</span>
+        {/if}
+        {#if entry.children?.length}
+          <button type="button" class="navigation-toggle" aria-expanded={isExpanded}
+              aria-label={t(isExpanded ? 'Collapse {chapter}' : 'Expand {chapter}', {chapter: label})}
+              onclick={() => toggleEntry(path)}>
+            <Fa icon={isExpanded ? faChevronDown : faChevronRight}/>
+          </button>
+        {/if}
+      </div>
+      {#if entry.children?.length && isExpanded}
+        <ol class="navigation-children">{@render tocRows(entry.children, `${path}.`)}</ol>
+      {/if}
+    </li>
+  {/each}
+{/snippet}
+
 <style>
   .komelia-navigation-scrim { position: fixed; inset: 0; z-index: 55; background: rgb(3 9 17 / 40%); border: 0; touch-action: none; }
   .komelia-navigation-sheet { position: fixed; inset-inline: 0; bottom: 0; z-index: 60; height: min(75dvh, 570px); width: 100%; max-width: 600px; margin-inline: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -187,13 +249,22 @@
   .navigation-mode select { appearance: none; background: transparent; border: 0; min-height: 48px; max-width: 260px; padding: 0 24px 0 0; font: inherit; }
   .navigation-mode option { color: #13283e; background: #f4f7fb; }
   .navigation-mode :global(svg) { pointer-events: none; position: absolute; right: 0; width: 12px; height: 12px; opacity: .7; }
-  .navigation-summary { display: flex; gap: 8px; align-items: center; margin-top: -8px; padding: 0 26px 10px; font-size: 12px; line-height: 18px; }
+  .navigation-summary { display: flex; gap: 8px; align-items: center; margin-top: 4px; padding: 0 26px; font-size: 12px; line-height: 18px; }
+  @media (min-width: 840px) { .navigation-summary { padding-bottom: 6px; } }
   .navigation-summary > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .navigation-summary > span:last-child { flex: none; }
   .navigation-body { padding: 0 26px; }
+  .navigation-chapters { overflow-x: hidden; }
   .navigation-chapters > li { border-bottom: 1px solid rgb(176 211 242 / 17%); }
   .navigation-chapter { display: flex; width: calc(100% + 24px); margin-inline: -12px; min-height: 48px; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; border-radius: 10px; text-align: left; }
   .navigation-chapter[aria-current="location"] { color: #70d9ff !important; background: #18384c !important; border-left: 3px solid #70d9ff !important; padding-left: 9px; }
   .navigation-chapter :global(svg) { flex: none; width: 16px; height: 16px; }
+  .navigation-row { display: flex; align-items: center; }
+  .navigation-row .navigation-chapter { flex: 1; width: auto; min-width: 0; margin: 0; padding-inline: 0; overflow-wrap: anywhere; }
+  .navigation-row .navigation-chapter > span { min-width: 0; overflow-wrap: anywhere; }
+  .navigation-row .navigation-chapter[aria-current="location"] { padding-inline-start: 9px; }
+  .navigation-toggle { display: grid; flex: none; place-items: center; width: 48px; height: 48px; }
+  .navigation-toggle :global(svg) { width: 16px; height: 16px; }
+  .navigation-children { margin-inline-start: 16px; }
   :global([data-komelia-theme="LIGHT"]) .navigation-chapter[aria-current="location"] { color: #00638d !important; background: #dceef7 !important; }
 </style>

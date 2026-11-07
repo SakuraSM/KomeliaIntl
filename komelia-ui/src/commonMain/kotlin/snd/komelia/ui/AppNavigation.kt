@@ -1,5 +1,8 @@
 package snd.komelia.ui
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import snd.komelia.ui.library.LibraryScreen
@@ -69,6 +72,20 @@ internal fun screenTransitionAction(
 
 internal fun immersiveScreenSaveableStateKey(screenKey: String): String =
     "immersive-screen:$screenKey"
+
+@OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+internal fun newReaderSessionId(): String = kotlin.uuid.Uuid.random().toString()
+
+@OptIn(InternalVoyagerApi::class)
+@Composable
+internal fun ImmersiveScreen(navigator: Navigator, screen: Screen) {
+    DisposableEffect(navigator, screen) {
+        onDispose {
+            if (navigator.items.none { it.key == screen.key }) navigator.dispose(screen)
+        }
+    }
+    navigator.saveableState(immersiveScreenSaveableStateKey(screen.key), screen) { screen.Content() }
+}
 
 internal fun <T> outermostNavigationTarget(
     current: T,

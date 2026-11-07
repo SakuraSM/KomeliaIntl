@@ -51,6 +51,17 @@ import snd.komelia.ui.settings.SettingsScreenContainer
 
 class LoginScreen : Screen {
 
+    private var sessionId: String? = newLoginSessionId()
+    override val key: String
+        get() = "login:${sessionId ?: newLoginSessionId().also { sessionId = it }}"
+
+    private companion object {
+        private const val serialVersionUID = 683216702757185201L
+
+        @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+        fun newLoginSessionId(): String = kotlin.uuid.Uuid.random().toString()
+    }
+
     @Composable
     override fun Content() {
         val rootNavigator = LocalNavigator.currentOrThrow.appRootNavigator()

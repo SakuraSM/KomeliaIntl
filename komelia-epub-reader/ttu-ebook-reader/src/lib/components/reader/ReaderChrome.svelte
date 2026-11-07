@@ -76,7 +76,7 @@
   <button
       data-komelia-chrome
       type="button"
-      class="writing-horizontal-tb fixed left-3 top-1/2 z-10 hidden h-14 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950/82 text-white shadow-lg shadow-black/25 backdrop-blur-md transition hover:bg-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 disabled:pointer-events-none disabled:opacity-30 md:flex"
+      class="reader-edge-control writing-horizontal-tb fixed left-3 top-1/2 z-10 hidden h-14 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950/82 text-white opacity-0 shadow-lg shadow-black/25 backdrop-blur-md transition hover:bg-slate-950 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 disabled:pointer-events-none disabled:opacity-30 md:flex"
       aria-label={t('Previous page')}
       title={t('Previous page')}
       disabled={!hasPageManager}
@@ -87,7 +87,7 @@
   <button
       data-komelia-chrome
       type="button"
-      class="writing-horizontal-tb fixed right-3 top-1/2 z-10 hidden h-14 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950/82 text-white shadow-lg shadow-black/25 backdrop-blur-md transition hover:bg-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 disabled:pointer-events-none disabled:opacity-30 md:flex"
+      class="reader-edge-control writing-horizontal-tb fixed right-3 top-1/2 z-10 hidden h-14 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950/82 text-white opacity-0 shadow-lg shadow-black/25 backdrop-blur-md transition hover:bg-slate-950 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 disabled:pointer-events-none disabled:opacity-30 md:flex"
       aria-label={t('Next page')}
       title={t('Next page')}
       disabled={!hasPageManager}
@@ -208,3 +208,9 @@
     </div>
   {/if}
 </div>
+
+<style>
+  @media (hover: none) {
+    .reader-edge-control { display: none !important; }
+  }
+</style>

@@ -28,5 +28,8 @@ kotlin {
             implementation(libs.slf4j.api)
             implementation(libs.directories)
         }
+        jvmMain {
+            resources.srcDir(rootProject.layout.buildDirectory.dir("macos-native-resources"))
+        }
     }
 }

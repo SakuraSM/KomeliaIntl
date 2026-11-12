@@ -10,10 +10,17 @@ on:
       - 'komelia-infra/onnxruntime/native/**'
       - 'komelia-infra/image-decoder/vips/native/**'
       - 'komelia-app/androidApp/src/androidTest/**'
+      - 'komelia-app/androidApp/build.gradle.kts'
+      - 'komelia-domain/core/src/androidMain/kotlin/snd/komelia/updates/**'
+      - 'komelia-domain/core/src/commonMain/kotlin/snd/komelia/updates/**'
+      - 'komelia-domain/core/src/commonTest/kotlin/snd/komelia/updates/**'
       - 'komelia-ui/src/commonMain/kotlin/snd/komelia/ui/login/**'
       - 'komelia-ui/src/commonMain/kotlin/snd/komelia/ui/MainView.kt'
       - 'scripts/CheckAndroidNativeAbis.java'
       - 'scripts/check-android-native-abis.test.mjs'
+      - 'scripts/stage-android-release.mjs'
+      - 'scripts/stage-android-release.test.mjs'
+      - 'scripts/build-release.sh'
       - 'scripts/test-zlib-arm-auxv.sh'
       - 'cmake/**'
       - 'CMakeLists.txt'
@@ -112,12 +119,22 @@ jobs:
           node-version: 24
       - uses: gradle/actions/setup-gradle@v4
       - name: Test the package validator
-        run: node --test scripts/check-android-native-abis.test.mjs
+        run: node --test scripts/check-android-native-abis.test.mjs scripts/stage-android-release.test.mjs
       - name: Build the app and native recovery test
         run: |
           gradle=(./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx4g -Pkotlin.compiler.execution.strategy=in-process --max-workers=2 --no-parallel)
           "${gradle[@]}" buildEpubReaders
           "${gradle[@]}" --no-configuration-cache :komelia-app:androidApp:assembleDebug :komelia-app:androidApp:assembleDebugAndroidTest
+      - name: Verify separate release APK and app bundle builds
+        if: ${{ matrix.abi == 'x86_64' }}
+        run: |
+          gradle=(./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx4g -Pkotlin.compiler.execution.strategy=in-process --max-workers=2 --no-parallel --no-configuration-cache)
+          "${gradle[@]}" :komelia-app:androidApp:assembleRelease
+          test "$(jq '.elements | length' komelia-app/androidApp/build/outputs/apk/release/output-metadata.json)" = 5
+          "${gradle[@]}" :komelia-app:androidApp:bundleRelease
+          java scripts/CheckAndroidNativeAbis.java komelia-app/androidApp/build/outputs/bundle/release/androidApp-release.aab \
+            komelia-infra/jni/src/androidMain/jniLibs/arm64-v8a \
+            komelia-infra/database/sqlite/src/androidMain/jniLibs/arm64-v8a
       - name: Install emulator runtime libraries
         run: |
           sudo apt-get update -qq
@@ -165,7 +182,11 @@ jobs:
           test "${booted:-}" = 1
           "$adb" -s emulator-5554 shell getprop ro.product.cpu.abilist | tr -d '\r' > runtime-evidence/device-abis.txt
           grep -Eq "(^|,)${EXPECTED_ABI}(,|$)" runtime-evidence/device-abis.txt
-          apk=komelia-app/androidApp/build/outputs/apk/debug/androidApp-debug.apk
+          apk_dir=komelia-app/androidApp/build/outputs/apk/debug
+          apk_name=$(jq -er --arg abi "$EXPECTED_ABI" \
+            '.elements[] | select(any(.filters[]?; .filterType == "ABI" and .value == $abi)) | .outputFile' \
+            "$apk_dir/output-metadata.json")
+          apk="$apk_dir/$apk_name"
           test_apk=komelia-app/androidApp/build/outputs/apk/androidTest/debug/androidApp-debug-androidTest.apk
           sha256sum "$apk" "$test_apk" > runtime-evidence/sha256.txt
           "$adb" -s emulator-5554 install -r --abi "$EXPECTED_ABI" "$apk"
@@ -175,7 +196,7 @@ jobs:
           set +e
           java scripts/CheckAndroidNativeAbis.java "$apk" \
             komelia-infra/jni/src/androidMain/jniLibs/arm64-v8a \
-            komelia-infra/database/sqlite/src/androidMain/jniLibs/arm64-v8a > runtime-evidence/abis.log 2>&1
+            komelia-infra/database/sqlite/src/androidMain/jniLibs/arm64-v8a "$EXPECTED_ABI" > runtime-evidence/abis.log 2>&1
           abi_status=$?
           instrumentation_failed=0
           for test_case in decodesJpegWithPackagedImageLibraries decodesPngWithPackagedImageLibraries nativeErrorsAllowRetryAndIdentityInference; do
@@ -189,6 +210,15 @@ jobs:
               instrumentation_failed=1
             fi
           done
+          "$adb" -s emulator-5554 shell am instrument -w -r \
+            -e class 'snd.komelia.AndroidAbiUpdateTest' \
+            io.github.zhengningning.komelia.debug.test/androidx.test.runner.AndroidJUnitRunner \
+            > runtime-evidence/abi-update.log 2>&1
+          update_status=$?
+          cat runtime-evidence/abi-update.log
+          if [[ "$update_status" != 0 ]] || ! grep -q 'OK (3 tests)' runtime-evidence/abi-update.log; then
+            instrumentation_failed=1
+          fi
           set -e
           test "$abi_status" = 0
           "$adb" -s emulator-5554 shell input keyevent KEYCODE_WAKEUP

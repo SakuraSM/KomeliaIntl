@@ -55,7 +55,7 @@ The macOS source build includes native image decoding, WebView, and CPU-based ON
 
 | Target | Gradle task | Typical package |
 |---|---|---|
-| Android | `androidRelease` | APK |
+| Android | `androidRelease` | Per-ABI and universal APKs |
 | Windows x86_64 | `desktopMsi` | MSI |
 | Linux x86_64 | `desktopDeb` | DEB |
 | macOS Apple Silicon | `desktopDmg` | DMG |
@@ -120,6 +120,8 @@ Use the root build aliases for common targets:
 ./gradlew desktopJar
 ./gradlew komfWebUI
 ```
+
+Android APK builds produce a universal package and separate packages for `arm64-v8a`, `armeabi-v7a`, `x86`, and `x86_64`. See the [release guide](docs/maintainers/versioning.md#android-apk-distribution) before distributing them or building an app bundle.
 
 On macOS, install the native build dependencies and prepare them before running `desktopJar` or `desktopDmg`. Use a JDK distribution suitable for packaging, such as Temurin 21:
 

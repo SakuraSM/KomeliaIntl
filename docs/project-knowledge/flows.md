@@ -157,6 +157,8 @@ Web Komf login accepts an API key through `ApiKeyStore` and the existing bounded
 
 Server settings announcements use only the active Komga session's `KomgaAnnouncementsApi`. A failed server request is an error, not an empty feed or a fallback to GitHub release notes. Application version checks and Komelia release notes remain under App settings / App updates. Keep the existing server-admin navigation gate and read-status API unchanged.
 
+Android releases retain exactly one `.apk` asset in the existing GitHub Release so older in-app updaters always receive the universal package. An optional `android-abi-apks.json` points to separately hosted, versioned ABI APKs and their SHA-256 values. When in-app installation is enabled, the updater selects the first valid device-supported ABI and checks its downloaded hash before committing the installer session. A missing, invalid or unavailable manifest falls back to the universal APK, as does an ABI download or checksum failure. Debug builds continue to open the release page instead of replacing the separately identified release app.
+
 ## Localization
 
 Poster grids share `posterGridCells`, including loading placeholders and the settings preview. Compact and medium mobile layouts use the existing card-width preference as density: the default 240 gives three columns, bounded by actual width and touch-target size. Larger mobile layouts, desktop, and Web retain adaptive minimum widths. No additional preference or migration is needed.

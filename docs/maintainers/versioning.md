@@ -71,6 +71,16 @@ scripts/check-release-notes.sh \
 
 The scripts reject skipped version cores, a level that does not match the numeric increment, malformed pre-release labels, mismatched application version files, a nonstandard Release title, and invalid language sections.
 
+## Android APK distribution
+
+Android builds produce one universal APK and one standalone APK for each of `arm64-v8a`, `armeabi-v7a`, `x86`, and `x86_64`. They share the release application ID, version, version code, and signing identity. Debug APKs retain their separate `.debug` identity.
+
+`scripts/build-release.sh --apk` builds and stages them under `build/android-release/<version>/`. Staging requires Android build tools from `ANDROID_HOME`/`ANDROID_SDK_ROOT` or `PATH`. It verifies package identity, version, ABI and every signature, and rejects differing signing certificates. Upload only `release/` to the existing GitHub Release: it contains the universal `Komelia-<version>.apk` and, when configured, `android-abi-apks.json`. Publish `abi/` at a separate immutable HTTPS directory, and link to those files in the release notes. Never upload the ABI APKs as additional `.apk` assets to the existing Release: older clients select its first `.apk`, even if they skip intermediate versions. Do not depend on release asset order.
+
+Pass `--abi-base-url https://example.org/path/<version>/` when building the release to create the update manifest for that directory. Without it, staging omits the manifest and clients continue using the universal APK. `SHA256SUMS` in the staging root records all staged files; merge the appropriate checksums into the Release's full checksum file. Do not upload the manifest before every referenced APK is available at its final URL and its downloaded bytes match the recorded hash.
+
+Verify each signed output's package ID, version, certificate, ABI and required native libraries. Compare the certificate with the previous Release or an approved signing lineage; matching the new APKs to each other is not enough. Check the 64-bit ZIP and ELF 16 KiB alignment and install the final artifacts on the relevant devices or emulators. Test an upgrade from the previous signed Release, including the path where an old client skips the transition release. A debug APK cannot replace a release APK. Google Play bundles use `--bundle --variant play` and retain the app bundle's versioning and Play signing rules. Run APK and bundle builds in separate Gradle invocations: AGP 9.1.1 cannot reuse the release resource-shrinker outputs from ABI-split APKs when building an app bundle.
+
 ## Publish without changing a released version
 
 Create a draft Release first. Attach every listed package and checksum, then run the checks. Publish only after the assets and notes match. If a published package needs a correction, increment PATCH and publish a new Release. Do not replace a published tag or binary.

@@ -55,7 +55,7 @@ macOS 源码构建已接入原生图片解码、WebView 和 CPU 版 ONNX Runtime
 
 | 平台 | Gradle 任务 | 常见产物 |
 |---|---|---|
-| Android | `androidRelease` | APK |
+| Android | `androidRelease` | 按架构分包及通用 APK |
 | Windows x86_64 | `desktopMsi` | MSI |
 | Linux x86_64 | `desktopDeb` | DEB |
 | macOS Apple Silicon | `desktopDmg` | DMG |
@@ -120,6 +120,8 @@ git submodule update --init --recursive
 ./gradlew desktopJar
 ./gradlew komfWebUI
 ```
+
+Android 构建会生成通用 APK，以及 `arm64-v8a`、`armeabi-v7a`、`x86` 和 `x86_64` 的独立 APK。分发这些安装包或构建 App Bundle 前，请参阅[发布指南](docs/maintainers/versioning.md#android-apk-distribution)。
 
 在 macOS 上，请先安装并构建原生依赖，再运行 `desktopJar` 或 `desktopDmg`。打包时使用适合生成安装包的 JDK，例如 Temurin 21：
 

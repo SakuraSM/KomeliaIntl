@@ -56,6 +56,7 @@ The settings flag is stored by `KomfSettingsRepository`; fork migration V18 adds
 - `.github/workflows/release-desktop.yml` builds and starts Linux/Windows installers before uploading them to a draft Release.
 - `.github/workflows/desktop-compatibility.yml` validates Linux/Windows native builds and installed-package WebView/media probes on pull requests without publishing.
 - `.github/workflows/android-native-validation.yml` builds the remaining Android native architectures and checks installed x86, x86_64 and translated ARMv7 packages. It also tests same-process Android activity relaunch on x86_64; `scripts/CheckAndroidNativeAbis.java` checks the packaged library set and ELF architecture.
+- Android APKs are split by ABI with a universal fallback. `scripts/stage-android-release.mjs` separates the legacy Release assets from externally hosted ABI APKs and can produce the update manifest. `AndroidAppUpdater` selects a supported ABI and checks its SHA-256 before committing the installer session.
 
 Linux startup loads system WebKit first. When that succeeds, `DesktopAppModule` tells
 `VipsSharedLibraries` to reuse the loaded system GLib family. Loading bundled GObject or GIO

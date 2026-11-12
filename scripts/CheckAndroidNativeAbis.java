@@ -20,11 +20,15 @@ public final class CheckAndroidNativeAbis {
     );
 
     public static void main(String[] args) throws IOException {
-        if (args.length != 3) {
-            throw new IllegalArgumentException("Usage: CheckAndroidNativeAbis <apk-or-aab> <arm64-jni-dir> <arm64-sqlite-dir>");
+        if (args.length != 3 && args.length != 4) {
+            throw new IllegalArgumentException("Usage: CheckAndroidNativeAbis <apk-or-aab> <arm64-jni-dir> <arm64-sqlite-dir> [expected-abi]");
+        }
+        Set<String> expectedAbis = args.length == 4 ? Set.of(args[3]) : ARCHITECTURES.keySet();
+        if (!ARCHITECTURES.keySet().containsAll(expectedAbis)) {
+            throw new IllegalArgumentException("Unknown expected Android ABI: " + args[3]);
         }
         Set<String> required = new TreeSet<>();
-        for (int index = 1; index < args.length; index++) {
+        for (int index = 1; index < 3; index++) {
             try (var files = Files.list(Path.of(args[index]))) {
                 files.map(path -> path.getFileName().toString()).filter(name -> name.endsWith(".so")).forEach(required::add);
             }
@@ -46,14 +50,14 @@ public final class CheckAndroidNativeAbis {
                     }
                 }
             }
-            Set<String> missingAbis = new TreeSet<>(ARCHITECTURES.keySet());
+            Set<String> missingAbis = new TreeSet<>(expectedAbis);
             missingAbis.removeAll(entries.keySet());
             if (!missingAbis.isEmpty()) throw new IllegalStateException("Missing Android ABIs: " + missingAbis);
-            Set<String> unknownAbis = new TreeSet<>(entries.keySet());
-            unknownAbis.removeAll(ARCHITECTURES.keySet());
-            if (!unknownAbis.isEmpty()) throw new IllegalStateException("Unknown Android ABIs: " + unknownAbis);
+            Set<String> unexpectedAbis = new TreeSet<>(entries.keySet());
+            unexpectedAbis.removeAll(expectedAbis);
+            if (!unexpectedAbis.isEmpty()) throw new IllegalStateException("Unexpected Android ABIs: " + unexpectedAbis);
             var errors = new ArrayList<String>();
-            for (String abi : new TreeSet<>(ARCHITECTURES.keySet())) {
+            for (String abi : new TreeSet<>(expectedAbis)) {
                 var libraries = entries.get(abi);
                 Set<String> missing = new TreeSet<>(required);
                 missing.removeAll(libraries.keySet());

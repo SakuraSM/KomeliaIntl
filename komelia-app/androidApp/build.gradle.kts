@@ -38,6 +38,7 @@ dependencies {
     androidTestImplementation("junit:junit:4.13.2")
     androidTestImplementation(libs.commons.compress)
     androidTestImplementation(libs.xz)
+    androidTestImplementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
 
 }
 
@@ -75,6 +76,16 @@ val releaseSigningProperties = mapOf(
 )
 val hasReleaseSigningConfig = releaseSigningProperties.values.all { !it.isNullOrBlank() }
 
+// AGP 9.1.1 cannot reuse ABI-split resource-shrinker outputs for an app bundle.
+// Select one packaging format per Gradle invocation; bundles generate their own splits.
+val packagingTasks = gradle.startParameter.taskNames.filter { task ->
+    val owner = task.substringBeforeLast(':', "").trimStart(':')
+    owner.isEmpty() || owner == "komelia-app:androidApp"
+}.map { it.substringAfterLast(':').lowercase() }
+val buildingBundle = packagingTasks.any { it.startsWith("bundle") }
+val buildingApk = packagingTasks.any { it.startsWith("assemble") || it == "androiddebug" || it == "androidrelease" }
+require(!(buildingBundle && buildingApk)) { "Build Android APKs and app bundles in separate Gradle invocations." }
+
 android {
     namespace = "io.github.snd_r.komelia"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -105,6 +116,14 @@ android {
         }
         buildConfigField("boolean", "ENABLE_SELF_UPDATES", enableSelfUpdates)
         buildConfigField("boolean", "ENABLE_UPDATE_CHECKS", (androidVariant == AndroidVariant.STANDALONE).toString())
+    }
+    splits {
+        abi {
+            isEnable = !buildingBundle
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+            isUniversalApk = true
+        }
     }
     packaging {
         resources {

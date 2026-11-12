@@ -25,7 +25,8 @@ function elfHeader(abi) {
   return header;
 }
 
-function fixture(t, {missing = '', wrongArchitecture = '', bundle = false} = {}) {
+function fixture(t, {missing = '', wrongArchitecture = '', bundle = false,
+  abis = Object.keys(architectures), expectedAbi} = {}) {
   const directory = mkdtempSync(join(tmpdir(), 'komelia-android-abi-'));
   t.after(() => rmSync(directory, {recursive: true, force: true}));
   const nativeDir = join(directory, 'native');
@@ -35,7 +36,7 @@ function fixture(t, {missing = '', wrongArchitecture = '', bundle = false} = {})
   mkdirSync(sqliteDir);
   for (const name of nativeLibraries) writeFileSync(join(nativeDir, name), elfHeader('arm64-v8a'));
   writeFileSync(join(sqliteDir, sqliteLibrary), elfHeader('arm64-v8a'));
-  for (const abi of Object.keys(architectures)) {
+  for (const abi of abis) {
     const output = join(contents, ...(bundle ? ['base'] : []), 'lib', abi);
     mkdirSync(output, {recursive: true});
     for (const name of [...nativeLibraries, sqliteLibrary]) {
@@ -45,7 +46,9 @@ function fixture(t, {missing = '', wrongArchitecture = '', bundle = false} = {})
   }
   const packagePath = join(directory, bundle ? 'fixture.aab' : 'fixture.apk');
   execFileSync(jar, ['--create', '--file', packagePath, '-M', '-C', contents, '.']);
-  const result = spawnSync(java, [join(root, 'scripts/CheckAndroidNativeAbis.java'), packagePath, nativeDir, sqliteDir],
+  const args = [join(root, 'scripts/CheckAndroidNativeAbis.java'), packagePath, nativeDir, sqliteDir];
+  if (expectedAbi) args.push(expectedAbi);
+  const result = spawnSync(java, args,
     {encoding: 'utf8'});
   if (result.error) throw result.error;
   return result;
@@ -69,4 +72,22 @@ test('accepts complete APK and app bundle native libraries', t => {
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /ANDROID_NATIVE_ABIS_PASSED/);
   }
+});
+
+test('accepts a complete single-ABI APK when that ABI is expected', t => {
+  const result = fixture(t, {abis: ['arm64-v8a'], expectedAbi: 'arm64-v8a'});
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test('rejects a wrong or unexpected ABI in a single-ABI APK', t => {
+  const wrong = fixture(t, {abis: ['x86_64'], expectedAbi: 'arm64-v8a'});
+  assert.notEqual(wrong.status, 0);
+  const extra = fixture(t, {abis: ['arm64-v8a', 'x86_64'], expectedAbi: 'arm64-v8a'});
+  assert.notEqual(extra.status, 0);
+});
+
+test('still rejects missing native libraries in a single-ABI APK', t => {
+  const result = fixture(t, {abis: ['arm64-v8a'], expectedAbi: 'arm64-v8a', missing: 'arm64-v8a/libkomelia_vips.so'});
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /arm64-v8a missing.*libkomelia_vips\.so/);
 });

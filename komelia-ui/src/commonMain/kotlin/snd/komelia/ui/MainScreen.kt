@@ -6,6 +6,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -84,6 +85,16 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Constraints
+import kotlin.math.roundToInt
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -478,44 +489,75 @@ internal fun AppBottomBar(
     val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     val glass = LocalSurfaceAppearance.current.useGlass
     val colors = MaterialTheme.colorScheme
+    val motion = LocalKomeliaMotion.current
     KomeliaChromeSurface(
         modifier = (if (floating) Modifier.navigationBarsPadding().padding(horizontal = ReadingDesign.navigationInset)
             .padding(top = 8.dp, bottom = 4.dp) else Modifier).testTag("primary-navigation"),
         shape = RoundedCornerShape(if (floating) 20.dp else 0.dp),
         shadowElevation = if (floating) 2.dp else 0.dp,
     ) {
-        Row(
+        Layout(
             modifier = Modifier.fillMaxWidth()
-                .height(ReadingDesign.navigationHeight * LocalDensity.current.fontScale.coerceAtLeast(1f))
                 .windowInsetsPadding(if (floating) WindowInsets(0.dp) else WindowInsets.navigationBars)
+                .height(ReadingDesign.navigationHeight * LocalDensity.current.fontScale.coerceAtLeast(1f))
                 .selectableGroup(),
-        ) {
-            CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                destinationItems.forEach { item ->
-                    val interactions = remember(item.destination) { MutableInteractionSource() }
-                    NavigationBarItem(
-                        modifier = Modifier.padding(horizontal = 3.dp).background(
-                            if (selected == item.destination) colors.primaryContainer.copy(alpha = .9f) else Color.Transparent,
-                            KomeliaChromeStyle.navigationHighlightShape,
-                        ).komeliaHighlight(
-                            selected == item.destination, KomeliaChromeStyle.navigationHighlightShape,
-                            inset = KomeliaChromeStyle.navigationHighlightInset,
-                            interactionSource = interactions,
-                        ).testTag("primary-tab-${item.destination.name.lowercase()}"),
-                        interactionSource = interactions,
-                        selected = selected == item.destination,
-                        onClick = { onSelect(item.destination, null) },
-                        icon = { DestinationIcon(item, selected == item.destination) },
-                        label = { NavigationDestinationLabel(stringResource(item.label), selected == item.destination) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = colors.primary,
-                            selectedTextColor = colors.primary,
-                            indicatorColor = Color.Transparent,
-                            unselectedIconColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
-                            unselectedTextColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
-                        ),
-                    )
+            content = {
+                CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                    destinationItems.forEach { item ->
+                        val interactions = remember(item.destination) { MutableInteractionSource() }
+                        val active = selected == item.destination
+                        val pressed by interactions.collectIsPressedAsState()
+                        val hovered by interactions.collectIsHoveredAsState()
+                        val focused by interactions.collectIsFocusedAsState()
+                        val targetBackground = when {
+                            active -> colors.primaryContainer.copy(alpha = if (glass) .75f else .9f)
+                            pressed -> colors.primaryContainer.copy(alpha = .55f)
+                            hovered || focused -> colors.primaryContainer.copy(alpha = .4f)
+                            else -> Color.Transparent
+                        }
+                        val animatedBackground by animateColorAsState(
+                            targetValue = targetBackground,
+                            animationSpec = tween(motion.duration(motion.stateDurationMillis), easing = motion.standardEasing),
+                            label = "bottomNavigationBackground",
+                        )
+                        val background = if (motion.isReducedMotion) targetBackground else animatedBackground
+                        Row {
+                            NavigationBarItem(
+                                modifier = Modifier.padding(horizontal = 3.dp).drawBehind {
+                                    val inset = 4.dp.toPx().coerceAtMost(size.height / 2)
+                                    val outline = KomeliaChromeStyle.navigationHighlightShape.createOutline(
+                                        Size(size.width, size.height - inset * 2), layoutDirection, this,
+                                    )
+                                    translate(top = inset) { drawOutline(outline, background) }
+                                }.then(if (glass) Modifier.komeliaHighlight(
+                                    active, KomeliaChromeStyle.navigationHighlightShape,
+                                    inset = KomeliaChromeStyle.navigationHighlightInset, interactionSource = interactions,
+                                ) else Modifier).testTag("primary-tab-${item.destination.name.lowercase()}"),
+                                interactionSource = interactions,
+                                selected = active,
+                                onClick = { onSelect(item.destination, null) },
+                                icon = { DestinationIcon(item, active) },
+                                label = { NavigationDestinationLabel(stringResource(item.label), active) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = colors.primary,
+                                    selectedTextColor = colors.primary,
+                                    indicatorColor = Color.Transparent,
+                                    unselectedIconColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
+                                    unselectedTextColor = if (glass) colors.onSurface else colors.onSurfaceVariant,
+                                ),
+                            )
+                        }
+                    }
                 }
+            },
+        ) { measurables, constraints ->
+            // Round cell boundaries independently so remainder pixels do not accumulate on one side.
+            fun edge(index: Int) = (constraints.maxWidth * index.toFloat() / measurables.size).roundToInt()
+            val items = measurables.mapIndexed { index, measurable ->
+                measurable.measure(Constraints.fixed(edge(index + 1) - edge(index), constraints.maxHeight))
+            }
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                items.forEachIndexed { index, item -> item.placeRelative(edge(index), 0) }
             }
         }
     }

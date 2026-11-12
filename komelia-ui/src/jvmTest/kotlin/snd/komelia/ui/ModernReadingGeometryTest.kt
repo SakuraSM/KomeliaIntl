@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasSetTextAction
@@ -13,8 +14,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import org.junit.Rule
 import org.junit.Test
@@ -54,7 +58,7 @@ class ModernReadingGeometryTest {
         near("search.height", 46.5f, (bounds.bottom - bounds.top).value)
     }
 
-    @Test fun floatingNavigationMatchesTheApprovedPhoneFrameWithinTwoPixels() {
+    @Test fun floatingNavigationMatchesTheApprovedPhoneFrameWithinOnePixel() {
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(1f), LocalPlatform provides PlatformType.MOBILE,
                 LocalSurfaceAppearance provides SurfaceAppearance(style = AppSurfaceStyle.LIQUID_GLASS),
@@ -69,16 +73,47 @@ class ModernReadingGeometryTest {
         }
         val bounds = compose.onNodeWithTag("primary-navigation").getUnclippedBoundsInRoot()
         val canvas = compose.onNodeWithTag("canvas").getUnclippedBoundsInRoot()
-        near("navigation.left", 14f, (bounds.left-canvas.left).value)
-        near("navigation.top", 747f, (bounds.top-canvas.top).value)
-        near("navigation.width", 362f, (bounds.right - bounds.left).value)
-        near("navigation.height", 70f, (bounds.bottom - bounds.top).value)
+        nearOnePixel("navigation.left", 14f, (bounds.left-canvas.left).value)
+        nearOnePixel("navigation.top", 747f, (bounds.top-canvas.top).value)
+        nearOnePixel("navigation.width", 362f, (bounds.right - bounds.left).value)
+        nearOnePixel("navigation.height", 70f, (bounds.bottom - bounds.top).value)
         listOf(AppDestination.HOME,AppDestination.LIBRARY,AppDestination.LOCAL,AppDestination.SEARCH,AppDestination.SETTINGS).forEachIndexed { index,destination ->
             val tab=compose.onNodeWithTag("primary-tab-${destination.name.lowercase()}").getUnclippedBoundsInRoot()
-            near("navigation.$destination.x",17f+72.4f*index,(tab.left-canvas.left).value)
-            near("navigation.$destination.width",66.4f,(tab.right-tab.left).value)
-            near("navigation.$destination.height",70f,(tab.bottom-tab.top).value)
+            nearOnePixel("navigation.$destination.x",17f+72.4f*index,(tab.left-canvas.left).value)
+            nearOnePixel("navigation.$destination.width",66.4f,(tab.right-tab.left).value)
+            nearOnePixel("navigation.$destination.height",70f,(tab.bottom-tab.top).value)
         }
+    }
+
+    @Test fun narrowLargeTextNavigationKeepsEvenRtlPositionsAndTouchTargets() {
+        compose.setContent {
+            CompositionLocalProvider(
+                LocalDensity provides Density(1f, 1.3f),
+                LocalLayoutDirection provides LayoutDirection.Rtl,
+                LocalPlatform provides PlatformType.MOBILE,
+                LocalSurfaceAppearance provides SurfaceAppearance(style = AppSurfaceStyle.LIQUID_GLASS),
+            ) {
+                KomeliaTheme(AppTheme.DARK) {
+                    Box(Modifier.width(360.dp)) { AppBottomBar(AppDestination.HOME) { _, _ -> } }
+                }
+            }
+        }
+        val navigation = compose.onNodeWithTag("primary-navigation").getUnclippedBoundsInRoot()
+        val width = (navigation.right - navigation.left).value
+        listOf(AppDestination.HOME, AppDestination.LIBRARY, AppDestination.LOCAL, AppDestination.SEARCH, AppDestination.SETTINGS)
+            .forEachIndexed { index, destination ->
+                val node = compose.onNodeWithTag("primary-tab-${destination.name.lowercase()}")
+                node.assertWidthIsAtLeast(48.dp).assertHeightIsAtLeast(48.dp)
+                val tab = node.getUnclippedBoundsInRoot()
+                val center = (tab.left.value + tab.right.value) / 2
+                nearOnePixel("rtl.$destination.center", navigation.right.value - width * (index + .5f) / 5, center)
+            }
+    }
+
+    private fun nearOnePixel(anchor: String, expected: Float, measured: Float) {
+        val deviation = abs(expected - measured)
+        println("VISUAL_MEASUREMENT $anchor expected=$expected measured=$measured deviation=$deviation")
+        assertTrue(deviation <= 1f, "$anchor differs by $deviation px: $measured, expected $expected")
     }
 
     private fun near(anchor: String, expected: Float, measured: Float) {

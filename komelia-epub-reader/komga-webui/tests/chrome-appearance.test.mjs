@@ -35,3 +35,12 @@ test('an unresponsive optional bridge cannot block the reader', async () => {
   const result = await refreshChromeAppearance({getChromeAppearance:()=>new Promise(()=>{})},root);
   assert.equal(result.surface,'classic');
 });
+
+test('only an explicitly identified Mac host enables Mac chrome', async () => {
+  const root = {dataset:{publicationTheme:'sepia'}};
+  await refreshChromeAppearance({getChromeAppearance:async()=>({result:{isMacOS:true}})},root);
+  assert.equal(root.dataset.komeliaPlatform, 'macos');
+  assert.equal(root.dataset.publicationTheme, 'sepia');
+  await refreshChromeAppearance({},root);
+  assert.equal(root.dataset.komeliaPlatform, undefined);
+});

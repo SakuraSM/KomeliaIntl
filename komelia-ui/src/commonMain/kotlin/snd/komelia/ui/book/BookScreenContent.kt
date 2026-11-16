@@ -56,6 +56,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_summary
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_series_info
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_series_title
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_detail_title
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_contents
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.actions_show_more
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.book_download
@@ -119,9 +120,10 @@ fun BookScreenContent(
     val isContentScrolled by remember(scrollState) { derivedStateOf { scrollState.value > 0 } }
     val contentIsAvailable = snd.komelia.ui.common.bookContentIsAvailable(book, library.unavailable)
     val canRead = contentIsAvailable && readIsSupported(book)
+    val mac = snd.komelia.ui.LocalMacOS.current
     val onRead = if (canRead) onBookReadPress else null
     val windowWidth = snd.komelia.ui.LocalWindowWidth.current
-    val actionInset = when (windowWidth) {
+    val actionInset = if (mac) 0.dp else when (windowWidth) {
         snd.komelia.ui.platform.WindowSizeClass.COMPACT, snd.komelia.ui.platform.WindowSizeClass.MEDIUM -> 0.dp
         snd.komelia.ui.platform.WindowSizeClass.EXPANDED -> 27.dp
         snd.komelia.ui.platform.WindowSizeClass.FULL -> 30.dp
@@ -130,6 +132,7 @@ fun BookScreenContent(
     var readingBarHeight by remember { mutableStateOf(116.dp) }
     var showFileDetails by rememberSaveable(book.id.value) { mutableStateOf(false) }
     var showContents by rememberSaveable(book.id.value) { mutableStateOf(false) }
+    val openContents = onContents ?: if (book.media.mediaType == "application/epub+zip") { { showContents = true } } else null
     val navigationScope = androidx.compose.runtime.rememberCoroutineScope()
     val factory = snd.komelia.ui.LocalViewModelFactory.current
     val navigation = remember(book.id) { factory.getBookReadingNavigationState(book, navigationScope) }
@@ -138,9 +141,9 @@ fun BookScreenContent(
     KomeliaPageScaffold(
         topBar = { customToolbar?.invoke(isContentScrolled, onRead)
             ?: BookToolBar(book, bookMenuActions, onBackPress, showTitle = isContentScrolled, onReadClick = onRead,
-                onParentSeriesClick = onParentSeriesPress) },
+                onParentSeriesClick = onParentSeriesPress, onContents = if (mac) openContents else null) },
         bottomBar = {
-            if (canRead) ReadingActionFooter(book, onBookReadPress,
+            if (canRead && !mac) ReadingActionFooter(book, onBookReadPress,
                 Modifier.padding(bottom = LocalNavigationBarInset.current)
                     .onSizeChanged { readingBarHeight = with(density) { it.height.toDp() } }, horizontalInset = actionInset)
         },
@@ -149,16 +152,18 @@ fun BookScreenContent(
             Column(
                 Modifier.widthIn(max = layout.contentMaxWidth).fillMaxWidth()
                     .verticalScroll(scrollState)
-                    .padding(horizontal = if (windowWidth == snd.komelia.ui.platform.WindowSizeClass.FULL) 40.dp
+                    .padding(horizontal = if (mac || windowWidth == snd.komelia.ui.platform.WindowSizeClass.FULL) 40.dp
                         else if (actionInset == 0.dp && book.media.mediaType == "application/epub+zip") 20.dp else ReadingDesign.homeInset)
                     .padding(top = topInset + if (actionInset == 0.dp) {
                         if (book.media.mediaType == "application/epub+zip") 12.dp else 6.dp
                     } else if (windowWidth == snd.komelia.ui.platform.WindowSizeClass.FULL) 20.dp else 58.dp,
-                        bottom = if (canRead) readingBarHeight + 16.dp else layout.gridBottomPadding),
+                        bottom = if (canRead && !mac) readingBarHeight + 16.dp else layout.gridBottomPadding),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 ReadingBookHeader(book, onParentSeries = if (book.oneshot) null else onParentSeriesPress,
-                    unavailable = !contentIsAvailable, onDownload = onBookDownload, onContents = onContents ?: if (book.media.mediaType == "application/epub+zip") { { showContents = true } } else null)
+                    unavailable = !contentIsAvailable, onDownload = onBookDownload,
+                    onContents = if (mac && customToolbar == null) null else openContents,
+                    onRead = if (mac && canRead) { { onBookReadPress(true) } } else null)
                 val wideImage = actionInset > 0.dp && book.media.mediaType != "application/epub+zip"
                 if (!wideImage) HorizontalDivider(Modifier.padding(top = 10.dp), color = MaterialTheme.colorScheme.outlineVariant)
                 if (book.metadata.summary.isNotBlank()) {
@@ -217,12 +222,14 @@ fun BookToolBar(
     showTitle: Boolean = true,
     onReadClick: ((Boolean) -> Unit)? = null,
     onParentSeriesClick: (() -> Unit)? = null,
+    onContents: (() -> Unit)? = null,
 ) {
     val compactToolbar = snd.komelia.ui.LocalWindowWidth.current in listOf(
         snd.komelia.ui.platform.WindowSizeClass.COMPACT, snd.komelia.ui.platform.WindowSizeClass.MEDIUM)
     val textBook = book.media.mediaType == "application/epub+zip"
+    val mac = snd.komelia.ui.LocalMacOS.current
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = if (snd.komelia.ui.LocalWindowWidth.current == snd.komelia.ui.platform.WindowSizeClass.FULL) 24.dp else 0.dp)
+        modifier = Modifier.fillMaxWidth().padding(top = if (!mac && snd.komelia.ui.LocalWindowWidth.current == snd.komelia.ui.platform.WindowSizeClass.FULL) 24.dp else 0.dp)
             .heightIn(min = 48.dp).padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -241,7 +248,7 @@ fun BookToolBar(
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f).then(if (compactToolbar) Modifier.offset(x = if (textBook) 0.dp else (-6).dp, y = (-4).dp) else Modifier),
-            textAlign = if (textBook) TextAlign.Center else TextAlign.Start,
+            textAlign = if (textBook && !mac) TextAlign.Center else TextAlign.Start,
         )
         if (onParentSeriesClick != null && !book.oneshot && book.media.mediaType != "application/epub+zip" &&
             snd.komelia.ui.LocalWindowWidth.current in listOf(snd.komelia.ui.platform.WindowSizeClass.COMPACT, snd.komelia.ui.platform.WindowSizeClass.MEDIUM)) {
@@ -249,6 +256,9 @@ fun BookToolBar(
                 Icon(Icons.AutoMirrored.Rounded.List, stringResource(Res.string.reading_series_title),
                     Modifier.size(20.dp).offset(x = 4.dp, y = (-4).dp))
             }
+        }
+        if (mac && onContents != null) OutlinedIconButton(onClick = onContents, modifier = Modifier.size(40.dp)) {
+            Icon(Icons.AutoMirrored.Rounded.List, stringResource(Res.string.reading_contents), Modifier.size(20.dp))
         }
         ToolbarBookActions(book, bookMenuActions, floating, onReadClick)
     }

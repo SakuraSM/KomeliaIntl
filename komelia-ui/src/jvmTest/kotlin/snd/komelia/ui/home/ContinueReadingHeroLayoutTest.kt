@@ -22,6 +22,7 @@ import org.junit.Rule
 import org.junit.Test
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalLibraries
+import snd.komelia.ui.LocalMacOS
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.KomgaBookMetadata
 import snd.komga.client.book.KomgaMediaStatus
@@ -37,6 +38,22 @@ class ContinueReadingHeroLayoutTest {
     @Test fun largeFontKeepsProgressAboveAFullWidthReadingAction() = assertControls(360, 1.5f, true)
     @Test fun narrowPhoneKeepsAFullWidthReadingAction() = assertControls(320, 1f, true)
     @Test fun regularPhoneUsesTheSameReadingActionHierarchy() = assertControls(412, 1f, false)
+
+    @Test fun macReadingActionStaysCompactAndKeepsItsClickTarget() {
+        var clicks = 0
+        compose.setContent {
+            CompositionLocalProvider(LocalMacOS provides true, LocalLibraries provides MutableStateFlow(emptyList())) {
+                MaterialTheme {
+                    Box(Modifier.width(800.dp)) { HeroReadingControls(book("Mac chapter")) { clicks++ } }
+                }
+            }
+        }
+        val action = compose.onNode(hasClickAction()).getUnclippedBoundsInRoot()
+        assertTrue((action.right - action.left) <= 184.dp, "Mac reading action stretched across the window")
+        assertTrue((action.bottom - action.top) >= 40.dp, "Mac reading action is too small to click")
+        compose.onNode(hasClickAction()).performClick()
+        assertEquals(1, clicks)
+    }
 
     private fun assertControls(width: Int, fontScale: Float, stacked: Boolean) {
         var readClicks = 0

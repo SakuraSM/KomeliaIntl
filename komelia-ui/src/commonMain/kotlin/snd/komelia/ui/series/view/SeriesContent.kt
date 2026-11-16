@@ -256,7 +256,8 @@ fun SeriesContent(
                     modifier = Modifier
                         .widthIn(max = layout.contentMaxWidth)
                         .fillMaxSize()
-                        .padding(horizontal = if (masterPaneGrid) 28.dp else if (compact && !isMasterPane) ReadingDesign.homeInset else layout.pageHorizontalPadding),
+                        .padding(horizontal = if (snd.komelia.ui.LocalMacOS.current) snd.komelia.ui.MacDesign.pageInset
+                            else if (masterPaneGrid) 28.dp else if (compact && !isMasterPane) ReadingDesign.homeInset else layout.pageHorizontalPadding),
                 ) {
 
                     if (series != null && library != null) {
@@ -600,10 +601,11 @@ fun Series(
     readingAction: @Composable () -> Unit = {},
 ) {
     val width = LocalWindowWidth.current
+    val mac = snd.komelia.ui.LocalMacOS.current
     BoxWithConstraints(Modifier.fillMaxWidth()) {
     val compact = width == COMPACT || width == MEDIUM
-    val coverWidth = detailCoverWidth(maxWidth, width) + if (compact) 3.5.dp else 0.dp
-    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.Top) {
+    val coverWidth = if (mac) (maxWidth * .32f).coerceAtMost(190.dp) else detailCoverWidth(maxWidth, width) + if (compact) 3.5.dp else 0.dp
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(if (mac) 36.dp else 20.dp), verticalAlignment = Alignment.Top) {
         SeriesThumbnail(series.id, modifier = Modifier.width(coverWidth).aspectRatio(if (compact) .685f else 2f / 3f)
             .clip(ReadingDesign.coverShape), contentScale = ContentScale.Fit)
         Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -618,7 +620,7 @@ fun Series(
             if (series.metadata.summary.isNotBlank()) Text(series.metadata.summary,
                 maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.weight(1f).heightIn(min = 8.dp))
+            if (mac) Spacer(Modifier.height(8.dp)) else Spacer(Modifier.weight(1f).heightIn(min = 8.dp))
             readingAction()
         }
     }

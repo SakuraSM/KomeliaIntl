@@ -15,6 +15,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,9 +32,11 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.transitions.CrossfadeTransition
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_close_settings
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile_title
 import kotlinx.coroutines.flow.SharedFlow
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LocalKeyEvents
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.appRootNavigator
@@ -82,15 +85,20 @@ class SettingsScreen(
                     SettingsScreenLayout(
                         navMenu = {
                             KomeliaChromeContent {
+                                val mac = LocalMacOS.current
                                 Row(
-                                    Modifier
+                                    if (mac) Modifier.padding(top = 28.dp, start = 24.dp, end = 24.dp) else Modifier
                                         .padding(12.dp)
                                         .komeliaChrome(RoundedCornerShape(24.dp), MaterialTheme.colorScheme.surface)
                                         .padding(top = settingsDesktopTopPadding, start = 16.dp, end = 16.dp)
                                 ) {
-                                    Spacer(Modifier.weight(1f))
+                                    if (!mac) Spacer(Modifier.weight(1f))
                                     SettingsNavigationMenu(
-                                        header = { KomeliaWordmark(Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) },
+                                        header = {
+                                            if (mac) Text(stringResource(Res.string.settings_mobile_title),
+                                                style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp))
+                                            else KomeliaWordmark(Modifier.padding(horizontal = 8.dp, vertical = 8.dp))
+                                        },
                                         currentScreen = navigator.lastItem,
                                         onNavigation = { navigator.replaceAll(it) },
                                         hasMediaErrors = vm.hasMediaErrors,
@@ -99,7 +107,7 @@ class SettingsScreen(
                                         newVersionIsAvailable = vm.newVersionIsAvailable,
                                         onLogout = vm::logout,
                                         contentColor = MaterialTheme.colorScheme.surface,
-                                        modifier = Modifier.width(settingsDesktopNavMenuWidth),
+                                        modifier = Modifier.width(if (mac) 280.dp else settingsDesktopNavMenuWidth),
                                         user = vm.user.collectAsState().value
                                     )
                                 }

@@ -145,7 +145,7 @@ TTU passes the manifest's nested table of contents to its navigation drawer sepa
 
 TTU reveals its desktop edge page controls on pointer hover or keyboard focus. Touch devices use the reader toolbar for those actions, leaving publication text unobstructed while the toolbar is hidden. System Back and the desktop title-bar exit ask TTU to save before closing. Bookmark writes stay ordered, and a failed save keeps the reader open with retry and explicit exit options. Manual bookmarks retain their existing behavior. Incognito reading does not persist progress, and normal and incognito sessions use separate screen models.
 
-Series details hide global phone navigation and retain one reading action. Wide layouts keep the volume list and a nested book detail together. Reading opens on the surrounding `AppTab` navigator so the reader fills the application while retaining the selected series and list state. A cached copy remains available when its remote file disappears; resume lookup skips missing remote-only volumes.
+Series details hide global phone navigation and retain one reading action. On macOS, the volume list and book detail use separate pages. Other wide layouts keep the list and a nested book detail together. Reading opens on the surrounding `AppTab` navigator so the reader fills the application while retaining the selected series and list state. A cached copy remains available when its remote file disappears; resume lookup skips missing remote-only volumes.
 
 ## Android LAN permission and Web API keys
 

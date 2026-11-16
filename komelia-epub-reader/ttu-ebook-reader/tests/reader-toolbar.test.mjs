@@ -120,3 +120,36 @@ test('TTU keeps narrow chrome on one row and preserves overflow actions and keyb
     await server.close();
   }
 });
+
+test('Mac TTU toolbar is centered and retains its reader actions', async () => {
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport:{width:960,height:720}});
+    await page.goto(server.url);
+    const toolbar = page.getByRole('navigation', {name:'Reader toolbar'});
+    await toolbar.waitFor();
+    await page.evaluate(() => {
+      const host = document.getElementById('app');
+      host.style.width = 'calc(100% - 17px)';
+      host.style.transform = 'translateZ(0)';
+      document.documentElement.dataset.komeliaPlatform = 'macos';
+    });
+    const bounds = await toolbar.boundingBox();
+    assert.equal(bounds.width, 350);
+    assert.ok(Math.abs(bounds.x + bounds.width / 2 - 480) <= 1);
+    for (const name of ['Close Book', 'Open Table of Contents', 'Reader settings', 'More options']) {
+      const button = toolbar.getByRole('button', {name, exact:true});
+      const size = await button.boundingBox();
+      assert.ok(size.width >= 40 && size.height >= 40, name);
+    }
+    const settings = toolbar.getByRole('button', {name:'Reader settings'});
+    await settings.focus();
+    assert.notEqual(await settings.evaluate(node => getComputedStyle(node).outlineStyle), 'none');
+    await page.keyboard.press('Enter');
+    assert.equal(await page.locator('output').textContent(), 'settings');
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});

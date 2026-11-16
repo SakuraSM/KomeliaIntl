@@ -127,7 +127,7 @@ internal fun LocalContent(
             LazyColumn(
                 state = listState,
                 contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
-                modifier = Modifier.fillMaxSize().padding(horizontal = 22.dp),
+                modifier = Modifier.fillMaxSize().padding(horizontal = if (snd.komelia.ui.LocalMacOS.current) snd.komelia.ui.MacDesign.pageInset else 22.dp),
             ) {
                 item {
                     Surface(onClick = onManageLocalFolders, color = androidx.compose.ui.graphics.Color.Transparent) {

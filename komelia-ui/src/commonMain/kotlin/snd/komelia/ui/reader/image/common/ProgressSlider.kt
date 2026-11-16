@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,11 +29,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.LayoutDirection.Ltr
@@ -60,8 +67,10 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_previous
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.image.coil.BookPageThumbnailRequest
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.common.components.AppSliderDefaults
 import snd.komelia.ui.common.components.KomeliaChromeSurface
+import snd.komelia.ui.common.components.KomeliaDropdownMenu
 import snd.komelia.ui.reader.image.PageMetadata
 
 @Composable
@@ -72,6 +81,7 @@ fun ProgressSlider(
     show: Boolean,
     layoutDirection: LayoutDirection,
     modifier: Modifier = Modifier,
+    onPagePickerVisibilityChange: (Boolean) -> Unit = {},
 ) {
     PageSpreadProgressSlider(
         pageSpreads = pages.map { listOf(it) },
@@ -79,7 +89,8 @@ fun ProgressSlider(
         onPageNumberChange = onPageNumberChange,
         show = show,
         layoutDirection = layoutDirection,
-        modifier = modifier
+        modifier = modifier,
+        onPagePickerVisibilityChange = onPagePickerVisibilityChange,
     )
 }
 
@@ -91,11 +102,17 @@ fun PageSpreadProgressSlider(
     show: Boolean,
     layoutDirection: LayoutDirection,
     modifier: Modifier = Modifier,
+    onPagePickerVisibilityChange: (Boolean) -> Unit = {},
 ) {
     if (pageSpreads.isEmpty()) return
 
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
+    if (LocalMacOS.current) {
+        MacPageSpreadControls(pageSpreads, currentSpreadIndex, onPageNumberChange, show || isHovered.value,
+            layoutDirection, modifier.hoverable(interactionSource), onPagePickerVisibilityChange)
+        return
+    }
 
     Box(
         modifier = modifier.then(
@@ -117,6 +134,55 @@ fun PageSpreadProgressSlider(
                         onPageNumberChange = onPageNumberChange,
                         layoutDirection = layoutDirection
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MacPageSpreadControls(
+    pageSpreads: List<List<PageMetadata>>,
+    currentSpreadIndex: Int,
+    onPageNumberChange: (Int) -> Unit,
+    show: Boolean,
+    layoutDirection: LayoutDirection,
+    modifier: Modifier,
+    onPagePickerVisibilityChange: (Boolean) -> Unit,
+) {
+    var pickerOpen by remember { mutableStateOf(false) }
+    val currentIndex = currentSpreadIndex.coerceIn(0, pageSpreads.lastIndex)
+    val spread = pageSpreads[currentIndex].let { if (layoutDirection == Rtl) it.reversed() else it }
+    val label = spread.joinToString("-") { it.pageNumber.toString() }
+    DisposableEffect(Unit) { onDispose { onPagePickerVisibilityChange(false) } }
+    Box(modifier.fillMaxWidth()) {
+        if (show || pickerOpen) CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+            Surface(modifier = Modifier.align(Alignment.Center).padding(vertical = 10.dp).testTag("mac-reader-page-controls"),
+                color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), shadowElevation = 4.dp) {
+                Row(Modifier.padding(horizontal = 6.dp), horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedIconButton(onClick = { onPageNumberChange(currentIndex - 1) },
+                        enabled = currentIndex > 0, shape = RoundedCornerShape(10.dp), modifier = Modifier.size(40.dp)) {
+                        Icon(Icons.Rounded.ChevronLeft, stringResource(Res.string.reader_previous_page))
+                    }
+                    Box {
+                        TextButton(onClick = { pickerOpen = true; onPagePickerVisibilityChange(true) }) {
+                            Text("$label / ${pageSpreads.sumOf { it.size }}", style = MaterialTheme.typography.labelLarge)
+                        }
+                        KomeliaDropdownMenu(pickerOpen, onDismissRequest = {
+                            pickerOpen = false
+                            onPagePickerVisibilityChange(false)
+                        }) {
+                            Box(Modifier.width(360.dp)) {
+                                Slider(pageSpreads, currentIndex, onPageNumberChange, layoutDirection)
+                            }
+                        }
+                    }
+                    OutlinedIconButton(onClick = { onPageNumberChange(currentIndex + 1) },
+                        enabled = currentIndex < pageSpreads.lastIndex, shape = RoundedCornerShape(10.dp), modifier = Modifier.size(40.dp)) {
+                        Icon(Icons.Rounded.ChevronRight, stringResource(Res.string.reader_next_page))
+                    }
                 }
             }
         }

@@ -40,6 +40,9 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.home_filter_sea
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalMacOS
+import snd.komelia.ui.LocalMacToolbarAccessory
+import snd.komelia.ui.RegisterMacToolbarAccessory
 import snd.komelia.ui.LocalWindowWidth
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material.icons.rounded.ExpandMore
@@ -77,11 +80,7 @@ internal fun HomeBrowseHeader(
     LaunchedEffect(currentFilterNumber, toolbarFilters) {
         if (currentFilterNumber != 0 && toolbarFilters.none { it.id == currentFilterNumber }) onFilterChange(0)
     }
-    BrowsePageHeader(
-        title = "Komelia",
-        titleContent = { modifier -> Text("Komelia", style = MaterialTheme.typography.titleLarge,
-            modifier = modifier.padding(start = 16.dp).offset(y = (-6).dp)) },
-    ) {
+    val picker: @Composable () -> Unit = {
         if (toolbarFilters.isNotEmpty()) {
             Box(Modifier.padding(end = 16.dp)) {
                 Surface(onClick = { pickerOpen = true }, color = androidx.compose.ui.graphics.Color.Transparent,
@@ -107,6 +106,15 @@ internal fun HomeBrowseHeader(
                 }
             }
         }
+    }
+    if (LocalMacOS.current && LocalMacToolbarAccessory.current != null) {
+        if (toolbarFilters.isNotEmpty()) RegisterMacToolbarAccessory(picker)
+    } else {
+        BrowsePageHeader(
+            title = "Komelia",
+            titleContent = { modifier -> Text("Komelia", style = MaterialTheme.typography.titleLarge,
+                modifier = modifier.padding(start = 16.dp).offset(y = (-6).dp)) },
+        ) { picker() }
     }
     if (useBottomSheet && pickerOpen) HomeGroupPickerSheet(entries, currentFilterNumber,
         onDismiss = { pickerOpen = false }, onFilterChange = {

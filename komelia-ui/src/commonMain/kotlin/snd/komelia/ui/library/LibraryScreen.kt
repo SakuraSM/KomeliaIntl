@@ -104,6 +104,8 @@ import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalReloadEvents
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalMacOS
+import snd.komelia.ui.MacDesign
 import snd.komelia.ui.ReadingDesign
 import androidx.compose.runtime.CompositionLocalProvider
 import snd.komelia.ui.ReloadableScreen
@@ -163,6 +165,7 @@ class LibraryScreen(
             )
         }
         val width = LocalWindowWidth.current
+        val mac = LocalMacOS.current
         val libraryActions = remember(vm) { vm.libraryActions() }
 
         LaunchedEffect(libraryId) {
@@ -197,7 +200,7 @@ class LibraryScreen(
                     }
 
                     Row {
-                        if (width == FULL) {
+                        if (width == FULL && !mac) {
                             LibrarySupportingPane(
                                 libraries = libraryScopes,
                                 selectedLibraryId = libraryId,
@@ -213,7 +216,7 @@ class LibraryScreen(
                                     LibraryToolBar(
                                         viewModel = vm,
                                         libraries = libraryScopes,
-                                        showScopeSelector = width != FULL,
+                                        showScopeSelector = width != FULL || mac,
                                         selectedLibraryId = libraryId,
                                         onLibrarySelect = onScopeSelected,
                                         libraryActions = libraryActions,
@@ -256,7 +259,8 @@ class LibraryScreen(
                 val loading = state is Loading || state is Uninitialized || filter != seriesTabState.loadedFilter
                 Column {
                     LibraryBrowseControls(seriesTabState)
-                    CompositionLocalProvider(LocalKomeliaLayout provides LocalKomeliaLayout.current.copy(pageHorizontalPadding = ReadingDesign.browseInset)) {
+                    CompositionLocalProvider(LocalKomeliaLayout provides LocalKomeliaLayout.current.copy(
+                        pageHorizontalPadding = if (LocalMacOS.current) MacDesign.pageInset else ReadingDesign.browseInset)) {
                         Box(Modifier.weight(1f)) {
                             SeriesListContent(
                                 isList = seriesTabState.isList,

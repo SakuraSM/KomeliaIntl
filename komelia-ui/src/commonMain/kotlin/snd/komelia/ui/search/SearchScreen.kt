@@ -33,6 +33,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_search
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.book.bookScreen
@@ -63,7 +64,7 @@ class SearchScreen(
 
         ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
             KomeliaPageScaffold(topBar = {
-                if (LocalPlatform.current == PlatformType.MOBILE) {
+                if (LocalPlatform.current == PlatformType.MOBILE || LocalMacOS.current) {
                     BrowseSearchHeader(
                         title = stringResource(Res.string.navbar_search),
                         query = vm.query,

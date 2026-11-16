@@ -136,7 +136,12 @@ class ImageReaderScreen(
 
         Column {
             PlatformTitleBar(Modifier.zIndex(10f), false) {
-                if (canIntegrateWithSystemBar()) {
+                if (snd.komelia.ui.LocalMacOS.current) {
+                    val isFullscreen = LocalWindowState.current.isFullscreen.collectAsState(false)
+                    if (!isFullscreen.value) MacReaderTitleBar(onExit = currentBook?.let { book ->
+                        { onExit(navigator, book, exitController, lastModeHint) }
+                    })
+                } else if (canIntegrateWithSystemBar()) {
                     val isFullscreen = LocalWindowState.current.isFullscreen.collectAsState(false)
                     if (currentBook != null && !isFullscreen.value) {
                         TitleBarContent(

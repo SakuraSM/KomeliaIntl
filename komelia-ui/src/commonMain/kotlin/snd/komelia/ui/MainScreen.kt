@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextOverflow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.browse_app_controls
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
@@ -74,6 +75,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -170,6 +172,8 @@ class MainScreen(
         val platform = LocalPlatform.current
         val width = LocalWindowWidth.current
         val motion = LocalKomeliaMotion.current
+        val macToolbarSearch = remember { MacToolbarSlotHost() }
+        val macToolbarAccessory = remember { MacToolbarSlotHost() }
         val vm = rememberScreenModel { viewModelFactory.getNavigationViewModel() }
         val isOffline by vm.isOffline.collectAsState()
         val sessionNavigators = rememberScreenModel("session-navigators") { SessionNavigators() }
@@ -190,7 +194,7 @@ class MainScreen(
             }
 
             var utilitiesVisible by remember { mutableStateOf(false) }
-            val compactUtilities = platform != MOBILE && !isOffline &&
+            val compactUtilities = platform != MOBILE && !LocalMacOS.current && !isOffline &&
                 LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS &&
                 navigationPresentation(width) == NavigationPresentation.Rail
             var activeNavigator by remember { mutableStateOf<Navigator?>(null) }
@@ -235,9 +239,11 @@ class MainScreen(
                 CompositionLocalProvider(
                     LocalAppNavigationController provides appNavigationController,
                     LocalPageTopInset provides pageTopInset,
+                    LocalMacToolbarSearch provides if (LocalMacOS.current) macToolbarSearch else null,
+                    LocalMacToolbarAccessory provides if (LocalMacOS.current) macToolbarAccessory else null,
                 ) {
                     Surface(
-                        color = if (platform == MOBILE) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.surface,
+                        color = if (platform == MOBILE || LocalMacOS.current) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.surface,
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         Column(Modifier.komeliaTopBarScroll(topBarScrollState)) {
@@ -265,7 +271,7 @@ class MainScreen(
                             }
 
                             Scaffold(
-                                containerColor = if (platform == MOBILE) Color.Transparent else MaterialTheme.colorScheme.surface,
+                                containerColor = if (platform == MOBILE || LocalMacOS.current) Color.Transparent else MaterialTheme.colorScheme.surface,
                                 contentWindowInsets = if (platform == MOBILE) {
                                     WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
                                 } else {
@@ -440,7 +446,7 @@ private fun destinationFor(screen: Screen): AppDestination = when (screen) {
 @Composable
 internal fun DestinationContent(navigator: Navigator) {
     val screen = navigator.lastItem
-    val detailTypography = if (screen is BookScreen || screen is OneshotScreen) {
+    val detailTypography = if (!LocalMacOS.current && (screen is BookScreen || screen is OneshotScreen)) {
         when (LocalWindowWidth.current) {
             WindowSizeClass.FULL -> KomeliaDesktopReadingTypography
             WindowSizeClass.EXPANDED -> KomeliaTabletReadingTypography
@@ -570,6 +576,10 @@ internal fun AppNavigationRail(
     onSelect: (AppDestination, Screen?) -> Unit,
     onUtilitiesClick: (() -> Unit)? = null,
 ) {
+    if (LocalMacOS.current) {
+        MacNavigationRail(selected, onSelect)
+        return
+    }
     val colors = MaterialTheme.colorScheme
     val expanded = LocalWindowWidth.current == WindowSizeClass.FULL
     val width = if (expanded) ReadingDesign.desktopNavigationWidth else ReadingDesign.tabletNavigationWidth
@@ -609,6 +619,39 @@ internal fun AppNavigationRail(
                     Icon(item.icon, null, Modifier.size(24.dp), tint = if (active) colors.primary else colors.onSurface)
                     Text(stringResource(item.label), style = MaterialTheme.typography.labelMedium,
                         color = if (active) colors.primary else colors.onSurface)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MacNavigationRail(selected: AppDestination, onSelect: (AppDestination, Screen?) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val full = LocalWindowWidth.current == WindowSizeClass.FULL
+    val fontScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
+    val width = if (full) MacDesign.sidebarWidth else MacDesign.narrowSidebarWidth + 80.dp * (fontScale - 1f)
+    val sidebarColor = if (colors.background.luminance() > .5f) colors.surfaceContainer else colors.surface
+    Surface(color = sidebarColor, modifier = Modifier.width(width).fillMaxHeight().testTag("primary-navigation-rail")) {
+        Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .padding(horizontal = MacDesign.sidebarInset).padding(top = MacDesign.sidebarTopInset, bottom = 16.dp)
+                .selectableGroup(),
+        ) {
+            destinationItems.forEach { item ->
+                val active = selected == item.destination
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(MacDesign.sidebarRowHeight * fontScale)
+                        .background(if (active) colors.primaryContainer else Color.Transparent, RoundedCornerShape(10.dp))
+                        .selectable(active, role = Role.Tab, onClick = { onSelect(item.destination, null) })
+                        .testTag("primary-rail-tab-${item.destination.name.lowercase()}")
+                        .padding(horizontal = if (full) 16.dp else 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(if (full) 16.dp else 12.dp),
+                ) {
+                    Icon(item.icon, null, Modifier.size(22.dp), tint = if (active) colors.primary else colors.onSurface)
+                    Text(stringResource(item.label), style = MaterialTheme.typography.bodyLarge,
+                        color = if (active) colors.primary else colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }

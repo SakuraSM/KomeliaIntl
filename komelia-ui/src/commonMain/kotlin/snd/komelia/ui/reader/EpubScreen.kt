@@ -19,6 +19,7 @@ import snd.komelia.ui.BookSiblingsContext
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.LocalWindowState
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.MainScreen
 import snd.komelia.ui.newReaderSessionId
 import snd.komelia.ui.book.BookScreen
@@ -63,9 +64,10 @@ class EpubScreen(
         }
         val appearance = LocalSurfaceAppearance.current
         val reducedMotion = LocalKomeliaMotion.current.isReducedMotion
+        val mac = LocalMacOS.current
         SideEffect {
             vm.chromeAppearance.value = EpubChromeAppearance(
-                appearance.style, appearance.theme, appearance.reduceTransparency, reducedMotion, appearance.renderingSupported,
+                appearance.style, appearance.theme, appearance.reduceTransparency, reducedMotion, appearance.renderingSupported, mac,
             )
         }
         LaunchedEffect(bookId) {
@@ -83,7 +85,13 @@ class EpubScreen(
         val state = vm.state.collectAsState().value
         Column {
             PlatformTitleBar(applyInsets = false) {
-                if (canIntegrateWithSystemBar()) {
+                if (LocalMacOS.current) {
+                    val isFullscreen = LocalWindowState.current.isFullscreen.collectAsState(false)
+                    if (!isFullscreen.value) {
+                        val title = if (state is LoadState.Success) state.value.book.collectAsState().value?.metadata?.title else null
+                        MacReaderTitleBar(title, if (state is LoadState.Success) state.value::onBackButtonPress else null)
+                    }
+                } else if (canIntegrateWithSystemBar()) {
                     val isFullscreen = LocalWindowState.current.isFullscreen.collectAsState(false)
                     if (state is LoadState.Success && !isFullscreen.value) {
                         val book = state.value.book.collectAsState().value

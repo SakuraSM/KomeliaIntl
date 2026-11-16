@@ -25,6 +25,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.*
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.ReadingDesign
+import snd.komelia.ui.LocalMacOS
+import snd.komelia.ui.MacDesign
 import snd.komelia.ui.common.components.KomeliaDropdownMenu
 import snd.komelia.ui.strings.AppStrings
 import snd.komga.client.book.KomgaReadStatus
@@ -34,17 +36,19 @@ internal fun LibraryBrowseControls(state: LibrarySeriesTabState) {
     val filter by state.filterState.state.collectAsState()
     val selectedStatuses = filter.readStatus.map { stringResource(AppStrings.forSeriesReadStatus(it)) }
     val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+    val mac = LocalMacOS.current
+    val inset = if (mac) MacDesign.pageInset else ReadingDesign.browseInset
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val wrapControls = maxWidth < 360.dp * fontScale
+        val wrapControls = maxWidth < (if (mac) 440.dp else 360.dp) * fontScale
         Column {
             Row(
-                Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = ReadingDesign.browseInset),
+                Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = inset),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 BrowseChoice(
                     label = if (filter.readStatus.isEmpty()) stringResource(Res.string.browse_all_status)
                         else selectedStatuses.joinToString(" · "),
-                    modifier = Modifier.weight(1f),
+                    modifier = if (mac && !wrapControls) Modifier.width(144.dp * fontScale) else Modifier.weight(1f),
                 ) { dismiss ->
                     DropdownMenuItem(text = { Text(stringResource(Res.string.browse_all_status)) }, onClick = {
                         filter.readStatus.forEach(state.filterState::onReadStatusSelect)
@@ -58,7 +62,8 @@ internal fun LibraryBrowseControls(state: LibrarySeriesTabState) {
                         )
                     }
                 }
-                BrowseChoice(stringResource(AppStrings.forSeriesSort(filter.sortOrder)), Modifier.weight(if (wrapControls) 1.6f else 1.1f)) { dismiss ->
+                BrowseChoice(stringResource(AppStrings.forSeriesSort(filter.sortOrder)),
+                    if (mac && !wrapControls) Modifier.width(160.dp * fontScale) else Modifier.weight(if (wrapControls) 1.6f else 1.1f)) { dismiss ->
                     LibrarySeriesTabState.SeriesSort.entries.forEach { sort ->
                         DropdownMenuItem(
                             text = { Text(stringResource(AppStrings.forSeriesSort(sort))) },
@@ -70,11 +75,14 @@ internal fun LibraryBrowseControls(state: LibrarySeriesTabState) {
                         )
                     }
                 }
-                if (!wrapControls) LibraryCountAndDisplayControls(state)
+                if (!wrapControls) {
+                    if (mac) Spacer(Modifier.weight(1f))
+                    LibraryCountAndDisplayControls(state)
+                }
             }
             if (wrapControls) {
                 Row(
-                    Modifier.fillMaxWidth().padding(horizontal = ReadingDesign.browseInset),
+                    Modifier.fillMaxWidth().padding(horizontal = inset),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

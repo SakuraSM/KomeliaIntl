@@ -247,3 +247,44 @@
 @media (max-width: 839px) {
   .komelia-reader-title > span { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
+
+/* Keep Mac reader controls compact without changing publication styles. */
+:root[data-komelia-platform="macos"][data-komelia-surface] [data-komelia-toolbar="top"] {
+  position: fixed !important;
+  inset-inline: auto !important;
+  left: max(12px, calc((100vw - 350px) / 2)) !important;
+  right: auto !important;
+  top: 16px !important;
+  width: 350px !important;
+  max-width: calc(100% - 24px);
+  min-height: 44px;
+  margin: 0 !important;
+  padding-inline: 4px;
+  justify-content: space-around;
+  border: 1px solid rgb(20 27 35 / 12%) !important;
+  border-radius: 22px !important;
+  color: #141b23 !important;
+  background: #ebeae6 !important;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 12%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+:root[data-komelia-platform="macos"] [data-komelia-toolbar="top"] .komelia-reader-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+:root[data-komelia-platform="macos"] [data-komelia-toolbar="top"] .komelia-reader-action {
+  flex-basis: 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+}
+:root[data-komelia-platform="macos"] [data-komelia-toolbar="top"] .komelia-reader-action:focus-visible {
+  outline: 2px solid #005477 !important;
+  outline-offset: -3px;
+}

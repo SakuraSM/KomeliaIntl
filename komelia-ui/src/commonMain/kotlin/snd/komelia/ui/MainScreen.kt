@@ -123,6 +123,8 @@ import snd.komelia.ui.library.LibraryScreen
 import snd.komelia.ui.local.LocalContentScreen
 import snd.komelia.ui.oneshot.OneshotScreen
 import snd.komelia.ui.platform.BackPressHandler
+import snd.komelia.ui.platform.PlatformType
+import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.canIntegrateWithSystemBar
@@ -278,11 +280,12 @@ class MainScreen(
                                             ),
                                         ),
                                     ) {
-                                        AppBottomBar(currentTab.destination, ::selectDestination)
+                                        AppBottomBar(currentTab.destination, platform, ::selectDestination)
                                     }
                                 },
                             ) { contentPadding ->
-                                val floatingBar = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS &&
+                                val floatingBar = platform != MOBILE &&
+                                    LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS &&
                                     showBottomNavigation
                                 val bottomInset = if (floatingBar) contentPadding.calculateBottomPadding() else 0.dp
                                 val direction = LocalLayoutDirection.current
@@ -456,7 +459,7 @@ internal fun SingleLayerDestinationTransition(
     }
 }
 
-private data class DestinationItem(
+internal data class DestinationItem(
     val destination: AppDestination,
     val label: StringResource,
     val icon: ImageVector,
@@ -475,8 +478,13 @@ private val destinationItems = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 internal fun AppBottomBar(
     selected: AppDestination,
+    platform: PlatformType = DESKTOP,
     onSelect: (AppDestination, Screen?) -> Unit,
 ) {
+    if (platform == MOBILE) {
+        MobileFloatingDock(selected, destinationItems) { onSelect(it, null) }
+        return
+    }
     val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     val glass = LocalSurfaceAppearance.current.useGlass
     val colors = MaterialTheme.colorScheme

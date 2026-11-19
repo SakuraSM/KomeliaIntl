@@ -17,6 +17,7 @@ RUN apt-get update -o Acquire::Retries=5 && apt-get install -y --no-install-reco
     autopoint \
     autotools-dev \
     libtool \
+    libltdl-dev \
     texinfo \
     pkg-config \
     libglib2.0-dev \

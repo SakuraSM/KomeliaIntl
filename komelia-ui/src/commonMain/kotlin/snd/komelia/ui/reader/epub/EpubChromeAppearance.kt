@@ -12,4 +12,5 @@ data class EpubChromeAppearance(
     val reduceTransparency: Boolean = false,
     val reducedMotion: Boolean = false,
     val renderingSupported: Boolean = true,
+    val isMacOS: Boolean = false,
 )

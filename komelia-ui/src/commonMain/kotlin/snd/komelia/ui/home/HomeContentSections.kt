@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +30,9 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.MacDesign
+import snd.komelia.ui.platform.WindowSizeClass
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.TextButton
 import snd.komelia.ui.common.cards.SeriesDetailedListCard
@@ -46,6 +51,7 @@ internal fun LazyGridScope.BookFilterEntry(
     onBookReadClick: (KomeliaBook, Boolean) -> Unit,
     featuredBook: KomeliaBook? = null,
     preview: Boolean = false,
+    macPreview: Boolean = false,
     onViewAll: () -> Unit = {},
 ) {
     if (books.isEmpty()) return
@@ -81,7 +87,27 @@ internal fun LazyGridScope.BookFilterEntry(
             if (preview) HomeViewAllButton(onViewAll)
         }
     }
-    val visibleBooks = books.filterNot { it.id == featuredBook?.id }.let { if (preview) it.take(3) else it }
+    val visibleBooks = books.filterNot { it.id == featuredBook?.id }.let { if (preview) it.take(if (macPreview) 5 else 3) else it }
+    if (preview && macPreview && featuredBook != null) {
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            val wide = LocalWindowWidth.current == WindowSizeClass.FULL
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(if (wide) 48.dp else 20.dp)) {
+                items(visibleBooks.size, key = { visibleBooks[it].id.value }) { index ->
+                    val book = visibleBooks[index]
+                    BookImageCard(
+                        book = book,
+                        onBookClick = { onBookClick(book) },
+                        onBookReadClick = { onBookReadClick(book, it) },
+                        bookMenuActions = bookMenuActions,
+                        showSeriesTitle = false,
+                        compactCaption = true,
+                        modifier = Modifier.width(if (wide) MacDesign.recentCoverWidth else MacDesign.narrowRecentCoverWidth),
+                    )
+                }
+            }
+        }
+        return
+    }
     if (preview && featuredBook == null) {
         items(visibleBooks, span = { GridItemSpan(maxLineSpan) }) { book ->
             BookDetailedListCard(book, onClick = { onBookClick(book) }, bookMenuActions = bookMenuActions,

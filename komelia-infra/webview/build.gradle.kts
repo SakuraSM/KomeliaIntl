@@ -48,7 +48,11 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(libs.compose.desktop)
+            implementation(libs.swing.webview)
             api(projects.komeliaInfra.jni)
+        }
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }

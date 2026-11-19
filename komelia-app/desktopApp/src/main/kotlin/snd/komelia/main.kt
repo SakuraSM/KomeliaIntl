@@ -59,6 +59,7 @@ import snd.komelia.AppDirectories.projectDirectories
 import snd.komelia.DesktopPlatform.Linux
 import snd.komelia.ui.DependencyContainer
 import snd.komelia.ui.LocalAwtWindowState
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.LocalWindow
 import snd.komelia.ui.MainView
 import snd.komelia.ui.error.ErrorView
@@ -189,6 +190,18 @@ private fun ApplicationScope.MainAppContent(
             false
         }
     ) {
+        if (DesktopPlatform.Current == DesktopPlatform.MacOS) {
+            androidx.compose.runtime.DisposableEffect(window) {
+                window.rootPane.putClientProperty("apple.awt.fullWindowContent", true)
+                window.rootPane.putClientProperty("apple.awt.transparentTitleBar", true)
+                window.rootPane.putClientProperty("apple.awt.windowTitleVisible", false)
+                onDispose {
+                    window.rootPane.putClientProperty("apple.awt.fullWindowContent", false)
+                    window.rootPane.putClientProperty("apple.awt.transparentTitleBar", false)
+                    window.rootPane.putClientProperty("apple.awt.windowTitleVisible", true)
+                }
+            }
+        }
         LaunchedEffect(Unit) {
             window.minimumSize = Dimension(800, 540)
             appWindow.value = window
@@ -212,7 +225,8 @@ private fun ApplicationScope.MainAppContent(
 
         CompositionLocalProvider(
             LocalWindow provides window,
-            LocalAwtWindowState provides windowState
+            LocalAwtWindowState provides windowState,
+            LocalMacOS provides (DesktopPlatform.Current == DesktopPlatform.MacOS),
         ) {
             val borderModifier = derivedStateOf {
                 if (undecorated && windowState.placement == Floating)

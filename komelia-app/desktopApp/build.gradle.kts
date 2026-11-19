@@ -81,7 +81,7 @@ compose.desktop {
             appResourcesRootDir.set(
                 project.projectDir.resolve("desktopUnpackedResources")
             )
-            modules("jdk.security.auth", "java.sql")
+            modules("jdk.security.auth", "jdk.httpserver", "java.sql")
 
             windows {
                 menu = true

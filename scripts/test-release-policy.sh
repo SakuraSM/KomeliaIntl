@@ -139,4 +139,17 @@ cat > "$TEST_DIR/placeholder-notes.md" <<'EOF'
 EOF
 expect_notes_fail "$TEST_DIR/placeholder-notes.md"
 
+cp "$ROOT_DIR/gradle/libs.versions.toml" "$TEST_DIR/versions.before"
+cp "$ROOT_DIR/komelia-app/androidApp/build.gradle.kts" "$TEST_DIR/android-build.before"
+if "$ROOT_DIR/scripts/build-release.sh" --abi-base-url http://example.test/ >/dev/null 2>&1; then
+  echo "Expected insecure ABI host to be rejected" >&2
+  exit 1
+fi
+if "$ROOT_DIR/scripts/build-release.sh" --bundle --abi-base-url https://example.test/ >/dev/null 2>&1; then
+  echo "Expected ABI host to be rejected for an app bundle" >&2
+  exit 1
+fi
+cmp "$TEST_DIR/versions.before" "$ROOT_DIR/gradle/libs.versions.toml"
+cmp "$TEST_DIR/android-build.before" "$ROOT_DIR/komelia-app/androidApp/build.gradle.kts"
+
 echo "Release policy tests passed."

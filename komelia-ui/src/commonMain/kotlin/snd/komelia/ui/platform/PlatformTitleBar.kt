@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 expect fun canIntegrateWithSystemBar(): Boolean
 
@@ -63,15 +64,17 @@ fun TitleBarLayout(
     modifier: Modifier = Modifier,
     applyTitleBar: (height: Dp) -> PaddingValues,
     onElementsPlaced: (elements: List<Rect>) -> Unit,
+    centerBias: Float = 0f,
     content: @Composable TitleBarScope.() -> Unit,
 ) {
     Layout(
         content = { TitleBarScopeImpl().content() },
         modifier = modifier.fillMaxWidth(),
-        measurePolicy = remember(applyTitleBar) {
+        measurePolicy = remember(applyTitleBar, onElementsPlaced, centerBias) {
             TitleBarMeasurePolicy(
                 applyTitleBar,
-                onElementsPlaced
+                onElementsPlaced,
+                centerBias,
             )
         }
     )
@@ -87,6 +90,7 @@ interface TitleBarScope {
 internal class TitleBarMeasurePolicy(
     private val applyTitleBar: (height: Dp) -> PaddingValues,
     private val onElementsPlaced: (elements: List<Rect>) -> Unit,
+    private val centerBias: Float,
 ) : MeasurePolicy {
 
     override fun MeasureScope.measure(
@@ -177,7 +181,7 @@ internal class TitleBarMeasurePolicy(
             val requiredCenterSpace = centerPlaceable.sumOf { it.second.width }
             val minX = headUsedSpace
             val maxX = boxWidth - trailerUsedSpace - requiredCenterSpace
-            var centerX = (boxWidth - requiredCenterSpace) / 2
+            var centerX = (boxWidth - requiredCenterSpace) / 2 + (boxWidth * centerBias).roundToInt()
 
             if (minX <= maxX) {
                 if (centerX > maxX) {

@@ -56,6 +56,8 @@ npm run build
 
 For local EPUB navigation, run offline `LocalEpubNavigationTest`, `ProgressMarkProgressionActionTest` and SQLite `LocalLibraryManagerIntegrationTest`. Cover EPUB 2/3 nested TOCs, position endpoints, absolute resource URL progress and reindexing an unchanged legacy book without losing locked metadata or saved progress. The package `npm test` covers slow swipes, post-touch momentum, short-chapter non-skipping, pinch/cancel, expiry and cleanup. Repeat the actual touch flow on Android; event-model tests are not device input proof.
 
+For TTU contents and fragment changes, run `TtuNavigationTest` and the TTU `npm run test:browser` suite with Playwright and a Chrome executable available. Exercise nested EPUB 2 and 3 entries in continuous and paginated readers on a device or emulator; include reopening the book and navigation within the same resource.
+
 ## UI and interaction matrix
 
 When rendering or interaction changes, cover the relevant subset:
@@ -73,6 +75,12 @@ Use real Komga content only when authorized. Redact credentials, addresses, file
 ## Android test-package handoff
 
 When the user will validate on a physical device, follow [Android device validation](android-device-validation.md). Deliver an identifiable debug APK that coexists with production, verify its packaged labels and signature, and keep physical-device acceptance pending until the user reports results.
+
+For Android JNI, decoder or ONNX changes, validate the final APK or AAB with `java scripts/CheckAndroidNativeAbis.java <package> komelia-infra/jni/src/androidMain/jniLibs/arm64-v8a komelia-infra/database/sqlite/src/androidMain/jniLibs/arm64-v8a`. The checker compares the library set and ELF architecture for ARM64, ARMv7, x86 and x86_64. Run `node --test scripts/check-android-native-abis.test.mjs` for the checker itself. Install the final APK on the affected architecture and run `AndroidOnnxRuntimeRecoveryTest` for JPEG and PNG decoding, native model-load failures, retry and CPU inference. The Android native validation workflow builds ARMv7, x86 and x86_64 dependencies and runs this package test on x86 (API 30), translated ARMv7 (API 30) and x86_64 (API 35) emulators, checking the selected ABI. `bash scripts/test-zlib-arm-auxv.sh` exercises the zlib ARM platform check with missing and valid platform values using the pinned source and build patch. Static package checks and translated execution do not replace physical-device acceptance.
+
+For an ABI-specific APK, append its expected ABI to `CheckAndroidNativeAbis`; the checker then requires exactly that ABI. For APK distribution or update changes, also run `node --test scripts/stage-android-release.test.mjs`, the `AndroidAbiApksTest` and `AndroidAbiManifestDownloadTest` JVM tests, and `AndroidAbiUpdateTest` on Android. Verify the final universal package contains all four ABIs and each final split contains only its expected complete library set. Check signing, installed ABI, 16 KiB ZIP and ELF alignment, safe fallback to the universal APK, and an upgrade from the preceding release. The signed release and physical-device checks remain pending until run against those artifacts.
+
+For login or application lifecycle changes, run `AndroidWarmRelaunchTest` on a dedicated Android emulator. It finishes and recreates the activity while the process remains alive and checks that the authenticated session reaches the main navigation. The Android validation workflow also runs it on the x86_64 API 35 emulator.
 
 ## Evidence record
 
@@ -96,11 +104,28 @@ initializer, then decodes and resizes a synthetic PNG and checks every RGBA pixe
 both `system-webview` and `bundled` modes in separate processes; Windows runs `bundled` mode.
 The same probe constructs a lookup-table operation and checks PNG/JPEG thumbnail decoding.
 The lookup-table graph reproduces GLib sorting-symbol failures missed by a single-input resize.
+`DesktopWebviewSmoke` runs against the installed jars and loads a synthetic page through the
+native request interceptor. It checks navigation, Unicode responses, rejected native calls,
+and book-resource loading. Linux runs it under Xvfb and Windows uses its desktop session.
+`desktop-compatibility.yml` builds the Linux and Windows native libraries and installers, then
+runs these probes without publishing a Release.
 The Linux native build checks all GLib symbols required by VIPS and the JNI libraries against
 the system compilation baseline before packaging.
 
+On macOS, run `scripts/macos/build-native.sh` before the JVM tests and packaging. Run
+`:komelia-infra:webview:jvmTest`, `:komelia-domain:offline:jvmTest`, `desktopJar`, and
+`desktopDmg`, then run `scripts/macos/verify-installer.sh <dmg> <evidence-directory>`.
+Run `DesktopNativeSmoke`, `DesktopOnnxSmoke` and `DesktopOnnxExitSmoke` against the built desktop JAR.
+The installer check also requests a normal application exit and requires status zero. Verify both EPUB readers with images and
+stylesheet resources, plus comic and PDF reading and progress. Record Apple Silicon and Intel
+results separately. A locally built, ad-hoc-signed DMG is not evidence of notarized distribution.
+
 `LoginContentLayoutTest` measures the real login form at desktop and phone widths. Keep the
 maximum width before `fillMaxWidth` so an incoming full-width constraint cannot defeat it.
+
+`ReaderBackShortcutTest` dispatches Alt+Left through the paged, panel, and continuous reader
+key handlers. Returning must preserve the current page or scroll position, and plain Left
+must still navigate. Repeat the shortcut from a non-first page and reopen the book on desktop.
 
 Windows verification enumerates visible windows owned by the launched application process tree.
 `Process.MainWindowHandle` alone can miss a window owned by a child process or another native
@@ -134,6 +159,8 @@ For Android page sharing, run UI `ReaderPageShareStateTest` and `PageShareButton
 For chapter navigation, run `LocalFirstBookApiTest`, `ReaderSiblingTest`, `ReaderSiblingStateTest`, and `SiblingStatusContentTest` in UI JVM tests. SQLite `LocalLibraryManagerIntegrationTest` covers imported decimal chapter labels, rescans, and both sibling boundaries. Check partial downloads, online read-list order, query failure/retry, and unchanged current-page progress. Use original reporter data separately from synthetic fixtures.
 
 For Android provider compatibility, run `SafChannelTest` and `AndroidArchiveAccessTest` on a dedicated emulator. These cover seekable and pipe-backed providers, bounded temporary copies, cache eviction, corrupt archives, permissions, free-space limits, and cancellation cleanup. Also import and open a CBZ and EPUB through the real folder picker. Preserve existing app data during package installation.
+
+`LocalContentProgressRefreshTest` checks progress refresh on return, listener lifecycle, search during initial load, delayed results and errors, and a non-cancellable old read. Repeat the return and search flows on Android using local books.
 
 For local-series navigation, SQLite `LocalLibraryManagerIntegrationTest` checks local single-book and multi-book series with a non-root server user selected, including pagination, read-status filtering, current-user progress and exclusion of other servers' downloads. `OneshotEmptySeriesTest` checks empty results, request failures, manual retry and series-event reload. Repeat a local series-card click on Android with the same selected user; opening a book directly or testing only root misses this path.
 
@@ -209,9 +236,11 @@ Run `HomeFeaturedBookTest`, `RecentlyReadBooksTest` and `ReadingOverviewFilterTe
 
 `ModalSheetAppearanceTest` pauses capture before a backdrop frame exists and requires a readable light sheet. Repeat focused local search followed by filters on the final APK. Komga `tests/reader-settings.test.mjs` mounts the production settings sheet and checks control contrast across Classic, Glass and reduced-transparency palettes, plus settings callbacks and Escape. Repeat the sheet inside the native WebView; a toolbar fixture alone does not exercise its nested Vuetify theme.
 
-`NavigationSelectionTest` renders the bottom bar in Light, Dark and OLED, changes the selected destination and checks the rounded marker's contrast and native selection semantics. Inspect the final APK at compact and tablet widths, including large text and reduced transparency. Exercise all five destinations.
+`NavigationSelectionTest` renders the bottom bar in Light, Dark and OLED, changes the selected destination and checks the rounded marker's contrast and native selection semantics. `BottomNavigationMotionTest` checks the rendered selection transition, reduced motion and rapid taps; `ModernReadingGeometryTest` checks phone anchors within one logical pixel and narrow RTL touch targets. Inspect the final APK at compact and tablet widths, including large text and reduced transparency. Exercise all five destinations and confirm the classic bar reserves the system navigation inset separately.
 
 Run `PopupSemanticsBrowserTest` against the actual Wasm browser viewport after changing shared overlay material. Its first-party case opens glass menus and dialogs, repeats dismissal and checks that the main accessibility tree still updates in glass and opaque fallback modes. On Android, inspect dialog, menu and sheet backgrounds over illustrated content; verify Back/Escape, focus, text entry, both EPUB readers and both UI languages separately. Browser semantics and emulator captures do not complete physical-device or TalkBack acceptance.
+
+`LibrarySeriesEmptyStateTest` distinguishes empty libraries, filters and searches. On Android, check the search empty-state title and description above the open keyboard at 360dp and 130% font scale.
 
 `BrowseHeaderLayoutTest` checks one-row title/search/filter layouts at 360dp and 130% font scale, inline search focus, query retention and focus restoration after view options close. Run `BROWSE-HEADER-01` on the final APK: switch library scope and content type, change page size and filters, then exercise local source/sort/search and global search result type. Check compact and tablet widths without losing any of the existing controls.
 
@@ -225,7 +254,13 @@ Komga `tests/toc.test.mjs` mounts the production TOC in a browser. It checks exp
 
 `ReadingLayoutGeometryTest` measures the full-width reading action and compact cover inside its grid cell. `CoverCaptionFontScaleTest` also checks equal title alignment. `BrowseOptionsLayoutTest` keeps Done visible while long filter content scrolls. Recheck the final APK at 390dp and at 360dp with 130% font scale, then compare the 834dp and 1440dp pane insets.
 
+TTU `tests/reader-native-exit.test.mjs` mounts the reader and checks native exit, ordered saves, manual bookmarks, and save and close failures. `TtuExitSessionTest` checks repeated Back and session retirement. `ReaderHostNavigationTest` checks that normal and incognito readers have separate screen models. `TtuIncognitoSettingsTest` checks that editing incognito settings preserves the automatic bookmark preference. On the final Android APK, turn a page and immediately press Back, then reopen the book. Repeat with a delayed save, a save failure and retry, and incognito reading followed by normal reading.
+
+`SqliteBusyRecoveryTest` holds an external SQLite write lock, checks the busy failure, then verifies that later transactions can commit and roll back. Repeat the save-and-retry path in the native reader; the database test does not exercise the WebView bridge.
+
 TTU `tests/reader-settings.test.mjs` mounts the production settings component. It checks theme-sample colors, balanced theme columns, font selection and Escape focus, view-mode selection semantics and narrow overflow. Its continuous-reader fixture also checks explicit chapter/anchor entry and unchanged ordinary bookmark restoration. Keep these checks separate from native WebView, TalkBack and physical-device acceptance.
+
+TTU `tests/reader-bookmark-roundtrip.test.mjs` exercises the production continuous bookmark calculator through repeated restores with fractional scroll boundaries, horizontal and vertical writing, and custom reading-point offsets. Repeat no-scroll exit and reopen on the final Android package and compare the saved locator; browser results alone do not establish native WebView behavior.
 
 `FullPageControlGeometryTest` measures actual Compose bounds against the approved control references at density 1. It covers footer variants, cover and metadata columns, catalog rows, settings rows, search tabs, filter fields, reader modes, switches, the image toolbar and live page badge. It also exercises callbacks, compact-paint touch expansion and label ink at 360dp with 130 percent text. `ModernReadingGeometryTest` measures navigation and search; `ReadingLayoutGeometryTest` retains the layout contracts. Reference canvases and per-page scope are recorded in [the control measurements](../design/modern-ui-20261030/MEASUREMENTS.md).
 

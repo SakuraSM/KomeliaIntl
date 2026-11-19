@@ -107,7 +107,8 @@ object VipsSharedLibraries {
             when (DesktopPlatform.Current) {
                 Linux -> loadLinuxLibs(systemGlibLoaded)
                 Windows -> loadLibs(windowsLibs)
-                MacOS, Unknown -> error("Unsupported OS")
+                MacOS -> libVipsIsBundled = SharedLibrariesLoader.loadMacLibrary("komelia_vips") is BundledLibrary
+                Unknown -> error("Unsupported OS")
             }
         } catch (e: Throwable) {
             loadError = e

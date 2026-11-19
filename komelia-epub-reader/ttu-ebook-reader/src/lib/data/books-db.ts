@@ -14,8 +14,15 @@ export interface BookData {
   hasThumb: boolean;
   characters: number;
   sections?: Section[];
+  toc?: TocEntry[];
   lastBookModified: number;
   lastBookOpen: number;
+}
+
+export interface TocEntry {
+  title?: string | null;
+  reference?: string | null;
+  children?: TocEntry[];
 }
 
 export interface Section {

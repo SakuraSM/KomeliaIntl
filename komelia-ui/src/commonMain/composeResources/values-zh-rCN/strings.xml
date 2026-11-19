@@ -348,6 +348,11 @@
     <string name="series_tab_books">书籍</string>
     <string name="series_tab_collections">合集</string>
     <string name="series_no_books">暂无书籍</string>
+    <string name="series_no_books_matching_filters">没有符合筛选条件的书籍</string>
+    <string name="library_no_series">暂无系列</string>
+    <string name="library_no_series_body">向书库添加书籍后，即可在这里查看。</string>
+    <string name="library_no_series_matching_filters">没有符合筛选条件的系列</string>
+    <string name="library_no_series_matching_filters_body">请调整筛选条件后重试。</string>
     <string name="series_book_selection_mode">点击项目以选择或取消选择</string>
     <plurals name="series_books_count">
         <item quantity="one">%1$s 本</item>

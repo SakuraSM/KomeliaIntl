@@ -39,6 +39,8 @@ val LocalKeyEvents = compositionLocalOf<SharedFlow<KeyEvent>> { error("Key event
 val LocalWindowWidth = compositionLocalOf<WindowSizeClass> { error("Window size is not set") }
 val LocalWindowHeight = compositionLocalOf<WindowSizeClass> { error("Window size is not set") }
 val LocalPlatform = compositionLocalOf<PlatformType> { error("Platform type is not set") }
+/** Desktop presentation choice supplied by the macOS host, never persisted. */
+val LocalMacOS = staticCompositionLocalOf { false }
 val LocalTheme = compositionLocalOf { Theme.DARK }
 val LocalWindowState = compositionLocalOf<AppWindowState> { error("Window state was not initialized") }
 val LocalLibraries = compositionLocalOf<StateFlow<List<KomgaLibrary>>> { error("Libraries were not initialized") }

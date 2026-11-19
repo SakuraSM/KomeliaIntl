@@ -9,12 +9,13 @@ import java.awt.event.ComponentEvent
 import javax.swing.JPanel
 import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
+import snd.jni.DesktopPlatform
 
 class WebviewPanel(
     onCreated: (KomeliaWebview) -> Unit
 ) : JPanel() {
 
-    private val drawSurface: Component = Canvas().apply { background = Color.black }
+    private var drawSurface: Component = Canvas().apply { background = Color.black }
     private var webview: KomeliaWebview? = null
 
     init {
@@ -24,6 +25,18 @@ class WebviewPanel(
         addAncestorListener(
             object : AncestorListener {
                 override fun ancestorAdded(event: AncestorEvent) {
+                    if (DesktopPlatform.Current == DesktopPlatform.MacOS) {
+                        if (webview?.isClosed == false) return
+                        remove(drawSurface)
+                        val backend = MacWebviewBackend()
+                        drawSurface = backend.component
+                        add(drawSurface, BorderLayout.CENTER)
+                        revalidate()
+                        val webview = KomeliaWebview.macWebview(backend)
+                        this@WebviewPanel.webview = webview
+                        onCreated(webview)
+                        return
+                    }
                     KomeliaWebview.webview(drawSurface) { webview ->
                         this@WebviewPanel.webview = webview
                         webview.updateSize(event.component.width, event.component.height)
@@ -31,7 +44,9 @@ class WebviewPanel(
                     }
                 }
 
-                override fun ancestorRemoved(event: AncestorEvent) {}
+                override fun ancestorRemoved(event: AncestorEvent) {
+                    if (DesktopPlatform.Current == DesktopPlatform.MacOS) webview?.close()
+                }
 
                 override fun ancestorMoved(event: AncestorEvent) {}
             }

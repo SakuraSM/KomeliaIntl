@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -84,6 +85,7 @@ import snd.komelia.settings.model.ReaderType.CONTINUOUS
 import snd.komelia.settings.model.ReaderType.PAGED
 import snd.komelia.settings.model.ReaderType.PANELS
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.NumberFieldWithIncrements
@@ -144,18 +146,27 @@ fun SettingsSideMenuOverlay(
 
     onBackPress: () -> Unit,
     onShowHelpMenu: () -> Unit,
+    onSettingsDialogVisibilityChange: (Boolean) -> Unit = {},
     pageShareAction: PageShareAction? = null,
     modeHintPreference: snd.komelia.ui.settings.imagereader.ReaderModeHintPreference? = null,
     volumeKeys: Boolean = false,
     onVolumeKeysChange: ((Boolean) -> Unit)? = null,
 ) = KomeliaChromeContent {
+    val mac = LocalMacOS.current
+    var showMacSettings by remember { mutableStateOf(false) }
+    if (mac) DisposableEffect(Unit) {
+        onDispose { onSettingsDialogVisibilityChange(false) }
+    }
     Column(modifier = Modifier.fillMaxSize()) {
-        Spacer(
+        if (mac) ImageReaderToolbar(book, onBackPress, onSettingsClick = {
+            showMacSettings = !showMacSettings
+            onSettingsDialogVisibilityChange(showMacSettings)
+        }, pageShareAction = pageShareAction) else Spacer(
             Modifier.fillMaxWidth()
                 .komeliaChrome(RoundedCornerShape(0.dp), MaterialTheme.colorScheme.surface)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
         )
-        Column(
+        if (!mac || showMacSettings) Column(
             modifier = Modifier
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
                 .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)

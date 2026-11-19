@@ -35,6 +35,7 @@ actual fun supportedOnnxRuntimeExecutionProviders(): List<OnnxRuntimeExecutionPr
 }
 
 actual fun isOnnxRuntimeInstalled() = OnnxRuntimeSharedLibraries.isAvailable
+actual fun canUpdateOnnxRuntime() = DesktopPlatform.Current != DesktopPlatform.MacOS
 actual fun onnxRuntimeLoadError() = OnnxRuntimeSharedLibraries.loadErrorMessage
 
 actual val ortExecutionProvider: OnnxRuntimeExecutionProvider? = OnnxRuntimeSharedLibraries.executionProvider

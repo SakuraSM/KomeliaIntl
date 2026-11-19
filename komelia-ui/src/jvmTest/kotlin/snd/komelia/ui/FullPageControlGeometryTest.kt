@@ -134,6 +134,28 @@ class FullPageControlGeometryTest {
         near("05","metadata.y",8f,(metadata.top-canvas.top).value)
     }
 
+    @Test fun macBookDetailsKeepCompactCoverAndOneWorkingReadingAction() {
+        var reads = 0
+        compose.setContent {
+            GeometryScope(WindowSizeClass.FULL, AppTheme.DARK) {
+                CompositionLocalProvider(LocalMacOS provides true) {
+                    Box(Modifier.requiredSize(800.dp, 600.dp)) {
+                        ReadingBookHeader(fixture(true).copy(downloaded = true), onParentSeries = null,
+                            onDownload = {}, onRead = { reads++ })
+                    }
+                }
+            }
+        }
+        val cover = compose.onNodeWithTag("detail-cover").getUnclippedBoundsInRoot()
+        assertTrue(kotlin.math.abs((cover.right - cover.left).value - 166f) < 1f)
+        assertTrue(kotlin.math.abs((cover.bottom - cover.top).value - 249f) < 1f)
+        compose.onAllNodes(hasClickAction()).assertCountEquals(1)
+        val action = compose.onNode(hasClickAction()).getUnclippedBoundsInRoot()
+        assertTrue((action.right - action.left) <= 184.dp)
+        compose.onNode(hasClickAction()).performClick()
+        compose.runOnIdle { assertTrue(reads == 1) }
+    }
+
     @Test fun libraryDisplayChoicesMatchTheMeasuredPaintAndRetainFortyEightPixelTargets() {
         val list = mutableStateOf(false)
         compose.setContent {

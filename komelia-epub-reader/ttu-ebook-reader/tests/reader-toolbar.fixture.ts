@@ -11,19 +11,65 @@ import {viewMode$, availableSystemFonts$} from '../src/lib/data/store';
 import {ViewMode} from '../src/lib/data/view-mode';
 import {setLocale} from '../src/lib/i18n';
 
+declare global {
+  interface Window { navigateTestChapter: (reference: string) => void }
+}
+
 const parameters = new URLSearchParams(location.search);
+const longChapterRepetitions = 30;
 setLocale(parameters.get('locale') ?? 'en');
 document.documentElement.dataset.komeliaSurface = parameters.get('surface') ?? 'glass';
 document.documentElement.dataset.komeliaTheme = parameters.get('theme') ?? 'LIGHT';
 viewMode$.next(ViewMode.Paginated);
 const action = (name: string): (() => void) => () => { document.querySelector('output')!.textContent = name; };
 if (parameters.has('contents')) {
+  if (parameters.has('activeFragment')) {
+    const positions = {visible: 120, future: 1200, past: -400, later: 1400, vertical: 220, verticalFuture: -200, horizontalFuture: 900};
+    const chapter = document.createElement('div');
+    chapter.id = 'chapter-two';
+    if (parameters.has('paginatedContents')) chapter.className = 'book-content-container';
+    chapter.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:2000px';
+    const anchor = document.createElement(parameters.has('emptyActive') ? 'a' : 'h2');
+    anchor.id = 'selected';
+    const anchorTop = parameters.has('fragmentFuture') ? positions.future : parameters.has('fragmentAfter') ? positions.past : positions.visible;
+    const anchorLeft = parameters.has('verticalContents') ? positions.vertical : positions.visible;
+    anchor.style.cssText = `position:absolute;top:${anchorTop}px;left:${anchorLeft}px`;
+    if (parameters.has('fragmentHidden')) anchor.style.display = 'none';
+    if (!parameters.has('emptyActive')) anchor.textContent = 'Requested fragment in reading viewport';
+    const laterAnchor = document.createElement('h2');
+    laterAnchor.id = 'deep';
+    laterAnchor.style.cssText = `position:absolute;top:${parameters.has('fragmentAfter') ? positions.visible : positions.later}px;left:${parameters.has('verticalContents') ? positions.verticalFuture : positions.horizontalFuture}px`;
+    laterAnchor.textContent = 'Later fragment';
+    chapter.append(anchor, laterAnchor);
+    if (parameters.has('duplicateAnchor')) {
+      const otherChapter = document.createElement('div');
+      otherChapter.id = 'chapter-one';
+      otherChapter.innerHTML = '<h2 id="selected">Different chapter anchor</h2>';
+      document.body.append(otherChapter);
+    }
+    document.body.append(chapter);
+  }
   nextChapter$.subscribe(reference => { document.querySelector('output')!.setAttribute('data-chapter', reference); });
   mount(ReaderNavigationDrawer, {target: document.querySelector('#app')!, props: {
     sectionData: [
       {reference: 'chapter-one', label: 'First chapter', startCharacter: 0, characters: 200, charactersWeight: 200, progress: 100},
       {reference: 'chapter-two', label: 'Second chapter', startCharacter: 200, characters: 200, charactersWeight: 200, progress: 60},
-    ], verticalMode: false, exploredCharCount: 320, bookTitle: 'Synthetic publication',
+    ], verticalMode: parameters.has('verticalContents'), exploredCharCount: 320, bookTitle: 'Synthetic publication',
+    ...(parameters.has('nestedContents') ? {toc: [
+      {title: 'Parent chapter', reference: 'chapter-one', children: [
+        {title: 'Nested fragment', reference: 'chapter-two#selected', children: []},
+        {title: 'Section group', reference: null, children: [
+          {title: 'Deep fragment', reference: 'chapter-two#deep', children: []},
+        ]},
+      ]},
+      {title: 'Second chapter', reference: 'chapter-two', children: []},
+    ]} : parameters.has('longContents') ? {toc: [
+      {title: 'LongChapter'.repeat(longChapterRepetitions), reference: 'chapter-one', children: [
+        {title: 'Nested fragment', reference: 'chapter-two#selected', children: []},
+      ]},
+    ]} : parameters.has('invalidContents') ? {toc: [
+      {title: 'Unavailable section', reference: null, children: []},
+    ]} : {}),
     searchQuery: '', searchResults: [], annotations: [], onClose: action('closed-contents'),
     onSearchQueryInput: query => { document.querySelector('output')!.textContent = `query:${query}`; },
     onPreviousSearchResult: action('previous-result'), onNextSearchResult: action('next-result'),
@@ -51,6 +97,7 @@ if (parameters.has('settings')) {
 }
 
 if (parameters.has('initialChapter')) {
+  window.navigateTestChapter = reference => nextChapter$.next(reference);
   document.body.classList.add('reader-horizontal-mode');
   const first = '<div id="chapter-one"><h1>First chapter</h1>' + '<p>Introduction text.</p>'.repeat(40) + '</div>';
   const second = '<div id="chapter-two"><h1>Second chapter</h1>' + '<p>Chapter introduction.</p>'.repeat(8) +

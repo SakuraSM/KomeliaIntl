@@ -32,6 +32,8 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalMacOS
+import snd.komelia.ui.MacDesign
 import snd.komelia.ui.ReadingDesign
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_recent_heading
 import androidx.compose.foundation.lazy.LazyColumn
@@ -118,6 +120,7 @@ private fun DisplayContent(
     onShowRecent: () -> Unit,
 ) {
     val layout = LocalKomeliaLayout.current
+    val mac = LocalMacOS.current
     val columns = snd.komelia.ui.common.itemlist.posterGridCells(cardWidth)
     val featured = remember(filters, activeFilterNumber) { homeFeaturedBook(filters, activeFilterNumber) }
     val recentLabel = stringResource(Res.string.reading_recent_heading)
@@ -127,13 +130,13 @@ private fun DisplayContent(
             modifier = Modifier
                 .widthIn(max = layout.contentMaxWidth)
                 .fillMaxSize()
-                .padding(start = ReadingDesign.homeInset, end = 10.dp),
+                .padding(start = if (mac) MacDesign.pageInset else ReadingDesign.homeInset, end = if (mac) MacDesign.pageInset else 10.dp),
             state = gridState,
             columns = columns,
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             contentPadding = PaddingValues(
-                top = 8.dp + topInset,
+                top = (if (mac) 32.dp else 8.dp) + topInset,
                 bottom = layout.gridBottomPadding + layout.sectionSpacing,
             )
         ) {
@@ -146,6 +149,7 @@ private fun DisplayContent(
                     onBookClick = onBookClick,
                     onBookReadClick = onBookReadClick,
                     preview = true,
+                    macPreview = mac,
                     onViewAll = onShowRecent,
                 )
             }
@@ -164,6 +168,7 @@ private fun DisplayContent(
                             onBookClick = onBookClick,
                             onBookReadClick = onBookReadClick,
                             preview = activeFilterNumber == HOME_ALL_TAB_ID,
+                            macPreview = mac,
                             onViewAll = { onFilterChange(data.filter.order) },
                         )
 

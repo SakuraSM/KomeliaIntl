@@ -104,18 +104,19 @@ private fun DesktopContainer(title: String, content: @Composable ColumnScope.() 
 @Composable
 private fun DesktopContent(title: String, content: @Composable ColumnScope.() -> Unit) {
     val layout = LocalKomeliaLayout.current
+    val horizontalPadding = if (snd.komelia.ui.LocalMacOS.current) snd.komelia.ui.MacDesign.pageInset else layout.pageHorizontalPadding
     Column(Modifier.widthIn(min = 0.dp, max = settingsDesktopContentWidth)) {
         Spacer(Modifier.height(layout.pageVerticalPadding))
         Text(
             title,
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(horizontal = layout.pageHorizontalPadding),
+            modifier = Modifier.padding(horizontal = horizontalPadding),
         )
         Spacer(Modifier.height(layout.sectionSpacing))
 
         Column(
             modifier = Modifier.padding(
-                horizontal = layout.pageHorizontalPadding,
+                horizontal = horizontalPadding,
                 vertical = layout.pageVerticalPadding,
             ),
             verticalArrangement = Arrangement.spacedBy(layout.sectionSpacing),

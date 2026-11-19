@@ -40,6 +40,7 @@ import snd.komelia.settings.model.ReaderType.CONTINUOUS
 import snd.komelia.settings.model.ReaderType.PAGED
 import snd.komelia.settings.model.ReaderType.PANELS
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.platform.PlatformType.DESKTOP
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
@@ -78,6 +79,17 @@ fun BoxScope.SettingsOverlay(
     if (!show) return
     val windowWidth = LocalWindowWidth.current
     val platform = LocalPlatform.current
+    val mac = LocalMacOS.current
+    var macSettingsOpen by remember { mutableStateOf(false) }
+    var macPagePickerOpen by remember { mutableStateOf(false) }
+    val onMacSettingsVisibilityChange: (Boolean) -> Unit = {
+        macSettingsOpen = it
+        onSettingsDialogVisibilityChange(macSettingsOpen || macPagePickerOpen)
+    }
+    val onMacPagePickerVisibilityChange: (Boolean) -> Unit = {
+        macPagePickerOpen = it
+        onSettingsDialogVisibilityChange(macSettingsOpen || macPagePickerOpen)
+    }
     val book = commonReaderState.booksState.collectAsState().value?.currentBook
     val readerType = commonReaderState.readerType.collectAsState().value
     val coroutineScope = rememberCoroutineScope()
@@ -132,7 +144,7 @@ fun BoxScope.SettingsOverlay(
             onFlashWithChange = commonReaderState::onFlashWithChange,
 
             onBackPress = onBackPress,
-            onSettingsDialogVisibilityChange = onSettingsDialogVisibilityChange,
+            onSettingsDialogVisibilityChange = if (mac) onMacSettingsVisibilityChange else onSettingsDialogVisibilityChange,
             pageShareAction = pageShareAction,
         )
     } else {
@@ -178,6 +190,7 @@ fun BoxScope.SettingsOverlay(
 
             onBackPress = onBackPress,
             onShowHelpMenu = { ohShowHelpDialogChange(true) },
+            onSettingsDialogVisibilityChange = if (mac) onMacSettingsVisibilityChange else onSettingsDialogVisibilityChange,
         )
     }
     val showBadge = (windowWidth == COMPACT || windowWidth == MEDIUM) && platform != DESKTOP &&
@@ -202,7 +215,8 @@ fun BoxScope.SettingsOverlay(
                 onPageNumberChange = pagedReaderState::onPageChange,
                 show = show,
                 layoutDirection = layoutDirection,
-                modifier = Modifier.align(Alignment.BottomStart)
+                modifier = Modifier.align(Alignment.BottomStart),
+                onPagePickerVisibilityChange = onMacPagePickerVisibilityChange,
             )
             if (showBadge) {
                 val spread = spreads.getOrNull(spreadIndex).orEmpty().let { if(layoutDirection==Rtl)it.reversed()else it }
@@ -227,7 +241,8 @@ fun BoxScope.SettingsOverlay(
                 onPageNumberChange = panelsReaderState::onPageChange,
                 show = show,
                 layoutDirection = layoutDirection,
-                modifier = Modifier.align(Alignment.BottomStart)
+                modifier = Modifier.align(Alignment.BottomStart),
+                onPagePickerVisibilityChange = onMacPagePickerVisibilityChange,
             )
             if (showBadge) ImageReaderProgressBadge(pages.getOrNull(currentIndex.page)?.pageNumber?.toString(),pages.size,badgeModifier)
 
@@ -251,7 +266,8 @@ fun BoxScope.SettingsOverlay(
                 onPageNumberChange = { coroutineScope.launch { continuousReaderState.scrollToBookPage(it + 1) } },
                 show = show,
                 layoutDirection = layoutDirection,
-                modifier = Modifier.align(Alignment.BottomStart)
+                modifier = Modifier.align(Alignment.BottomStart),
+                onPagePickerVisibilityChange = onMacPagePickerVisibilityChange,
             )
             if (showBadge) ImageReaderProgressBadge(pages.getOrNull(pageIndex)?.pageNumber?.toString(),pages.size,badgeModifier)
 

@@ -60,3 +60,32 @@ test('Komga EPUB toolbar preserves touch targets, navigation and overflow action
     await server.close();
   }
 });
+
+test('Mac EPUB toolbar is centered and retains the original actions', async () => {
+  const server = await startReaderToolbarServer(createServer);
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport:{width:960,height:720}});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.goto(server.url);
+    const toolbar = page.locator('[data-komelia-toolbar="top"]');
+    await toolbar.waitFor();
+    await page.evaluate(() => { document.documentElement.dataset.komeliaPlatform = 'macos'; });
+    const bounds = await toolbar.boundingBox();
+    assert.equal(bounds.width, 350);
+    assert.ok(Math.abs(bounds.x + bounds.width / 2 - 480) <= 1);
+    for (const name of ['Close', 'Show/hide table of contents', 'Settings', 'More options']) {
+      const button = toolbar.getByRole('button', {name, exact:true});
+      const size = await button.boundingBox();
+      assert.ok(size.width >= 40 && size.height >= 40, name);
+    }
+    const settings = toolbar.getByRole('button', {name:'Settings', exact:true});
+    await settings.focus();
+    assert.notEqual(await settings.evaluate(node => getComputedStyle(node).outlineStyle), 'none');
+    await page.keyboard.press('Enter');
+    assert.equal(await page.locator('output').textContent(), 'settings');
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});

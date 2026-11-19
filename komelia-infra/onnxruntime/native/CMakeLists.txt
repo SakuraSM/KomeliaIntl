@@ -18,7 +18,7 @@ endif ()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(VIPS REQUIRED IMPORTED_TARGET vips)
 find_package(Threads REQUIRED)
-find_package(OpenMP REQUIRED)
+find_package(OpenMP REQUIRED COMPONENTS C)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 
 pkg_search_module(GLIB2 REQUIRED glib-2.0 IMPORTED_TARGET)
@@ -62,6 +62,10 @@ add_library(komelia_onnxruntime SHARED
         src/onnxruntime/komelia_ort_rf_detr.h
         src/onnxruntime/komelia_ort_rf_detr.c
 )
+
+if (APPLE)
+    target_sources(komelia_onnxruntime PRIVATE src/onnxruntime/device/komelia_enumerate_devices_cpu.c)
+endif ()
 
 target_include_directories(komelia_onnxruntime PRIVATE
         ${VIPS_INCLUDE_DIRS}

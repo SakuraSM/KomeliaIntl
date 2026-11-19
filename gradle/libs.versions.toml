@@ -50,9 +50,12 @@ markdown = "0.7.14"
 markdown-renderer = "0.45.0"
 okhttp = "5.5.0"
 reorderable = "3.1.0"
+pdfbox = "3.0.8"
+jbig2 = "3.0.5"
 richEditor = "1.1.0"
 slf4j = "2.0.20"
 sqlite-jdbc = "3.51.3.0"
+swing-webview = "1.13.0"
 voyager = "2.2.21-1.10.3"
 
 [libraries]
@@ -125,7 +128,10 @@ reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reo
 richEditor-compose = { module = "com.mohamedrejeb.richeditor:richeditor-compose", version.ref = "richEditor" }
 secret-service = { module = "de.swiesend:secret-service" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
+jbig2-imageio = { module = "org.apache.pdfbox:jbig2-imageio", version.ref = "jbig2" }
 sqlite-xerial-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc" }
+swing-webview = { module = "ca.weblite:webview", version.ref = "swing-webview" }
 voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
 voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }

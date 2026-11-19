@@ -96,6 +96,7 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.ui.LocalOfflineAvailable
 import snd.komelia.ui.LocalOfflineMode
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.common.components.LocalNavigationBarInset
@@ -245,7 +246,16 @@ internal fun SettingsNavigationMenu(
         MobileSettingsSection.CONNECTIONS -> appEntries.filter { it.screen is NetworkSettingsScreen }
         MobileSettingsSection.ADVANCED -> appEntries.filter { it.screen is HomeGroupsSettingsScreen }
         MobileSettingsSection.ABOUT -> appEntries.filter { it.screen is AppUpdatesScreen || it.screen is AboutSettingsScreen }
-        null -> appEntries
+        null -> if (LocalMacOS.current) appEntries.sortedBy {
+            when (it.screen) {
+                is EpubReaderSettingsScreen -> 0
+                is ImageReaderSettingsScreen -> 1
+                is AppSettingsScreen -> 2
+                is LocalLibrarySettingsScreen -> 3
+                is OfflineSettingsScreen -> 4
+                else -> 5
+            }
+        } else appEntries
     }
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()).padding(bottom = LocalNavigationBarInset.current),
@@ -257,6 +267,7 @@ internal fun SettingsNavigationMenu(
             entries = displayedAppEntries,
             contentColor = contentColor,
             onNavigation = onNavigation,
+            showTitle = !LocalMacOS.current,
         )
 
         if (!isOffline) {
@@ -369,7 +380,19 @@ private fun SettingsNavigationSection(
     entries: List<NavigationEntry>,
     contentColor: Color,
     onNavigation: (Screen) -> Unit,
+    showTitle: Boolean = true,
 ) {
+    if (LocalMacOS.current) {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            if (showTitle) Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 14.dp, top = 8.dp, bottom = 4.dp))
+            entries.forEach { entry ->
+                NavigationButton(entry.label, entry.icon, entry.selected, { onNavigation(entry.screen) },
+                    error = entry.error, color = Color.Transparent)
+            }
+        }
+        return
+    }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             title,

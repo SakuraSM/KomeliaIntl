@@ -4,6 +4,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,6 +29,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_type_continuous
@@ -42,6 +44,7 @@ import snd.komelia.settings.model.ReaderType.CONTINUOUS
 import snd.komelia.settings.model.ReaderType.PAGED
 import snd.komelia.settings.model.ReaderType.PANELS
 import snd.komelia.ui.LocalNotifications
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowState
 import snd.komelia.ui.common.components.GlassBackdropScope
@@ -79,6 +82,7 @@ fun ReaderContent(
     modeHintPreference: snd.komelia.ui.settings.imagereader.ReaderModeHintPreference? = null,
     modeActions: snd.komelia.ui.reader.image.settings.ReaderModeActions? = null,
 ) {
+    val mac = LocalMacOS.current
     var showHelpDialog by remember { mutableStateOf(false) }
     var showSettingsMenu by remember { mutableStateOf(false) }
     var settingsDialogOpen by remember { mutableStateOf(false) }
@@ -122,9 +126,7 @@ fun ReaderContent(
         Box(
             Modifier
                 .fillMaxSize()
-                .onSizeChanged {
-                    screenScaleState.setAreaSize(it)
-                }
+                .then(if (mac) Modifier else Modifier.onSizeChanged { screenScaleState.setAreaSize(it) })
                 .focusable()
                 .focusRequester(topLevelFocus)
                 .onFocusChanged { hasFocus = it.hasFocus }
@@ -144,13 +146,10 @@ fun ReaderContent(
                     consumed
                 }
         ) {
-            if (areaSize.value == IntSize.Zero) {
-                LoadingMaxSizeIndicator()
-                return@Box
-            }
-
-            Box(Modifier.fillMaxSize().glassBackdrop(active = showSettingsMenu)) {
-                when (commonReaderState.readerType.collectAsState().value) {
+            Box(Modifier.fillMaxSize().then(if (mac) Modifier.padding(top = 48.dp, bottom = 68.dp)
+                .onSizeChanged { screenScaleState.setAreaSize(it) } else Modifier).glassBackdrop(active = showSettingsMenu)) {
+                if (areaSize.value == IntSize.Zero) LoadingMaxSizeIndicator()
+                else when (commonReaderState.readerType.collectAsState().value) {
                     PAGED -> {
                         PagedReaderContent(
                             showHelpDialog = showHelpDialog,
@@ -191,7 +190,7 @@ fun ReaderContent(
                 }
 
             }
-            SettingsOverlay(
+            if (areaSize.value != IntSize.Zero) SettingsOverlay(
                 show = showSettingsMenu,
                 commonReaderState = commonReaderState,
                 pagedReaderState = pagedReaderState,

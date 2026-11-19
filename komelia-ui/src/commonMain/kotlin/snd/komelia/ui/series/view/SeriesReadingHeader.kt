@@ -14,6 +14,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reader_sibling_
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LoadState
+import snd.komelia.ui.LocalMacOS
+import snd.komelia.ui.MacDesign
 import snd.komelia.ui.book.readingActionLabel
 import snd.komelia.ui.common.readIsSupported
 
@@ -28,7 +30,8 @@ internal fun SeriesReadingHeader(
         val target = (readingTarget as? LoadState.Success)?.value
         if (target != null && readIsSupported(target)) {
             Surface(onClick = { onRead(target) }, color = Color.Transparent,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = MaterialTheme.shapes.small) {
+                modifier = (if (LocalMacOS.current) Modifier.widthIn(max = MacDesign.heroActionWidth) else Modifier)
+                    .fillMaxWidth().heightIn(min = if (LocalMacOS.current) 40.dp else 48.dp), shape = MaterialTheme.shapes.small) {
                 Box(contentAlignment = Alignment.BottomCenter) {
                     Surface(color = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary,
                         shape = MaterialTheme.shapes.small, modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp)) {

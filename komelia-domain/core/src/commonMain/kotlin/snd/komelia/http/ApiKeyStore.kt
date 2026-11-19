@@ -5,15 +5,15 @@ import kotlinx.coroutines.flow.StateFlow
 import snd.komelia.settings.SecretsRepository
 
 class ApiKeyStore(
-    private val komgaUrl: StateFlow<Url>,
+    private val komgaUrl: StateFlow<Url?>,
     private val secretsRepository: SecretsRepository,
 ) {
     private val keys = mutableMapOf<String, String>()
     val apiKey: String?
-        get() = keys[komgaUrl.value.toString()]
+        get() = komgaUrl.value?.let { keys[it.toString()] }
 
     suspend fun loadStoredApiKey() {
-        val url = komgaUrl.value
+        val url = komgaUrl.value ?: return
         val key = secretsRepository.getApiKey(url.toString())
         if (key == null) keys.remove(url.toString()) else keys[url.toString()] = key
     }

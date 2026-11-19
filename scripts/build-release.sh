@@ -13,6 +13,7 @@ target_version_code=""
 variant="standalone"
 artifact="apk"
 skip_build="false"
+abi_base_url=""
 
 usage() {
   cat <<'EOF'
@@ -27,6 +28,7 @@ Options:
                              Android manifest variant. Default: standalone.
   --apk                      Build release APK with assembleRelease. Default.
   --bundle                   Build release AAB with bundleRelease.
+  --abi-base-url HTTPS_URL   Host ABI APKs at this directory; include their update manifest.
   --skip-build               Only update version files.
   -h, --help                 Show this help.
 
@@ -63,6 +65,11 @@ while [[ $# -gt 0 ]]; do
       artifact="bundle"
       shift
       ;;
+    --abi-base-url)
+      abi_base_url="${2:-}"
+      [[ -n "$abi_base_url" ]] || { echo "--abi-base-url requires a URL" >&2; exit 1; }
+      shift 2
+      ;;
     --skip-build)
       skip_build="true"
       shift
@@ -94,6 +101,17 @@ case "$variant" in
     exit 1
     ;;
 esac
+
+if [[ "$artifact" == "bundle" && -n "$abi_base_url" ]]; then
+  echo "--abi-base-url applies to APK releases, not bundles" >&2
+  exit 1
+fi
+if [[ -n "$abi_base_url" ]]; then
+  node -e 'const u = new URL(process.argv[1]); if (u.protocol !== "https:" || u.username || u.password || u.search || u.hash) process.exit(1)' "$abi_base_url" || {
+    echo "--abi-base-url must be an HTTPS directory URL without credentials, query, or fragment" >&2
+    exit 1
+  }
+fi
 
 current_version="$(sed -nE 's/^app-version = "([^"]+)"/\1/p' "$VERSION_FILE")"
 if [[ -z "$current_version" ]]; then
@@ -178,6 +196,12 @@ if [[ ! "$target_version_code" =~ ^[1-9][0-9]*$ ]]; then
   exit 1
 fi
 
+stage_dir="$ROOT_DIR/build/android-release/$target_version"
+if [[ "$skip_build" != "true" && "$artifact" == "apk" && -e "$stage_dir" ]]; then
+  echo "Android release staging directory already exists: $stage_dir" >&2
+  exit 1
+fi
+
 if [[ "$target_version" == "$current_version" && "$target_version_code" == "$current_version_code" ]]; then
   echo "Version is already $target_version ($target_version_code)"
 else
@@ -212,6 +236,11 @@ fi
 gradle_task=":komelia-app:androidApp:assembleRelease"
 if [[ "$artifact" == "bundle" ]]; then
   gradle_task=":komelia-app:androidApp:bundleRelease"
+  exec "$ROOT_DIR/gradlew" "-Psnd.android.variant=$variant" -PrequireReleaseSigning=true "$gradle_task"
 fi
 
-exec "$ROOT_DIR/gradlew" "-Psnd.android.variant=$variant" -PrequireReleaseSigning=true "$gradle_task"
+"$ROOT_DIR/gradlew" "-Psnd.android.variant=$variant" -PrequireReleaseSigning=true "$gradle_task"
+mkdir -p "$(dirname "$stage_dir")"
+stage_args=(--metadata "$ROOT_DIR/komelia-app/androidApp/build/outputs/apk/release/output-metadata.json" --out "$stage_dir")
+if [[ -n "$abi_base_url" ]]; then stage_args+=(--abi-base-url "$abi_base_url"); fi
+node "$ROOT_DIR/scripts/stage-android-release.mjs" "${stage_args[@]}"

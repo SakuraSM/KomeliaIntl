@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+    <group
+        android:scaleX="0.59055"
+        android:scaleY="0.59055"
+        android:translateX="104"
+        android:translateY="104">
+        <path
+            android:pathData="@string/komelia_mark_path"
+            android:fillColor="#404E59"
+            android:strokeColor="#9ABFCF"
+            android:strokeWidth="1.6" />
+    </group>
+</vector>

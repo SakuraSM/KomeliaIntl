@@ -71,6 +71,7 @@ fun MainView(
     platformType: PlatformType,
     keyEvents: SharedFlow<KeyEvent>,
     appLocaleController: AppLocaleController = NoOpAppLocaleController,
+    onFirstScreenReady: (() -> Unit)? = null,
 ) {
     var theme by rememberSaveable { mutableStateOf(Theme.DARK) }
     var appLanguage by rememberSaveable { mutableStateOf(AppLanguage.SYSTEM) }
@@ -122,6 +123,7 @@ fun MainView(
 
             CompositionLocalProvider(
                 LocalSurfaceAppearance provides SurfaceAppearance(surfaceStyle, theme.toAppTheme(), reduceTransparency, glassSupported),
+                LocalFirstScreenReady provides onFirstScreenReady,
                 LocalViewModelFactory provides viewModelFactory,
                 LocalNotifications provides dependencies.appNotifications,
                 LocalKomgaEvents provides dependencies.komgaEvents.events,
@@ -157,7 +159,7 @@ fun MainView(
 @Composable
 private fun MainContent(
     platformType: PlatformType,
-    komgaSharedState: KomgaAuthenticationState
+    komgaSharedState: KomgaAuthenticationState,
 ) {
     val loginScreen = remember(platformType) {
         when (platformType) {

@@ -15,6 +15,7 @@ actual fun Webview(
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { WebView(it).apply {
+            WebView.setWebContentsDebuggingEnabled(false)
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT

@@ -11,12 +11,16 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import snd.komelia.ui.LoadState
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineMode
+import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalReloadEvents
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.ReloadableScreen
+import snd.komelia.ui.SignalFirstScreenReady
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.common.components.ErrorContent
+import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
 import snd.komelia.ui.platform.ScreenPullToRefreshBox
+import snd.komelia.ui.platform.PlatformType.MOBILE
 import snd.komelia.ui.reader.readerScreen
 import snd.komelia.ui.series.seriesScreen
 import snd.komga.client.library.KomgaLibraryId
@@ -26,6 +30,7 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
     @Composable
     override fun Content() {
         val viewModelFactory = LocalViewModelFactory.current
+        val isMobile = LocalPlatform.current == MOBILE
         val isOffline = LocalOfflineMode.current.value
         val serverUrl = LocalKomgaState.current.serverUrl.value
 
@@ -51,16 +56,23 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
         }
 
         ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
-            when (val state = vm.state.collectAsState().value) {
-                is LoadState.Error -> ErrorContent(
+            val state = vm.state.collectAsState().value
+            val filters = vm.currentFilters.collectAsState().value
+            val recentlyRead = vm.recentlyReadBooks.collectAsState().value
+            val loadingInitialContent = isMobile && state !is LoadState.Success && state !is LoadState.Error &&
+                filters.isEmpty() && recentlyRead.isEmpty()
+            when {
+                loadingInitialContent -> LoadingMaxSizeIndicator()
+
+                state is LoadState.Error -> ErrorContent(
                     exception = state.exception,
                     onReload = vm::reload
                 )
 
                 else ->
                     HomeContent(
-                        filters = vm.currentFilters.collectAsState().value,
-                        recentlyReadBooks = vm.recentlyReadBooks.collectAsState().value,
+                        filters = filters,
+                        recentlyReadBooks = recentlyRead,
                         activeFilterNumber = vm.activeFilterNumber.collectAsState().value,
                         onFilterChange = vm::onFilterChange,
                         cardWidth = vm.cardWidth.collectAsState().value,
@@ -74,6 +86,9 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
                     )
 
             }
+            // Give the first batch a chance to arrive, but make the navigation
+            // and loading indicator available if the server is still responding.
+            SignalFirstScreenReady(waitMillis = if (loadingInitialContent) 700 else 0)
         }
     }
 }

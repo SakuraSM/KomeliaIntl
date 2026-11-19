@@ -69,6 +69,7 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.KomeliaSpacing
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.SignalFirstScreenReady
 import snd.komelia.ui.common.components.KomeliaWordmark
 import snd.komelia.ui.common.components.OutlinedHttpTextField
 import snd.komelia.ui.common.components.withTextFieldNavigation
@@ -335,6 +336,7 @@ fun LoginLoadingContent(onCancel: () -> Unit) {
 
         CircularProgressIndicator()
         if (showCancelButton) {
+            SignalFirstScreenReady()
             Spacer(Modifier.height(100.dp))
             Button(onClick = onCancel) { Text(stringResource(Res.string.login_cancel)) }
         }

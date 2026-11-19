@@ -79,6 +79,10 @@ hash and confirming that application sources and the selected platform's build s
 
 `MobileReadingSettings` groups existing settings screens. `LocalDownloadTasks` consumes `OfflineDownloadsState` scoped to `LocalContentViewModel`; pause, retry and cancel retain their existing task owners. Reader overlays share `ReaderModeHintPreference` with global image settings. The approved targets and implementation evidence are under [reading experience v2](../design/reading-experience-v2-20261029/README.md).
 
+### Android launcher and compact navigation
+
+`MainActivity` plays `LaunchMotion` once on a cold launcher start while the app initializes. The system window draws the first mark on the same background. The launch screen fades out when the login controls or Home are ready. If Home data takes longer, it exposes navigation and an in-page loading indicator. Restored activities skip the intro and reduced motion uses a static mark. Android initializes WebView when a reader first needs it. `MainScreen` reserves space for `MobileFloatingDock` on compact Android windows. The dock reuses the five destination models and only animates the selected appearance; larger windows use the existing rail.
+
 ### Android reader and search validation
 
 - `komelia-domain/core/src/androidMain/kotlin/snd/komelia/AndroidWindowState.kt` controls reader system bars; preserve system navigation by default and hide it only for explicitly selected EPUB immersion.

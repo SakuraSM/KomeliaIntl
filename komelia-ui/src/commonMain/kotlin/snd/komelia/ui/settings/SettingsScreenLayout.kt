@@ -36,6 +36,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_mobile
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.ui.common.components.KomeliaChromeSurface
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.platform.BackPressHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -102,43 +103,46 @@ private fun DesktopSettingsLayout(
     navMenu: @Composable () -> Unit,
     content: @Composable () -> Unit,
     dismissButton: @Composable () -> Unit,
-) = Layout(
-    modifier = Modifier.fillMaxSize(),
-    contents = listOf(navMenu, content, dismissButton)
-) { (navMenuMeasurable, contentMeasurable, dismissMeasurable), constraints ->
-    val navWidth = settingsDesktopNavMenuWidth.roundToPx()
-    val contentWidth = settingsDesktopContentWidth.roundToPx()
-    val padding =
-        ((constraints.maxWidth - (navWidth + contentWidth)).toFloat() / 2).roundToInt().coerceAtLeast(0)
+) {
+    val mac = LocalMacOS.current
+    Layout(
+        modifier = Modifier.fillMaxSize(),
+        contents = listOf(navMenu, content, dismissButton)
+    ) { (navMenuMeasurable, contentMeasurable, dismissMeasurable), constraints ->
+        val navWidth = (if (mac) 328.dp else settingsDesktopNavMenuWidth).roundToPx()
+        val contentWidth = settingsDesktopContentWidth.roundToPx()
+        val padding =
+            ((constraints.maxWidth - (navWidth + contentWidth)).toFloat() / 2).roundToInt().coerceAtLeast(0)
 
-    val contentPlaceable = contentMeasurable.first()
-        .measure(
-            constraints.copy(
-                minWidth = 0,
-                maxWidth = padding + contentWidth.coerceAtMost(constraints.maxWidth - navWidth)
+        val contentPlaceable = contentMeasurable.first()
+            .measure(
+                constraints.copy(
+                    minWidth = 0,
+                    maxWidth = padding + contentWidth.coerceAtMost(constraints.maxWidth - navWidth)
+                )
             )
-        )
 
-    val navMenuPlaceable = navMenuMeasurable.first()
-        .measure(
-            constraints.copy(
-                minWidth = 0,
-                maxWidth = padding + navWidth
+        val navMenuPlaceable = navMenuMeasurable.first()
+            .measure(
+                constraints.copy(
+                    minWidth = 0,
+                    maxWidth = padding + navWidth
+                )
             )
-        )
-    val dismissPlaceable = dismissMeasurable.firstOrNull()?.measure(constraints.copy(minWidth = 0, minHeight = 0))
-    layout(constraints.maxWidth, constraints.maxHeight) {
-        navMenuPlaceable.placeRelative(
-            0,
-            0
-        )
-        contentPlaceable.placeRelative(
-            padding + navWidth,
-            0
-        )
-        dismissPlaceable?.placeRelative(
-            (padding + navWidth + contentWidth).coerceAtMost(constraints.maxWidth - dismissPlaceable.width),
-            0
-        )
+        val dismissPlaceable = dismissMeasurable.firstOrNull()?.measure(constraints.copy(minWidth = 0, minHeight = 0))
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            navMenuPlaceable.placeRelative(
+                0,
+                0
+            )
+            contentPlaceable.placeRelative(
+                padding + navWidth,
+                0
+            )
+            dismissPlaceable?.placeRelative(
+                (padding + navWidth + contentWidth).coerceAtMost(constraints.maxWidth - dismissPlaceable.width),
+                0
+            )
+        }
     }
 }

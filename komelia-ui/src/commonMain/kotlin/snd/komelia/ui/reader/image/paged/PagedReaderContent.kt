@@ -228,7 +228,7 @@ private fun DoublePageLayout(
     }
 }
 
-private fun pagedReaderOnKeyEvents(
+internal fun pagedReaderOnKeyEvents(
     event: KeyEvent,
     readingDirection: PagedReadingDirection,
     layoutOffset: Boolean,
@@ -258,8 +258,7 @@ private fun pagedReaderOnKeyEvents(
     var consumed = true
     when (event.key) {
         Key.DirectionLeft -> {
-            previousPage()
-            if (event.isAltPressed) consumed = false
+            if (event.isAltPressed) consumed = false else previousPage()
         }
 
         Key.DirectionRight -> nextPage()

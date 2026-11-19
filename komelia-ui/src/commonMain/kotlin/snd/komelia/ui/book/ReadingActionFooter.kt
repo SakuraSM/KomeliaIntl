@@ -1,6 +1,7 @@
 package snd.komelia.ui.book
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -11,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.*
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
@@ -58,20 +60,39 @@ internal fun ReadingActionFooter(book: KomeliaBook, onRead: (Boolean) -> Unit, m
 @Composable
 private fun DesktopReadingAction(book: KomeliaBook, onRead: (Boolean) -> Unit, colors: ColorScheme) {
     val progress = bookReadProgressFraction(book)
-    Row(Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 18.dp), verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(readingProgressLabel(book, progress), style = MaterialTheme.typography.bodyMedium)
-            if (progress != null) Box(Modifier.weight(1f).height(12.dp).testTag("reading-footer-progress")) {
-                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxSize(),
-                    color = colors.primary, trackColor = colors.outlineVariant, gapSize = 0.dp, drawStopIndicator = {})
-            }
+    if (LocalDensity.current.fontScale > 1.3f) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            DesktopReadingProgress(book, progress, colors, Modifier.fillMaxWidth())
+            DesktopReadingButton(book, onRead, colors, Modifier.fillMaxWidth())
         }
-        BookReadButton(modifier = Modifier.width(270.dp).height(64.dp), onRead = { onRead(true) },
-            label = readingActionLabel(book), containerColor = colors.primary, contentColor = colors.onPrimary,
-            paintedHeight = 62.dp, labelStyle = MaterialTheme.typography.titleLarge,
-            leadingIconSize = 32.dp, iconSpacing = 12.dp)
+    } else {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 18.dp), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+            DesktopReadingProgress(book, progress, colors, Modifier.weight(1f))
+            DesktopReadingButton(book, onRead, colors, Modifier.width(270.dp))
+        }
     }
+}
+
+@Composable
+private fun DesktopReadingProgress(book: KomeliaBook, progress: Float?, colors: ColorScheme, modifier: Modifier) {
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(readingProgressLabel(book, progress), style = MaterialTheme.typography.bodyMedium)
+        if (progress != null) Box(Modifier.weight(1f).height(12.dp).testTag("reading-footer-progress")) {
+            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxSize(),
+                color = colors.primary, trackColor = colors.outlineVariant, gapSize = 0.dp, drawStopIndicator = {})
+        }
+    }
+}
+
+@Composable
+private fun DesktopReadingButton(book: KomeliaBook, onRead: (Boolean) -> Unit, colors: ColorScheme, modifier: Modifier) {
+    BookReadButton(modifier = modifier.height(64.dp), onRead = { onRead(true) },
+        label = readingActionLabel(book), containerColor = colors.primary, contentColor = colors.onPrimary,
+        paintedHeight = 62.dp, labelStyle = MaterialTheme.typography.titleLarge,
+        leadingIconSize = 32.dp, iconSpacing = 12.dp,
+        labelAutoSize = TextAutoSize.StepBased(minFontSize = 16.sp, maxFontSize = 24.sp, stepSize = 1.sp))
 }
 
 @Composable

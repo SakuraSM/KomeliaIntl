@@ -231,7 +231,9 @@ fun SettingsSection(
     val layout = LocalKomeliaLayout.current
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(layout.controlSpacing)) {
         if (title != null) SectionHeader(title = title, supportingText = supportingText)
-        KomeliaCard(modifier = Modifier.fillMaxWidth(), containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
+        if (snd.komelia.ui.LocalMacOS.current) {
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(layout.itemSpacing), content = content)
+        } else KomeliaCard(modifier = Modifier.fillMaxWidth(), containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(layout.cardContentPadding),
                 verticalArrangement = Arrangement.spacedBy(layout.itemSpacing),

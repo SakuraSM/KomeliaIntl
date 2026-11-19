@@ -1,6 +1,6 @@
 # 全页控件对齐标尺
 
-按用户确认的口径，检测全页控件的位置、尺寸和间距，保留真实书籍内容。容差为归一化画布上的2个逻辑像素。手机画布390×844，平板834×1194，桌面1440×1024；Compose测量密度为1，浏览器使用CSS像素。
+按用户确认的口径，检测全页控件的位置、尺寸和间距，保留真实书籍内容。容差为归一化画布上的2个逻辑像素；手机底部导航外框及五个入口的位置、尺寸收紧到1个逻辑像素。手机画布390×844，平板834×1194，桌面1440×1024；Compose测量密度为1，浏览器使用CSS像素。
 
 [完整对照](../../verification/modern-ui-alignment-20261102-assets/index.html)、[实测参数](../../verification/modern-ui-alignment-20261102-assets/measurements.json)与[原始图像指纹](../../verification/modern-ui-alignment-20261102-assets/manifest.json)共同记录结果。验证命令、制品及未覆盖项见[执行记录](../../verification/modern-ui-alignment-20261102.md)。
 
@@ -48,7 +48,7 @@
 
 `FullPageControlGeometryTest`读取真实Compose节点，覆盖阅读条变体、封面和文字列、设置行、搜索标签、筛选、目录行变体、阅读模式、开关、顶栏和页码。绘制区域与点击区域分别检查；紧凑系列入口还通过绘制区域之外的实际指针点击验证48dp触控范围。
 
-`ModernReadingGeometryTest`测量搜索、底栏和宽屏侧栏。`ImageReaderToolbarTest`比较实际像素、点击边界和设置回调。360dp、130%字号检查使用文字实际行边界，避免把段落的预留宽度误记为裁切。
+`ModernReadingGeometryTest`测量搜索、底栏和宽屏侧栏，并检查360dp、130%字号下的底栏触控区域和从右到左布局。`BottomNavigationMotionTest`检查实际绘制的选中背景过渡、减少动态效果与快速切换。`ImageReaderToolbarTest`比较实际像素、点击边界和设置回调。360dp、130%字号检查使用文字实际行边界，避免把段落的预留宽度误记为裁切。
 
 TTU和Komga的`reader-settings.test.mjs`以及TTU的`reader-contents.test.mjs`输出DOM矩形。TTU几何用例通过生产Vite构建挂载组件，覆盖打包后的CSS顺序；Android WebView的实际控件矩形另外保留。设置`KOMELIA_VISUAL_OUTPUT`可保存组件截图与原稿并排图。
 

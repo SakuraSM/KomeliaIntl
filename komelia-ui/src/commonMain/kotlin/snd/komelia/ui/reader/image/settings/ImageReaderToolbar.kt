@@ -23,6 +23,7 @@ import snd.komelia.ui.icons.AppIcons
 import snd.komelia.ui.icons.outlined.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,6 +44,7 @@ import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.common.components.KomeliaIconButton
 import snd.komelia.ui.common.components.komeliaChrome
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
@@ -56,6 +58,7 @@ internal fun ImageReaderToolbar(
     pageShareAction: PageShareAction? = null,
 ) {
     val layout = LocalKomeliaLayout.current
+    val mac = LocalMacOS.current
     val floating = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     val compactGlass = floating && LocalWindowWidth.current == COMPACT
     val shape = RoundedCornerShape(if (floating) 12.dp else 0.dp)
@@ -78,7 +81,18 @@ internal fun ImageReaderToolbar(
             modifier = Modifier.size(layout.minimumTouchTarget),
             iconModifier = if(compactGlass)Modifier.offset(x=(-6).dp,y=(-2).dp)else Modifier,
         )
-        if (book != null) {
+        if (book != null && mac) {
+            Row(Modifier.weight(1f).padding(horizontal = layout.controlSpacing)
+                .semantics { contentDescription = book.metadata.title }, verticalAlignment = Alignment.CenterVertically) {
+                Text(book.seriesTitle.ifBlank { book.metadata.title }, style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                if (book.seriesTitle.isNotBlank() && book.seriesTitle != book.metadata.title) {
+                    VerticalDivider(Modifier.padding(horizontal = 12.dp).height(22.dp))
+                    Text(book.metadata.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1,
+                        overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                }
+            }
+        } else if (book != null) {
             Column(Modifier.weight(1f)
                 .then(if(compactGlass)Modifier.padding(end=layout.controlSpacing)else Modifier.padding(horizontal=layout.controlSpacing))
                 .semantics { contentDescription = book.metadata.title }) {

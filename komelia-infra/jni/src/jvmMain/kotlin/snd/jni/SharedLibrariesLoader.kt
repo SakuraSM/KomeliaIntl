@@ -6,6 +6,7 @@ import snd.jni.SharedLibrariesLoader.LibraryLoadResult.SystemLibrary
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import java.nio.file.StandardCopyOption
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
@@ -20,6 +21,42 @@ object SharedLibrariesLoader {
         .resolve("komelia")
         .resolve("libs")
         .createDirectories()
+    private var macLibrariesDir: Path? = null
+
+    /** Extract the complete macOS dependency set before loading any library in it. */
+    @Synchronized
+    @Suppress("UnsafeDynamicallyLoadedCode")
+    fun loadMacLibrary(libName: String): LibraryLoadResult {
+        val architecture = when (System.getProperty("os.arch")) {
+            "aarch64", "arm64" -> "arm64"
+            "x86_64", "amd64" -> "x64"
+            else -> throw UnsatisfiedLinkError("Unsupported macOS architecture")
+        }
+        val resourcePath = "/macos/$architecture"
+        val manifest = SharedLibrariesLoader::class.java.getResourceAsStream("$resourcePath/manifest.txt")
+            ?: return loadLibrary(libName)
+        val directory = macLibrariesDir ?: run {
+            val filenames = manifest.bufferedReader().use { it.readLines() }.filter { it.isNotBlank() }
+            check(filenames.isNotEmpty() && filenames.distinct().size == filenames.size &&
+                filenames.all { it.matches(Regex("[A-Za-z0-9_.+-]+\\.dylib")) }) { "Invalid macOS native library manifest" }
+            val destination = Files.createTempDirectory(tempDir, "macos-")
+            destination.toFile().deleteOnExit()
+            for (filename in filenames) {
+                val target = destination.resolve(filename)
+                val source = SharedLibrariesLoader::class.java.getResourceAsStream("$resourcePath/$filename")
+                    ?: error("Missing bundled macOS library $filename")
+                source.use { Files.copy(it, target, StandardCopyOption.REPLACE_EXISTING) }
+                target.toFile().deleteOnExit()
+            }
+            destination.also { macLibrariesDir = it }
+        }
+        manifest.close()
+        val file = directory.resolve(System.mapLibraryName(libName))
+        if (!file.exists()) throw UnsatisfiedLinkError("Missing bundled macOS library ${file.fileName}")
+        System.load(file.absolutePathString())
+        logger.info("loaded bundled macOS native library {}", file.fileName)
+        return BundledLibrary
+    }
 
 
     @Suppress("UnsafeDynamicallyLoadedCode")

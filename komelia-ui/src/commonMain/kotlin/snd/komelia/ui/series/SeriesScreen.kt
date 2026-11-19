@@ -12,6 +12,7 @@ import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.ReadingDesign
 import snd.komelia.ui.KomeliaDesktopBrowseTypography
+import snd.komelia.ui.LocalMacOS
 import androidx.compose.material3.MaterialTheme
 import snd.komelia.ui.search.SearchScreen
 import snd.komelia.ui.komeliaLayoutSpec
@@ -108,7 +109,7 @@ class SeriesScreen(
 
                 else -> {
                     BoxWithConstraints(Modifier.fillMaxSize()) {
-                        val canShowPane = maxWidth >= 680.dp
+                        val canShowPane = !LocalMacOS.current && maxWidth >= 680.dp
                         val full = LocalWindowWidth.current == WindowSizeClass.FULL
                         val listWidth = if (full) ReadingDesign.desktopMasterWidth else ReadingDesign.tabletMasterWidth
                         val platform = LocalPlatform.current

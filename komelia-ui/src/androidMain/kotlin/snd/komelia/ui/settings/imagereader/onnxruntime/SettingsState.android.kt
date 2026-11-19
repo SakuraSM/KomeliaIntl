@@ -9,5 +9,6 @@ actual fun supportedOnnxRuntimeExecutionProviders(): List<OnnxRuntimeExecutionPr
 }
 
 actual fun isOnnxRuntimeInstalled() = OnnxRuntimeSharedLibraries.isAvailable
+actual fun canUpdateOnnxRuntime() = false
 actual fun onnxRuntimeLoadError(): String? = null
 actual val ortExecutionProvider: OnnxRuntimeExecutionProvider? = OnnxRuntimeExecutionProvider.CPU

@@ -93,6 +93,7 @@ class TtsuReaderState(
     private val epubLoadTask = CompletableDeferred<TtuEpubData>()
     private var epubLoadJob: Job? = null
     private var webviewLoadJob: Job? = null
+    private var exitSession = TtuExitSession()
     private val availableSystemFonts = MutableStateFlow<List<String>>(emptyList())
     private val selectedFontFile = MutableStateFlow<PlatformFile?>(null)
     private val navigator = MutableStateFlow<Navigator?>(null)
@@ -125,16 +126,20 @@ class TtsuReaderState(
     }
 
     override fun onWebviewCreated(webview: KomeliaWebview) {
+        exitSession.retire()
+        val session = TtuExitSession()
+        exitSession = session
         this.webview.value = webview
         webviewLoadJob?.cancel()
-        webviewLoadJob = coroutineScope.launch { loadEpub(webview) }
+        webviewLoadJob = coroutineScope.launch { loadEpub(webview, session) }
     }
 
     override fun onBackButtonPress() {
-        closeWebview()
+        if (!exitSession.requestExit()) closeWebview()
     }
 
     override fun closeWebview() {
+        if (!exitSession.retire()) return
         webview.value?.close()
         if (platformType == PlatformType.MOBILE) windowState.setFullscreen(false)
 
@@ -149,6 +154,7 @@ class TtsuReaderState(
     }
 
     override fun dispose() {
+        exitSession.retire()
         webviewLoadJob?.cancel()
         epubLoadJob?.cancel()
         if (!epubLoadTask.isCompleted) epubLoadTask.cancel()
@@ -159,7 +165,8 @@ class TtsuReaderState(
     }
 
     @OptIn(ExperimentalResourceApi::class)
-    private suspend fun loadEpub(webview: KomeliaWebview) {
+    private suspend fun loadEpub(webview: KomeliaWebview, session: TtuExitSession) {
+        webview.bind<Unit, Boolean>("waitForReaderExit") { session.awaitRequest() }
         webview.bind<Unit, String>("getCurrentBookId") { bookId.value.value }
         webview.bind<Unit, String?>("getLocale") { localeTag }
         webview.bind<Unit, TtuBookData>("getBookData") {
@@ -174,25 +181,18 @@ class TtsuReaderState(
                 hasThumb = false,
                 characters = data.characterCount,
                 sections = data.sections,
+                toc = ttuNavigationEntries(data.manifest.toc, data.manifest.readingOrder),
                 lastBookModified = Clock.System.now().toEpochMilliseconds(),
                 lastBookOpen = Clock.System.now().toEpochMilliseconds()
             )
         }
 
         webview.bind<Unit, EpubChromeAppearance>("getChromeAppearance") { chromeAppearance.value }
-        webview.bind<Unit, TtsuReaderSettings>("getSettings") {
-            val settings = epubSettingsRepository.getTtsuReaderSettings()
-            backgroundColor.value = ttsuReaderBackground(settings)
-            if (!markReadProgress) settings.copy(autoBookmark = false)
-            else settings
-        }
-        webview.bind<TtsuReaderSettings, Unit>("putSettings") {
-            backgroundColor.value = ttsuReaderBackground(it)
-            epubSettingsRepository.putTtsuReaderSettings(it)
-        }
+        webview.bind<Unit, TtsuReaderSettings>("getSettings") { getReaderSettings() }
+        webview.bind<TtsuReaderSettings, Unit>("putSettings") { putReaderSettings(it) }
         webview.bind<Unit, TtuBookmarkData>("getBookmark") { getBookmark() }
 
-        webview.bind<TtuBookmarkData, Unit>("putBookmark") { putBookmark(it) }
+        webview.bind<TtuBookmarkData, Unit>("putBookmark") { if (markReadProgress) putBookmark(it) }
 
         webview.bind<Unit, Unit>("closeBook") { closeWebview() }
 
@@ -284,6 +284,17 @@ class TtsuReaderState(
 
         webview.navigate("http://komelia/ttsu.html")
         webview.start()
+    }
+
+    internal suspend fun getReaderSettings(): TtsuReaderSettings {
+        val settings = epubSettingsRepository.getTtsuReaderSettings()
+        backgroundColor.value = ttsuReaderBackground(settings)
+        return settings
+    }
+
+    internal suspend fun putReaderSettings(settings: TtsuReaderSettings) {
+        backgroundColor.value = ttsuReaderBackground(settings)
+        epubSettingsRepository.putTtsuReaderSettings(settings)
     }
 
     private suspend fun getBookmark(): TtuBookmarkData {
@@ -529,9 +540,12 @@ class TtsuReaderState(
         val combinedDirtyStyleString = manifest.resources
             .filter { it.type == "text/css" }
             .mapNotNull { res ->
-                res.href?.let { proxyResourceRequest(bookApi, it, serverUrl).data.decodeToString() }
+                res.href?.let { href ->
+                    val css = proxyResourceRequest(bookApi, href, serverUrl).data.decodeToString()
+                    resolveStylesheetUrls(css, href)
+                }
             }
-            .fold("") { acc, css -> acc + css }
+            .joinToString("\n")
 
         return TtuEpubData(
             element = result,
@@ -723,6 +737,7 @@ class TtsuReaderState(
         val hasThumb: Boolean,
         val characters: Long,
         val sections: List<TtuSection>?,
+        val toc: List<TtuTocEntry>,
         val lastBookModified: Long,
         val lastBookOpen: Long
     )

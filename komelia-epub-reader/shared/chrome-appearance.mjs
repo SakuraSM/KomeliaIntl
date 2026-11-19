@@ -29,6 +29,8 @@ export async function refreshChromeAppearance(host = window, root = document.doc
   root.dataset.komeliaSurface = settings.surface;
   root.dataset.komeliaTheme = settings.theme;
   root.dataset.komeliaReducedMotion = String(settings.reducedMotion);
+  if (appearance?.isMacOS === true) root.dataset.komeliaPlatform = 'macos';
+  else delete root.dataset.komeliaPlatform;
   return settings;
 }
 

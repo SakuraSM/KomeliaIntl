@@ -14,6 +14,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.text.TextStyle
 import snd.komelia.ui.ReadingDesign
+import snd.komelia.ui.LocalMacOS
+import snd.komelia.ui.LocalMacToolbarSearch
+import snd.komelia.ui.MacDesign
+import snd.komelia.ui.RegisterMacToolbarSearch
 import snd.komelia.ui.search.SearchTextField
 
 /** A persistent title and search row keep scope, query and view options in one place. */
@@ -36,9 +40,8 @@ internal fun BrowseSearchHeader(
     actions: @Composable RowScope.() -> Unit = {},
 ) = KomeliaSafeTopBar {
     val focus = LocalFocusManager.current
-    Column {
-        BrowsePageHeader(title = title, prominent = true, titleStyle = titleStyle, horizontalInset = titleInset,
-            headerHeight = headerHeight, titleOffset = titleOffset, actions = titleActions)
+    val useMacToolbar = LocalMacOS.current && LocalMacToolbarSearch.current != null
+    val searchField: @Composable () -> Unit = {
         SearchTextField(
             query = query,
             onQueryChange = onQueryChange,
@@ -47,9 +50,18 @@ internal fun BrowseSearchHeader(
             placeholder = placeholder,
             horizontalContentPadding = searchContentPadding,
             paintedHeight = searchPaintHeight,
-            modifier = Modifier.fillMaxWidth().padding(searchInsets)
+            modifier = if (useMacToolbar) Modifier.fillMaxWidth() else Modifier.fillMaxWidth().padding(searchInsets)
                 .padding(top = searchTopSpacing, bottom = 4.dp),
             trailingContent = { Row(verticalAlignment = Alignment.CenterVertically, content = actions) },
         )
+    }
+    if (useMacToolbar) RegisterMacToolbarSearch(searchField)
+    Column {
+        BrowsePageHeader(title = title, prominent = true,
+            titleStyle = if (useMacToolbar) androidx.compose.material3.MaterialTheme.typography.headlineSmall else titleStyle,
+            horizontalInset = if (useMacToolbar) MacDesign.pageInset else titleInset,
+            headerHeight = if (useMacToolbar) 64.dp else headerHeight,
+            titleOffset = if (useMacToolbar) 0.dp else titleOffset, actions = titleActions)
+        if (!useMacToolbar) searchField()
     }
 }

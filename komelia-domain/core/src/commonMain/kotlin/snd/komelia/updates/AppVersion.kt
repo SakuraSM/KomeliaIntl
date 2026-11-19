@@ -19,7 +19,7 @@ data class AppVersion(
 
     companion object {
         // Keep in sync with gradle/libs.versions.toml app-version.
-        val current = AppVersion(0, 32, 0)
+        val current = AppVersion(0, 33, 0)
 
         fun fromString(value: String): AppVersion {
             val match = VERSION_PATTERN.matchEntire(value.trim())
@@ -95,6 +95,8 @@ data class AppRelease(
 
     val assetName: String?,
     val assetUrl: String?,
+    val assetSha256: String? = null,
+    val fallbackAssetUrl: String? = null,
 )
 
 object AppVersionSerializer : KSerializer<AppVersion> {

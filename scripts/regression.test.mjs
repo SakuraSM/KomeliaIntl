@@ -11,7 +11,7 @@ function record() { return { sourceFingerprint: 'current', checks: [{ id: 'unit'
   cases: [{ id: 'LAN-01', status: 'passed', operator: 'tester', environment: 'API37', artifact: 'sha256:' + 'a'.repeat(64),
     completedAt: '2026-09-14T00:00:00Z', evidence: [{}] }] }; }
 test('catalog IDs and profile references validate', () => {
-  assert.equal(catalog().cases.length, 32);
+  assert.equal(catalog().cases.length, 33);
   assert.ok(plan('login').cases.some(c => c.id === 'LAN-01'));
   assert.ok(plan('reader').cases.some(c => c.id === 'SHARE-01'));
   assert.ok(plan('premerge').cases.some(c => c.id === 'APPEARANCE-03'));

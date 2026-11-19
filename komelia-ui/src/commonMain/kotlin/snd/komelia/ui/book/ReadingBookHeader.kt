@@ -19,12 +19,15 @@ import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.offline.local.isLocalLibrary
 import snd.komelia.ui.LocalOfflineAvailable
+import snd.komelia.ui.LocalMacOS
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.MacDesign
 import snd.komelia.ui.ReadingDesign
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.foundation.shape.CircleShape
 import snd.komelia.ui.common.images.BookThumbnail
 import snd.komelia.ui.detailCoverWidth
+import snd.komelia.ui.home.HeroReadingControls
 import snd.komelia.ui.platform.WindowSizeClass
 
 @Composable
@@ -34,7 +37,12 @@ internal fun ReadingBookHeader(
     onDownload: () -> Unit,
     onContents: (() -> Unit)? = null,
     unavailable: Boolean = false,
+    onRead: (() -> Unit)? = null,
 ) {
+    if (LocalMacOS.current) {
+        MacReadingBookHeader(book, onParentSeries, onDownload, onContents, unavailable, onRead)
+        return
+    }
     val colors = MaterialTheme.colorScheme
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val windowWidth = LocalWindowWidth.current
@@ -91,6 +99,44 @@ internal fun ReadingBookHeader(
         }
         if (!wide && isText) ReadingSecondaryActions(book, onDownload, onContents, compact = true,
             modifier = Modifier.fillMaxWidth(), alignEnd = true)
+        }
+    }
+}
+
+@Composable
+private fun MacReadingBookHeader(
+    book: KomeliaBook,
+    onParentSeries: (() -> Unit)?,
+    onDownload: () -> Unit,
+    onContents: (() -> Unit)?,
+    unavailable: Boolean,
+    onRead: (() -> Unit)?,
+) {
+    val colors = MaterialTheme.colorScheme
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val coverWidth = if (maxWidth < 420.dp) (maxWidth * .32f).coerceAtMost(MacDesign.heroCoverWidth) else MacDesign.heroCoverWidth
+        Row(horizontalArrangement = Arrangement.spacedBy(if (maxWidth < 420.dp) 16.dp else 36.dp)) {
+            BookThumbnail(book.id, contentScale = ContentScale.Fit,
+                modifier = Modifier.width(coverWidth).aspectRatio(2f / 3f)
+                    .clip(ReadingDesign.coverShape).background(colors.surfaceContainerLow).testTag("detail-cover"))
+            Column(Modifier.weight(1f).testTag("detail-metadata"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(book.metadata.title, style = MaterialTheme.typography.headlineSmall, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                val authors = remember(book.metadata.authors) { book.metadata.authors.map { it.name }.distinct().joinToString("、") }
+                if (authors.isNotBlank()) Text(authors, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                if (onParentSeries != null && book.seriesTitle.isNotBlank()) {
+                    TextButton(onClick = onParentSeries, contentPadding = PaddingValues(0.dp), modifier = Modifier.heightIn(min = 32.dp)) {
+                        Text(book.seriesTitle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Icon(Icons.Rounded.ChevronRight, null, Modifier.size(18.dp))
+                    }
+                }
+                Text(readingMediaLabel(book), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                if (unavailable || book.remoteFileUnavailable) Text(stringResource(
+                    if (unavailable) Res.string.book_unavailable else Res.string.book_remote_unavailable),
+                    style = MaterialTheme.typography.bodySmall, color = if (unavailable) colors.error else colors.onSurfaceVariant)
+                if (onRead != null) HeroReadingControls(book, onRead = onRead)
+                else ReadingProgressSummary(book)
+                ReadingSecondaryActions(book, onDownload, onContents, compact = true)
+            }
         }
     }
 }

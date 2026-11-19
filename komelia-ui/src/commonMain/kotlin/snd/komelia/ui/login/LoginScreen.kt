@@ -41,6 +41,7 @@ import snd.komelia.ui.LocalOfflineMode
 import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.MainScreen
+import snd.komelia.ui.SignalFirstScreenReady
 import snd.komelia.ui.appRootNavigator
 import snd.komelia.ui.login.offline.OfflineLoginScreen
 import snd.komelia.ui.platform.PlatformTitleBar
@@ -50,6 +51,17 @@ import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 import snd.komelia.ui.settings.SettingsScreenContainer
 
 class LoginScreen : Screen {
+
+    private var sessionId: String? = newLoginSessionId()
+    override val key: String
+        get() = "login:${sessionId ?: newLoginSessionId().also { sessionId = it }}"
+
+    private companion object {
+        private const val serialVersionUID = 683216702757185201L
+
+        @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+        fun newLoginSessionId(): String = kotlin.uuid.Uuid.random().toString()
+    }
 
     @Composable
     override fun Content() {
@@ -92,6 +104,7 @@ class LoginScreen : Screen {
         var permissionAction by remember { mutableStateOf<(() -> Unit)?>(null) }
         var requestSystemPermission by remember { mutableStateOf(false) }
         var autoPermissionOffered by remember { mutableStateOf(false) }
+        if (state.value is Error || permissionAction != null) SignalFirstScreenReady()
         LaunchedEffect(state.value, viewModel.autoLoginError, granted) {
             if (state.value is Error && viewModel.autoLoginError != null &&
                 !granted && !autoPermissionOffered) {

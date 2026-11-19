@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.FullscreenExit
@@ -18,7 +19,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,6 +36,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.topbar_go_online
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.topbar_offline
@@ -45,11 +49,16 @@ import snd.komelia.ui.LocalKeyEvents
 import snd.komelia.ui.LocalKomeliaMotion
 import snd.komelia.ui.LocalWindowState
 import snd.komelia.ui.LocalWindowWidth
+import snd.komelia.ui.LocalMacOS
+import snd.komelia.ui.LocalMacToolbarSearch
+import snd.komelia.ui.LocalMacToolbarAccessory
+import snd.komelia.ui.LocalMacTitleBarCenterBias
 import snd.komelia.ui.ReloadableScreen
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.WindowSizeClass.FULL
+import snd.komelia.ui.platform.WindowSizeClass.EXPANDED
 import snd.komelia.ui.search.SearchBar
 import snd.komelia.ui.search.SearchResults
 import snd.komga.client.library.KomgaLibrary
@@ -74,6 +83,14 @@ fun AppBar(
     onOfflineModeChange: () -> Unit,
     isContentScrolled: Boolean,
 ) {
+    if (LocalMacOS.current) {
+        MacAppBar(
+            canNavigateBack, onNavigateBack, currentScreen, query, onQueryChange, isLoading,
+            onSearchAllClick, searchResults, libraryById, onBookClick, onSeriesClick, onRefreshClick,
+            notificationsState, isOffline, onOfflineModeChange, isContentScrolled,
+        )
+        return
+    }
     KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
         PlatformTitleBar {
             IconButton(
@@ -139,6 +156,75 @@ fun AppBar(
             }
         }
     }
+}
+
+@Composable
+private fun MacAppBar(
+    canNavigateBack: Boolean,
+    onNavigateBack: () -> Unit,
+    currentScreen: cafe.adriel.voyager.core.screen.Screen?,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    isLoading: Boolean,
+    onSearchAllClick: (String) -> Unit,
+    searchResults: SearchResults,
+    libraryById: (KomgaLibraryId) -> KomgaLibrary?,
+    onBookClick: (KomeliaBook) -> Unit,
+    onSeriesClick: (KomeliaSeries) -> Unit,
+    onRefreshClick: () -> Unit,
+    notificationsState: NotificationsState,
+    isOffline: Boolean,
+    onOfflineModeChange: () -> Unit,
+    isContentScrolled: Boolean,
+) {
+    val searchHost = LocalMacToolbarSearch.current
+    val accessoryHost = LocalMacToolbarAccessory.current
+    val windowState = LocalWindowState.current
+    val scope = rememberCoroutineScope()
+    val fullscreen by windowState.isFullscreen.collectAsState(false)
+    var showOfflineConfirmation by remember { mutableStateOf(false) }
+    KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
+        CompositionLocalProvider(LocalMacTitleBarCenterBias provides .118f) {
+            PlatformTitleBar(applyInsets = false) {
+                Text("Komelia", style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
+                    modifier = Modifier.align(Alignment.Start).padding(start = 12.dp, end = 16.dp))
+                if (canNavigateBack && currentScreen !is snd.komelia.ui.book.BookScreen &&
+                    currentScreen !is snd.komelia.ui.series.SeriesScreen && currentScreen !is snd.komelia.ui.oneshot.OneshotScreen
+                ) IconButton(onClick = onNavigateBack, modifier = Modifier.align(Alignment.Start)) {
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, null)
+                }
+                val searchWidth = when (LocalWindowWidth.current) {
+                    FULL -> 700.dp
+                    EXPANDED -> 360.dp
+                    else -> 220.dp
+                }
+                Box(Modifier.align(Alignment.CenterHorizontally).widthIn(max = searchWidth).width(searchWidth)) {
+                    val fallback: @Composable () -> Unit = {
+                        SearchBar(
+                            searchResults = searchResults, query = query, onQueryChange = onQueryChange,
+                            isLoading = isLoading, onSearchAllClick = onSearchAllClick, libraryById = libraryById,
+                            onBookClick = onBookClick, onSeriesClick = onSeriesClick,
+                        )
+                    }
+                    if (searchHost == null) fallback() else searchHost.Content(fallback)
+                }
+                val reloadableScreen = remember(currentScreen) { currentScreen as? ReloadableScreen }
+                if (accessoryHost != null) Box(Modifier.align(Alignment.End)) { accessoryHost.Content {} }
+                RefreshIndicator(onClick = onRefreshClick, enabled = reloadableScreen != null, modifier = Modifier.align(Alignment.End))
+                DownloadsPopupIcon(notificationsState, Modifier.align(Alignment.End))
+                if (fullscreen) IconButton(onClick = { scope.launch { windowState.setFullscreen(false) } },
+                    modifier = Modifier.align(Alignment.End)) { Icon(Icons.Rounded.FullscreenExit, null) }
+                if (isOffline) TextButton(onClick = { showOfflineConfirmation = true }, modifier = Modifier.align(Alignment.End)) {
+                    Text(stringResource(Res.string.topbar_offline))
+                }
+            }
+        }
+    }
+    if (showOfflineConfirmation) ConfirmationDialog(
+        body = stringResource(Res.string.topbar_go_online),
+        onDialogConfirm = { showOfflineConfirmation = false; onOfflineModeChange() },
+        onDialogDismiss = { showOfflineConfirmation = false },
+    )
 }
 
 

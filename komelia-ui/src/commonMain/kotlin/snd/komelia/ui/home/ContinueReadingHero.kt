@@ -24,6 +24,8 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalLibraries
+import snd.komelia.ui.LocalMacOS
+import snd.komelia.ui.MacDesign
 import snd.komelia.ui.ReadingDesign
 import snd.komelia.ui.book.ReadingProgressSummary
 import snd.komelia.ui.book.readingActionLabel
@@ -40,13 +42,14 @@ internal data class ContinueReadingHeroActions(val onDetails: () -> Unit, val on
 internal fun ContinueReadingHero(content: ContinueReadingHeroContent, actions: ContinueReadingHeroActions) {
     val book = content.book
     val colors = MaterialTheme.colorScheme
+    val mac = LocalMacOS.current
     var showMenu by remember(book.id) { mutableStateOf(false) }
-    Column(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-        Text(content.title, style = MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp),
-            modifier = Modifier.offset(y = (-7).dp).testTag("home-reading-heading"))
+    Column(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(if (mac) 12.dp else 3.dp)) {
+        Text(content.title, style = MaterialTheme.typography.headlineMedium.copy(fontSize = if (mac) 24.sp else 28.sp),
+            modifier = (if (mac) Modifier else Modifier.offset(y = (-7).dp)).testTag("home-reading-heading"))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val coverWidth = (maxWidth * .3815f).coerceIn(112.dp, 176.dp)
-            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(22.dp)) {
+            val coverWidth = if (mac) MacDesign.heroCoverWidth else (maxWidth * .3815f).coerceIn(112.dp, 176.dp)
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(if (mac) 36.dp else 22.dp)) {
                 Box {
                     BookThumbnail(book.id, contentScale = ContentScale.Fit,
                         modifier = Modifier.width(coverWidth).aspectRatio(2f / 3f)
@@ -71,6 +74,7 @@ internal fun ContinueReadingHero(content: ContinueReadingHeroContent, actions: C
                 }
             }
         }
+        if (mac) HorizontalDivider(Modifier.padding(top = 12.dp), color = colors.outlineVariant)
     }
 }
 
@@ -82,10 +86,13 @@ internal fun HeroReadingControls(book: KomeliaBook,
     val libraryUnavailable = LocalLibraries.current.value.firstOrNull { it.id == book.libraryId }?.unavailable == true
     val enabled = snd.komelia.ui.common.bookContentIsAvailable(book, libraryUnavailable) && readIsSupported(book)
     val shape = RoundedCornerShape(10.dp)
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    val mac = LocalMacOS.current
+    Column(if (mac) Modifier.widthIn(max = MacDesign.heroControlsWidth).fillMaxWidth() else Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(if (mac) 12.dp else 4.dp)) {
         ReadingProgressSummary(book, accent, labelRowHeight = 25.dp)
         Surface(onClick = onRead, enabled = enabled, color = androidx.compose.ui.graphics.Color.Transparent,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = shape) {
+            modifier = (if (mac) Modifier.widthIn(max = MacDesign.heroActionWidth).fillMaxWidth() else Modifier.fillMaxWidth())
+                .heightIn(min = if (mac) 40.dp else 48.dp), shape = shape) {
             Box(contentAlignment = Alignment.BottomCenter) {
                 Surface(color = if (enabled) accent else accent.copy(alpha = .12f), contentColor = if (enabled) onAccent else onAccent.copy(alpha = .38f),
                     shape = shape, modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp).testTag("home-reading-action-paint")) {

@@ -43,6 +43,7 @@ import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.canIntegrateWithSystemBar
 import snd.komelia.ui.reader.image.ReaderViewModel
+import snd.komelia.ui.newReaderSessionId
 import snd.komelia.ui.reader.image.PageShareAction
 import snd.komelia.ui.reader.image.common.ReaderContent
 import snd.komga.client.book.KomgaBookId
@@ -86,7 +87,13 @@ class ImageReaderScreen(
     private val markReadProgress: Boolean = true,
 ) : Screen {
 
-    override val key: ScreenKey = bookId.value
+    private var sessionId: String? = newReaderSessionId()
+    override val key: ScreenKey
+        get() = "image-reader:${bookId.value}:${if (markReadProgress) "tracked" else "incognito"}:${sessionId ?: newReaderSessionId().also { sessionId = it }}"
+
+    private companion object {
+        private const val serialVersionUID = -4560914891045483052L
+    }
 
     @Composable
     override fun Content() {
@@ -129,7 +136,12 @@ class ImageReaderScreen(
 
         Column {
             PlatformTitleBar(Modifier.zIndex(10f), false) {
-                if (canIntegrateWithSystemBar()) {
+                if (snd.komelia.ui.LocalMacOS.current) {
+                    val isFullscreen = LocalWindowState.current.isFullscreen.collectAsState(false)
+                    if (!isFullscreen.value) MacReaderTitleBar(onExit = currentBook?.let { book ->
+                        { onExit(navigator, book, exitController, lastModeHint) }
+                    })
+                } else if (canIntegrateWithSystemBar()) {
                     val isFullscreen = LocalWindowState.current.isFullscreen.collectAsState(false)
                     if (currentBook != null && !isFullscreen.value) {
                         TitleBarContent(

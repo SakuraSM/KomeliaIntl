@@ -25,6 +25,8 @@ export interface ExternalFunctionsWindow extends Window {
 
   closeBook(): Promise<CallbackResponse<undefined>>
 
+  waitForReaderExit(): Promise<CallbackResponse<boolean>>
+
   getAvailableFonts(): Promise<CallbackResponse<string[]>>
 
   saveFont(path: string): Promise<CallbackResponse<undefined>>
@@ -83,6 +85,10 @@ export class ExternalFunctions {
 
   async closeBook(): Promise<undefined> {
     return this.windowFunctions.closeBook().then((result) => result.result)
+  }
+
+  async waitForReaderExit(): Promise<boolean> {
+    return this.windowFunctions.waitForReaderExit().then((result) => result.result)
   }
 
   async getAvailableSystemFonts(): Promise<string[]> {

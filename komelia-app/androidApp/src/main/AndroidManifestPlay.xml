@@ -22,6 +22,7 @@
                 android:windowSoftInputMode="adjustResize"
                 android:exported="true"
                 android:name="snd.komelia.MainActivity"
+                android:theme="@style/LaunchTheme"
         >
 
             <intent-filter>

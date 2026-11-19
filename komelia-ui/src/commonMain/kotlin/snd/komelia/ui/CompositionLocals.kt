@@ -1,8 +1,11 @@
 package snd.komelia.ui
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.input.key.KeyEvent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -17,6 +20,17 @@ import snd.komga.client.sse.KomgaEvent
 
 val LocalViewModelFactory = compositionLocalOf<ViewModelFactory> { error("ViewModel factory is not set") }
 
+internal val LocalFirstScreenReady = staticCompositionLocalOf<(() -> Unit)?> { null }
+
+@Composable
+internal fun SignalFirstScreenReady(waitMillis: Long = 0) {
+    val onReady = LocalFirstScreenReady.current
+    if (onReady != null) LaunchedEffect(onReady, waitMillis) {
+        delay(waitMillis)
+        onReady()
+    }
+}
+
 val LocalNotifications = compositionLocalOf<AppNotifications> { error("Toaster is not set") }
 val LocalKomgaEvents = compositionLocalOf<SharedFlow<KomgaEvent>> { error("Komga events are not set") }
 val LocalKomfIntegration = compositionLocalOf { flowOf(false) }
@@ -25,6 +39,8 @@ val LocalKeyEvents = compositionLocalOf<SharedFlow<KeyEvent>> { error("Key event
 val LocalWindowWidth = compositionLocalOf<WindowSizeClass> { error("Window size is not set") }
 val LocalWindowHeight = compositionLocalOf<WindowSizeClass> { error("Window size is not set") }
 val LocalPlatform = compositionLocalOf<PlatformType> { error("Platform type is not set") }
+/** Desktop presentation choice supplied by the macOS host, never persisted. */
+val LocalMacOS = staticCompositionLocalOf { false }
 val LocalTheme = compositionLocalOf { Theme.DARK }
 val LocalWindowState = compositionLocalOf<AppWindowState> { error("Window state was not initialized") }
 val LocalLibraries = compositionLocalOf<StateFlow<List<KomgaLibrary>>> { error("Libraries were not initialized") }

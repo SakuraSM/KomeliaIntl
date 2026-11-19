@@ -1,0 +1,132 @@
+name: Validate Linux and Windows packages
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/desktop-compatibility.yml'
+      - 'komelia-infra/jni/**'
+      - 'komelia-infra/image-decoder/**'
+      - 'komelia-infra/webview/**'
+      - 'komelia-infra/onnxruntime/**'
+      - 'komelia-domain/offline/src/jvmMain/**'
+      - 'komelia-app/desktopApp/**'
+      - 'cmake/**'
+      - 'gradle/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'scripts/Desktop*Smoke.java'
+      - 'scripts/verify-linux-installer.sh'
+      - 'scripts/desktop-smoke-windows.ps1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-compatibility-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build native dependencies
+        run: |
+          docker build --tag komelia-build-linux --file cmake/linux-x86_64.Dockerfile .
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --env HOME=/tmp/komelia-build-home --env npm_config_cache=/tmp/komelia-npm-cache \
+            --volume "$GITHUB_WORKSPACE:/build" komelia-build-linux
+          ./gradlew --no-configuration-cache linux-x86_64_copyJniLibs
+      - name: Test and package
+        run: ./gradlew :komelia-domain:offline:jvmTest desktopDeb
+      - name: Verify installed application
+        run: |
+          package=$(find komelia-app/desktopApp/build/compose/binaries -name '*.deb' -print -quit)
+          test -n "$package"
+          bash scripts/verify-linux-installer.sh "$package" "$PWD/runtime-evidence"
+          shasum -a 256 "$package" > runtime-evidence/sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-validation
+          path: |
+            komelia-app/desktopApp/build/compose/binaries/main-release/deb/*.deb
+            komelia-domain/offline/build/test-results
+            runtime-evidence
+          if-no-files-found: warn
+
+  windows-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build native dependencies
+        run: |
+          docker build --tag komelia-build-windows --file cmake/windows-x86_64.Dockerfile .
+          docker run --rm --user "$(id -u):$(id -g)" --volume "$GITHUB_WORKSPACE:/build" komelia-build-windows
+          ./gradlew --no-configuration-cache windows-x86_64_copyJniLibs windows-x86_64_copyJniLibsComposeResources
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-validation-native
+          path: |
+            komelia-infra/jni/src/jvmMain/resources
+            komelia-app/desktopApp/desktopUnpackedResources/windows
+          if-no-files-found: error
+
+  windows:
+    needs: windows-native
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-validation-native
+          path: .
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test and package
+        shell: bash
+        run: ./gradlew :komelia-domain:offline:jvmTest desktopMsi
+      - name: Verify installed application
+        shell: pwsh
+        run: |
+          $installer = (Get-ChildItem komelia-app/desktopApp/build/compose/binaries -Filter '*.msi' -Recurse | Select-Object -First 1).FullName
+          ./scripts/desktop-smoke-windows.ps1 -Installer $installer -Evidence runtime-evidence
+          Get-FileHash $installer -Algorithm SHA256 | Format-List | Out-File runtime-evidence/sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-validation
+          path: |
+            komelia-app/desktopApp/build/compose/binaries/main-release/msi/*.msi
+            komelia-domain/offline/build/test-results
+            runtime-evidence
+          if-no-files-found: warn

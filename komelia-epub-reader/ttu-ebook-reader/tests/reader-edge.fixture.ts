@@ -9,13 +9,14 @@ const parameters = new URLSearchParams(location.search);
 setLocale('en');
 document.documentElement.dataset.komeliaSurface = parameters.get('surface') ?? 'classic';
 document.documentElement.dataset.komeliaTheme = 'LIGHT';
+if (parameters.has('android')) document.documentElement.dataset.komeliaPlatform = 'android';
 const action = (name: string): (() => void) => () => { document.querySelector('output')!.textContent = name; };
 
 mount(ReaderChrome, {target: document.querySelector('#app')!, props: {
   showHeader: false, showImageGallery: false, navigationOpen: false, hasBookData: true,
   hasChapterData: true, hasPageManager: true, showFooter: parameters.has('footer'),
-  bookCharCount: 100, showCharacterCounter: true, readingProgressPercent: 10,
-  readingProgressLabel: '10%', activeChapterLabel: 'Synthetic chapter', viewMode: ViewMode.Continuous,
+  bookCharCount: 100, showCharacterCounter: !parameters.has('hideCharacterCounter'), readingProgressPercent: 10,
+  readingProgressLabel: '10 / 100 10.00%', activeChapterLabel: 'Synthetic chapter', viewMode: ViewMode.Continuous,
   autoScrollMultiplier: 1, autoScrollEnabled: false,
   onOpenNavigation: action('navigation'), onPreviousPage: action('previous'), onNextPage: action('next'),
   onPreviousChapter: action('previous-chapter'), onNextChapter: action('next-chapter'),

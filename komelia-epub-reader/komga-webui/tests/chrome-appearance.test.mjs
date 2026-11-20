@@ -44,3 +44,12 @@ test('only an explicitly identified Mac host enables Mac chrome', async () => {
   await refreshChromeAppearance({},root);
   assert.equal(root.dataset.komeliaPlatform, undefined);
 });
+
+test('Android chrome is selected from the host without changing the reading theme', async () => {
+  const root = {dataset:{publicationTheme:'sepia'}};
+  await refreshChromeAppearance({getChromeAppearance:async()=>({result:{isAndroid:true}})},root);
+  assert.equal(root.dataset.komeliaPlatform, 'android');
+  assert.equal(root.dataset.publicationTheme, 'sepia');
+  await refreshChromeAppearance({},root);
+  assert.equal(root.dataset.komeliaPlatform, undefined);
+});

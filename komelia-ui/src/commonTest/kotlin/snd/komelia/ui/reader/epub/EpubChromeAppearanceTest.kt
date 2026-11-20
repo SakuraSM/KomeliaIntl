@@ -12,11 +12,18 @@ import kotlin.test.assertTrue
 
 class EpubChromeAppearanceTest {
     @Test fun oldAppearancePayloadsKeepTheStandardToolbar() {
-        assertFalse(Json.decodeFromString<EpubChromeAppearance>("{}").isMacOS)
+        val oldAppearance = Json.decodeFromString<EpubChromeAppearance>("{}")
+        assertFalse(oldAppearance.isMacOS)
+        assertFalse(oldAppearance.isAndroid)
     }
 
     @Test fun macAppearanceIncludesTheOptionalHostFlag() {
         val json = Json.encodeToString(EpubChromeAppearance(isMacOS = true))
         assertTrue(Json.parseToJsonElement(json).jsonObject.getValue("isMacOS").jsonPrimitive.boolean)
+    }
+
+    @Test fun androidAppearanceIncludesTheOptionalHostFlag() {
+        val json = Json.encodeToString(EpubChromeAppearance(isAndroid = true))
+        assertTrue(Json.parseToJsonElement(json).jsonObject.getValue("isAndroid").jsonPrimitive.boolean)
     }
 }

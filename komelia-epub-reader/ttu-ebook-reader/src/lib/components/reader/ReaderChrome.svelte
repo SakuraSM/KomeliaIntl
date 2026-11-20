@@ -28,6 +28,8 @@
     readingProgressPercent: number;
     readingProgressLabel: string;
     activeChapterLabel: string;
+    paperColor?: string;
+    inkColor?: string;
     tooltipColor?: string;
     viewMode: ViewMode;
     autoScrollMultiplier: number;
@@ -55,6 +57,8 @@
     readingProgressPercent,
     readingProgressLabel,
     activeChapterLabel,
+    paperColor,
+    inkColor,
     tooltipColor,
     viewMode,
     autoScrollMultiplier,
@@ -100,10 +104,12 @@
 <div
     id="ttu-page-footer"
     class="writing-horizontal-tb pointer-events-none fixed inset-x-0 bottom-0 z-10"
+    style:--komelia-reader-paper={paperColor}
+    style:--komelia-reader-ink={inkColor}
     aria-live="polite"
 >
   {#if bookCharCount}
-    <div class="h-1 w-full bg-black/10">
+    <div data-komelia-reader-progress-track class="h-1 w-full bg-black/10">
       <div
           class="h-full rounded-r-full bg-[#69c9ff] transition-[width] duration-200 ease-out"
           style:width={`${readingProgressPercent}%`}
@@ -112,8 +118,9 @@
   {/if}
 
   {#if showFooter && bookCharCount}
-    <div class="mx-auto mb-3 flex max-w-[calc(100vw-1.5rem)] items-center justify-center gap-2 px-3 sm:mb-4">
-      <div data-komelia-chrome class="pointer-events-auto flex max-w-full items-center gap-1 overflow-hidden rounded-full bg-slate-950/90 p-1 text-white shadow-xl shadow-black/30 backdrop-blur-md">
+    <div data-komelia-reader-progress-holder class="mx-auto mb-3 flex max-w-[calc(100vw-1.5rem)] items-center justify-center gap-2 px-3 sm:mb-4">
+      <div data-komelia-chrome data-komelia-reader-progress
+           class="pointer-events-auto flex max-w-full items-center gap-1 overflow-hidden rounded-full bg-slate-950/90 p-1 text-white shadow-xl shadow-black/30 backdrop-blur-md">
         <button
             type="button"
             class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95 sm:flex"
@@ -143,12 +150,22 @@
             style:color={tooltipColor}
             onclick={hasChapterData ? onOpenNavigation : onCopyProgress}
         >
-          <span class="block max-w-[44vw] truncate text-[11px] font-medium leading-4 text-white/80 sm:max-w-xs">
+          <span data-komelia-reader-progress-detail class="block max-w-[44vw] truncate text-[11px] font-medium leading-4 text-white/80 sm:max-w-xs">
             {activeChapterLabel}
           </span>
-          <span class="flex items-center gap-2 text-xs font-semibold leading-4 text-white">
+          <span data-komelia-reader-progress-detail class="flex items-center gap-2 text-xs font-semibold leading-4 text-white">
             <Fa icon={hasChapterData ? faList : faCopy}/>
             {readingProgressLabel}
+          </span>
+          <span data-komelia-reader-progress-summary title={readingProgressLabel}>
+            {#if showCharacterCounter}
+              {#if activeChapterLabel}
+                <span class="block truncate text-xs leading-4">{activeChapterLabel}</span>
+              {/if}
+              <span class="block truncate text-xs leading-4">{readingProgressLabel}</span>
+            {:else}
+              {activeChapterLabel ? `${activeChapterLabel} · ` : ''}{Math.round(readingProgressPercent)}%
+            {/if}
           </span>
         </button>
 

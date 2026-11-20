@@ -153,3 +153,80 @@ test('Mac TTU toolbar is centered and retains its reader actions', async () => {
     await server.close();
   }
 });
+
+test('Android TTU uses the current paper colors and retains a single toolbar row', async () => {
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport:{width:390,height:844}, hasTouch:true, isMobile:true});
+    await page.goto(server.url);
+    const toolbar = page.getByRole('navigation', {name:'Reader toolbar'});
+    await toolbar.waitFor();
+    const initial = await toolbar.evaluate(node => getComputedStyle(node).backgroundColor);
+    await page.evaluate(() => {
+      document.documentElement.dataset.komeliaPlatform = 'android';
+      document.body.style.setProperty('--komelia-reader-paper', '#faf4e8');
+    });
+    assert.deepEqual(await toolbar.boundingBox(), {x:12,y:10,width:366,height:48});
+    const paperColor = await toolbar.evaluate(node => getComputedStyle(node).backgroundColor);
+    assert.notEqual(paperColor, initial);
+    await page.evaluate(() => {
+      document.body.style.setProperty('--komelia-reader-paper', '#23272a');
+      document.body.style.setProperty('--komelia-reader-ink', '#dedede');
+    });
+    assert.notEqual(await toolbar.evaluate(node => getComputedStyle(node).backgroundColor), paperColor);
+    assert.equal(await toolbar.evaluate(node => getComputedStyle(node).color), 'rgb(222, 222, 222)');
+    const settings = toolbar.getByRole('button', {name:'Reader settings'});
+    assert.equal((await settings.boundingBox()).height, 48);
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});
+
+test('Android TTU keeps every auto-scroll control reachable on medium viewports', async () => {
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-edge.fixture.ts');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport:{width:640,height:844}, hasTouch:true, isMobile:true});
+    await page.goto(`${server.url}?footer&android&hideCharacterCounter`);
+    const footer = page.locator('[data-komelia-reader-progress]');
+    await footer.waitFor();
+    for (const width of [640, 700, 839]) {
+      await page.setViewportSize({width, height:844});
+      const bounds = await footer.boundingBox();
+      for (const [name, result] of [
+        ['Decrease auto-scroll speed', 'speed'],
+        ['Toggle auto-scroll', 'auto-scroll'],
+        ['Increase auto-scroll speed', 'speed'],
+      ]) {
+        const control = footer.getByRole('button', {name});
+        const button = await control.boundingBox();
+        assert.ok(button.x >= bounds.x && button.x + button.width <= bounds.x + bounds.width, `${name} at ${width}px`);
+        await control.click();
+        assert.equal(await page.locator('output').textContent(), result);
+      }
+    }
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});
+
+test('Android TTU paper progress follows the character counter preference', async () => {
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-edge.fixture.ts');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport:{width:390,height:844}, hasTouch:true, isMobile:true});
+    const summary = page.locator('[data-komelia-reader-progress-summary]');
+    await page.goto(`${server.url}?footer&android`);
+    await summary.waitFor();
+    assert.match((await summary.innerText()).trim(), /10 \/ 100 10\.00%/);
+    await page.goto(`${server.url}?footer&android&hideCharacterCounter`);
+    await summary.waitFor();
+    assert.equal((await summary.innerText()).trim(), 'Synthetic chapter · 10%');
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});

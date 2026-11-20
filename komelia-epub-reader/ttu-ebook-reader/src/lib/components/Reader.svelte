@@ -1182,6 +1182,8 @@
       {readingProgressPercent}
       {readingProgressLabel}
       {activeChapterLabel}
+      paperColor={$backgroundColor$}
+      inkColor={$themeOption$?.fontColor}
       tooltipColor={$themeOption$?.tooltipTextFontColor}
       viewMode={$viewMode$}
       autoScrollMultiplier={$multiplier$}
@@ -1199,6 +1201,8 @@
     <div
         class="writing-horizontal-tb fixed inset-x-0 top-0 z-10 w-full"
         data-komelia-chrome-motion
+        style:--komelia-reader-paper={$backgroundColor$}
+        style:--komelia-reader-ink={$themeOption$?.fontColor}
         transition:fly|local={{ y: -24, duration: prefersReducedChromeMotion() ? 0 : 220, easing: quintInOut }}
         use:clickOutside={() => (showHeader = false)}
     >

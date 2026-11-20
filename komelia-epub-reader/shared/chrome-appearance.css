@@ -288,3 +288,138 @@
   outline: 2px solid #005477 !important;
   outline-offset: -3px;
 }
+
+[data-komelia-reader-paper-title],
+[data-komelia-reader-progress-summary],
+[data-komelia-reader-book-navigation] {
+  display: none !important;
+}
+
+/* Paper controls follow the EPUB colors without styling the book or changing its viewport. */
+@media (max-width: 839px) {
+  :root[data-komelia-platform="android"][data-komelia-surface] {
+    --komelia-paper-control-inset: 12px;
+    --komelia-paper-control-top: 10px;
+    --komelia-paper-target: 48px;
+    --komelia-paper-progress-width: 304px;
+    --komelia-paper-progress-height: 52px;
+    --komelia-paper-progress-bottom: 20px;
+  }
+
+  :root[data-komelia-platform="android"][data-komelia-surface] :is([data-komelia-toolbar="top"], [data-komelia-reader-progress]) {
+    --komelia-paper-ink: var(--komelia-reader-ink, #242421);
+    --komelia-paper-fill: color-mix(in srgb, var(--komelia-reader-paper, #fff) 88%, #9e9271);
+    --komelia-paper-border: color-mix(in srgb, var(--komelia-paper-ink) 32%, var(--komelia-paper-fill));
+    background: var(--komelia-reader-paper, #f4f1e8) !important;
+    background: var(--komelia-paper-fill) !important;
+    color: var(--komelia-paper-ink) !important;
+    border: 0;
+    box-shadow: inset 0 0 0 1px var(--komelia-paper-border, #a9a498) !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  :root[data-komelia-platform="android"][data-komelia-surface] [data-komelia-toolbar="top"] {
+    inset-inline: var(--komelia-paper-control-inset);
+    top: calc(env(safe-area-inset-top, 0px) + var(--komelia-paper-control-top)) !important;
+    width: calc(100% - 2 * var(--komelia-paper-control-inset));
+    min-height: var(--komelia-paper-target);
+    padding-inline: 4px;
+    border-radius: 12px;
+  }
+
+  :root[data-komelia-platform="android"][data-komelia-surface] nav[data-komelia-toolbar="top"] {
+    position: relative;
+    inset: auto !important;
+    margin: var(--komelia-paper-control-top) var(--komelia-paper-control-inset) 0;
+  }
+
+  :root[data-komelia-platform="android"] [data-komelia-toolbar="top"] .komelia-reader-title {
+    margin-inline: 4px;
+  }
+
+  :root[data-komelia-platform="android"] [data-komelia-toolbar="top"] .komelia-reader-title strong {
+    font-size: 15px;
+    font-weight: 650;
+  }
+
+  :root[data-komelia-platform="android"] [data-komelia-reader-series-title] {
+    display: none !important;
+  }
+
+  :root[data-komelia-platform="android"] [data-komelia-reader-paper-title] {
+    display: block !important;
+  }
+
+  :root[data-komelia-platform="android"] :is([data-komelia-toolbar="top"], [data-komelia-reader-progress]) button {
+    flex: 0 0 var(--komelia-paper-target);
+    width: var(--komelia-paper-target);
+    min-width: var(--komelia-paper-target);
+    height: var(--komelia-paper-target);
+    min-height: var(--komelia-paper-target);
+    color: inherit !important;
+  }
+
+  :root[data-komelia-platform="android"] :is([data-komelia-toolbar="top"], [data-komelia-reader-progress]) button:focus-visible {
+    outline: 2px solid currentColor !important;
+    outline-offset: -4px;
+    box-shadow: none;
+  }
+
+  :root[data-komelia-platform="android"][data-komelia-surface] [data-komelia-reader-progress] {
+    width: min(var(--komelia-paper-progress-width), calc(100vw - 24px)) !important;
+    min-height: var(--komelia-paper-progress-height);
+    border-radius: calc(var(--komelia-paper-progress-height) / 2);
+    padding: 0 10px;
+    justify-content: space-between;
+  }
+
+  :root[data-komelia-platform="android"][data-komelia-surface] [data-komelia-toolbar="bottom"][data-komelia-reader-progress] {
+    inset-inline: 0;
+    margin-inline: auto;
+    bottom: max(var(--komelia-paper-progress-bottom), env(safe-area-inset-bottom)) !important;
+  }
+
+  :root[data-komelia-platform="android"] [data-komelia-reader-progress-holder] {
+    margin-bottom: var(--komelia-paper-progress-bottom);
+  }
+
+  :root[data-komelia-platform="android"] [data-komelia-reader-progress] .v-toolbar__content {
+    height: var(--komelia-paper-progress-height) !important;
+    justify-content: space-between;
+  }
+
+  :root[data-komelia-platform="android"] [data-komelia-reader-progress] .v-spacer,
+  :root[data-komelia-platform="android"] [data-komelia-reader-progress-detail],
+  :root[data-komelia-platform="android"] #ttu-page-footer:has([data-komelia-reader-progress]) [data-komelia-reader-progress-track] {
+    display: none !important;
+  }
+
+  :root[data-komelia-platform="android"] [data-komelia-reader-progress] button:has([data-komelia-reader-progress-summary]) {
+    flex: 1 1 auto;
+    width: auto;
+    padding-inline: 0;
+  }
+
+  :root[data-komelia-platform="android"] [data-komelia-reader-progress-summary] {
+    display: block !important;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  :root[data-komelia-platform="android"] [data-komelia-reader-book-navigation] {
+    display: grid !important;
+  }
+}
+
+/* TTU shows chapter and auto-scroll buttons starting at its sm breakpoint. */
+@media (min-width: 640px) and (max-width: 839px) {
+  :root[data-komelia-platform="android"][data-komelia-surface] #ttu-page-footer [data-komelia-reader-progress] {
+    width: max-content !important;
+  }
+}

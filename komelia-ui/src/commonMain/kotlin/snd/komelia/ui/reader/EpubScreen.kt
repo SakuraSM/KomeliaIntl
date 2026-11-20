@@ -65,9 +65,16 @@ class EpubScreen(
         val appearance = LocalSurfaceAppearance.current
         val reducedMotion = LocalKomeliaMotion.current.isReducedMotion
         val mac = LocalMacOS.current
+        val android = snd.komelia.ui.LocalPlatform.current == snd.komelia.ui.platform.PlatformType.MOBILE
         SideEffect {
             vm.chromeAppearance.value = EpubChromeAppearance(
-                appearance.style, appearance.theme, appearance.reduceTransparency, reducedMotion, appearance.renderingSupported, mac,
+                surfaceStyle = appearance.style,
+                theme = appearance.theme,
+                reduceTransparency = appearance.reduceTransparency,
+                reducedMotion = reducedMotion,
+                renderingSupported = appearance.renderingSupported,
+                isMacOS = mac,
+                isAndroid = android,
             )
         }
         LaunchedEffect(bookId) {

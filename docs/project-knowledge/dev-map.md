@@ -130,6 +130,8 @@ Shared chrome uses `KomeliaChromeStyle` for 24dp blur, a cool tint and fine bord
 
 On macOS, `MacDesign` defines the compact navigation and page sizes. `MacToolbarSlotHost` displays the active page's search or home group picker in the window toolbar; each page retains its own query and filter state. macOS book and series details use separate pages. The macOS EPUB reader keeps its publication settings while centering the WebView, and its title-bar exit calls the reader session's existing back handler. `EpubChromeAppearance.isMacOS` selects the compact toolbar in both embedded EPUB readers; older hosts retain the standard toolbar.
 
+`EpubChromeAppearance.isAndroid` enables paper-colored floating controls on compact Android viewports in TTU and Komga EPUB. Both engines supply the current publication theme to the shared toolbar CSS. The native WebView retains ownership of system insets. Komga keeps sibling-book navigation in the overflow menu on these viewports. TTU expands its progress bar to fit the extra chapter and auto-scroll controls at 640–839 pixels and shows character counts when the reader enables them.
+
 ## Web rendering compatibility
 
 Wasm configurations use the `compose-web` core-library version to include the semantics-owner fix

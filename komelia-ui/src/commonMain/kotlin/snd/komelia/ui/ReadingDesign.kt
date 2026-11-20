@@ -11,6 +11,9 @@ internal object ReadingDesign {
     val sectionGap = 24.dp
     val coverGap = 10.dp
     val coverShape = RoundedCornerShape(8.dp)
+    val seriesGridInset = 12.dp
+    val seriesGridColumnGap = 8.dp
+    val seriesGridRowGap = 18.dp
     val desktopNavigationWidth = 237.dp
     val tabletNavigationWidth = 92.dp
     val desktopMasterWidth = 422.dp

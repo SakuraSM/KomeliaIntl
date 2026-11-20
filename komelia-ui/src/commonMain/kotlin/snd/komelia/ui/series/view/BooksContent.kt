@@ -123,6 +123,7 @@ fun LazyGridScope.SeriesBooksContent(
     masterPaneGrid: Boolean = false,
     activeBookId: KomgaBookId? = null,
     tabSelector: (@Composable () -> Unit)? = null,
+    compactPosterGrid: Boolean = false,
 ) {
     if (booksLoadState is LoadState.Success<BooksData>) {
         val booksState = booksLoadState.value
@@ -160,7 +161,8 @@ fun LazyGridScope.SeriesBooksContent(
             onBookSelect = onBookSelect,
             layout = if (isMasterPane && !masterPaneGrid) LIST else booksState.layout,
             activeBookId = activeBookId,
-            showVolumeTitles = masterPaneGrid
+            showVolumeTitles = masterPaneGrid,
+            compactPosterGrid = compactPosterGrid,
         )
 
         if (!booksState.selectionMode) {
@@ -214,6 +216,7 @@ private fun LazyGridScope.BooksContent(
     layout: BooksLayout,
     activeBookId: KomgaBookId? = null,
     showVolumeTitles: Boolean = false,
+    compactPosterGrid: Boolean = false,
 ) {
     if (books.isEmpty()) {
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -229,7 +232,9 @@ private fun LazyGridScope.BooksContent(
         when (layout) {
             GRID -> {
                 BooksGrid(
-                    activeBookId = activeBookId, showVolumeTitles = showVolumeTitles,
+                    activeBookId = activeBookId,
+                    showVolumeTitles = showVolumeTitles,
+                    compactPosterGrid = compactPosterGrid,
                     books = books,
                     onBookClick = if (selectionMode) onBookSelect else onBookClick,
                     onBookReadClick = if (selectionMode) null else onBookReadClick,
@@ -560,6 +565,7 @@ private fun LazyGridScope.BooksGrid(
     books: List<KomeliaBook>,
     activeBookId: KomgaBookId? = null,
     showVolumeTitles: Boolean = false,
+    compactPosterGrid: Boolean = false,
     onBookClick: ((KomeliaBook) -> Unit)? = null,
     onBookReadClick: ((KomeliaBook, Boolean) -> Unit)? = null,
     bookMenuActions: BookMenuActions? = null,
@@ -572,13 +578,14 @@ private fun LazyGridScope.BooksGrid(
             BookImageCard(
                 book = book,
                 isActive = activeBookId == book.id, showVolumeTitle = showVolumeTitles,
+                compactStackedCaption = compactPosterGrid,
                 onBookClick = onBookClick?.let { { onBookClick(book) } },
                 onBookReadClick = onBookReadClick?.let { { onBookReadClick(book, it) } },
                 bookMenuActions = bookMenuActions,
                 isSelected = selectedBooks.any { it.id == book.id },
                 onSelect = onBookSelect?.let { { onBookSelect(book) } },
             )
-            if (!showVolumeTitles) Spacer(Modifier.height(15.dp))
+            if (!showVolumeTitles && !compactPosterGrid) Spacer(Modifier.height(15.dp))
         }
 
     }

@@ -19,12 +19,13 @@ fun KomeliaPageScaffold(
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit,
     bottomBar: @Composable () -> Unit = {},
+    topBarModifier: Modifier = Modifier,
     content: @Composable (topContentInset: Dp) -> Unit,
 ) {
     val overlay = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     GlassBackdropScope {
         SubcomposeLayout(modifier.fillMaxSize()) { constraints ->
-            val header = subcompose(PageSlot.Header) { KomeliaSafeTopBar(topBar) }.single().measure(
+            val header = subcompose(PageSlot.Header) { KomeliaSafeTopBar(topBarModifier, topBar) }.single().measure(
                 constraints.copy(minHeight = 0),
             )
             val topInset = if (overlay) header.height.toDp() else 0.dp

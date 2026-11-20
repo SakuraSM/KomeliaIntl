@@ -56,6 +56,7 @@ import snd.komelia.ui.platform.PlatformType.WEB_KOMF
 import snd.komelia.ui.platform.WindowSizeClass
 import snd.komelia.settings.model.AppLanguage
 import snd.komelia.settings.model.AppSurfaceStyle
+import snd.komelia.ui.common.components.LocalFrostedPageHeaders
 import snd.komelia.ui.common.components.LocalSurfaceAppearance
 import snd.komelia.ui.common.components.SurfaceAppearance
 import snd.komelia.updates.AppRelease
@@ -123,6 +124,7 @@ fun MainView(
 
             CompositionLocalProvider(
                 LocalSurfaceAppearance provides SurfaceAppearance(surfaceStyle, theme.toAppTheme(), reduceTransparency, glassSupported),
+                LocalFrostedPageHeaders provides (platformType == MOBILE),
                 LocalFirstScreenReady provides onFirstScreenReady,
                 LocalViewModelFactory provides viewModelFactory,
                 LocalNotifications provides dependencies.appNotifications,

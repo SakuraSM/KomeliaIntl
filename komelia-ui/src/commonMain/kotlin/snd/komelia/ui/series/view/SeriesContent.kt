@@ -70,10 +70,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.reading_series_title
@@ -110,6 +113,7 @@ import snd.komelia.ui.LocalKomfIntegration
 import snd.komelia.ui.LocalKomfMangaBakaIntegration
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalOfflineMode
+import snd.komelia.ui.LocalPlatform
 import snd.komelia.ui.LocalWindowWidth
 import snd.komelia.ui.detailCoverWidth
 import snd.komelia.ui.ReadingDesign
@@ -122,6 +126,7 @@ import snd.komelia.ui.common.components.FloatingChromeIconButton
 import snd.komelia.ui.common.components.KomeliaPageScaffold
 import snd.komelia.ui.common.components.KomeliaTopBarSurface
 import snd.komelia.ui.common.components.LabeledEntry
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
 import snd.komelia.ui.common.components.LabeledEntry.Companion.stringEntry
 import snd.komelia.ui.common.components.PauseGlassWhileBusy
 import snd.komelia.ui.common.images.SeriesThumbnail
@@ -138,6 +143,7 @@ import snd.komelia.ui.icons.AppIcons
 import snd.komelia.ui.icons.outlined.LinkedServices
 import snd.komelia.ui.library.SeriesScreenFilter
 import snd.komelia.ui.platform.VerticalScrollbarWithFullSpans
+import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.WindowSizeClass.COMPACT
 import snd.komelia.ui.platform.WindowSizeClass.MEDIUM
 import snd.komelia.ui.platform.cursorForHand
@@ -213,8 +219,20 @@ fun SeriesContent(
 
     PauseGlassWhileBusy(scrollState.isScrollInProgress)
     val compact = windowWidth == COMPACT || windowWidth == MEDIUM
+    val compactAndroid = LocalPlatform.current == PlatformType.MOBILE && windowWidth == COMPACT && !isMasterPane
+    val compactPosterGrid = compactAndroid && currentTab == SeriesTab.BOOKS && booksData.layout == BooksLayout.GRID
+    val headerEdge = MaterialTheme.colorScheme.primary.copy(alpha = .24f)
+    val topBarModifier = if (compactAndroid && LocalSurfaceAppearance.current.useGlass) {
+        Modifier.drawWithContent {
+            drawContent()
+            if (size.height > 0f) {
+                val y = size.height - .5f
+                drawLine(headerEdge, Offset(0f, y), Offset(size.width, y), strokeWidth = 1f)
+            }
+        }
+    } else Modifier
     Column(Modifier.fillMaxSize()) {
-        KomeliaPageScaffold(modifier = Modifier.weight(1f), topBar = {
+        KomeliaPageScaffold(modifier = Modifier.weight(1f), topBarModifier = topBarModifier, topBar = {
             if (booksData.selectionMode) {
                 KomeliaTopBarSurface(isContentScrolled = isContentScrolled) {
                     BooksBulkActionsToolbar(
@@ -239,7 +257,7 @@ fun SeriesContent(
                     onBack = { onBackPress() }, onViewOptions = { showMasterFilters = true })
             } else {
                 SeriesToolBar(series, seriesMenuActions, mangaBaka, onDownload, onBackPress,
-                    showTitle = isContentScrolled || isMasterPane)
+                    showTitle = isContentScrolled || isMasterPane, compactAndroid = compactAndroid)
             }
         }) { topInset ->
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -247,8 +265,16 @@ fun SeriesContent(
                     state = scrollState,
                     columns = if (masterPaneGrid && booksData.layout == BooksLayout.GRID) GridCells.FixedSize((gridMinWidth / 1.48f).coerceIn(112.dp, 200.dp))
                         else snd.komelia.ui.common.itemlist.posterGridCells(gridMinWidth),
-                    horizontalArrangement = Arrangement.spacedBy(if (masterPaneGrid) 10.dp else layout.gridSpacing),
-                    verticalArrangement = Arrangement.spacedBy(if (booksData.layout == BooksLayout.LIST) 0.dp else layout.gridSpacing),
+                    horizontalArrangement = Arrangement.spacedBy(when {
+                        compactPosterGrid -> ReadingDesign.seriesGridColumnGap
+                        masterPaneGrid -> 10.dp
+                        else -> layout.gridSpacing
+                    }),
+                    verticalArrangement = Arrangement.spacedBy(when {
+                        booksData.layout == BooksLayout.LIST -> 0.dp
+                        compactPosterGrid -> ReadingDesign.seriesGridRowGap
+                        else -> layout.gridSpacing
+                    }),
                     contentPadding = PaddingValues(
                         top = (if (compact && !isMasterPane) 2.dp else if (compact) 6.dp else layout.topBarContentSpacing) + topInset,
                         bottom = layout.gridBottomPadding + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
@@ -256,8 +282,13 @@ fun SeriesContent(
                     modifier = Modifier
                         .widthIn(max = layout.contentMaxWidth)
                         .fillMaxSize()
-                        .padding(horizontal = if (snd.komelia.ui.LocalMacOS.current) snd.komelia.ui.MacDesign.pageInset
-                            else if (masterPaneGrid) 28.dp else if (compact && !isMasterPane) ReadingDesign.homeInset else layout.pageHorizontalPadding),
+                        .padding(horizontal = when {
+                            snd.komelia.ui.LocalMacOS.current -> snd.komelia.ui.MacDesign.pageInset
+                            masterPaneGrid -> 28.dp
+                            compactPosterGrid -> ReadingDesign.seriesGridInset
+                            compact && !isMasterPane -> ReadingDesign.homeInset
+                            else -> layout.pageHorizontalPadding
+                        }),
                 ) {
 
                     if (series != null && library != null) {
@@ -297,6 +328,7 @@ fun SeriesContent(
                                 masterPaneGrid = masterPaneGrid,
                                 activeBookId = activeBookId,
                                 tabSelector = tabSelector,
+                                compactPosterGrid = compactPosterGrid,
                             )
 
                             SeriesTab.COLLECTIONS -> item(span = { GridItemSpan(maxLineSpan) }) {
@@ -406,9 +438,9 @@ fun SeriesToolBar(
     onBackPress: () -> Unit,
     floating: Boolean = false,
     showTitle: Boolean = true,
+    compactAndroid: Boolean = false,
 ) {
-    val layout = LocalKomeliaLayout.current
-    val compactToolbar = LocalWindowWidth.current in listOf(COMPACT, MEDIUM)
+    val offsetToolbar = !compactAndroid && LocalWindowWidth.current in listOf(COMPACT, MEDIUM)
     Row(
         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -418,7 +450,7 @@ fun SeriesToolBar(
             Icon(
                 Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = stringResource(Res.string.navigation_back),
-                modifier = if (compactToolbar) Modifier.size(20.dp).offset(y = (-3).dp) else Modifier,
+                modifier = if (offsetToolbar) Modifier.size(20.dp).offset(y = (-3).dp) else Modifier,
             )
         }
 
@@ -427,15 +459,22 @@ fun SeriesToolBar(
                 if (showTitle) mangaBaka?.titleState?.mainTitle?.title ?: series.metadata.title else stringResource(Res.string.reading_series_title),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                style = if (compactToolbar) MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp) else MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f).then(if (compactToolbar) Modifier.offset(x = (-6).dp, y = (-3).dp) else Modifier), textAlign = TextAlign.Start,
+                style = when {
+                    compactAndroid -> MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold,
+                    )
+                    offsetToolbar -> MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp)
+                    else -> MaterialTheme.typography.titleMedium
+                },
+                modifier = Modifier.weight(1f).then(if (offsetToolbar) Modifier.offset(x = (-6).dp, y = (-3).dp) else Modifier),
+                textAlign = TextAlign.Start,
             )
 
             Box {
                 var expandActions by remember { mutableStateOf(false) }
                 FloatingChromeIconButton(onClick = { expandActions = true }, floating = floating) {
                     Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.actions_show_more),
-                        modifier = if (compactToolbar) Modifier.size(20.dp).offset(x = 4.dp, y = (-3).dp) else Modifier)
+                        modifier = if (offsetToolbar) Modifier.size(20.dp).offset(x = 4.dp, y = (-3).dp) else Modifier)
                 }
 
                 SeriesActionsMenu(

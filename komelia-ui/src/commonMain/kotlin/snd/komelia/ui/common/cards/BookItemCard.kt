@@ -79,6 +79,7 @@ fun BookImageCard(
     showVolumeTitle: Boolean = false,
     compactCaption: Boolean = false,
     modifier: Modifier = Modifier,
+    compactStackedCaption: Boolean = false,
 ) {
     val libraries = LocalLibraries.current
     val libraryIsDeleted = remember {
@@ -105,6 +106,7 @@ fun BookImageCard(
                         libraryIsDeleted = libraryIsDeleted,
                         showTitle = false,
                         showProgress = false,
+                        showUnreadTick = !compactStackedCaption,
                     ) {
                         BookThumbnail(
                             book.id,
@@ -120,6 +122,7 @@ fun BookImageCard(
             ReadingCoverCaption(
                 prominent = showVolumeTitle,
                 compact = compactCaption,
+                compactStacked = compactStackedCaption,
                 title = if (showVolumeTitle) book.seriesTitle.ifBlank { book.metadata.title } else book.metadata.title,
                 progress = progress,
                 status = when {
@@ -166,6 +169,7 @@ private fun BookImageOverlay(
     showTitle: Boolean = true,
     showSeriesTitle: Boolean = false,
     showProgress: Boolean = true,
+    showUnreadTick: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val layout = LocalKomeliaLayout.current
@@ -186,7 +190,7 @@ private fun BookImageOverlay(
                 }
 
                 Spacer(Modifier.weight(1f))
-                if (book.readProgress == null) BookUnreadTick()
+                if (showUnreadTick && book.readProgress == null) BookUnreadTick()
             }
 
             Spacer(modifier = Modifier.weight(1f))

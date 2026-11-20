@@ -1,6 +1,7 @@
 package snd.komelia.ui.common.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -10,11 +11,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performScrollTo
@@ -23,9 +28,50 @@ import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import snd.komelia.settings.model.AppSurfaceStyle
+import snd.komelia.settings.model.AppTheme
 
 class KomeliaPageScaffoldTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test fun frostedHeaderCoversTheStatusInsetWithReadableFallbackMaterial() {
+        val scheme = darkColorScheme(background = Color.Black)
+        compose.setContent {
+            MaterialTheme(colorScheme = scheme) {
+                CompositionLocalProvider(
+                    LocalSurfaceAppearance provides SurfaceAppearance(
+                        style = AppSurfaceStyle.LIQUID_GLASS,
+                        theme = AppTheme.DARKER,
+                        reduceTransparency = true,
+                    ),
+                    LocalFrostedPageHeaders provides true,
+                    LocalPageTopInset provides 32.dp,
+                ) {
+                    KomeliaPageScaffold(
+                        modifier = Modifier.size(360.dp, 200.dp).testTag("frosted-page"),
+                        topBar = {
+                            KomeliaTopBarSurface(isContentScrolled = true) {
+                                Box(Modifier.fillMaxWidth().height(48.dp).testTag("frosted-toolbar"))
+                            }
+                        },
+                    ) { inset ->
+                        Box(Modifier.fillMaxWidth().height(200.dp).background(Color.White)) {
+                            Text("Content", Modifier.padding(top = inset).testTag("frosted-content"))
+                        }
+                    }
+                }
+            }
+        }
+
+        assertEquals(32.dp, compose.onNodeWithTag("frosted-toolbar").getUnclippedBoundsInRoot().top)
+        assertEquals(80.dp, compose.onNodeWithTag("frosted-content").getUnclippedBoundsInRoot().top)
+        val pixels = compose.onNodeWithTag("frosted-page").captureToImage().toPixelMap()
+        val tint = glassTintColor(AppTheme.DARKER, scheme)
+        val x = pixels.width / 2
+        assertEquals(tint, pixels[x, pixels.height / 10])
+        assertEquals(tint, pixels[x, pixels.height / 4])
+        assertEquals(tint, pixels[0, pixels.height / 4])
+        assertEquals(Color.White, pixels[x, pixels.height * 3 / 4])
+    }
 
     @Test fun nestedHeadersConsumeTheCutoutInsetOnlyOnce() {
         compose.setContent {

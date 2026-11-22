@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_books_tab
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.search_no_results_body
@@ -87,6 +88,7 @@ fun SearchContent(
     bookCoverage: SearchCoverage = coverage,
     bookMenuActions: BookMenuActions? = null,
     seriesMenuActions: SeriesMenuActions? = null,
+    scrollingTopInset: Dp? = null,
 ) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         val layout = LocalKomeliaLayout.current
@@ -98,10 +100,7 @@ fun SearchContent(
         val scrollState = rememberLazyListState()
         PauseGlassWhileBusy(scrollState.isScrollInProgress)
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        val controls: @Composable () -> Unit = {
             if (showToolbar) SearchToolBar(
                 searchType = searchType,
                 onSearchTypeChange = onSearchTypeChange,
@@ -113,20 +112,36 @@ fun SearchContent(
             if (!showAll && coverage != SearchCoverage.COMPLETE) {
                 SearchCoverageBanner(coverage, widthModifier)
             }
-
-            val visibleResultsEmpty = if (showAll) seriesResults.isEmpty() && bookResults.isEmpty()
-                else if (searchType == SearchResultsTab.SERIES) seriesResults.isEmpty() else bookResults.isEmpty()
+        }
+        val visibleResultsEmpty = if (showAll) seriesResults.isEmpty() && bookResults.isEmpty()
+            else if (searchType == SearchResultsTab.SERIES) seriesResults.isEmpty() else bookResults.isEmpty()
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             if (query.isNotBlank() && visibleResultsEmpty) {
+                Column(Modifier.padding(top = scrollingTopInset ?: 0.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    controls()
+                }
                 EmptySearchResults()
                 return@Column
             }
+            if (scrollingTopInset == null) controls()
             LazyColumn(
                 state = scrollState,
                 verticalArrangement = Arrangement.spacedBy(0.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(bottom = layout.pageVerticalPadding + LocalNavigationBarInset.current),
+                contentPadding = PaddingValues(
+                    top = scrollingTopInset ?: 0.dp,
+                    bottom = layout.pageVerticalPadding + LocalNavigationBarInset.current,
+                ),
                 modifier = Modifier.fillMaxWidth()
             ) {
+                if (scrollingTopInset != null) {
+                    item(key = "search-controls") {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) { controls() }
+                    }
+                }
                 if (showAll || searchType == SearchResultsTab.SERIES) {
                     if (showAll && seriesCoverage != SearchCoverage.COMPLETE) item { SearchCoverageBanner(seriesCoverage, widthModifier) }
                     items(seriesResults, key = { "series-${it.id.value}" }) { series ->

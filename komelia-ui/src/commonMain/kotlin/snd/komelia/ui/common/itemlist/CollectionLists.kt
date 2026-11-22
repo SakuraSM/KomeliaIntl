@@ -34,6 +34,7 @@ fun CollectionLazyCardGrid(
     currentPage: Int,
     onPageChange: (Int) -> Unit,
     minSize: Dp = 200.dp,
+    topContentInset: Dp = 0.dp,
     scrollState: LazyGridState = rememberLazyGridState(),
 ) {
     val layout = LocalKomeliaLayout.current
@@ -44,7 +45,7 @@ fun CollectionLazyCardGrid(
             state = scrollState,
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(layout.gridSpacing),
-            contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
+            contentPadding = PaddingValues(top = topContentInset, bottom = layout.gridBottomPadding),
             modifier = Modifier
                 .widthIn(max = layout.contentMaxWidth)
                 .fillMaxSize()

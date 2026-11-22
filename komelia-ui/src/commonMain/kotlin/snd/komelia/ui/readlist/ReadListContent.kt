@@ -3,6 +3,7 @@ package snd.komelia.ui.readlist
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -38,9 +39,11 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komelia.ui.LocalKomeliaLayout
+import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalWindowWidth
-import snd.komelia.ui.common.components.KomeliaSafeTopBar
+import snd.komelia.ui.common.components.KomeliaPageScaffold
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.components.FloatingChromeIconButton
 import snd.komelia.ui.common.itemlist.BookLazyCardGrid
@@ -79,8 +82,9 @@ fun ReadListContent(
     cardMinSize: Dp,
 ) {
     val layout = LocalKomeliaLayout.current
+    val scrollSummary = LocalPlatform.current == PlatformType.MOBILE
     Column {
-        KomeliaSafeTopBar {
+        KomeliaPageScaffold(modifier = Modifier.weight(1f), topBar = {
             if (editMode)
                 BulkActionsToolbar(
                     onCancel = { onEditModeChange(false) },
@@ -100,42 +104,45 @@ fun ReadListContent(
                 )
             }
 
-        }
+        }) { topInset ->
 
-        if (readList.summary.isNotBlank()) {
-            Column(
-                Modifier.padding(
-                    horizontal = layout.pageHorizontalPadding,
-                    vertical = layout.controlSpacing,
-                ),
-                verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
-            ) {
-                Text(readList.summary)
-                HorizontalDivider()
+            val summary: (@Composable () -> Unit)? = if (readList.summary.isBlank()) null else {
+                {
+                    Column(
+                        Modifier.padding(vertical = layout.controlSpacing),
+                        verticalArrangement = Arrangement.spacedBy(layout.controlSpacing),
+                    ) {
+                        Text(readList.summary)
+                        HorizontalDivider()
+                    }
+                }
             }
-        }
-        Box(Modifier.weight(1f)) {
-            BookLazyCardGrid(
-                books = books,
-                onBookClick = if (editMode) onBookSelect else onBookClick,
-                onBookReadClick = if (editMode) null else onBookReadClick,
-                bookMenuActions = if (editMode) null else bookMenuActions,
-
-                selectedBooks = selectedBooks,
-                onBookSelect = onBookSelect,
-
-                reorderable = readList.ordered && editMode,
-                onReorder = onReorder,
-                onReorderDragStateChange = onReorderDragStateChange,
-
-                totalPages = totalPages,
-                currentPage = currentPage,
-                onPageChange = onPageChange,
-
-                minSize = cardMinSize,
-                listMode = true,
-                firstItemNumber = if (editMode) 1 else (currentPage - 1) * pageSize + 1,
-            )
+            Column(Modifier.fillMaxSize().padding(top = if (scrollSummary) 0.dp else topInset)) {
+                if (!scrollSummary && summary != null) {
+                    Box(Modifier.padding(horizontal = layout.pageHorizontalPadding)) { summary() }
+                }
+                Box(Modifier.weight(1f)) {
+                    BookLazyCardGrid(
+                        books = books,
+                        onBookClick = if (editMode) onBookSelect else onBookClick,
+                        onBookReadClick = if (editMode) null else onBookReadClick,
+                        bookMenuActions = if (editMode) null else bookMenuActions,
+                        selectedBooks = selectedBooks,
+                        onBookSelect = onBookSelect,
+                        reorderable = readList.ordered && editMode,
+                        onReorder = onReorder,
+                        onReorderDragStateChange = onReorderDragStateChange,
+                        totalPages = totalPages,
+                        currentPage = currentPage,
+                        onPageChange = onPageChange,
+                        minSize = cardMinSize,
+                        listMode = true,
+                        firstItemNumber = if (editMode) 1 else (currentPage - 1) * pageSize + 1,
+                        topContentInset = if (scrollSummary) topInset else 0.dp,
+                        beforeContent = summary.takeIf { scrollSummary },
+                    )
+                }
+            }
         }
 
         val width = LocalWindowWidth.current

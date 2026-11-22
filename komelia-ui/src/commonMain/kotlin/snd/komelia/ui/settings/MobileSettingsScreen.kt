@@ -67,7 +67,7 @@ class MobileSettingsScreen(
                 )
 
             }) { topInset ->
-                Box(Modifier.fillMaxSize().padding(top = topInset + 2.dp)) {
+                Box(Modifier.fillMaxSize()) {
                     SettingsNavigationMenu(
                         header = {
                             if (topLevel) Column(
@@ -88,6 +88,7 @@ class MobileSettingsScreen(
                         onLogout = vm::logout,
                         user = vm.user.collectAsState().value,
                         contentColor = MaterialTheme.colorScheme.surface,
+                        topContentInset = topInset + 2.dp,
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = ReadingDesign.browseInset)

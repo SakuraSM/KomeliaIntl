@@ -237,11 +237,13 @@ class FullPageControlGeometryTest {
                 }
             }
         }
-        val field=compose.onNode(hasSetTextAction()).getUnclippedBoundsInRoot()
+        compose.onNode(hasSetTextAction()).assertDoesNotExist()
+        compose.onNodeWithContentDescription(runBlocking { getString(Res.string.navbar_search) }).performClick()
+        val field=compose.onNode(hasSetTextAction()).assertIsFocused().getUnclippedBoundsInRoot()
         val canvas=compose.onNodeWithTag("canvas").getUnclippedBoundsInRoot()
-        near("06","search.x",14.2f,(field.left-canvas.left).value)
-        near("06","search.y",72f,(field.top-canvas.top).value)
-        near("06","search.width",362f,(field.right-field.left).value)
+        near("06","search.x",56f,(field.left-canvas.left).value)
+        near("06","search.y",28f,(field.top-canvas.top).value)
+        near("06","search.width",278f,(field.right-field.left).value)
         near("06","search.height",48f,(field.bottom-field.top).value)
         val icon=compose.onNodeWithTag("local-directory-icon",useUnmergedTree=true).getUnclippedBoundsInRoot()
         near("06","directory-icon.x",22f,(icon.left-canvas.left).value)
@@ -265,6 +267,30 @@ class FullPageControlGeometryTest {
         }
         compose.onNodeWithText(runBlocking{getString(Res.string.search_books_tab)}+" 0").performClick()
         compose.runOnIdle { assertTrue(selected==SearchResultsTab.BOOKS) }
+    }
+
+    @Test fun localDirectoryRemainsVisibleBehindTheGlassToolbarWhenScrolled() {
+        compose.setContent {
+            GeometryScope(WindowSizeClass.COMPACT, AppTheme.DARK) {
+                CompositionLocalProvider(LocalPageTopInset provides 24.dp) {
+                    Box(Modifier.requiredSize(390.dp, 260.dp)) {
+                        LocalContent(
+                            query = "", onQueryChange = {}, selectedSource = AvailableBookSource.ALL, onSourceChange = {},
+                            selectedSort = LocalHomeBookSort.RECENTLY_ADDED, onSortChange = {},
+                            books = listOf(fixture(false)), currentPage = 1, totalPages = 1,
+                            onPageChange = {}, cardWidth = 160.dp,
+                            bookMenuActions = BookMenuActions({}, {}, {}, {}, {}, {}, {}),
+                            loading = false, onBookClick = {}, onBookReadClick = { _, _ -> },
+                        )
+                    }
+                }
+            }
+        }
+        val directory = compose.onNodeWithTag("local-directory-icon", useUnmergedTree = true)
+        assertTrue(directory.fetchSemanticsNode().boundsInRoot.top >= 80f)
+        compose.onNode(hasScrollAction()).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.ScrollBy) { it(0f, 36f) }
+        compose.waitForIdle()
+        assertTrue(directory.fetchSemanticsNode().boundsInRoot.top < 80f, "The list viewport clips content at the toolbar edge")
     }
 
     @Test fun heroReadingControlsKeepTheCompactPaintAndTheNormalReadingCallback() {

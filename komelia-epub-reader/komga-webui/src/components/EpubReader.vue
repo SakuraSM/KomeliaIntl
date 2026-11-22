@@ -1,19 +1,26 @@
 <template>
-  <div id="root" :key="bookId">
+  <div id="root" :key="bookId" :class="appearanceClass('reader-paper')">
     <v-slide-y-transition>
       <epub-reader-toolbar
           v-if="showToolbars"
           :title="series?.metadata?.title || book?.metadata?.title || ''"
+          :paper-title="book?.metadata?.title"
           :subtitle="series?.metadata?.title ? book?.metadata?.title : undefined"
           :has-navigation="hasToc || hasLandmarks || hasPageList"
           :is-toc-open="showToc"
           :is-settings-open="showSettings"
           :is-fullscreen-available="fullscreenIsAvailable"
+          :book-navigation="{
+            previousDisabled: readerLoading || siblings?.previous.status === SiblingStatus.Loading,
+            nextDisabled: readerLoading || siblings?.next.status === SiblingStatus.Loading,
+          }"
           @close="closeBook"
           @toggle-toc="showToc = !showToc"
           @toggle-settings="toggleSettings"
           @toggle-help="showHelp = !showHelp"
           @fullscreen="switchFullscreen"
+          @previous-book="previousBook"
+          @next-book="nextBook"
           @overflow-visibility-change="isOverflowMenuOpen = $event"
       />
     </v-slide-y-transition>
@@ -23,6 +30,7 @@
       <v-toolbar
           data-komelia-chrome
           data-komelia-toolbar="bottom"
+          data-komelia-reader-progress
           dense
           elevation="1"
           class="settings full-width"
@@ -30,7 +38,7 @@
           horizontal
           v-if="showToolbars"
       >
-        <v-btn icon :disabled="readerLoading || siblings?.previous.status === SiblingStatus.Loading"
+        <v-btn data-komelia-reader-progress-detail icon :disabled="readerLoading || siblings?.previous.status === SiblingStatus.Loading"
                :aria-label="t('epubreader.previous_book')" @click="previousBook">
           <v-icon :icon="mdiUndo"/>
         </v-btn>
@@ -46,8 +54,11 @@
           <v-icon :icon="mdiChevronLeft"/>
         </v-btn>
 
-        <span v-if="verticalScroll" class="mx-2" style="font-size: 0.85em">
+        <span v-if="verticalScroll" data-komelia-reader-progress-detail class="mx-2" style="font-size: 0.85em">
           {{ progressionTotalPercentage }}
+        </span>
+        <span data-komelia-reader-progress-summary>
+          {{ progressionTitle || t('epubreader.current_chapter') }} · {{ progressionTotalPercentage }}
         </span>
 
         <v-btn
@@ -61,7 +72,7 @@
 
         <v-spacer/>
 
-        <v-btn icon :disabled="readerLoading || siblings?.next.status === SiblingStatus.Loading"
+        <v-btn data-komelia-reader-progress-detail icon :disabled="readerLoading || siblings?.next.status === SiblingStatus.Loading"
                :aria-label="t('epubreader.next_book')" @click="nextBook">
           <v-icon :icon="mdiRedo"/>
         </v-btn>
@@ -1175,6 +1186,9 @@ async function markProgress(location: Locator) {
 .night {
   color: #DADADA;
 }
+
+.sepia-reader-paper { --komelia-reader-paper: #faf4e8; }
+.night-reader-paper { --komelia-reader-paper: #000; --komelia-reader-ink: #dadada; }
 
 .hidden {
   display: none !important;

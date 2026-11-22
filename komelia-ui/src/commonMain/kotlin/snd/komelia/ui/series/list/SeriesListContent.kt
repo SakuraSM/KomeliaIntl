@@ -84,6 +84,8 @@ fun SeriesListContent(
     minSize: Dp,
     showToolbar: Boolean = true,
     isList: Boolean = false,
+    topContentInset: Dp = 0.dp,
+    leadingContent: (@Composable () -> Unit)? = null,
 ) {
     Column {
         if (editMode) {
@@ -96,7 +98,7 @@ fun SeriesListContent(
         }
 
         SeriesLazyCardGrid(
-            hasBeforeContent = showToolbar && !editMode,
+            hasBeforeContent = !editMode && (showToolbar || leadingContent != null),
             isList = isList,
             series = series,
             onSeriesClick = if (editMode) onSeriesSelect else onSeriesClick,
@@ -110,6 +112,7 @@ fun SeriesListContent(
             onPageChange = onPageChange,
 
             beforeContent = {
+                leadingContent?.invoke()
                 AnimatedVisibility(showToolbar && !editMode) {
                     ToolBar(
                         seriesTotalCount = seriesTotalCount,
@@ -122,6 +125,7 @@ fun SeriesListContent(
 
             },
             minSize = minSize,
+            topContentInset = topContentInset,
             modifier = Modifier.weight(1f),
         )
         val width = LocalWindowWidth.current

@@ -62,6 +62,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.mangabaka_navigation
@@ -150,6 +151,7 @@ internal fun SettingsNavigationMenu(
     modifier: Modifier = Modifier,
     header: @Composable () -> Unit = {},
     mobileSection: MobileSettingsSection? = null,
+    topContentInset: Dp = 0.dp,
 ) {
     val isAdmin = remember(user) { user?.roleAdmin() ?: true }
     val offlineAvailable = LocalOfflineAvailable.current
@@ -239,7 +241,7 @@ internal fun SettingsNavigationMenu(
     }
 
     if (LocalPlatform.current == MOBILE && currentScreen is MobileSettingsScreen && mobileSection == null) {
-        MobileReadingSettingsHome(onNavigation, offlineAvailable, webviewIsAvailable(), modifier)
+        MobileReadingSettingsHome(onNavigation, offlineAvailable, webviewIsAvailable(), modifier, topContentInset)
         return
     }
     val displayedAppEntries = when (mobileSection) {
@@ -258,7 +260,8 @@ internal fun SettingsNavigationMenu(
         } else appEntries
     }
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState()).padding(bottom = LocalNavigationBarInset.current),
+        modifier = modifier.verticalScroll(rememberScrollState())
+            .padding(top = topContentInset, bottom = LocalNavigationBarInset.current),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         header()

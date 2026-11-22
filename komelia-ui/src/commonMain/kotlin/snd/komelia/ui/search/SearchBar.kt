@@ -288,6 +288,7 @@ fun SearchTextField(
     trailingContent: (@Composable () -> Unit)? = null,
     horizontalContentPadding: androidx.compose.ui.unit.Dp = 10.dp,
     paintedHeight: androidx.compose.ui.unit.Dp? = null,
+    onBack: (() -> Unit)? = null,
 ) {
     val focusManager = LocalFocusManager.current
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -321,7 +322,8 @@ fun SearchTextField(
                     }
 
                     keyEvent.key == Key.Back || keyEvent.key == Key.Escape -> {
-                        focusManager.clearFocus()
+                        if (onBack == null) focusManager.clearFocus()
+                        else if (keyEvent.type == KeyEventType.KeyUp) onBack()
                         true
                     }
 

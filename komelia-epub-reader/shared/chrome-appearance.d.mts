@@ -4,6 +4,8 @@ export interface ChromeAppearance {
   reduceTransparency?: boolean;
   reducedMotion?: boolean;
   renderingSupported?: boolean;
+  isMacOS?: boolean;
+  isAndroid?: boolean;
 }
 export interface NormalizedChromeAppearance {
   surface: 'classic' | 'glass' | 'solid';

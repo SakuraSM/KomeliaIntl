@@ -41,7 +41,7 @@ import snd.komelia.komga.api.model.KomeliaSeries
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalKomgaState
 import snd.komelia.ui.LocalWindowWidth
-import snd.komelia.ui.common.components.KomeliaSafeTopBar
+import snd.komelia.ui.common.components.KomeliaPageScaffold
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
 import snd.komelia.ui.common.components.FloatingChromeIconButton
 import snd.komelia.ui.common.itemlist.SeriesLazyCardGrid
@@ -83,7 +83,7 @@ fun CollectionContent(
     cardMinSize: Dp,
 ) {
     Column {
-        KomeliaSafeTopBar {
+        KomeliaPageScaffold(modifier = Modifier.weight(1f), topBar = {
             if (editMode) {
                 BulkActionsToolbar(
                     onCancel = { onEditModeChange(false) },
@@ -103,27 +103,23 @@ fun CollectionContent(
 
                 )
 
+        }) { topInset ->
+            SeriesLazyCardGrid(
+                series = series,
+                onSeriesClick = if (editMode) onSeriesSelect else onSeriesClick,
+                seriesMenuActions = if (editMode) null else seriesActions,
+                selectedSeries = selectedSeries,
+                onSeriesSelect = onSeriesSelect,
+                reorderable = collection.ordered && editMode,
+                onReorder = onReorder,
+                onReorderDragStateChange = onReorderDragStateChange,
+                totalPages = totalPages,
+                currentPage = currentPage,
+                onPageChange = onPageChange,
+                minSize = cardMinSize,
+                topContentInset = topInset,
+            )
         }
-
-        SeriesLazyCardGrid(
-            series = series,
-            onSeriesClick = if (editMode) onSeriesSelect else onSeriesClick,
-            seriesMenuActions = if (editMode) null else seriesActions,
-
-            selectedSeries = selectedSeries,
-            onSeriesSelect = onSeriesSelect,
-
-            reorderable = collection.ordered && editMode,
-            onReorder = onReorder,
-            onReorderDragStateChange = onReorderDragStateChange,
-
-            totalPages = totalPages,
-            currentPage = currentPage,
-            onPageChange = onPageChange,
-
-            minSize = cardMinSize,
-            modifier = Modifier.weight(1f)
-        )
 
         val width = LocalWindowWidth.current
         if ((width == COMPACT || width == MEDIUM) && selectedSeries.isNotEmpty()) {

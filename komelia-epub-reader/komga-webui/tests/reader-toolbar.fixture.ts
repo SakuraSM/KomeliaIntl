@@ -21,12 +21,15 @@ const app = createApp({
   render: () => h(VApp, {}, { default: () => h(EpubReaderToolbar, {
     ...state,
     title: 'A long synthetic series title for narrow reader toolbars',
+    paperTitle: '从零开始的异世界生活',
     subtitle: 'Chapter 2: A very long book title that should truncate',
     hasNavigation: true, isFullscreenAvailable: true,
+    bookNavigation: { previousDisabled: true, nextDisabled: false },
     onClose: () => record('close'),
     onToggleToc: () => { state.isTocOpen = !state.isTocOpen; record('toc'); },
     onToggleSettings: () => { state.isSettingsOpen = !state.isSettingsOpen; record('settings'); },
     onToggleHelp: () => record('help'), onFullscreen: () => record('fullscreen'),
+    onNextBook: () => record('nextBook'),
     onOverflowVisibilityChange: (isOpen: boolean) => { document.querySelector('output')!.dataset.overflowOpen = String(isOpen); },
   }) }),
 });

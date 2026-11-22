@@ -57,12 +57,17 @@ fun BookLazyCardGrid(
     gridState: LazyGridState = rememberLazyGridState(),
     listMode: Boolean = false,
     firstItemNumber: Int = 1,
+    topContentInset: Dp = 0.dp,
+    beforeContent: (@Composable () -> Unit)? = null,
 ) {
     val layout = LocalKomeliaLayout.current
     val coroutineScope = rememberCoroutineScope()
     val reorderableLazyGridState = rememberReorderableLazyGridState(
         lazyGridState = gridState,
-        onMove = { from, to -> onReorder(from.index, to.index) }
+        onMove = { from, to ->
+            val headerItems = if (beforeContent == null) 0 else 1
+            onReorder(from.index - headerItems, to.index - headerItems)
+        }
     )
     LaunchedEffect(reorderableLazyGridState.isAnyItemDragging) {
         onReorderDragStateChange(reorderableLazyGridState.isAnyItemDragging)
@@ -74,12 +79,15 @@ fun BookLazyCardGrid(
             state = gridState,
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(if (listMode) 0.dp else layout.gridSpacing),
-            contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
+            contentPadding = PaddingValues(top = topContentInset, bottom = layout.gridBottomPadding),
             modifier = Modifier
                 .widthIn(max = layout.contentMaxWidth)
                 .fillMaxSize()
                 .padding(horizontal = layout.pageHorizontalPadding)
         ) {
+            if (beforeContent != null) item(span = { GridItemSpan(maxLineSpan) }) {
+                beforeContent()
+            }
 
             itemsIndexed(books, key = { _, book -> book.id.value }) { index, book ->
                 val isSelected = remember(selectedBooks) { selectedBooks.any { it.id == book.id } }

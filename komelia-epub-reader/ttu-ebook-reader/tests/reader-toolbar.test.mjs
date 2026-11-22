@@ -153,3 +153,129 @@ test('Mac TTU toolbar is centered and retains its reader actions', async () => {
     await server.close();
   }
 });
+
+test('Android TTU uses the current paper colors and retains a single toolbar row', async () => {
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-toolbar.bootstrap.ts');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport:{width:390,height:844}, hasTouch:true, isMobile:true});
+    await page.goto(server.url);
+    const toolbar = page.getByRole('navigation', {name:'Reader toolbar'});
+    await toolbar.waitFor();
+    const initial = await toolbar.evaluate(node => getComputedStyle(node).backgroundColor);
+    await page.evaluate(() => {
+      document.documentElement.dataset.komeliaPlatform = 'android';
+      document.body.style.setProperty('--komelia-reader-paper', '#faf4e8');
+    });
+    assert.deepEqual(await toolbar.boundingBox(), {x:12,y:10,width:366,height:48});
+    const paperColor = await toolbar.evaluate(node => getComputedStyle(node).backgroundColor);
+    assert.notEqual(paperColor, initial);
+    await page.evaluate(() => {
+      document.body.style.setProperty('--komelia-reader-paper', '#23272a');
+      document.body.style.setProperty('--komelia-reader-ink', '#dedede');
+    });
+    assert.notEqual(await toolbar.evaluate(node => getComputedStyle(node).backgroundColor), paperColor);
+    assert.equal(await toolbar.evaluate(node => getComputedStyle(node).color), 'rgb(222, 222, 222)');
+    const settings = toolbar.getByRole('button', {name:'Reader settings'});
+    assert.equal((await settings.boundingBox()).height, 48);
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});
+
+test('Android TTU keeps every auto-scroll control reachable on medium viewports', async () => {
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-edge.fixture.ts');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport:{width:640,height:844}, hasTouch:true, isMobile:true});
+    await page.goto(`${server.url}?footer&android&hideCharacterCounter`);
+    const footer = page.locator('[data-komelia-reader-progress]');
+    await footer.waitFor();
+    for (const width of [640, 700, 839]) {
+      await page.setViewportSize({width, height:844});
+      const bounds = await footer.boundingBox();
+      for (const [name, result] of [
+        ['Decrease auto-scroll speed', 'speed'],
+        ['Toggle auto-scroll', 'auto-scroll'],
+        ['Increase auto-scroll speed', 'speed'],
+      ]) {
+        const control = footer.getByRole('button', {name});
+        const button = await control.boundingBox();
+        assert.ok(button.x >= bounds.x && button.x + button.width <= bounds.x + bounds.width, `${name} at ${width}px`);
+        await control.click();
+        assert.equal(await page.locator('output').textContent(), result);
+      }
+    }
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});
+
+test('Android TTU paper progress follows the character counter preference', async () => {
+  const server = await startReaderToolbarServer(createServer, 'tests/reader-edge.fixture.ts');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport:{width:390,height:844}, hasTouch:true, isMobile:true});
+    const summary = page.locator('[data-komelia-reader-progress-summary]');
+    await page.goto(`${server.url}?footer&android`);
+    await summary.waitFor();
+    assert.match((await summary.innerText()).trim(), /10 \/ 100 10\.00%/);
+    await page.goto(`${server.url}?footer&android&hideCharacterCounter`);
+    await summary.waitFor();
+    assert.equal((await summary.innerText()).trim(), 'Synthetic chapter · 10%');
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});
+
+test('Android paper controls blur the page only in supported Glass mode', async () => {
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport:{width:390,height:844}, hasTouch:true, isMobile:true});
+    await page.setContent(`<!doctype html>
+      <html data-komelia-platform="android" data-komelia-surface="glass" data-komelia-theme="LIGHT">
+        <head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${chromeStyles}</style></head>
+        <body>
+          <header data-komelia-chrome data-komelia-toolbar="top">Reader toolbar</header>
+          <footer data-komelia-chrome data-komelia-reader-progress>Progress</footer>
+        </body>
+      </html>`);
+    const styles = () => page.evaluate(() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 1;
+      const pixel = canvas.getContext('2d');
+      return [...document.querySelectorAll('[data-komelia-chrome]')].map(control => {
+        const style = getComputedStyle(control);
+        pixel.clearRect(0, 0, 1, 1);
+        pixel.fillStyle = style.backgroundColor;
+        pixel.fillRect(0, 0, 1, 1);
+        return {
+          filter:style.backdropFilter,
+          opacity:pixel.getImageData(0, 0, 1, 1).data[3],
+          border:style.borderTopWidth,
+          shadow:style.boxShadow,
+        };
+      });
+    });
+    for (const style of await styles()) {
+      assert.match(style.filter, /blur\(/);
+      assert.ok(style.opacity > 0 && style.opacity < 255);
+      assert.equal(style.border, '0px');
+      assert.equal(style.shadow, 'none');
+    }
+    for (const surface of ['classic', 'solid']) {
+      await page.evaluate(value => { document.documentElement.dataset.komeliaSurface = value; }, surface);
+      assert.deepEqual(await styles(), Array(2).fill({filter:'none',opacity:255,border:'0px',shadow:'none'}));
+    }
+    await page.evaluate(() => { document.documentElement.dataset.komeliaSurface = 'glass'; });
+    const session = await page.context().newCDPSession(page);
+    await session.send('Emulation.setEmulatedMedia', {features:[{name:'prefers-reduced-transparency',value:'reduce'}]});
+    assert.equal(await page.evaluate(() => matchMedia('(prefers-reduced-transparency: reduce)').matches), true);
+    assert.deepEqual(await styles(), Array(2).fill({filter:'none',opacity:255,border:'0px',shadow:'none'}));
+  } finally {
+    await browser.close();
+  }
+});

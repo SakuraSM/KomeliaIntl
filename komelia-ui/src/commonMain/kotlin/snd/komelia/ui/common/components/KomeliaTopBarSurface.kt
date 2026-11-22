@@ -27,23 +27,30 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
+import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.ui.LocalKomeliaMotion
 
-private val LocalHeaderMaterialProvided = staticCompositionLocalOf { false }
+private enum class HeaderFrame { None, Plain, Frosted }
+
+private val LocalHeaderFrame = staticCompositionLocalOf { HeaderFrame.None }
+internal val LocalFrostedPageHeaders = staticCompositionLocalOf { false }
 
 /** Consumes the cutout once and keeps an absent toolbar at zero height. */
 @Composable
-fun KomeliaSafeTopBar(content: @Composable () -> Unit) {
-    if (LocalHeaderMaterialProvided.current) {
+fun KomeliaSafeTopBar(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    if (LocalHeaderFrame.current != HeaderFrame.None) {
         content()
         return
     }
+    val frosted = LocalFrostedPageHeaders.current && LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
     val topInset = LocalPageTopInset.current
-    Layout(modifier = Modifier.fillMaxWidth(), content = {
-        Box(Modifier.background(MaterialTheme.colorScheme.background)) {
+    // Apply the material to the measured status inset as well as the toolbar row.
+    val material = if (frosted) Modifier.komeliaChrome(RoundedCornerShape(0.dp)) else Modifier
+    Layout(modifier = modifier.fillMaxWidth().then(material), content = {
+        Box(if (frosted) Modifier else Modifier.background(MaterialTheme.colorScheme.background)) {
             CompositionLocalProvider(
                 LocalPageTopInset provides 0.dp,
-                LocalHeaderMaterialProvided provides true,
+                LocalHeaderFrame provides if (frosted) HeaderFrame.Frosted else HeaderFrame.Plain,
             ) {
                 Layout(content = content) { measurables, constraints ->
                     val children = measurables.map { it.measure(constraints.copy(minHeight = 0)) }
@@ -113,6 +120,11 @@ fun KomeliaTopBarSurface(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    // The surrounding safe header already draws the material across both rows.
+    if (LocalHeaderFrame.current == HeaderFrame.Frosted) {
+        Box(modifier.fillMaxWidth()) { KomeliaChromeContent(content) }
+        return
+    }
     val motion = LocalKomeliaMotion.current
     val targetElevation = komeliaTopBarElevation(isContentScrolled, LocalSurfaceAppearance.current.useGlass)
     val animationSpec = tween<Dp>(

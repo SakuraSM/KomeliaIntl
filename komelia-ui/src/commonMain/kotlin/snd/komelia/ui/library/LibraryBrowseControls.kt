@@ -32,14 +32,16 @@ import snd.komelia.ui.strings.AppStrings
 import snd.komga.client.book.KomgaReadStatus
 
 @Composable
-internal fun LibraryBrowseControls(state: LibrarySeriesTabState) {
+internal fun LibraryBrowseControls(state: LibrarySeriesTabState, insideGrid: Boolean = false) {
     val filter by state.filterState.state.collectAsState()
     val selectedStatuses = filter.readStatus.map { stringResource(AppStrings.forSeriesReadStatus(it)) }
     val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
     val mac = LocalMacOS.current
-    val inset = if (mac) MacDesign.pageInset else ReadingDesign.browseInset
+    val pageInset = if (mac) MacDesign.pageInset else ReadingDesign.browseInset
+    val inset = if (insideGrid) 0.dp else pageInset
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val wrapControls = maxWidth < (if (mac) 440.dp else 360.dp) * fontScale
+        val pageWidth = maxWidth + (pageInset - inset) * 2
+        val wrapControls = pageWidth < (if (mac) 440.dp else 360.dp) * fontScale
         Column {
             Row(
                 Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = inset),

@@ -38,6 +38,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navbar_search
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalPlatform
+import snd.komelia.ui.ReadingDesign
 import snd.komelia.ui.komeliaLayoutSpec
 import snd.komelia.ui.platform.PlatformType
 import snd.komelia.ui.platform.WindowSizeClass
@@ -45,6 +46,47 @@ import kotlin.test.assertEquals
 
 class BrowseHeaderLayoutTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test fun compactDestinationSearchKeepsTheHomeHeaderHeightAndQuery() {
+        val search = runBlocking { getString(Res.string.navbar_search) }
+        val back = runBlocking { getString(Res.string.navigation_back) }
+        val query = mutableStateOf("")
+        compose.setContent {
+            MaterialTheme {
+                CompositionLocalProvider(
+                    LocalPlatform provides PlatformType.MOBILE,
+                    LocalPageTopInset provides 32.dp,
+                    LocalDensity provides Density(LocalDensity.current.density, fontScale = 1.3f),
+                    LocalKomeliaLayout provides komeliaLayoutSpec(PlatformType.MOBILE, WindowSizeClass.COMPACT),
+                ) {
+                    Column(Modifier.size(360.dp, 440.dp)) {
+                        Box(Modifier.testTag("home")) { BrowsePageHeader("Komelia", titleOffset = ReadingDesign.destinationTitleOffset) }
+                        Box(Modifier.testTag("browse")) {
+                            BrowseSearchHeader("Local", query.value, { query.value = it }, compactOnAndroid = true) {
+                                BrowseOptionsButton { Text("Local options") }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        fun height(tag: String) = compose.onNodeWithTag(tag).getUnclippedBoundsInRoot().let { it.bottom - it.top }
+        assertEquals(height("home"), height("browse"))
+        fun titleTop(title: String, tag: String) = compose.onNodeWithText(title).getUnclippedBoundsInRoot().top -
+            compose.onNodeWithTag(tag).getUnclippedBoundsInRoot().top
+        assertEquals(titleTop("Komelia", "home"), titleTop("Local", "browse"))
+        compose.onNode(hasSetTextAction()).assertDoesNotExist()
+        compose.onNodeWithContentDescription(search).performClick()
+        val field = compose.onNode(hasSetTextAction())
+        field.assertIsFocused().performTextInput("sample")
+        assertEquals(height("home"), height("browse"))
+        compose.onNodeWithContentDescription(back).performClick()
+        field.assertDoesNotExist()
+        compose.onNodeWithContentDescription(search).assertIsSelected().performClick()
+        field.assertIsFocused().assertTextEquals("sample")
+        field.performKeyInput { pressKey(Key.Escape) }
+        field.assertDoesNotExist()
+    }
 
     @Test fun persistentSearchHasItsOwnRowWithoutShrinkingTouchTargetsAtLargeFontScale() {
         compose.setContent {

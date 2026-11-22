@@ -230,3 +230,52 @@ test('Android TTU paper progress follows the character counter preference', asyn
     await server.close();
   }
 });
+
+test('Android paper controls blur the page only in supported Glass mode', async () => {
+  const browser = await chromium.launch({executablePath: process.env.CHROME_BIN});
+  try {
+    const page = await browser.newPage({viewport:{width:390,height:844}, hasTouch:true, isMobile:true});
+    await page.setContent(`<!doctype html>
+      <html data-komelia-platform="android" data-komelia-surface="glass" data-komelia-theme="LIGHT">
+        <head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${chromeStyles}</style></head>
+        <body>
+          <header data-komelia-chrome data-komelia-toolbar="top">Reader toolbar</header>
+          <footer data-komelia-chrome data-komelia-reader-progress>Progress</footer>
+        </body>
+      </html>`);
+    const styles = () => page.evaluate(() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 1;
+      const pixel = canvas.getContext('2d');
+      return [...document.querySelectorAll('[data-komelia-chrome]')].map(control => {
+        const style = getComputedStyle(control);
+        pixel.clearRect(0, 0, 1, 1);
+        pixel.fillStyle = style.backgroundColor;
+        pixel.fillRect(0, 0, 1, 1);
+        return {
+          filter:style.backdropFilter,
+          opacity:pixel.getImageData(0, 0, 1, 1).data[3],
+          border:style.borderTopWidth,
+          shadow:style.boxShadow,
+        };
+      });
+    });
+    for (const style of await styles()) {
+      assert.match(style.filter, /blur\(/);
+      assert.ok(style.opacity > 0 && style.opacity < 255);
+      assert.equal(style.border, '0px');
+      assert.equal(style.shadow, 'none');
+    }
+    for (const surface of ['classic', 'solid']) {
+      await page.evaluate(value => { document.documentElement.dataset.komeliaSurface = value; }, surface);
+      assert.deepEqual(await styles(), Array(2).fill({filter:'none',opacity:255,border:'0px',shadow:'none'}));
+    }
+    await page.evaluate(() => { document.documentElement.dataset.komeliaSurface = 'glass'; });
+    const session = await page.context().newCDPSession(page);
+    await session.send('Emulation.setEmulatedMedia', {features:[{name:'prefers-reduced-transparency',value:'reduce'}]});
+    assert.equal(await page.evaluate(() => matchMedia('(prefers-reduced-transparency: reduce)').matches), true);
+    assert.deepEqual(await styles(), Array(2).fill({filter:'none',opacity:255,border:'0px',shadow:'none'}));
+  } finally {
+    await browser.close();
+  }
+});

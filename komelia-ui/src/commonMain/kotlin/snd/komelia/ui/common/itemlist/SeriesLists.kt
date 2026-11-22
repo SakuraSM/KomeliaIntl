@@ -71,6 +71,7 @@ fun SeriesLazyCardGrid(
     beforeContent: @Composable () -> Unit = {},
     isList: Boolean = false,
     hasBeforeContent: Boolean = true,
+    topContentInset: Dp = 0.dp,
 ) {
     val layout = LocalKomeliaLayout.current
     val headerItems = if (hasBeforeContent) 1 else 0
@@ -92,7 +93,7 @@ fun SeriesLazyCardGrid(
             columns = if (isList) GridCells.Fixed(1) else posterGridCells(minSize),
             horizontalArrangement = Arrangement.spacedBy(layout.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(if (isList) 0.dp else layout.gridSpacing),
-            contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
+            contentPadding = PaddingValues(top = topContentInset, bottom = layout.gridBottomPadding),
             modifier = Modifier
                 .widthIn(max = layout.contentMaxWidth)
                 .fillMaxSize()

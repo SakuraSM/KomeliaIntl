@@ -38,8 +38,9 @@ fun LibraryCollectionsContent(
 
     minSize: Dp,
     showToolbar: Boolean = true,
+    topContentInset: Dp = 0.dp,
 ) {
-    Column(verticalArrangement = Arrangement.Center) {
+    Column(Modifier.padding(top = if (isLoading) topContentInset else 0.dp), verticalArrangement = Arrangement.Center) {
 
         if (showToolbar) Row(
             horizontalArrangement = Arrangement.End,
@@ -74,7 +75,8 @@ fun LibraryCollectionsContent(
                 totalPages = totalPages,
                 currentPage = currentPage,
                 onPageChange = onPageChange,
-                minSize = minSize
+                minSize = minSize,
+                topContentInset = topContentInset,
             )
         }
     }

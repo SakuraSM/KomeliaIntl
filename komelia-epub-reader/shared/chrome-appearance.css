@@ -306,17 +306,30 @@
     --komelia-paper-progress-bottom: 20px;
   }
 
+  @supports (color: color-mix(in srgb, white 74%, transparent)) and ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root[data-komelia-platform="android"][data-komelia-surface="glass"] {
+      --komelia-paper-opacity: 74%;
+      --komelia-paper-filter: blur(20px) saturate(1.2);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :root[data-komelia-platform="android"][data-komelia-surface="glass"] {
+      --komelia-paper-opacity: 100%;
+      --komelia-paper-filter: none;
+    }
+  }
+
   :root[data-komelia-platform="android"][data-komelia-surface] :is([data-komelia-toolbar="top"], [data-komelia-reader-progress]) {
     --komelia-paper-ink: var(--komelia-reader-ink, #242421);
     --komelia-paper-fill: color-mix(in srgb, var(--komelia-reader-paper, #fff) 88%, #9e9271);
-    --komelia-paper-border: color-mix(in srgb, var(--komelia-paper-ink) 32%, var(--komelia-paper-fill));
     background: var(--komelia-reader-paper, #f4f1e8) !important;
-    background: var(--komelia-paper-fill) !important;
+    background: color-mix(in srgb, var(--komelia-paper-fill) var(--komelia-paper-opacity, 100%), transparent) !important;
     color: var(--komelia-paper-ink) !important;
     border: 0;
-    box-shadow: inset 0 0 0 1px var(--komelia-paper-border, #a9a498) !important;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    box-shadow: none !important;
+    backdrop-filter: var(--komelia-paper-filter, none);
+    -webkit-backdrop-filter: var(--komelia-paper-filter, none);
   }
 
   :root[data-komelia-platform="android"][data-komelia-surface] [data-komelia-toolbar="top"] {

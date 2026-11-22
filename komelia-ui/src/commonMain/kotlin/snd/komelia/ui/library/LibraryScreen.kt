@@ -2,6 +2,7 @@ package snd.komelia.ui.library
 
 import snd.komelia.ui.common.components.BrowseOptionsButton
 import snd.komelia.ui.common.components.BrowseSearchHeader
+import snd.komelia.ui.common.components.BrowseScopeButton
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.common.components.PageSizeSelectionDropdown
@@ -73,6 +74,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -224,11 +226,12 @@ class LibraryScreen(
                                 }
                             },
                         ) { topInset ->
-                            Box(Modifier.fillMaxSize().padding(top = topInset)) {
+                            val scrollingInset = if (LocalPlatform.current == MOBILE) topInset else 0.dp
+                            Box(Modifier.fillMaxSize().padding(top = topInset - scrollingInset)) {
                                 when (vm.currentTab) {
-                                    SERIES -> BrowseTab(vm.seriesTabState)
-                                    COLLECTIONS -> CollectionsTab(vm.collectionsTabState)
-                                    READ_LISTS -> ReadListsTab(vm.readListsTabState)
+                                    SERIES -> BrowseTab(vm.seriesTabState, scrollingInset)
+                                    COLLECTIONS -> CollectionsTab(vm.collectionsTabState, scrollingInset)
+                                    READ_LISTS -> ReadListsTab(vm.readListsTabState, scrollingInset)
                                 }
                             }
                         }
@@ -239,7 +242,7 @@ class LibraryScreen(
     }
 
     @Composable
-    private fun BrowseTab(seriesTabState: LibrarySeriesTabState) {
+    private fun BrowseTab(seriesTabState: LibrarySeriesTabState, topContentInset: Dp) {
         val navigator = LocalNavigator.currentOrThrow
         LaunchedEffect(libraryId) { seriesTabState.initialize(seriesFilter) }
         DisposableEffect(Unit) {
@@ -248,17 +251,17 @@ class LibraryScreen(
         }
 
         when (val state = seriesTabState.state.collectAsState().value) {
-            is Error -> ErrorContent(
-                exception = state.exception,
-                onReload = seriesTabState::reload
-            )
+            is Error -> Box(Modifier.padding(top = topContentInset)) {
+                ErrorContent(exception = state.exception, onReload = seriesTabState::reload)
+            }
 
             else -> {
                 val editMode by seriesTabState.isInEditMode.collectAsState()
                 val filter by seriesTabState.filterState.state.collectAsState()
                 val loading = state is Loading || state is Uninitialized || filter != seriesTabState.loadedFilter
-                Column {
-                    LibraryBrowseControls(seriesTabState)
+                val scrollControls = LocalPlatform.current == MOBILE && !editMode && seriesTabState.series.isNotEmpty()
+                Column(Modifier.padding(top = if (scrollControls) 0.dp else topContentInset)) {
+                    if (!scrollControls) LibraryBrowseControls(seriesTabState)
                     CompositionLocalProvider(LocalKomeliaLayout provides LocalKomeliaLayout.current.copy(
                         pageHorizontalPadding = if (LocalMacOS.current) MacDesign.pageInset else ReadingDesign.browseInset)) {
                         Box(Modifier.weight(1f)) {
@@ -281,6 +284,10 @@ class LibraryScreen(
                                 onPageChange = seriesTabState::onPageChange,
                                 minSize = seriesTabState.cardWidth.collectAsState().value,
                                 showToolbar = false,
+                                topContentInset = if (scrollControls) topContentInset else 0.dp,
+                                leadingContent = if (scrollControls) {
+                                    { LibraryBrowseControls(seriesTabState, insideGrid = true) }
+                                } else null,
                             )
                             LibrarySeriesEmptyState(
                                 loading = loading,
@@ -296,7 +303,7 @@ class LibraryScreen(
     }
 
     @Composable
-    private fun CollectionsTab(collectionsTabState: LibraryCollectionsTabState) {
+    private fun CollectionsTab(collectionsTabState: LibraryCollectionsTabState, topContentInset: Dp) {
         val navigator = LocalNavigator.currentOrThrow
         LaunchedEffect(libraryId) { collectionsTabState.initialize() }
         DisposableEffect(Unit) {
@@ -305,11 +312,10 @@ class LibraryScreen(
         }
 
         when (val state = collectionsTabState.state.collectAsState().value) {
-            Uninitialized -> LoadingMaxSizeIndicator()
-            is Error -> ErrorContent(
-                exception = state.exception,
-                onReload = collectionsTabState::reload
-            )
+            Uninitialized -> LoadingMaxSizeIndicator(Modifier.padding(top = topContentInset))
+            is Error -> Box(Modifier.padding(top = topContentInset)) {
+                ErrorContent(exception = state.exception, onReload = collectionsTabState::reload)
+            }
 
             else -> {
                 val loading = state is Loading
@@ -328,6 +334,7 @@ class LibraryScreen(
 
                     minSize = collectionsTabState.cardWidth.collectAsState().value,
                     showToolbar = false,
+                    topContentInset = topContentInset,
                 )
 
             }
@@ -336,7 +343,7 @@ class LibraryScreen(
     }
 
     @Composable
-    private fun ReadListsTab(readListTabState: LibraryReadListsTabState) {
+    private fun ReadListsTab(readListTabState: LibraryReadListsTabState, topContentInset: Dp) {
         val navigator = LocalNavigator.currentOrThrow
         LaunchedEffect(libraryId) { readListTabState.initialize() }
         DisposableEffect(Unit) {
@@ -345,8 +352,8 @@ class LibraryScreen(
         }
 
         when (val state = readListTabState.state.collectAsState().value) {
-            Uninitialized -> LoadingMaxSizeIndicator()
-            is Error -> Text(stringResource(Res.string.error_unknown))
+            Uninitialized -> LoadingMaxSizeIndicator(Modifier.padding(top = topContentInset))
+            is Error -> Text(stringResource(Res.string.error_unknown), Modifier.padding(top = topContentInset))
             else -> {
                 val loading = state is Loading
                 LibraryReadListsContent(
@@ -364,6 +371,7 @@ class LibraryScreen(
 
                     minSize = readListTabState.cardWidth.collectAsState().value,
                     showToolbar = false,
+                    topContentInset = topContentInset,
                 )
             }
         }
@@ -446,6 +454,7 @@ private fun LibraryToolBar(
         query = if (viewModel.currentTab == SERIES) filter.searchTerm else otherQuery,
         onQueryChange = { if (viewModel.currentTab == SERIES) filterState.onSearchTermChange(it) else otherQuery = it },
         onSubmit = { if (viewModel.currentTab != SERIES) navigation.open(SearchScreen(it)) },
+        compactOnAndroid = true,
         titleActions = {
             if (showScopeSelector) Box(Modifier.widthIn(max = 148.dp)) {
                 LibraryScopeSelector(libraries, selectedLibraryId, compact = true, onSelect = onLibrarySelect)
@@ -554,7 +563,9 @@ internal fun LibraryScopeSelector(
     }
 
     Box {
-        if (compact || formField) Surface(onClick = { expanded = true }, color = androidx.compose.ui.graphics.Color.Transparent,
+        if (compact && !formField && platform == MOBILE) {
+            BrowseScopeButton(label = selectedName, onClick = { expanded = true })
+        } else if (compact || formField) Surface(onClick = { expanded = true }, color = androidx.compose.ui.graphics.Color.Transparent,
             modifier = (if (formField) Modifier.fillMaxWidth() else Modifier.width((132.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)).coerceAtMost(148.dp)))
                 .height(48.dp)) {
             Box(contentAlignment = Alignment.Center) {

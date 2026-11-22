@@ -119,7 +119,7 @@ internal fun BrowseOptionsButton(
             modifier = Modifier.focusRequester(anchorFocus).semantics { selected = active },
         ) {
             BadgedBox(badge = { if (active) Badge() }) {
-                Icon(Icons.Rounded.Tune, label)
+                Icon(Icons.Rounded.Tune, label, Modifier.offset(y = LocalBrowseHeaderIconOffset.current))
             }
         }
         if (!mobile) {

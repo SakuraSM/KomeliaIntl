@@ -103,6 +103,7 @@ internal fun LocalContent(
             query = query,
             onQueryChange = onQueryChange,
             placeholder = stringResource(Res.string.local_content_search),
+            compactOnAndroid = true,
             headerHeight = 48.dp,
             titleStyle = MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp),
             searchPaintHeight = 44.dp,
@@ -120,13 +121,14 @@ internal fun LocalContent(
             }
         }
     }) { topInset ->
-        Column(Modifier.fillMaxSize().padding(top = topInset)) {
+        val scrollingInset = if (snd.komelia.ui.LocalPlatform.current == snd.komelia.ui.platform.PlatformType.MOBILE && !loading) topInset else 0.dp
+        Column(Modifier.fillMaxSize().padding(top = topInset - scrollingInset)) {
             if (loading) {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
             }
             LazyColumn(
                 state = listState,
-                contentPadding = PaddingValues(bottom = layout.gridBottomPadding),
+                contentPadding = PaddingValues(top = scrollingInset, bottom = layout.gridBottomPadding),
                 modifier = Modifier.fillMaxSize().padding(horizontal = if (snd.komelia.ui.LocalMacOS.current) snd.komelia.ui.MacDesign.pageInset else 22.dp),
             ) {
                 item {

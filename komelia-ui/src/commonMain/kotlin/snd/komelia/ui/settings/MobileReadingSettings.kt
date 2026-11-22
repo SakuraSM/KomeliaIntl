@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -59,7 +60,8 @@ internal class MobileSettingsSectionScreen(private val section: MobileSettingsSe
                 updatesEnabled = vm.updatesEnabled, newVersionIsAvailable = vm.newVersionIsAvailable,
                 onLogout = vm::logout, user = vm.user.collectAsState().value,
                 contentColor = MaterialTheme.colorScheme.surface, mobileSection = section,
-                modifier = Modifier.fillMaxSize().padding(top = topInset + 16.dp).padding(horizontal = 16.dp))
+                topContentInset = topInset + 16.dp,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp))
         }
         BackPressHandler { navigator.pop() }
     }
@@ -71,12 +73,14 @@ internal fun MobileReadingSettingsHome(
     offlineAvailable: Boolean,
     textReaderAvailable: Boolean,
     modifier: Modifier = Modifier,
+    topContentInset: Dp = 0.dp,
 ) {
     val appearance = LocalSurfaceAppearance.current
     val appearanceSummary = stringResource(AppStrings.forAppTheme(appearance.theme)) + " · " + stringResource(
         if (appearance.style == AppSurfaceStyle.LIQUID_GLASS) Res.string.appearance_liquid_glass else Res.string.appearance_classic)
     Column(modifier.verticalScroll(rememberScrollState())
-        .padding(bottom = LocalNavigationBarInset.current + 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        .padding(top = topContentInset, bottom = LocalNavigationBarInset.current + 16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)) {
         ReadingSettingsGroup {
             SettingsGroupLabel(stringResource(Res.string.reading_settings_group))
             if (textReaderAvailable) ReadingSettingsRow(stringResource(Res.string.reading_text_settings), Icons.AutoMirrored.Rounded.MenuBook,

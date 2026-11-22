@@ -69,6 +69,8 @@ class SearchScreen(
                         title = stringResource(Res.string.navbar_search),
                         query = vm.query,
                         onQueryChange = { vm.query = it },
+                        compactOnAndroid = true,
+                        searchInitiallyExpanded = !initialQuery.isNullOrBlank(),
                         titleStyle = MaterialTheme.typography.headlineMedium.copy(fontSize = 31.5.sp, lineHeight = 38.sp),
                         titleOffset = 5.dp,
                     ) { SearchViewOptions(vm) }
@@ -76,11 +78,13 @@ class SearchScreen(
                     BrowsePageHeader(stringResource(Res.string.navbar_search)) { SearchViewOptions(vm) }
                 }
             }) { topInset ->
+                val state = vm.state.collectAsState().value
+                val scrollsUnderHeader = LocalPlatform.current == PlatformType.MOBILE && state is LoadState.Success
                 Column(
-                    modifier = Modifier.fillMaxSize().padding(top = topInset),
+                    modifier = Modifier.fillMaxSize().padding(top = if (scrollsUnderHeader) 0.dp else topInset),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    when (val state = vm.state.collectAsState().value) {
+                    when (state) {
                         is LoadState.Error -> ErrorContent(
                             exception = state.exception,
                             onReload = vm::reload
@@ -111,6 +115,7 @@ class SearchScreen(
                                 onBookPageChange = vm::onBookPageChange,
                                 onBookClick = { navigator.push(bookScreen(it)) },
                                 showToolbar = true,
+                                scrollingTopInset = topInset.takeIf { scrollsUnderHeader },
                             )
 
                         }

@@ -21,6 +21,7 @@ internal object ReadingDesign {
     val navigationHeight = 70.dp
     val navigationInset = 14.dp
     val primaryHeaderHeight = 72.dp
+    val destinationTitleOffset = (-6).dp
     val toolbarHeight = 48.dp
     val sheetInset = 20.dp
     val sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)

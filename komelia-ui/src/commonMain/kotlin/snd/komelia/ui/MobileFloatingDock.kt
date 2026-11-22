@@ -50,7 +50,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.settings.model.AppSurfaceStyle
 import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.ui.common.components.komeliaChrome
 import kotlin.math.roundToInt
 
 @Composable
@@ -62,6 +64,9 @@ internal fun MobileFloatingDock(
     val colors = MaterialTheme.colorScheme
     val light = colors.background.luminance() > 0.5f
     val dockColor = if (light) colors.surfaceContainerLow else lerp(colors.surfaceContainer, Color.Black, 0.36f)
+    val glassStyle = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS
+    val shape = RoundedCornerShape(16.dp)
+    val material = if (glassStyle) Modifier.komeliaChrome(shape) else Modifier
     val insets = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
     val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
@@ -70,10 +75,10 @@ internal fun MobileFloatingDock(
             .padding(horizontal = 9.dp).padding(top = 8.dp, bottom = 4.dp),
     ) {
         Surface(
-            modifier = Modifier.fillMaxWidth().testTag("primary-navigation"),
-            shape = RoundedCornerShape(16.dp),
-            color = dockColor,
-            border = BorderStroke(1.dp, colors.outlineVariant),
+            modifier = Modifier.fillMaxWidth().testTag("primary-navigation").then(material),
+            shape = shape,
+            color = if (glassStyle) Color.Transparent else dockColor,
+            border = if (glassStyle) null else BorderStroke(1.dp, colors.outlineVariant),
         ) {
             Layout(
                 modifier = Modifier.fillMaxWidth().height(60.dp + 32.dp * (fontScale - 1f)).selectableGroup(),

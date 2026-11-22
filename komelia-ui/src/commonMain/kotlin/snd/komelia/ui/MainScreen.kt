@@ -299,8 +299,7 @@ class MainScreen(
                                     }
                                 },
                             ) { contentPadding ->
-                                val floatingBar = platform != MOBILE &&
-                                    LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS &&
+                                val floatingBar = LocalSurfaceAppearance.current.style == AppSurfaceStyle.LIQUID_GLASS &&
                                     showBottomNavigation
                                 val bottomInset = if (floatingBar) contentPadding.calculateBottomPadding() else 0.dp
                                 val direction = LocalLayoutDirection.current

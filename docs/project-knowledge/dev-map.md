@@ -85,7 +85,7 @@ hash and confirming that application sources and the selected platform's build s
 
 ### Android launcher and compact navigation
 
-`MainActivity` plays `LaunchMotion` once on a cold launcher start while the app initializes. The system window draws the first mark on the same background. The launch screen fades out when the login controls or Home are ready. If Home data takes longer, it exposes navigation and an in-page loading indicator. Restored activities skip the intro and reduced motion uses a static mark. Android initializes WebView when a reader first needs it. `MainScreen` reserves space for `MobileFloatingDock` on compact Android windows. The dock reuses the five destination models and only animates the selected appearance; larger windows use the existing rail.
+`MainActivity` plays `LaunchMotion` once on a cold launcher start while the app initializes. The system window draws the first mark on the same background. The launch screen fades out when the login controls or Home are ready. If Home data takes longer, it exposes navigation and an in-page loading indicator. Restored activities skip the intro and reduced motion uses a static mark. Android initializes WebView when a reader first needs it. On compact Android windows, `MobileFloatingDock` uses the shared glass material in Liquid Glass mode. `MainScreen` lets pages scroll behind the dock and applies its measured height at the end of scrolling content. The dock reuses the five destinations and their selection animation. Larger windows use the navigation rail.
 
 ### Android reader and search validation
 

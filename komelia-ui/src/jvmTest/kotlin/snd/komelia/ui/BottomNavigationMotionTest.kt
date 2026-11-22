@@ -2,6 +2,7 @@ package snd.komelia.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,11 +17,36 @@ import androidx.compose.ui.unit.dp
 import org.junit.Rule
 import org.junit.Test
 import snd.komelia.settings.model.AppTheme
+import snd.komelia.settings.model.AppSurfaceStyle
+import snd.komelia.ui.common.components.LocalSurfaceAppearance
+import snd.komelia.ui.common.components.SurfaceAppearance
+import snd.komelia.ui.platform.PlatformType
 import kotlin.math.abs
 import kotlin.test.assertTrue
 
 class BottomNavigationMotionTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test fun androidDockUsesTheGlassFallbackWhenTransparencyIsReduced() {
+        compose.setContent {
+            KomeliaTheme(AppTheme.DARKER) {
+                CompositionLocalProvider(
+                    LocalSurfaceAppearance provides SurfaceAppearance(
+                        style = AppSurfaceStyle.LIQUID_GLASS,
+                        theme = AppTheme.DARKER,
+                        reduceTransparency = true,
+                    ),
+                ) {
+                    Box(Modifier.width(390.dp)) {
+                        AppBottomBar(AppDestination.HOME, PlatformType.MOBILE) { _, _ -> }
+                    }
+                }
+            }
+        }
+        val pixels = compose.onNodeWithTag("primary-navigation").captureToImage().toPixelMap()
+        val material = pixels[pixels.width / 2, 4]
+        assertTrue(distance(Color(0xFF09121E), material) < .01f && material.alpha == 1f, "The dock must use the opaque glass tint")
+    }
 
     @Test fun selectionBackgroundTransitionsWithoutDelayingSelection() {
         val selected = mutableStateOf(AppDestination.HOME)

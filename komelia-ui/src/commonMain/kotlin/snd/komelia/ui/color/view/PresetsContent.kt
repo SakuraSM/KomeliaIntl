@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.color_correction_preset
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.color_correction_preset_delete
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.color_correction_preset_delete_confirm_body
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.color_correction_preset_name_already_exists
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.color_correction_preset_name_enter
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.color_correction_preset_name_placeholder
@@ -40,6 +41,7 @@ import snd.komelia.ui.common.components.CheckboxWithLabel
 import snd.komelia.ui.common.components.DropdownChoiceMenu
 import snd.komelia.ui.common.components.LabeledEntry
 import snd.komelia.ui.dialogs.AppDialog
+import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.dialogs.DialogConfirmCancelButtons
 
 @Composable
@@ -49,7 +51,9 @@ fun <T : Preset> PresetsContent(
 ) {
     val selectedPreset = state.selectedPreset.collectAsState().value
     val availablePresets = state.presets.collectAsState().value
+    val isWritingPreset by state.isWritingPreset.collectAsState()
     var showNameDialog by remember { mutableStateOf(false) }
+    var presetToDelete by remember { mutableStateOf<T?>(null) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -64,20 +68,30 @@ fun <T : Preset> PresetsContent(
         )
         if (selectedPreset == null)
             Tooltip(stringResource(Res.string.color_correction_preset_save)) {
-                IconButton(onClick = { showNameDialog = true }) {
-                    Icon(Icons.Rounded.Add, null)
+                IconButton(onClick = { showNameDialog = true }, enabled = !isWritingPreset) {
+                    Icon(Icons.Rounded.Add, stringResource(Res.string.color_correction_preset_save))
                 }
             }
         else {
             Tooltip(stringResource(Res.string.color_correction_preset_delete)) {
                 IconButton(
-                    onClick = { state.onPresetDelete(selectedPreset) },
+                    onClick = { presetToDelete = selectedPreset },
+                    enabled = !isWritingPreset,
                 ) {
-                    Icon(Icons.Rounded.Delete, null)
+                    Icon(Icons.Rounded.Delete, stringResource(Res.string.color_correction_preset_delete))
                 }
             }
         }
 
+    }
+    presetToDelete?.let { preset ->
+        ConfirmationDialog(
+            title = stringResource(Res.string.color_correction_preset_delete),
+            body = stringResource(Res.string.color_correction_preset_delete_confirm_body, preset.name),
+            buttonConfirm = stringResource(Res.string.color_correction_preset_delete),
+            onDialogConfirm = { state.onPresetDelete(preset) },
+            onDialogDismiss = { presetToDelete = null },
+        )
     }
     var newPresetName by remember { mutableStateOf("") }
     val isValidName by derivedStateOf { availablePresets.none { it.name == newPresetName } }

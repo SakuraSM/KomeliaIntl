@@ -10,6 +10,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -17,7 +19,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import snd.komelia.AppNotifications
 import snd.komelia.AppWindowState
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaReadListApi
@@ -41,6 +42,10 @@ import snd.webview.KomeliaWebview
 import snd.webview.ResourceLoadResult
 
 private val logger = KotlinLogging.logger {}
+private const val CONTENT_LOAD_TIMEOUT_MILLIS = 30_000L
+
+@Serializable
+private data class KomgaContentLoad(val generation: Int?, val bookId: String? = null, val chapterHref: String? = null)
 class KomgaEpubReaderState(
     bookId: KomgaBookId,
     book: KomeliaBook?,
@@ -50,7 +55,6 @@ class KomgaEpubReaderState(
     private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
     private val displaySettings: StateFlow<EpubDisplaySettings>,
-    private val notifications: AppNotifications,
     private val markReadProgress: Boolean,
     private val windowState: AppWindowState,
     private val platformType: PlatformType,
@@ -69,6 +73,10 @@ class KomgaEpubReaderState(
     private val navigator = MutableStateFlow<Navigator?>(null)
     private val isClosed = MutableStateFlow(false)
     private var activeSession: EpubReaderSession? = null
+    private var contentLoadTimeout: Job? = null
+    private var webviewLoadJob: Job? = null
+    internal var failedChapter: String? = null
+        private set
 
     override suspend fun initialize(navigator: Navigator) {
         isClosed.value = false
@@ -77,12 +85,14 @@ class KomgaEpubReaderState(
         if (state.value !is Uninitialized) return
 
         state.value = LoadState.Loading
-        notifications.runCatchingToNotifications {
+        try {
             Res.getUri("files/komga.html")
             if (book.value == null) book.value = bookApi.getOne(bookId.value)
             state.value = LoadState.Success(Unit)
-        }.onFailure {
-            state.value = LoadState.Error(it)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            failLoad(error)
         }
     }
 
@@ -90,10 +100,20 @@ class KomgaEpubReaderState(
         // A retained screen can create its native view before initialize() runs again.
         isClosed.value = false
         activeSession?.close()
+        webviewLoadJob?.cancel()
         val session = EpubReaderSession().also { activeSession = it }
         contentReady.value = false
         this.webview.value = webview
-        coroutineScope.launch { loadEpub(webview, session) }
+        startContentLoadTimeout(session, generation = null)
+        webviewLoadJob = coroutineScope.launch {
+            try {
+                loadEpub(webview, session)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                if (activeSession === session) failLoad(error)
+            }
+        }
     }
 
     override fun onBackButtonPress() {
@@ -123,12 +143,33 @@ class KomgaEpubReaderState(
     private fun retireWebview() {
         activeSession?.close()
         activeSession = null
+        webviewLoadJob?.cancel()
+        webviewLoadJob = null
+        contentLoadTimeout?.cancel()
+        contentLoadTimeout = null
         val closing = webview.value
         webview.value = null
         contentReady.value = false
         // Android close() does not destroy the document. Retire its JS realm explicitly.
         closing?.navigate("about:blank")
         closing?.close()
+    }
+
+    private fun startContentLoadTimeout(session: EpubReaderSession, generation: Int?) {
+        contentLoadTimeout?.cancel()
+        contentLoadTimeout = coroutineScope.launch {
+            delay(CONTENT_LOAD_TIMEOUT_MILLIS)
+            if (activeSession === session && session.isCurrentContentLoad(generation) && !contentReady.value) {
+                failLoad(IllegalStateException("EPUB renderer did not become ready"))
+            }
+        }
+    }
+
+    private fun failLoad(error: Exception, chapterHref: String? = null) {
+        logger.catching(error)
+        failedChapter = chapterHref
+        state.value = LoadState.Error(error)
+        dispose()
     }
 
     @OptIn(ExperimentalResourceApi::class)
@@ -144,7 +185,6 @@ class KomgaEpubReaderState(
             val book = bookApi.getOne(bookId)
             session.requireOpen()
             this.book.value = book
-            this.bookId.value = book.id
             book
         }
         bindActive(webview, session, "bookGetProgression") { bookId: KomgaBookId ->
@@ -219,8 +259,25 @@ class KomgaEpubReaderState(
             session.requireOpen()
             windowState.setFullscreen(!fullscreen, hideNavigationBar = displaySettings.value.immersiveMode)
         }
-        bindActive<Unit, Unit>(webview, session, "readerContentReady") {
-            contentReady.value = true
+        bindActive<KomgaContentLoad, Unit>(webview, session, "readerContentLoading") { request ->
+            val generation = request.generation ?: return@bindActive
+            val loadingBookId = request.bookId ?: return@bindActive
+            if (session.beginContentLoad(generation)) {
+                bookId.value = KomgaBookId(loadingBookId)
+                contentReady.value = false
+                startContentLoadTimeout(session, generation)
+            }
+        }
+        bindActive<KomgaContentLoad, Unit>(webview, session, "readerContentReady") { request ->
+            if (session.isCurrentContentLoad(request.generation)) {
+                contentLoadTimeout?.cancel()
+                contentReady.value = true
+            }
+        }
+        webview.bind<KomgaContentLoad, Unit>("readerContentFailed") { request ->
+            if (session.isCurrentContentLoad(request.generation)) {
+                failLoad(IllegalStateException("EPUB renderer reported a load failure"), request.chapterHref)
+            }
         }
 
         webview.registerRequestInterceptor { request ->

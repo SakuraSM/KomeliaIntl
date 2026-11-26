@@ -7,10 +7,10 @@ import kotlinx.coroutines.CancellationException
 import snd.komelia.settings.model.EpubReaderType
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.compose.ui.graphics.Color
+import io.github.oshai.kotlinlogging.KotlinLogging
 import snd.komelia.settings.model.EpubDisplaySettings
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import snd.komelia.AppNotifications
 import snd.komelia.AppWindowState
 import snd.komelia.fonts.UserFontsRepository
 import snd.komelia.komga.api.KomgaBookApi
@@ -28,6 +28,8 @@ import snd.komelia.ui.platform.PlatformType
 import snd.komga.client.book.KomgaBookId
 import snd.webview.KomeliaWebview
 
+private val logger = KotlinLogging.logger {}
+
 class EpubReaderViewModel(
     private val bookId: KomgaBookId,
     private val book: KomeliaBook?,
@@ -39,7 +41,6 @@ class EpubReaderViewModel(
     private val epubSettingsRepository: EpubReaderSettingsRepository,
     private val settingsRepository: CommonSettingsRepository,
     private val fontsRepository: UserFontsRepository,
-    private val notifications: AppNotifications,
     private val windowState: AppWindowState,
     private val platformType: PlatformType,
     private val bookSiblingsContext: BookSiblingsContext,
@@ -49,6 +50,8 @@ class EpubReaderViewModel(
     val chromeAppearance = MutableStateFlow(EpubChromeAppearance())
 
     private val retainedReader = RetainedEpubReader()
+    private var openingBookId = bookId
+    private var openingChapter: String? = null
 
     override fun onDispose() {
         retainedReader.dispose()
@@ -56,14 +59,35 @@ class EpubReaderViewModel(
     }
 
     suspend fun initialize(navigator: Navigator, initialChapterHref: String? = null) {
-        if (state.value is LoadState.Loading && initialChapterHref == null) return
-        displaySettings.value = epubSettingsRepository.getDisplaySettings().first()
-        val selectedType = epubSettingsRepository.getReaderType().first()
-        val reader = retainedReader.select(selectedType, replaceExisting = initialChapterHref != null) {
-            createReader(selectedType, initialChapterHref)
+        if (state.value is LoadState.Loading) return
+        openReader(navigator, bookId, initialChapterHref, replaceExisting = initialChapterHref != null)
+    }
+
+    suspend fun retry(navigator: Navigator) {
+        if (state.value is LoadState.Loading) return
+        val previous = (state.value as? LoadState.Success)?.value as? KomgaEpubReaderState
+        val retryBookId = previous?.bookId?.value ?: openingBookId
+        val retryChapter = previous?.failedChapter ?: openingChapter.takeIf { retryBookId == openingBookId }
+        openReader(navigator, retryBookId, retryChapter, replaceExisting = true)
+    }
+
+    private suspend fun openReader(
+        navigator: Navigator,
+        targetBookId: KomgaBookId,
+        chapterHref: String?,
+        replaceExisting: Boolean,
+    ) {
+        if (replaceExisting || state.value !is LoadState.Success) {
+            openingBookId = targetBookId
+            openingChapter = chapterHref
+            mutableState.value = LoadState.Loading
         }
-        if ((state.value as? LoadState.Success)?.value !== reader) mutableState.value = LoadState.Loading
         try {
+            displaySettings.value = epubSettingsRepository.getDisplaySettings().first()
+            val selectedType = epubSettingsRepository.getReaderType().first()
+            val reader = retainedReader.select(selectedType, replaceExisting) {
+                createReader(selectedType, targetBookId, chapterHref)
+            }
             reader.initialize(navigator)
             mutableState.value = when (val result = reader.state.value) {
                 is LoadState.Error -> LoadState.Error(result.exception)
@@ -74,22 +98,22 @@ class EpubReaderViewModel(
             mutableState.value = LoadState.Uninitialized
             throw cancelled
         } catch (error: Exception) {
+            logger.catching(error)
             mutableState.value = LoadState.Error(error)
         }
     }
 
-    private suspend fun createReader(type: EpubReaderType, initialChapterHref: String?): EpubReaderState {
+    private suspend fun createReader(type: EpubReaderType, targetBookId: KomgaBookId, initialChapterHref: String?): EpubReaderState {
         var pendingChapter = initialChapterHref
         val consumeInitialChapter = { pendingChapter.also { pendingChapter = null } }
         return when (type) {
         KOMGA_EPUB -> KomgaEpubReaderState(
-            bookId = bookId,
-            book = book,
+            bookId = targetBookId,
+            book = book?.takeIf { it.id == targetBookId },
             bookApi = bookApi,
             seriesApi = seriesApi,
             readListApi = readListApi,
             serverUrl = serverUrl,
-            notifications = notifications,
             markReadProgress = markReadProgress,
             epubSettingsRepository = epubSettingsRepository,
             displaySettings = displaySettings,
@@ -101,10 +125,9 @@ class EpubReaderViewModel(
             consumeInitialChapter = consumeInitialChapter,
         )
         TTSU_EPUB -> TtsuReaderState(
-            bookId = bookId,
-            book = book,
+            bookId = targetBookId,
+            book = book?.takeIf { it.id == targetBookId },
             bookApi = bookApi,
-            notifications = notifications,
             markReadProgress = markReadProgress,
             serverUrl = serverUrl,
             epubSettingsRepository = epubSettingsRepository,

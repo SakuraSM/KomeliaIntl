@@ -1,0 +1,4 @@
+<resources>
+    <string name="onnx_model_download_failed">Could not download the model. Try again.</string>
+    <string name="onnx_model_download_retry">Retry</string>
+</resources>

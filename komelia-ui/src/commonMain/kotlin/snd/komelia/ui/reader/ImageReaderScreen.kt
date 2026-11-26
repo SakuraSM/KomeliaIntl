@@ -52,6 +52,9 @@ import snd.komga.client.book.MediaProfile.EPUB
 import snd.komga.client.book.MediaProfile.PDF
 import kotlin.jvm.Transient
 
+internal fun isImageReaderBook(book: KomeliaBook): Boolean =
+    book.media.mediaProfile == DIVINA || book.media.mediaProfile == PDF || book.media.epubDivinaCompatible
+
 fun readerScreen(
     book: KomeliaBook,
     markReadProgress: Boolean,
@@ -60,7 +63,7 @@ fun readerScreen(
     val context = bookSiblingsContext ?: BookSiblingsContext.Series
     val mediaProfile = book.media.mediaProfile
     return when {
-        mediaProfile == DIVINA || mediaProfile == PDF || book.media.epubDivinaCompatible -> {
+        isImageReaderBook(book) -> {
             ImageReaderScreen(
                 bookId = book.id,
                 book = book,
@@ -118,7 +121,7 @@ class ImageReaderScreen(
             val bookId = KomgaBookId(currentBookId)
             vm.initialize(bookId)
             val book = vm.readerState.booksState.value?.currentBook
-            if (book != null && book.media.mediaProfile != DIVINA && book.media.mediaProfile != PDF) {
+            if (book != null && !isImageReaderBook(book)) {
                 navigator.replace(
                     readerScreen(
                         book = book,
@@ -126,6 +129,7 @@ class ImageReaderScreen(
                         markReadProgress = markReadProgress
                     )
                 )
+                return@LaunchedEffect
             }
             vm.readerState.booksState.filterNotNull()
                 .collect { currentBookId = it.currentBook.id.value }

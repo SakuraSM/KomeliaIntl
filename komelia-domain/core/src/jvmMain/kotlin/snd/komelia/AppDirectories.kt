@@ -7,7 +7,7 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.notExists
 
 object AppDirectories {
-    private val mangaJaNaiModelFiles = listOf(
+    internal val mangaJaNaiModelFiles = setOf(
         "2x_MangaJaNai_1200p_V1_ESRGAN_70k.onnx",
         "2x_MangaJaNai_1300p_V1_ESRGAN_75k.onnx",
         "2x_MangaJaNai_1400p_V1_ESRGAN_70k.onnx",
@@ -17,7 +17,7 @@ object AppDirectories {
         "2x_MangaJaNai_2048p_V1_ESRGAN_95k.onnx",
     )
 
-    private val mangaJaNaiIllustrationModelFiles = listOf(
+    internal val mangaJaNaiIllustrationModelFiles = setOf(
         "2x_IllustrationJaNai_V1_ESRGAN_120k.onnx",
         "4x_IllustrationJaNai_V1_ESRGAN_135k.onnx",
     )

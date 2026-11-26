@@ -288,7 +288,7 @@ class DesktopAppModule(
     override fun createOnnxRuntimeInstaller(updateClient: UpdateClient) = DesktopOnnxRuntimeInstaller(updateClient)
 
     override fun createOnnxModelDownloader(updateClient: UpdateClient) =
-        DesktopOnnxModelDownloader(updateClient, appNotifications)
+        DesktopOnnxModelDownloader(updateClient)
 
     override fun createOnnxRuntime(): OnnxRuntime? {
         if (!OnnxRuntimeSharedLibraries.isAvailable) {

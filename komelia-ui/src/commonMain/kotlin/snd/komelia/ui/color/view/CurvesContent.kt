@@ -108,7 +108,7 @@ fun ColorCurvesContent(
     pointType: CurvePointType,
     onPointTypeChange: (CurvePointType) -> Unit,
     pointerIcon: PointerIcon,
-    onKeyEvent: (KeyEvent) -> Unit,
+    onKeyEvent: (KeyEvent) -> Boolean,
     onPointerEvent: (PointerEvent) -> Unit,
     onCanvasSizeChange: (IntSize) -> Unit,
     onDensityChange: (Density) -> Unit,
@@ -229,7 +229,7 @@ private fun Curve(
     selectedChannel: ColorChannel,
     selectedPoint: SelectedPoint?,
     pointerIcon: PointerIcon,
-    onKeyEvent: (KeyEvent) -> Unit,
+    onKeyEvent: (KeyEvent) -> Boolean,
     onPointerEvent: (PointerEvent) -> Unit,
     onCanvasSizeChange: (IntSize) -> Unit,
     onDensityChange: (Density) -> Unit,
@@ -273,10 +273,7 @@ private fun Curve(
             .padding(horizontal = 4.dp, vertical = 4.dp)
             .focusRequester(focusRequester)
             .focusable()
-            .onKeyEvent {
-                onKeyEvent(it)
-                true
-            }
+            .onKeyEvent(onKeyEvent)
             .pointerHoverIcon(pointerIcon)
             .pointerInput(PointerEventPass.Main) {
                 awaitPointerEventScope {

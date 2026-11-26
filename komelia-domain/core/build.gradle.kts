@@ -77,6 +77,10 @@ kotlin {
             implementation(libs.richEditor.compose)
         }
 
+        val jvmSharedMain by creating { dependsOn(commonMain.get()) }
+        androidMain.get().dependsOn(jvmSharedMain)
+        jvmMain.get().dependsOn(jvmSharedMain)
+
         androidMain.dependencies {
             implementation(libs.androidx.appcompat)
             implementation(libs.commons.compress)

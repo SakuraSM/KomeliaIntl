@@ -1,11 +1,12 @@
 package snd.komelia.ui.settings.imagereader.onnxruntime
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -13,17 +14,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
-import kotlinx.coroutines.delay
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.onnx_model_download_failed
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.onnx_model_download_retry
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.conflate
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.formatDecimal
 import snd.komelia.ui.dialogs.AppDialog
@@ -36,13 +35,12 @@ fun DownloadDialog(
     onDismiss: () -> Unit,
     headerText: String,
 ) {
-    var progress by remember { mutableStateOf(UpdateProgress(0, 0)) }
-    LaunchedEffect(Unit) {
-        onDownloadRequest().conflate().collect {
-            progress = it
-            delay(100)
-        }
-        onDismiss()
+    val operation = remember { OnnxProgressOperation() }
+    val scope = rememberCoroutineScope()
+    val status = operation.status
+    LaunchedEffect(Unit) { operation.start(scope, onDownloadRequest) }
+    LaunchedEffect(status) {
+        if (status == OnnxProgressOperation.Status.Succeeded) onDismiss()
     }
 
     AppDialog(
@@ -53,15 +51,35 @@ fun DownloadDialog(
                 HorizontalDivider(Modifier.padding(top = 10.dp))
             }
         },
-        content = { UpdateProgressContent(progress) },
+        content = {
+            if (status is OnnxProgressOperation.Status.Failed) {
+                Text(
+                    text = stringResource(Res.string.onnx_model_download_failed),
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(20.dp),
+                )
+            } else {
+                UpdateProgressContent((status as? OnnxProgressOperation.Status.Running)?.progress ?: UpdateProgress(0, 0))
+            }
+        },
         controlButtons = {
-            Box(modifier = Modifier.padding(bottom = 10.dp, end = 10.dp)) {
-
+            Row(
+                modifier = Modifier.padding(bottom = 10.dp, end = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 TextButton(
-                    onClick = onDismiss,
+                    onClick = {
+                        operation.cancel()
+                        onDismiss()
+                    },
                     modifier = Modifier.cursorForHand(),
                     content = { Text(stringResource(Res.string.dialog_cancel)) }
                 )
+                if (status is OnnxProgressOperation.Status.Failed) {
+                    FilledTonalButton(onClick = { operation.start(scope, onDownloadRequest) }) {
+                        Text(stringResource(Res.string.onnx_model_download_retry))
+                    }
+                }
             }
         },
         onDismissRequest = {}
@@ -77,12 +95,12 @@ internal fun UpdateProgressContent(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         if (progress.total == 0L) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxSize())
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             progress.description?.let { Text(it) }
         } else {
             LinearProgressIndicator(
-                progress = { progress.completed / progress.total.toFloat() },
-                modifier = Modifier.fillMaxSize()
+                progress = { (progress.completed / progress.total.toFloat()).coerceIn(0f, 1f) },
+                modifier = Modifier.fillMaxWidth()
             )
             progress.description?.let { Text(it) }
 

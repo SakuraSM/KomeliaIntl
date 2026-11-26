@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="local_library_remove_confirm_body">从此设备的书库移除「%1$s」？该目录的书目索引和本地阅读进度会被清除。源文件会保留在原目录中。</string>
+    <string name="color_correction_preset_delete_confirm_body">删除已保存的预设「%1$s」？</string>
+</resources>

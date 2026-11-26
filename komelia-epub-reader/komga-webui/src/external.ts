@@ -44,8 +44,16 @@ declare global {
 
         isFullscreenAvailable: () => Promise<CallbackResponse<boolean>>
         toggleFullscreen: () => Promise<CallbackResponse<undefined>>
-        readerContentReady: () => Promise<CallbackResponse<undefined>>
+        readerContentLoading: (load: ReaderContentLoad) => Promise<CallbackResponse<undefined>>
+        readerContentReady: (load: ReaderContentLoad) => Promise<CallbackResponse<undefined>>
+        readerContentFailed: (load: ReaderContentLoad) => Promise<CallbackResponse<undefined>>
     }
+}
+
+export interface ReaderContentLoad {
+    generation: number | null
+    bookId?: string
+    chapterHref?: string
 }
 
 export interface CallbackResponse<T> {
@@ -130,8 +138,16 @@ export default class ExternalFunctions {
         return window.toggleFullscreen().then((value) => value.result)
     }
 
-    async readerContentReady(): Promise<undefined> {
-        return window.readerContentReady().then((value) => value.result)
+    async readerContentLoading(load: ReaderContentLoad): Promise<undefined> {
+        return this.callbackResult(window.readerContentLoading(load))
+    }
+
+    async readerContentReady(load: ReaderContentLoad): Promise<undefined> {
+        return this.callbackResult(window.readerContentReady(load))
+    }
+
+    async readerContentFailed(load: ReaderContentLoad): Promise<undefined> {
+        return this.callbackResult(window.readerContentFailed(load))
     }
 
     async callbackResult<T>(promise: Promise<CallbackResponse<T>>): Promise<T> {

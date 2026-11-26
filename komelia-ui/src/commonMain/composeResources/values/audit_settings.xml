@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="local_library_remove_confirm_body">Remove “%1$s” from this device’s library? This clears its catalog entries and local reading progress. The source files stay in the folder.</string>
+    <string name="color_correction_preset_delete_confirm_body">Delete the saved preset “%1$s”?</string>
+</resources>

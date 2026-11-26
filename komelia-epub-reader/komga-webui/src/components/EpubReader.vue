@@ -221,6 +221,7 @@ import {EpubReaderSettings} from "@/types/epub-reader-settings";
 import {externalFunctions} from "@/main";
 import {watchNativeExit} from '../../../shared/native-exit'
 import {listenForFootnotes} from '@/functions/footnote'
+import {loadPublicationContent} from '@/functions/publicationContent'
 import {
   mdiChevronLeft,
   mdiChevronRight,
@@ -297,6 +298,8 @@ watch([showToolbars, showSettings, showToc], async states => {
 })
 const readerLoading = ref(true)
 let readerLoadGeneration = 0
+let failedLoadGeneration: number | null | undefined
+let requestedChapterHref: string | undefined
 const tab: Ref<string> = ref("hasToc")
 const readingDirs = ref(
     [
@@ -643,7 +646,7 @@ const navigationClick = computed({
 onBeforeUnmount(() => {
   window.removeEventListener('pagehide', disposeReaderNavigation)
   disposeReaderNavigation()
-  d2Reader.value.stop()
+  d2Reader.value.stop?.()
 })
 
 function disposeReaderNavigation(): void {
@@ -662,11 +665,15 @@ onMounted(async () => {
     leave: async () => { if (footnoteTrigger.value) closeFootnote(); else await closeBook() },
     onError: error => console.warn('EPUB Back listener ended', error),
   })
-  let bookId = await externalFunctions.getInitialBookId()
-  let externalSettings = await externalFunctions.getReaderSettings()
-  fullscreenIsAvailable.value = await externalFunctions.isFullscreenAvailable()
-  Object.assign(settings, externalSettings)
-  await setupState(bookId)
+  try {
+    const initialBookId = await externalFunctions.getInitialBookId()
+    const externalSettings = await externalFunctions.getReaderSettings()
+    fullscreenIsAvailable.value = await externalFunctions.isFullscreenAvailable()
+    Object.assign(settings, externalSettings)
+    if (readerLoadGeneration === 0) await setupState(initialBookId)
+  } catch (error) {
+    await reportContentFailure(error, null)
+  }
 })
 
 function previousBook(): void {
@@ -857,10 +864,35 @@ function navigateResourceAfterUnchangedBoundary(
   }, CHAPTER_NAVIGATION_SETTLE_MS)
 }
 
-async function setupState(currentBookId: string) {
+async function reportContentFailure(
+    error: unknown,
+    generation: number | null,
+    chapterHref = requestedChapterHref,
+): Promise<void> {
+  if ((generation ?? 0) !== readerLoadGeneration || failedLoadGeneration === generation) return
+  failedLoadGeneration = generation
+  console.error('Unable to open EPUB content', error)
+  try {
+    await externalFunctions.readerContentFailed({generation, chapterHref})
+  } catch (bridgeError) {
+    console.warn('EPUB failure could not be delivered to the host', bridgeError)
+  }
+}
+
+async function setupState(currentBookId: string): Promise<void> {
   const loadGeneration = ++readerLoadGeneration
-  siblingState.reset(currentBookId)
   readerLoading.value = true
+  requestedChapterHref = undefined
+  try {
+    await externalFunctions.readerContentLoading({generation: loadGeneration, bookId: currentBookId})
+    if (loadGeneration === readerLoadGeneration) await loadPublication(currentBookId, loadGeneration)
+  } catch (error) {
+    await reportContentFailure(error, loadGeneration)
+  }
+}
+
+async function loadPublication(currentBookId: string, loadGeneration: number) {
+  siblingState.reset(currentBookId)
   bookId.value = currentBookId
   book.value = await externalFunctions.bookGet(currentBookId)
   series.value = await externalFunctions.getOneSeries(book.value.seriesId)
@@ -948,12 +980,22 @@ async function setupState(currentBookId: string) {
     },
     services: canUsePositions ? {positions: positionsUrl} : {},
     api: {
-      getContent: externalFunctions.d2ReaderGetContent,
+      getContent: (href: string) => loadPublicationContent({
+        href,
+        bookId: currentBookId,
+        load: externalFunctions.d2ReaderGetContent,
+        onFailure: error => {
+          const requested = requestedChapterHref
+          const chapterHref = requested && requested.split('#', 1)[0] === href.split('#', 1)[0] ? requested : href
+          void reportContentFailure(error, loadGeneration, chapterHref)
+        },
+      }),
       getContentBytesLength: externalFunctions.d2ReaderGetContentBytesLength,
       updateCurrentLocation: updateCurrentLocation,
       keydownFallthrough: keyPressed,
       clickThrough: clickThrough,
-      resourceReady: handleResourceReady,
+      resourceReady: () => handleResourceReady(loadGeneration),
+      onError: error => { void reportContentFailure(error, loadGeneration) },
       positionInfo: updatePositionInfo,
       chapterInfo: updateChapterInfo,
       direction: updateDirection,
@@ -970,24 +1012,26 @@ async function setupState(currentBookId: string) {
 
 }
 
-function handleResourceReady(): void {
+function handleResourceReady(loadGeneration: number): void {
+  if (loadGeneration !== readerLoadGeneration || failedLoadGeneration === loadGeneration) return
   attachFootnoteListeners()
   scheduleReaderContentSwipeNavigationSetup()
-  const loadGeneration = readerLoadGeneration
-  void hideReaderLoadingAfterFirstPaint(loadGeneration)
+  void hideReaderLoadingAfterFirstPaint(loadGeneration).catch(error => reportContentFailure(error, loadGeneration))
 }
 
 async function hasUsablePositionsService(source: {isLocal: boolean; url: URL}): Promise<boolean> {
   if (!source.isLocal) return true
   // An old book may be opened before its background rescan completes. An empty positions
   // array breaks the reader's locator path; retain positionless reading until it is indexed.
-  const response = await fetch(source.url.href)
-  if (!response.ok) throw new Error(`Unable to load local EPUB positions: ${response.status}`)
-  const result: unknown = await response.json()
-  if (typeof result !== 'object' || result === null || !('positions' in result) || !Array.isArray(result.positions)) {
-    throw new Error('Invalid local EPUB positions response')
+  try {
+    const response = await fetch(source.url.href)
+    if (!response.ok) return false
+    const result: unknown = await response.json()
+    return typeof result === 'object' && result !== null && 'positions' in result &&
+      Array.isArray(result.positions) && result.positions.length > 0
+  } catch {
+    return false
   }
-  return result.positions.length > 0
 }
 
 async function hideReaderLoadingAfterFirstPaint(loadGeneration: number): Promise<void> {
@@ -1005,18 +1049,21 @@ async function hideReaderLoadingAfterFirstPaint(loadGeneration: number): Promise
       await nextAnimationFrame(readerFrame)
       await nextAnimationFrame()
       await nextAnimationFrame()
-      if (loadGeneration === readerLoadGeneration) {
-        await externalFunctions.readerContentReady()
-        readerLoading.value = false
-      }
+      await finishContentLoad(loadGeneration)
       return
     }
     await new Promise(resolve => window.setTimeout(resolve, 80))
   }
 
-  if (loadGeneration === readerLoadGeneration) {
-    await externalFunctions.readerContentReady()
+  await finishContentLoad(loadGeneration)
+}
+
+async function finishContentLoad(generation: number): Promise<void> {
+  if (generation !== readerLoadGeneration || failedLoadGeneration === generation) return
+  await externalFunctions.readerContentReady({generation})
+  if (generation === readerLoadGeneration && failedLoadGeneration !== generation) {
     readerLoading.value = false
+    requestedChapterHref = undefined
   }
 }
 
@@ -1092,7 +1139,9 @@ function goToEntry(tocEntry: TocEntry) {
   const locator = tocEntryToLocator(tocEntry)
   if (locator === undefined) return
 
-  d2Reader.value.goTo(locator)
+  requestedChapterHref = tocEntry.href
+  const generation = readerLoadGeneration
+  void Promise.resolve(d2Reader.value.goTo(locator)).catch(error => reportContentFailure(error, generation))
   showToc.value = false
   showToolbars.value = false
 }

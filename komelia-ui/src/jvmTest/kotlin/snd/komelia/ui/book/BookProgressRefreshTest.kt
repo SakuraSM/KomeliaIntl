@@ -18,16 +18,84 @@ import org.junit.Test
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.model.KomeliaBook
 import snd.komga.client.book.*
+import snd.komelia.ui.LoadState
+import snd.komelia.ui.reader.EpubScreen
+import snd.komelia.ui.reader.ImageReaderScreen
+import snd.komelia.ui.reader.isImageReaderBook
+import snd.komelia.ui.reader.readerScreen
+import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.library.KomgaLibraryId
+import snd.komga.client.library.ScanInterval
+import snd.komga.client.library.SeriesCover
 import snd.komga.client.series.KomgaSeriesId
 import snd.komga.client.sse.KomgaEvent
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class, InternalVoyagerApi::class)
 class BookProgressRefreshTest {
     @Test fun returningFromReaderRefreshesProgressWithoutAnEvent() = verifyRefresh(false)
     @Test fun initialDetailSnapshotDoesNotOverrideSavedProgress() = verifyRefresh(true)
+
+    @Test fun missingLibraryCanBeRetriedWithoutLeavingTheBook() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val snapshot = book()
+        var libraryAvailable = false
+        val holder = "book-library-${java.util.UUID.randomUUID()}"
+        val vm = ScreenModelStore.getOrPut(holder, null) { BookViewModel(
+            book = null, bookId = snapshot.id,
+            bookApi = stub { name -> when (name) {
+                "getOne" -> snapshot
+                "getAllReadListsByBook" -> emptyList<Any>()
+                else -> error("Unexpected call $name")
+            } },
+            libraryApi = stub { if (libraryAvailable) library() else throw IOException("Library unavailable") },
+            notifications = AppNotifications(), komgaEvents = MutableSharedFlow(),
+            libraries = MutableStateFlow(emptyList()), taskEmitter = null, localLibraryManager = null,
+            settingsRepository = stub { flowOf(240) },
+            readListApi = stub { error("No synthetic read lists") },
+        ) }
+        try {
+            vm.initialize()
+            assertIs<LoadState.Error>(vm.state.value)
+            assertNull(vm.library)
+
+            libraryAvailable = true
+            vm.reload()
+            advanceUntilIdle()
+            assertIs<LoadState.Success<Unit>>(vm.state.value)
+            assertEquals(snapshot.id, vm.book.value?.id)
+            assertEquals(snapshot.libraryId, vm.library?.id)
+
+            libraryAvailable = false
+            vm.reload()
+            advanceUntilIdle()
+            assertIs<LoadState.Error>(vm.state.value)
+            assertEquals(snapshot.id, vm.book.value?.id)
+            assertEquals(snapshot.libraryId, vm.library?.id)
+        } finally {
+            ScreenModelStore.onDisposeNavigator(holder)
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test fun routesImageEpubWithoutAnImageReaderRedirect() {
+        val comic = book()
+        val textEpub = comic.copy(media = comic.media.copy(mediaProfile = MediaProfile.EPUB))
+        val imageEpub = textEpub.copy(media = textEpub.media.copy(epubDivinaCompatible = true))
+        val pdf = comic.copy(media = comic.media.copy(mediaProfile = MediaProfile.PDF))
+
+        for (imageBook in listOf(comic, imageEpub, pdf)) {
+            assertTrue(isImageReaderBook(imageBook))
+            assertIs<ImageReaderScreen>(readerScreen(imageBook, markReadProgress = false))
+        }
+        assertFalse(isImageReaderBook(textEpub))
+        assertIs<EpubScreen>(readerScreen(textEpub, markReadProgress = false))
+    }
 
     private fun verifyRefresh(staleInitially: Boolean) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
@@ -42,7 +110,7 @@ class BookProgressRefreshTest {
                 "getAllReadListsByBook" -> emptyList<Any>()
                 else -> error("Unexpected call $name")
             } },
-            libraryApi = stub { throw IOException("No synthetic library") },
+            libraryApi = stub { library() },
             notifications = AppNotifications(), komgaEvents = events,
             libraries = MutableStateFlow(emptyList()), taskEmitter = null, localLibraryManager = null,
             settingsRepository = stub { flowOf(240) },
@@ -84,6 +152,19 @@ class BookProgressRefreshTest {
             localFileLastModified = now, remoteFileUnavailable = false,
         )
     }
+
+    private fun library(): KomgaLibrary = KomgaLibrary(
+        id = KomgaLibraryId("library"), name = "Synthetic library", root = "local://synthetic",
+        importComicInfoBook = false, importComicInfoSeries = false, importComicInfoCollection = false,
+        importComicInfoReadList = false, importComicInfoSeriesAppendVolume = false,
+        importEpubBook = false, importEpubSeries = false, importMylarSeries = false,
+        importLocalArtwork = false, importBarcodeIsbn = false, scanForceModifiedTime = false,
+        scanInterval = ScanInterval.DISABLED, scanOnStartup = false, scanCbx = true, scanPdf = true, scanEpub = true,
+        scanDirectoryExclusions = emptyList(), repairExtensions = false, convertToCbz = false,
+        emptyTrashAfterScan = false, seriesCover = SeriesCover.FIRST,
+        hashFiles = false, hashPages = false, hashKoreader = false, analyzeDimensions = false,
+        oneshotsDirectory = null, unavailable = false,
+    )
 
     private inline fun <reified T> stub(crossinline answer: (String) -> Any?): T =
         Proxy.newProxyInstance(T::class.java.classLoader, arrayOf(T::class.java)) { _, method, _ ->

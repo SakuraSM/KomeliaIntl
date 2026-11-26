@@ -22,6 +22,8 @@ sealed class PresetsState<T : Preset>(
 ) {
     val selectedPreset = MutableStateFlow<T?>(null)
     val presets = MutableStateFlow<List<T>>(emptyList())
+    private val presetWriteInProgress = MutableStateFlow(false)
+    val isWritingPreset: StateFlow<Boolean> = presetWriteInProgress
 
     suspend fun initialize() {
         presets.value = getPresets()
@@ -50,9 +52,11 @@ sealed class PresetsState<T : Preset>(
             )
             return
         }
-        presets.update { it.minus(preset) }
-        selectedPreset.value = null
-        coroutineScope.launch { presetDelete(preset) }
+        writePreset {
+            presetDelete(deletePreset)
+            presets.update { it.minus(deletePreset) }
+            selectedPreset.compareAndSet(deletePreset, null)
+        }
     }
 
 
@@ -63,7 +67,7 @@ sealed class PresetsState<T : Preset>(
             return
         }
 
-        coroutineScope.launch {
+        writePreset {
             val preset = presetSave(presetName)
             if (existingPreset != null) {
                 presets.update { presets ->
@@ -77,6 +81,13 @@ sealed class PresetsState<T : Preset>(
             }
             onPresetSelect(preset)
         }
+    }
+
+    private fun writePreset(write: suspend () -> Unit) {
+        if (!presetWriteInProgress.compareAndSet(false, true)) return
+        coroutineScope.launch {
+            appNotifications.runCatchingToNotifications { write() }
+        }.invokeOnCompletion { presetWriteInProgress.value = false }
     }
 
     fun deselectCurrent() {
@@ -118,9 +129,7 @@ class CurvePresetsState(
     }
 
     override suspend fun presetDelete(preset: ColorCurvePreset) {
-        presets.value.firstOrNull { it.name == preset.name }?.let {
-            presetRepository.deletePreset(it)
-        }
+        presetRepository.deletePreset(preset)
     }
 
     override fun presetSelect(preset: ColorCurvePreset) {
@@ -158,9 +167,7 @@ class LevelsPresetsState(
     }
 
     override suspend fun presetDelete(preset: ColorLevelsPreset) {
-        presets.value.firstOrNull { it.name == preset.name }?.let {
-            presetRepository.deletePreset(it)
-        }
+        presetRepository.deletePreset(preset)
     }
 
     override fun presetSelect(preset: ColorLevelsPreset) {

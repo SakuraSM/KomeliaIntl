@@ -41,6 +41,8 @@ fun ErrorContent(
     message: String,
     onReload: (() -> Unit)? = null,
     onExit: (() -> Unit)? = null,
+    exitLabel: String? = null,
+    reloadLabel: String? = null,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -57,13 +59,13 @@ fun ErrorContent(
             Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                 if (onReload != null) {
                     FilledTonalButton(onClick = onReload) {
-                        Text(stringResource(Res.string.error_reload))
+                        Text(reloadLabel ?: stringResource(Res.string.error_reload))
                     }
                 }
 
                 if (onExit != null) {
                     FilledTonalButton(onClick = onExit) {
-                        Text(stringResource(Res.string.error_exit))
+                        Text(exitLabel ?: stringResource(Res.string.error_exit))
                     }
                 }
             }

@@ -311,7 +311,6 @@ class AndroidAppModule(
     override fun createOnnxModelDownloader(updateClient: UpdateClient) =
         AndroidOnnxModelDownloader(
             updateClient = updateClient,
-            appNotifications = appNotifications,
             dataDir = context.filesDir.resolve("onnx").toPath().createDirectories()
         )
 

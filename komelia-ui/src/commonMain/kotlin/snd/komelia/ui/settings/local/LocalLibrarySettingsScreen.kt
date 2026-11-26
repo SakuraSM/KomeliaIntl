@@ -30,8 +30,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_archive_import_failures
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_add
@@ -39,12 +37,14 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_a
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_not_available
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_refresh
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_remove
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_remove_confirm_body
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_sources
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_excluded_books
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_excluded_books_description
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_library_restore_book
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_navigation_local_library
 import org.jetbrains.compose.resources.stringResource
+import snd.komelia.offline.library.model.OfflineLibrary
 import snd.komelia.ui.LocalKomeliaLayout
 import snd.komelia.ui.LocalViewModelFactory
 import snd.komelia.ui.common.components.SettingsSection
@@ -52,6 +52,7 @@ import snd.komelia.ui.common.archiveFailureMessage
 import snd.komelia.offline.mediacontainer.ArchivePreparation
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.local_archive_preparing
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.dialog_cancel
+import snd.komelia.ui.dialogs.ConfirmationDialog
 import snd.komelia.ui.dialogs.permissions.StoragePermissionRequestDialog
 import snd.komelia.ui.settings.SettingsScreenContainer
 import snd.komga.client.library.ScanInterval
@@ -62,9 +63,11 @@ class LocalLibrarySettingsScreen : Screen {
         val factory = LocalViewModelFactory.current
         val vm = rememberScreenModel { factory.getLocalLibraryViewModel() }
         var selectingDirectory by remember { mutableStateOf(false) }
+        var libraryToRemove by remember { mutableStateOf<OfflineLibrary?>(null) }
         val scanState by vm.scanState.collectAsState()
         val preparingArchives by ArchivePreparation.activeCount.collectAsState()
         val layout = LocalKomeliaLayout.current
+        val isBusy = vm.loading || scanState.scanningLibraryId != null
 
         LaunchedEffect(Unit) { vm.initialize() }
         if (selectingDirectory) {
@@ -72,6 +75,15 @@ class LocalLibrarySettingsScreen : Screen {
                 selectingDirectory = false
                 directory?.let(vm::addLibrary)
             }
+        }
+        libraryToRemove?.let { library ->
+            ConfirmationDialog(
+                title = stringResource(Res.string.local_library_remove),
+                body = stringResource(Res.string.local_library_remove_confirm_body, library.name),
+                buttonConfirm = stringResource(Res.string.local_library_remove),
+                onDialogConfirm = { vm.remove(library.id) },
+                onDialogDismiss = { libraryToRemove = null },
+            )
         }
 
         SettingsScreenContainer(stringResource(Res.string.settings_navigation_local_library)) {
@@ -85,15 +97,22 @@ class LocalLibrarySettingsScreen : Screen {
 
             SettingsSection(
                 title = stringResource(Res.string.local_library_sources),
-                supportingText = if (preparingArchives > 0) stringResource(Res.string.local_archive_preparing)
-                else scanState.error ?: vm.error ?: scanState.archiveFailure?.let { archiveFailureMessage(it) }
-                    ?: if (scanState.failedImports > 0) stringResource(Res.string.local_archive_import_failures, scanState.failedImports) else null,
             ) {
-                Button(onClick = { selectingDirectory = true }, enabled = !vm.loading) {
+                val error = vm.error ?: scanState.error ?: scanState.archiveFailure?.let { archiveFailureMessage(it) }
+                    ?: if (scanState.failedImports > 0) {
+                        stringResource(Res.string.local_archive_import_failures, scanState.failedImports)
+                    } else null
+                if (error != null) {
+                    Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+                if (preparingArchives > 0) {
+                    Text(stringResource(Res.string.local_archive_preparing), style = MaterialTheme.typography.bodySmall)
+                }
+                Button(onClick = { selectingDirectory = true }, enabled = !isBusy) {
                     Icon(Icons.Rounded.Add, contentDescription = null)
                     Text(stringResource(Res.string.local_library_add))
                 }
-                if (vm.loading || scanState.scanningLibraryId != null) {
+                if (isBusy) {
                     CircularProgressIndicator()
                 }
                 if (vm.loading) {
@@ -120,13 +139,13 @@ class LocalLibrarySettingsScreen : Screen {
                                     overflow = TextOverflow.Ellipsis,
                                 )
                             }
-                            IconButton(onClick = { vm.refresh(library.id) }, enabled = !vm.loading) {
+                            IconButton(onClick = { vm.refresh(library.id) }, enabled = !isBusy) {
                                 Icon(
                                     Icons.Rounded.Refresh,
                                     contentDescription = stringResource(Res.string.local_library_refresh),
                                 )
                             }
-                            IconButton(onClick = { vm.remove(library.id) }, enabled = !vm.loading) {
+                            IconButton(onClick = { libraryToRemove = library }, enabled = !isBusy) {
                                 Icon(
                                     Icons.Rounded.Delete,
                                     contentDescription = stringResource(Res.string.local_library_remove),
@@ -142,6 +161,7 @@ class LocalLibrarySettingsScreen : Screen {
                             Switch(
                                 checked = library.scanInterval != ScanInterval.DISABLED,
                                 onCheckedChange = { vm.setScheduled(library.id, it) },
+                                enabled = !isBusy,
                             )
                         }
                     }
@@ -172,7 +192,7 @@ class LocalLibrarySettingsScreen : Screen {
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
-                            IconButton(onClick = { vm.restore(exclusion) }, enabled = !vm.loading) {
+                            IconButton(onClick = { vm.restore(exclusion) }, enabled = !isBusy) {
                                 Icon(
                                     Icons.Rounded.Restore,
                                     contentDescription = stringResource(Res.string.local_library_restore_book),

@@ -39,4 +39,18 @@ class EpubReaderSessionTest {
         assertEquals("current book", current.run { "current book" })
         assertFailsWith<CancellationException> { old.run { "stale book" } }
     }
+    @Test fun replacedLoadsAndRetiredWebviewsCannotReportContent() {
+        val session = EpubReaderSession()
+        assertEquals(true, session.isCurrentContentLoad(null))
+        assertEquals(true, session.beginContentLoad(1))
+        assertEquals(true, session.beginContentLoad(2))
+        assertEquals(false, session.beginContentLoad(1))
+        assertEquals(false, session.isCurrentContentLoad(null))
+        assertEquals(false, session.isCurrentContentLoad(1))
+        assertEquals(true, session.isCurrentContentLoad(2))
+        session.close()
+        assertEquals(false, session.isCurrentContentLoad(2))
+        assertEquals(false, session.beginContentLoad(3))
+    }
+
 }

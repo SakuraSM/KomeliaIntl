@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 
 class TtuExitSessionTest {
     @Test fun requestsWaitForTheReaderAndIgnoreRepeatedBackPresses() = runTest {
-        val session = TtuExitSession()
+        val session = EpubExitSession()
         assertFalse(session.requestExit())
         val first = async(start = CoroutineStart.UNDISPATCHED) { session.awaitRequest() }
         assertTrue(session.requestExit())
@@ -25,7 +25,7 @@ class TtuExitSessionTest {
     }
 
     @Test fun closingTheSessionReleasesItsWaitingReader() = runTest {
-        val session = TtuExitSession()
+        val session = EpubExitSession()
         val waiting = async(start = CoroutineStart.UNDISPATCHED) { session.awaitRequest() }
         assertTrue(session.retire())
         assertFalse(waiting.await())

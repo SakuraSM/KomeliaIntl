@@ -79,7 +79,7 @@
 
   $effect(() => {
     if (!dialogs.length) {
-      dialogTrigger?.focus();
+      dialogTrigger?.focus({preventScroll: true});
       dialogTrigger = null;
       return;
     }

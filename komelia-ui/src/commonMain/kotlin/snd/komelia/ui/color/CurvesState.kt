@@ -172,15 +172,12 @@ class CurvesState(
         blueCurve.setPoints(channels.blueCurvePoints)
     }
 
-    fun onKeyEvent(event: KeyEvent) {
-        if (event.type == KeyEventType.KeyUp && event.key == Key.Delete) {
-            val curve = selectedCurve.value
-            val selectedPoint = this.selectedPoint.value
-            if (selectedPoint != null) {
-                curve.removePoint(selectedPoint.index)
-                this.selectedPoint.value = null
-            }
-        }
+    fun onKeyEvent(event: KeyEvent): Boolean {
+        if (event.type != KeyEventType.KeyUp || event.key != Key.Delete) return false
+        val point = selectedPoint.value ?: return false
+        selectedCurve.value.removePoint(point.index)
+        selectedPoint.value = null
+        return true
     }
 
     fun onPointerEvent(event: PointerEvent) {

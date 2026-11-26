@@ -29,7 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.getString
-import snd.komelia.AppNotifications
 import snd.komelia.AppWindowState
 import snd.komelia.codepointsCount
 import snd.komelia.fonts.UserFont
@@ -69,7 +68,6 @@ class TtsuReaderState(
     bookId: KomgaBookId,
     book: KomeliaBook?,
     private val bookApi: KomgaBookApi,
-    private val notifications: AppNotifications,
     private val markReadProgress: Boolean,
     private val serverUrl: StateFlow<String>,
     private val epubSettingsRepository: EpubReaderSettingsRepository,
@@ -93,7 +91,7 @@ class TtsuReaderState(
     private val epubLoadTask = CompletableDeferred<TtuEpubData>()
     private var epubLoadJob: Job? = null
     private var webviewLoadJob: Job? = null
-    private var exitSession = TtuExitSession()
+    private var exitSession = EpubExitSession()
     private val availableSystemFonts = MutableStateFlow<List<String>>(emptyList())
     private val selectedFontFile = MutableStateFlow<PlatformFile?>(null)
     private val navigator = MutableStateFlow<Navigator?>(null)
@@ -105,33 +103,49 @@ class TtsuReaderState(
         if (state.value !is LoadState.Uninitialized) return
 
         state.value = LoadState.Loading
-        notifications.runCatchingToNotifications {
+        try {
             Res.getUri("files/ttsu.html")
-
             if (book.value == null) book.value = bookApi.getOne(bookId.value)
-            epubLoadJob = coroutineScope.launch {
-                runCatching { epubLoadTask.complete(generateEpubHtml(bookId.value)) }
-                    .onFailure {
-                        if (it is CancellationException) throw it
-                        logger.catching(it)
-                        webview.value?.close()
-                        state.value = LoadState.Error(it)
-                    }
-            }
             availableSystemFonts.value = getSystemFontNames()
             state.value = LoadState.Success(Unit)
-        }.onFailure {
-            state.value = LoadState.Error(it)
+            epubLoadJob = coroutineScope.launch {
+                try {
+                    epubLoadTask.complete(generateEpubHtml(bookId.value))
+                } catch (cancelled: CancellationException) {
+                    epubLoadTask.cancel(cancelled)
+                    throw cancelled
+                } catch (error: Exception) {
+                    if (epubLoadTask.completeExceptionally(error)) failLoad(error)
+                }
+            }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            failLoad(error)
         }
+    }
+
+    private fun failLoad(error: Exception) {
+        logger.catching(error)
+        state.value = LoadState.Error(error)
+        dispose()
     }
 
     override fun onWebviewCreated(webview: KomeliaWebview) {
         exitSession.retire()
-        val session = TtuExitSession()
+        val session = EpubExitSession()
         exitSession = session
         this.webview.value = webview
         webviewLoadJob?.cancel()
-        webviewLoadJob = coroutineScope.launch { loadEpub(webview, session) }
+        webviewLoadJob = coroutineScope.launch {
+            try {
+                loadEpub(webview, session)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                if (exitSession === session && this@TtsuReaderState.webview.value === webview) failLoad(error)
+            }
+        }
     }
 
     override fun onBackButtonPress() {
@@ -140,8 +154,7 @@ class TtsuReaderState(
 
     override fun closeWebview() {
         if (!exitSession.retire()) return
-        webview.value?.close()
-        if (platformType == PlatformType.MOBILE) windowState.setFullscreen(false)
+        retireReader()
 
         navigator.value?.let { nav ->
             if (nav.canPop) nav.pop()
@@ -154,7 +167,10 @@ class TtsuReaderState(
     }
 
     override fun dispose() {
-        exitSession.retire()
+        if (exitSession.retire()) retireReader()
+    }
+
+    private fun retireReader() {
         webviewLoadJob?.cancel()
         epubLoadJob?.cancel()
         if (!epubLoadTask.isCompleted) epubLoadTask.cancel()
@@ -162,10 +178,17 @@ class TtsuReaderState(
         webview.value = null
         closing?.navigate("about:blank")
         closing?.close()
+        if (platformType == PlatformType.MOBILE) windowState.setFullscreen(false)
+    }
+
+    internal suspend fun markBookCompleted() {
+        if (markReadProgress) {
+            bookApi.markReadProgress(bookId.value, KomgaBookReadProgressUpdateRequest(completed = true))
+        }
     }
 
     @OptIn(ExperimentalResourceApi::class)
-    private suspend fun loadEpub(webview: KomeliaWebview, session: TtuExitSession) {
+    private suspend fun loadEpub(webview: KomeliaWebview, session: EpubExitSession) {
         webview.bind<Unit, Boolean>("waitForReaderExit") { session.awaitRequest() }
         webview.bind<Unit, String>("getCurrentBookId") { bookId.value.value }
         webview.bind<Unit, String?>("getLocale") { localeTag }
@@ -249,7 +272,7 @@ class TtsuReaderState(
         }
 
         webview.bind<Unit, Unit>("completeBook") {
-            bookApi.markReadProgress(bookId.value, KomgaBookReadProgressUpdateRequest(completed = true))
+            markBookCompleted()
             closeWebview()
         }
 
@@ -434,7 +457,7 @@ class TtsuReaderState(
         val data: String,
     )
 
-    private suspend fun generateEpubHtml(bookId: KomgaBookId): TtuEpubData {
+    private suspend fun generateEpubHtml(bookId: KomgaBookId): TtuEpubData = kotlinx.coroutines.coroutineScope {
         val manifest = bookApi.getWebPubManifest(bookId)
         val positions = bookApi.getReadiumPositions(bookId)
         val sectionData: MutableList<TtuSection> = mutableListOf()
@@ -447,7 +470,7 @@ class TtsuReaderState(
         val chapters = manifest.readingOrder
             .mapNotNull { it.href }
             .map { href ->
-                coroutineScope.async {
+                async {
                     Chapter(href, proxyResourceRequest(bookApi, href, serverUrl).data.decodeToString())
                 }
             }
@@ -547,7 +570,7 @@ class TtsuReaderState(
             }
             .joinToString("\n")
 
-        return TtuEpubData(
+        TtuEpubData(
             element = result,
             stylesheet = combinedDirtyStyleString,
             characterCount = currentCharCount,

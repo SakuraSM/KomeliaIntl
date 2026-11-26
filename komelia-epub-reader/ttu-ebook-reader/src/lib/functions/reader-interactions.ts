@@ -7,6 +7,7 @@
 import type {SectionWithProgress} from '$lib/components/book-reader/book-toc/book-toc';
 import type {BookmarkData, Section} from '$lib/data/books-db';
 import {t} from '$lib/i18n';
+import {markSearchSpan, projectSearchText, searchSpans, type SearchText} from './epub-search-text';
 import {
   DEFAULT_READER_HIGHLIGHT_COLOR,
   READER_ANNOTATION_TYPE_HIGHLIGHT,
@@ -18,12 +19,11 @@ const SEARCH_SNIPPET_RADIUS = 36;
 const MAX_SEARCH_RESULTS = 200;
 const WEAK_MATCH_MIN_LENGTH = 8;
 
-export interface ReaderSearchIndexItem {
+export interface ReaderSearchIndexItem extends SearchText {
   chapterReference: string;
   chapterIndex: number;
   chapterLabel: string;
   startCharacter: number;
-  text: string;
 }
 
 export interface ReaderSearchResult {
@@ -60,9 +60,7 @@ export function buildReaderSearchIndex(
     .map((section, chapterIndex) => {
       const sectionRoot = container.querySelector<HTMLElement>(`#${cssEscape(section.reference)}`) ??
         container.querySelector<HTMLElement>(`[id="${escapeAttributeValue(section.reference)}"]`);
-      const text = sectionRoot?.textContent || '';
-
-      if (!text) {
+      if (!sectionRoot) {
         return undefined;
       }
 
@@ -71,7 +69,7 @@ export function buildReaderSearchIndex(
         chapterIndex,
         chapterLabel: section.label || t('Chapter {number}', {number: chapterIndex + 1}),
         startCharacter: section.startCharacter || 0,
-        text
+        ...projectSearchText(sectionRoot)
       } satisfies ReaderSearchIndexItem;
     })
     .filter((item): item is ReaderSearchIndexItem => !!item);
@@ -84,21 +82,11 @@ export function searchReaderIndex(index: ReaderSearchIndexItem[], rawQuery: stri
     return [];
   }
 
-  const normalizedQuery = query.toLocaleLowerCase();
+  const pattern = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'giu');
   const results: ReaderSearchResult[] = [];
 
   for (const item of index) {
-    const normalizedText = item.text.toLocaleLowerCase();
-    let fromIndex = 0;
-
-    while (results.length < MAX_SEARCH_RESULTS) {
-      const matchIndex = normalizedText.indexOf(normalizedQuery, fromIndex);
-
-      if (matchIndex === -1) {
-        break;
-      }
-
-      const endIndex = matchIndex + query.length;
+    for (const {start: matchIndex, end: endIndex} of searchSpans(item, pattern, MAX_SEARCH_RESULTS - results.length)) {
       const snippetStart = Math.max(0, matchIndex - SEARCH_SNIPPET_RADIUS);
       const snippetEnd = Math.min(item.text.length, endIndex + SEARCH_SNIPPET_RADIUS);
 
@@ -114,8 +102,6 @@ export function searchReaderIndex(index: ReaderSearchIndexItem[], rawQuery: stri
         snippetMatch: item.text.slice(matchIndex, endIndex),
         snippetAfter: item.text.slice(endIndex, snippetEnd)
       });
-
-      fromIndex = endIndex;
     }
 
     if (results.length >= MAX_SEARCH_RESULTS) {
@@ -263,19 +249,24 @@ export function renderReaderMarks(
 
   clearReaderMarks(container);
 
-  const searchAnnotation = activeSearchResult
-    ? searchResultToAnnotation(activeSearchResult)
-    : undefined;
-  const marks = [
-    ...annotations,
-    ...(searchAnnotation ? [searchAnnotation] : [])
-  ].sort((a, b) => b.startCharacter - a.startCharacter);
+  const marks = [...annotations].sort((a, b) => b.startCharacter - a.startCharacter);
 
   for (const annotation of marks) {
     try {
-      renderSingleMark(container, annotation, sections, annotation.id === searchAnnotation?.id);
+      renderSingleMark(container, annotation, sections);
     } catch {
       // Annotation recovery is best-effort; invalid offsets are ignored.
+    }
+  }
+  if (activeSearchResult) {
+    const section = sections[activeSearchResult.chapterIndex];
+    const root = container.querySelector('#' + cssEscape(activeSearchResult.chapterReference));
+    if (section && root) {
+      const start = section.startCharacter || 0;
+      markSearchSpan(root, {
+        start: activeSearchResult.startCharacter - start,
+        end: activeSearchResult.endCharacter - start
+      }, activeSearchResult.id);
     }
   }
 }
@@ -302,8 +293,7 @@ export function clearReaderMarks(container: Element) {
 function renderSingleMark(
   container: Element,
   annotation: ReaderAnnotation,
-  sections: SectionWithProgress[],
-  isSearchMark: boolean
+  sections: SectionWithProgress[]
 ) {
   const section = sections.find((item) => item.reference === annotation.chapterReference);
   const sectionRoot = section ? container.querySelector<HTMLElement>(`#${cssEscape(section.reference)}`) ??
@@ -331,34 +321,18 @@ function renderSingleMark(
   range.setStart(start.node, start.offset);
   range.setEnd(end.node, end.offset);
 
-  if (!isSearchMark && !isWeakTextMatch(range.toString(), annotation.text)) {
+  if (!isWeakTextMatch(range.toString(), annotation.text)) {
     return;
   }
 
   const span = document.createElement('mark');
   span.dataset.readerMarkId = annotation.id;
-  span.className = isSearchMark ? 'reader-search-match' : 'reader-highlight';
+  span.className = 'reader-highlight';
   span.style.setProperty('--reader-mark-color', annotation.color || DEFAULT_READER_HIGHLIGHT_COLOR);
 
   const content = range.extractContents();
   span.appendChild(content);
   range.insertNode(span);
-}
-
-function searchResultToAnnotation(result: ReaderSearchResult) {
-  return {
-    id: `reader-search-match:${result.id}`,
-    type: READER_ANNOTATION_TYPE_HIGHLIGHT,
-    bookId: '',
-    chapterReference: result.chapterReference,
-    chapterIndex: result.chapterIndex,
-    startCharacter: result.startCharacter,
-    endCharacter: result.endCharacter,
-    text: result.text,
-    color: '#8e8bb8',
-    createdAt: 0,
-    updatedAt: 0
-  } satisfies ReaderAnnotation;
 }
 
 function findSectionIndexByCharacter(sections: SectionWithProgress[], character: number) {

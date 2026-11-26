@@ -9,6 +9,13 @@ import snd.komelia.ui.reader.epub.EpubChromeAppearance
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.Res
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.epub_open_failed
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.error_retry
+import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.navigation_back
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -26,6 +33,7 @@ import snd.komelia.ui.book.BookScreen
 import snd.komelia.ui.book.bookScreen
 import snd.komelia.ui.common.components.ErrorContent
 import snd.komelia.ui.common.components.LoadingMaxSizeIndicator
+import snd.komelia.ui.platform.BackPressHandler
 import snd.komelia.ui.platform.PlatformTitleBar
 import snd.komelia.ui.platform.canIntegrateWithSystemBar
 import snd.komelia.ui.reader.epub.EpubContent
@@ -84,19 +92,32 @@ class EpubScreen(
             if (state is LoadState.Success) {
                 val book = state.value.book.value
                 if (book != null && book.media.mediaProfile != MediaProfile.EPUB) {
-                    navigator.replace(readerScreen(book, markReadProgress))
+                    navigator.replace(readerScreen(book, markReadProgress, bookSiblingsContext))
                 }
             }
         }
 
         val state = vm.state.collectAsState().value
+        val reader = (state as? LoadState.Success)?.value
+        val readerState = reader?.state?.collectAsState()?.value
+        val isError = state is LoadState.Error || readerState is LoadState.Error
+        val scope = rememberCoroutineScope()
+        val onExit: () -> Unit = {
+            if (navigator.canPop) navigator.pop()
+            else {
+                val screen = (reader?.book?.value ?: book)?.let {
+                    bookScreen(book = it, bookSiblingsContext = bookSiblingsContext)
+                } ?: BookScreen(bookId = bookId, bookSiblingsContext = bookSiblingsContext)
+                navigator.replaceAll(MainScreen(screen))
+            }
+        }
         Column {
             PlatformTitleBar(applyInsets = false) {
                 if (LocalMacOS.current) {
                     val isFullscreen = LocalWindowState.current.isFullscreen.collectAsState(false)
                     if (!isFullscreen.value) {
                         val title = if (state is LoadState.Success) state.value.book.collectAsState().value?.metadata?.title else null
-                        MacReaderTitleBar(title, if (state is LoadState.Success) state.value::onBackButtonPress else null)
+                        MacReaderTitleBar(title, if (isError || reader == null) onExit else reader::onBackButtonPress)
                     }
                 } else if (canIntegrateWithSystemBar()) {
                     val isFullscreen = LocalWindowState.current.isFullscreen.collectAsState(false)
@@ -104,30 +125,35 @@ class EpubScreen(
                         val book = state.value.book.collectAsState().value
                         TitleBarContent(
                             title = book?.metadata?.title ?: "",
-                            onExit = { state.value.onBackButtonPress() }
+                            onExit = if (isError) onExit else state.value::onBackButtonPress
                         )
                     }
                 }
             }
-            when (state) {
-                LoadState.Loading, LoadState.Uninitialized -> LoadingMaxSizeIndicator()
-                is LoadState.Error -> ErrorContent(
-                    message = state.exception.message ?: state.exception.stackTraceToString(),
-                    onExit = {
-                        val screen = book?.let { bookScreen(book = it, bookSiblingsContext = bookSiblingsContext) }
-                            ?: BookScreen(bookId = bookId, bookSiblingsContext = bookSiblingsContext)
-
-                        navigator.replaceAll(MainScreen(screen))
-                    }
-                )
-
-                is LoadState.Success -> key(state.value) { EpubContent(
-                    onWebviewCreated = { state.value.onWebviewCreated(it) },
-                    onBackButtonPress = state.value::onBackButtonPress,
-                    contentReady = state.value.contentReady.collectAsState().value,
-                    displaySettings = vm.displaySettings.collectAsState().value,
-                    backgroundColor = state.value.backgroundColor.collectAsState().value,
-                ) }
+            when {
+                isError -> {
+                    ErrorContent(
+                        message = stringResource(Res.string.epub_open_failed),
+                        onReload = { scope.launch { vm.retry(navigator) } },
+                        onExit = onExit,
+                        reloadLabel = stringResource(Res.string.error_retry),
+                        exitLabel = stringResource(Res.string.navigation_back),
+                    )
+                    BackPressHandler(onExit)
+                }
+                reader == null -> {
+                    LoadingMaxSizeIndicator()
+                    BackPressHandler(onExit)
+                }
+                else -> key(reader) {
+                    EpubContent(
+                        onWebviewCreated = reader::onWebviewCreated,
+                        onBackButtonPress = reader::onBackButtonPress,
+                        contentReady = reader.contentReady.collectAsState().value,
+                        displaySettings = vm.displaySettings.collectAsState().value,
+                        backgroundColor = reader.backgroundColor.collectAsState().value,
+                    )
+                }
             }
         }
     }

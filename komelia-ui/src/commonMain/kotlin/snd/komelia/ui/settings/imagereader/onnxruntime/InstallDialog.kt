@@ -46,10 +46,7 @@ import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_tensorrt_desc
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_webgpu
 import io.github.snd_r.komelia.ui.komelia_ui.generated.resources.settings_image_onnxruntime_webgpu_desc
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider
 import snd.komelia.onnxruntime.OnnxRuntimeExecutionProvider.CPU
@@ -73,30 +70,19 @@ fun OrtInstallDialog(
 
     val coroutineScope = rememberCoroutineScope()
     var provider by remember { mutableStateOf<OnnxRuntimeExecutionProvider?>(null) }
-    var updateProgress by remember { mutableStateOf<UpdateProgress?>(null) }
+    val operation = remember { OnnxProgressOperation() }
+    val status = operation.status
+    val canDismiss = { !operation.isRunning }
 
-    var installError by remember { mutableStateOf<String?>(null) }
-    var showPostInstallDialog by remember { mutableStateOf(false) }
-    fun onInstall(provider: OnnxRuntimeExecutionProvider) {
-        coroutineScope.launch {
-            runCatching {
-                onInstallRequest(provider)
-                    .conflate()
-                    .collect {
-                        updateProgress = it
-                        delay(100)
-                    }
-            }.onFailure { installError = "${it::class.simpleName} ${it.message}" }
-            showPostInstallDialog = true
-        }
-    }
-
-    if (!showPostInstallDialog) {
+    if (status is OnnxProgressOperation.Status.Failed || status == OnnxProgressOperation.Status.Succeeded) {
+        val error = (status as? OnnxProgressOperation.Status.Failed)?.error
+        RestartDialog(error = error?.message ?: error?.let { it::class.simpleName }, onConfirm = onDismiss)
+    } else {
         AppDialog(
             modifier = Modifier.widthIn(max = 840.dp),
             header = {
                 Column(modifier = Modifier.padding(10.dp)) {
-                    if (updateProgress == null)
+                    if (status !is OnnxProgressOperation.Status.Running)
                         Text(
                             stringResource(Res.string.settings_image_onnxruntime_choose_version),
                             style = MaterialTheme.typography.titleLarge,
@@ -110,9 +96,8 @@ fun OrtInstallDialog(
                 }
             },
             content = {
-                val progress = updateProgress
-                if (progress != null) {
-                    UpdateProgressContent(progress)
+                if (status is OnnxProgressOperation.Status.Running) {
+                    UpdateProgressContent(status.progress)
                 } else {
                     OrtDownloadDialogContent(
                         chosenProvider = provider,
@@ -127,24 +112,28 @@ fun OrtInstallDialog(
                 ) {
 
                     TextButton(
-                        onClick = onDismiss,
+                        enabled = !operation.isRunning,
+                        onClick = { if (canDismiss()) onDismiss() },
                         modifier = Modifier.cursorForHand(),
                         content = { Text(stringResource(Res.string.dialog_cancel)) }
                     )
 
                     FilledTonalButton(
-                        enabled = provider != null && updateProgress == null,
-                        onClick = { provider?.let { onInstall(it) } },
+                        enabled = provider != null && status == OnnxProgressOperation.Status.Idle,
+                        onClick = {
+                            val selectedProvider = provider
+                            if (selectedProvider != null && operation.status == OnnxProgressOperation.Status.Idle) {
+                                operation.start(coroutineScope) { onInstallRequest(selectedProvider) }
+                            }
+                        },
                         modifier = Modifier.cursorForHand(),
                     ) {
                         Text(stringResource(Res.string.settings_image_onnxruntime_install))
                     }
                 }
             },
-            onDismissRequest = { if (updateProgress == null) onDismiss() }
+            onDismissRequest = { if (canDismiss()) onDismiss() }
         )
-    } else {
-        RestartDialog(error = installError, onConfirm = { onDismiss() })
     }
 }
 

@@ -1,0 +1,3 @@
+<resources>
+    <string name="epub_open_failed">Could not open the EPUB.</string>
+</resources>

@@ -3,13 +3,13 @@ package snd.komelia.ui.reader.epub
 import java.lang.reflect.Proxy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import snd.komelia.AppNotifications
 import snd.komelia.settings.EpubReaderSettingsRepository
 import snd.komelia.settings.model.EpubDisplaySettings
 import snd.komelia.settings.model.TtsuReaderSettings
 import snd.komelia.ui.BookSiblingsContext
 import snd.komelia.ui.platform.PlatformType
 import snd.komga.client.book.KomgaBookId
+import snd.komga.client.book.KomgaBookReadProgressUpdateRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -28,7 +28,6 @@ class TtuIncognitoSettingsTest {
                 bookId = KomgaBookId("synthetic"),
                 book = null,
                 bookApi = proxy { name, _ -> error("Unexpected book operation $name") },
-                notifications = AppNotifications(),
                 markReadProgress = trackProgress,
                 serverUrl = MutableStateFlow(""),
                 epubSettingsRepository = repository,
@@ -48,6 +47,34 @@ class TtuIncognitoSettingsTest {
             assertEquals(autoBookmark, normal.autoBookmark)
             assertEquals(21, normal.fontSize)
         }
+    }
+
+    @Test fun completingInIncognitoSkipsTheBookApiWrite() = runTest {
+        val writes = mutableListOf<KomgaBookReadProgressUpdateRequest>()
+        fun reader(trackProgress: Boolean) = TtsuReaderState(
+            bookId = KomgaBookId("synthetic"),
+            book = null,
+            bookApi = proxy { name, args ->
+                check(name.startsWith("markReadProgress"))
+                writes += args[1] as KomgaBookReadProgressUpdateRequest
+                Unit
+            },
+            markReadProgress = trackProgress,
+            serverUrl = MutableStateFlow(""),
+            epubSettingsRepository = proxy { name, _ -> error("Unexpected settings operation $name") },
+            displaySettings = MutableStateFlow(EpubDisplaySettings()),
+            localeTag = "en",
+            fontsRepository = proxy { name, _ -> error("Unexpected font operation $name") },
+            windowState = proxy { name, _ -> error("Unexpected window operation $name") },
+            platformType = PlatformType.MOBILE,
+            coroutineScope = backgroundScope,
+            bookSiblingsContext = BookSiblingsContext.Series,
+        )
+
+        reader(trackProgress = false).markBookCompleted()
+        assertEquals(emptyList(), writes)
+        reader(trackProgress = true).markBookCompleted()
+        assertEquals(listOf(KomgaBookReadProgressUpdateRequest(completed = true)), writes)
     }
 
     @Suppress("UNCHECKED_CAST")

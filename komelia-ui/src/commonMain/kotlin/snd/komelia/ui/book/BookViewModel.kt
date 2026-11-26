@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import snd.komelia.AppNotifications
 import snd.komelia.komga.api.KomgaBookApi
 import snd.komelia.komga.api.KomgaLibraryApi
@@ -63,6 +65,7 @@ class BookViewModel(
     private val reloadEventsEnabled = MutableStateFlow(true)
     private val reloadJobsFlow = MutableSharedFlow<Unit>(1, 0, DROP_OLDEST)
     private var listenersStarted = false
+    private val detailLoadMutex = Mutex()
 
     val readListsState = BookReadListsState(
         book = this.book,
@@ -86,42 +89,41 @@ class BookViewModel(
 
     suspend fun initialize() {
         // The retained detail model may miss progress events while the reader is visible.
-        loadBook()
-        loadLibrary()
-        if (book.value == null) return
+        loadDetail(refreshReadLists = false)
+    }
+
+    fun reload() {
+        screenModelScope.launch { loadDetail(refreshReadLists = true) }
+    }
+
+    private suspend fun loadDetail(refreshReadLists: Boolean) = detailLoadMutex.withLock {
+        mutableState.value = Loading
+        val result = notifications.runCatchingToNotifications {
+            val loadedBook = bookApi.getOne(bookId)
+            val loadedLibrary = libraries.value.firstOrNull { it.id == loadedBook.libraryId }
+                ?: libraryApi.getLibrary(loadedBook.libraryId)
+            library = loadedLibrary
+            book.value = loadedBook
+        }
+        val failure = result.exceptionOrNull()
+        if (failure != null) {
+            mutableState.value = Error(failure)
+            return@withLock
+        }
+        mutableState.value = Success(Unit)
+
+        if (listenersStarted) {
+            if (refreshReadLists) readListsState.reload()
+            return@withLock
+        }
+
         readListsState.initialize()
-        if (listenersStarted) return
         listenersStarted = true
         startKomgaEventListener()
-
         reloadJobsFlow.onEach {
             reloadEventsEnabled.first { it }
             reload()
         }.launchIn(screenModelScope)
-    }
-
-    fun reload() {
-        screenModelScope.launch {
-            loadBook()
-            loadLibrary()
-            readListsState.reload()
-        }
-    }
-
-    private suspend fun loadBook() {
-        notifications.runCatchingToNotifications {
-            mutableState.value = Loading
-            val loadedBook = bookApi.getOne(bookId)
-            book.value = loadedBook
-        }
-            .onSuccess { mutableState.value = Success(Unit) }
-            .onFailure { mutableState.value = Error(it) }
-    }
-
-    private suspend fun loadLibrary() {
-        val book = book.value ?: return
-        library = libraries.value.firstOrNull { library -> library.id == book.libraryId }
-            ?: runCatching { libraryApi.getLibrary(book.libraryId) }.getOrNull()
     }
 
     fun stopKomgaEventHandler() {

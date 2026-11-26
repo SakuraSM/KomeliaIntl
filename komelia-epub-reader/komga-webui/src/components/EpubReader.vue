@@ -110,6 +110,15 @@
       </v-tabs-window>
     </v-navigation-drawer>
 
+    <v-dialog :model-value="!!footnoteTrigger" max-width="480" aria-labelledby="reader-footnote-title"
+              @update:model-value="open => { if (!open) closeFootnote() }">
+      <v-card :class="appearanceClass('reader-paper')" class="footnote-card">
+        <v-card-title id="reader-footnote-title">{{ t('epubreader.footnote') }}</v-card-title>
+        <v-card-text class="footnote-text" aria-live="polite">{{ footnoteBody }}</v-card-text>
+        <v-card-actions><v-spacer/><v-btn @click="closeFootnote">{{ t('common.close') }}</v-btn></v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <header id="headerMenu"/>
 
     <v-fade-transition>
@@ -210,6 +219,8 @@ import {createR2Progression, r2ProgressionToReadingPosition} from '@/functions/r
 import {useDisplay, useRtl} from "vuetify";
 import {EpubReaderSettings} from "@/types/epub-reader-settings";
 import {externalFunctions} from "@/main";
+import {watchNativeExit} from '../../../shared/native-exit'
+import {listenForFootnotes} from '@/functions/footnote'
 import {
   mdiChevronLeft,
   mdiChevronRight,
@@ -249,6 +260,32 @@ const showSettings = ref(false)
 const showToolbars = ref(false)
 const showToc = ref(false)
 const showHelp = ref(false)
+const footnoteTrigger = ref<HTMLAnchorElement>()
+const footnoteBody = ref('')
+let stopNativeExit: (() => void) | undefined
+let removeFootnoteListeners: (() => void)[] = []
+
+function closeFootnote() {
+  const trigger = footnoteTrigger.value
+  footnoteTrigger.value = undefined
+  void nextTick(() => trigger?.focus({preventScroll: true}))
+}
+
+function attachFootnoteListeners() {
+  removeFootnoteListeners.forEach(remove => remove())
+  removeFootnoteListeners = []
+  for (const frame of Array.from(document.querySelectorAll<HTMLIFrameElement>('#iframe-wrapper iframe'))) {
+    if (!frame.contentWindow) continue
+    removeFootnoteListeners.push(listenForFootnotes(frame.contentWindow, {
+      bookId: bookId.value,
+      getContent: href => externalFunctions.d2ReaderGetContent(href),
+      open: link => { footnoteBody.value = t('epubreader.loading_book'); footnoteTrigger.value = link },
+      show: text => { footnoteBody.value = text },
+      unavailable: () => { footnoteBody.value = t('epubreader.footnote_unavailable') },
+    }))
+  }
+}
+
 const isOverflowMenuOpen = ref(false)
 const chromeTheme = ref<'light' | 'dark'>('dark')
 watch([showToolbars, showSettings, showToc], async states => {
@@ -610,6 +647,9 @@ onBeforeUnmount(() => {
 })
 
 function disposeReaderNavigation(): void {
+  stopNativeExit?.()
+  removeFootnoteListeners.forEach(remove => remove())
+  removeFootnoteListeners = []
   siblingState.dispose()
   readerLoadGeneration++
   cleanupReaderContentSwipeNavigation()
@@ -617,6 +657,11 @@ function disposeReaderNavigation(): void {
 
 onMounted(async () => {
   window.addEventListener('pagehide', disposeReaderNavigation)
+  stopNativeExit = watchNativeExit({
+    waitForRequest: async () => (await window.waitForReaderExit()).result,
+    leave: async () => { if (footnoteTrigger.value) closeFootnote(); else await closeBook() },
+    onError: error => console.warn('EPUB Back listener ended', error),
+  })
   let bookId = await externalFunctions.getInitialBookId()
   let externalSettings = await externalFunctions.getReaderSettings()
   fullscreenIsAvailable.value = await externalFunctions.isFullscreenAvailable()
@@ -653,7 +698,7 @@ function toggleHelp() {
 }
 
 function keyPressed(e: KeyboardEvent) {
-  if (isOverflowMenuOpen.value) return
+  if (isOverflowMenuOpen.value || footnoteTrigger.value) return
   shortcuts.value[e.key]?.action()
 }
 
@@ -926,6 +971,7 @@ async function setupState(currentBookId: string) {
 }
 
 function handleResourceReady(): void {
+  attachFootnoteListeners()
   scheduleReaderContentSwipeNavigationSetup()
   const loadGeneration = readerLoadGeneration
   void hideReaderLoadingAfterFirstPaint(loadGeneration)
@@ -1075,6 +1121,7 @@ function tocEntryToLocator(tocEntry: TocEntry): Locator | undefined {
 }
 
 function closeDialog() {
+  if (footnoteTrigger.value) { closeFootnote(); return }
   if (showToc.value) {
     showToc.value = false
     return
@@ -1151,6 +1198,9 @@ async function markProgress(location: Locator) {
 </script>
 <style src="@d-i-t-a/reader/dist/reader.css"/>
 <style scoped>
+.footnote-card { background: var(--komelia-reader-paper, #fff); color: var(--komelia-reader-ink, #252525); }
+.footnote-text { max-height: min(55vh, 26rem); overflow: auto; overscroll-behavior: contain;
+  white-space: pre-line; overflow-wrap: anywhere; }
 .settings {
   z-index: 2;
 }

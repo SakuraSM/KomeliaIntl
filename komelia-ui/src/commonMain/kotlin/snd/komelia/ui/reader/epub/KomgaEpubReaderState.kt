@@ -97,7 +97,7 @@ class KomgaEpubReaderState(
     }
 
     override fun onBackButtonPress() {
-        closeWebview()
+        if (activeSession?.exitRequests?.requestExit() != true) closeWebview()
     }
 
     override fun closeWebview() {
@@ -192,6 +192,7 @@ class KomgaEpubReaderState(
             bookApi.getWebPubManifest(bookId)
         }
 
+        webview.bind<Unit, Boolean>("waitForReaderExit") { session.exitRequests.awaitRequest() }
         webview.bind<Unit, Unit>("closeBook") { session.requireOpen(); closeWebview() }
 
         bindActive<Unit, String>(webview, session, "getServerUrl") {

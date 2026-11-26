@@ -5,6 +5,7 @@
  */
 
 import {BlurMode} from '$lib/data/blur-mode';
+import {prepareFootnotes} from '$lib/functions/epub-footnotes';
 import type {BookData} from '$lib/data/books-db';
 import {Observable} from 'rxjs';
 import {isElementGaiji} from '$lib/functions/is-element-gaiji';
@@ -25,6 +26,7 @@ export default function formatBookDataHtml(
       const element = document.createElement('div');
       element.innerHTML = elementHtml;
 
+      prepareFootnotes(element);
       addImageContainerClass(element);
       // combineImagePairs(element);
       removeSvgDimensions(element);

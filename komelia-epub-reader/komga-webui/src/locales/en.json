@@ -732,6 +732,8 @@
     }
   },
   "epubreader": {
+    "footnote": "Footnote",
+    "footnote_unavailable": "This footnote could not be loaded.",
     "previous_book": "Previous book",
     "next_book": "Next book",
     "sibling_error_previous": "Unable to load the previous book. Tap Previous book to retry.",

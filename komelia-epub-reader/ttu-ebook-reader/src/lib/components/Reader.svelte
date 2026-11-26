@@ -1,6 +1,6 @@
 <script lang="ts">
   import { refreshChromeAppearance, prefersReducedChromeMotion } from "../../../../shared/chrome-appearance.mjs";
-  import {nativeExitErrorMessage, watchNativeExit} from '$lib/components/reader/native-exit';
+  import {nativeExitErrorMessage} from '$lib/components/reader/native-exit';
   import {
     debounceTime,
     EMPTY,
@@ -28,6 +28,9 @@
   import BookReader from '$lib/components/book-reader/book-reader.svelte';
   import type {AutoScroller, BookmarkManager, PageManager} from '$lib/components/book-reader/types';
   import MessageDialog from '$lib/components/message-dialog.svelte';
+  import {watchNativeExit} from '../../../../shared/native-exit';
+  import {readingOffset} from '$lib/functions/epub-search-text';
+  import FootnoteDialog from '$lib/components/reader/FootnoteDialog.svelte';
   import StyleSheetRenderer from '$lib/components/style-sheet-renderer.svelte';
   import Fa from 'svelte-fa';
   import {
@@ -435,6 +438,7 @@
 
   onMount(() => {
     // settings = await SettingsStore.getSettingsStore();
+    document.addEventListener('click', openFootnote, true);
     document.addEventListener('ttu-action', handleAction, false)
     document.addEventListener('pointerdown', handleDocumentPointerDown, true);
     return watchNativeExit({
@@ -443,6 +447,17 @@
       onError: error => logger.error(error),
     });
   });
+
+  function openFootnote(event: MouseEvent) {
+    const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('.book-content a[href][data-reader-footnote]') : null;
+    if (!link?.dataset.readerFootnote) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    autoScroller?.off();
+    link.focus({preventScroll: true});
+    dialogManager.dialogs$.next([{component: FootnoteDialog,
+      props: {text: link.dataset.readerFootnote, paperColor: $backgroundColor$, inkColor: $themeOption$.fontColor}}]);
+  }
 
   function handleAction({detail}: any) {
     if (!detail.type) {
@@ -456,6 +471,7 @@
   /** Experimental Code - May be removed any time without warning */
 
   onDestroy(() => {
+    document.removeEventListener('click', openFootnote, true);
     document.removeEventListener('ttu-action', handleAction, false);
     document.removeEventListener('pointerdown', handleDocumentPointerDown, true);
 
@@ -697,6 +713,7 @@
   }
 
   function onKeydown(ev: KeyboardEvent) {
+    if (ev.defaultPrevented || dialogManager.dialogs$.getValue()[0]?.component === FootnoteDialog) return;
     if (ev.key === 'Escape') {
       showHeader = false;
       showFooter = false;
@@ -816,7 +833,8 @@
     activeSearchResultId = result.id;
     showHeader = false;
     tocIsOpen$.next(false);
-    scrollToCharacter(result.startCharacter);
+    const chapter = readerSearchIndex.find(item => item.chapterReference === result.chapterReference);
+    if (chapter) scrollToCharacter(chapter.startCharacter + readingOffset(chapter, result.startCharacter - chapter.startCharacter));
   }
 
   function activateRelativeSearchResult(offset: number) {
@@ -982,6 +1000,10 @@
   }
 
   async function leaveReader() {
+    if (dialogManager.dialogs$.getValue()[0]?.component === FootnoteDialog) {
+      dialogManager.dialogs$.next([]);
+      return;
+    }
     if (isLeaving) return;
     isLeaving = true;
     let savingPosition = false;

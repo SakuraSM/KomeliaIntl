@@ -194,6 +194,8 @@ On Android, use a synthetic multipage CBZ with white borders. Verify crop on/off
 
 `BookProgressRefreshTest` checks initial detail entry and return from a reader with no progress event. Both must refresh saved progress without adding duplicate event subscriptions. On-device acceptance must check both the restored reader page and the percentage displayed on the retained detail screen.
 
+For EPUB search and footnotes, run TTU’s `tests/reading-context.test.mjs` and Komga’s `tests/footnote.test.mjs` through their browser suites. On Android, search a Japanese word that spans adjacent ruby elements using both its spelling and its reading. In both engines tap same-chapter and cross-chapter notes with duplicate fragment IDs, then use system Back and check the original paragraph.
+
 TTU's `npm run test:browser` compiles the production styles and checks document scroll ownership with real wheel input. It requires Playwright resolvable by Node and a compatible browser, supplied through the QA environment's `NODE_PATH` and `CHROME_BIN` when needed. Missing browser tooling is blocked, not passed. Follow this focused regression with actual EPUB scrolling, bookmark save, Back and reopen on the final APK.
 
 `OnlineLoginCoordinatorTest`, `LoginViewModelTest`, `LoginHttpRetryTest`, and `DefaultServerUrlResolverTest` cover route readiness, time budgets, retry classification, cancellation, and stale results. Run UI, domain-core, and shared-app `allTests`. The shared-app Wasm tests package Skiko through the Compose plugin, as UI and domain-core tests do.

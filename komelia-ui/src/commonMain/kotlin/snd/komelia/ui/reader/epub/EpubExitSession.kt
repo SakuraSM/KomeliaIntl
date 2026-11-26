@@ -3,7 +3,7 @@ package snd.komelia.ui.reader.epub
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 
-internal class TtuExitSession {
+internal class EpubExitSession {
     private enum class State { NOT_READY, WAITING, REQUESTED, CLOSED }
 
     private val state = MutableStateFlow(State.NOT_READY)

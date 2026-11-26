@@ -31,6 +31,7 @@ declare global {
         getReaderSettings: () => Promise<CallbackResponse<EpubReaderSettings>>;
         setReaderSettings: (settings: EpubReaderSettings) => Promise<CallbackResponse<undefined>>;
 
+        waitForReaderExit: () => Promise<CallbackResponse<boolean>>;
         closeBook: () => Promise<CallbackResponse<undefined>>;
 
         getPublication: (bookId: string) => Promise<CallbackResponse<any>>

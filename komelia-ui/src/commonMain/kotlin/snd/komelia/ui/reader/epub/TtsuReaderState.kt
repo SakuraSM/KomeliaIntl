@@ -93,7 +93,7 @@ class TtsuReaderState(
     private val epubLoadTask = CompletableDeferred<TtuEpubData>()
     private var epubLoadJob: Job? = null
     private var webviewLoadJob: Job? = null
-    private var exitSession = TtuExitSession()
+    private var exitSession = EpubExitSession()
     private val availableSystemFonts = MutableStateFlow<List<String>>(emptyList())
     private val selectedFontFile = MutableStateFlow<PlatformFile?>(null)
     private val navigator = MutableStateFlow<Navigator?>(null)
@@ -127,7 +127,7 @@ class TtsuReaderState(
 
     override fun onWebviewCreated(webview: KomeliaWebview) {
         exitSession.retire()
-        val session = TtuExitSession()
+        val session = EpubExitSession()
         exitSession = session
         this.webview.value = webview
         webviewLoadJob?.cancel()
@@ -165,7 +165,7 @@ class TtsuReaderState(
     }
 
     @OptIn(ExperimentalResourceApi::class)
-    private suspend fun loadEpub(webview: KomeliaWebview, session: TtuExitSession) {
+    private suspend fun loadEpub(webview: KomeliaWebview, session: EpubExitSession) {
         webview.bind<Unit, Boolean>("waitForReaderExit") { session.awaitRequest() }
         webview.bind<Unit, String>("getCurrentBookId") { bookId.value.value }
         webview.bind<Unit, String?>("getLocale") { localeTag }

@@ -732,6 +732,8 @@
     }
   },
   "epubreader": {
+    "footnote": "脚注",
+    "footnote_unavailable": "未能加载这条脚注。",
     "previous_book": "上一本",
     "next_book": "下一本",
     "sibling_error_previous": "上一本查询失败，请点击“上一本”重试。",

@@ -100,6 +100,7 @@ const zhCN: Record<string, string> = {
   'Cancel': '取消',
   'Confirm': '确认',
   'Close': '关闭',
+  'Footnote': '脚注',
   'Keep reading': '继续阅读',
   'Exit without saving': '不保存退出',
   'Retry': '重试',
